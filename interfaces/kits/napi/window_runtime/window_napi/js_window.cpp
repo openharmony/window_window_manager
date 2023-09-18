@@ -3035,10 +3035,6 @@ NativeValue* JsWindow::OnHideNonSystemFloatingWindows(NativeEngine& engine, Nati
 
 NativeValue* JsWindow::OnRaiseAboveTarget(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
-        return engine.CreateUndefined();
-    }
     WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("Argc is invalid: %{public}zu", info.argc);
