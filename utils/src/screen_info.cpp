@@ -33,7 +33,8 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     for (uint32_t modeIndex = 0; modeIndex < modes_.size(); modeIndex++) {
-        if (parcel.WriteUint32(modes_[modeIndex]->height_) &&
+        if (parcel.WriteUint32(modes_[modeIndex]->id_) &&
+            parcel.WriteUint32(modes_[modeIndex]->height_) &&
             parcel.WriteUint32(modes_[modeIndex]->width_) &&
             parcel.WriteUint32(modes_[modeIndex]->refreshRate_)) {
             continue;
@@ -83,7 +84,8 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
         if (mode == nullptr) {
             return false;
         }
-        if (parcel.ReadUint32(mode->height_) &&
+        if (parcel.ReadUint32(mode->id_) &&
+            parcel.ReadUint32(mode->height_) &&
             parcel.ReadUint32(mode->width_) &&
             parcel.ReadUint32(mode->refreshRate_)) {
             modes_.push_back(mode);

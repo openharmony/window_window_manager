@@ -426,6 +426,7 @@ bool AbstractScreenController::InitAbstractScreenModesInfo(sptr<AbstractScreen>&
             WLOGFE("create SupportedScreenModes failed");
             return false;
         }
+        info->id_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenModeId());
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
