@@ -176,6 +176,11 @@ sptr<WindowSessionProperty> WindowSessionImpl::GetProperty() const
     return property_;
 }
 
+SystemSessionConfig WindowSessionImpl::GetSystemSessionConfig() const
+{
+    return windowSystemConfig_;
+}
+
 sptr<ISession> WindowSessionImpl::GetHostSession() const
 {
     return hostSession_;
@@ -630,6 +635,28 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     }
     property_->SetTouchable(isTouchable);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+}
+
+WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
+{
+    WLOGFD("set dragEnabled");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetDragEnabled(dragEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+}
+
+WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
+{
+    WLOGFD("set raiseEnabled");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetRaiseEnabled(raiseEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
 bool WindowSessionImpl::GetTouchable() const

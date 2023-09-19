@@ -528,6 +528,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             enterSession_ = wptr<SceneSession>(this);
         }
     }
+
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
@@ -535,13 +536,23 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
         }
-        moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
-        if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
-            return  WSError::WS_OK;
+        if (property_->GetDragEnabled()) {
+            moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
+            if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
+                return  WSError::WS_OK;
+            }
         }
+
         if (moveDragController_->GetStartMoveFlag()) {
             return moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_);
         }
+    }
+
+    auto action = pointerEvent->GetPointerAction();
+    bool raiseEnabled = WindowHelper::IsSubWindow(property_->GetWindowType()) && property_->GetRaiseEnabled() &&
+        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    if (raiseEnabled) {
+        RaiseToAppTop();
     }
     return Session::TransferPointerEvent(pointerEvent);
 }
