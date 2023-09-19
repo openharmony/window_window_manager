@@ -1291,7 +1291,7 @@ void Session::SetClickListener(const NotifyClickFunc& func)
 
 void Session::NotifySessionFocusableChange(bool isFocusable)
 {
-    WLOGFD("Notify session focusable change: %{public}u", isFocusable);
+    WLOGFI("Notify session focusable change, id: %{public}d, focusable: %{public}u", GetPersistentId(), isFocusable);
     if (sessionFocusableChangeFunc_) {
         sessionFocusableChangeFunc_(isFocusable);
     }
