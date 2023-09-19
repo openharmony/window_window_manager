@@ -295,6 +295,164 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, Function | SmallTest | 
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
     ASSERT_EQ(ScreenColorGamut::COLOR_GAMUT_ADOBE_RGB, screenColorGamut);
 }
+
+/**
+ * @tc.name: SetScreenColorGamut01
+ * @tc.desc: test DisplayManagerProxy::SetScreenColorGamut
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorGamut01, Function | SmallTest | Level1)
+{
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+    auto result1 = proxy1.SetScreenColorGamut(0, 3);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    auto result2 = proxy2.SetScreenColorGamut(0, 3);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenColorGamut(0, 3);
+    ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: GetScreenGamutMap01
+ * @tc.desc: test DisplayManagerProxy::GetScreenGamutMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, Function | SmallTest | Level1)
+{
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+    ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    auto result1 = proxy1.GetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    auto result2 = proxy2.GetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_OK, result2);
+    EXPECT_EQ(ScreenGamutMap::GAMUT_MAP_CONSTANT, gamutMap);
+
+    gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.GetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+    EXPECT_EQ(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION, gamutMap);
+}
+
+/**
+ * @tc.name: SetScreenGamutMap01
+ * @tc.desc: test DisplayManagerProxy::SetScreenGamutMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, Function | SmallTest | Level1)
+{
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+    ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    auto result1 = proxy1.SetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    auto result2 = proxy2.SetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_OK, result2);
+    EXPECT_EQ(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION, gamutMap);
+
+    gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenGamutMap(0, gamutMap);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+    EXPECT_EQ(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION, gamutMap);
+}
+
+/**
+ * @tc.name: SetScreenColorTransform01
+ * @tc.desc: test DisplayManagerProxy::SetScreenColorTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorTransform01, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    auto result2 = proxy2.SetScreenColorTransform(0);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenColorTransform(0);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: RegisterDisplayManagerAgent01
+ * @tc.desc: test DisplayManagerProxy::RegisterDisplayManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, RegisterDisplayManagerAgent01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    DisplayManagerProxy proxy1(iRemoteObject);
+    EXPECT_NE(nullptr, proxy1.remoteObject_);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    DisplayManagerAgentType type = DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER;
+    DMError result01 = proxy1.RegisterDisplayManagerAgent(displayManagerAgent, type);
+    EXPECT_EQ(result01, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: UnregisterDisplayManagerAgent01
+ * @tc.desc: test DisplayManagerProxy::UnregisterDisplayManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, UnregisterDisplayManagerAgent01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    DisplayManagerProxy proxy1(iRemoteObject);
+    EXPECT_NE(nullptr, proxy1.remoteObject_);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    DisplayManagerAgentType type = DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER;
+    DMError result01 = proxy1.UnregisterDisplayManagerAgent(displayManagerAgent, type);
+    EXPECT_EQ(result01, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: WakeUpBegin01
+ * @tc.desc: test DisplayManagerProxy::WakeUpBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, WakeUpBegin01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    DisplayManagerProxy proxy1(iRemoteObject);
+    EXPECT_NE(nullptr, proxy1.remoteObject_);
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
+    bool result01 = proxy1.WakeUpBegin(reason);
+    EXPECT_EQ(result01, false);
+}
+
+/**
+ * @tc.name: WakeUpEnd01
+ * @tc.desc: test DisplayManagerProxy::WakeUpEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    DisplayManagerProxy proxy1(iRemoteObject);
+    EXPECT_NE(nullptr, proxy1.remoteObject_);
+    bool result01 = proxy1.WakeUpEnd();
+    EXPECT_EQ(result01, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
