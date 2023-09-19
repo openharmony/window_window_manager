@@ -31,6 +31,7 @@ group("unittest") {
     ":wmserver_mock_session_manager_service_test",
     ":wmserver_remote_animation_test",
     ":wmserver_starting_window_test",
+    ":wmserver_window_common_event_test",
     ":wmserver_window_controller_test",
     ":wmserver_window_display_zoom_controller_test",
     ":wmserver_window_dumper_test",
@@ -449,6 +450,16 @@ ohos_unittest("wmserver_mock_session_manager_service_stub_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "mock_session_manager_service_stub_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_common_event_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_common_event_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
