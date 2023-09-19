@@ -886,18 +886,18 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
     }
 
     sptr<SceneSession> sceneSession = nullptr;
+    JsSceneSession* jsSceneSession;
     if (errCode == WSErrorCode::WS_OK) {
         auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]Failed to get js scene session object");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
-            auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
+            jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
             if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             } else {
-                jsSceneSession->ClearCbMap(needRemoveSession);
                 sceneSession = jsSceneSession->GetNativeSession();
                 SetIsClearSession(engine, jsSceneSessionObj, sceneSession);
             }
@@ -917,6 +917,13 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
+    auto localScheduler = SceneSessionManager::GetInstance().GetTaskScheduler();
+    auto clearTask = [jsSceneSession, needRemoveSession] () {
+        if (jsSceneSession != nullptr) {
+            jsSceneSession->ClearCbMap(needRemoveSession);
+        }
+    };
+    localScheduler->PostAsyncTask(clearTask);
     return engine.CreateUndefined();
 }
 
