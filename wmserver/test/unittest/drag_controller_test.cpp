@@ -567,6 +567,89 @@ HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
     auto ret = moveDragController_->Init();
     ASSERT_EQ(true, ret);
 }
+
+/**
+ * @tc.name: StartDrag02
+ * @tc.desc: StartDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, StartDrag02, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->StartDrag(windowId);
+    sptr<WindowNode> dragNode = nullptr;
+    ASSERT_TRUE(moveDragController_);
+}
+
+/**
+ * @tc.name: FinishDrag02
+ * @tc.desc: FinishDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, FinishDrag02, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->StartDrag(windowId);
+    uint64_t hitWindowId_ = 10;
+    sptr<WindowNode> hitWindow = windowRoot_->GetWindowNode(hitWindowId_);
+    ASSERT_TRUE(moveDragController_);
+}
+
+/**
+ * @tc.name: GetHitWindow04
+ * @tc.desc: GetHitWindow04
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetHitWindow04, Function | SmallTest | Level2)
+{
+    DisplayId id = 0;
+    PointInfo point;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
+}
+
+/**
+ * @tc.name: GetHitPoint
+ * @tc.desc: GetHitPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetHitPoint, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    PointInfo point;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    auto result = dragcontroller->GetHitPoint(windowId, point);
+    sptr<WindowNode> windowNode = nullptr;
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: HandleEndUpMovingOrDragging01
+ * @tc.desc: HandleEndUpMovingOrDragging01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    uint32_t windowId = 1; // windowId: 1
+    uint32_t activeWindowId_ = INVALID_WINDOW_ID;
+    ASSERT_NE(activeWindowId_, windowId);
+    moveDragController_->HandleEndUpMovingOrDragging(windowId);
+}
+
+/**
+ * @tc.name: HandleDisplayLimitRectChange
+ * @tc.desc: HandleDisplayLimitRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, HandleDisplayLimitRectChange, Function | SmallTest | Level2)
+{
+    std::map<DisplayId, Rect> limitRectMap;
+    moveDragController_->HandleDisplayLimitRectChange(limitRectMap);
+    ASSERT_TRUE(moveDragController_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
