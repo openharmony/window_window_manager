@@ -510,7 +510,6 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-
 HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, Function | SmallTest | Level2)
 {
     DisplayId displayId = 0;
