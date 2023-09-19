@@ -412,11 +412,7 @@ HWTEST_F(WindowSceneTest, GoForeground02, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
-    // sptr<Window> mainwindow;
-    // mainwindow = SingletonContainer::Get<StaticCall>().CreateWindow(
-    //     GenerateMainWindowName(abilityContext_), optionTest, abilityContext_);
     uint32_t reason = 0;
-    // auto ret = mainwindow->Show(reason);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoForeground(reason));
 }
 
