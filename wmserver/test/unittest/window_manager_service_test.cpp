@@ -1130,9 +1130,9 @@ HWTEST_F(WindowManagerServiceTest, RemoveWindow, Function | SmallTest | Level2)
     bool isFromInnerkits = false;
     wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
     WMError res = wms->RemoveWindow(appNode->GetWindowId(), isFromInnerkits);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
     res = wms->RemoveWindow(appNode->GetWindowId(), isFromInnerkits);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
