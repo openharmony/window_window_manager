@@ -149,6 +149,7 @@ public:
     };
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
+    void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetZOrder(uint32_t zOrder) override;
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
