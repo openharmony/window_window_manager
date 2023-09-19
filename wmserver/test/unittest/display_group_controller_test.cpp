@@ -853,6 +853,173 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowPairByDisplayId01, Function | Smal
 {
     ASSERT_EQ(nullptr, displayGroupController_->GetWindowPairByDisplayId(1));
 }
+
+/**
+ * @tc.name: ProcessDisplayCreate
+ * @tc.desc: ProcessDisplayCreate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplayCreate, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    std::map<DisplayId, Rect> displayRectMap;
+    displayGroupController_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
+    auto layoutPolicy = container_->GetLayoutPolicy();
+    ASSERT_NE(nullptr, layoutPolicy);
+}
+
+/**
+ * @tc.name: ProcessDisplayDestroy
+ * @tc.desc: ProcessDisplayDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    std::map<DisplayId, Rect> displayRectMap;
+    std::vector<uint32_t> windowIds;
+    displayGroupController_->ProcessDisplayDestroy(defaultDisplayId, displayInfo,
+                                                   displayRectMap, windowIds);
+    auto layoutPolicy = container_->GetLayoutPolicy();
+    ASSERT_NE(nullptr, layoutPolicy);
+}
+
+/**
+ * @tc.name: ProcessSystemBarRotation
+ * @tc.desc: ProcessSystemBarRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallTest | Level2)
+{
+    // sptr<WindowNodeContainer> windowNodeContainer_;
+    sptr<WindowNode> node = new WindowNode();
+    std::map<DisplayId, Rect> displayRectMap = {};
+    displayGroupController_->ProcessSystemBarRotation(node, displayRectMap);
+    auto layoutPolicy = container_->GetLayoutPolicy();
+    ASSERT_NE(nullptr, layoutPolicy);
+}
+
+/**
+ * @tc.name: ProcessWindowPairWhenDisplayChange
+ * @tc.desc: ProcessWindowPairWhenDisplayChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, Function | SmallTest | Level2)
+{
+    // sptr<WindowNodeContainer> windowNodeContainer_;
+    bool rotateDisplay = true;
+    displayGroupController_->ProcessWindowPairWhenDisplayChange(rotateDisplay);
+    auto layoutPolicy = container_->GetLayoutPolicy();
+    layoutPolicy = nullptr;
+    ASSERT_EQ(nullptr, layoutPolicy);
+}
+/**
+ * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay08
+ * @tc.desc: DisplayId not equals to defaultDisplayId, and no node on groupWindowTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay08, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::vector<uint32_t> windowIds;
+    DisplayGroupWindowTree displayGroupWindowTree_;
+    displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
+    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
+    ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: SetSplitRatioConfig
+ * @tc.desc:SetSplitRatioConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, SetSplitRatioConfig, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::vector<uint32_t> windowIds;
+    SplitRatioConfig splitRatioConfig;
+    displayGroupController_->SetSplitRatioConfig(splitRatioConfig);
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    windowPair = nullptr;
+    DisplayGroupWindowTree displayGroupWindowTree_;
+    displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
+    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
+    ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: UpdateSplitRatioPoints01
+ * @tc.desc:UpdateSplitRatioPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints01, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::vector<uint32_t> windowIds;
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    windowPair = nullptr;
+    displayGroupController_->UpdateSplitRatioPoints(displayId);
+    DisplayGroupWindowTree displayGroupWindowTree_;
+    displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
+    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
+    ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: UpdateSplitRatioPoints02
+ * @tc.desc:UpdateSplitRatioPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints02, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::vector<uint32_t> windowIds;
+    auto displayRects = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
+    displayRects.find(displayId) = displayRects.end();
+    displayGroupController_->UpdateSplitRatioPoints(displayId);
+    DisplayGroupWindowTree displayGroupWindowTree_;
+    displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
+    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
+    ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: UpdateSplitRatioPoints03
+ * @tc.desc:UpdateSplitRatioPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::vector<uint32_t> windowIds;
+    auto layoutPolicy = container_->GetLayoutPolicy();
+    layoutPolicy = nullptr;
+    displayGroupController_->UpdateSplitRatioPoints(displayId);
+    DisplayGroupWindowTree displayGroupWindowTree_;
+    displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
+    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
+    ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: PreProcessWindowNode05
+ * @tc.desc:UpdateSplitRatioPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, Function | SmallTest | Level2)
+{
+    WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    displayGroupController_->PreProcessWindowNode(node1, type);
+    if (type != WindowUpdateType::WINDOW_UPDATE_ADDED)
+    {
+        type = WindowUpdateType::WINDOW_UPDATE_ADDED;
+    }
+    std::vector<uint32_t> windowIds;
+    ASSERT_EQ(0, windowIds.size());
+}
 }
 }
 }

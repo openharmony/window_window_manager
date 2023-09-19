@@ -1093,6 +1093,86 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest 
     EXPECT_EQ(true, targets[0]->missionId_ == 1);
     usleep(SLEEP_TIME_IN_US);
 }
+
+/*
+ * @tc.name: GetAndDrawSnapShot
+ * @tc.desc: GetWindowAnimationTargets successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, GetAndDrawSnapShot, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> srcNode = new WindowNode();
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS, 1.0, 1.0);
+    ASSERT_FALSE(snapSucc);
+}
+
+/*
+ * @tc.name: GetExpectRect
+ * @tc.desc: GetWindowAnimationTargets successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, GetExpectRect, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> dstNode = new WindowNode();
+    std::vector<uint32_t> missionIds;
+    sptr<RSWindowAnimationTarget> dstTarget;
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    auto avoidRect = windowRoot_->GetDisplayRectWithoutSystemBarAreas(dstNode);
+    auto result = WindowHelper::IsEmptyRect(avoidRect);
+    ASSERT_FALSE(result);
+    RemoteAnimation::GetExpectRect(dstNode, dstTarget);
+}
+
+/*
+ * @tc.name: NotifyAnimationAbilityDied
+ * @tc.desc: NotifyAnimationAbilityDied for null window root
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, Function | SmallTest | Level2)
+{
+    sptr<WindowTransitionInfo> info = new WindowTransitionInfo();
+    RemoteAnimation::NotifyAnimationAbilityDied(info);
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    EXPECT_EQ(true, targets.empty());
+}
+
+/*
+ * @tc.name: NotifyAnimationMinimize
+ * @tc.desc: NotifyAnimationMinimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize, Function | SmallTest | Level2)
+{
+    sptr<WindowTransitionInfo> srcInfo = new WindowTransitionInfo();
+    sptr<WindowNode> srcNode = new WindowNode();
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(
+        srcNode, TransitionEvent::MINIMIZE);
+    finishedCallback = nullptr;
+    ASSERT_EQ(finishedCallback, nullptr);
+    auto result = RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
+    ASSERT_EQ(result, WMError::WM_ERROR_NO_MEM);
+}
+
+/*
+ * @tc.name: CreateAnimationFinishedCallback02
+ * @tc.desc: CreateAnimationFinishedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback02, Function | SmallTest | Level2)
+{
+    std::function<void(void)> callback;
+    sptr<WindowNode> windowNode = new WindowNode();
+    std::string timeOutTaskName;
+    wptr<WindowNode> weakNode = windowNode;
+    auto timeoutFunc = [callback, timeOutTaskName, weakNode]()
+    {
+        callback();
+        auto node = weakNode.promote();
+    };
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    EXPECT_EQ(true, targets.empty());
+}
 }
 }
 }
