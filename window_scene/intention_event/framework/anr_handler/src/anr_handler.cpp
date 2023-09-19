@@ -92,9 +92,11 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     anrHandlerState_.sendStatus.erase(persistentId);
     anrHandlerState_.eventsIterMap.erase(persistentId);
-    for (const auto &elem : sessionStageMap_) {
-        if (elem.second.persistentId == persistentId) {
-            sessionStageMap_.erase(elem.first);
+    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
+        if (iter->second.persistentId == persistentId) {
+            iter = sessionStageMap_.erase(iter);
+        } else {
+            iter++;
         }
     }
     WLOGFD("PersistentId:%{public}d and its events erased in ANRHandler", persistentId);
@@ -161,11 +163,13 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
-    for (const auto& elem : sessionStageMap_) {
-        auto currentPersistentId = GetPersistentIdOfEvent(elem.first);
-        if (elem.first < eventId &&
+    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
+        auto currentPersistentId = GetPersistentIdOfEvent(iter->first);
+        if (iter->first < eventId &&
             (currentPersistentId == persistentId || currentPersistentId == INVALID_PERSISTENT_ID)) {
-            sessionStageMap_.erase(elem.first);
+            iter = sessionStageMap_.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
