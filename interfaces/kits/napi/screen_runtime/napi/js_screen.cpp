@@ -302,9 +302,11 @@ NativeValue* CreateJsScreenModeObject(NativeEngine& engine, const sptr<Supported
         WLOGFE("Failed to convert prop to jsObject");
         return engine.CreateUndefined();
     }
+    uint32_t id = mode->id_;
     uint32_t width = mode->width_;
     uint32_t height = mode->height_;
     uint32_t refreshRate = mode->refreshRate_;
+    optionObject->SetProperty("id", CreateJsValue(engine, id));
     optionObject->SetProperty("width", CreateJsValue(engine, width));
     optionObject->SetProperty("height", CreateJsValue(engine, height));
     optionObject->SetProperty("refreshRate", CreateJsValue(engine, refreshRate));
