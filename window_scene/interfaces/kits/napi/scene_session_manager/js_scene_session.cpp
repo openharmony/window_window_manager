@@ -384,7 +384,7 @@ void JsSceneSession::ProcessSessionFocusableChangeRegister()
         return;
     }
     session->SetSessionFocusableChangeListener(func);
-    WLOGFD("ProcessSessionFocusableChangeRegister success");
+    WLOGFI("ProcessSessionFocusableChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionTouchableChangeRegister()
@@ -948,7 +948,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
-    WLOGFD("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    WLOGFI("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
     auto iter = jsCbMap_.find(SESSION_FOCUSABLE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
