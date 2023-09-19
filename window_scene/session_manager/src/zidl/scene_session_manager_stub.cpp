@@ -189,7 +189,7 @@ int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessagePa
     } else {
         WLOGFW("Property not exist!");
     }
-    const WSError& ret = UpdateProperty(property, action);
+    const WMError& ret = UpdateProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

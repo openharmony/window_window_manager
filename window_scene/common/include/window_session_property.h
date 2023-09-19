@@ -64,6 +64,7 @@ public:
     void SetHideNonSystemFloatingWindows(bool hide);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
+    void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetBrightness(float brightness);
@@ -102,6 +103,7 @@ public:
     bool GetHideNonSystemFloatingWindows() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
+    bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     float GetBrightness() const;
@@ -146,6 +148,7 @@ private:
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
+    bool isSystemCalling_ = { false };
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;

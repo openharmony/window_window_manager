@@ -148,6 +148,7 @@ private:
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
+    void UpdateWindowState();
 
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;

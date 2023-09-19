@@ -139,6 +139,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
+        windowSystemConfig_ = parentSession->GetSystemSessionConfig();
         // creat sub session by parent session
         parentSession->GetHostSession()->CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session, token);
@@ -169,6 +170,23 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, type: %{public}u]",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::UpdateWindowState()
+{
+    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    state_ = WindowState::STATE_CREATED;
+    requestState_ = WindowState::STATE_CREATED;
+    if (WindowHelper::IsMainWindow(GetType())) {
+        maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
+        SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+        NotifyWindowNeedAvoid(
+            (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+        GetConfigurationFromAbilityInfo();
+    } else {
+        UpdateWindowSizeLimits();
+    }
 }
 
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
@@ -211,17 +229,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         ret = CreateAndConnectSpecificSession();
     }
     if (ret == WMError::WM_OK) {
-        windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
-            std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
-        state_ = WindowState::STATE_CREATED;
-        requestState_ = WindowState::STATE_CREATED;
-        if (WindowHelper::IsMainWindow(GetType())) {
-            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-            SetWindowMode(windowSystemConfig_.defaultWindowMode_);
-            NotifyWindowNeedAvoid(
-                (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-            GetConfigurationFromAbilityInfo();
-        }
+        UpdateWindowState();
     }
     WLOGFD("Window Create [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
@@ -274,7 +282,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 uint32_t WindowSceneSessionImpl::UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal,
                                                  uint32_t defaultVal, float vpr)
 {
-    bool validConfig = minVal < configVal && configVal < maxVal;
+    bool validConfig = minVal < (configVal * vpr) && (configVal * vpr) < maxVal;
     return validConfig ? static_cast<uint32_t>(configVal * vpr) : static_cast<uint32_t>(defaultVal * vpr);
 }
 

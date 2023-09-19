@@ -129,6 +129,7 @@ public:
     int32_t GetParentId() const;
     int32_t GetPersistentId() const override;
     sptr<WindowSessionProperty> GetProperty() const;
+    SystemSessionConfig GetSystemSessionConfig() const;
     sptr<ISession> GetHostSession() const;
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
