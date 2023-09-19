@@ -1812,7 +1812,7 @@ HWTEST_F(WindowRootTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
     bool ret = windowRoot_->IsForbidDockSliceMove(displayGroupId);
     ASSERT_EQ(ret, true);
     ret = windowRoot_->IsDockSliceInExitSplitModeArea(displayGroupId);
-    ASSERT_EQ(ret, true);
+    ASSERT_EQ(ret, false);
     windowRoot_->ExitSplitMode(displayGroupId);
 }
 

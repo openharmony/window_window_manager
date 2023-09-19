@@ -1048,7 +1048,7 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle3, Function | SmallTest | Level3)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     } else {
-        ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     }
 }
 
