@@ -1431,29 +1431,61 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     return abilityInfo;
 }
 
-WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
+    property->SetSystemCalling(isSystemCalling);
     wptr<SceneSessionManager> weak = this;
-    auto task = [weak, property, action]() {
+    auto task = [weak, property, action]() -> WMError {
         auto weakSession = weak.promote();
         if (weakSession == nullptr) {
-            return;
+            WLOGFE("the session is nullptr");
+            WMError::WM_DO_NOTHING;
         }
         if (property == nullptr) {
-            return;
+            WLOGFE("the property is nullptr");
+            WMError::WM_DO_NOTHING;
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
         if (sceneSession == nullptr) {
-            return;
+            WLOGFE("the scene session is nullptr");
+            WMError::WM_DO_NOTHING;
         }
         WLOGI("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
-        weakSession->HandleUpdateProperty(property, action, sceneSession);
+        return weakSession->HandleUpdateProperty(property, action, sceneSession);
     };
-    taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    return taskScheduler_->PostSyncTask(task);
 }
 
-void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
+WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
+                                                       const sptr<SceneSession>& sceneSession)
+{
+    if (!property->GetSystemCalling()) {
+        WLOGFE("Update property dragEnabled permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->SetDragEnabled(property->GetDragEnabled());
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
+                                                        const sptr<SceneSession>& sceneSession)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Update property raiseEnabled permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->SetRaiseEnabled(property->GetRaiseEnabled());
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
     switch (action) {
@@ -1480,7 +1512,7 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
             if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 WLOGW("only app main window can set brightness");
-                return;
+                return WMError::WM_OK;
             }
             // @todo if sceneSession is inactive, return
             SetBrightness(sceneSession, property->GetBrightness());
@@ -1547,10 +1579,18 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
             }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED: {
+            return UpdatePropertyDragEnabled(property, sceneSession);
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED: {
+            return UpdatePropertyRaiseEnabled(property, sceneSession);
         }
         default:
             break;
     }
+    return WMError::WM_OK;
 }
 
 void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
