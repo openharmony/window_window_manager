@@ -192,6 +192,8 @@ public:
     int GetSceneSessionPrivacyModeCount();
     bool CheckIfReuseSession(SessionInfo& sessionInfo);
 
+public:
+    std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
