@@ -93,7 +93,7 @@ public:
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token = nullptr) = 0;
     virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
-    virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
+    virtual WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
     virtual WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) = 0;
     virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
