@@ -117,6 +117,37 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Init04
+ * @tc.desc: Init Scene with abilityContext, null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, Init04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> optionTest = nullptr;
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<IRemoteObject> iSession = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext_, listener, optionTest, iSession));
+}
+
+/**
+ * @tc.name: Init05
+ * @tc.desc: Init Scene with abilityContext, null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, Init05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> optionTest = new WindowOption();
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<IRemoteObject> iSession = new IPCObjectStub();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext, listener, optionTest, iSession));
+}
+
+/**
  * @tc.name: Create01
  * @tc.desc: CreateWindow without windowName
  * @tc.type: FUNC
@@ -261,6 +292,21 @@ HWTEST_F(WindowSceneTest, OnNewWant02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateConfiguration01
+ * @tc.desc: UpdateConfiguration01 without mainWindow
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ04
+ */
+HWTEST_F(WindowSceneTest, UpdateConfiguration01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
+    scene->UpdateConfiguration(configuration);
+    int32_t level = 0;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(level));
+}
+
+/**
  * @tc.name: UpdateConfiguration02
  * @tc.desc: UpdateConfiguration without scene init
  * @tc.type: FUNC
@@ -353,6 +399,28 @@ HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GoForeground02
+ * @tc.desc: GoForeground02 without mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoForeground02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    // sptr<Window> mainwindow;
+    // mainwindow = SingletonContainer::Get<StaticCall>().CreateWindow(
+    //     GenerateMainWindowName(abilityContext_), optionTest, abilityContext_);
+    uint32_t reason = 0;
+    // auto ret = mainwindow->Show(reason);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoForeground(reason));
+}
+
+/**
  * @tc.name: GoBackground01
  * @tc.desc: GoBackground01 without mainWindow
  * @tc.type: FUNC
@@ -364,6 +432,24 @@ HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GoBackground02
+ * @tc.desc: GoBackground02 without mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoBackground02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    uint32_t reason = 0;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoBackground(reason));
+}
+
+/**
  * @tc.name: RequestFocus01
  * @tc.desc: RequestFocus01 without mainWindow
  * @tc.type: FUNC
@@ -372,6 +458,23 @@ HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->RequestFocus());
+}
+
+/**
+ * @tc.name: RequestFocus02
+ * @tc.desc: RequestFocus02 without mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, RequestFocus02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->RequestFocus());
 }
 
 /**
