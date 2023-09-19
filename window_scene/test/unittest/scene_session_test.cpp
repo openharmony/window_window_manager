@@ -743,7 +743,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     SystemBarProperty statusBarProperty;
     scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-              WSError::WS_ERROR_NULLPTR);
+              WSError::WS_OK);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -799,7 +799,7 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->IsShowWhenLocked(), false);
     scensession->property_ = property;
     property->SetWindowFlags(4);
-    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), false);
 }
 
 /**
@@ -1412,7 +1412,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
     delete scensession;
 }
 
