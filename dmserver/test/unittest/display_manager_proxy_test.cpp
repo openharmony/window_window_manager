@@ -17,6 +17,7 @@
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
+#include "display_manager_agent_default.h"
 #include "display_manager_proxy.h"
 #include "iremote_object_mocker.h"
 
