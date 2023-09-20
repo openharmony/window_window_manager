@@ -1579,10 +1579,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str())) {
-        WLOGFD("Add resource %{private}s failed.", loadPath.c_str());
-        return resourceMgr;
-    }
+    resourceMgr->AddResource(loadPath.c_str());
     return resourceMgr;
 }
 

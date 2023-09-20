@@ -36,11 +36,11 @@ public:
     RootScene();
     virtual ~RootScene();
 
-    void LoadContent(const std::string& contentUrl,
-        NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context);
+    void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+        AbilityRuntime::Context* context);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
-    virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
@@ -82,12 +82,11 @@ public:
 private:
     void RegisterInputEventListener();
 
+    std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
-    std::recursive_mutex mutex_;
     float density_ = 1.0f;
-
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
 };
