@@ -97,6 +97,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
     BindNativeFunction(*engine, *object, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     BindNativeFunction(*engine, *object, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
+    BindNativeFunction(*engine, *object, "getRootSceneUIContext", moduleName,
+        JsSceneSessionManager::GetRootSceneUIContext);
     return engine->CreateUndefined();
 }
 
@@ -393,6 +395,13 @@ NativeValue* JsSceneSessionManager::UpdateWindowMode(NativeEngine* engine, Nativ
     WLOGI("[NAPI]UpdateWindowMode");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnUpdateWindowMode(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::GetRootSceneUIContext(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]GetRootSceneUIContext");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetRootSceneUIContext(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -1136,5 +1145,36 @@ NativeValue* JsSceneSessionManager::OnUpdateWindowMode(NativeEngine& engine, Nat
     }
     SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
     return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSessionManager::OnGetRootSceneUIContext(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= 1) {
+        WLOGFE("Argc is invalid: %{public}zu, expect zero params", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    if (RootScene::staticRootScene_ == nullptr) {
+        WLOGFE("Root scene is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+
+    const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+    if (uiContent == nullptr) {
+        WLOGFE("uiContent is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+
+    NativeValue* uiContext = uiContent->GetUIContext();
+    if (uiContext == nullptr) {
+        WLOGFE("uiContext obtained from jsEngine is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+    WLOGFD("OnGetRootSceneUIContext success");
+    return uiContext;
 }
 } // namespace OHOS::Rosen
