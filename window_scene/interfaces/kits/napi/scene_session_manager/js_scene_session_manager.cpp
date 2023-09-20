@@ -99,6 +99,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     BindNativeFunction(*engine, *object, "getRootSceneUIContext", moduleName,
         JsSceneSessionManager::GetRootSceneUIContext);
+    BindNativeFunction(*engine, *object, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
+
     return engine->CreateUndefined();
 }
 
@@ -402,6 +404,13 @@ NativeValue* JsSceneSessionManager::GetRootSceneUIContext(NativeEngine* engine, 
     WLOGI("[NAPI]GetRootSceneUIContext");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetRootSceneUIContext(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::SendTouchEvent(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]SendTouchEvent");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnSendTouchEvent(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -1176,5 +1185,36 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneUIContext(NativeEngine& engine
     }
     WLOGFD("OnGetRootSceneUIContext success");
     return uiContext;
+}
+
+NativeValue* JsSceneSessionManager::OnSendTouchEvent(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc != 2) { // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
+    if (nativeObj == nullptr) {
+        WLOGFE("[NAPI]Failed to convert object");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    auto pointerEvent = MMI::PointerEvent::Create();
+    if (!ConvertPointerEventFromJs(engine, nativeObj, *pointerEvent)) {
+        WLOGFE("[NAPI]Failed to convert pointer event");
+        return engine.CreateUndefined();
+    }
+    uint32_t zIndex;
+    if (!ConvertFromJsValue(engine, info.argv[1], zIndex)) {
+        WLOGFE("[NAPI]Failed to convert parameter to zIndex");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    SceneSessionManager::GetInstance().SendTouchEvent(pointerEvent, zIndex);
+    return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen
