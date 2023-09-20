@@ -103,6 +103,11 @@ ohos_unittest("dmserver_display_manager_proxy_test") {
     "graphic_2d:surface",
     "hilog:libhilog",
   ]
+
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
 }
 
 ohos_unittest("dmserver_screen_rotation_controller_test") {
