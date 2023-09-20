@@ -45,6 +45,7 @@ private:
 private:
     void PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event);
     void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
+    void PrintInfoPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
 
     sptr<ISessionStage> sessionStage_ = nullptr;
     std::function<void(int32_t, int64_t)> dispatchCallback_ { nullptr };
