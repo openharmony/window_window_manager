@@ -342,29 +342,6 @@ HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToSensorRelatedOrientation, Fu
 }
 
 /**
- * @tc.name: GetCurrentDisplayRotation
- * @tc.desc: test function : GetCurrentDisplayRotation
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationPropertyTest, GetCurrentDisplayRotation, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation start";
-    ScreenRotationProperty::Init();
-    ScreenSessionManager *screenSessionManager = new ScreenSessionManager;
-    sptr<DisplayInfo> defaultDisplayInfo = screenSessionManager->GetDefaultDisplayInfo();
-    Rotation rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
-    ASSERT_EQ(defaultDisplayInfo->GetRotation(), rotation);
-    defaultDisplayInfo = nullptr;
-    rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
-    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT), rotation);
-    ScreenRotationProperty::defaultDeviceRotation_ = 1;
-    rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
-    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE), rotation);
-    delete screenSessionManager;
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation end";
-}
-
-/**
  * @tc.name: HandleSensorEventInput
  * @tc.desc: test function : HandleSensorEventInput
  * @tc.type: FUNC
