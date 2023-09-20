@@ -140,7 +140,10 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
     for (const auto &buff : buffer) {
         str += std::to_string(buff);
     }
-    WLOGFD("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
+    auto pointerAction = event->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        WLOGFD("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
         "VerticalAxisValue:%{public}.2f,HorizontalAxisValue:%{public}.2f,"
         "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
         "BufferCount:%{public}zu,Buffer:%{public}s",
@@ -149,17 +152,40 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
         event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_HORIZONTAL),
         event->GetPointerId(), pointerIds.size(), event->GetId(), buffer.size(), str.c_str());
 
-    for (const auto &pointerId : pointerIds) {
-        MMI::PointerEvent::PointerItem item;
-        if (!event->GetPointerItem(pointerId, item)) {
-            WLOGFE("Invalid pointer: %{public}d.", pointerId);
-            return;
+        for (const auto &pointerId : pointerIds) {
+            MMI::PointerEvent::PointerItem item;
+            if (!event->GetPointerItem(pointerId, item)) {
+                WLOGFE("Invalid pointer: %{public}d.", pointerId);
+                return;
+            }
+            WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+                "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+                pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
+                item.GetWindowX(), item.GetWindowY());
         }
-        WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-            "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
-            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
-            item.GetWindowX(), item.GetWindowY());
+    } else {
+        WLOGFI("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
+        "VerticalAxisValue:%{public}.2f,HorizontalAxisValue:%{public}.2f,"
+        "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
+        "BufferCount:%{public}zu,Buffer:%{public}s",
+        event->DumpPointerAction(), event->DumpSourceType(), event->GetButtonId(),
+        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL),
+        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_HORIZONTAL),
+        event->GetPointerId(), pointerIds.size(), event->GetId(), buffer.size(), str.c_str());
+
+        for (const auto &pointerId : pointerIds) {
+            MMI::PointerEvent::PointerItem item;
+            if (!event->GetPointerItem(pointerId, item)) {
+                WLOGFE("Invalid pointer: %{public}d.", pointerId);
+                return;
+            }
+            WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+                "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+                pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
+                item.GetWindowX(), item.GetWindowY());
+        }
     }
+    
 }
 
 WSError WindowEventChannel::TransferFocusState(bool focusState)
