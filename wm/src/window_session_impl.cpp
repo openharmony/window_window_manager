@@ -345,9 +345,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
-    if (hostSession_ != nullptr) {
-        hostSession_ = nullptr;
-    }
+    hostSession_ = nullptr;
     windowSessionMap_.erase(property_->GetWindowName());
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     return WMError::WM_OK;
