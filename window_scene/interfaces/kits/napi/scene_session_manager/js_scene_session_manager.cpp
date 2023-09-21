@@ -100,10 +100,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "getRootSceneUIContext", moduleName,
         JsSceneSessionManager::GetRootSceneUIContext);
     BindNativeFunction(*engine, *object, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
-    BindNativeFunction(*engine, *object, "openSyncTransaction", moduleName,
-        JsSceneSessionManager::OpenSyncTransaction);
-    BindNativeFunction(*engine, *object, "closeSyncTransaction", moduleName,
-        JsSceneSessionManager::CloseSyncTransaction);
+
     return engine->CreateUndefined();
 }
 
@@ -414,20 +411,6 @@ NativeValue* JsSceneSessionManager::SendTouchEvent(NativeEngine* engine, NativeC
     WLOGI("[NAPI]SendTouchEvent");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnSendTouchEvent(*engine, *info) : nullptr;
-}
-
-NativeValue* JsSceneSessionManager::OpenSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    WLOGI("[NAPI]OpenSyncTransaction");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
-    return (me != nullptr) ? me->OnOpenSyncTransaction(*engine, *info) : nullptr;
-}
-
-NativeValue* JsSceneSessionManager::CloseSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    WLOGI("[NAPI]CloseSyncTransaction");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
-    return (me != nullptr) ? me->OnCloseSyncTransaction(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -1234,17 +1217,5 @@ NativeValue* JsSceneSessionManager::OnSendTouchEvent(NativeEngine& engine, Nativ
         return engine.CreateUndefined();
     }
     SceneSessionManager::GetInstance().SendTouchEvent(pointerEvent, zIndex);
-}
-
-NativeValue* JsSceneSessionManager::OnOpenSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info)
-{
-    SceneSessionManager::GetInstance().OpenSyncTransaction();
-    return engine.CreateUndefined();
-}
-
-NativeValue* JsSceneSessionManager::OnCloseSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info)
-{
-    SceneSessionManager::GetInstance().CloseSyncTransaction();
-    return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen

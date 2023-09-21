@@ -54,9 +54,12 @@ public:
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetRootSceneUIContext(NativeEngine* engine, NativeCallbackInfo* info);
+<<<<<<< HEAD
     static NativeValue* SendTouchEvent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* OpenSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CloseSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info);
+=======
+>>>>>>> 77172a71f... Add transaction manager napi
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -84,8 +87,6 @@ private:
     NativeValue* OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetRootSceneUIContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSendTouchEvent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnOpenSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnCloseSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
