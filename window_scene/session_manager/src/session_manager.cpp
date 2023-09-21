@@ -44,23 +44,15 @@ void SessionManager::ClearSessionManagerProxy()
         WLOGFE("Already destroyed");
         return;
     }
-    if (mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_ = nullptr;
-    }
+    mockSessionManagerServiceProxy_ = nullptr;
     if (sessionManagerServiceProxy_ != nullptr) {
         int refCount = sessionManagerServiceProxy_->GetSptrRefCount();
         WLOGFI("sessionManagerServiceProxy_ GetSptrRefCount : %{public}d", refCount);
         sessionManagerServiceProxy_ = nullptr;
     }
-    if (sceneSessionManagerProxy_ != nullptr) {
-        sceneSessionManagerProxy_ = nullptr;
-    }
-    if (screenSessionManagerProxy_ != nullptr) {
-        screenSessionManagerProxy_ = nullptr;
-    }
-    if (screenLockManagerProxy_ != nullptr) {
-        screenLockManagerProxy_ = nullptr;
-    }
+    sceneSessionManagerProxy_ = nullptr;
+    screenSessionManagerProxy_ = nullptr;
+    screenLockManagerProxy_ = nullptr;
 }
 
 sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
