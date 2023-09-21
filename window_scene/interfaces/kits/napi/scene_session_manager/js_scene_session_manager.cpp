@@ -1092,6 +1092,7 @@ NativeValue* JsSceneSessionManager::OnPrepareTerminate(NativeEngine& engine, Nat
 NativeValue* JsSceneSessionManager::OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGI("[NAPI]OnPerfRequestEx");
+#ifdef SOC_PERF_ENABLE
     if (info.argc < 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -1118,6 +1119,7 @@ NativeValue* JsSceneSessionManager::OnPerfRequestEx(NativeEngine& engine, Native
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, msg);
     WLOGFD("[NAPI]PerfRequestEx success cmdId: %{public}d onOffTag: %{public}u msg:%{public}s",
         cmdId, static_cast<uint32_t>(onOffTag), msg.c_str());
+#endif
     return engine.CreateUndefined();
 }
 
