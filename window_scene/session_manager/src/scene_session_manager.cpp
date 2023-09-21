@@ -41,8 +41,9 @@
 #include <system_ability_definition.h>
 #include <want.h>
 #include <hitrace_meter.h>
-#include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_sync_transaction_controller.h>
+#include <transaction/rs_transaction.h>
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -4549,4 +4550,22 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
 }
 
+WSError SceneSessionManager::OpenSyncTransaction()
+{
+    auto transactionController = RSSyncTransactionController::GetInstance();
+    if (transactionController) {
+        RSTransaction::FlushImplicitTransaction();
+        transactionController->OpenSyncTransaction();
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::CloseSyncTransaction()
+{
+    auto transactionController = RSSyncTransactionController::GetInstance();
+    if (transactionController) {
+        transactionController->CloseSyncTransaction();
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

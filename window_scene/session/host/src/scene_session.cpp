@@ -358,9 +358,10 @@ WSError SceneSession::SetAspectRatio(float ratio)
     });
 }
 
-WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rect, reason]() {
+    PostTask([weakThis = wptr(this), rect, reason, rsTransaction]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -374,7 +375,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
             WLOGFD("skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        WSError ret = session->Session::UpdateRect(rect, reason);
+        WSError ret = session->Session::UpdateRect(rect, reason, rsTransaction);
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }

@@ -17,6 +17,7 @@
 #include "session/container/include/zidl/session_stage_ipc_interface_code.h"
 
 #include <ipc_types.h>
+#include <transaction/rs_transaction.h>
 
 #include "window_manager_hilog.h"
 
@@ -87,8 +88,20 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     WLOGFD("UpdateRect!");
     WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
     SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    WSError errCode = UpdateRect(rect, reason);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    bool hasRSTransaction = data.ReadBool();
+    if (hasRSTransaction) {
+        auto rsTransaction = data.ReadParcelable<RSTransaction>();
+        if (!rsTransaction) {
+            WLOGFE("RSTransaction unMarsh failed");
+            return -1;
+        }
+        std::shared_ptr<RSTransaction> transaction(rsTransaction);
+        WSError errCode = UpdateRect(rect, reason, transaction);
+        reply.WriteUint32(static_cast<uint32_t>(errCode));
+    } else {
+        WSError errCode = UpdateRect(rect, reason);
+        reply.WriteUint32(static_cast<uint32_t>(errCode));
+    }
     return ERR_NONE;
 }
 

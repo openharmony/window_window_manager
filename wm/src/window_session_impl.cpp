@@ -367,7 +367,8 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
@@ -390,7 +391,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetWindowRect(wmRect);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
-        UpdateRectForRotation(wmRect, preRect, wmReason);
+        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
             NotifySizeChange(wmRect, wmReason);
@@ -404,21 +405,17 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason)
+void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect]() mutable {
-        RSTransaction::FlushImplicitTransaction();
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
         auto window = weak.promote();
         if (!window) {
             return;
         }
-        auto node = window->GetSurfaceNode();
-        if (!node) {
-            return;
-        }
-        if (window->rotationAnimationCount_ == 0) {
-            window->lastGravity_ = node->GetStagingProperties().GetFrameGravity();
-            node->SetFrameGravity(Gravity::RESIZE);
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
         }
         RSSystemProperties::SetDrawTextAsBitmap(true);
         RSInterfaces::GetInstance().EnableCacheForRotation();
@@ -432,9 +429,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            auto node = window->GetSurfaceNode();
-            if (window->rotationAnimationCount_ == 0 && node) {
-                node->SetFrameGravity(window->lastGravity_);
+            if (window->rotationAnimationCount_ == 0) {
                 RSSystemProperties::SetDrawTextAsBitmap(false);
                 RSInterfaces::GetInstance().DisableCacheForRotation();
             }
@@ -443,9 +438,13 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
-        window->UpdateViewportConfig(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
         RSNode::CloseImplicitAnimation();
-        RSTransaction::FlushImplicitTransaction();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransaction::FlushImplicitTransaction();
+        }
         window->postTaskDone_ = true;
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
@@ -480,7 +479,8 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
+void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
@@ -497,7 +497,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     }
     float density = display->GetDisplayInfo()->GetVirtualPixelRatio();
     config.SetDensity(density);
-    uiContent_->UpdateViewportConfig(config, reason);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }

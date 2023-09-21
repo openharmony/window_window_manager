@@ -17,6 +17,7 @@
 #define OHOS_WINDOW_SCENE_SESSION_STAGE_RPOXY_H
 
 #include <iremote_proxy.h>
+#include <transaction/rs_transaction.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
@@ -29,7 +30,8 @@ public:
     ~SessionStageProxy() {};
 
     WSError SetActive(bool active) override;
-    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
