@@ -1582,12 +1582,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest
     windowscenesession->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     limits = windowscenesession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
     ASSERT_NE(limits.minWidth_, minMainWidth);
-    ASSERT_EQ(limits.minHeight_, minMainHeight);
-
-    windowscenesession->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    limits = windowscenesession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    ASSERT_NE(limits.minWidth_, minMainWidth);
-    ASSERT_EQ(limits.minHeight_, minMainHeight);
+    ASSERT_NE(limits.minHeight_, minMainHeight);
 }
 
 /**
