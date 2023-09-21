@@ -203,6 +203,7 @@ private:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void SetMoveDragCallback();
     void OnMoveDragCallback(const SizeChangeReason& reason);
+    void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
     std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);
