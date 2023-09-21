@@ -148,8 +148,15 @@ void JsSceneSession::ClearCbMap(bool needRemove)
     if (!needRemove) {
         return;
     }
-    WLOGFI("clear callbackMap");
-    jsCbMap_.clear();
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            WLOGFI("clear callbackMap");
+            this->jsCbMap_.clear();
+    });
+    NativeReference* callback = nullptr;
+    AsyncTask::ScheduleHighQos("JsSceneSession::ClearCbMap", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
