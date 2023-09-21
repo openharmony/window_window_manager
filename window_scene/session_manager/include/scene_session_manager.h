@@ -113,6 +113,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WSError OpenSyncTransaction();
+    WSError CloseSyncTransaction();
 
     WSError SetFocusedSession(int32_t persistentId);
     int32_t GetFocusedSession() const;

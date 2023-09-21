@@ -572,7 +572,8 @@ void Session::UpdatePointerArea(const WSRect& rect)
     preRect_ = rect;
 }
 
-WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFD("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
@@ -582,7 +583,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     }
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateRect(rect, reason);
+        sessionStage_->UpdateRect(rect, reason, rsTransaction);
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }

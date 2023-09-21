@@ -42,6 +42,7 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSTransaction;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
@@ -136,7 +137,8 @@ public:
     WSRect GetSessionRequestRect() const;
 
     virtual WSError SetActive(bool active);
-    virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
+    virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
 
     void SetShowRecent(bool showRecent);
