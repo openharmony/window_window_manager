@@ -447,7 +447,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         RSNode::CloseImplicitAnimation();
         RSTransaction::FlushImplicitTransaction();
         window->postTaskDone_ = true;
-    });
+    }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
 
 void WindowSessionImpl::UpdateDensity()
