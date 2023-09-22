@@ -323,8 +323,8 @@ WSError SceneSession::SetAspectRatio(float ratio)
             auto limits = session->GetSessionProperty()->GetWindowLimits();
             if (session->IsDecorEnable()) {
                 if (limits.minWidth_ && limits.maxHeight_ &&
-                    MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
-                    SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr)) {
+                    MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr) /
+                    SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
                     WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
                     return WSError::WS_ERROR_INVALID_PARAM;
                 } else if (limits.minHeight_ && limits.maxWidth_ &&
@@ -1053,6 +1053,34 @@ bool SceneSession::SaveAspectRatio(float ratio)
     return false;
 }
 
+void SceneSession::FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr)
+{
+    if (isDecor) {
+        rect.width_ = SessionUtils::ToLayoutWidth(rect.width_, vpr);
+        rect.height_ = SessionUtils::ToLayoutHeight(rect.height_, vpr);
+        limits.minWidth_ = SessionUtils::ToLayoutWidth(limits.minWidth_, vpr);
+        limits.maxWidth_ = SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr);
+        limits.minHeight_ = SessionUtils::ToLayoutHeight(limits.minHeight_, vpr);
+        limits.maxHeight_ = SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr);
+    }
+    if (static_cast<uint32_t>(rect.height_) > limits.maxHeight_) {
+        rect.height_ = limits.maxHeight_;
+        rect.width_ = floor(rect.height_ * ratio);
+    } else if (static_cast<uint32_t>(rect.width_) > limits.maxWidth_) {
+        rect.width_ = limits.maxWidth_;
+        rect.height_ = floor(rect.width_ / ratio);
+    } else if (static_cast<uint32_t>(rect.width_) < limits.minWidth_) {
+        rect.width_ = limits.minWidth_;
+        rect.height_ = ceil(rect.width_ / ratio);
+    } else if (static_cast<uint32_t>(rect.height_) < limits.minHeight_) {
+        rect.height_ = limits.minHeight_;
+        rect.width_ = ceil(rect.height_ * ratio);
+    }
+    if (isDecor) {
+        rect.height_ = SessionUtils::ToWinHeight(rect.height_, vpr) ;
+        rect.width_ = SessionUtils::ToWinWidth(rect.width_, vpr);
+    }
+}
 bool SceneSession::FixRectByAspectRatio(WSRect& rect)
 {
     const int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
@@ -1095,6 +1123,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
             rect.height_ = rect.width_ / aspectRatio_;
         }
     }
+    FixRectByLimits(property->GetWindowLimits(), rect, aspectRatio_, IsDecorEnable(), vpr);
     if (std::abs(static_cast<int32_t>(originalRect.width_) - static_cast<int32_t>(rect.width_)) <= tolerancePx &&
         std::abs(static_cast<int32_t>(originalRect.height_) - static_cast<int32_t>(rect.height_)) <= tolerancePx) {
         rect = originalRect;
