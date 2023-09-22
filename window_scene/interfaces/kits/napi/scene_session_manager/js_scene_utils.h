@@ -19,6 +19,7 @@
 #include <js_runtime_utils.h>
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+#include <pointer_event.h>
 
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
@@ -143,7 +144,9 @@ const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSI
         JsSessionOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
     {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
 };
+
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
+bool ConvertPointerEventFromJs(NativeEngine& engine, NativeObject* jsObject, MMI::PointerEvent& pointerEvent);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
 NativeValue* CreateJsSessionSizeChangeReason(NativeEngine& engine);

@@ -54,6 +54,7 @@ public:
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetRootSceneUIContext(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SendTouchEvent(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -80,6 +81,7 @@ private:
     NativeValue* OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetRootSceneUIContext(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSendTouchEvent(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
