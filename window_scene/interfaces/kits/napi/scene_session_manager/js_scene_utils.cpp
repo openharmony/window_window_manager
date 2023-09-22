@@ -18,13 +18,46 @@
 #include "js_scene_utils.h"
 
 #include "interfaces/include/ws_common.h"
+#include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
+constexpr int32_t NUMBER_2 = 2;
+constexpr int32_t NUMBER_3 = 3;
+
+int32_t GetMMITouchType(int32_t aceType)
+{
+    switch (aceType) {
+        case 0:
+            return MMI::PointerEvent::POINTER_ACTION_DOWN;
+        case 1:
+            return MMI::PointerEvent::POINTER_ACTION_UP;
+        case NUMBER_2:
+            return MMI::PointerEvent::POINTER_ACTION_MOVE;
+        case NUMBER_3:
+            return MMI::PointerEvent::POINTER_ACTION_CANCEL;
+        default:
+            return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
+    }
 }
+
+int32_t GetMMISourceType(int32_t aceType)
+{
+    switch (aceType) {
+        case 1:
+            return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+        case NUMBER_2:
+            return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+        case NUMBER_3:
+            return MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD;
+        default:
+            return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    }
+}
+} // namespace
 
 bool IsJsBundleNameUndefind(NativeEngine& engine, NativeValue* jsBundleName, SessionInfo& sessionInfo)
 {
@@ -166,6 +199,96 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         return false;
     }
     if (!IsJsSessionTypeUndefind(engine, jsSessionType, sessionInfo)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertPointerItemFromJs(NativeEngine& engine, NativeObject* touchObject, MMI::PointerEvent& pointerEvent)
+{
+    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (!displayInfo) {
+        WLOGFE("[NAPI]Default display info is null");
+        return false;
+    }
+    auto vpr = displayInfo->GetVirtualPixelRatio();
+    MMI::PointerEvent::PointerItem pointerItem;
+    NativeValue* jsId = touchObject->GetProperty("id");
+    NativeValue* jsTouchType = touchObject->GetProperty("type");
+    NativeValue* jsWindowX = touchObject->GetProperty("windowX");
+    NativeValue* jsWindowY = touchObject->GetProperty("windowY");
+    NativeValue* jsDisplayX = touchObject->GetProperty("displayX");
+    NativeValue* jsDisplayY = touchObject->GetProperty("displayY");
+    int32_t id;
+    if (!ConvertFromJsValue(engine, jsId, id)) {
+        WLOGFE("[NAPI]Failed to convert parameter to id");
+        return false;
+    }
+    pointerItem.SetPointerId(id);
+    pointerEvent.SetPointerId(id);
+    int32_t touchType;
+    if (!ConvertFromJsValue(engine, jsTouchType, touchType)) {
+        WLOGFE("[NAPI]Failed to convert parameter to touchType");
+        return false;
+    }
+    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
+    double windowX;
+    if (!ConvertFromJsValue(engine, jsWindowX, windowX)) {
+        WLOGFE("[NAPI]Failed to convert parameter to windowX");
+        return false;
+    }
+    pointerItem.SetWindowX(std::round(windowX * vpr));
+    double windowY;
+    if (!ConvertFromJsValue(engine, jsWindowY, windowY)) {
+        WLOGFE("[NAPI]Failed to convert parameter to windowY");
+        return false;
+    }
+    pointerItem.SetWindowY(std::round(windowY * vpr));
+    double displayX;
+    if (!ConvertFromJsValue(engine, jsDisplayX, displayX)) {
+        WLOGFE("[NAPI]Failed to convert parameter to displayX");
+        return false;
+    }
+    pointerItem.SetDisplayX(std::round(displayX * vpr));
+    double displayY;
+    if (!ConvertFromJsValue(engine, jsDisplayY, displayY)) {
+        WLOGFE("[NAPI]Failed to convert parameter to displayY");
+        return false;
+    }
+    pointerItem.SetDisplayY(std::round(displayY * vpr));
+    pointerEvent.AddPointerItem(pointerItem);
+    return true;
+}
+
+bool ConvertPointerEventFromJs(NativeEngine& engine, NativeObject* jsObject, MMI::PointerEvent& pointerEvent)
+{
+    NativeValue* jsSourceType = jsObject->GetProperty("source");
+    NativeValue* jsTimestamp = jsObject->GetProperty("timestamp");
+    NativeValue* jsChangedTouches = jsObject->GetProperty("changedTouches");
+    int32_t sourceType;
+    if (!ConvertFromJsValue(engine, jsSourceType, sourceType)) {
+        WLOGFE("[NAPI]Failed to convert parameter to sourceType");
+        return false;
+    }
+    pointerEvent.SetSourceType(GetMMISourceType(sourceType));
+    double timestamp;
+    if (!ConvertFromJsValue(engine, jsTimestamp, timestamp)) {
+        WLOGFE("[NAPI]Failed to convert parameter to timestamp");
+        return false;
+    }
+    pointerEvent.SetActionTime(timestamp);
+    NativeArray* changedTouchesArray = ConvertNativeValueTo<NativeArray>(jsChangedTouches);
+    if (changedTouchesArray == nullptr) {
+        WLOGFE("[NAPI]Failed to convert parameter to touchesArray");
+        return false;
+    }
+    // use changedTouches[0] only
+    NativeObject* touchObject = ConvertNativeValueTo<NativeObject>(changedTouchesArray->GetElement(0));
+    if (touchObject == nullptr) {
+        WLOGFE("[NAPI]Failed to convert parameter to touchObject");
+        return false;
+    }
+    if (!ConvertPointerItemFromJs(engine, touchObject, pointerEvent)) {
         return false;
     }
     return true;

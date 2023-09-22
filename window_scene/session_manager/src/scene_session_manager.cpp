@@ -32,6 +32,7 @@
 #include <iservice_registry.h>
 #include <parameters.h>
 #include "parameter.h"
+#include <pointer_event.h>
 #include <power_mgr_client.h>
 #include <resource_manager.h>
 #include <running_lock.h>
@@ -1580,10 +1581,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str())) {
-        WLOGFD("Add resource %{private}s failed.", loadPath.c_str());
-        return resourceMgr;
-    }
+    resourceMgr->AddResource(loadPath.c_str());
     return resourceMgr;
 }
 
@@ -2556,6 +2554,48 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
     return sceneSession->UpdateWindowMode(mode);
+}
+
+WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
+{
+    if (!pointerEvent) {
+        WLOGFE("pointerEvent is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uint32_t targetZIndex = 0;
+    sptr<SceneSession> targetSession;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFE("Failed to get pointerItem");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto displayX = pointerItem.GetDisplayX();
+    auto displayY = pointerItem.GetDisplayY();
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SendTouchEvent [%d, %d]", displayX, displayY);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [id, session] : sceneSessionMap_) {
+            if (!session || session->IsSystemSession() || !session->GetTouchable() || !IsSessionVisible(session)) {
+                continue;
+            }
+            auto zOrder = session->GetZOrder();
+            if (zOrder <= targetZIndex || zOrder >= zIndex) {
+                continue;
+            }
+            if (!session->GetSessionRect().IsInRegion(displayX, displayY)) {
+                continue;
+            }
+            targetZIndex = zOrder;
+            targetSession = session;
+        }
+    }
+    if (!targetSession) {
+        return WSError::WS_DO_NOTHING;
+    }
+    WLOGFI("Send touch event to session with id: %{public}" PRIu32 " zIndex: %{public}u",
+        targetSession->GetPersistentId(), targetZIndex);
+    targetSession->TransferPointerEvent(pointerEvent);
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
