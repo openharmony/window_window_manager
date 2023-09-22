@@ -23,6 +23,7 @@
 #include "display_cutout_controller.h"
 #include "display_info.h"
 #include "dm_common.h"
+#include "fold_screen_info.h"
 #include "screen.h"
 #include "screen_info.h"
 #include "screen_group_info.h"
@@ -83,6 +84,11 @@ public:
         TRANS_ID_SCENE_BOARD_SCREEN_BASE = 2000,
         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
+        TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
+        TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
+        TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -140,6 +146,16 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
+
+    virtual bool IsFoldable() { return false; }
+
+    virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; }
+
+    virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+
+    virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
+
+    virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 };
 } // namespace OHOS::Rosen
 
