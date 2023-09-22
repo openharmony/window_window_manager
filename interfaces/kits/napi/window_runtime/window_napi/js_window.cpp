@@ -1412,7 +1412,8 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
             reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
         if (token == nullptr) {
             std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
-                AbilityRuntime::RequestInfo::UnwrapRequestInfo(engine, info.argv[0]);
+                AbilityRuntime::RequestInfo::UnwrapRequestInfo(reinterpret_cast<napi_env>(&engine),
+                    reinterpret_cast<napi_value>(info.argv[0]));
             token = (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
         }
     }
