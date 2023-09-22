@@ -2157,6 +2157,10 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 WLOGFW("NotifySessionExceptionFunc, listenerController_ is nullptr");
                 return;
             }
+            if (scnSession->GetSessionInfo().isSystem_) {
+                WLOGFW("NotifySessionExceptionFunc, id: %{public}d is system", scnSession->GetPersistentId());
+                return;
+            }
             WLOGFI("NotifySessionExceptionFunc, errorCode: %{public}d, id: %{public}d", info.errorCode,
                    info.persistentId_);
             if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT) ||
@@ -2185,6 +2189,10 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
                 WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
                 return;
             }
+            if (scnSession->GetSessionInfo().isSystem_) {
+                WLOGFW("NotifySessionSnapshotFunc, id: %{public}d is system", scnSession->GetPersistentId());
+                return;
+            }
             auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
             if (abilityInfoPtr == nullptr) {
                 WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
@@ -2208,6 +2216,10 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scn
 {
     if (scnSession == nullptr) {
         WLOGFW("NotifySessionForCallback, scnSession is nullptr");
+        return;
+    }
+    if (scnSession->GetSessionInfo().isSystem_) {
+        WLOGFW("NotifySessionForCallback, id: %{public}d is system", scnSession->GetPersistentId());
         return;
     }
     WLOGFI("NotifySessionForCallback, id: %{public}d, needRemoveSession: %{public}u", scnSession->GetPersistentId(),
@@ -2529,7 +2541,9 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         if (res != WSError::WS_OK) {
             return res;
         }
-        if (listenerController_ != nullptr) {
+        WLOGFI("UpdateFocus, id: %{public}d, isSystem: %{public}d", sceneSession->GetPersistentId(),
+               sceneSession->GetSessionInfo().isSystem_);
+        if (listenerController_ != nullptr && !sceneSession->GetSessionInfo().isSystem_) {
             if (isFocused) {
                 WLOGFD("NotifySessionFocused, id: %{public}d", sceneSession->GetPersistentId());
                 listenerController_->NotifySessionFocused(sceneSession->GetPersistentId());
@@ -2742,7 +2756,10 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     if (abilityInfoPtr == nullptr) {
         return;
     }
-    if ((listenerController_ != nullptr) && !(abilityInfoPtr->excludeFromMissions)) {
+    WLOGFI("NotifyCompleteFirstFrameDrawing, id: %{public}d, isSystem: %{public}d", scnSession->GetPersistentId(),
+           scnSession->GetSessionInfo().isSystem_);
+    if ((listenerController_ != nullptr) && !scnSession->GetSessionInfo().isSystem_ &&
+        !(abilityInfoPtr->excludeFromMissions)) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
         listenerController_->NotifySessionCreated(persistentId);
     }
@@ -2760,7 +2777,14 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 {
     WLOGFI("NotifySessionMovedToFront, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
-    if (scnSession && listenerController_ != nullptr &&
+    if (scnSession == nullptr) {
+        WLOGFE("session is invalid with %{public}d", persistentId);
+        return;
+    }
+    WLOGFI("NotifySessionMovedToFront, id: %{public}d, isSystem: %{public}d", scnSession->GetPersistentId(),
+           scnSession->GetSessionInfo().isSystem_);
+    if (listenerController_ != nullptr &&
+        !scnSession->GetSessionInfo().isSystem_ &&
         (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         listenerController_->NotifySessionMovedToFront(persistentId);
@@ -2785,7 +2809,9 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
         WLOGFI("try to run OnSessionLabelChange");
         sessionListener_->OnSessionLabelChange(sceneSession->GetPersistentId(), label);
     }
-    if (listenerController_ != nullptr) {
+    WLOGFI("NotifySessionLabelUpdated, id: %{public}d, isSystem: %{public}d", sceneSession->GetPersistentId(),
+           sceneSession->GetSessionInfo().isSystem_);
+    if (listenerController_ != nullptr && !sceneSession->GetSessionInfo().isSystem_) {
         WLOGFD("NotifySessionLabelUpdated, id: %{public}d", sceneSession->GetPersistentId());
         listenerController_->NotifySessionLabelUpdated(sceneSession->GetPersistentId());
     }
@@ -2811,7 +2837,10 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         WLOGFI("try to run OnSessionIconChange.");
         sessionListener_->OnSessionIconChange(sceneSession->GetPersistentId(), icon);
     }
+    WLOGFI("NotifySessionIconChanged, id: %{public}d, isSystem: %{public}d", sceneSession->GetPersistentId(),
+           sceneSession->GetSessionInfo().isSystem_);
     if (listenerController_ != nullptr &&
+        !sceneSession->GetSessionInfo().isSystem_ &&
         (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         WLOGFD("NotifySessionIconChanged, id: %{public}d", sceneSession->GetPersistentId());
