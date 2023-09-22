@@ -928,6 +928,15 @@ void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func
     sessionExceptionFuncs_.emplace_back(funcSptr);
 }
 
+void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
+{
+    if (func == nullptr) {
+        WLOGFE("func is nullptr");
+        return;
+    }
+    notifySessionSnapshotFunc_ = func;
+}
+
 void Session::SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func)
 {
     pendingSessionToForegroundFunc_ = func;
@@ -1243,6 +1252,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot()
     auto pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
         WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        notifySessionSnapshotFunc_(persistentId_);
     } else {
         WLOGFE("Failed to get pixelMap, return nullptr");
     }
