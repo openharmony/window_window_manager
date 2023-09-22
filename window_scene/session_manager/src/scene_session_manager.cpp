@@ -836,6 +836,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
         }
         RegisterSessionExceptionFunc(sceneSession);
+        RegisterSessionSnapshotFunc(sceneSession);
         FillSessionInfo(sceneSession);
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
@@ -2171,6 +2172,38 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     };
     sceneSession->SetSessionExceptionListener(sessionExceptionFunc);
     WLOGFI("RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifySessionSnapshotFunc sessionSnapshotFunc = [this](int32_t persistentId) {
+        auto task = [this, persistentId]() {
+            auto scnSession = GetSceneSession(persistentId);
+            if (scnSession == nullptr) {
+                WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
+                return;
+            }
+            auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
+            if (abilityInfoPtr == nullptr) {
+                WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
+                return;
+            }
+            if (listenerController_ == nullptr) {
+                WLOGFW("NotifySessionSnapshotFunc, listenerController_ is nullptr");
+                return;
+            }
+            if (!(abilityInfoPtr->excludeFromMissions)) {
+                listenerController_->NotifySessionSnapshotChanged(persistentId);
+            }
+        };
+        taskScheduler_->PostVoidSyncTask(task);
+    };
+    sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
+    WLOGFI("RegisterSessionSnapshotFunc success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
 void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession)
@@ -3664,10 +3697,6 @@ std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId
             return std::string("");
         }
         std::string filePath = scnSession->GetSessionSnapshotFilePath();
-        if (listenerController_ != nullptr && !filePath.empty()) {
-            WLOGFD("NotifySessionSnapshotChanged, id: %{public}d", scnSession->GetPersistentId());
-            listenerController_->NotifySessionSnapshotChanged(scnSession->GetPersistentId());
-        }
         return filePath;
     };
     return taskScheduler_->PostSyncTask(task);
