@@ -31,6 +31,7 @@
 namespace OHOS::Rosen {
 class BaseAdapter {
 public:
+    virtual ~BaseAdapter();
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
