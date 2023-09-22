@@ -55,6 +55,7 @@ using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& in
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
+using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
 using NotifyCallingSessionUpdateRectFunc = std::function<void(const int32_t& persistentId)>;
@@ -147,6 +148,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
     void SetSessionExceptionListener(const NotifySessionExceptionFunc& func);
+    void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear();
@@ -303,6 +305,7 @@ protected:
     NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
     NofitySessionIconUpdatedFunc updateSessionIconFunc_;
     std::vector<std::shared_ptr<NotifySessionExceptionFunc>> sessionExceptionFuncs_;
+    NotifySessionSnapshotFunc notifySessionSnapshotFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyCallingSessionUpdateRectFunc notifyCallingSessionUpdateRectFunc_;

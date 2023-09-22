@@ -278,6 +278,7 @@ private:
     void OnInputMethodShown(const int32_t& persistentId);
     void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession);
     bool IsSessionVisible(const sptr<SceneSession>& session);
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
