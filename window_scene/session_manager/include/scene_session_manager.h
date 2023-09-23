@@ -336,6 +336,8 @@ private:
     RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
+    void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
+    void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
     sptr<ISessionChangeListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
