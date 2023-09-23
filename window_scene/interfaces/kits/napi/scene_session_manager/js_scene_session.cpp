@@ -168,6 +168,12 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
     }
     sessionchangeCallback->onWindowAnimationFlagChange_ = std::bind(
         &JsSceneSession::OnDefaultAnimationFlagChange, this, std::placeholders::_1);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sessionchangeCallback->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
     WLOGFD("ProcessSessionDefaultAnimationFlagChangeRegister success");
 }
 
