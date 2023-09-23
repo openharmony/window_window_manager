@@ -721,7 +721,7 @@ void Session::HandleDialogForeground()
             continue;
         }
         WLOGFD("Foreground dialog, id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_FOREGROUND);
+        dialog->SetSessionState(SessionState::STATE_ACTIVE);
     }
 }
 
@@ -983,6 +983,11 @@ void Session::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBa
     notifyCallingSessionBackgroundFunc_ = func;
 }
 
+void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func)
+{
+    raiseToTopForPointDownFunc_ = func;
+}
+
 void Session::NotifyTouchDialogTarget()
 {
     if (!sessionStage_) {
@@ -1062,12 +1067,14 @@ bool Session::CheckDialogOnForeground()
 {
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
     if (dialogVec_.empty()) {
+        WLOGFD("Dialog is empty, id: %{public}d", GetPersistentId());
         return false;
     }
     for (auto dialogSession : dialogVec_) {
-        if (dialogSession && dialogSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+        if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+            GetSessionState() == SessionState::STATE_FOREGROUND)) {
             dialogSession->NotifyTouchDialogTarget();
-            WLOGFD("Notify touch dialog window");
+            WLOGFD("Notify touch dialog window, id: %{public}d", GetPersistentId());
             return true;
         }
     }
@@ -1095,6 +1102,34 @@ const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
     return iter->second;
 }
 
+WSError Session::RaiseToAppTopForPointDown()
+{
+    if (raiseToTopForPointDownFunc_) {
+        raiseToTopForPointDownFunc_();
+        WLOGFD("RaiseToAppTopForPointDown, id: %{public}d", GetPersistentId());
+    }
+    return WSError::WS_OK;
+}
+
+void Session::HandlePointDownDialog(int32_t pointAction)
+{
+    if (!(pointAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+        WLOGFD("Point main window, action is not down, id: %{public}d", GetPersistentId());
+        return;
+    }
+    for (auto dialog : dialogVec_) {
+        if (dialog && (dialog->GetSessionState() == SessionState::STATE_FOREGROUND ||
+            dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
+            dialog->RaiseToAppTopForPointDown();
+            dialog->PresentFoucusIfNeed(pointAction);
+            WLOGFD("Point main window, raise to top and dialog need focus, id: %{public}d, dialogId: %{public}d",
+                GetPersistentId(), dialog->GetPersistentId());
+            break;
+        }
+    }
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
@@ -1108,8 +1143,8 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     auto pointerAction = pointerEvent->GetPointerAction();
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
-            WLOGFD("Point main window, has dialog on foreground, id: %{public}d", GetPersistentId());
-            PresentFoucusIfNeed(pointerAction);
+            HandlePointDownDialog(pointerAction);
+
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {

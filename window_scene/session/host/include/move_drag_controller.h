@@ -122,6 +122,7 @@ private:
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
     bool isDecorEnable_ = true;
+    bool hasPointDown_ = false;
     float aspectRatio_ = 0.0f;
     float vpr_ = 1.0f;
     int32_t minTranX_ = INT32_MIN;
