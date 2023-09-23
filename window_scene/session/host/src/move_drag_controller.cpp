@@ -43,11 +43,18 @@ void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBa
 
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
+    if (flag && (!hasPointDown_ || isStartDrag_)) {
+        WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
+            hasPointDown_, isStartDrag_);
+        return;
+    }
     isStartMove_ = flag;
+    WLOGFD("SetStartMoveFlag, isStartMove_: %{public}d", isStartMove_);
 }
 
 bool MoveDragController::GetStartMoveFlag() const
 {
+    WLOGFD("GetStartMoveFlag, isStartMove_: %{public}d", isStartMove_);
     return isStartMove_;
 }
 
@@ -111,10 +118,17 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
 
     UpdateMoveTempProperty(pointerEvent);
 
+    int32_t action = pointerEvent->GetPointerAction();
     if (!GetStartMoveFlag()) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+            WLOGFD("Reset hasPointDown_ when point up or cancel");
+            hasPointDown_ = false;
+        }
+        WLOGFD("No need to move");
         return false;
     }
-    int32_t action = pointerEvent->GetPointerAction();
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
@@ -126,6 +140,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             reason = SizeChangeReason::DRAG_END;
             SetStartMoveFlag(false);
+            hasPointDown_ = false;
             break;
         }
         default:
@@ -169,6 +184,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
+            hasPointDown_ = false;
             break;
         }
         default:
@@ -233,6 +249,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerId, pointerItem);
     InitMoveDragProperty();
+    hasPointDown_ = true;
     moveDragProperty_.originalRect_ = originalRect;
     auto display = ScreenSessionManager::GetInstance().GetDisplayInfoById(pointerEvent->GetTargetDisplayId());
     if (display) {
