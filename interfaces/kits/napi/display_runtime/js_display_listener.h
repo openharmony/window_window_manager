@@ -25,7 +25,9 @@
 namespace OHOS {
 namespace Rosen {
 class JsDisplayListener : public DisplayManager::IDisplayListener,
-                          public DisplayManager::IPrivateWindowListener {
+                          public DisplayManager::IPrivateWindowListener,
+                          public DisplayManager::IFoldStatusListener,
+                          public DisplayManager::IDisplayModeListener {
 public:
     explicit JsDisplayListener(NativeEngine* engine) : engine_(engine) {}
     ~JsDisplayListener() override = default;
@@ -36,6 +38,8 @@ public:
     void OnDestroy(DisplayId id) override;
     void OnChange(DisplayId id) override;
     void OnPrivateWindow(bool hasPrivate) override;
+    void OnFoldStatusChanged(FoldStatus foldStatus) override;
+    void OnDisplayModeChanged(FoldDisplayMode displayMode) override;
 
 private:
     void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
@@ -48,6 +52,9 @@ const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";
 const std::string EVENT_CHANGE = "change";
 const std::string EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
+const std::string
+EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
+const std::string EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */
