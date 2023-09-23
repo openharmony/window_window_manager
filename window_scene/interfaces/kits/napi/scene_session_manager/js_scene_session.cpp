@@ -272,12 +272,15 @@ void JsSceneSession::ProcessRaiseToTopRegister()
 
 void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    NotifyRaiseToTopForPointDownFunc func = [this]() {
+        this->OnRaiseToTopForPointDown();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->onRaiseToTopForPointDown_ = std::bind(&JsSceneSession::OnRaiseToTopForPointDown, this);
+    session->SetRaiseToAppTopForPointDownFunc(func);
     WLOGFD("ProcessRaiseToTopForPointDownRegister success");
 }
 
