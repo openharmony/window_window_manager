@@ -1823,17 +1823,17 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
-	return FoldDisplayMode::UNKNOWN;
+    return FoldDisplayMode::UNKNOWN;
 }
 
 bool ScreenSessionManager::IsFoldable()
 {
-	return false;
+    return false;
 }
 
 FoldStatus ScreenSessionManager::GetFoldStatus()
 {
-	return FoldStatus::UNKNOWN;
+    return FoldStatus::UNKNOWN;
 }
 
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
