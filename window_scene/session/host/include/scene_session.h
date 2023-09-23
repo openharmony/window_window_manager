@@ -193,6 +193,7 @@ public:
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     WSRect GetLastSafeRect();
     void SetLastSafeRect(WSRect rect);
+    bool IsNeedDefaultAnimation();
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
@@ -226,6 +227,7 @@ private:
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
+    bool needDefaultAnimationFlag_ = false;
 };
 } // namespace OHOS::Rosen
 

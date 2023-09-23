@@ -1350,6 +1350,7 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        session->needDefaultAnimationFlag_ = needDefaultAnimationFlag;
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onWindowAnimationFlagChange_) {
             session->sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
         }
@@ -1359,10 +1360,16 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 
 void SceneSession::SetWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
+    needDefaultAnimationFlag_ = needDefaultAnimationFlag;
     if (sessionChangeCallback_ && sessionChangeCallback_->onWindowAnimationFlagChange_) {
         sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
     }
     return;
+}
+
+bool SceneSession::IsNeedDefaultAnimation()
+{
+    return needDefaultAnimationFlag_;
 }
 
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
