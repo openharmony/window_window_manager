@@ -1814,4 +1814,54 @@ void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpI
     oss << "NodeId: " << nodeId << std::endl;
     dumpInfo.append(oss.str());
 }
+
+// --- Fold Screen ---
+void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
+{
+    WLOGFI("ScreenSessionManager::SetFoldDisplayMode");
+}
+
+FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
+{
+    return FoldDisplayMode::UNKNOWN;
+}
+
+bool ScreenSessionManager::IsFoldable()
+{
+    return false;
+}
+
+FoldStatus ScreenSessionManager::GetFoldStatus()
+{
+    return FoldStatus::UNKNOWN;
+}
+
+sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
+{
+    return nullptr;
+}
+
+void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
+{
+    WLOGI("NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyFoldStatusChanged(foldStatus);
+    }
+}
+
+void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    WLOGI("NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyDisplayModeChanged(displayMode);
+    }
+}
 } // namespace OHOS::Rosen

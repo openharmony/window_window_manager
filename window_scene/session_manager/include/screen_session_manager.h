@@ -157,6 +157,23 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
+    //Fold Screen
+    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+
+    FoldDisplayMode GetFoldDisplayMode() override;
+
+    bool IsFoldable() override;
+
+    FoldStatus GetFoldStatus() override;
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+
+    ScreenProperty GetPhyScreenProperty(ScreenId screenId);
+    uint32_t GetCurvedCompressionArea() const;
+
+    void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

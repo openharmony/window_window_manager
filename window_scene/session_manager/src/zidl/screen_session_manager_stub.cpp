@@ -330,6 +330,29 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteString(dumpInfo);
             break;
         }
+        //Fold Screen
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
+            FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+            SetFoldDisplayMode(displayMode);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
+            FoldDisplayMode displayMode = GetFoldDisplayMode();
+            reply.WriteUint32(static_cast<uint32_t>(displayMode));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE: {
+            reply.WriteBool(IsFoldable());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS: {
+            reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus()));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {
+            reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
