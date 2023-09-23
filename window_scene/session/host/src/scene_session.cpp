@@ -501,23 +501,6 @@ WSError SceneSession::RaiseToAppTop()
     });
 }
 
-WSError SceneSession::RaiseToAppTopForPointDown()
-{
-    PostTask([weakThis = wptr(this)]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTopForPointDown_) {
-            session->sessionChangeCallback_->onRaiseToTopForPointDown_();
-        }
-        WLOGFD("RaiseToAppTopForPointDown, id: %{public}d", session->GetPersistentId());
-        return WSError::WS_OK;
-    });
-    return WSError::WS_OK;
-}
-
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {

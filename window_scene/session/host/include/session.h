@@ -61,6 +61,7 @@ using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(cons
 using NotifyCallingSessionUpdateRectFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyCallingSessionForegroundFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyCallingSessionBackgroundFunc = std::function<void()>;
+using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -225,6 +226,7 @@ public:
     void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func);
     void NotifyCallingSessionForeground();
     void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
+    void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
     virtual std::vector<Rect> GetTouchHotAreas() const
@@ -254,6 +256,7 @@ public:
     WSError SetPointerStyle(MMI::WindowArea area);
     const char* DumpPointerWindowArea(MMI::WindowArea area) const;
     WSRectF UpdateHotRect(const WSRect& rect);
+    WSError RaiseToAppTopForPointDown();
 
 protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
@@ -311,6 +314,7 @@ protected:
     NotifyCallingSessionUpdateRectFunc notifyCallingSessionUpdateRectFunc_;
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
+    NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
@@ -325,6 +329,7 @@ private:
     bool CheckDialogOnForeground();
     void HandleDialogForeground();
     void HandleDialogBackground();
+    void HandlePointDownDialog(int32_t pointAction);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
