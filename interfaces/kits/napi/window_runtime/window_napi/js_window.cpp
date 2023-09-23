@@ -1419,7 +1419,7 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     AsyncTask::CompleteCallback complete =
         [weakToken, token, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 return;
@@ -1850,8 +1850,8 @@ NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCa
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     errCode = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
-    if (info.argc < 1 || // 1: params num
-        !GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, engine, info, windowToken_)) {
+    if (errCode == WmErrorCode::WM_OK && (info.argc < 1 || // 1: params num
+        !GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, engine, info, windowToken_))) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -1859,7 +1859,7 @@ NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCa
     AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 return;
@@ -1971,7 +1971,7 @@ NativeValue* JsWindow::OnSetWindowSystemBarProperties(NativeEngine& engine, Nati
     AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 return;
