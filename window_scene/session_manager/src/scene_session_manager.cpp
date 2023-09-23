@@ -2615,12 +2615,16 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount()
 {
     auto countFunc = [](const std::pair<int32_t, sptr<SceneSession>>& sessionPair) -> bool {
         sptr<SceneSession> sceneSession = sessionPair.second;
-        bool isForground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+        bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
+        if (isForeground && sceneSession->GetParentSession() != nullptr) {
+            isForeground &= sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
+            sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE;
+        }
         bool isPrivate = sceneSession->GetSessionProperty() != nullptr &&
             sceneSession->GetSessionProperty()->GetPrivacyMode();
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
-        return (isForground || IsSystemWindowVisible) && isPrivate;
+        return (isForeground || IsSystemWindowVisible) && isPrivate;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     return std::count_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), countFunc);
@@ -2653,15 +2657,65 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
             UpdatePrivateStateAndNotify(persistentId);
+            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                ProcessSubSessionForeground(sceneSession);
+            }
             break;
         case SessionState::STATE_BACKGROUND:
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
             UpdatePrivateStateAndNotify(persistentId);
+            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                ProcessSubSessionBackground(sceneSession);
+            }
             break;
         default:
             break;
+    }
+}
+
+void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFD("session is nullptr");
+        return;
+    }
+    for (const auto& subSession : sceneSession->GetSubSession()) {
+        if (subSession == nullptr) {
+            WLOGFD("sub session is nullptr");
+            continue;
+        }
+        const auto& state = subSession->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            WLOGFD("sub session is not active");
+            continue;
+        }
+        NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn());
+        UpdatePrivateStateAndNotify(subSession->GetPersistentId());
+    }
+}
+
+void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFD("session is nullptr");
+        return;
+    }
+    for (const auto& subSession : sceneSession->GetSubSession()) {
+        if (subSession == nullptr) {
+            WLOGFD("sub session is nullptr");
+            continue;
+        }
+        const auto& state = subSession->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            WLOGFD("sub session is not active");
+            continue;
+        }
+        NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        HandleKeepScreenOn(subSession, false);
+        UpdatePrivateStateAndNotify(subSession->GetPersistentId());
     }
 }
 

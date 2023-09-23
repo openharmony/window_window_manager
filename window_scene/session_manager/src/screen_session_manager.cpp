@@ -1920,12 +1920,12 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
         WLOGFD("screen session state is not changed, return");
         return;
     }
+    WLOGI("PrivateSession status : %{public}u", hasPrivate);
     screenPrivacyStates = hasPrivate;
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
     if (agents.empty()) {
         return;
     }
-    WLOGI("PrivateSession status : %{public}u", hasPrivate);
     for (auto& agent : agents) {
         agent->NotifyPrivateWindowStateChanged(hasPrivate);
     }
