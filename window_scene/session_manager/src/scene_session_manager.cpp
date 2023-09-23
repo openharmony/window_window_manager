@@ -1477,7 +1477,8 @@ void SceneSessionManager::CleanUserMap()
     WLOGFI("CleanUserMap in size = %{public}zu", sceneSessionMap_.size());
     auto iter = sceneSessionMap_.begin();
     while (iter != sceneSessionMap_.end()) {
-        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_ &&
+            iter->second->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             iter = sceneSessionMap_.erase(iter);
         } else {
             iter++;
