@@ -2919,7 +2919,8 @@ NativeValue* JsWindow::OnSetResizeByDragEnabled(NativeEngine& engine, NativeCall
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set dragEnabled failed"));
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode),
+                            "Window set dragEnabled failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] set dragEnabled end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -2964,7 +2965,7 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
             }
             if (errCode != WMError::WM_OK) {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode), "Invalidate params."));
                 return;
             }
             WMError ret = weakWindow->SetRaiseByClickEnabled(raiseEnabled);
