@@ -1360,7 +1360,8 @@ void Session::NotifyClick()
 
 void Session::PresentFoucusIfNeed(int32_t pointerAction)
 {
-    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+    if ((!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) &&
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
         NotifyClick();
     }
