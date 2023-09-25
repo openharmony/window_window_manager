@@ -699,7 +699,13 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    property_->SetDragEnabled(dragEnabled);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        property_->SetDragEnabled(dragEnabled);
+    } else {
+        WLOGFE("This is not main window.");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
