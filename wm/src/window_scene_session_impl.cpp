@@ -1077,6 +1077,9 @@ WMError WindowSceneSessionImpl::Minimize()
     }
     if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    } else {
+        WLOGFE("This window state is abnormal.");
+        return WMError::WM_DO_NOTHING;
     }
     return WMError::WM_OK;
 }
