@@ -29,11 +29,11 @@ class JsDisplayListener : public DisplayManager::IDisplayListener,
                           public DisplayManager::IFoldStatusListener,
                           public DisplayManager::IDisplayModeListener {
 public:
-    explicit JsDisplayListener(NativeEngine* engine) : engine_(engine) {}
+    explicit JsDisplayListener(napi_env env) : env_(env) {}
     ~JsDisplayListener() override = default;
-    void AddCallback(const std::string& type, NativeValue* jsListenerObject);
+    void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
-    void RemoveCallback(const std::string& type, NativeValue* jsListenerObject);
+    void RemoveCallback(const std::string& type, napi_value jsListenerObject);
     void OnCreate(DisplayId id) override;
     void OnDestroy(DisplayId id) override;
     void OnChange(DisplayId id) override;
@@ -42,11 +42,11 @@ public:
     void OnDisplayModeChanged(FoldDisplayMode displayMode) override;
 
 private:
-    void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
-    NativeEngine* engine_ = nullptr;
+    void CallJsMethod(const std::string& methodName, napi_value const* argv = nullptr, size_t argc = 0);
+    napi_env env_ = nullptr;
     std::mutex mtx_;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
-    NativeValue* CreateDisplayIdArray(NativeEngine& engine, const std::vector<DisplayId>& data);
+    napi_value CreateDisplayIdArray(napi_env env, const std::vector<DisplayId>& data);
 };
 const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";

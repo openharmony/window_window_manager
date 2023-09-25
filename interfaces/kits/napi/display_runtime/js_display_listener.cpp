@@ -15,6 +15,7 @@
 #include "js_display_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
+#include "js_display.h"
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -22,15 +23,17 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
 }
 
-void JsDisplayListener::AddCallback(const std::string& type, NativeValue* jsListenerObject)
+void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
     WLOGI("JsDisplayListener::AddCallback is called");
     std::unique_ptr<NativeReference> callbackRef;
-    if (engine_ == nullptr) {
-        WLOGFE("engine_ nullptr");
+    if (env_ == nullptr) {
+        WLOGFE("env_ nullptr");
         return;
     }
-    callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
+    napi_ref result = nullptr;
+    napi_create_reference(env_, jsListenerObject, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(mtx_);
     jsCallBack_[type].emplace_back(std::move(callbackRef));
     WLOGI("JsDisplayListener::AddCallback success jsCallBack_ size: %{public}u!",
@@ -43,7 +46,7 @@ void JsDisplayListener::RemoveAllCallback()
     jsCallBack_.clear();
 }
 
-void JsDisplayListener::RemoveCallback(const std::string& type, NativeValue* jsListenerObject)
+void JsDisplayListener::RemoveCallback(const std::string& type, napi_value jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     auto it = jsCallBack_.find(type);
@@ -53,7 +56,9 @@ void JsDisplayListener::RemoveCallback(const std::string& type, NativeValue* jsL
     }
     auto& listeners = it->second;
     for (auto iter = listeners.begin(); iter != listeners.end();) {
-        if (jsListenerObject->StrictEquals((*iter)->Get())) {
+        bool isEquals = false;
+        napi_strict_equals(env_, jsListenerObject, (*iter)->GetNapiValue(), &isEquals);
+        if (isEquals) {
             listeners.erase(iter);
         } else {
             iter++;
@@ -63,24 +68,24 @@ void JsDisplayListener::RemoveCallback(const std::string& type, NativeValue* jsL
         static_cast<uint32_t>(listeners.size()));
 }
 
-void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
+void JsDisplayListener::CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc)
 {
     if (methodName.empty()) {
         WLOGFE("empty method name str, call method failed");
         return;
     }
     WLOGI("CallJsMethod methodName = %{public}s", methodName.c_str());
-    if (engine_ == nullptr) {
-        WLOGFE("engine_ nullptr");
+    if (env_ == nullptr) {
+        WLOGFE("env_ nullptr");
         return;
     }
     for (auto& callback : jsCallBack_[methodName]) {
-        NativeValue* method = callback->Get();
+        napi_value method = callback->GetNapiValue();
         if (method == nullptr) {
             WLOGFE("Failed to get method callback from object");
             continue;
         }
-        engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+        napi_call_function(env_, NapiGetUndefined(env_), method, argc, argv, nullptr);
     }
 }
 
@@ -97,16 +102,16 @@ void JsDisplayListener::OnCreate(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnCreate", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnCreate", env_, std::make_unique<NapiAsyncTask>(
         callback, std::move(execute), std::move(complete)));
 }
 
@@ -123,16 +128,16 @@ void JsDisplayListener::OnDestroy(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnDestroy", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnDestroy", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -149,16 +154,16 @@ void JsDisplayListener::OnChange(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnChange", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnChange", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -175,16 +180,16 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, hasPrivate] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, hasPrivate)};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, hasPrivate] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, hasPrivate)};
             CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnPrivateWindow", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnPrivateWindow", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -201,16 +206,16 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, foldStatus] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, foldStatus)};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, foldStatus] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, foldStatus)};
             CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnFoldStatusChanged", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnFoldStatusChanged", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -227,16 +232,16 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [this, listener, displayMode] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, displayMode)};
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, displayMode] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, displayMode)};
             CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", *engine_, std::make_unique<AsyncTask>(
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
