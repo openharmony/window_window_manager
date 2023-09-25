@@ -1023,6 +1023,11 @@ void Session::SetParentSession(const sptr<Session>& session)
         session->GetPersistentId(), GetPersistentId());
 }
 
+sptr<Session> Session::GetParentSession() const
+{
+    return parentSession_;
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
