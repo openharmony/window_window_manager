@@ -1571,9 +1571,17 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
     }
     auto resourceMgr = context->GetResourceManager();
     if (!resourceMgr) {
-        WLOGFE("resource manager is nullptr.");
+        WLOGFE("resourceMgr is nullptr.");
         return nullptr;
     }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (!resConfig) {
+        WLOGFE("resConfig is nullptr.");
+        return nullptr;
+    }
+    resourceMgr->GetResConfig(*resConfig);
+    resourceMgr.reset(Global::Resource::CreateResourceManager());
+    resourceMgr->UpdateResConfig(*resConfig);
 
     std::string loadPath;
     if (!abilityInfo.hapPath.empty()) { // zipped hap
@@ -1582,7 +1590,10 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    resourceMgr->AddResource(loadPath.c_str());
+    if (!resourceMgr->AddResource(loadPath.c_str())) {
+        WLOGFE("Add resource %{private}s failed.", loadPath.c_str());
+        return nullptr;
+    }
     return resourceMgr;
 }
 
