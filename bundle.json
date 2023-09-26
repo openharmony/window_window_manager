@@ -16,7 +16,8 @@
       "features": [
         "window_manager_feature_coverage = false",
         "window_manager_dayu210_resource_config",
-        "window_manager_feature_subscribe_motion"
+        "window_manager_feature_subscribe_motion",
+        "window_manager_feature_tp_enable"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",
