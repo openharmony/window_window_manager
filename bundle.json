@@ -66,7 +66,8 @@
           "screenlock_mgr",
           "previewer",
           "hilog",
-          "memmgr_plugin"
+          "memmgr_plugin",
+          "data_share"
         ],
         "third_party": [
           "libjpeg-turbo",

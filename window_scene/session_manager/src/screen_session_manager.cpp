@@ -29,6 +29,7 @@
 #include "window_manager_hilog.h"
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
+#include "screen_setting_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -562,6 +563,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetBounds(screenBounds);
     property.CalcDefaultDisplayOrientation();
     if (isDensityDpiLoad_) {
+        SetDpiFromSettingData();
         property.SetVirtualPixelRatio(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
@@ -690,6 +692,20 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
 void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit)
 {
     foldScreenPowerInit_ = foldScreenPowerInit;
+}
+
+void ScreenSessionManager::SetDpiFromSettingData()
+{
+    uint32_t settingDpi;
+    bool ret = ScreenSettingHelper::GetSettingDpi(settingDpi);
+    if (!ret) {
+        WLOGFW("get setting dpi failed");
+    } else {
+        WLOGFI("get setting dpi success,settingDpi: %{public}u", settingDpi);
+        if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            densityDpi_ = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+        }
+    }
 }
 
 std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()

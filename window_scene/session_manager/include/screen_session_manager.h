@@ -258,6 +258,7 @@ private:
     static void BootFinishedCallback(const char *key, const char *value, void *context);
     std::function<void()> foldScreenPowerInit_ = nullptr;
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
+    void SetDpiFromSettingData();
 };
 } // namespace OHOS::Rosen
 
