@@ -27,6 +27,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 constexpr int32_t NUMBER_2 = 2;
 constexpr int32_t NUMBER_3 = 3;
+constexpr int32_t US_PER_NS = 1000;
 
 int32_t GetMMITouchType(int32_t aceType)
 {
@@ -276,7 +277,7 @@ bool ConvertPointerEventFromJs(NativeEngine& engine, NativeObject* jsObject, MMI
         WLOGFE("[NAPI]Failed to convert parameter to timestamp");
         return false;
     }
-    pointerEvent.SetActionTime(timestamp);
+    pointerEvent.SetActionTime(std::round(timestamp / US_PER_NS));
     NativeArray* changedTouchesArray = ConvertNativeValueTo<NativeArray>(jsChangedTouches);
     if (changedTouchesArray == nullptr) {
         WLOGFE("[NAPI]Failed to convert parameter to touchesArray");
