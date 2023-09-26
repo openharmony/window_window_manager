@@ -64,23 +64,40 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
         ScreenId screenIdFull = 0;
         ScreenId screenIdMain = 5;
         int64_t timeStamp = 3000;
+        #ifdef TP_FEATURE_ENABLE
+        int32_t tpType = 12;
+        std::string fullTpChange = "0";
+        std::string mainTpChange = "1";
+        #endif
         SetFoldScreenPowerInit([&]() {
             WLOGFI("ScreenSessionManager Fold Screen Power Init 1.");
+            #ifdef TP_FEATURE_ENABLE
+            rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
+            #endif
             rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
             rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
 
             WLOGFI("ScreenSessionManager Fold Screen Power Init 2.");
+            #ifdef TP_FEATURE_ENABLE
+            rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
+            #endif
             rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
             rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
 
             WLOGFI("ScreenSessionManager Fold Screen Power Init 3.");
+            #ifdef TP_FEATURE_ENABLE
+            rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
+            #endif
             rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
             rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
 
             WLOGFI("ScreenSessionManager Fold Screen Power Init 4.");
+            #ifdef TP_FEATURE_ENABLE
+            rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
+            #endif
             rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
             rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
         });
