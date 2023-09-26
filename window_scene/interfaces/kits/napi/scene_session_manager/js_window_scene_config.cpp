@@ -16,6 +16,7 @@
 #include "js_window_scene_config.h"
 
 #include "window_manager_hilog.h"
+#include "js_scene_utils.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -23,90 +24,89 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowSceneConfig" };
 } // namespace
 
-NativeValue* JsWindowSceneConfig::CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config)
+napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppWindowSceneConfig& config)
 {
     WLOGI("[NAPI]CreateWindowSceneConfig");
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    object->SetProperty("floatCornerRadius", CreateJsValue(engine, config.floatCornerRadius_));
-
-    object->SetProperty("focusedShadow", CreateShadowValue(engine, config, true));
-    object->SetProperty("unfocusedShadow", CreateShadowValue(engine, config, false));
-    object->SetProperty("keyboardAnimation", CreateKeyboardAnimationValue(engine, config));
-    object->SetProperty("windowAnimation", CreateWindowAnimationValue(engine, config));
+    napi_set_named_property(env, objValue, "floatCornerRadius", CreateJsValue(env, config.floatCornerRadius_));
+    napi_set_named_property(env, objValue, "focusedShadow", CreateShadowValue(env, config, true));
+    napi_set_named_property(env, objValue, "unfocusedShadow", CreateShadowValue(env, config, false));
+    napi_set_named_property(env, objValue, "keyboardAnimation", CreateKeyboardAnimationValue(env, config));
+    napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
     return objValue;
 }
 
-NativeValue* JsWindowSceneConfig::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config,
+napi_value JsWindowSceneConfig::CreateShadowValue(napi_env env, const AppWindowSceneConfig& config,
     bool focused)
 {
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    object->SetProperty("offsetX", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "offsetX", CreateJsValue(env,
         focused ? config.focusedShadow_.offsetX_ : config.unfocusedShadow_.offsetX_));
-    object->SetProperty("offsetY", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "offsetY", CreateJsValue(env,
         focused ? config.focusedShadow_.offsetY_ : config.unfocusedShadow_.offsetY_));
-    object->SetProperty("radius", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "radius", CreateJsValue(env,
         focused ? config.focusedShadow_.radius_ : config.unfocusedShadow_.radius_));
-    object->SetProperty("color", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "color", CreateJsValue(env,
         focused ? config.focusedShadow_.color_ : config.unfocusedShadow_.color_));
 
     return objValue;
 }
 
-NativeValue* JsWindowSceneConfig::CreateWindowAnimationValue(NativeEngine& engine, const AppWindowSceneConfig& config)
+napi_value JsWindowSceneConfig::CreateWindowAnimationValue(napi_env env, const AppWindowSceneConfig& config)
 {
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
-    object->SetProperty("duration", CreateJsValue(engine, config.windowAnimation_.duration_));
-    object->SetProperty("curveType", CreateJsValue(engine, config.windowAnimation_.curveType_));
-    object->SetProperty("ctrlX1", CreateJsValue(engine, config.windowAnimation_.ctrlX1_));
-    object->SetProperty("ctrlY1", CreateJsValue(engine, config.windowAnimation_.ctrlY1_));
-    object->SetProperty("ctrlX2", CreateJsValue(engine, config.windowAnimation_.ctrlX2_));
-    object->SetProperty("ctrlY2", CreateJsValue(engine, config.windowAnimation_.ctrlY2_));
-    object->SetProperty("scaleX", CreateJsValue(engine, config.windowAnimation_.scaleX_));
-    object->SetProperty("scaleY", CreateJsValue(engine, config.windowAnimation_.scaleY_));
-    object->SetProperty("rotationX", CreateJsValue(engine, config.windowAnimation_.rotationX_));
-    object->SetProperty("rotationY", CreateJsValue(engine, config.windowAnimation_.rotationY_));
-    object->SetProperty("rotationZ", CreateJsValue(engine, config.windowAnimation_.rotationZ_));
-    object->SetProperty("angle", CreateJsValue(engine, config.windowAnimation_.angle_));
-    object->SetProperty("translateX", CreateJsValue(engine, config.windowAnimation_.translateX_));
-    object->SetProperty("translateY", CreateJsValue(engine, config.windowAnimation_.translateY_));
-    object->SetProperty("opacity", CreateJsValue(engine, config.windowAnimation_.opacity_));
+    napi_set_named_property(env, objValue, "duration", CreateJsValue(env, config.windowAnimation_.duration_));
+    napi_set_named_property(env, objValue, "curveType", CreateJsValue(env, config.windowAnimation_.curveType_));
+    napi_set_named_property(env, objValue, "ctrlX1", CreateJsValue(env, config.windowAnimation_.ctrlX1_));
+    napi_set_named_property(env, objValue, "ctrlY1", CreateJsValue(env, config.windowAnimation_.ctrlY1_));
+    napi_set_named_property(env, objValue, "ctrlX2", CreateJsValue(env, config.windowAnimation_.ctrlX2_));
+    napi_set_named_property(env, objValue, "ctrlY2", CreateJsValue(env, config.windowAnimation_.ctrlY2_));
+    napi_set_named_property(env, objValue, "scaleX", CreateJsValue(env, config.windowAnimation_.scaleX_));
+    napi_set_named_property(env, objValue, "scaleY", CreateJsValue(env, config.windowAnimation_.scaleY_));
+    napi_set_named_property(env, objValue, "rotationX", CreateJsValue(env, config.windowAnimation_.rotationX_));
+    napi_set_named_property(env, objValue, "rotationY", CreateJsValue(env, config.windowAnimation_.rotationY_));
+    napi_set_named_property(env, objValue, "rotationZ", CreateJsValue(env, config.windowAnimation_.rotationZ_));
+    napi_set_named_property(env, objValue, "angle", CreateJsValue(env, config.windowAnimation_.angle_));
+    napi_set_named_property(env, objValue, "translateX", CreateJsValue(env, config.windowAnimation_.translateX_));
+    napi_set_named_property(env, objValue, "translateY", CreateJsValue(env, config.windowAnimation_.translateY_));
+    napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, config.windowAnimation_.opacity_));
     return objValue;
 }
 
-NativeValue* JsWindowSceneConfig::CreateKeyboardAnimationValue(NativeEngine& engine,
+napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
     const AppWindowSceneConfig& config)
 {
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    object->SetProperty("curveType", CreateJsValue(engine, config.keyboardAnimation_.curveType_));
-    object->SetProperty("ctrlX1", CreateJsValue(engine, config.keyboardAnimation_.ctrlX1_));
-    object->SetProperty("ctrlY1", CreateJsValue(engine, config.keyboardAnimation_.ctrlY1_));
-    object->SetProperty("ctrlX2", CreateJsValue(engine, config.keyboardAnimation_.ctrlX2_));
-    object->SetProperty("ctrlY2", CreateJsValue(engine, config.keyboardAnimation_.ctrlY2_));
-    object->SetProperty("durationIn", CreateJsValue(engine, config.keyboardAnimation_.durationIn_));
-    object->SetProperty("durationOut", CreateJsValue(engine, config.keyboardAnimation_.durationOut_));
+    napi_set_named_property(env, objValue, "curveType", CreateJsValue(env, config.keyboardAnimation_.curveType_));
+    napi_set_named_property(env, objValue, "ctrlX1", CreateJsValue(env, config.keyboardAnimation_.ctrlX1_));
+    napi_set_named_property(env, objValue, "ctrlY1", CreateJsValue(env, config.keyboardAnimation_.ctrlY1_));
+    napi_set_named_property(env, objValue, "ctrlX2", CreateJsValue(env, config.keyboardAnimation_.ctrlX2_));
+    napi_set_named_property(env, objValue, "ctrlY2", CreateJsValue(env, config.keyboardAnimation_.ctrlY2_));
+    napi_set_named_property(env, objValue, "durationIn", CreateJsValue(env, config.keyboardAnimation_.durationIn_));
+    napi_set_named_property(env, objValue, "durationOut", CreateJsValue(env, config.keyboardAnimation_.durationOut_));
 
     return objValue;
 }

@@ -17,13 +17,13 @@
 
 #include "js_scene_session_manager.h"
 
+static napi_module g_sceneSessionModule = {
+    .nm_filename = "libscenesessionmanager_napi.so/sceneSessionManager.js",
+    .nm_register_func = OHOS::Rosen::JsSceneSessionManager::Init,
+    .nm_modname = "sceneSessionManager",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_sceneSessionManager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "sceneSessionManager",
-        .fileName = "libscenesessionmanager_napi.so/sceneSessionManager.js",
-        .registerCallback = OHOS::Rosen::JsSceneSessionManager::Init,
-    };
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_sceneSessionModule);
 }

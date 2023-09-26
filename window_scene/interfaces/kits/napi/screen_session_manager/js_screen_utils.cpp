@@ -25,136 +25,140 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenUtils" };
 }
 
-NativeValue* JsScreenUtils::CreateJsScreenProperty(NativeEngine& engine, const ScreenProperty& screenProperty)
+napi_value NapiGetUndefined(napi_env env)
 {
-    auto objValue = engine.CreateObject();
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+bool NapiIsCallable(napi_env env, napi_value value)
+{
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
+}
+
+napi_valuetype GetType(napi_env env, napi_value value)
+{
+    napi_valuetype res = napi_undefined;
+    napi_typeof(env, value, &res);
+    return res;
+}
+
+napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenProperty& screenProperty)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
     if (objValue == nullptr) {
         WLOGFE("Failed to create object!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    auto object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert object!");
-        return engine.CreateUndefined();
-    }
-
-    object->SetProperty("rotation", CreateJsValue(engine, screenProperty.GetRotation()));
-    object->SetProperty("bounds", CreateJsRRect(engine, screenProperty.GetBounds()));
+    napi_set_named_property(env, objValue, "rotation", CreateJsValue(env, screenProperty.GetRotation()));
+    napi_set_named_property(env, objValue, "bounds", CreateJsRRect(env, screenProperty.GetBounds()));
     return objValue;
 }
 
-NativeValue* JsScreenUtils::CreateJsRRect(NativeEngine& engine, const RRect& rrect)
+napi_value JsScreenUtils::CreateJsRRect(napi_env env, const RRect& rrect)
 {
-    auto objValue = engine.CreateObject();
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
     if (objValue == nullptr) {
         WLOGFE("Failed to create object!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    auto object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert object!");
-        return engine.CreateUndefined();
-    }
-
-    object->SetProperty("left", CreateJsValue(engine, rrect.rect_.left_));
-    object->SetProperty("top", CreateJsValue(engine, rrect.rect_.top_));
-    object->SetProperty("width", CreateJsValue(engine, rrect.rect_.width_));
-    object->SetProperty("height", CreateJsValue(engine, rrect.rect_.height_));
-    object->SetProperty("radius", CreateJsValue(engine, rrect.radius_[0].x_));
+    napi_set_named_property(env, objValue, "left", CreateJsValue(env, rrect.rect_.left_));
+    napi_set_named_property(env, objValue, "top", CreateJsValue(env, rrect.rect_.top_));
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, rrect.rect_.width_));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, rrect.rect_.height_));
+    napi_set_named_property(env, objValue, "radius", CreateJsValue(env, rrect.radius_[0].x_));
     return objValue;
 }
 
-NativeValue* JsScreenUtils::CreateJsScreenConnectChangeType(NativeEngine& engine)
+napi_value JsScreenUtils::CreateJsScreenConnectChangeType(napi_env env)
 {
-    auto objValue = engine.CreateObject();
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
     if (objValue == nullptr) {
         WLOGFE("Failed to create object!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    auto object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert object!");
-        return engine.CreateUndefined();
-    }
-
-    object->SetProperty("CONNECT", CreateJsValue(engine, 0));
-    object->SetProperty("DISCONNECT", CreateJsValue(engine, 1));
+    napi_set_named_property(env, objValue, "CONNECT", CreateJsValue(env, 0));
+    napi_set_named_property(env, objValue, "DISCONNECT", CreateJsValue(env, 1));
     return objValue;
 }
 
-NativeValue* JsScreenUtils::CreateJsScreenPropertyChangeReason(NativeEngine& engine)
+napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
 {
-    auto objValue = engine.CreateObject();
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
     if (objValue == nullptr) {
         WLOGFE("Failed to create object!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
-    auto object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert object!");
-        return engine.CreateUndefined();
-    }
-    object->SetProperty("UNDEFINED", CreateJsValue(engine,
+
+    napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::UNDEFINED)));
-    object->SetProperty("ROTATION", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "ROTATION", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::ROTATION)));
-    object->SetProperty("CHANGE_MODE", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "CHANGE_MODE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::CHANGE_MODE)));
-    object->SetProperty("FOLD_SCREEN_EXPAND", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "FOLD_SCREEN_EXPAND", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND)));
-    object->SetProperty("SCREEN_CONNECT", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "SCREEN_CONNECT", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_CONNECT)));
-    object->SetProperty("SCREEN_DISCONNECT", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "SCREEN_DISCONNECT", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_DISCONNECT)));
     return objValue;
 }
 
-bool ConvertRRectFromJs(NativeEngine& engine, NativeObject* jsObject, RRect& bound)
+bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 {
-    NativeValue* jsLeft = jsObject->GetProperty("left");
-    NativeValue* jsTop = jsObject->GetProperty("top");
-    NativeValue* jsWidth = jsObject->GetProperty("width");
-    NativeValue* jsHeight = jsObject->GetProperty("height");
-    NativeValue* jsRadius = jsObject->GetProperty("radius");
+    napi_value jsLeft = nullptr, jsTop = nullptr, jsWidth = nullptr, jsHeight = nullptr, jsRadius = nullptr;
+    napi_get_named_property(env, jsObject, "left", &jsLeft);
+    napi_get_named_property(env, jsObject, "top", &jsTop);
+    napi_get_named_property(env, jsObject, "width", &jsWidth);
+    napi_get_named_property(env, jsObject, "height", &jsHeight);
+    napi_get_named_property(env, jsObject, "radius", &jsRadius);
 
-    if (jsLeft->TypeOf() != NATIVE_UNDEFINED) {
+    if (GetType(env, jsLeft) != napi_undefined) {
         int32_t left;
-        if (!ConvertFromJsValue(engine, jsLeft, left)) {
+        if (!ConvertFromJsValue(env, jsLeft, left)) {
             WLOGFE("[NAPI]Failed to convert parameter to left");
             return false;
         }
         bound.rect_.left_ = left;
     }
-    if (jsTop->TypeOf() != NATIVE_UNDEFINED) {
+    if (GetType(env, jsTop) != napi_undefined) {
         int32_t top;
-        if (!ConvertFromJsValue(engine, jsTop, top)) {
+        if (!ConvertFromJsValue(env, jsTop, top)) {
             WLOGFE("[NAPI]Failed to convert parameter to top");
             return false;
         }
         bound.rect_.top_ = top;
     }
-    if (jsWidth->TypeOf() != NATIVE_UNDEFINED) {
+    if (GetType(env, jsWidth) != napi_undefined) {
         int32_t width;
-        if (!ConvertFromJsValue(engine, jsWidth, width)) {
+        if (!ConvertFromJsValue(env, jsWidth, width)) {
             WLOGFE("[NAPI]Failed to convert parameter to width");
             return false;
         }
         bound.rect_.width_ = width;
     }
-    if (jsHeight->TypeOf() != NATIVE_UNDEFINED) {
+    if (GetType(env, jsHeight) != napi_undefined) {
         int32_t height;
-        if (!ConvertFromJsValue(engine, jsHeight, height)) {
+        if (!ConvertFromJsValue(env, jsHeight, height)) {
             WLOGFE("[NAPI]Failed to convert parameter to height");
             return false;
         }
         bound.rect_.height_ = height;
     }
-    if (jsRadius->TypeOf() != NATIVE_UNDEFINED) {
+    if (GetType(env, jsRadius) != napi_undefined) {
         int radius;
-        if (!ConvertFromJsValue(engine, jsRadius, radius)) {
+        if (!ConvertFromJsValue(env, jsRadius, radius)) {
             WLOGFE("[NAPI]Failed to convert parameter to radius");
             return false;
         }
