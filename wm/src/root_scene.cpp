@@ -99,14 +99,14 @@ RootScene::~RootScene()
 {
 }
 
-void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
     AbilityRuntime::Context* context)
 {
     if (context == nullptr) {
         WLOGFE("context is nullptr!");
         return;
     }
-    uiContent_ = Ace::UIContent::Create(context, engine);
+    uiContent_ = Ace::UIContent::Create(context, reinterpret_cast<NativeEngine*>(env));
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
         return;
