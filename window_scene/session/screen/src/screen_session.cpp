@@ -268,6 +268,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation)
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f], rotation: %{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(), targetRotation);
