@@ -3793,7 +3793,7 @@ sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& su
 
 void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData)
 {
-    WLOGFD("WindowVisibilityChangeCallback: entry");
+    WLOGFI("WindowVisibilityChangeCallback: entry");
     std::weak_ptr<RSOcclusionData> weak(occlusiontionData);
 
     taskScheduler_->PostVoidSyncTask([this, weak]() {
@@ -3822,17 +3822,17 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible));
 #endif
-        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+        WLOGFI("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             session->GetWindowId(), isVisible);
         CheckAndNotifyWaterMarkChangedResult();
     }
         if (windowVisibilityInfos.size() != 0) {
-            WLOGD("Notify windowvisibilityinfo changed start");
+            WLOGI("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
         }
 #ifdef MEMMGR_WINDOW_ENABLE
         if (memMgrWindowInfos.size() != 0) {
-            WLOGD("Notify memMgrWindowInfos changed start");
+            WLOGI("Notify memMgrWindowInfos changed start");
             Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
         }
 #endif
