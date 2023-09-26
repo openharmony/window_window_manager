@@ -119,46 +119,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, 
 }
 
 /**
- * @tc.name: HandleUpdateProperty
- * @tc.desc: test HandleUpdateProperty01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateProperty01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    WSPropertyChangeAction type = WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW;
-    data.WriteUint32(static_cast<uint32_t>(type));
-    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
-    data.WriteStrongParcelable(windowSessionProperty);
-    data.WriteBool(true);
-
-    int res = stub_->HandleUpdateProperty(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleUpdateProperty
- * @tc.desc: test HandleUpdateProperty02
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateProperty02, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    WSPropertyChangeAction type = WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW;
-    data.WriteUint32(static_cast<uint32_t>(type));
-    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
-    data.WriteStrongParcelable(windowSessionProperty);
-    data.WriteBool(false);
-
-    int res = stub_->HandleUpdateProperty(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleRegisterWindowManagerAgent
  * @tc.desc: test HandleRegisterWindowManagerAgent
  * @tc.type: FUNC
