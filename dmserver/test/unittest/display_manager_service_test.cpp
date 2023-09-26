@@ -96,11 +96,7 @@ HWTEST_F(DisplayManagerServiceTest, OnStart, Function | SmallTest | Level3)
 {
     dms_->OnStart();
     bool result = dms_->Init();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_TRUE(result);
-    } else {
-        EXPECT_FALSE(result);
-    }
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -263,11 +259,7 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3
     dms_->RemoveVirtualScreenFromGroup(screens);
 
     DMError result = dms_->DestroyVirtualScreen(10086);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_INVALID_CALLING);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
 }
 
 /**
@@ -280,11 +272,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
     DisplayId displayId = 10086;
     DmErrorCode* errorCode = nullptr;
     std::shared_ptr<Media::PixelMap> result = dms_->GetDisplaySnapshot(displayId, errorCode);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, nullptr);
-    } else {
-        EXPECT_NE(result, nullptr);
-    }
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
@@ -374,11 +362,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenPower, Function | SmallTest | Level3)
 
     ScreenId dmsScreenId = 2;
     ScreenPowerState result = dms_->GetScreenPower(dmsScreenId);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenPowerState::INVALID_STATE);
-    } else {
-        EXPECT_NE(result, ScreenPowerState::INVALID_STATE);
-    }
+    EXPECT_EQ(result, ScreenPowerState::INVALID_STATE);
 
     ASSERT_EQ(true, dms_->SetDisplayState(displayState));
     ASSERT_EQ(DisplayState::ON, dms_->GetDisplayState(0));
@@ -464,11 +448,7 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTes
     sptr<DisplayManagerService> dms = new DisplayManagerService();
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
     surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
@@ -503,11 +483,7 @@ HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Functio
 {
     dms_->SetGravitySensorSubscriptionEnabled();
     DMError result = dms_->DestroyVirtualScreen(10086);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_INVALID_CALLING);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
 }
 }
 } // namespace Rosen

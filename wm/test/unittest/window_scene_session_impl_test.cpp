@@ -875,7 +875,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTurnScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetTurnScreenOn(false));
 }
 
 /*
@@ -917,7 +917,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetKeepScreenOn(false));
     ASSERT_FALSE(window->IsKeepScreenOn());
 }
 
