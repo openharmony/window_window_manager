@@ -1325,17 +1325,17 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetUIContent
+ * @tc.name: NapiSetUIContent
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    NativeEngine* engine = nullptr;
-    NativeValue* storage = nullptr;
-    auto ret = window->SetUIContent("info", engine, storage);
+    napi_env env = nullptr;
+    napi_value storage = nullptr;
+    auto ret = window->NapiSetUIContent("info", env, storage);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

@@ -50,7 +50,7 @@ public:
     }
 };
 
-NativeValue *AttachWindowExtensionContext(NativeEngine *engine, void *value, void *)
+napi_value AttachWindowExtensionContext(napi_env env, void *value, void *)
 {
     WLOGI("AttachWindowExtensionContext");
     if (value == nullptr) {
@@ -62,30 +62,29 @@ NativeValue *AttachWindowExtensionContext(NativeEngine *engine, void *value, voi
         WLOGFE("invalid context.");
         return nullptr;
     }
-    NativeValue* object = CreateJsWindowExtensionContext(*engine, ptr);
+    napi_value object = CreateJsWindowExtensionContext(env, ptr);
     if (object == nullptr) {
         WLOGFE("Failed to get js window extension context");
         return nullptr;
     }
-    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(engine,
-        "application.WindowExtensionContext", &object, 1)->Get();
-    NativeObject* nObject = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
-    if (nObject == nullptr) {
+    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
+        "application.WindowExtensionContext", &object, 1)->GetNapiValue();
+    if (contextObj == nullptr) {
         WLOGFE("Failed to get context native object");
         return nullptr;
     }
-    nObject->ConvertToNativeBindingObject(engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
-        value, nullptr);
+    napi_coerce_to_native_binding_object(env, contextObj,
+        AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<WindowExtensionContext>(ptr);
     if (workContext == nullptr) {
         WLOGFE("Failed to get window extension context");
         return nullptr;
     }
-    nObject->SetNativePointer(workContext,
-        [](NativeEngine *, void *data, void *) {
-            WLOGI("Finalizer for weak_ptr service extension context is called");
-            delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
-        }, nullptr);
+    napi_wrap(env, contextObj, workContext,
+              [](napi_env, void *data, void *) {
+                WLOGI("Finalizer for weak_ptr service extension context is called");
+                delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
+              }, nullptr, nullptr);
     return contextObj;
 }
 
@@ -132,17 +131,17 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         return;
     }
     WLOGI("JsWindowExtension::Init ConvertNativeValueTo.");
-    auto& engine = jsRuntime_.GetNativeEngine();
-    NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsObj_->Get());
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value obj = jsObj_->GetNapiValue();
     if (obj == nullptr) {
         WLOGFE("Failed to get JsWindowExtension object");
         return;
     }
 
-    BindContext(engine, obj);
+    BindContext(env, obj);
 }
 
-void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
+void JsWindowExtension::BindContext(napi_env env, napi_value obj)
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -150,15 +149,14 @@ void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
         return;
     }
 
-    NativeValue* contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNativeEngine(), context);
+    napi_value contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNapiEnv(), context);
     if (contextObj == nullptr) {
         WLOGFE("Failed to get js window extension context");
         return;
     }
     auto shellContextRef = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
-    contextObj = shellContextRef->Get();
-    NativeObject* nativeObj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
-    if (nativeObj == nullptr) {
+    contextObj = shellContextRef->GetNapiValue();
+    if (contextObj == nullptr) {
         WLOGFE("Failed to get context native object");
         return;
     }
@@ -167,19 +165,18 @@ void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
         WLOGFE("Failed to get window extension context");
         return;
     }
-    nativeObj->ConvertToNativeBindingObject(&engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
-        workContext, nullptr);
+    napi_coerce_to_native_binding_object(env, contextObj,
+        AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext, workContext, nullptr);
     WLOGI("JsWindowExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef.release());
     WLOGI("JsWindowExtension::SetProperty.");
-    obj->SetProperty("context", contextObj);
+    napi_set_named_property(env, obj, "context", contextObj);
 
-    nativeObj->SetNativePointer(workContext,
-        [](NativeEngine *, void *data, void *) {
-            WLOGI("Finalizer for weak_ptr extension context is called");
-            delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
-        }, nullptr);
-
+    napi_wrap(env, contextObj, workContext,
+              [](napi_env, void *data, void *) {
+                WLOGI("Finalizer for weak_ptr extension context is called");
+                delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
+              }, nullptr, nullptr);
     WLOGI("JsWindowExtension::Init end.");
 }
 
@@ -214,21 +211,20 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     WLOGI("called.");
     Extension::OnConnect(want);
-    NativeEngine& engine = jsRuntime_.GetNativeEngine();
-    std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
-        std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
-            NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
-            napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-            NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-            NativeValue* argv[] = { nativeWant };
+    napi_env env = jsRuntime_.GetNapiEnv();
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback> complete =
+        std::make_unique<AbilityRuntime::NapiAsyncTask::CompleteCallback>(
+        [=] (napi_env env, AbilityRuntime::NapiAsyncTask& task, int32_t status) {
+            napi_env napiEnv = jsRuntime_.GetNapiEnv();
+            napi_value napiWant = OHOS::AppExecFwk::WrapWant(napiEnv, want);
+            napi_value argv[] = { napiWant };
             CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
         }
     );
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AbilityRuntime::AsyncTask::ExecuteCallback> execute = nullptr;
-    AbilityRuntime::AsyncTask::Schedule("JsWindowExtension::OnConnect", engine,
-        std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    AbilityRuntime::NapiAsyncTask::Schedule("JsWindowExtension::OnConnect", env,
+        std::make_unique<AbilityRuntime::NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 
     if (!stub_) {
         WLOGFE("stub is nullptr.");
@@ -244,10 +240,9 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 {
     Extension::OnDisconnect(want);
-    NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-    NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-    NativeValue* argv[] = { nativeWant };
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+    napi_value argv[] = { napiWant };
     CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
     auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
     if (window != nullptr) {
@@ -300,32 +295,32 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
 
 void JsWindowExtension::OnWindowCreated() const
 {
-    NativeEngine& engine = jsRuntime_.GetNativeEngine();
-    std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
-        std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
+    napi_env env = jsRuntime_.GetNapiEnv();
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback> complete =
+        std::make_unique<AbilityRuntime::NapiAsyncTask::CompleteCallback>(
+        [=] (napi_env env, AbilityRuntime::NapiAsyncTask& task, int32_t status) {
             auto window = stub_->GetWindow();
             if (window == nullptr) {
                 WLOGFE("get window failed");
                 return;
             }
-            NativeValue* value = CreateJsWindowObject(engine, window);
+            napi_value value = CreateJsWindowObject(env, window);
             if (value == nullptr) {
                 WLOGFE("Create js window failed");
                 return;
             }
-            NativeValue* argv[] = { value };
+            napi_value argv[] = { value };
             CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AbilityRuntime::AsyncTask::ExecuteCallback> execute = nullptr;
-    AbilityRuntime::AsyncTask::Schedule("JsWindowExtension::OnWindowCreated", engine,
-        std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    AbilityRuntime::NapiAsyncTask::Schedule("JsWindowExtension::OnWindowCreated", env,
+        std::make_unique<AbilityRuntime::NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* const* argv, size_t argc) const
+napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const* argv, size_t argc) const
 {
     WLOGI("called (%{public}s), begin", name);
 
@@ -335,22 +330,30 @@ NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* cons
     }
 
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
-    auto& nativeEngine = jsRuntime_.GetNativeEngine();
+    napi_env env = jsRuntime_.GetNapiEnv();
 
-    NativeValue* value = jsObj_->Get();
-    NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(value);
-    if (obj == nullptr) {
+    napi_value value = jsObj_->GetNapiValue();
+    if (value == nullptr) {
         WLOGFE("Failed to get WindowExtension object");
         return nullptr;
     }
 
-    NativeValue* method = obj->GetProperty(name);
-    if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
+    napi_value method = nullptr;
+    napi_get_named_property(env, value, name, &method);
+    if (method == nullptr) {
+        WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
+        return nullptr;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, method, &valueType);
+    if (valueType != napi_function) {
         WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
         return nullptr;
     }
     WLOGI("(%{public}s), success", name);
-    return nativeEngine.CallFunction(value, method, argv, argc);
+    napi_value result = nullptr;
+    napi_call_function(env, value, method, argc, argv, &result);
+    return result;
 }
 } // namespace Rosen
 } // namespace OHOS

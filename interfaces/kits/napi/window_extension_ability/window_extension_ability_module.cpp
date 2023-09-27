@@ -20,16 +20,15 @@ extern const char _binary_window_extension_ability_js_end[];
 extern const char _binary_window_extension_ability_abc_start[];
 extern const char _binary_window_extension_ability_abc_end[];
 
+static napi_module g_winExtensionAbilityModule = {
+    .nm_filename = "application/libwindowextensionability_napi.so/window_extension_ability.js",
+    .nm_modname = "application.WindowExtensionAbility",
+};
+
 extern "C" __attribute__((constructor))
 void NAPI_application_WindowExtensionAbility_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "application.WindowExtensionAbility",
-        .fileName = "application/libwindowextensionability_napi.so/window_extension_ability.js",
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_winExtensionAbilityModule);
 }
 
 extern "C" __attribute__((visibility("default")))

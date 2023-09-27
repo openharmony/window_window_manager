@@ -1233,7 +1233,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneUIContext(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
 
-    napi_value uiContext = reinterpret_cast<napi_value>(uiContent->GetUIContext());
+    napi_value uiContext = uiContent->GetUINapiContext();
     if (uiContext == nullptr) {
         WLOGFE("uiContext obtained from jsEngine is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));

@@ -26,24 +26,24 @@ class JsTransitionContext {
 public:
     JsTransitionContext(sptr<Window> window, bool isShownTransContext);
     ~JsTransitionContext();
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
-    static NativeValue* CompleteTransition(NativeEngine* engine, NativeCallbackInfo* info);
+    static void Finalizer(napi_env env, void* data, void* hint);
+    static napi_value CompleteTransition(napi_env env, napi_callback_info info);
 private:
-    NativeValue* OnCompleteTransition(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnCompleteTransition(napi_env env, napi_callback_info info);
     wptr<Window> windowToken_;
     bool isShownTransContext_ = false;
 };
 
 class JsTransitionController : public IAnimationTransitionController {
 public:
-    JsTransitionController(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin, sptr<Window> window);
+    JsTransitionController(napi_env env, std::shared_ptr<NativeReference> jsWin, sptr<Window> window);
     ~JsTransitionController();
     void AnimationForShown() override;
     void AnimationForHidden() override;
     void SetJsController(std::shared_ptr<NativeReference> jsVal);
 private:
-    void CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc);
-    NativeEngine& engine_;
+    void CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc);
+    napi_env env_;
     std::weak_ptr<NativeReference> jsTransControllerObj_;
     std::weak_ptr<NativeReference> jsWin_;
     wptr<Window> windowToken_;

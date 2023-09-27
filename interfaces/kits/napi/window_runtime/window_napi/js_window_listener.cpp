@@ -29,19 +29,21 @@ JsWindowListener::~JsWindowListener()
     WLOGI("[NAPI]~JsWindowListener");
 }
 
-void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
+void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* argv, size_t argc)
 {
     WLOGFD("[NAPI]CallJsMethod methodName = %{public}s", methodName);
-    if (engine_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]engine_ nullptr or jsCallBack_ is nullptr");
+    if (env_ == nullptr || jsCallBack_ == nullptr) {
+        WLOGFE("[NAPI]env_ nullptr or jsCallBack_ is nullptr");
         return;
     }
-    NativeValue* method = jsCallBack_->Get();
+    napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
         WLOGFE("[NAPI]Failed to get method callback from object");
         return;
     }
-    engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+    napi_value result = nullptr;
+    napi_get_undefined(env_, &result);
+    napi_call_function(env_, result, method, argc, argv, nullptr);
 }
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
@@ -49,35 +51,35 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, eng = engine_] () {
+    auto jsCallback = [self = weakRef_, rect, eng = env_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("[NAPI]this listener or engine is nullptr");
+            WLOGFE("[NAPI]this listener or eng is nullptr");
             return;
         }
-        NativeValue* sizeValue = eng->CreateObject();
-        NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
-        if (object == nullptr) {
+        napi_value objValue = nullptr;
+        napi_create_object(eng, &objValue);
+        if (objValue == nullptr) {
             WLOGFE("Failed to convert rect to jsObject");
             return;
         }
-        object->SetProperty("width", CreateJsValue(*eng, rect.width_));
-        object->SetProperty("height", CreateJsValue(*eng, rect.height_));
-        NativeValue* argv[] = {sizeValue};
+        napi_set_named_property(eng, objValue, "width", CreateJsValue(eng, rect.width_));
+        napi_set_named_property(eng, objValue, "height", CreateJsValue(eng, rect.height_));
+        napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
     } else {
-        std::unique_ptr<AsyncTask::CompleteCallback> complete =
-            std::make_unique<AsyncTask::CompleteCallback>([jsCallback] (NativeEngine &engine,
-            AsyncTask &task, int32_t status) {
+        std::unique_ptr<NapiAsyncTask::CompleteCallback> complete =
+            std::make_unique<NapiAsyncTask::CompleteCallback>([jsCallback] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
                 jsCallback();
             });
-        NativeReference* callback = nullptr;
-        std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-        AsyncTask::Schedule("JsWindowListener::OnSizeChange",
-            *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_ref callback = nullptr;
+        std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+        NapiAsyncTask::Schedule("JsWindowListener::OnSizeChange",
+            env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
     }
 }
 
@@ -90,92 +92,94 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 {
     WLOGFD("[NAPI]OnSystemBarPropertyChange");
     // js callback should run in js thread
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_, displayId, tints, eng = engine_] (NativeEngine &engine,
-            AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* propertyValue = eng->CreateObject();
-            NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-            if (object == nullptr) {
+            napi_value propertyValue = nullptr;
+            napi_create_object(eng, &propertyValue);
+            if (propertyValue == nullptr) {
                 WLOGFE("[NAPI]Failed to convert prop to jsObject");
                 return;
             }
-            object->SetProperty("displayId", CreateJsValue(*eng, static_cast<uint32_t>(displayId)));
-            object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*eng, tints));
-            NativeValue* argv[] = {propertyValue};
+            napi_set_named_property(env, propertyValue, "displayId",
+                CreateJsValue(eng, static_cast<uint32_t>(displayId)));
+            napi_set_named_property(env, propertyValue, "regionTint",
+                CreateJsSystemBarRegionTintArrayObject(eng, tints));
+            napi_value argv[] = {propertyValue};
             thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnSystemBarPropertyChange",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnSystemBarPropertyChange",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
     WLOGFD("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_, avoidArea, type, eng = engine_] (NativeEngine &engine,
-            AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* avoidAreaValue = ConvertAvoidAreaToJsValue(engine, avoidArea, type);
+            napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
             if (avoidAreaValue == nullptr) {
                 return;
             }
             if (thisListener->isDeprecatedInterface_) {
-                NativeValue* argv[] = { avoidAreaValue };
+                napi_value argv[] = { avoidAreaValue };
                 thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
             } else {
-                NativeValue *objValue = engine.CreateObject();
-                NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-                if (object == nullptr) {
+                napi_value objValue = nullptr;
+                napi_create_object(env, &objValue);
+                if (objValue == nullptr) {
                     WLOGFE("Failed to get object");
                     return;
                 }
-                object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(type)));
-                object->SetProperty("area", avoidAreaValue);
-                NativeValue* argv[] = { objValue };
+                napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
+                napi_set_named_property(env, objValue, "area", avoidAreaValue);
+                napi_value argv[] = { objValue };
                 thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
             }
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnAvoidAreaChanged",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnAvoidAreaChanged",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
     WLOGI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [self = weakRef_, eventType, eng = engine_] (NativeEngine &engine,
-            AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [self = weakRef_, eventType, eng = env_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* argv[] = {CreateJsValue(*eng, static_cast<uint32_t>(eventType))};
+            napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
             thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
         }
     );
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::LifeCycleCallBack",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::LifeCycleCallBack",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::AfterForeground()
@@ -215,30 +219,30 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_, info, eng = engine_] (NativeEngine &engine,
-            AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, info, eng = env_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* argv[] = {CreateJsValue(*eng, info->rect_.height_)};
+            napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
             thisListener->CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnSizeChange",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnSizeChange",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -248,17 +252,17 @@ void JsWindowListener::OnTouchOutside() const
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnOutsidePressed",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnOutsidePressed",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnScreenshot()
 {
     WLOGI("CALLED");
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = wptr<JsWindowListener>(this)] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -268,16 +272,16 @@ void JsWindowListener::OnScreenshot()
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnScreenshot",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnScreenshot",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnDialogTargetTouch() const
 {
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -287,16 +291,16 @@ void JsWindowListener::OnDialogTargetTouch() const
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnDialogTargetTouch",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnDialogTargetTouch",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnDialogDeathRecipient() const
 {
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -306,50 +310,50 @@ void JsWindowListener::OnDialogDeathRecipient() const
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
 {
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_, enable, eng = engine_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, enable, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* argv[] = {CreateJsValue(*eng, enable)};
+            napi_value argv[] = {CreateJsValue(eng, enable)};
             thisListener->CallJsMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnGestureNavigationEnabledUpdate",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnGestureNavigationEnabledUpdate",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 {
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_, showWaterMark, eng = engine_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, showWaterMark, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or engine is nullptr");
+                WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            NativeValue* argv[] = {CreateJsValue(*eng, showWaterMark)};
+            napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
             thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsWindowListener::OnWaterMarkFlagUpdate",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWaterMarkFlagUpdate",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS
