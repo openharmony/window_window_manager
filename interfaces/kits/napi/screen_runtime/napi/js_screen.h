@@ -24,23 +24,25 @@
 
 namespace OHOS {
 namespace Rosen {
-NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen);
-NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<sptr<SupportedScreenModes>> screenModes);
-NativeValue* CreateJsScreenModeObject(NativeEngine &engine, const sptr<SupportedScreenModes>& mode);
+napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen);
+napi_value CreateJsScreenModeArrayObject(napi_env env, std::vector<sptr<SupportedScreenModes>> screenModes);
+napi_value CreateJsScreenModeObject(napi_env env, const sptr<SupportedScreenModes>& mode);
+napi_value NapiGetUndefined(napi_env env);
+napi_valuetype GetType(napi_env env, napi_value root);
 class JsScreen final {
 public:
     explicit JsScreen(const sptr<Screen>& screen);
     ~JsScreen();
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
-    static NativeValue* SetScreenActiveMode(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetOrientation(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetDensityDpi(NativeEngine* engine, NativeCallbackInfo* info);
+    static void Finalizer(napi_env env, void* data, void* hint);
+    static napi_value SetScreenActiveMode(napi_env env, napi_callback_info info);
+    static napi_value SetOrientation(napi_env env, napi_callback_info info);
+    static napi_value SetDensityDpi(napi_env env, napi_callback_info info);
 
 private:
     sptr<Screen> screen_ = nullptr;
-    NativeValue* OnSetOrientation(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetScreenActiveMode(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnSetOrientation(napi_env env, napi_callback_info info);
+    napi_value OnSetScreenActiveMode(napi_env env, napi_callback_info info);
+    napi_value OnSetDensityDpi(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

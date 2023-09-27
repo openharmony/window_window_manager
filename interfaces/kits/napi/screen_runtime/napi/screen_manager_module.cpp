@@ -16,14 +16,13 @@
 #include "js_screen_manager.h"
 #include "native_engine/native_engine.h"
 
+static napi_module g_screenModule = {
+    .nm_filename = "module/libscreen_napi.so/screen.js",
+    .nm_register_func = OHOS::Rosen::JsScreenManagerInit,
+    .nm_modname = "screen",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_application_screenmanager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "screen",
-        .fileName = "module/libscreen_napi.so/screen.js",
-        .registerCallback = OHOS::Rosen::JsScreenManagerInit,
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_screenModule);
 }
