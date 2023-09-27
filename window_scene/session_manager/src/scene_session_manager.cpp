@@ -841,8 +841,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         FillSessionInfo(sceneSession);
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
-        if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
-            auto sessionInfo = scnSession->GetSessionInfo();
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            auto sessionInfo = sceneSession->GetSessionInfo();
             WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
         }
         sceneSession->SetSystemConfig(systemConfig_);
