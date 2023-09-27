@@ -60,11 +60,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, Function 
     DisplayId id = 3;
     DisplayState state = DisplayState::ON;
     bool result = displayManagerAgentController.NotifyDisplayStateChanged(id, state);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
     std::set<sptr<IDisplayManagerAgent>> setIDisplay;
@@ -72,11 +68,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, Function 
     displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
         {DisplayManagerAgentType::DISPLAY_STATE_LISTENER, setIDisplay});
     result = displayManagerAgentController.NotifyDisplayStateChanged(id, state);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -102,11 +94,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTes
     displayManagerAgentController.OnScreenConnect(screenInfo);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 1);
-    } else {
-        ASSERT_NE(result, 1);
-    }
+    ASSERT_EQ(result, 1);
 }
 /**
  * @tc.name: OnScreenChange
@@ -132,11 +120,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest
     displayManagerAgentController.OnScreenChange(screenInfo, screenChangeEvent);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 1);
-    } else {
-        ASSERT_NE(result, 1);
-    }
+    ASSERT_EQ(result, 1);
 }
 /**
  * @tc.name: OnScreenGroupChange
@@ -166,11 +150,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
     displayManagerAgentController.OnScreenGroupChange(trigger, screenInfos, groupEvent);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 1);
-    } else {
-        ASSERT_NE(result, 1);
-    }
+    ASSERT_EQ(result, 1);
     delete screenInfo;
 }
 /**
@@ -195,11 +175,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
     displayManagerAgentController.OnDisplayCreate(displayInfo);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
     delete displayInfo;
 }
 /**
@@ -223,11 +199,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTe
     displayManagerAgentController.OnDisplayDestroy(displayId);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 /**
  * @tc.name: OnDisplayChange
@@ -255,11 +227,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTes
     displayManagerAgentController.OnDisplayChange(displayInfo, displayChangeEvent);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 /**
  * @tc.name: OnScreenshot
@@ -284,11 +252,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, Function | SmallTest |
     displayManagerAgentController.OnScreenshot(info);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 
 /**
@@ -309,11 +273,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyPrivateWindowStateChanged, Fun
     displayManagerAgentController.NotifyPrivateWindowStateChanged(hasPrivate);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 
 /**
@@ -334,11 +294,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyFoldStatusChanged, Function | 
     displayManagerAgentController.NotifyFoldStatusChanged(foldStatus);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 
 /**
@@ -359,11 +315,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayModeChanged, Function |
     displayManagerAgentController.NotifyDisplayModeChanged(displayMode);
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result, 0);
-    } else {
-        ASSERT_NE(result, 0);
-    }
+    ASSERT_EQ(result, 0);
 }
 }
 } // namespace Rosen

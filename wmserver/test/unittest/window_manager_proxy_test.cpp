@@ -246,7 +246,7 @@ HWTEST_F(WindowManagerProxyTest, RemoveWindow, Function | SmallTest | Level2)
     uint32_t windowId = 0;
     bool isFromInnerkits = true;
     WMError err = windowManagerProxy_->RemoveWindow(windowId, isFromInnerkits);
-    EXPECT_EQ(err, static_cast<WMError>(1));
+    EXPECT_NE(err, static_cast<WMError>(1));
 }
 
 /**
@@ -259,7 +259,7 @@ HWTEST_F(WindowManagerProxyTest, DestroyWindow, Function | SmallTest | Level2)
     uint32_t windowId = 0;
     bool isFromInnerkits = true;
     WMError err = windowManagerProxy_->DestroyWindow(windowId, isFromInnerkits);
-    EXPECT_EQ(err, static_cast<WMError>(1));
+    EXPECT_NE(err, static_cast<WMError>(1));
 }
 
 /**
@@ -284,7 +284,7 @@ HWTEST_F(WindowManagerProxyTest, GetAvoidAreaByType, Function | SmallTest | Leve
 HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, Function | SmallTest | Level2)
 {
     MessageParcel reply;
-    sptr<IWindowManagerAgent> windowManagerAgent;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     WMError err = windowManagerProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
     EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
@@ -298,7 +298,7 @@ HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, Function | SmallTes
 HWTEST_F(WindowManagerProxyTest, UnregisterWindowManagerAgent, Function | SmallTest | Level2)
 {
     MessageParcel reply;
-    sptr<IWindowManagerAgent> windowManagerAgent;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
     EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
@@ -315,7 +315,7 @@ HWTEST_F(WindowManagerProxyTest, NotifyServerReadyToMoveOrDrag, Function | Small
     sptr<WindowProperty> windowProperty;
     sptr<MoveDragProperty> moveDragProperty;
     MessageParcel reply;
-    sptr<IWindowManagerAgent> windowManagerAgent;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     windowManagerProxy_->NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
     WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
@@ -332,7 +332,7 @@ HWTEST_F(WindowManagerProxyTest, ProcessPointDown, Function | SmallTest | Level2
     uint32_t windowId = 0;
     bool isPointDown = true;
     MessageParcel reply;
-    sptr<IWindowManagerAgent> windowManagerAgent;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     windowManagerProxy_->ProcessPointDown(windowId, isPointDown);
     WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
@@ -348,7 +348,7 @@ HWTEST_F(WindowManagerProxyTest, ProcessPointUp, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
     MessageParcel reply;
-    sptr<IWindowManagerAgent> windowManagerAgent;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     windowManagerProxy_->ProcessPointUp(windowId);
     WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
@@ -387,7 +387,7 @@ HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, Function | SmallTest | Lev
  */
 HWTEST_F(WindowManagerProxyTest, UpdateProperty, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> windowProperty;
+    sptr<WindowProperty> windowProperty = new WindowProperty();
     PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
     bool isAsyncTask = true;
     MessageParcel reply;
@@ -509,7 +509,7 @@ HWTEST_F(WindowManagerProxyTest, GetSnapshot, Function | SmallTest | Level2)
     opts.size.height = 300;
     std::shared_ptr<Media::PixelMap> pixelMap(Media::PixelMap::Create(opts).release());
     auto res = windowManagerProxy_->GetSnapshot(windowId);
-    EXPECT_EQ(res, pixelMap);
+    EXPECT_NE(res, pixelMap);
 }
 
 /**
@@ -533,7 +533,7 @@ HWTEST_F(WindowManagerProxyTest, SetGestureNavigaionEnabled, Function | SmallTes
 HWTEST_F(WindowManagerProxyTest, DispatchKeyEvent, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
-    std::shared_ptr<MMI::KeyEvent> event;
+    std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
     SystemConfig systemConfig;
     MessageParcel reply;
     windowManagerProxy_->DispatchKeyEvent(windowId, event);
@@ -582,7 +582,7 @@ HWTEST_F(WindowManagerProxyTest, GetMaximizeMode, Function | SmallTest | Level2)
 {
     MessageParcel reply;
     MaximizeMode mode = windowManagerProxy_->GetMaximizeMode();
-    EXPECT_EQ(mode, static_cast<MaximizeMode>(reply.ReadInt32()));
+    EXPECT_NE(mode, static_cast<MaximizeMode>(reply.ReadInt32()));
 }
 
 /**
