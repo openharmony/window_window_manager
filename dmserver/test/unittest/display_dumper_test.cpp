@@ -347,11 +347,7 @@ HWTEST_F(DisplayDumperTest, DumpScreenInfo01, Function | SmallTest | Level1)
     sptr<AbstractScreenGroup> screenGroup = nullptr;
     std::string dumpInfo;
     DMError result = displayDumper->DumpScreenInfo(screenGroup, dumpInfo);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -378,11 +374,7 @@ HWTEST_F(DisplayDumperTest, DumpScreenInfo02, Function | SmallTest | Level1)
     sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
     std::string dumpInfo;
     DMError result = displayDumper->DumpScreenInfo(screenGroup, dumpInfo);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -397,25 +389,13 @@ HWTEST_F(DisplayDumperTest, TransferTypeToString, Function | SmallTest | Level1)
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
     ScreenType type = ScreenType::REAL;
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "REAL");
-    } else {
-        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "REAL");
-    }
+    EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "REAL");
 
     type = ScreenType::VIRTUAL;
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "VIRTUAL");
-    } else {
-        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "VIRTUAL");
-    }
+    EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "VIRTUAL");
 
     type = ScreenType::UNDEFINED;
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "UNDEFINED");
-    } else {
-        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "UNDEFINED");
-    }
+    EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "UNDEFINED");
 }
 
 /**
@@ -432,11 +412,7 @@ HWTEST_F(DisplayDumperTest, GetScreenInfo01, Function | SmallTest | Level1)
     std::ostringstream oss;
     displayDumper->GetScreenInfo(nullptr, oss);
     std::string result = oss.str();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result.size(), 0);
-    } else {
-        ASSERT_NE(result.size(), 0);
-    }
+    ASSERT_EQ(result.size(), 0);
 }
 
 /**
@@ -462,11 +438,7 @@ HWTEST_F(DisplayDumperTest, GetScreenInfo02, Function | SmallTest | Level1)
     absScreen->modes_ = { { info } };
     displayDumper->GetScreenInfo(absScreen, oss);
     std::string result = oss.str();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result.size(), 165);
-    } else {
-        ASSERT_NE(result.size(), 165);
-    }
+    ASSERT_EQ(result.size(), 165);
 }
 
 /**
@@ -512,11 +484,7 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo02, Function | SmallTest | Level1)
     displayDumper->GetDisplayInfo(absDisplay, oss);
     std::string result = oss.str();
 
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result.size(), 109);
-    } else {
-        EXPECT_NE(result.size(), 109);
-    }
+    EXPECT_EQ(result.size(), 109);
 }
 }
 }

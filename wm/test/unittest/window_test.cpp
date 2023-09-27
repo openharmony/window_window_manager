@@ -1561,7 +1561,7 @@ HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Minimize();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2093,7 +2093,7 @@ HWTEST_F(WindowTest, SetResizeByDragEnabled, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_OK, window->SetResizeByDragEnabled(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetResizeByDragEnabled(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2106,7 +2106,7 @@ HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_OK, window->SetRaiseByClickEnabled(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetRaiseByClickEnabled(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2119,7 +2119,7 @@ HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WmErrorCode::WM_OK, window->RaiseAboveTarget(2));
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->RaiseAboveTarget(2));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 

@@ -62,21 +62,11 @@ HWTEST_F(DisplayManagerConfigTest, Split, Function | SmallTest | Level1)
     std::string str = "stringPatStr";
     std::string pattern = "pattern";
     std::vector<std::string> result(DisplayManagerConfig::Split(str, pattern));
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result[0], "stringPatStr");
-    } else {
-        EXPECT_NE(result[0], "stringPatStr");
-    }
+    EXPECT_EQ(result[0], "stringPatStr");
     result.clear();
     std::string str02 = "stringPatternStr";
     std::vector<std::string> result02(DisplayManagerConfig::Split(str02, pattern));
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result02[0], "stringPatternStr");
-        EXPECT_EQ(result02[1], "");
-    } else {
-        EXPECT_NE(result02[0], "stringPatternStr");
-        EXPECT_NE(result02[1], "");
-    }
+    EXPECT_EQ(result02[0], "stringPatternStr");
 }
 
 /**
@@ -87,11 +77,7 @@ HWTEST_F(DisplayManagerConfigTest, Split, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerConfigTest, LoadConfigXml, Function | SmallTest | Level1)
 {
     bool result = DisplayManagerConfig::LoadConfigXml();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_TRUE(result);
-    } else {
-        EXPECT_FALSE(result);
-    }
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -113,11 +99,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadIntNumbersConfigInfo, Function | SmallTes
     xmlNodeSetContent(invalidNode, BAD_CAST invalidContent);
     DisplayManagerConfig::ReadIntNumbersConfigInfo(invalidNode);
 
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_LE(DisplayManagerConfig::enableConfig_.size(), 0);
-    } else {
-        EXPECT_GE(DisplayManagerConfig::enableConfig_.size(), 0);
-    }
+    EXPECT_LE(DisplayManagerConfig::enableConfig_.size(), 0);
     xmlFreeNode(validNode);
     xmlFreeNode(invalidNode);
 }

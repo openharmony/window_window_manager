@@ -196,18 +196,10 @@ HWTEST_F(AbstractScreenTest, CalcRotation, Function | SmallTest | Level3)
 HWTEST_F(AbstractScreenTest, GetScreenGroupId, Function | SmallTest | Level3)
 {
     ScreenId result = absScreen_->GetScreenGroupId();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, SCREEN_ID_INVALID);
-    } else {
-        EXPECT_NE(result, SCREEN_ID_INVALID);
-    }
+    EXPECT_EQ(result, SCREEN_ID_INVALID);
     absScreen_->groupDmsId_ = 10086;
     result = absScreen_->GetScreenGroupId();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, 10086);
-    } else {
-        EXPECT_NE(result, 10086);
-    }
+    EXPECT_EQ(result, 10086);
 }
 
 /**
@@ -219,11 +211,7 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, Function | SmallTest | Level3)
 {
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_CONSTANT;
     DMError result = absScreen_->SetScreenGamutMap(gamutMap);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    } else {
-        EXPECT_NE(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    }
+    EXPECT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
 }
 
 /**
@@ -234,11 +222,7 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, Function | SmallTest | Level3)
 HWTEST_F(AbstractScreenTest, SetScreenColorTransform, Function | SmallTest | Level3)
 {
     DMError result = absScreen_->SetScreenColorTransform();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, DMError::DM_OK);
-    } else {
-        EXPECT_NE(result, DMError::DM_OK);
-    }
+    EXPECT_EQ(result, DMError::DM_OK);
 }
 
 /**
@@ -249,11 +233,7 @@ HWTEST_F(AbstractScreenTest, SetScreenColorTransform, Function | SmallTest | Lev
 HWTEST_F(AbstractScreenTest, GetVirtualPixelRatio, Function | SmallTest | Level3)
 {
     float result = absScreen_->GetVirtualPixelRatio();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, 2.0f);
-    } else {
-        EXPECT_NE(result, 2.0f);
-    }
+    EXPECT_EQ(result, 2.0f);
 }
 
 /**
@@ -267,42 +247,22 @@ HWTEST_F(AbstractScreenTest, GetSourceMode, Function | SmallTest | Level3)
     absScreen_->screenController_->dmsScreenGroupMap_.insert({10086, absScreenGroup_});
     absScreen_->groupDmsId_ = 10086;
     ScreenSourceMode result = absScreen_->GetSourceMode();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenSourceMode::SCREEN_MAIN);
-    } else {
-        EXPECT_NE(result, ScreenSourceMode::SCREEN_MAIN);
-    }
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MAIN);
 
     absScreen_->screenController_->defaultRsScreenId_ = 144;
     result = absScreen_->GetSourceMode();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenSourceMode::SCREEN_MIRROR);
-    } else {
-        EXPECT_NE(result, ScreenSourceMode::SCREEN_MIRROR);
-    }
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MIRROR);
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
     result = absScreen_->GetSourceMode();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenSourceMode::SCREEN_EXTEND);
-    } else {
-        EXPECT_NE(result, ScreenSourceMode::SCREEN_EXTEND);
-    }
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_EXTEND);
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
     result = absScreen_->GetSourceMode();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-    } else {
-        EXPECT_NE(result, ScreenSourceMode::SCREEN_ALONE);
-    }
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
 
     sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
     sptr<AbstractScreen> absScreenTest = new AbstractScreen(absScreenController, name_, 0, 0);
     result = absScreenTest->GetSourceMode();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-    } else {
-        EXPECT_NE(result, ScreenSourceMode::SCREEN_ALONE);
-    }
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
 }
 
 /**
@@ -316,11 +276,7 @@ HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, Function | SmallTest | Le
     std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
     (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
     sptr<ScreenGroupInfo> result = absScreenGroup_->ConvertToScreenGroupInfo();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result->children_[0], 10086);
-    } else {
-        EXPECT_NE(result->children_[0], 10086);
-    }
+    EXPECT_EQ(result->children_[0], 10086);
 }
 
 /**
@@ -333,37 +289,21 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig, Function | SmallTest | Leve
     sptr<AbstractScreen> absTest = nullptr;
     RSDisplayNodeConfig config_;
     bool result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
     result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
     absScreenGroup_->mirrorScreenId_ = 0;
     result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
     Point point_(159, 357);
     std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
     (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
     absScreenGroup_->mirrorScreenId_ = 10086;
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -377,39 +317,23 @@ HWTEST_F(AbstractScreenTest, AddChild01, Function | SmallTest | Level3)
     sptr<AbstractScreen> absTest = nullptr;
     Point point_(159, 357);
     bool result = absScreenGroup_->AddChild(absTest, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     absScreenGroup_->mirrorScreenId_ = 10086;
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
     result = absScreenGroup_->AddChild(absScreen_, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
     absScreen_->rsDisplayNode_ = nullptr;
     result = absScreenGroup_->AddChild(absScreen_, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     absScreen_->type_ = ScreenType::REAL;
     absScreenGroup_->defaultScreenId_ = 0;
     result = absScreenGroup_->AddChild(absScreen_, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -427,22 +351,14 @@ HWTEST_F(AbstractScreenTest, AddChild02, Function | SmallTest | Level3)
     (absScreenGroup_->abstractScreenMap_).insert({0, pair_});
     absScreen_->rsDisplayNode_ = nullptr;
     bool result = absScreenGroup_->AddChild(absScreen_, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     absScreen_->type_ = ScreenType::REAL;
     absScreenGroup_->defaultScreenId_ = 0;
     result = absScreenGroup_->AddChild(absScreen_, point_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -456,19 +372,11 @@ HWTEST_F(AbstractScreenTest, AddChildren, Function | SmallTest | Level3)
     std::vector<Point> vecPoint({point_});
     std::vector<sptr<AbstractScreen>> vecSptr;
     bool result = absScreenGroup_->AddChildren(vecSptr, vecPoint);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     vecSptr.push_back(absScreen_);
     result = absScreenGroup_->AddChildren(vecSptr, vecPoint);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -480,20 +388,12 @@ HWTEST_F(AbstractScreenTest, RemoveChild01, Function | SmallTest | Level3)
 {
     sptr<AbstractScreen> absTest = nullptr;
     bool result = absScreenGroup_->RemoveChild(absTest);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     result = absScreenGroup_->RemoveChild(absScreen_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_TRUE(result);
-    } else {
-        EXPECT_FALSE(result);
-    }
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -509,11 +409,7 @@ HWTEST_F(AbstractScreenTest, RemoveChild02, Function | SmallTest | Level3)
     std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
     (absScreenGroup_->abstractScreenMap_).insert({0, pair_});
     bool result = absScreenGroup_->RemoveChild(absScreen_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -525,28 +421,16 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, Function | SmallTest | Level3)
 {
     sptr<AbstractScreen> absTest = nullptr;
     bool result = absScreenGroup_->RemoveDefaultScreen(absTest);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_FALSE(result);
-    } else {
-        EXPECT_TRUE(result);
-    }
+    EXPECT_FALSE(result);
 
     absScreen_->rsDisplayNode_ = nullptr;
     result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_TRUE(result);
-    } else {
-        EXPECT_FALSE(result);
-    }
+    EXPECT_TRUE(result);
 
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(result);
-    } else {
-        ASSERT_FALSE(result);
-    }
+    ASSERT_TRUE(result);
 }
 
 /**
@@ -560,11 +444,7 @@ HWTEST_F(AbstractScreenTest, GetChildren, Function | SmallTest | Level3)
     std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
     (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
     std::vector<sptr<AbstractScreen>> result = absScreenGroup_->GetChildren();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(result[0], absScreen_);
-    } else {
-        ASSERT_NE(result[0], absScreen_);
-    }
+    ASSERT_EQ(result[0], absScreen_);
 }
 
 /**
@@ -578,13 +458,8 @@ HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
     std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
     (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
     std::vector<Point> result = absScreenGroup_->GetChildrenPosition();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result[0].posX_, 159);
-        ASSERT_EQ(result[0].posY_, 357);
-    } else {
-        EXPECT_NE(result[0].posX_, 159);
-        ASSERT_NE(result[0].posY_, 357);
-    }
+    EXPECT_EQ(result[0].posX_, 159);
+    EXPECT_EQ(result[0].posY_, 357);
 }
 }
 } // namespace Rosen
