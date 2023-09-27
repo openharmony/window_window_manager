@@ -148,6 +148,7 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_scene_config.cpp",
     "src/screen_sensor_connector.cpp",
     "src/screen_session_manager.cpp",
+    "src/screen_setting_helper.cpp",
     "src/session_display_power_controller.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
   ]
@@ -166,6 +167,7 @@ ohos_shared_library("screen_session_manager") {
   external_deps = [
     "c_utils:utils",
     "config_policy:configpolicy_util",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
@@ -173,6 +175,7 @@ ohos_shared_library("screen_session_manager") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "ipc:ipc_core",
+    "power_manager:power_setting",
     "sensor:sensor_interface_native",
   ]
 
