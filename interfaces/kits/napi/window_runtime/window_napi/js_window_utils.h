@@ -53,6 +53,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_FLOAT_CAMERA,
     TYPE_DIALOG,
     TYPE_SCREENSHOT,
+    TYPE_TOP_TOAST,
     TYPE_END
 };
 
@@ -82,6 +83,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   ApiWindowType::TYPE_VOICE_INTERACTION },
     { WindowType::WINDOW_TYPE_POINTER,             ApiWindowType::TYPE_POINTER           },
     { WindowType::WINDOW_TYPE_SCREENSHOT,          ApiWindowType::TYPE_SCREENSHOT        },
+    { WindowType::WINDOW_TYPE_TOP_TOAST,           ApiWindowType::TYPE_TOP_TOAST         },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -103,6 +105,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_VOICE_INTERACTION,   WindowType::WINDOW_TYPE_VOICE_INTERACTION   },
     { ApiWindowType::TYPE_POINTER,             WindowType::WINDOW_TYPE_POINTER             },
     { ApiWindowType::TYPE_SCREENSHOT,          WindowType::WINDOW_TYPE_SCREENSHOT          },
+    { ApiWindowType::TYPE_TOP_TOAST,           WindowType::WINDOW_TYPE_TOP_TOAST           },
 };
 
 enum class ApiWindowMode : uint32_t {
