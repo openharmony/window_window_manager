@@ -26,21 +26,23 @@
 namespace OHOS {
 namespace Rosen {
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
-NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display);
-NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo);
-NativeValue* CreateJsRectObject(NativeEngine& engine, DMRect rect);
-NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
+napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display);
+napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo);
+napi_value CreateJsRectObject(napi_env env, DMRect rect);
+napi_value CreateJsWaterfallDisplayAreaRectsObject(napi_env env,
     WaterfallDisplayAreaRects waterfallDisplayAreaRects);
-NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<DMRect> boundingRects);
+napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> boundingRects);
+napi_value NapiGetUndefined(napi_env env);
+napi_valuetype GetType(napi_env env, napi_value value);
 class JsDisplay final {
 public:
     explicit JsDisplay(const sptr<Display>& display);
     ~JsDisplay();
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
-    static NativeValue* GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info);
+    static void Finalizer(napi_env env, void* data, void* hint);
+    static napi_value GetCutoutInfo(napi_env env, napi_callback_info info);
 private:
     sptr<Display> display_ = nullptr;
-    NativeValue* OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnGetCutoutInfo(napi_env env, napi_callback_info info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
