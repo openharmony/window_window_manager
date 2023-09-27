@@ -57,7 +57,9 @@ public:
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
-    WMError SetUIContentByName(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
+        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+    WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
@@ -217,7 +219,7 @@ private:
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
 
-    WMError SetUIContentInner(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability);
 
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;

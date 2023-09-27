@@ -331,15 +331,16 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
 }
 } // namespace OHOS::Rosen
 
+static napi_module g_screenshotModule = {
+    .nm_version = 1, // NAPI v1
+    .nm_flags = 0, // normal
+    .nm_filename = nullptr,
+    .nm_register_func = OHOS::Rosen::ScreenshotModuleInit,
+    .nm_modname = "screenshot",
+    .nm_priv = nullptr,
+};
+
 extern "C" __attribute__((constructor)) void RegisterModule(void)
 {
-    napi_module screenshotModule = {
-        .nm_version = 1, // NAPI v1
-        .nm_flags = 0, // normal
-        .nm_filename = nullptr,
-        .nm_register_func = OHOS::Rosen::ScreenshotModuleInit,
-        .nm_modname = "screenshot",
-        .nm_priv = nullptr,
-    };
-    napi_module_register(&screenshotModule);
+    napi_module_register(&g_screenshotModule);
 }

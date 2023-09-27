@@ -16,7 +16,7 @@
 #include "js_transition_controller.h"
 namespace OHOS {
 namespace Rosen {
-JsTransitionController::JsTransitionController(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,
+JsTransitionController::JsTransitionController(napi_env env, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window)
 {
 }

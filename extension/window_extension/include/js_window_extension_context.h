@@ -35,7 +35,7 @@ public:
     virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 };
 
-NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
+napi_value CreateJsWindowExtensionContext(napi_env env,
     const std::shared_ptr<Rosen::WindowExtensionContext>& context);
 } // namespace Rosen
 } // namespace OHOS

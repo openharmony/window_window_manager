@@ -169,6 +169,8 @@ public:
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
+        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
