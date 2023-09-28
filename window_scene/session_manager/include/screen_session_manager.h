@@ -202,6 +202,7 @@ private:
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
+    bool SetScreenPower(ScreenPowerStatus status);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -251,6 +252,8 @@ private:
     float densityDpi_ { 1.0f };
 
     bool screenPrivacyStates = false;
+    bool keyguardDrawnDone_ = true;
+    bool needScreenOnWhenKeyguardNotify_ = false;
 
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
