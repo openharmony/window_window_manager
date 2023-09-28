@@ -25,21 +25,21 @@ namespace OHOS {
 namespace Rosen {
 class JsScreenListener : public ScreenManager::IScreenListener {
 public:
-    explicit JsScreenListener(NativeEngine* engine) : engine_(engine) {}
+    explicit JsScreenListener(napi_env env) : env_(env) {}
     ~JsScreenListener() override = default;
-    void AddCallback(const std::string& type, NativeValue* jsListenerObject);
+    void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
-    void RemoveCallback(const std::string& type, NativeValue* jsListenerObject);
+    void RemoveCallback(const std::string& type, napi_value jsListenerObject);
     void OnConnect(ScreenId id) override;
     void OnDisconnect(ScreenId id) override;
     void OnChange(ScreenId id) override;
 
 private:
-    void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
-    NativeEngine* engine_ = nullptr;
+    void CallJsMethod(const std::string& methodName, napi_value const* argv = nullptr, size_t argc = 0);
+    napi_env env_ = nullptr;
     std::mutex mtx_;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
-    NativeValue* CreateScreenIdArray(NativeEngine& engine, const std::vector<ScreenId>& data);
+    napi_value CreateScreenIdArray(napi_env env, const std::vector<ScreenId>& data);
 };
 const std::string EVENT_CONNECT = "connect";
 const std::string EVENT_DISCONNECT = "disconnect";

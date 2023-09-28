@@ -16,14 +16,13 @@
 #include "js_display_manager.h"
 #include "native_engine/native_engine.h"
 
-extern "C" __attribute__((constructor)) void NAPI_application_displaymanager_AutoRegister()
-{
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "display",
-        .fileName = "module/libdisplay_napi.so/display.js",
-        .registerCallback = OHOS::Rosen::JsDisplayManagerInit,
-    };
+static napi_module g_displayModule = {
+    .nm_filename = "module/libdisplay_napi.so/display.js",
+    .nm_register_func = OHOS::Rosen::JsDisplayManagerInit,
+    .nm_modname = "display",
+};
 
-    moduleManager->Register(&newModuleInfo);
+extern "C" __attribute__((constructor)) void NAPI_application_screenmanager_AutoRegister()
+{
+    napi_module_register(&g_displayModule);
 }

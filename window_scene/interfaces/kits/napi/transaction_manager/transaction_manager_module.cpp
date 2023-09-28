@@ -14,15 +14,16 @@
  */
 
 #include "native_engine/native_engine.h"
-#include "js_session_manager_service.h"
+#include "js_transaction_manager.h"
 
-static napi_module g_sessionServiceModule = {
-    .nm_filename = "module/libsessionmanagerservice_napi.so/sessionManagerService.js",
-    .nm_register_func = OHOS::Rosen::JsSessionManagerServiceInit,
-    .nm_modname = "sessionManagerService",
-};
-
-extern "C" __attribute__((constructor)) void NAPI_application_sessionmanagerservice_AutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_transactionManager_AutoRegister()
 {
-    napi_module_register(&g_sessionServiceModule);
+    auto moduleManager = NativeModuleManager::GetInstance();
+    NativeModule newModuleInfo = {
+        .name = "transactionManager",
+        .fileName = "module/libtransactionmanager_napi.so/transactionManager.js",
+        .registerCallback = OHOS::Rosen::JsTransactionManager::Init,
+    };
+
+    moduleManager->Register(&newModuleInfo);
 }

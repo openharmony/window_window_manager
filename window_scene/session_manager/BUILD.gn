@@ -187,6 +187,10 @@ ohos_shared_library("screen_session_manager") {
     }
   }
 
+  if (window_manager_feature_tp_enable) {
+    defines += [ "TP_FEATURE_ENABLE" ]
+  }
+
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
   } else {

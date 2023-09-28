@@ -29,6 +29,7 @@ sensor_path = "//base/sensors/sensor"
 declare_args() {
   efficiency_manager_enable = true
   window_manager_feature_subscribe_motion = false
+  window_manager_feature_tp_enable = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_efficiency_manager)) {

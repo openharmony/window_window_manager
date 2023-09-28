@@ -19,7 +19,8 @@
 #include <mutex>
 
 #include "window.h"
-
+typedef struct napi_env__* napi_env;
+typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {
 class EventHandler;
 class LauncherService;
@@ -36,7 +37,7 @@ public:
     RootScene();
     virtual ~RootScene();
 
-    void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+    void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
         AbilityRuntime::Context* context);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);

@@ -42,7 +42,7 @@ JsScreen::~JsScreen()
     WLOGI("JsScreen::~JsScreen is called");
 }
 
-void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsScreen::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("JsScreen::Finalizer is called");
     auto jsScreen = std::unique_ptr<JsScreen>(static_cast<JsScreen*>(data));
@@ -64,161 +64,186 @@ void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
     }
 }
 
-NativeValue* JsScreen::SetOrientation(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsScreen::SetOrientation(napi_env env, napi_callback_info info)
 {
-    JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
-    return (me != nullptr) ? me->OnSetOrientation(*engine, *info) : nullptr;
+    JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
+    return (me != nullptr) ? me->OnSetOrientation(env, info) : nullptr;
 }
 
-NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value NapiGetUndefined(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+napi_valuetype GetType(napi_env env, napi_value value)
+{
+    napi_valuetype res = napi_undefined;
+    napi_typeof(env, value, &res);
+    return res;
+}
+
+napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
 {
     WLOGI("OnSetOrientation is called");
     bool paramValidFlag = true;
     Orientation orientation = Orientation::UNSPECIFIED;
-    if (info.argc < ARGC_ONE) {
-        WLOGFE("OnSetOrientation Params not match, info argc: %{public}zu", info.argc);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("OnSetOrientation Params not match, info argc: %{public}zu", argc);
         paramValidFlag = false;
     } else {
-        if (!ConvertFromJsValue(engine, info.argv[0], orientation)) {
+        if (!ConvertFromJsValue(env, argv[0], orientation)) {
             paramValidFlag = false;
             WLOGFE("Failed to convert parameter to orientation");
         }
     }
     if (!paramValidFlag) {
         WLOGE("OnSetOrientation paramValidFlag error");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
         WLOGE("Orientation param error! orientation value must from enum Orientation");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetOrientation(orientation));
             if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
+                task.Resolve(env, NapiGetUndefined(env));
                 WLOGI("OnSetOrientation success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                                   "JsScreen::OnSetOrientation failed."));
                 WLOGFE("OnSetOrientation failed");
             }
         };
-    NativeValue* lastParam = nullptr;
-    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
-        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[ARGC_TWO - 1];
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr &&
+        GetType(env, argv[ARGC_TWO - 1]) == napi_function) {
+        lastParam = argv[ARGC_TWO - 1];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsScreen::OnSetOrientation",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsScreen::OnSetOrientation",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
 
-NativeValue* JsScreen::SetScreenActiveMode(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsScreen::SetScreenActiveMode(napi_env env, napi_callback_info info)
 {
     WLOGI("SetScreenActiveMode is called");
-    JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
+    JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
     if (me != nullptr) {
-        HiviewDFX::ReportXPowerJsStackSysEvent(engine, "EPS_LCD_FREQ");
+        HiviewDFX::ReportXPowerJsStackSysEvent(env, "EPS_LCD_FREQ");
     }
-    return (me != nullptr) ? me->OnSetScreenActiveMode(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnSetScreenActiveMode(env, info) : nullptr;
 }
 
-NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info)
 {
     WLOGI("OnSetScreenActiveMode is called");
     bool paramValidFlag = true;
     uint32_t modeId = 0;
-    if (info.argc < ARGC_ONE) {
-        WLOGFE("OnSetScreenActiveMode Params not match %{public}zu", info.argc);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("OnSetScreenActiveMode Params not match %{public}zu", argc);
         paramValidFlag = false;
     } else {
-        if (!ConvertFromJsValue(engine, info.argv[0], modeId)) {
+        if (!ConvertFromJsValue(env, argv[0], modeId)) {
             WLOGFE("Failed to convert parameter to modeId");
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
         WLOGFE("OnSetScreenActiveMode paramValidFlag error");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(modeId));
             if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
+                task.Resolve(env, NapiGetUndefined(env));
                 WLOGI("OnSetScreenActiveMode success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                                 "JsScreen::OnSetScreenActiveMode failed."));
                 WLOGFE("OnSetScreenActiveMode failed");
             }
         };
-    NativeValue* lastParam = nullptr;
-    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
-        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[ARGC_TWO - 1];
+
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr &&
+        GetType(env, argv[ARGC_TWO - 1]) == napi_function) {
+        lastParam = argv[ARGC_TWO - 1];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsScreen::OnSetScreenActiveMode",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsScreen::OnSetScreenActiveMode",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-NativeValue* JsScreen::SetDensityDpi(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsScreen::SetDensityDpi(napi_env env, napi_callback_info info)
 {
     WLOGI("SetDensityDpi is called");
-    JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
-    return (me != nullptr) ? me->OnSetDensityDpi(*engine, *info) : nullptr;
+    JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
+    return (me != nullptr) ? me->OnSetDensityDpi(env, info) : nullptr;
 }
 
-NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
 {
     WLOGI("OnSetDensityDpi is called");
     bool paramValidFlag = true;
     uint32_t densityDpi = 0;
-    if (info.argc < ARGC_ONE) {
-        WLOGFE("OnSetDensityDpi Params not match %{public}zu", info.argc);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("OnSetDensityDpi Params not match %{public}zu", argc);
         paramValidFlag = false;
     } else {
-        if (!ConvertFromJsValue(engine, info.argv[0], densityDpi)) {
+        if (!ConvertFromJsValue(env, argv[0], densityDpi)) {
             WLOGFE("Failed to convert parameter to densityDpi");
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
         WLOGFE("OnSetDensityDpi paramValidFlag error");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetDensityDpi(densityDpi));
             if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
+                task.Resolve(env, NapiGetUndefined(env));
                 WLOGI("OnSetDensityDpi success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                                 "JsScreen::OnSetDensityDpi failed."));
                 WLOGFE("OnSetDensityDpi failed");
             }
         };
-    NativeValue* lastParam = nullptr;
-    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
-        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[ARGC_TWO - 1];
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr &&
+        GetType(env, argv[ARGC_TWO - 1]) == napi_function) {
+        lastParam = argv[ARGC_TWO - 1];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsScreen::OnSetDensityDpi",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsScreen::OnSetDensityDpi",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -233,83 +258,84 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
     return g_JsScreenMap[screenId];
 }
 
-NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
+napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
 {
     WLOGI("JsScreen::CreateJsScreen is called");
-    NativeValue* objValue = nullptr;
+    napi_value objValue = nullptr;
     std::shared_ptr<NativeReference> jsScreenObj = FindJsDisplayObject(screen->GetId());
-    if (jsScreenObj != nullptr && jsScreenObj->Get() != nullptr) {
+    if (jsScreenObj != nullptr && jsScreenObj->GetNapiValue() != nullptr) {
         WLOGI("[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
-        objValue = jsScreenObj->Get();
+        objValue = jsScreenObj->GetNapiValue();
     }
     if (objValue == nullptr) {
-        objValue = engine.CreateObject();
+        napi_create_object(env, &objValue);
     }
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    if (objValue == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     std::unique_ptr<JsScreen> jsScreen = std::make_unique<JsScreen>(screen);
-    object->SetNativePointer(jsScreen.release(), JsScreen::Finalizer, nullptr);
+    napi_wrap(env, objValue, jsScreen.release(), JsScreen::Finalizer, nullptr, nullptr);
     auto info = screen->GetScreenInfo();
     if (info == nullptr) {
         WLOGFE("Failed to GetScreenInfo");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     ScreenId screenId = info->GetScreenId();
-    object->SetProperty("id",
-        CreateJsValue(engine, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
+    napi_set_named_property(env, objValue, "id",
+        CreateJsValue(env, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
     ScreenId parentId = info->GetParentId();
-    object->SetProperty("parent",
-        CreateJsValue(engine, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
-    object->SetProperty("orientation", CreateJsValue(engine, info->GetOrientation()));
-    object->SetProperty("sourceMode", CreateJsValue(engine, info->GetSourceMode()));
-    object->SetProperty("activeModeIndex", CreateJsValue(engine, info->GetModeId()));
-    object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, info->GetModes()));
-    object->SetProperty("densityDpi", CreateJsValue(engine,
+    napi_set_named_property(env, objValue, "parent",
+        CreateJsValue(env, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
+    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info->GetOrientation()));
+    napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetSourceMode()));
+    napi_set_named_property(env, objValue, "activeModeIndex", CreateJsValue(env, info->GetModeId()));
+    napi_set_named_property(env, objValue, "supportedModeInfo", CreateJsScreenModeArrayObject(env, info->GetModes()));
+    napi_set_named_property(env, objValue, "densityDpi", CreateJsValue(env,
         static_cast<uint32_t>(info->GetVirtualPixelRatio() * DOT_PER_INCH))); // Dpi = Density(VPR) * 160.
-    if (jsScreenObj == nullptr || jsScreenObj->Get() == nullptr) {
+    if (jsScreenObj == nullptr || jsScreenObj->GetNapiValue() == nullptr) {
         std::shared_ptr<NativeReference> JsScreenRef;
-        JsScreenRef.reset(engine.CreateReference(objValue, 1));
+        napi_ref result = nullptr;
+        napi_create_reference(env, objValue, 1, &result);
+        JsScreenRef.reset(reinterpret_cast<NativeReference*>(result));
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
         g_JsScreenMap[screenId] = JsScreenRef;
         const char *moduleName = "JsScreen";
-        BindNativeFunction(engine, *object, "setScreenActiveMode", moduleName, JsScreen::SetScreenActiveMode);
-        BindNativeFunction(engine, *object, "setOrientation", moduleName, JsScreen::SetOrientation);
-        BindNativeFunction(engine, *object, "setDensityDpi", moduleName, JsScreen::SetDensityDpi);
+        BindNativeFunction(env, objValue, "setScreenActiveMode", moduleName, JsScreen::SetScreenActiveMode);
+        BindNativeFunction(env, objValue, "setOrientation", moduleName, JsScreen::SetOrientation);
+        BindNativeFunction(env, objValue, "setDensityDpi", moduleName, JsScreen::SetDensityDpi);
     }
     return objValue;
 }
 
-NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<sptr<SupportedScreenModes>> screenModes)
+napi_value CreateJsScreenModeArrayObject(napi_env env, std::vector<sptr<SupportedScreenModes>> screenModes)
 {
-    NativeValue* arrayValue = engine.CreateArray(screenModes.size());
-    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, screenModes.size(), &arrayValue);
     size_t i = 0;
     for (const auto& mode : screenModes) {
-        array->SetElement(i++, CreateJsScreenModeObject(engine, mode));
+        napi_set_element(env, arrayValue, i++, CreateJsScreenModeObject(env, mode));
     }
     return arrayValue;
 }
 
-NativeValue* CreateJsScreenModeObject(NativeEngine& engine, const sptr<SupportedScreenModes>& mode)
+napi_value CreateJsScreenModeObject(napi_env env, const sptr<SupportedScreenModes>& mode)
 {
     WLOGI("JsScreen::CreateJsScreenMode is called");
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* optionObject = ConvertNativeValueTo<NativeObject>(objValue);
-    if (optionObject == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     uint32_t id = mode->id_;
     uint32_t width = mode->width_;
     uint32_t height = mode->height_;
     uint32_t refreshRate = mode->refreshRate_;
-    optionObject->SetProperty("id", CreateJsValue(engine, id));
-    optionObject->SetProperty("width", CreateJsValue(engine, width));
-    optionObject->SetProperty("height", CreateJsValue(engine, height));
-    optionObject->SetProperty("refreshRate", CreateJsValue(engine, refreshRate));
+    napi_set_named_property(env, objValue, "id", CreateJsValue(env, id));
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, width));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, height));
+    napi_set_named_property(env, objValue, "refreshRate", CreateJsValue(env, refreshRate));
     return objValue;
 }
 }  // namespace Rosen

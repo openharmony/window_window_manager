@@ -195,7 +195,8 @@ WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
     return WMError::WM_OK;
 }
 
-WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFI("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
         rect.height_, static_cast<int>(reason));
