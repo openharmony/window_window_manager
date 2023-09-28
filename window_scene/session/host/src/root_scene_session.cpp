@@ -22,10 +22,10 @@ void RootSceneSession::SetLoadContentFunc(const LoadContentFunc& loadContentFunc
 }
 
 void RootSceneSession::LoadContent(
-    const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context)
+    const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context)
 {
     if (loadContentFunc_) {
-        loadContentFunc_(contentUrl, engine, storage, context);
+        loadContentFunc_(contentUrl, env, storage, context);
     }
 }
 } // namespace OHOS::Rosen

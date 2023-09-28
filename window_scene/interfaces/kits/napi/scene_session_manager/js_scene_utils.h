@@ -145,15 +145,22 @@ const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSI
     {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
 };
 
-bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
-bool ConvertPointerEventFromJs(NativeEngine& engine, NativeObject* jsObject, MMI::PointerEvent& pointerEvent);
-NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
-NativeValue* CreateJsSessionState(NativeEngine& engine);
-NativeValue* CreateJsSessionSizeChangeReason(NativeEngine& engine);
-NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
-NativeValue* CreateJsSystemBarPropertyArrayObject(
-    NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
-NativeValue* SessionTypeInit(NativeEngine* engine);
+bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
+bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
+napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+napi_value CreateJsSessionState(napi_env env);
+napi_value CreateJsSessionSizeChangeReason(napi_env env);
+napi_value CreateJsSessionRect(napi_env env, const WSRect& rect);
+napi_value CreateJsSystemBarPropertyArrayObject(
+    napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
+napi_value SessionTypeInit(napi_env env);
+napi_value NapiGetUndefined(napi_env env);
+napi_valuetype GetType(napi_env env, napi_value value);
+bool NapiIsCallable(napi_env env, napi_value value);
+constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
 } // namespace OHOS::Rosen
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H

@@ -17,13 +17,13 @@
 
 #include "js_screen_session_manager.h"
 
+static napi_module g_screenSessionModule = {
+    .nm_filename = "libscreensessionmanager_napi.so/screenSessionManager.js",
+    .nm_register_func = OHOS::Rosen::JsScreenSessionManager::Init,
+    .nm_modname = "screenSessionManager",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_screenSessionManager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "screenSessionManager",
-        .fileName = "libscreensessionmanager_napi.so/screenSessionManager.js",
-        .registerCallback = OHOS::Rosen::JsScreenSessionManager::Init,
-    };
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_screenSessionModule);
 }

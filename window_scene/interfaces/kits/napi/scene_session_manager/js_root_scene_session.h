@@ -23,23 +23,23 @@
 namespace OHOS::Rosen {
 class JsRootSceneSession : public RefBase {
 public:
-    JsRootSceneSession(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
+    JsRootSceneSession(napi_env env, const sptr<RootSceneSession>& rootSceneSession);
     ~JsRootSceneSession() = default;
 
-    static NativeValue* Create(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static napi_value Create(napi_env env, const sptr<RootSceneSession>& rootSceneSession);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
-    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
+    static napi_value RegisterCallback(napi_env env, napi_callback_info info);
+    static napi_value LoadContent(napi_env env, napi_callback_info info);
 
 private:
-    NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
-    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
+    napi_value OnLoadContent(napi_env env, napi_callback_info info);
+    bool IsCallbackRegistered(std::string type, napi_value jsListenerObject);
     void PendingSessionActivation(SessionInfo& info);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
 
-    NativeEngine& engine_;
+    napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     sptr<RootSceneSession> rootSceneSession_;
 };
