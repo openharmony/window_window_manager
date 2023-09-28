@@ -28,6 +28,8 @@ public:
     using Task = std::function<void()>;
     void PostAsyncTask(Task&& task, int64_t delayTime = 0);
     void PostVoidSyncTask(Task&& task);
+    void PostTask(Task&& task, const std::string& name, int64_t delayTime = 0);
+    void RemoveTask(const std::string& name);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task)
     {
