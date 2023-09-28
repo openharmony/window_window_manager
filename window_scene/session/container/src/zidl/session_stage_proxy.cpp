@@ -52,7 +52,8 @@ WSError SessionStageProxy::SetActive(bool active)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -71,6 +72,18 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("Write SessionSizeChangeReason failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    bool hasRSTransaction = rsTransaction != nullptr;
+    if (!data.WriteBool(hasRSTransaction)) {
+        WLOGFE("Write has transaction failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (hasRSTransaction) {
+        if (!data.WriteParcelable(rsTransaction.get())) {
+            WLOGFE("Write transaction sync Id failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE),
