@@ -29,78 +29,88 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRoot
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 } // namespace
 
-JsRootSceneSession::JsRootSceneSession(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession)
-    : engine_(engine), rootSceneSession_(rootSceneSession)
+JsRootSceneSession::JsRootSceneSession(napi_env env, const sptr<RootSceneSession>& rootSceneSession)
+    : env_(env), rootSceneSession_(rootSceneSession)
 {}
 
-NativeValue* JsRootSceneSession::Create(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession)
+napi_value JsRootSceneSession::Create(napi_env env, const sptr<RootSceneSession>& rootSceneSession)
 {
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    auto jsRootSceneSession = std::make_unique<JsRootSceneSession>(engine, rootSceneSession);
-    object->SetNativePointer(jsRootSceneSession.release(), JsRootSceneSession::Finalizer, nullptr);
+    auto jsRootSceneSession = std::make_unique<JsRootSceneSession>(env, rootSceneSession);
+    napi_wrap(env, objValue, jsRootSceneSession.release(), JsRootSceneSession::Finalizer, nullptr, nullptr);
 
     const char* moduleName = "JsRootSceneSession";
-    BindNativeFunction(engine, *object, "loadContent", moduleName, JsRootSceneSession::LoadContent);
-    BindNativeFunction(engine, *object, "on", moduleName, JsRootSceneSession::RegisterCallback);
+    BindNativeFunction(env, objValue, "loadContent", moduleName, JsRootSceneSession::LoadContent);
+    BindNativeFunction(env, objValue, "on", moduleName, JsRootSceneSession::RegisterCallback);
     return objValue;
 }
 
-void JsRootSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsRootSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGD("Finalizer.");
     std::unique_ptr<JsRootSceneSession>(static_cast<JsRootSceneSession*>(data));
 }
 
-NativeValue* JsRootSceneSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsRootSceneSession::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("RegisterCallback.");
-    JsRootSceneSession* me = CheckParamsAndGetThis<JsRootSceneSession>(engine, info);
-    return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
+    JsRootSceneSession* me = CheckParamsAndGetThis<JsRootSceneSession>(env, info);
+    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
 }
 
-NativeValue* JsRootSceneSession::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsRootSceneSession::LoadContent(napi_env env, napi_callback_info info)
 {
     WLOGD("LoadContent.");
-    JsRootSceneSession* me = CheckParamsAndGetThis<JsRootSceneSession>(engine, info);
-    return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
+    JsRootSceneSession* me = CheckParamsAndGetThis<JsRootSceneSession>(env, info);
+    return (me != nullptr) ? me->OnLoadContent(env, info) : nullptr;
 }
 
-NativeValue* JsRootSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info)
+bool NapiIsCallable(napi_env env, napi_value value)
 {
-    if (info.argc < 2) { // 2: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
+}
+
+napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     std::string cbType;
-    if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
         WLOGFE("[NAPI]Failed to convert parameter to callbackType");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
-    NativeValue* value = info.argv[1];
-    if (value == nullptr || !value->IsCallable()) {
+    napi_value value = argv[1];
+    if (value == nullptr || !NapiIsCallable(env, value)) {
         WLOGFE("[NAPI]Invalid argument");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     if (IsCallbackRegistered(cbType, value)) {
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     if (rootSceneSession_ == nullptr) {
         WLOGFE("[NAPI]root session is nullptr");
-        engine.Throw(CreateJsError(
-            engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "Root scene session is null!"));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(
+            env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "Root scene session is null!"));
+        return NapiGetUndefined(env);
     }
 
     NotifyPendingSessionActivationFunc func = [this](SessionInfo& info) {
@@ -108,65 +118,76 @@ NativeValue* JsRootSceneSession::OnRegisterCallback(NativeEngine& engine, Native
     };
     rootSceneSession_->SetPendingSessionActivationEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
-    callbackRef.reset(engine.CreateReference(value, 1));
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     jsCbMap_[cbType] = callbackRef;
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
-NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]OnLoadContent");
-    if (info.argc < 2) { // 2: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     std::string contentUrl;
-    NativeValue* context = info.argv[1];
-    NativeValue* storage = info.argc < 3 ? nullptr : info.argv[2];
-    if (!ConvertFromJsValue(engine, info.argv[0], contentUrl)) {
+    napi_value context = argv[1];
+    napi_value storage = argc < 3 ? nullptr : argv[2];
+    if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
         WLOGFE("[NAPI]Failed to convert parameter to content url");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
-    auto contextObj = ConvertNativeValueTo<NativeObject>(context);
-    if (contextObj == nullptr) {
+
+    if (context == nullptr) {
         WLOGFE("[NAPI]Failed to get context object");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
     }
-    auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(contextObj->GetNativePointer());
+    void* pointerResult = nullptr;
+    napi_unwrap(env, context, &pointerResult);
+    auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
     if (contextNativePointer == nullptr) {
         WLOGFE("[NAPI]Failed to get context pointer from js object");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
     }
     auto contextWeakPtr = *contextNativePointer;
     SceneSessionManager::GetInstance().SetRootSceneContext(contextWeakPtr);
 
-    std::shared_ptr<NativeReference> contentStorage =
-        (storage == nullptr) ? nullptr : std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
-    AsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
-        contentUrl, contextWeakPtr, contentStorage](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    std::shared_ptr<NativeReference> contentStorage = nullptr;
+    if (storage != nullptr) {
+        napi_ref ref = nullptr;
+        napi_create_reference(env_, storage, 1, &ref);
+        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
+    }
+
+    NapiAsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
+        contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (rootSceneSession == nullptr) {
             WLOGFE("[NAPI]rootSceneSession is nullptr");
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
-        NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
-        rootSceneSession->LoadContent(contentUrl, &engine, nativeStorage, contextWeakPtr.lock().get());
+        napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
+        rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
     };
-    NativeValue* lastParam = nullptr;
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsRootSceneSession::OnLoadContent", engine,
-        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value lastParam = nullptr, result = nullptr;
+    NapiAsyncTask::Schedule("JsRootSceneSession::OnLoadContent", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+bool JsRootSceneSession::IsCallbackRegistered(std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
@@ -174,7 +195,9 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsL
     }
 
     for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
-        if (jsListenerObject->StrictEquals(iter->second->Get())) {
+        bool isEquals = false;
+        napi_strict_equals(env_, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
+        if (isEquals) {
             WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;
         }
@@ -216,21 +239,21 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     }
 
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [info, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
+            napi_value jsSessionInfo = CreateJsSessionInfo(env, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
             }
-            NativeValue* argv[] = { jsSessionInfo };
-            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+            napi_value argv[] = { jsSessionInfo };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsSceneSession::PendingSessionActivation", engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSession::PendingSessionActivation", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)

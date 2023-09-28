@@ -38,213 +38,223 @@ namespace {
 
 class JsDisplayManager {
 public:
-explicit JsDisplayManager(NativeEngine* engine) {
+explicit JsDisplayManager(napi_env env) {
 }
 
 ~JsDisplayManager() = default;
 
-static void Finalizer(NativeEngine* engine, void* data, void* hint)
+static void Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("Finalizer is called");
     std::unique_ptr<JsDisplayManager>(static_cast<JsDisplayManager*>(data));
 }
 
-static NativeValue* GetDefaultDisplay(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetDefaultDisplay(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetDefaultDisplay(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetDefaultDisplay(env, info) : nullptr;
 }
 
-static NativeValue* GetDefaultDisplaySync(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetDefaultDisplaySync(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetDefaultDisplaySync(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetDefaultDisplaySync(env, info) : nullptr;
 }
 
-static NativeValue* GetAllDisplay(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetAllDisplay(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetAllDisplay(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllDisplay(env, info) : nullptr;
 }
 
-static NativeValue* GetAllDisplays(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetAllDisplays(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetAllDisplays(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllDisplays(env, info) : nullptr;
 }
 
-static NativeValue* RegisterDisplayManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value RegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnRegisterDisplayManagerCallback(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterDisplayManagerCallback(env, info) : nullptr;
 }
 
-static NativeValue* UnregisterDisplayManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(env, info) : nullptr;
 }
 
-static NativeValue* HasPrivateWindow(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value HasPrivateWindow(napi_env env, napi_callback_info info)
 {
-    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnHasPrivateWindow(*engine, *info) : nullptr;
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnHasPrivateWindow(env, info) : nullptr;
 }
 
-static NativeValue* IsFoldable(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value IsFoldable(napi_env env, napi_callback_info info)
 {
-    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnIsFoldable(*engine, *info) : nullptr;
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnIsFoldable(env, info) : nullptr;
 }
 
-static NativeValue* GetFoldStatus(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetFoldStatus(napi_env env, napi_callback_info info)
 {
-    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetFoldStatus(*engine, *info) : nullptr;
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetFoldStatus(env, info) : nullptr;
 }
 
-static NativeValue* GetFoldDisplayMode(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
-    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetFoldDisplayMode(*engine, *info) : nullptr;
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetFoldDisplayMode(env, info) : nullptr;
 }
 
-static NativeValue* SetFoldDisplayMode(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value SetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
-    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnSetFoldDisplayMode(*engine, *info) : nullptr;
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnSetFoldDisplayMode(env, info) : nullptr;
 }
 
-static NativeValue* GetCurrentFoldCreaseRegion(NativeEngine* engine, NativeCallbackInfo* info)
+static napi_value GetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
-    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
-    return (me != nullptr) ? me->OnGetCurrentFoldCreaseRegion(*engine, *info) : nullptr;
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetCurrentFoldCreaseRegion(env, info) : nullptr;
 }
 
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
 std::mutex mtx_;
 
-NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
 {
     WLOGI("GetDefaultDisplay called");
     DMError errCode = DMError::DM_OK;
-    if (info.argc != 0 && info.argc != ARGC_ONE) {
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 0 && argc != ARGC_ONE) {
         WLOGFE("OnGetDefaultDisplay params not match");
         errCode = DMError::DM_ERROR_INVALID_PARAM;
     }
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != DMError::DM_OK) {
-                task.Reject(engine, CreateJsError(engine,
+                task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(errCode), "JsDisplayManager::OnGetDefaultDisplay failed."));
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Async:GetDefaultDisplay");
             sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
             if (display != nullptr) {
-                task.Resolve(engine, CreateJsDisplayObject(engine, display));
+                task.Resolve(env, CreateJsDisplayObject(env, display));
                 WLOGI("OnGetDefaultDisplay success");
             } else {
-                task.Reject(engine, CreateJsError(engine,
+                task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetDefaultDisplay failed."));
             }
         };
-    NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_ONE && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[0];
+    napi_value lastParam = nullptr;
+    if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_function) {
+        lastParam = argv[0];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsDisplayManager::OnGetDefaultDisplay",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayManager::OnGetDefaultDisplay",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
 {
     WLOGI("GetDefaultDisplaySync called");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:GetDefaultDisplay");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
         WLOGFE("OnGetDefaultDisplaySync, display is nullptr.");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
+        return NapiGetUndefined(env);
     }
-    return CreateJsDisplayObject(engine, display);
+    return CreateJsDisplayObject(env, display);
 }
 
-NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
 {
     WLOGI("GetAllDisplay called");
     DMError errCode = DMError::DM_OK;
-    if (info.argc != 0 && info.argc != ARGC_ONE) {
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 0 && argc != ARGC_ONE) {
         WLOGFE("OnGetAllDisplay params not match");
         errCode = DMError::DM_ERROR_INVALID_PARAM;
     }
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != DMError::DM_OK) {
-                task.Reject(engine, CreateJsError(engine,
+                task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplay failed."));
             }
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
-                task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
+                task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
                 WLOGI("GetAllDisplays success");
             } else {
-                task.Reject(engine, CreateJsError(engine,
+                task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetAllDisplay failed."));
             }
         };
 
-    NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_ONE && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[0];
+    napi_value lastParam = nullptr;
+    if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_function) {
+        lastParam = argv[0];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsDisplayManager::OnGetAllDisplay",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayManager::OnGetAllDisplay",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-NativeValue* OnGetAllDisplays(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
 {
     WLOGI("GetAllDisplays is called");
 
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
-                task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
+                task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
                 WLOGI("GetAllDisplays success");
             } else {
-                task.Reject(engine, CreateJsError(engine,
+                task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
                     "JsDisplayManager::OnGetAllDisplays failed."));
             }
         };
-
-    NativeValue* lastParam = nullptr;
-    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] != nullptr &&
-        info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[0];
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
+        GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
+        lastParam = argv[0];
     }
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsDisplayManager::OnGetAllDisplays",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayManager::OnGetAllDisplays",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-DMError RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& type, NativeValue* value)
+DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
-    if (IfCallbackRegistered(type, value)) {
+    if (IfCallbackRegistered(env, type, value)) {
         WLOGFE("RegisterDisplayListenerWithType callback already registered!");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     std::unique_ptr<NativeReference> callbackRef;
-    callbackRef.reset(engine.CreateReference(value, 1));
-    sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(&engine);
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(env);
     DMError ret = DMError::DM_OK;
     if (displayListener == nullptr) {
         WLOGFE("displayListener is nullptr");
@@ -271,7 +281,7 @@ DMError RegisterDisplayListenerWithType(NativeEngine& engine, const std::string&
     return DMError::DM_OK;
 }
 
-bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
+bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
@@ -279,7 +289,9 @@ bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject
     }
 
     for (auto& iter : jsCbMap_[type]) {
-        if (jsListenerObject->StrictEquals(iter.first->Get())) {
+        bool isEquals = false;
+        napi_strict_equals(env, jsListenerObject, iter.first->GetNapiValue(), &isEquals);
+        if (isEquals) {
             WLOGFE("IfCallbackRegistered callback already registered!");
             return true;
         }
@@ -312,7 +324,7 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
     return ret;
 }
 
-DMError UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* value)
+DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
@@ -321,7 +333,9 @@ DMError UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* 
     }
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-        if (value->StrictEquals(it->first->Get())) {
+        bool isEquals = false;
+        napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+        if (isEquals) {
             it->second->RemoveCallback(type, value);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
@@ -347,437 +361,476 @@ DMError UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* 
     return ret;
 }
 
-NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
+bool NapiIsCallable(napi_env env, napi_value value)
 {
-    WLOGI("OnRegisterDisplayManagerCallback is called");
-    if (info.argc < ARGC_TWO) {
-        WLOGFE("JsDisplayManager Params not match: %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
-    std::string cbType;
-    if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        WLOGFE("Failed to convert parameter to callbackType");
-        return engine.CreateUndefined();
-    }
-    NativeValue* value = info.argv[INDEX_ONE];
-    if (value == nullptr) {
-        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
-    if (!value->IsCallable()) {
-        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is not callable");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
-    std::lock_guard<std::mutex> lock(mtx_);
-    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(engine, cbType, value));
-    if (ret != DmErrorCode::DM_OK) {
-        WLOGFE("Failed to register display listener with type");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
-    return engine.CreateUndefined();
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
 }
 
-NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnUnregisterDisplayCallback is called");
-    if (info.argc < ARGC_ONE) {
-        WLOGFE("JsDisplayManager Params not match %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    WLOGI("OnRegisterDisplayManagerCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("JsDisplayManager Params not match: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     std::string cbType;
-    if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         WLOGFE("Failed to convert parameter to callbackType");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
+    }
+    napi_value value = argv[INDEX_ONE];
+    if (value == nullptr) {
+        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    if (!NapiIsCallable(env, value)) {
+        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is not callable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(env, cbType, value));
+    if (ret != DmErrorCode::DM_OK) {
+        WLOGFE("Failed to register display listener with type");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
+napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnUnregisterDisplayCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("JsDisplayManager Params not match %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        WLOGFE("Failed to convert parameter to callbackType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     std::lock_guard<std::mutex> lock(mtx_);
     DmErrorCode ret;
-    if (info.argc == ARGC_ONE) {
+    if (argc == ARGC_ONE) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
     } else {
-        NativeValue* value = info.argv[INDEX_ONE];
-        if ((value == nullptr) || (!value->IsCallable())) {
+        napi_value value = argv[INDEX_ONE];
+        if ((value == nullptr) || (!NapiIsCallable(env, value))) {
             ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
         } else {
-            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(cbType, value));
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(env, cbType, value));
         }
     }
     if (ret != DmErrorCode::DM_OK) {
         WLOGFE("failed to unregister display listener with type");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
-NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnHasPrivateWindow(napi_env env, napi_callback_info info)
 {
     bool hasPrivateWindow = false;
-    if (info.argc < ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
-    if (!ConvertFromJsValue(engine, info.argv[0], displayId)) {
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
         WLOGFE("[NAPI]Failed to convert parameter to displayId");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     if (displayId < 0) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().HasPrivateWindow(displayId, hasPrivateWindow));
     WLOGI("[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
         static_cast<uint64_t>(displayId), hasPrivateWindow, errCode);
     if (errCode != DmErrorCode::DM_OK) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(errCode)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        return NapiGetUndefined(env);
     }
-    return engine.CreateBoolean(hasPrivateWindow);
+    napi_value result;
+    napi_get_boolean(env, hasPrivateWindow, &result);
+    return result;
 }
 
-NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<Display>>& displays)
+napi_value CreateJsDisplayArrayObject(napi_env env, std::vector<sptr<Display>>& displays)
 {
     WLOGI("CreateJsDisplayArrayObject is called");
-    NativeValue* arrayValue = engine.CreateArray(displays.size());
-    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
-    if (array == nullptr) {
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, displays.size(), &arrayValue);
+    if (arrayValue == nullptr) {
         WLOGFE("Failed to create display array");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     int32_t i = 0;
     for (auto& display : displays) {
         if (display == nullptr) {
             continue;
         }
-        array->SetElement(i++, CreateJsDisplayObject(engine, display));
+        napi_set_element(env, arrayValue, i++, CreateJsDisplayObject(env, display));
     }
     return arrayValue;
 }
 
-NativeValue* OnIsFoldable(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnIsFoldable(napi_env env, napi_callback_info info)
 {
-    if (info.argc >= ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
     WLOGI("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
-    return engine.CreateBoolean(foldable);
+    napi_value result;
+    napi_get_boolean(env, foldable, &result);
+    return result;
 }
 
-NativeValue* OnGetFoldStatus(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
 {
-    if (info.argc >= ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     FoldStatus status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
     WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
-    return CreateJsValue(engine, status);
+    return CreateJsValue(env, status);
 }
 
-NativeValue* OnGetFoldDisplayMode(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
-    if (info.argc >= ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
     WLOGI("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
-    return CreateJsValue(engine, mode);
+    return CreateJsValue(env, mode);
 }
 
-NativeValue* OnSetFoldDisplayMode(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
-    if (info.argc < ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     FoldDisplayMode mode = FoldDisplayMode::UNKNOWN;
-    if (!ConvertFromJsValue(engine, info.argv[0], mode)) {
+    if (!ConvertFromJsValue(env, argv[0], mode)) {
         WLOGFE("[NAPI]Failed to convert parameter to FoldDisplayMode");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     SingletonContainer::Get<DisplayManager>().SetFoldDisplayMode(mode);
     WLOGI("[NAPI]" PRIu64", setFoldDisplayMode");
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
-NativeValue* OnGetCurrentFoldCreaseRegion(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
-    if (info.argc >= ARGC_ONE) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
     WLOGI("[NAPI]" PRIu64", getCurrentFoldCreaseRegion");
-    return CreateJsFoldCreaseRegionObject(engine, region);
+    return CreateJsFoldCreaseRegionObject(env, region);
 }
 
-NativeValue* CreateJsFoldCreaseRegionObject(NativeEngine& engine, sptr<FoldCreaseRegion> region)
+napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> region)
 {
     WLOGI("JsDisplay::CreateJsFoldCreaseRegionObject is called");
-    NativeValue* objValue = engine.CreateObject();
-    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     if (region == nullptr) {
         WLOGFE("Get null fold crease region");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
     DisplayId displayId = region->GetDisplayId();
     std::vector<DMRect> creaseRects = region->GetCreaseRects();
-    object->SetProperty("displayId", CreateJsValue(engine, static_cast<uint32_t>(displayId)));
-    object->SetProperty("creaseRects", CreateJsCreaseRectsArrayObject(engine, creaseRects));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(displayId)));
+    napi_set_named_property(env, objValue, "creaseRects", CreateJsCreaseRectsArrayObject(env, creaseRects));
     return objValue;
 }
 
-NativeValue* CreateJsCreaseRectsArrayObject(NativeEngine& engine, std::vector<DMRect> creaseRects)
+napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> creaseRects)
 {
-    NativeValue* arrayValue = engine.CreateArray(creaseRects.size());
-    auto* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, creaseRects.size(), &arrayValue);
     size_t i = 0;
     for (const auto& rect : creaseRects) {
-        array->SetElement(i++, CreateJsRectObject(engine, rect));
+        napi_set_element(env, arrayValue, i++, CreateJsRectObject(env, rect));
     }
     return arrayValue;
 }
 };
 
-NativeValue* InitDisplayState(NativeEngine* engine)
+napi_value InitDisplayState(napi_env env)
 {
     WLOGI("InitDisplayState called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue *objValue = engine->CreateObject();
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
-
-    object->SetProperty("STATE_UNKNOWN", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_UNKNOWN)));
-    object->SetProperty("STATE_OFF", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_OFF)));
-    object->SetProperty("STATE_ON", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_ON)));
-    object->SetProperty("STATE_DOZE",
-        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_DOZE)));
-    object->SetProperty("STATE_DOZE_SUSPEND",
-        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_DOZE_SUSPEND)));
-    object->SetProperty("STATE_VR",
-        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_VR)));
-    object->SetProperty("STATE_ON_SUSPEND",
-        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_ON_SUSPEND)));
+    napi_set_named_property(env, objValue, "STATE_UNKNOWN",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_UNKNOWN)));
+    napi_set_named_property(env, objValue, "STATE_OFF",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_OFF)));
+    napi_set_named_property(env, objValue, "STATE_ON",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_ON)));
+    napi_set_named_property(env, objValue, "STATE_DOZE",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_DOZE)));
+    napi_set_named_property(env, objValue, "STATE_DOZE_SUSPEND",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_DOZE_SUSPEND)));
+    napi_set_named_property(env, objValue, "STATE_VR",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_VR)));
+    napi_set_named_property(env, objValue, "STATE_ON_SUSPEND",
+        CreateJsValue(env, static_cast<int32_t>(DisplayStateMode::STATE_ON_SUSPEND)));
     return objValue;
 }
 
-NativeValue* InitOrientation(NativeEngine* engine)
+napi_value InitOrientation(napi_env env)
 {
     WLOGI("InitOrientation called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue *objValue = engine->CreateObject();
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
 
-    object->SetProperty("PORTRAIT", CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::PORTRAIT)));
-    object->SetProperty("LANDSCAPE", CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE)));
-    object->SetProperty("PORTRAIT_INVERTED",
-        CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::PORTRAIT_INVERTED)));
-    object->SetProperty("LANDSCAPE_INVERTED",
-        CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE_INVERTED)));
+    napi_set_named_property(env, objValue, "PORTRAIT",
+        CreateJsValue(env, static_cast<uint32_t>(DisplayOrientation::PORTRAIT)));
+    napi_set_named_property(env, objValue, "LANDSCAPE",
+        CreateJsValue(env, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE)));
+    napi_set_named_property(env, objValue, "PORTRAIT_INVERTED",
+        CreateJsValue(env, static_cast<uint32_t>(DisplayOrientation::PORTRAIT_INVERTED)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_INVERTED",
+        CreateJsValue(env, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE_INVERTED)));
     return objValue;
 }
 
-NativeValue* InitDisplayErrorCode(NativeEngine* engine)
+napi_value InitDisplayErrorCode(napi_env env)
 {
     WLOGI("InitDisplayErrorCode called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue *objValue = engine->CreateObject();
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
 
-    object->SetProperty("DM_ERROR_NO_PERMISSION",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_NO_PERMISSION)));
-    object->SetProperty("DM_ERROR_INVALID_PARAM",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-    object->SetProperty("DM_ERROR_DEVICE_NOT_SUPPORT",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT)));
-    object->SetProperty("DM_ERROR_INVALID_SCREEN",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
-    object->SetProperty("DM_ERROR_INVALID_CALLING",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_CALLING)));
-    object->SetProperty("DM_ERROR_SYSTEM_INNORMAL",
-        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+    napi_set_named_property(env, objValue, "DM_ERROR_NO_PERMISSION",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_NO_PERMISSION)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_PARAM",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+    napi_set_named_property(env, objValue, "DM_ERROR_DEVICE_NOT_SUPPORT",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_SCREEN",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_CALLING",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_CALLING)));
+    napi_set_named_property(env, objValue, "DM_ERROR_SYSTEM_INNORMAL",
+        CreateJsValue(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
 
     return objValue;
 }
 
-NativeValue* InitDisplayError(NativeEngine* engine)
+napi_value InitDisplayError(napi_env env)
 {
     WLOGI("InitDisplayError called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue *objValue = engine->CreateObject();
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
 
-    object->SetProperty("DM_ERROR_INIT_DMS_PROXY_LOCKED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED)));
-    object->SetProperty("DM_ERROR_IPC_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_IPC_FAILED)));
-    object->SetProperty("DM_ERROR_REMOTE_CREATE_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_REMOTE_CREATE_FAILED)));
-    object->SetProperty("DM_ERROR_NULLPTR",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR)));
-    object->SetProperty("DM_ERROR_INVALID_PARAM",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM)));
-    object->SetProperty("DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED)));
-    object->SetProperty("DM_ERROR_DEATH_RECIPIENT",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_DEATH_RECIPIENT)));
-    object->SetProperty("DM_ERROR_INVALID_MODE_ID",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_MODE_ID)));
-    object->SetProperty("DM_ERROR_WRITE_DATA_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_DATA_FAILED)));
-    object->SetProperty("DM_ERROR_RENDER_SERVICE_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_RENDER_SERVICE_FAILED)));
-    object->SetProperty("DM_ERROR_UNREGISTER_AGENT_FAILED",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNREGISTER_AGENT_FAILED)));
-    object->SetProperty("DM_ERROR_INVALID_CALLING",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_CALLING)));
-    object->SetProperty("DM_ERROR_UNKNOWN",
-        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INIT_DMS_PROXY_LOCKED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_IPC_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_IPC_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_REMOTE_CREATE_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_REMOTE_CREATE_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_NULLPTR",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_PARAM",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM)));
+    napi_set_named_property(env, objValue, "DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_DEATH_RECIPIENT",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_DEATH_RECIPIENT)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_MODE_ID",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_INVALID_MODE_ID)));
+    napi_set_named_property(env, objValue, "DM_ERROR_WRITE_DATA_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_WRITE_DATA_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_RENDER_SERVICE_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_RENDER_SERVICE_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_UNREGISTER_AGENT_FAILED",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_UNREGISTER_AGENT_FAILED)));
+    napi_set_named_property(env, objValue, "DM_ERROR_INVALID_CALLING",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_INVALID_CALLING)));
+    napi_set_named_property(env, objValue, "DM_ERROR_UNKNOWN",
+        CreateJsValue(env, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN)));
 
     return objValue;
 }
 
-NativeValue* InitFoldStatus(NativeEngine* engine)
+napi_value InitFoldStatus(napi_env env)
 {
     WLOGI("InitFoldStatus called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue* objValue = engine->CreateObject();
-    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
-    object->SetProperty("FOLD_STATUS_UNKNOWN", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::UNKNOWN)));
-    object->SetProperty("FOLD_STATUS_EXPANDED", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::EXPAND)));
-    object->SetProperty("FOLD_STATUS_FOLDED", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::FOLDED)));
-    object->SetProperty("FOLD_STATUS_HALF_FOLDED",
-        CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::HALF_FOLD)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_UNKNOWN",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::UNKNOWN)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_EXPANDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLDED)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::HALF_FOLD)));
     return objValue;
 }
 
-NativeValue* InitFoldDisplayMode(NativeEngine* engine)
+napi_value InitFoldDisplayMode(napi_env env)
 {
     WLOGI("IniFoldDisplayMode called");
 
-    if (engine == nullptr) {
-        WLOGFE("engine is nullptr");
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
         return nullptr;
     }
 
-    NativeValue* objValue = engine->CreateObject();
-    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("Failed to get object");
         return nullptr;
     }
 
-    object->SetProperty("FOLD_DISPLAY_MODE_UNKNOWN",
-        CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::UNKNOWN)));
-    object->SetProperty("FOLD_DISPLAY_MODE_FULL", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::FULL)));
-    object->SetProperty("FOLD_DISPLAY_MODE_MAIN", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::MAIN)));
-    object->SetProperty("FOLD_DISPLAY_MODE_SUB", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::SUB)));
-    object->SetProperty("FOLD_DISPLAY_MODE_COORDINATION",
-        CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::COORDINATION)));
+    napi_set_named_property(env, objValue, "FOLD_DISPLAY_MODE_UNKNOWN",
+        CreateJsValue(env, static_cast<uint32_t>(FoldDisplayMode::UNKNOWN)));
+    napi_set_named_property(env, objValue, "FOLD_DISPLAY_MODE_FULL",
+        CreateJsValue(env, static_cast<uint32_t>(FoldDisplayMode::FULL)));
+    napi_set_named_property(env, objValue, "FOLD_DISPLAY_MODE_MAIN",
+        CreateJsValue(env, static_cast<uint32_t>(FoldDisplayMode::MAIN)));
+    napi_set_named_property(env, objValue, "FOLD_DISPLAY_MODE_SUB",
+        CreateJsValue(env, static_cast<uint32_t>(FoldDisplayMode::SUB)));
+    napi_set_named_property(env, objValue, "FOLD_DISPLAY_MODE_COORDINATION",
+        CreateJsValue(env, static_cast<uint32_t>(FoldDisplayMode::COORDINATION)));
     return objValue;
 }
 
-NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
+napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGI("JsDisplayManagerInit is called");
 
-    if (engine == nullptr || exportObj == nullptr) {
-        WLOGFE("JsDisplayManagerInit engine or exportObj is nullptr");
+    if (env == nullptr || exportObj == nullptr) {
+        WLOGFE("JsDisplayManagerInit env or exportObj is nullptr");
         return nullptr;
     }
 
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(exportObj);
-    if (object == nullptr) {
-        WLOGFE("JsDisplayManagerInit object is nullptr");
-        return nullptr;
-    }
+    std::unique_ptr<JsDisplayManager> jsDisplayManager = std::make_unique<JsDisplayManager>(env);
+    napi_wrap(env, exportObj, jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr, nullptr);
 
-    std::unique_ptr<JsDisplayManager> jsDisplayManager = std::make_unique<JsDisplayManager>(engine);
-    object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
-
-    object->SetProperty("DisplayState", InitDisplayState(engine));
-    object->SetProperty("Orientation", InitOrientation(engine));
-    object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
-    object->SetProperty("DMError", InitDisplayError(engine));
-    object->SetProperty("FoldStatus", InitFoldStatus(engine));
-    object->SetProperty("FoldDisplayMode", InitFoldDisplayMode(engine));
+    napi_set_named_property(env, exportObj, "DisplayState", InitDisplayState(env));
+    napi_set_named_property(env, exportObj, "Orientation", InitOrientation(env));
+    napi_set_named_property(env, exportObj, "DmErrorCode", InitDisplayErrorCode(env));
+    napi_set_named_property(env, exportObj, "DMError", InitDisplayError(env));
+    napi_set_named_property(env, exportObj, "FoldStatus", InitFoldStatus(env));
+    napi_set_named_property(env, exportObj, "FoldDisplayMode", InitFoldDisplayMode(env));
 
     const char *moduleName = "JsDisplayManager";
-    BindNativeFunction(*engine, *object, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
-    BindNativeFunction(*engine, *object, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
-    BindNativeFunction(*engine, *object, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
-    BindNativeFunction(*engine, *object, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
-    BindNativeFunction(*engine, *object, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
-    BindNativeFunction(*engine, *object, "isFoldable", moduleName, JsDisplayManager::IsFoldable);
-    BindNativeFunction(*engine, *object, "getFoldStatus", moduleName, JsDisplayManager::GetFoldStatus);
-    BindNativeFunction(*engine, *object, "getFoldDisplayMode", moduleName, JsDisplayManager::GetFoldDisplayMode);
-    BindNativeFunction(*engine, *object, "setFoldDisplayMode", moduleName, JsDisplayManager::SetFoldDisplayMode);
-    BindNativeFunction(*engine, *object, "getCurrentFoldCreaseRegion", moduleName,
+    BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
+    BindNativeFunction(env, exportObj, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
+    BindNativeFunction(env, exportObj, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
+    BindNativeFunction(env, exportObj, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
+    BindNativeFunction(env, exportObj, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
+    BindNativeFunction(env, exportObj, "isFoldable", moduleName, JsDisplayManager::IsFoldable);
+    BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsDisplayManager::GetFoldStatus);
+    BindNativeFunction(env, exportObj, "getFoldDisplayMode", moduleName, JsDisplayManager::GetFoldDisplayMode);
+    BindNativeFunction(env, exportObj, "setFoldDisplayMode", moduleName, JsDisplayManager::SetFoldDisplayMode);
+    BindNativeFunction(env, exportObj, "getCurrentFoldCreaseRegion", moduleName,
         JsDisplayManager::GetCurrentFoldCreaseRegion);
-    BindNativeFunction(*engine, *object, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
-    BindNativeFunction(*engine, *object, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
-    return engine->CreateUndefined();
+    BindNativeFunction(env, exportObj, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
+    BindNativeFunction(env, exportObj, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
+    return NapiGetUndefined(env);
 }
 }  // namespace Rosen
 }  // namespace OHOS

@@ -31,29 +31,29 @@ namespace OHOS::Rosen {
 class SceneSession;
 class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
 public:
-    JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session);
+    JsSceneSession(napi_env env, const sptr<SceneSession>& session);
     ~JsSceneSession();
 
-    static NativeValue* Create(NativeEngine& engine, const sptr<SceneSession>& session);
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static napi_value Create(napi_env env, const sptr<SceneSession>& session);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
     void ClearCbMap(bool needRemove);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
-    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* UpdateNativeVisibility(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetShowRecent(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetZOrder(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
+    static napi_value RegisterCallback(napi_env env, napi_callback_info info);
+    static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
+    static napi_value SetShowRecent(napi_env env, napi_callback_info info);
+    static napi_value SetZOrder(napi_env env, napi_callback_info info);
+    static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
 
-    NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnUpdateNativeVisibility(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetShowRecent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetZOrder(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
+    napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
+    napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
+    napi_value OnSetZOrder(napi_env env, napi_callback_info info);
+    napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
 
-    bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
+    bool IsCallbackRegistered(const std::string& type, napi_value jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
 
     void ProcessPendingSceneSessionActivationRegister();
@@ -116,7 +116,7 @@ private:
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
 
-    NativeEngine& engine_;
+    napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;

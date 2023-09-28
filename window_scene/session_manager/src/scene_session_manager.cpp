@@ -41,8 +41,8 @@
 #include <system_ability_definition.h>
 #include <want.h>
 #include <hitrace_meter.h>
-#include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -2523,13 +2523,14 @@ void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
 WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
-        WLOGFD("Update focus, id: %{public}d, isFocused: %{public}u", persistentId, static_cast<uint32_t>(isFocused));
         // notify session and client
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFE("could not find window, persistentId:%{public}d", persistentId);
+            WLOGFE("UpdateFocus could not find window, persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
+        WLOGFI("UpdateFocus, name: %{public}s, id: %{public}d, isFocused: %{public}u",
+            sceneSession->GetWindowName().c_str(), persistentId, static_cast<uint32_t>(isFocused));
         // focusId change
         if (isFocused) {
             SetFocusedSession(persistentId);
@@ -4613,5 +4614,4 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
 }
-
 } // namespace OHOS::Rosen

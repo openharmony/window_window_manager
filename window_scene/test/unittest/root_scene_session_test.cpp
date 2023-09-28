@@ -30,7 +30,7 @@ public:
     void TearDown() override;
 };
 
-void LoadContentFuncTest(const std::string&, NativeEngine*, NativeValue*, AbilityRuntime::Context*)
+void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
 {
 }
 
@@ -73,10 +73,10 @@ HWTEST_F(RootSceneSessionTest, LoadContentFunc, Function | SmallTest | Level1)
 {
     RootSceneSession rootSceneSession;
     std::string strTest("LoadContentFuncTest");
-    NativeEngine* nativeEngine_ = nullptr;
-    NativeValue* nativeValue_ = nullptr;
+    napi_env nativeEnv_ = nullptr;
+    napi_value nativeValue_ = nullptr;
     AbilityRuntime::Context* conText_ = nullptr;
-    rootSceneSession.LoadContent(strTest, nativeEngine_, nativeValue_, conText_);
+    rootSceneSession.LoadContent(strTest, nativeEnv_, nativeValue_, conText_);
     ASSERT_FALSE(rootSceneSession.IsVisible());
 }
 

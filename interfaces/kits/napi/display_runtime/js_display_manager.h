@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Rosen {
-NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj);
+napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj);
 }  // namespace Rosen
 }  // namespace OHOS
 

@@ -22,13 +22,15 @@
 #include "session/screen/include/screen_property.h"
 
 namespace OHOS::Rosen {
-bool ConvertRRectFromJs(NativeEngine& engine, NativeObject* jsObject, RRect& bound);
+bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound);
+napi_value NapiGetUndefined(napi_env env);
+bool NapiIsCallable(napi_env env, napi_value value);
 class JsScreenUtils {
 public:
-    static NativeValue* CreateJsScreenProperty(NativeEngine& engine, const ScreenProperty& screenProperty);
-    static NativeValue* CreateJsRRect(NativeEngine& engine, const RRect& rrect);
-    static NativeValue* CreateJsScreenConnectChangeType(NativeEngine& engine);
-    static NativeValue* CreateJsScreenPropertyChangeReason(NativeEngine& engine);
+    static napi_value CreateJsScreenProperty(napi_env env, const ScreenProperty& screenProperty);
+    static napi_value CreateJsRRect(napi_env env, const RRect& rrect);
+    static napi_value CreateJsScreenConnectChangeType(napi_env env);
+    static napi_value CreateJsScreenPropertyChangeReason(napi_env env);
 };
 } // namespace OHOS::Rosen
 
