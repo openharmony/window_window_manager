@@ -35,6 +35,11 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     WLOGI("DualDisplayDevicePolicy ChangeScreenDisplayMode displayMode = %{public}d", displayMode);
     ScreenId screenIdFull = 0;
     ScreenId screenIdMain = 5;
+    #ifdef TP_FEATURE_ENABLE
+    int32_t tpType = 12;
+    std::string fullTpChange = "0";
+    std::string mainTpChange = "1";
+    #endif
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenIdFull);
     if (screenSession == nullptr) {
         WLOGE("ChangeScreenDisplayMode default screenSession is null");
@@ -44,6 +49,9 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
+                #ifdef TP_FEATURE_ENABLE
+                RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, mainTpChange.c_str());
+                #endif
                 //off full screen
                 RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
                 //on main screen
@@ -58,6 +66,9 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 break;
             }
             case FoldDisplayMode::FULL: {
+                #ifdef TP_FEATURE_ENABLE
+                RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, fullTpChange.c_str());
+                #endif
                 //off main screen
                 RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
                 //on full screen
