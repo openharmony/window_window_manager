@@ -41,8 +41,8 @@
 #include <system_ability_definition.h>
 #include <want.h>
 #include <hitrace_meter.h>
-#include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -4613,5 +4613,4 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
 }
-
 } // namespace OHOS::Rosen

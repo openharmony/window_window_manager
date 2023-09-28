@@ -89,7 +89,8 @@ public:
     int64_t GetVSyncPeriod() override;
     // inherits from session stage
     WSError SetActive(bool active) override;
-    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
     WSError UpdateWindowMode(WindowMode mode) override;
@@ -167,7 +168,8 @@ protected:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
-    void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
+    void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
 
     sptr<ISession> hostSession_;
@@ -218,7 +220,8 @@ private:
         bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability);
 
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
-    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason);
+    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
 
     static std::recursive_mutex globalMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
@@ -237,7 +240,6 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
-    Gravity lastGravity_ = Gravity::RESIZE;
 };
 } // namespace Rosen
 } // namespace OHOS

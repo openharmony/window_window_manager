@@ -759,6 +759,19 @@ void WindowNodeContainer::OpenInputMethodSyncTransaction()
     WLOGD("OpenInputMethodSyncTransaction");
 }
 
+void WindowNodeContainer::CloseInputMethodSyncTransaction()
+{
+    if (!isAnimateTransactionEnabled_) {
+        WLOGD("InputMethodSyncTransaction is not enabled while close");
+        return;
+    }
+    auto syncTransactionController = RSSyncTransactionController::GetInstance();
+    if (syncTransactionController) {
+        syncTransactionController->CloseSyncTransaction();
+    }
+    WLOGD("CloseInputMethodSyncTransaction");
+}
+
 bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
 {
     auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
@@ -829,6 +842,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
         OpenInputMethodSyncTransaction();
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
+        CloseInputMethodSyncTransaction();
     } else {
         WLOGFD("add node without animation");
         updateRSTreeFunc();
@@ -899,6 +913,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         OpenInputMethodSyncTransaction();
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
+        CloseInputMethodSyncTransaction();
     } else {
         updateRSTreeFunc();
     }

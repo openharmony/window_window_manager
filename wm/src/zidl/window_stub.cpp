@@ -51,7 +51,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                     return -1;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
-                rsTransaction->UnmarshallTransactionSyncController(data);
                 UpdateWindowRect(rect, decoStatus, reason, transaction);
             } else {
                 UpdateWindowRect(rect, decoStatus, reason);
@@ -108,7 +107,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                     return -1;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
-                rsTransaction->UnmarshallTransactionSyncController(data);
                 UpdateOccupiedAreaChangeInfo(info, transaction);
             } else {
                 UpdateOccupiedAreaChangeInfo(info);
@@ -127,7 +125,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                     return -1;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
-                rsTransaction->UnmarshallTransactionSyncController(data);
                 UpdateOccupiedAreaAndRect(info, rect, transaction);
             } else {
                 UpdateOccupiedAreaAndRect(info, rect);
