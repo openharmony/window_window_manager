@@ -514,7 +514,7 @@ NativeValue* SessionTypeInit(NativeEngine* engine)
     SetTypeProperty(object, engine, "TYPE_GLOBAL_SEARCH", JsSessionType::TYPE_GLOBAL_SEARCH);
     SetTypeProperty(object, engine, "TYPE_NEGATIVE_SCREEN", JsSessionType::TYPE_NEGATIVE_SCREEN);
     SetTypeProperty(object, engine, "TYPE_VOICE_INTERACTION", JsSessionType::TYPE_VOICE_INTERACTION);
-    SetTypeProperty(object, engine, "TYPE_TOP_TOAST", JsSessionType::TYPE_TOP_TOAST);
+    SetTypeProperty(object, engine, "TYPE_SYSTEM_TOAST", JsSessionType::TYPE_SYSTEM_TOAST);
     return objValue;
 }
 } // namespace OHOS::Rosen
