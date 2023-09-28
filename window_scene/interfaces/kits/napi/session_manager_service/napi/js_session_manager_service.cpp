@@ -26,52 +26,53 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSessionManagerService" };
 } // namespace
 
+napi_value NapiGetUndefined(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
 class JsSessionManagerService {
 public:
     JsSessionManagerService() = default;
     ~JsSessionManagerService() = default;
 
-    static void Finalizer(NativeEngine* engine, void* data, void* hint)
+    static void Finalizer(napi_env env, void* data, void* hint)
     {
         WLOGI("Finalizer is called");
         std::unique_ptr<JsSessionManagerService>(static_cast<JsSessionManagerService*>(data));
     }
 
-    static NativeValue* InitSessionManagerService(NativeEngine* engine, NativeCallbackInfo* info)
+    static napi_value InitSessionManagerService(napi_env env, napi_callback_info info)
     {
-        JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(engine, info);
-        return (me != nullptr) ? me->OnInitSessionManagerService(*engine, *info) : nullptr;
+        JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(env, info);
+        return (me != nullptr) ? me->OnInitSessionManagerService(env, info) : nullptr;
     }
 
 private:
-    NativeValue* OnInitSessionManagerService(NativeEngine& engine, NativeCallbackInfo& info)
+    napi_value OnInitSessionManagerService(napi_env env, napi_callback_info info)
     {
         WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
         SessionManagerService::GetInstance().Init();
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 };
 
-NativeValue* JsSessionManagerServiceInit(NativeEngine* engine, NativeValue* exportObj)
+napi_value JsSessionManagerServiceInit(napi_env env, napi_value exportObj)
 {
     WLOGI("JsSessionManagerServiceInit is called.");
-    if (engine == nullptr || exportObj == nullptr) {
-        WLOGFE("JsSessionManagerServiceInit engine or exportObj is nullptr");
-        return nullptr;
-    }
-
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(exportObj);
-    if (object == nullptr) {
-        WLOGFE("JsSessionManagerServiceInit object is nullptr");
+    if (env == nullptr || exportObj == nullptr) {
+        WLOGFE("JsSessionManagerServiceInit env or exportObj is nullptr");
         return nullptr;
     }
 
     auto jsSessionManagerService = std::make_unique<JsSessionManagerService>();
-    object->SetNativePointer(jsSessionManagerService.release(), JsSessionManagerService::Finalizer, nullptr);
+    napi_wrap(env, exportObj, jsSessionManagerService.release(), JsSessionManagerService::Finalizer, nullptr, nullptr);
 
     const char* moduleName = "JsSessionManagerService";
-    BindNativeFunction(*engine, *object, "initSessionManagerService", moduleName,
+    BindNativeFunction(env, exportObj, "initSessionManagerService", moduleName,
         JsSessionManagerService::InitSessionManagerService);
-    return engine->CreateUndefined();
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

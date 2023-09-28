@@ -33,69 +33,73 @@ const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChan
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 } // namespace
 
-NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
+napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
 {
     WLOGD("Create.");
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
-        return engine.CreateUndefined();
+        return NapiGetUndefined(env);
     }
 
-    auto jsScreenSession = std::make_unique<JsScreenSession>(engine, screenSession);
-    object->SetNativePointer(jsScreenSession.release(), JsScreenSession::Finalizer, nullptr);
-    object->SetProperty("screenId", CreateJsValue(engine, static_cast<int64_t>(screenSession->GetScreenId())));
+    auto jsScreenSession = std::make_unique<JsScreenSession>(env, screenSession);
+    napi_wrap(env, objValue, jsScreenSession.release(), JsScreenSession::Finalizer, nullptr, nullptr);
+    napi_set_named_property(env, objValue, "screenId",
+        CreateJsValue(env, static_cast<int64_t>(screenSession->GetScreenId())));
 
     const char* moduleName = "JsScreenSession";
-    BindNativeFunction(engine, *object, "on", moduleName, JsScreenSession::RegisterCallback);
-    BindNativeFunction(engine, *object, "setScreenRotationLocked", moduleName,
+    BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
+    BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
     return objValue;
 }
 
-void JsScreenSession::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGD("Finalizer.");
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
-JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
-    : engine_(engine), screenSession_(screenSession)
+JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
+    : env_(env), screenSession_(screenSession)
 {}
 
 JsScreenSession::~JsScreenSession() {}
 
-NativeValue* JsScreenSession::SetScreenRotationLocked(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
-    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(engine, info);
-    return (me != nullptr) ? me->OnSetScreenRotationLocked(*engine, *info) : nullptr;
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnSetScreenRotationLocked(env, info) : nullptr;
 }
 
-NativeValue* JsScreenSession::OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
     WLOGI("JsScreenSession::OnSetScreenRotationLocked is called");
-    if (info.argc < 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     bool isLocked = true;
-    NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+    napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         WLOGFE("ConvertNativeValueTo isLocked failed!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
-    isLocked = static_cast<bool>(*nativeVal);
+    napi_get_value_bool(env, nativeVal, &isLocked);
     if (screenSession_ == nullptr) {
         WLOGFE("Failed to register screen change listener, session is null!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
     screenSession_->SetScreenRotationLockedFromJs(isLocked);
     WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
 void JsScreenSession::RegisterScreenChangeListener()
@@ -108,47 +112,52 @@ void JsScreenSession::RegisterScreenChangeListener()
     screenSession_->RegisterScreenChangeListener(this);
 }
 
-NativeValue* JsScreenSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("Register callback.");
-    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(engine, info);
-    return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
 }
 
-NativeValue* JsScreenSession::OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("On register callback.");
-    if (info.argc < 2) { // 2: params num
-        WLOGFE("Argc is invalid: %{public}zu", info.argc);
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) { // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
     std::string callbackType;
-    if (!ConvertFromJsValue(engine, info.argv[0], callbackType)) {
+    if (!ConvertFromJsValue(env, argv[0], callbackType)) {
         WLOGFE("Failed to convert parameter to callback type.");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
-    NativeValue* callback = info.argv[1];
-    if (!callback->IsCallable()) {
+    napi_value callback = argv[1];
+    if (!NapiIsCallable(env, callback)) {
         WLOGFE("Failed to register callback, callback is not callable!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
     }
 
     if (mCallback_.count(callbackType)) {
         WLOGFE("Failed to register callback, callback is already existed!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
-        return engine.CreateUndefined();
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
+        return NapiGetUndefined(env);
     }
 
-    std::shared_ptr<NativeReference> callbackRef(engine.CreateReference(callback, 1));
+    napi_ref result = nullptr;
+    napi_create_reference(env, callback, 1, &result);
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     mCallback_[callbackType] = callbackRef;
     RegisterScreenChangeListener();
 
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
 void JsScreenSession::CallJsCallback(const std::string& callbackType)
@@ -161,37 +170,36 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
 
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, screenSessionWeak](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, screenSessionWeak](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
-            auto method = jsCallbackRef->Get();
+            auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
             }
-
             if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
                 auto screenSession = screenSessionWeak.promote();
                 if (screenSession == nullptr) {
                     WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                     return;
                 }
-                NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(
-                    engine, screenSession->GetScreenProperty()) };
-                engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+                napi_value argv[] = { JsScreenUtils::CreateJsScreenProperty(
+                    env, screenSession->GetScreenProperty()) };
+                napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
             } else {
-                NativeValue* argv[] = {};
-                engine.CallFunction(engine.CreateUndefined(), method, argv, 0);
+                napi_value argv[] = {};
+                napi_call_function(env, NapiGetUndefined(env), method, 0, argv, nullptr);
             }
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSession::OnConnect()
@@ -215,14 +223,14 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
 
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [jsCallbackRef, callbackType, screenSessionWeak, sensorRotation](
-            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
-            auto method = jsCallbackRef->Get();
+            auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
@@ -232,14 +240,14 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
                 WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
-            NativeValue* argv[] = { CreateJsValue(engine, sensorRotation) };
-            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+            napi_value argv[] = { CreateJsValue(env, sensorRotation) };
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSession::OnScreenOrientationChange(float screenRotation)
@@ -253,14 +261,14 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
 
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [jsCallbackRef, callbackType, screenSessionWeak, screenRotation](
-            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
-            auto method = jsCallbackRef->Get();
+            auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
@@ -270,14 +278,14 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
                 WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
-            NativeValue* argv[] = { CreateJsValue(engine, screenRotation) };
-            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+            napi_value argv[] = { CreateJsValue(env, screenRotation) };
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
@@ -291,14 +299,14 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
 
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason](
-            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
-            auto method = jsCallbackRef->Get();
+            auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
@@ -308,15 +316,15 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
                 WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
-            NativeValue* propertyChangeReason = CreateJsValue(engine, static_cast<int32_t>(reason));
-            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(engine, newProperty), propertyChangeReason };
-            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+            napi_value propertyChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
+            napi_value argv[] = { JsScreenUtils::CreateJsScreenProperty(env, newProperty), propertyChangeReason };
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSession::OnScreenRotationLockedChange(bool isLocked)
@@ -329,24 +337,24 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked)
     }
 
     auto jsCallbackRef = mCallback_[callbackType];
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, isLocked](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, isLocked](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
-            auto method = jsCallbackRef->Get();
+            auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
             }
-            NativeValue* argv[] = { CreateJsValue(engine, isLocked) };
-            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+            napi_value argv[] = { CreateJsValue(env, isLocked) };
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace OHOS::Rosen

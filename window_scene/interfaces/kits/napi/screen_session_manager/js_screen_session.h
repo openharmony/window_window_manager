@@ -25,17 +25,17 @@
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
-    JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession);
+    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
     ~JsScreenSession();
 
-    static NativeValue* Create(NativeEngine& engine, const sptr<ScreenSession>& session);
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& session);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
-    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
-    NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    static NativeValue* SetScreenRotationLocked(NativeEngine* engine, NativeCallbackInfo* info);
-    NativeValue* OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info);
+    static napi_value RegisterCallback(napi_env env, napi_callback_info info);
+    napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
+    static napi_value SetScreenRotationLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info);
     void CallJsCallback(const std::string& callbackType);
     void RegisterScreenChangeListener();
 
@@ -46,7 +46,7 @@ private:
     void OnScreenOrientationChange(float screenOrientation) override;
     void OnScreenRotationLockedChange(bool isLocked) override;
 
-    NativeEngine& engine_;
+    napi_env env_;
     sptr<ScreenSession> screenSession_;
     std::map<std::string, std::shared_ptr<NativeReference>> mCallback_;
 };

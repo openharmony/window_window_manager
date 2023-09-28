@@ -20,7 +20,7 @@
 #include "native_engine/native_value.h"
 
 namespace OHOS::Rosen {
-NativeValue* JsSessionManagerServiceInit(NativeEngine* engine, NativeValue* exportObj);
+napi_value JsSessionManagerServiceInit(napi_env env, napi_value exportObj);
 } // namespace OHOS::Rosen
 
 #endif // OHOS_JS_SESSION_MANAGER_SERVICE_H

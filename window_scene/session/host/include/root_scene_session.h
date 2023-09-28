@@ -18,24 +18,23 @@
 
 #include "session/host/include/scene_session.h"
 
+typedef struct napi_env__* napi_env;
+typedef struct napi_value__* napi_value;
 namespace OHOS::AbilityRuntime {
 class Context;
 } // namespace OHOS::AbilityRuntime
-
-class NativeEngine;
-class NativeValue;
 
 namespace OHOS::Rosen {
 class RootSceneSession : public SceneSession {
 public:
     using LoadContentFunc =
-        std::function<void(const std::string&, NativeEngine*, NativeValue*, AbilityRuntime::Context*)>;
+        std::function<void(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)>;
     RootSceneSession() : SceneSession({}, nullptr) {}
     virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
-        const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context);
+        const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
 private:
     LoadContentFunc loadContentFunc_;

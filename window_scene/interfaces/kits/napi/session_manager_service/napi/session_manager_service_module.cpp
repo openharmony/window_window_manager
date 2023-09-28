@@ -16,14 +16,13 @@
 #include "native_engine/native_engine.h"
 #include "js_session_manager_service.h"
 
+static napi_module g_sessionServiceModule = {
+    .nm_filename = "module/libsessionmanagerservice_napi.so/sessionManagerService.js",
+    .nm_register_func = OHOS::Rosen::JsSessionManagerServiceInit,
+    .nm_modname = "sessionManagerService",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_application_sessionmanagerservice_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "sessionManagerService",
-        .fileName = "module/libsessionmanagerservice_napi.so/sessionManagerService.js",
-        .registerCallback = OHOS::Rosen::JsSessionManagerServiceInit,
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_sessionServiceModule);
 }
