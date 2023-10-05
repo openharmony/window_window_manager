@@ -180,7 +180,8 @@ public:
 
     void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
     WSError PendingSessionToForeground();
-    void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc& func);
+    void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
+        func);
     WSError PendingSessionToBackgroundForDelegator();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);

@@ -56,7 +56,7 @@ void RootSceneTest::TearDown()
 {
 }
 
-namespace{
+namespace {
 /**
  * @tc.name: LoadContent01
  * @tc.desc: context is nullptr
@@ -90,8 +90,7 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    std::shared_ptr<AppExecFwk::Configuration> configuration = 
-        std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -104,8 +103,7 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, UpdateConfigurationForAll, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    std::shared_ptr<AppExecFwk::Configuration> configuration = 
-        std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     rootScene.UpdateConfigurationForAll(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -148,5 +146,5 @@ HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
 }
 
 }
-}// namespace Rosen
-}// namespace OHOS
+} // namespace Rosen
+} // namespace OHOS

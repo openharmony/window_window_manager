@@ -560,7 +560,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     if (iter != abstractScreenMap_.end()) {
         if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
             defaultScreenId_ == screenId) {
-            WLOGFD("Add default screen, dmsScreenId: %{public}" PRIu64"", screenId);
+            WLOGFD("Add default screen, id: %{public}" PRIu64"", screenId);
         } else {
             WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
             return false;

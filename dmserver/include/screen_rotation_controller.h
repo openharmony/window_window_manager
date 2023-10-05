@@ -70,6 +70,7 @@ private:
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
     static bool IsSensorRelatedOrientation(Orientation orientation);
+
     static void ProcessRotationMapping();
     static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);

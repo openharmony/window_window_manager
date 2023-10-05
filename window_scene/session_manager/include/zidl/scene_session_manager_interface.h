@@ -55,12 +55,12 @@ public:
         TRANS_ID_BIND_DIALOG_TARGET,
         TRANS_ID_GET_FOCUS_SESSION_INFO,
         TRANS_ID_SET_SESSION_GRAVITY,
-        TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_SET_SESSION_LABEL,
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_IS_VALID_SESSION_IDS,
         TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER,
+        TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
@@ -129,7 +129,8 @@ public:
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
 
-    virtual WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
+    virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
+        const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,

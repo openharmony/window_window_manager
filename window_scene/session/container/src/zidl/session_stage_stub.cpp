@@ -35,12 +35,12 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateDensity),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT),
         &SessionStageStub::HandleBackEventInner),
-    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE),
-        &SessionStageStub::HandleUpdateFocus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DESTROY),
         &SessionStageStub::HandleNotifyDestroy),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
         &SessionStageStub::HandleNotifyTouchDialogTarget),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE),
+        &SessionStageStub::HandleUpdateFocus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
@@ -120,15 +120,6 @@ int SessionStageStub::HandleBackEventInner(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("UpdateFocus!");
-    bool isFocused = data.ReadBool();
-    WSError errCode = UpdateFocus(isFocused);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Notify Destroy");
@@ -141,6 +132,15 @@ int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, Message
 {
     WLOGFD("Notify touch dialog target");
     NotifyTouchDialogTarget();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("UpdateFocus!");
+    bool isFocused = data.ReadBool();
+    WSError errCode = UpdateFocus(isFocused);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

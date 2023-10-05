@@ -103,6 +103,7 @@ public:
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
+    void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
@@ -179,7 +180,6 @@ public:
         const WSRect& rect, const WSRect& occupiedArea);
     void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info);
-    void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -346,9 +346,10 @@ private:
     void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
     bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
-    sptr<SceneSession> callingSession_ = nullptr;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+    sptr<SceneSession> callingSession_ = nullptr;
+
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
