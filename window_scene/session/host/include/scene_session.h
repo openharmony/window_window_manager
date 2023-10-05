@@ -35,7 +35,8 @@ namespace PARAM_KEY {
 }
 class SceneSession;
 
-using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
+using SpecificSessionCreateCallback =
+    std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
@@ -50,10 +51,10 @@ using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
+using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
-using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
@@ -80,8 +81,8 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
-        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
@@ -162,16 +163,15 @@ public:
     WSError SetKeepScreenOn(bool keepScreenOn);
     bool IsKeepScreenOn() const;
     const std::string& GetWindowName() const;
-    bool IsDecorEnable();
     void UpdateNativeVisibility(bool visible);
     void SetPrivacyMode(bool isPrivacy);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
+    void NotifyForceHideChange(bool hide);
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     void SetRequestedOrientation(Orientation orientation);
-    void NotifyForceHideChange(bool hide);
     Orientation GetRequestedOrientation() const;
     WSError BindDialogTarget(const sptr<SceneSession>& sceneSession);
     void DumpSessionInfo(std::vector<std::string> &info) const;
@@ -180,6 +180,7 @@ public:
     std::vector<sptr<SceneSession>> GetSubSession() const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
+    bool IsDecorEnable();
 
     int32_t GetCollaboratorType() const;
     void SetCollaboratorType(int32_t collaboratorType);
@@ -228,5 +229,4 @@ private:
     bool needDefaultAnimationFlag_ = false;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

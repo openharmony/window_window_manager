@@ -2204,8 +2204,6 @@ HWTEST_F(WindowImplTest, SetLayoutFullScreen, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
-
-
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |

@@ -1083,7 +1083,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag1, Function | SmallT
     ASSERT_EQ(windowNode->currentVisibility_, false);
     res = windowController_->NotifyServerReadyToMoveOrDrag(windowId, moveDragProperty);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
-    
+
     windowNode->currentVisibility_ = true;
     res = windowController_->NotifyServerReadyToMoveOrDrag(windowId, moveDragProperty);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
@@ -1112,7 +1112,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag2, Function | SmallT
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
-    
+
     sptr<MoveDragProperty> moveDragProperty = new MoveDragProperty();
     moveDragProperty->startMoveFlag_ = false;
     moveDragProperty->startDragFlag_ = false;
@@ -1156,7 +1156,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag3, Function | SmallT
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
-    
+
     sptr<MoveDragProperty> moveDragProperty = new MoveDragProperty();
     moveDragProperty->startMoveFlag_ = false;
     moveDragProperty->startDragFlag_ = false;

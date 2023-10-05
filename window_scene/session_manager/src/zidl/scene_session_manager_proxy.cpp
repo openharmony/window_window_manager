@@ -259,29 +259,6 @@ WMError SceneSessionManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgen
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return;
-    }
-    sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
-    if (info) {
-        focusInfo = *info;
-    } else {
-        WLOGFE("info is null.");
-    }
-}
-
 WSError SceneSessionManagerProxy::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
     MessageParcel data;
@@ -333,6 +310,29 @@ WMError SceneSessionManagerProxy::SetGestureNavigaionEnabled(bool enable)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
+}
+
+void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+    sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
+    if (info) {
+        focusInfo = *info;
+    } else {
+        WLOGFE("info is null.");
+    }
 }
 
 WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
@@ -529,7 +529,8 @@ WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const s
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -768,7 +769,6 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     token = reply.ReadRemoteObject();
     if (token == nullptr) {
         WLOGFE("get token nullptr.");
@@ -1080,7 +1080,8 @@ WSError SceneSessionManagerProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+WSError SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator(int32_t type,
+    const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
 {
     WLOGFI("run SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator");
     if (!impl) {

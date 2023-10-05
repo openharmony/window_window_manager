@@ -1522,7 +1522,6 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation, Function | SmallTest 
     itemDurationOut.SetValue(durationOut);
     itemDurationOut.SetValue({{"durationOut", itemDurationOut}});
     animationConfig.SetValue({{"timing", itemCurve}, {"timing", itemDurationIn}, {"timing", itemDurationOut}});
-    
     int ret = 0;
     ssm_->ConfigKeyboardAnimation(animationConfig);
     ASSERT_EQ(ret, 0);

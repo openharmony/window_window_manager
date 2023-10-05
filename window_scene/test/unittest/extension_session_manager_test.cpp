@@ -33,7 +33,6 @@ public:
 
 void ExtensionSessionManagerTest::SetUpTestCase()
 {
-
 }
 
 void ExtensionSessionManagerTest::TearDownTestCase()
