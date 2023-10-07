@@ -65,26 +65,4 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenSessionManagerService()
 
     return reply.ReadRemoteObject();
 }
-
-sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenLockManagerService()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return nullptr;
-    }
-
-    auto ret = Remote()->SendRequest(
-        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE),
-        data, reply, option);
-    if (ret != ERR_NONE) {
-        WLOGFE("SendRequest failed, errorCode %{public}d", ret);
-        return nullptr;
-    }
-
-    return reply.ReadRemoteObject();
-}
 } // namespace OHOS::Rosen

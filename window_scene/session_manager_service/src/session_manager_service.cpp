@@ -16,7 +16,6 @@
 #include "session_manager_service.h"
 
 #include "ability_manager_client.h"
-#include "screenlock_system_ability.h"
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/screen_session_manager.h"
@@ -37,16 +36,6 @@ sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
     }
     sceneSessionManagerObj_ = SceneSessionManager::GetInstance().AsObject();
     return sceneSessionManagerObj_;
-}
-
-sptr<IRemoteObject> SessionManagerService::GetScreenLockManagerService()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (screenLockManagerObj_) {
-        return screenLockManagerObj_;
-    }
-    screenLockManagerObj_ = ScreenLock::ScreenLockSystemAbility::GetInstance()->AsObject();
-    return screenLockManagerObj_;
 }
 
 sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
