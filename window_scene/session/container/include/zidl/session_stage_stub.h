@@ -41,9 +41,9 @@ private:
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
     int HandleBackEventInner(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
     int HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
     int HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);

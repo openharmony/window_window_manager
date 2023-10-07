@@ -204,7 +204,6 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     return 0; // WMError::WM_OK;
 }
 
-
 void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
 {
     dumpInfo.append("Usage:\n")

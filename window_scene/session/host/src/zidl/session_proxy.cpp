@@ -144,7 +144,9 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
-    systemConfig = *config;
+    if (config) {
+        systemConfig = *config;
+    }
     if (property) {
         property->SetPersistentId(reply.ReadInt32());
     }

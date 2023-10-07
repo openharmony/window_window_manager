@@ -83,11 +83,6 @@ void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
     raiseEnabled_ = raiseEnabled;
 }
 
-void WindowSessionProperty::SetBrightness(float brightness)
-{
-    brightness_ = brightness;
-}
-
 void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
@@ -101,6 +96,11 @@ void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
 {
     isSystemPrivacyMode_ = isSystemPrivate;
+}
+
+void WindowSessionProperty::SetBrightness(float brightness)
+{
+    brightness_ = brightness;
 }
 
 void WindowSessionProperty::SetSystemCalling(bool isSystemCalling)
@@ -173,11 +173,6 @@ bool WindowSessionProperty::GetRaiseEnabled() const
     return raiseEnabled_;
 }
 
-float WindowSessionProperty::GetBrightness() const
-{
-    return brightness_;
-}
-
 Orientation WindowSessionProperty::GetRequestedOrientation() const
 {
     return requestedOrientation_;
@@ -191,6 +186,11 @@ bool WindowSessionProperty::GetPrivacyMode() const
 bool WindowSessionProperty::GetSystemPrivacyMode() const
 {
     return isSystemPrivacyMode_;
+}
+
+float WindowSessionProperty::GetBrightness() const
+{
+    return brightness_;
 }
 
 bool WindowSessionProperty::GetSystemCalling() const
@@ -408,6 +408,10 @@ void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSess
 bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
+    if (size > 1) { // 1 max systembar number
+        return false;
+    }
+
     if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
         return false;
     }
@@ -426,6 +430,10 @@ bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property)
 {
     uint32_t size = parcel.ReadUint32();
+    if (size > 1) { // 1 max systembar number
+        return;
+    }
+
     for (uint32_t i = 0; i < size; i++) {
         WindowType type = static_cast<WindowType>(parcel.ReadUint32());
         SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32() };
@@ -478,14 +486,13 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteInt32(parentPersistentId_) &&
-        parcel.WriteUint32(accessTokenId_) && parcel.WriteInt32(static_cast<uint32_t>(maximizeMode_)) &&
-        parcel.WriteFloat(brightness_) &&
+        parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
-        MarshallingWindowLimits(parcel) &&
+        MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_);
@@ -517,7 +524,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetParentPersistentId(parcel.ReadInt32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
-    property->SetBrightness(parcel.ReadFloat());
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
@@ -527,6 +533,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
     property->SetForceHide(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
+    property->SetBrightness(parcel.ReadFloat());
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetFloatingWindowAppType(parcel.ReadBool());
@@ -551,10 +558,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
-    brightness_ = property->brightness_;
     requestedOrientation_ = property->requestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
+    brightness_ = property->brightness_;
     displayId_ = property->displayId_;
     parentId_ = property->parentId_;
     flags_ = property->flags_;

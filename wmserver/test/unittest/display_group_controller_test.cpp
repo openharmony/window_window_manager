@@ -893,7 +893,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, Function | SmallTest
  */
 HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallTest | Level2)
 {
-    // sptr<WindowNodeContainer> windowNodeContainer_;
     sptr<WindowNode> node = new WindowNode();
     std::map<DisplayId, Rect> displayRectMap = {};
     displayGroupController_->ProcessSystemBarRotation(node, displayRectMap);
@@ -908,7 +907,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallT
  */
 HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, Function | SmallTest | Level2)
 {
-    // sptr<WindowNodeContainer> windowNodeContainer_;
     bool rotateDisplay = true;
     displayGroupController_->ProcessWindowPairWhenDisplayChange(rotateDisplay);
     auto layoutPolicy = container_->GetLayoutPolicy();

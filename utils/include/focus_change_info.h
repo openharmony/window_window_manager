@@ -53,6 +53,7 @@ public:
         if (!ret) {
             return false;
         }
+
         if (abilityToken_) {
             return parcel.WriteBool(true) && (static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(abilityToken_);
         } else {

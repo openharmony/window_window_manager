@@ -45,7 +45,6 @@ public:
     int32_t RemoveTimer(int32_t timerId);
     int32_t CalcNextDelay();
     void ProcessTimers();
-
 private:
     struct TimerItem {
         int32_t id { 0 };

@@ -102,8 +102,9 @@ void ProcessCallback(napi_env env, napi_ref ref, napi_value result[], int count)
     }
     GNAPI_LOG("AsyncProcess Callback");
     napi_value callback = nullptr;
+    napi_value returnVal = nullptr;
     napi_get_reference_value(env, ref, &callback);
-    napi_call_function(env, nullptr, callback, 2, result, nullptr); // 2: callback func input number
+    napi_call_function(env, nullptr, callback, 2, result, &returnVal); // 2: callback func input number
     napi_delete_reference(env, ref);
 }
 

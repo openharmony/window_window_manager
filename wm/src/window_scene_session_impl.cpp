@@ -669,6 +669,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
+
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
@@ -679,7 +680,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     // Float camera window has a special limit:
     // if display sw <= 600dp, portrait: min width = display sw * 30%, landscape: min width = sw * 50%
     // if display sw > 600dp, portrait: min width = display sw * 12%, landscape: min width = sw * 30%
-    if (property_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+    if (GetType() != WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         return;
     }
 
@@ -777,6 +778,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
+
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);
@@ -1386,26 +1388,6 @@ uint32_t WindowSceneSessionImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
-static float ConvertRadiusToSigma(float radius)
-{
-    return radius > 0.0f ? 0.57735f * radius + SK_ScalarHalf : 0.0f; // 0.57735f is blur sigma scale
-}
-
-WMError WindowSceneSessionImpl::CheckParmAndPermission()
-{
-    if (surfaceNode_ == nullptr) {
-        WLOGFE("RSSurface node is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("Check failed, permission denied");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    return WMError::WM_OK;
-}
-
 void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
@@ -1418,7 +1400,6 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
     for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
         subWindowSession->UpdateConfiguration(configuration);
     }
-
 }
 
 void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -1464,6 +1445,33 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
     }
     WLOGFE("Cannot find Window!");
     return nullptr;
+}
+
+void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
+{
+    enableDefaultAnimation_= needDefaultAnimation;
+    hostSession_->UpdateWindowAnimationFlag(needDefaultAnimation);
+    return;
+}
+
+static float ConvertRadiusToSigma(float radius)
+{
+    return radius > 0.0f ? 0.57735f * radius + SK_ScalarHalf : 0.0f; // 0.57735f is blur sigma scale
+}
+
+WMError WindowSceneSessionImpl::CheckParmAndPermission()
+{
+    if (surfaceNode_ == nullptr) {
+        WLOGFE("RSSurface node is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Check failed, permission denied");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
@@ -1607,7 +1615,6 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     return WMError::WM_OK;
 }
 
-
 WMError WindowSceneSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
@@ -1669,6 +1676,7 @@ WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
     WLOGFD("WindowSceneSessionImpl::NotifyMemoryLevel End!");
     return WMError::WM_OK;
 }
+
 WMError WindowSceneSessionImpl::SetTurnScreenOn(bool turnScreenOn)
 {
     if (IsWindowSessionInvalid()) {
@@ -1696,13 +1704,6 @@ WMError WindowSceneSessionImpl::SetKeepScreenOn(bool keepScreenOn)
 bool WindowSceneSessionImpl::IsKeepScreenOn() const
 {
     return property_->IsKeepScreenOn();
-}
-
-void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
-{
-    enableDefaultAnimation_= needDefaultAnimation;
-    hostSession_->UpdateWindowAnimationFlag(needDefaultAnimation);
-    return;
 }
 
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)
@@ -1799,7 +1800,7 @@ WMError WindowSceneSessionImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd
 void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGE("AdjustWindowAnimationFlag failed since session ivalid!");
+        WLOGE("AdjustWindowAnimationFlag failed since session invalid!");
         return;
     }
     // when show/hide with animation

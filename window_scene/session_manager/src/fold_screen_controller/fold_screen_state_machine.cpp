@@ -39,7 +39,7 @@ void FoldScreenStateMachine::RegistrationTransitionCallback(const std::shared_pt
         } else {
             ++it;
         }
-    } 
+    }
     callbacks_.push_back(callback);
 }
 
@@ -56,21 +56,22 @@ void FoldScreenStateMachine::UnRegistrationTransitionCallback(const std::shared_
         } else {
             ++it;
         }
-    }  
+    }
 }
 
 void FoldScreenStateMachine::TransitionTo(FoldScreenState state)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for(const auto &callback : callbacks_) {
+    for (const auto &callback : callbacks_) {
         if (callback) {
             callback->OnTransitionEnter(currState_, state);
         }
     }
     auto previous = currState_;
     currState_ = state;
-    WLOGI("state transition from %{public}u to %{public}u", static_cast<int32_t>(currState_), static_cast<int32_t>(state));
-    for(const auto &callback : callbacks_) {
+    WLOGI("state transition from %{public}u to %{public}u",
+          static_cast<int32_t>(currState_), static_cast<int32_t>(state));
+    for (const auto &callback : callbacks_) {
         if (callback) {
             callback->OnTransitionExit(previous, currState_);
         }

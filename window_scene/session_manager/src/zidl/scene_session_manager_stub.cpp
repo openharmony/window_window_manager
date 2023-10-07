@@ -54,7 +54,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleUnRegisterSessionChangeListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
         &SceneSessionManagerStub::HandlePendingSessionToForeground),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
         &SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerStub::HandleGetFocusSessionToken),
@@ -84,10 +85,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO),
         &SceneSessionManagerStub::HandleGetSessionDump),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
-        &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
+        &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
@@ -498,16 +499,6 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
-{
-    WLOGFI("run HandleBindDialogTarget!");
-    auto persistentId = data.ReadUint64();
-    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    const WSError& ret = BindDialogTarget(persistentId, remoteObject);
-    reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
@@ -517,6 +508,16 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, Messa
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleBindDialogTarget!");
+    auto persistentId = data.ReadUint64();
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    const WSError& ret = BindDialogTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -605,7 +606,8 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel &data, Mes
 {
     WLOGFI("run HandleRegisterCollaborator!");
     int32_t type = data.ReadInt32();
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
     const WSError& ret = RegisterIAbilityManagerCollaborator(type, collaborator);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;

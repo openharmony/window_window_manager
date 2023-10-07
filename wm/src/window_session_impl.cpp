@@ -43,7 +43,6 @@
 #include "singleton_container.h"
 #include "perform_reporter.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -1045,6 +1044,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
     } else {
         task();
     }
+    uiContent_ = nullptr;
 
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);

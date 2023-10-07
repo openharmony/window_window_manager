@@ -91,7 +91,6 @@ public:
     virtual void OnGestureNavigationEnabledUpdate(bool enable) = 0;
 };
 
-
 /**
  * @class IVisibilityChangedListener
  *
