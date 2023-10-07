@@ -26,14 +26,12 @@ public:
     void Init();
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
-    sptr<IRemoteObject> GetScreenLockManagerService() override;
 
 private:
     std::recursive_mutex mutex_;
 
     sptr<IRemoteObject> sceneSessionManagerObj_;
     sptr<IRemoteObject> screenSessionManagerObj_;
-    sptr<IRemoteObject> screenLockManagerObj_;
 };
 } // namesapce OHOS::Rosen
 

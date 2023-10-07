@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 
 #include <shared_mutex>
-#include "screenlock_manager_interface.h"
 
 #include "session_manager_service_interface.h"
 #include "mock_session_manager_service_interface.h"
@@ -47,7 +46,6 @@ public:
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
-    sptr<ScreenLock::ScreenLockManagerInterface> GetScreenLockManagerProxy();
 
 protected:
     SessionManager() = default;
@@ -57,13 +55,11 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerProxy();
     void InitScreenSessionManagerProxy();
-    void InitScreenLockManagerProxy();
 
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
-    sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
