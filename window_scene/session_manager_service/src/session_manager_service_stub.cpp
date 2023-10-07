@@ -41,10 +41,6 @@ int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             reply.WriteRemoteObject(GetScreenSessionManagerService());
             break;
         }
-        case SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE: {
-            reply.WriteRemoteObject(GetScreenLockManagerService());
-            break;
-        }
         default: {
             WLOGFW("unknown transaction code.");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -42,7 +42,6 @@ ohos_shared_library("session_manager_service") {
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "screenlock_mgr:screenlock_server",
   ]
 
   innerapi_tags = [ "platformsdk" ]
