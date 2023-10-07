@@ -52,15 +52,6 @@ void SessionManager::ClearSessionManagerProxy()
     }
     sceneSessionManagerProxy_ = nullptr;
     screenSessionManagerProxy_ = nullptr;
-    screenLockManagerProxy_ = nullptr;
-}
-
-sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    InitSessionManagerServiceProxy();
-    InitScreenLockManagerProxy();
-    return screenLockManagerProxy_;
 }
 
 sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
@@ -249,26 +240,5 @@ WMError SessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObje
         return WMError::WM_DO_NOTHING;
     }
     return static_cast<WMError>(sceneSessionManagerProxy_->BindDialogTarget(persistentId, targetToken));
-}
-
-void SessionManager::InitScreenLockManagerProxy()
-{
-    if (screenLockManagerProxy_) {
-        return;
-    }
-    if (!sessionManagerServiceProxy_) {
-        WLOGFE("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
-        return;
-    }
-    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenLockManagerService();
-    if (!remoteObject) {
-        WLOGFE("Get screenlock manager proxy failed, screenlock manager service is null");
-        return;
-    }
-
-    screenLockManagerProxy_ = iface_cast<ScreenLock::ScreenLockManagerInterface>(remoteObject);
-    if (!screenLockManagerProxy_) {
-        WLOGFW("Get screenlock manager proxy failed, nullptr");
-    }
 }
 } // namespace OHOS::Rosen
