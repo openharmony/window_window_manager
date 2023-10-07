@@ -128,7 +128,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_GLOBAL_SEARCH,            WindowType::WINDOW_TYPE_GLOBAL_SEARCH           },
     { JsSessionType::TYPE_NEGATIVE_SCREEN,          WindowType::WINDOW_TYPE_NEGATIVE_SCREEN         },
     { JsSessionType::TYPE_VOICE_INTERACTION,        WindowType::WINDOW_TYPE_VOICE_INTERACTION       },
-    {JsSessionType::TYPE_SYSTEM_TOAST,              WindowType::WINDOW_TYPE_SYSTEM_TOAST,           },
+    { JsSessionType::TYPE_SYSTEM_TOAST,             WindowType::WINDOW_TYPE_SYSTEM_TOAST,           },
 };
 
 const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSION_MAP {
