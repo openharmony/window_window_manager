@@ -1387,7 +1387,7 @@ HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved02, Function | SmallT
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->UpdateFocusWindowWithWindowRemoved(node, container);
-    
+
     node->property_->SetWindowId(1);
     sptr<WindowNode> node1 = new WindowNode();
     node->children_.push_back(node1);

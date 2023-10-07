@@ -187,10 +187,12 @@ void SceneSessionManager::Init()
     if (ret != 0) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
+
     listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
+
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
 }
@@ -856,7 +858,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         WLOGFI("create session persistentId: %{public}d", persistentId);
         return sceneSession;
     };
-
     return taskScheduler_->PostSyncTask(task);
 }
 
@@ -1711,16 +1712,16 @@ WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         auto weakSession = weak.promote();
         if (weakSession == nullptr) {
             WLOGFE("the session is nullptr");
-            WMError::WM_DO_NOTHING;
+            return WMError::WM_DO_NOTHING;
         }
         if (property == nullptr) {
             WLOGFE("the property is nullptr");
-            WMError::WM_DO_NOTHING;
+            return WMError::WM_DO_NOTHING;
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
         if (sceneSession == nullptr) {
             WLOGFE("the scene session is nullptr");
-            WMError::WM_DO_NOTHING;
+            return WMError::WM_DO_NOTHING;
         }
         WLOGD("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
@@ -2307,7 +2308,10 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         sName = session->GetWindowName();
     }
     uint32_t displayId = 0;
-    uint32_t flag = session->GetSessionProperty()->GetWindowFlags();
+    uint32_t flag = 0;
+    if (session->GetSessionProperty()) {
+        flag = session->GetSessionProperty()->GetWindowFlags();
+    }
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
         sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
@@ -2567,6 +2571,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         }
         return WSError::WS_OK;
     };
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -3533,7 +3538,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         isReportTaskStart_ = false;
         StartWindowInfoReportLoop();
     };
-    int64_t delayTime = 1000 * 60 * 60; // an hour. 1000 * 60 * 60
+    int64_t delayTime = 1000 * 60 * 60; // an hour.
     bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
     if (!ret) {
         WLOGFE("Report post listener callback task failed. the task name is WindowInfoReport");
@@ -4408,7 +4413,8 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
     return true;
 }
 
-WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
+    const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
 {
     WLOGFI("RegisterIAbilityManagerCollaborator with type : %{public}d", type);
     auto isSaCall = SessionPermission::IsSACalling();
@@ -4502,7 +4508,8 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     if (collaborator != nullptr) {
-        collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_, *(sessionInfo.want), accessTokenIDEx);
+        collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
+            currentUserId_, *(sessionInfo.want), accessTokenIDEx);
     }
 }
 

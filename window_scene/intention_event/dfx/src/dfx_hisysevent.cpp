@@ -38,7 +38,7 @@ void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid,
         "MSG", "User input does not respond normally, report by sceneBoard.");
     if (ret != 0) {
         WLOGFE("Write HiSysEvent error, ret:%{public}d, eventId:%{public}d, pid:%{public}d, bundleName:%{public}s, "
-                "persistentId:%{public}d", ret, eventId, pid, bundleName.c_str(), persistentId);
+               "persistentId:%{public}d", ret, eventId, pid, bundleName.c_str(), persistentId);
     }
 }
 } // namespace Rosen

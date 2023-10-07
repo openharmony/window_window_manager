@@ -89,6 +89,5 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS

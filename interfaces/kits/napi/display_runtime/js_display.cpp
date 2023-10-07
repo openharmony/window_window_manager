@@ -142,7 +142,6 @@ napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
     if (objValue == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
         return NapiGetUndefined(env);
-
     }
     if (cutoutInfo == nullptr) {
         WLOGFE("Get null cutout info");
@@ -190,7 +189,8 @@ napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> bo
     return arrayValue;
 }
 
-void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> info) {
+void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> info)
+{
     napi_set_named_property(env, objValue, "id", CreateJsValue(env, static_cast<uint32_t>(info->GetDisplayId())));
     napi_set_named_property(env, objValue, "name", CreateJsValue(env, info->GetName()));
     napi_set_named_property(env, objValue, "alive", CreateJsValue(env, info->GetAliveStatus()));

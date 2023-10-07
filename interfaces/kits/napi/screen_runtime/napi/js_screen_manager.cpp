@@ -407,7 +407,7 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
             if (ret == DmErrorCode::DM_OK) {
                 task.Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
             } else {
-                task.Reject(env, 
+                task.Reject(env,
                     CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirror failed."));
             }
         };
@@ -515,7 +515,7 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 task.Reject(env,
-                    CreateJsError(env, static_cast<int32_t>(ret),"JsScreenManager::OnStopMirror failed."));
+                    CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnStopMirror failed."));
             }
         };
     napi_value lastParam = nullptr;

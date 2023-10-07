@@ -14,7 +14,6 @@
  */
 
 #include "session_manager.h"
-
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 

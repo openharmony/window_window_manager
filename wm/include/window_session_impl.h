@@ -243,4 +243,5 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
+
 #endif // OHOS_ROSEN_WINDOW_SESSION_IMPL_H
