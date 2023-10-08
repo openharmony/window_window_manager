@@ -839,7 +839,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
         }
         RegisterSessionExceptionFunc(sceneSession);
-        RegisterSessionSnapshotFunc(sceneSession);
         FillSessionInfo(sceneSession);
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
@@ -863,6 +862,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 
 void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession)
 {
+    RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     RegisterInputMethodUpdateFunc(sceneSession);
     RegisterInputMethodShownFunc(sceneSession);
