@@ -27,70 +27,71 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsTransactionManager" };
 } // namespace
 
-NativeValue* JsTransactionManager::Init(NativeEngine* engine, NativeValue* exportObj)
+napi_value NapiGetUndefined(napi_env env)
 {
-    WLOGI("[NAPI]JsTransactionManager Init");
-    if (engine == nullptr || exportObj == nullptr) {
-        WLOGFE("Engine or exportObj is null!");
-        return nullptr;
-    }
-
-    auto object = ConvertNativeValueTo<NativeObject>(exportObj);
-    if (object == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
-        return nullptr;
-    }
-
-    std::unique_ptr<JsTransactionManager> jsTransactionManager = std::make_unique<JsTransactionManager>(*engine);
-    object->SetNativePointer(jsTransactionManager.release(), JsTransactionManager::Finalizer, nullptr);
-
-    const char* moduleName = "JsTransactionManager";
-    BindNativeFunction(*engine, *object, "openSyncTransaction", moduleName,
-        JsTransactionManager::OpenSyncTransaction);
-    BindNativeFunction(*engine, *object, "closeSyncTransaction", moduleName,
-        JsTransactionManager::CloseSyncTransaction);
-    return engine->CreateUndefined();
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
 }
 
-JsTransactionManager::JsTransactionManager(NativeEngine& engine)
+napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
+{
+    WLOGI("[NAPI]JsTransactionManager Init");
+    if (env == nullptr || exportObj == nullptr) {
+        WLOGFE("Env or exportObj is null!");
+        return nullptr;
+    }
+
+    std::unique_ptr<JsTransactionManager> jsTransactionManager = std::make_unique<JsTransactionManager>(env);
+    napi_wrap(env, exportObj, jsTransactionManager.release(), JsTransactionManager::Finalizer, nullptr, nullptr);
+
+    const char* moduleName = "JsTransactionManager";
+    BindNativeFunction(env, exportObj, "openSyncTransaction", moduleName,
+        JsTransactionManager::OpenSyncTransaction);
+    BindNativeFunction(env, exportObj, "closeSyncTransaction", moduleName,
+        JsTransactionManager::CloseSyncTransaction);
+    return NapiGetUndefined(env);
+}
+
+JsTransactionManager::JsTransactionManager(napi_env env)
 {}
 
-void JsTransactionManager::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsTransactionManager::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
     std::unique_ptr<JsTransactionManager>(static_cast<JsTransactionManager*>(data));
 }
 
-NativeValue* JsTransactionManager::OpenSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsTransactionManager::OpenSyncTransaction(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]OpenSyncTransaction");
-    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(engine, info);
-    return (me != nullptr) ? me->OnOpenSyncTransaction(*engine, *info) : nullptr;
+    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
+    return (me != nullptr) ? me->OnOpenSyncTransaction(env, info) : nullptr;
 }
 
-NativeValue* JsTransactionManager::CloseSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]CloseSyncTransaction");
-    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(engine, info);
-    return (me != nullptr) ? me->OnCloseSyncTransaction(*engine, *info) : nullptr;
+    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
+    return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
 }
 
-NativeValue* JsTransactionManager::OnOpenSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
 {
     auto transactionController = RSSyncTransactionController::GetInstance();
     if (transactionController) {
         RSTransaction::FlushImplicitTransaction();
         transactionController->OpenSyncTransaction();
     }
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
-NativeValue* JsTransactionManager::OnCloseSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info)
+napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
     auto transactionController = RSSyncTransactionController::GetInstance();
     if (transactionController) {
         transactionController->CloseSyncTransaction();
     }
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
