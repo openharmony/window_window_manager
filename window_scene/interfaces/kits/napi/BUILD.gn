@@ -18,5 +18,6 @@ group("window_scene_napi_packages") {
     "scene_session_manager:scenesessionmanager_napi",
     "screen_session_manager:screensessionmanager_napi",
     "session_manager_service:sessionmanagerservice_napi",
+    "transaction_manager:transactionmanager_napi",
   ]
 }
