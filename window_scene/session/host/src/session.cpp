@@ -740,6 +740,7 @@ WSError Session::Background()
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionBackground();
     }
+    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 
