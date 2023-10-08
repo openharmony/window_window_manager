@@ -42,4 +42,19 @@ void TaskScheduler::PostVoidSyncTask(Task&& task)
     }
     handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
+
+void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
+{
+    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
+    }
+    handler_->PostTask(std::move(task), name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void TaskScheduler::RemoveTask(const std::string& name)
+{
+    if (handler_) {
+        handler_->RemoveTask(name);
+    }
+}
 } // namespace OHOS::Rosen
