@@ -66,9 +66,10 @@ private:
         { WindowType::WINDOW_TYPE_SCREENSHOT,           117 },
         { WindowType::WINDOW_TYPE_VOICE_INTERACTION,    117 },
         { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      118 },
-        { WindowType::WINDOW_TYPE_POINTER,              119 },
-        { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       120 },
-        { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       121 },
+        { WindowType::WINDOW_TYPE_SYSTEM_TOAST,         119 },
+        { WindowType::WINDOW_TYPE_POINTER,              120 },
+        { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       121 },
+        { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       122 },
     };
 };
 }
