@@ -1387,6 +1387,17 @@ bool SceneSession::IsNeedDefaultAnimation()
     return needDefaultAnimationFlag_;
 }
 
+bool SceneSession::IsAppSession() const
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        return true;
+    }
+    if (GetParentSession() && GetParentSession()->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        return true;
+    }
+    return false;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
