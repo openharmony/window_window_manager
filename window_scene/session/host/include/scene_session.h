@@ -194,6 +194,7 @@ public:
     WSRect GetLastSafeRect();
     void SetLastSafeRect(WSRect rect);
     bool IsNeedDefaultAnimation();
+    bool IsAppSession() const;
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
