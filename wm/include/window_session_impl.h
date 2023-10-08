@@ -188,6 +188,7 @@ protected:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -231,7 +232,6 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
-    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
 
     // FA only

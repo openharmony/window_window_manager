@@ -1293,7 +1293,9 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot()
     auto pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
         WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
-        notifySessionSnapshotFunc_(persistentId_);
+        if (notifySessionSnapshotFunc_) {
+            notifySessionSnapshotFunc_(persistentId_);
+        }
     } else {
         WLOGFE("Failed to get pixelMap, return nullptr");
     }
