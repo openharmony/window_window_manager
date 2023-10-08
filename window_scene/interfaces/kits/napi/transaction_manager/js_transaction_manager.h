@@ -22,18 +22,18 @@
 namespace OHOS::Rosen {
 class JsTransactionManager final {
 public:
-    explicit JsTransactionManager(NativeEngine& engine);
+    explicit JsTransactionManager(napi_env env);
     ~JsTransactionManager() = default;
 
-    static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static napi_value Init(napi_env env, napi_value exportObj);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
-    static NativeValue* OpenSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* CloseSyncTransaction(NativeEngine* engine, NativeCallbackInfo* info);
+    static napi_value OpenSyncTransaction(napi_env env, napi_callback_info info);
+    static napi_value CloseSyncTransaction(napi_env env, napi_callback_info info);
 
 private:
-    NativeValue* OnOpenSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnCloseSyncTransaction(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnOpenSyncTransaction(napi_env env, napi_callback_info info);
+    napi_value OnCloseSyncTransaction(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 
