@@ -1213,7 +1213,18 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
 WSError WindowSceneSessionImpl::HandleBackEvent()
 {
     bool isConsumed = false;
-    if (uiContent_) {
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGFD("Transfer back event to inputEventConsumer");
+        std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
+        backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+        backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+        isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
+    } else if (uiContent_) {
         WLOGFD("Transfer back event to uiContent");
         isConsumed = uiContent_->ProcessBackPressed();
     } else {
