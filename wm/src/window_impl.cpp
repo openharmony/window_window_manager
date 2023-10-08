@@ -3410,6 +3410,12 @@ void WindowImpl::SetDefaultOption()
             property_->SetFocusable(false);
             break;
         }
+        case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            break;
+        }
         default:
             break;
     }

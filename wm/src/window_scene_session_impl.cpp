@@ -82,7 +82,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_VOICE_INTERACTION || type == WindowType::WINDOW_TYPE_POINTER ||
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
-        type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)) {
+        type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
+        type == WindowType::WINDOW_TYPE_SYSTEM_TOAST)) {
         WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
@@ -532,6 +533,12 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
         case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetTouchable(false);
             property_->SetFocusable(false);
             break;
         }

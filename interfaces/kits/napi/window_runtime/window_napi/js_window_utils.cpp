@@ -80,6 +80,8 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
         static_cast<int32_t>(ApiWindowType::TYPE_POINTER)));
     object->SetProperty("TYPE_SCREENSHOT", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
+    object->SetProperty("TYPE_SYSTEM_TOAST", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
 
     return objValue;
 }
