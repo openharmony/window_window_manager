@@ -4041,20 +4041,23 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
 {
-    WLOGFI("UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
-        persistentId, haveListener);
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        WLOGFD("sceneSession is nullptr.");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (haveListener) {
-        avoidAreaListenerSessionSet_.insert(persistentId);
-    } else {
-        lastUpdatedAvoidArea_.erase(persistentId);
-        avoidAreaListenerSessionSet_.erase(persistentId);
-    }
-    return WSError::WS_OK;
+    auto task = [this, persistentId, haveListener]() {
+        WLOGFI("UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
+            persistentId, haveListener);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFD("sceneSession is nullptr.");
+            return WSError::WS_DO_NOTHING;
+        }
+        if (haveListener) {
+            avoidAreaListenerSessionSet_.insert(persistentId);
+        } else {
+            lastUpdatedAvoidArea_.erase(persistentId);
+            avoidAreaListenerSessionSet_.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
