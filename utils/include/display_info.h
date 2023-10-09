@@ -42,6 +42,8 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayType, DisplayType, type, DisplayType::DEFAULT);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, Width, width, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, Height, height, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, PhysicalWidth, physicalWidth, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, PhysicalHeight, physicalHeight, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, RefreshRate, refreshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenGroupId, screenGroupId, SCREEN_ID_INVALID);

@@ -66,6 +66,20 @@ public:
     int32_t GetHeight() const;
 
     /**
+     * @brief Get physical width of the display.
+     *
+     * @return Physical width of the display.
+     */
+    int32_t GetPhysicalWidth() const;
+
+    /**
+     * @brief Get physical height of the display.
+     *
+     * @return Physical height of the display.
+     */
+    int32_t GetPhysicalHeight() const;
+
+    /**
      * @brief Get the refresh rate of the display.
      *
      * @return Refresh rate of the display.

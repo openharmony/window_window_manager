@@ -71,6 +71,18 @@ int32_t Display::GetHeight() const
     return pImpl_->GetDisplayInfo()->GetHeight();
 }
 
+int32_t Display::GetPhysicalWidth() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetPhysicalWidth();
+}
+
+int32_t Display::GetPhysicalHeight() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetPhysicalHeight();
+}
+
 uint32_t Display::GetRefreshRate() const
 {
     UpdateDisplayInfo();
