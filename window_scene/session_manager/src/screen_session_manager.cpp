@@ -85,8 +85,8 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
             rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
             rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
         });
-        WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
     }
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
 
 void ScreenSessionManager::Init()
@@ -563,7 +563,6 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetBounds(screenBounds);
     property.CalcDefaultDisplayOrientation();
     if (isDensityDpiLoad_) {
-        SetDpiFromSettingData();
         property.SetVirtualPixelRatio(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
@@ -682,10 +681,12 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
 {
     auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
-    if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0
-            && that.foldScreenPowerInit_ != nullptr) {
+    if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         WLOGFI("ScreenSessionManager BootFinishedCallback boot animation finished");
-        that.foldScreenPowerInit_();
+        that.SetDpiFromSettingData();
+        if (that.foldScreenPowerInit_ != nullptr) {
+            that.foldScreenPowerInit_();
+        }
     }
 }
 
@@ -703,7 +704,9 @@ void ScreenSessionManager::SetDpiFromSettingData()
     } else {
         WLOGFI("get setting dpi success,settingDpi: %{public}u", settingDpi);
         if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
-            densityDpi_ = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+            float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+            ScreenId defaultScreenId = GetDefaultScreenId();
+            SetVirtualPixelRatio(defaultScreenId, dpi);
         }
     }
 }
