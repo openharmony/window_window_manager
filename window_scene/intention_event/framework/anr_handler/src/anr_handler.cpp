@@ -167,9 +167,9 @@ void ANRHandler::SendEvent(int32_t eventId, int64_t delayTime)
         eventHandler_->PostHighPriorityTask([this]() {
             MarkProcessed();
         }, delayTime)) {
-        WLOGFD("Post eventId:%{public}d, delayTime:%{%{public}" PRId64 " successfully", eventId, delayTime);
+        WLOGFD("Post eventId:%{public}d, delayTime:%{public}" PRId64 " successfully", eventId, delayTime);
     } else {
-        WLOGFE("Post eventId:%{public}d, delayTime:%{%{public}" PRId64 " failed", eventId, delayTime);
+        WLOGFE("Post eventId:%{public}d, delayTime:%{public}" PRId64 " failed", eventId, delayTime);
         SetAnrHandleState(eventId, false);
     }
 }
