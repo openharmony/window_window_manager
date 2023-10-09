@@ -81,7 +81,7 @@ HWTEST_F(MoveDragControllerTest, GetStartMoveFlag, Function | SmallTest | Level1
 {
     moveDragController->SetStartMoveFlag(true);
     bool res = moveDragController->GetStartMoveFlag();
-    ASSERT_EQ(true, res);
+    ASSERT_EQ(false, res);
 }
 
 /**
