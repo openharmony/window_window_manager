@@ -135,6 +135,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    RRect physicalBounds_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

@@ -109,6 +109,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(physicalBounds_.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(physicalBounds_.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
@@ -180,6 +182,7 @@ void ScreenSession::Connect()
     for (auto& listener : screenChangeListenerList_) {
         listener->OnConnect();
     }
+    physicalBounds_ = property_.GetBounds();
 }
 
 void ScreenSession::Disconnect()
