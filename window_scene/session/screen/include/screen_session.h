@@ -81,7 +81,6 @@ public:
     void SetScreenType(ScreenType type);
 
     ScreenId GetScreenId();
-    void SetScreenProperty(ScreenProperty prop);
     ScreenProperty GetScreenProperty() const;
     void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
@@ -106,6 +105,7 @@ public:
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
     void UpdatePropertyAfterRotation(RRect bounds, int rotation);
+    void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
@@ -135,7 +135,6 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
-    RRect physicalBounds_;
 };
 
 class ScreenSessionGroup : public ScreenSession {
