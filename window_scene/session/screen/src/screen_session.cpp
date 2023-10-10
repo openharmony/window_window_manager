@@ -109,8 +109,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
-    displayInfo->SetPhysicalWidth(physicalBounds_.rect_.GetWidth());
-    displayInfo->SetPhysicalHeight(physicalBounds_.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(property_.GetPhyBounds().rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
@@ -145,11 +145,6 @@ ScreenId ScreenSession::GetScreenId()
     return screenId_;
 }
 
-void ScreenSession::SetScreenProperty(ScreenProperty prop)
-{
-    property_ = prop;
-}
-
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;
@@ -164,6 +159,12 @@ void ScreenSession::UpdatePropertyByActiveMode()
         screeBounds.rect_.height_ = mode->height_;
         property_.SetBounds(screeBounds);
     }
+}
+
+void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
+{
+    property_.SetBounds(bounds);
+    property_.SetPhyBounds(phyBounds);
 }
 
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
@@ -182,7 +183,6 @@ void ScreenSession::Connect()
     for (auto& listener : screenChangeListenerList_) {
         listener->OnConnect();
     }
-    physicalBounds_ = property_.GetBounds();
 }
 
 void ScreenSession::Disconnect()
