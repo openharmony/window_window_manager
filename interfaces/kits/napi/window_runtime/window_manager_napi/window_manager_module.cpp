@@ -16,14 +16,13 @@
 #include "js_window_manager.h"
 #include "native_engine/native_engine.h"
 
+static napi_module g_winManagerModule = {
+    .nm_filename = "module/libwindow_napi.so/window.js",
+    .nm_register_func = OHOS::Rosen::JsWindowManagerInit,
+    .nm_modname = "window",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_application_windowmanager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "window",
-        .fileName = "module/libwindow_napi.so/window.js",
-        .registerCallback = OHOS::Rosen::JsWindowManagerInit,
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_winManagerModule);
 }

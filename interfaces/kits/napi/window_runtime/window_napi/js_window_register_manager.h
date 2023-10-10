@@ -34,11 +34,11 @@ public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, NativeEngine& engine, NativeValue* value);
+        CaseType caseType, napi_env env, napi_value value);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, NativeValue* value);
+        CaseType caseType, napi_env env, napi_value value);
 private:
-    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
     WmErrorCode ProcessWindowChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
     WmErrorCode ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister);

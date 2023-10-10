@@ -24,13 +24,13 @@ JsWindowRegisterManager::~JsWindowRegisterManager()
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, NativeEngine& engine, NativeValue* value)
+    CaseType caseType, napi_env env, napi_value value)
 {
     return WmErrorCode::WM_OK;
 }
 
 WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, NativeValue* value)
+    CaseType caseType, napi_env env, napi_value value)
 {
     return WmErrorCode::WM_OK;
 }

@@ -33,49 +33,61 @@ namespace {
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 }
 
+napi_value NapiGetUndefined(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
 class JsWindowExtensionContext final {
 public:
     explicit JsWindowExtensionContext(
         const std::shared_ptr<WindowExtensionContext>& context) : context_(context) {}
     ~JsWindowExtensionContext() = default;
 
-    static void Finalizer(NativeEngine* engine, void* data, void* hint)
+    static void Finalizer(napi_env env, void* data, void* hint)
     {
         WLOGI("JsWindowExtensionContext::Finalizer is called");
         std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
     }
 
-    static NativeValue* StartAbility(NativeEngine* engine, NativeCallbackInfo* info)
+    static napi_value StartAbility(napi_env env, napi_callback_info info)
     {
-        JsWindowExtensionContext* me = CheckParamsAndGetThis<JsWindowExtensionContext>(engine, info);
-        return (me != nullptr) ? me->OnStartAbility(*engine, *info) : nullptr;
+        JsWindowExtensionContext* me = CheckParamsAndGetThis<JsWindowExtensionContext>(env, info);
+        return (me != nullptr) ? me->OnStartAbility(env, info) : nullptr;
     }
 private:
     std::weak_ptr<WindowExtensionContext> context_;
 
     bool CheckStartAbilityInputParam(
-        NativeEngine& engine, NativeCallbackInfo& info,
+        napi_env env, napi_callback_info info,
         AAFwk::Want& want, AAFwk::StartOptions& startOptions) const
     {
-        if (info.argc < 1) {
+        size_t argc = 2; // 2 : max param number
+        napi_value argv[2] = {nullptr}; // 2 : max param number
+        napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+        if (argc < 1) {
             return false;
         }
         // Check input want
-        if (!CheckWantParam(engine, info.argv[0], want)) {
+        if (!CheckWantParam(env, argv[0], want)) {
             return false;
         }
-        if (info.argc > 1 && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
-            WLOGI("OnStartAbility start options is used.");
-            AppExecFwk::UnwrapStartOptions(reinterpret_cast<napi_env>(&engine),
-                reinterpret_cast<napi_value>(info.argv[1]), startOptions);
+        if (argc > 1) {
+            napi_valuetype valueType = napi_undefined;
+            napi_typeof(env, argv[1], &valueType);
+            if (valueType == napi_object) {
+                WLOGI("OnStartAbility start options is used.");
+                AppExecFwk::UnwrapStartOptions(env, argv[1], startOptions);
+            }
         }
         return true;
     }
 
-    bool CheckWantParam(NativeEngine& engine, NativeValue* value, AAFwk::Want& want) const
+    bool CheckWantParam(napi_env env, napi_value value, AAFwk::Want& want) const
     {
-        if (!OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine),
-            reinterpret_cast<napi_value>(value), want)) {
+        if (!OHOS::AppExecFwk::UnwrapWant(env, value, want)) {
             WLOGFE("The input want is invalid.");
             return false;
         }
@@ -84,46 +96,49 @@ private:
             want.GetElement().GetAbilityName().c_str());
         return true;
     }
-
-    NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info)
+    
+    napi_value OnStartAbility(napi_env env, napi_callback_info info)
     {
         WLOGI("OnStartAbility is called");
-        if (info.argc < 2) { // at least two argc
+        size_t argc = 4;
+        napi_value argv[4] = {nullptr};
+        napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+        if (argc < 2) { // at least two argc
             WLOGFE("Start ability failed, not enough params.");
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+            return NapiGetUndefined(env);
         }
 
         AAFwk::Want want;
         AAFwk::StartOptions startOptions;
-        if (!CheckStartAbilityInputParam(engine, info, want, startOptions)) {
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+        if (!CheckStartAbilityInputParam(env, info, want, startOptions)) {
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+            return NapiGetUndefined(env);
         }
 
-        AsyncTask::CompleteCallback complete =
-            [weak = context_, want, startOptions](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        NapiAsyncTask::CompleteCallback complete =
+            [weak = context_, want, startOptions](napi_env env, NapiAsyncTask& task, int32_t status) {
                 WLOGI("startAbility begin");
                 auto context = weak.lock();
                 if (!context) {
                     WLOGFW("context is released");
-                    task.Reject(engine, CreateJsError(engine,
+                    task.Reject(env, CreateJsError(env,
                         static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                     return;
                 }
 
                 WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(context->StartAbility(want, startOptions));
                 if (ret == WmErrorCode::WM_OK) {
-                    task.Resolve(engine, engine.CreateUndefined());
+                    task.Resolve(env, NapiGetUndefined(env));
                 } else {
-                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret)));
+                    task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
                 }
             };
 
-        NativeValue* lastParam = (info.argc <= 2) ? nullptr : info.argv[2]; // at least two argc
-        NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSServiceExtensionContext::OnStartAbility",
-            engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+        napi_value lastParam = (argc <= 2) ? nullptr : argv[2]; // at least two argc
+        napi_value result = nullptr;
+        NapiAsyncTask::Schedule("JSServiceExtensionContext::OnStartAbility",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 };
@@ -139,22 +154,20 @@ void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementN
     WLOGI("called");
 }
 
-NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
-                                            const std::shared_ptr<WindowExtensionContext>& context)
+napi_value CreateJsWindowExtensionContext(napi_env env, const std::shared_ptr<WindowExtensionContext>& context)
 {
     WLOGI("CreateJsWindowExtensionContext begin");
-    NativeValue* objValue = CreateJsExtensionContext(engine, context);
-    NativeObject* object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(objValue);
+    napi_value objValue = CreateJsExtensionContext(env, context);
 
     std::unique_ptr<JsWindowExtensionContext> jsContext
         = std::make_unique<JsWindowExtensionContext>(context);
-    object->SetNativePointer(jsContext.release(), JsWindowExtensionContext::Finalizer, nullptr);
+    napi_wrap(env, objValue, jsContext.release(), JsWindowExtensionContext::Finalizer, nullptr, nullptr);
 
     // make handler
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
     const char *moduleName = "JsWindowExtensionContext";
-    BindNativeFunction(engine, *object, "startAbility", moduleName, JsWindowExtensionContext::StartAbility);
+    BindNativeFunction(env, objValue, "startAbility", moduleName, JsWindowExtensionContext::StartAbility);
 
     return objValue;
 }

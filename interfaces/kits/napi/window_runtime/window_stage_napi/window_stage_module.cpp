@@ -20,15 +20,14 @@ extern const char _binary_window_stage_js_end[];
 extern const char _binary_window_stage_abc_start[];
 extern const char _binary_window_stage_abc_end[];
 
+static napi_module g_winStageModule = {
+    .nm_filename = "application/libwindowstage.so/window_stage.js",
+    .nm_modname = "application.WindowStage",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_application_WindowStage_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "application.WindowStage",
-        .fileName = "application/libwindowstage.so/window_stage.js",
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_winStageModule);
 }
 
 extern "C" __attribute__((visibility("default")))

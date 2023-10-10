@@ -20,15 +20,14 @@ extern const char _binary_window_extension_context_js_end[];
 extern const char _binary_window_extension_context_abc_start[];
 extern const char _binary_window_extension_context_abc_end[];
 
+static napi_module g_winExtensionContextModule = {
+    .nm_filename = "application/libwindowextensioncontext_napi.so/WindowExtensionContext.js",
+    .nm_modname = "application.WindowExtensionContext",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_application_WindowExtensionContext_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "application.WindowExtensionContext",
-        .fileName = "application/libwindowextensioncontext_napi.so/WindowExtensionContext.js",
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&g_winExtensionContextModule);
 }
 
 extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowExtensionContext_GetJSCode(
