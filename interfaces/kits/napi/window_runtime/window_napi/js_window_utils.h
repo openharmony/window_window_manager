@@ -170,36 +170,39 @@ struct SystemBarPropertyFlag {
     SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false) {}
 };
 
-    NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect);
-    NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
-    bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
+    napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
+    napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window);
+    bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
         sptr<Window>& window);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-        NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window);
-    NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
+        napi_env env, napi_callback_info info, sptr<Window>& window);
+    napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
-    NativeValue* ConvertAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea, AvoidAreaType type);
+    napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     bool CheckCallingPermission(std::string permission);
-    NativeValue* WindowTypeInit(NativeEngine* engine);
-    NativeValue* AvoidAreaTypeInit(NativeEngine* engine);
-    NativeValue* WindowModeInit(NativeEngine* engine);
-    NativeValue* ColorSpaceInit(NativeEngine* engine);
-    NativeValue* OrientationInit(NativeEngine* engine);
-    NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
-    NativeValue* WindowEventTypeInit(NativeEngine* engine);
-    NativeValue* WindowLayoutModeInit(NativeEngine* engine);
-    NativeValue* BlurStyleInit(NativeEngine* engine);
-    NativeValue* WindowErrorCodeInit(NativeEngine* engine);
-    NativeValue* WindowErrorInit(NativeEngine* engine);
-    bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
+    napi_value WindowTypeInit(napi_env env);
+    napi_value AvoidAreaTypeInit(napi_env env);
+    napi_value WindowModeInit(napi_env env);
+    napi_value ColorSpaceInit(napi_env env);
+    napi_value OrientationInit(napi_env env);
+    napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowEventTypeInit(napi_env env);
+    napi_value WindowLayoutModeInit(napi_env env);
+    napi_value BlurStyleInit(napi_env env);
+    napi_value WindowErrorCodeInit(napi_env env);
+    napi_value WindowErrorInit(napi_env env);
+    bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     template<class T>
-    bool ParseJsValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, T& data)
+    bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
-        NativeValue* value = jsObject->GetProperty(name.c_str());
-        if (value->TypeOf() != NATIVE_UNDEFINED) {
-            if (!AbilityRuntime::ConvertFromJsValue(engine, value, data)) {
+        napi_value value = nullptr;
+        napi_get_named_property(env, jsObject, name.c_str(), &value);
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env, value, &type);
+        if (type != napi_undefined) {
+            if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
                 return false;
             }
         } else {
@@ -208,15 +211,18 @@ struct SystemBarPropertyFlag {
         return true;
     }
     template<class T>
-    inline bool ConvertNativeValueToVector(NativeEngine& engine, NativeValue* nativeValue, std::vector<T>& out)
+    inline bool ConvertNativeValueToVector(napi_env env, napi_value nativeArray, std::vector<T>& out)
     {
-        NativeArray* nativeArray = AbilityRuntime::ConvertNativeValueTo<NativeArray>(nativeValue);
         if (nativeArray == nullptr) {
             return false;
         }
         T value;
-        for (uint32_t i = 0; i < nativeArray->GetLength(); i++) {
-            if (!AbilityRuntime::ConvertFromJsValue(engine, nativeArray->GetElement(i), value)) {
+        uint32_t size = 0;
+        napi_get_array_length(env, nativeArray, &size);
+        for (uint32_t i = 0; i < size; i++) {
+            napi_value getElementValue = nullptr;
+            napi_get_element(env, nativeArray, i, &getElementValue);
+            if (!AbilityRuntime::ConvertFromJsValue(env, getElementValue, value)) {
                 return false;
             }
             out.emplace_back(value);

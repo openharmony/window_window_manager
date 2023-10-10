@@ -33,9 +33,9 @@ public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, NativeEngine& engine, NativeValue* value);
+        CaseType caseType, napi_env env, napi_value value);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, NativeValue* value);
+        CaseType caseType, napi_env env, napi_value value);
 };
 } // namespace Rosen
 } // namespace OHOS

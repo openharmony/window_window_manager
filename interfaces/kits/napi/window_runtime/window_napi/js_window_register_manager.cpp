@@ -253,7 +253,7 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<Js
     return WmErrorCode::WM_OK;
 }
 
-bool JsWindowRegisterManager::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("[NAPI]Method %{public}s has not been registerted", type.c_str());
@@ -261,7 +261,9 @@ bool JsWindowRegisterManager::IsCallbackRegistered(std::string type, NativeValue
     }
 
     for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); ++iter) {
-        if (jsListenerObject->StrictEquals(iter->first->Get())) {
+        bool isEquals = false;
+        napi_strict_equals(env, jsListenerObject, iter->first->GetNapiValue(), &isEquals);
+        if (isEquals) {
             WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;
         }
@@ -270,18 +272,20 @@ bool JsWindowRegisterManager::IsCallbackRegistered(std::string type, NativeValue
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, NativeEngine& engine, NativeValue* value)
+    CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if (IsCallbackRegistered(type, value)) {
+    if (IsCallbackRegistered(env, type, value)) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    NativeReference* callbackRef = engine.CreateReference(value, 1);
-    sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine, callbackRef);
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    NativeReference* callbackRef = reinterpret_cast<NativeReference*>(result);
+    sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef);
     if (windowManagerListener == nullptr) {
         WLOGFE("[NAPI]New JsWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -298,7 +302,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
 }
 
 WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, NativeValue* value)
+    CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -321,7 +325,9 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     } else {
         bool findFlag = false;
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
-            if (!value->StrictEquals(it->first->Get())) {
+            bool isEquals = false;
+            napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+            if (!isEquals) {
                 continue;
             }
             findFlag = true;

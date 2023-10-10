@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Rosen {
 class JsTransitionController : public IAnimationTransitionController {
 public:
-    JsTransitionController(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin, sptr<Window> window);
+    JsTransitionController(napi_env env, std::shared_ptr<NativeReference> jsWin, sptr<Window> window);
     ~JsTransitionController();
     void AnimationForShown() override;
     void AnimationForHidden() override;

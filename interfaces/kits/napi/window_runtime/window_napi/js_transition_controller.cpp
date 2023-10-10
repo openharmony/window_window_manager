@@ -42,45 +42,59 @@ JsTransitionContext::~JsTransitionContext()
     WLOGI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++jsTransCxtDtorCnt);
 }
 
-void JsTransitionContext::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsTransitionContext::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]JsTransitionContext::Finalizer");
     std::unique_ptr<JsTransitionContext>(static_cast<JsTransitionContext*>(data));
 }
 
-NativeValue* JsTransitionContext::CompleteTransition(NativeEngine* engine, NativeCallbackInfo* info)
+napi_value JsTransitionContext::CompleteTransition(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]CompleteTransition");
-    JsTransitionContext* me = CheckParamsAndGetThis<JsTransitionContext>(engine, info);
-    return (me != nullptr) ? me->OnCompleteTransition(*engine, *info) : nullptr;
+    JsTransitionContext* me = CheckParamsAndGetThis<JsTransitionContext>(env, info);
+    return (me != nullptr) ? me->OnCompleteTransition(env, info) : nullptr;
 }
 
-NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, NativeCallbackInfo& info)
+static napi_value NapiGetUndefined(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+static napi_value NapiThrowError(napi_env env, WmErrorCode errCode)
+{
+    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (info.argc < 1) {
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool transitionCompleted = false;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(engine, info.argv[0], transitionCompleted)) {
+    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], transitionCompleted)) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WMError ret = WMError::WM_OK;
     auto window = windowToken_.promote();
     if (window == nullptr) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-        return engine.CreateUndefined();
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto state = window->GetWindowState();
     if (!isShownTransContext_) {
         if (state != WindowState::STATE_HIDDEN) {
             WLOGI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
                 window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
-            return engine.CreateUndefined();
+            return NapiGetUndefined(env);
         }
         window->UpdateSurfaceNodeAfterCustomAnimation(false); // remove from rs tree after animation
         if (!transitionCompleted) {
@@ -90,49 +104,48 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         if (state != WindowState::STATE_SHOWN) {
             WLOGI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
                 window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
-            return engine.CreateUndefined();
+            return NapiGetUndefined(env);
         }
         if (!transitionCompleted) {
             ret = window->Hide(); // show aborted
         }
     }
     if (ret != WMError::WM_OK) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret))));
-        return engine.CreateUndefined();
+        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
     }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
         window->GetWindowId(), window->GetWindowName().c_str(), transitionCompleted);
-    return engine.CreateUndefined();
+    return NapiGetUndefined(env);
 }
 
-static NativeValue* CreateJsTransitionContextObject(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,
+static napi_value CreateJsTransitionContextObject(napi_env env, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window, bool isShownTransContext)
 {
     WLOGI("[NAPI]CreateJsTransitionContextObject");
-    NativeValue *objValue = engine.CreateObject();
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
         WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
     std::unique_ptr<JsTransitionContext> jsTransContext = std::make_unique<JsTransitionContext>(window,
         isShownTransContext);
-    object->SetNativePointer(jsTransContext.release(), JsTransitionContext::Finalizer, nullptr);
-    if (jsWin != nullptr && jsWin->Get() != nullptr) {
-        object->SetProperty("toWindow", jsWin->Get());
+    napi_wrap(env, objValue, jsTransContext.release(), JsTransitionContext::Finalizer, nullptr, nullptr);
+    if (jsWin != nullptr && jsWin->GetNapiValue() != nullptr) {
+        napi_set_named_property(env, objValue, "toWindow", jsWin->GetNapiValue());
     } else {
         WLOGFE("[NAPI]jsWin is nullptr");
         return nullptr;
     }
 
     const char *moduleName = "JsTransitionContext";
-    BindNativeFunction(engine, *object, "completeTransition", moduleName, JsTransitionContext::CompleteTransition);
+    BindNativeFunction(env, objValue, "completeTransition", moduleName, JsTransitionContext::CompleteTransition);
     return objValue;
 }
 
-JsTransitionController::JsTransitionController(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,
+JsTransitionController::JsTransitionController(napi_env env, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window)
-    : engine_(engine), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
+    : env_(env), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
     WLOGI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++jsTransCtrlCtorCnt);
 }
@@ -145,14 +158,14 @@ JsTransitionController::~JsTransitionController()
 void JsTransitionController::AnimationForShown()
 {
     WLOGI("[NAPI]AnimationForShown");
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_](NativeEngine&, AsyncTask&, int32_t) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
             auto thisController = self.promote();
             if (thisController == nullptr) {
                 WLOGFE("this transition Controller is null!");
                 return;
             }
-            HandleScope handleScope(thisController->engine_);
+            HandleScope handleScope(thisController->env_);
             auto jsWin = thisController->jsWin_.lock();
             auto window = thisController->windowToken_.promote();
             if (jsWin == nullptr || window == nullptr) {
@@ -164,35 +177,35 @@ void JsTransitionController::AnimationForShown()
                 WLOGFE("animation shown configuration for state %{public}u not support!", static_cast<uint32_t>(state));
                 return;
             }
-            NativeValue* jsTransContextObj = CreateJsTransitionContextObject(
-                thisController->engine_, jsWin, window, true);
+            napi_value jsTransContextObj = CreateJsTransitionContextObject(
+                thisController->env_, jsWin, window, true);
             if (jsTransContextObj == nullptr) {
                 return;
             }
-            NativeValue *argv[] = { jsTransContextObj };
+            napi_value argv[] = { jsTransContextObj };
             thisController->CallJsMethod("animationForShown", argv, ArraySize(argv));
             // add to rs tree before animation
             window->UpdateSurfaceNodeAfterCustomAnimation(true);
         }
     );
 
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsTransitionController::AnimationForShown", engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsTransitionController::AnimationForShown", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsTransitionController::AnimationForHidden()
 {
     WLOGI("[NAPI]AnimationForHidden");
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = weakRef_](NativeEngine&, AsyncTask&, int32_t) {
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
             auto thisController = self.promote();
             if (thisController == nullptr) {
                 WLOGFE("this transition Controller is null!");
                 return;
             }
-            HandleScope handleScope(thisController->engine_);
+            HandleScope handleScope(thisController->env_);
             auto jsWin = thisController->jsWin_.lock();
             auto window = thisController->windowToken_.promote();
             if (jsWin == nullptr || window == nullptr) {
@@ -205,22 +218,22 @@ void JsTransitionController::AnimationForHidden()
                     static_cast<uint32_t>(state));
                 return;
             }
-            NativeValue* jsTransContextObj = CreateJsTransitionContextObject(
-                thisController->engine_, jsWin, window, false);
+            napi_value jsTransContextObj = CreateJsTransitionContextObject(
+                thisController->env_, jsWin, window, false);
             if (jsTransContextObj == nullptr) {
                 return;
             }
-            NativeValue *argv[] = { jsTransContextObj };
+            napi_value argv[] = { jsTransContextObj };
             thisController->CallJsMethod("animationForHidden", argv, ArraySize(argv));
         }
     );
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsTransitionController::AnimationForHidden", engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsTransitionController::AnimationForHidden", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsTransitionController::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
+void JsTransitionController::CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc)
 {
     WLOGI("Call js function:%{public}s.", methodName.c_str());
     auto self = jsTransControllerObj_.lock();
@@ -228,18 +241,25 @@ void JsTransitionController::CallJsMethod(const std::string& methodName, NativeV
         WLOGFE("JsController is null!");
         return;
     }
-    auto jsControllerValue = self->Get();
-    auto jsControllerObj = ConvertNativeValueTo<NativeObject>(jsControllerValue);
+    auto jsControllerObj = self->GetNapiValue();
     if (jsControllerObj == nullptr) {
         WLOGFE("JsControllerObj is null!");
         return;
     }
-    auto method = jsControllerObj->GetProperty(methodName.c_str());
-    if (method == nullptr || method->TypeOf() == NATIVE_UNDEFINED) {
+    napi_value method = nullptr;
+    napi_get_named_property(env_, jsControllerObj, methodName.c_str(), &method);
+    if (method == nullptr) {
         WLOGFE("Failed to get %{public}s from object", methodName.c_str());
         return;
     }
-    engine_.CallFunction(jsControllerValue, method, argv, argc);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env_, method, &type);
+    if (type == napi_undefined) {
+        WLOGFE("Failed to get %{public}s from object", methodName.c_str());
+        return;
+    }
+    napi_value returnVal = nullptr;
+    napi_call_function(env_, jsControllerObj, method, argc, argv, &returnVal);
 }
 
 void JsTransitionController::SetJsController(std::shared_ptr<NativeReference> jsVal)

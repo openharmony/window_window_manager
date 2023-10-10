@@ -540,22 +540,29 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
-WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
+    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContent(contentInfo, reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(storage),
+        isdistributed, ability);
+}
+
+WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     bool isdistributed, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, engine, storage, isdistributed, false, ability);
+    return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
-    const std::string& contentInfo, NativeEngine* engine, NativeValue* storage, AppExecFwk::Ability* ability)
+    const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, engine, storage, false, true, ability);
+    return SetUIContentInner(contentInfo, env, storage, false, true, ability);
 }
 
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
     bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability)
 {
-    WLOGFD("SetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    WLOGFD("NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
         uiContent_->Destroy();
     }
@@ -563,10 +570,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, Nat
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
     } else {
-        uiContent = Ace::UIContent::Create(context_.get(), engine);
+        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     }
     if (uiContent == nullptr) {
-        WLOGFE("fail to SetUIContent id: %{public}d", GetPersistentId());
+        WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
     if (isdistributed) {

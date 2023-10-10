@@ -28,37 +28,38 @@ namespace Rosen {
 #else
 #define WINDOW_EXPORT __attribute__((visibility("default")))
 #endif
-WINDOW_EXPORT NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene);
+WINDOW_EXPORT napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene);
+WINDOW_EXPORT NativeValue* CreateJsWindowStage(NativeEngine &Engine, std::shared_ptr<Rosen::WindowScene> windowScene);
 class JsWindowStage {
 public:
     explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~JsWindowStage();
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
-    static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* GetMainWindow(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* GetMainWindowSync(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* On(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* Off(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* LoadContentByName(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetShowOnLockScreen(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
+    static void Finalizer(napi_env env, void* data, void* hint);
+    static napi_value SetUIContent(napi_env env, napi_callback_info info);
+    static napi_value GetMainWindow(napi_env env, napi_callback_info info);
+    static napi_value GetMainWindowSync(napi_env env, napi_callback_info info);
+    static napi_value On(napi_env env, napi_callback_info info);
+    static napi_value Off(napi_env env, napi_callback_info info);
+    static napi_value LoadContent(napi_env env, napi_callback_info info);
+    static napi_value LoadContentByName(napi_env env, napi_callback_info info);
+    static napi_value GetWindowMode(napi_env env, napi_callback_info info);
+    static napi_value CreateSubWindow(napi_env env, napi_callback_info info);
+    static napi_value GetSubWindow(napi_env env, napi_callback_info info);
+    static napi_value SetShowOnLockScreen(napi_env env, napi_callback_info info);
+    static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
 
 private:
-    NativeValue* OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetMainWindowSync(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnEvent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OffEvent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName);
-    NativeValue* OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
+    napi_value OnSetUIContent(napi_env env, napi_callback_info info);
+    napi_value OnGetMainWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetMainWindowSync(napi_env env, napi_callback_info info);
+    napi_value OnEvent(napi_env env, napi_callback_info info);
+    napi_value OffEvent(napi_env env, napi_callback_info info);
+    napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
+    napi_value OnGetWindowMode(napi_env env, napi_callback_info info);
+    napi_value OnCreateSubWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetSubWindow(napi_env env, napi_callback_info info);
+    napi_value OnSetShowOnLockScreen(napi_env env, napi_callback_info info);
+    napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
 
     std::weak_ptr<Rosen::WindowScene> windowScene_;
 };

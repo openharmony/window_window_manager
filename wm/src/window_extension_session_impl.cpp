@@ -148,7 +148,14 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
 WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
-    WLOGFD("WindowExtensionSessionImpl SetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    return NapiSetUIContent(contentInfo, reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(storage),
+        isdistributed, ability);
+}
+
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
+    napi_env env, napi_value storage, bool isdistributed, AppExecFwk::Ability* ability)
+{
+    WLOGFD("WindowExtensionSessionImpl NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
         uiContent_->Destroy();
     }
@@ -156,10 +163,10 @@ WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
     } else {
-        uiContent = Ace::UIContent::Create(context_.get(), engine);
+        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     }
     if (uiContent == nullptr) {
-        WLOGFE("fail to SetUIContent id: %{public}d", GetPersistentId());
+        WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());

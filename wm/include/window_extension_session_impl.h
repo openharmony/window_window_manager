@@ -36,6 +36,8 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
+        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
