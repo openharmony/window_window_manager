@@ -1062,8 +1062,13 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
             WLOGFI("session need to be reusesd.");
-            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+            if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+                sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
+                    info.sessionAffinity);
+            } else {
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
+                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+            }
         }
         if (sceneSession == nullptr) {
             WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");

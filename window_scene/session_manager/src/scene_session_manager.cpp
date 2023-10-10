@@ -4482,11 +4482,14 @@ bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         WLOGFE("CheckIfReuseSession not collaborator!");
         return false;
     }
-    std::string sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
-    if (FindSessionByAffinity(sessionAffinity) != nullptr) {
-        WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionAffinity.c_str());
+    NotifyStartAbility(collaboratorType, sessionInfo);
+    sessionInfo.collaboratorType_ = collaboratorType;
+    sessionInfo.sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+    if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
+        WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionInfo.sessionAffinity.c_str());
         sessionInfo.reuse = true;
     }
+    WLOGFI("CheckIfReuseSession end");
     return true;
 }
 
@@ -4606,8 +4609,16 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     if (sceneSession == nullptr) {
         return;
     }
+    std::string sessionAffinity;
     WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
-    NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+    if (sceneSession->GetSessionInfo().want != nullptr) {
+        sessionAffinity = sceneSession->GetSessionInfo().want
+            ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+    }
+    if (sessionAffinity.empty()) {
+        WLOGFI("PreHandleCollaborator sessionAffinity: %{public}s", sessionAffinity.c_str());
+        NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+    }
     if (sceneSession->GetSessionInfo().want != nullptr) {
         WLOGFI("broker persistentId: %{public}d",
             sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));

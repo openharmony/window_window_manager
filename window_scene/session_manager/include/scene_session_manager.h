@@ -193,7 +193,8 @@ public:
     WMError CheckWindowId(int32_t windowId, int32_t &pid);
     int GetSceneSessionPrivacyModeCount();
     bool CheckIfReuseSession(SessionInfo& sessionInfo);
-
+    bool CheckCollaboratorType(int32_t type);
+    sptr<SceneSession> FindSessionByAffinity(std::string affinity);
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -361,7 +362,6 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
 
-    bool CheckCollaboratorType(int32_t type);
     void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
@@ -373,7 +373,6 @@ private:
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
-    sptr<SceneSession> FindSessionByAffinity(std::string affinity);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
