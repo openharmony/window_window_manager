@@ -1218,6 +1218,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
+    bool isUpdate = false;
+    WMError ret = WMError::WM_OK;
     WLOGFD("Start register");
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
@@ -1225,12 +1227,17 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
     }
 
     auto persistentId = GetPersistentId();
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    WMError ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
-    if (ret != WMError::WM_OK) {
-        return ret;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (avoidAreaChangeListeners_[persistentId].size() == 1) {
+            isUpdate = true;
+        }
     }
-    if (avoidAreaChangeListeners_[persistentId].size() == 1) {
+    if (isUpdate) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
     }
     return ret;
@@ -1238,18 +1245,25 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
 
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
+    bool isUpdate = false;
+    WMError ret = WMError::WM_OK;
     WLOGFD("Start unregister");
     auto persistentId = GetPersistentId();
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    WMError ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
-    if (ret != WMError::WM_OK) {
-        return ret;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (avoidAreaChangeListeners_[persistentId].empty()) {
+            isUpdate = true;
+        }
     }
-    if (avoidAreaChangeListeners_[persistentId].empty()) {
+    if (isUpdate) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, false);
     }
     return ret;
