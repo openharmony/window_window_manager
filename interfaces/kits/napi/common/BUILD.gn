@@ -45,6 +45,7 @@ ohos_static_library("dm_napi_common") {
   deps = [
     "../../../../utils:libwmutil",
     "../../../../wm:libwm",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
