@@ -42,6 +42,7 @@ group("systemtest") {
     ":wms_window_split_immersive_test",
     ":wms_window_split_test",
     ":wms_window_subwindow_test",
+    ":wms_window_system_toast_window_test",
     ":wms_window_systemsubwindow_test",
     ":wms_window_touch_outside_test",
     ":wms_window_visibility_info_test",
@@ -377,6 +378,21 @@ ohos_systemtest("wms_window_app_floating_window_test") {
   module_out_path = module_out_path
 
   sources = [ "window_app_floating_window_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "hilog:libhilog",
+    "power_manager:powermgr_client",
+  ]
+}
+
+ohos_systemtest("wms_window_system_toast_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_system_toast_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
 
