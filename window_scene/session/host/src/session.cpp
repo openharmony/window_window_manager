@@ -668,6 +668,13 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         SetActive(true);
     }
 
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (GetParentSession() && (GetParentSession()->GetSessionState() != SessionState::STATE_FOREGROUND ||
+            GetParentSession()->GetSessionState() != SessionState::STATE_ACTIVE)) {
+                SetSessionState(SessionState::STATE_BACKGROUND);
+            }
+    }
+
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionForeground();
     }
@@ -732,6 +739,11 @@ WSError Session::Background()
     SessionState state = GetSessionState();
     WLOGFD("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
+    if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        UpdateSessionState(SessionState::STATE_INACTIVE);
+        state = SessionState::STATE_INACTIVE;
+        isActive_ = false;
+    }
     if (state != SessionState::STATE_INACTIVE) {
         WLOGFE("Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;

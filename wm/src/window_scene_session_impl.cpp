@@ -481,15 +481,14 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     }
 
     // delete after replace WSError with WMError
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        // main window no need to notify host, since host knows hide first
-        // need to SetActive(false) for host session before background
-        res = static_cast<WMError>(SetActive(false));
-        if (res != WMError::WM_OK) {
-            return res;
-        }
-        res = static_cast<WMError>(hostSession_->Background());
+    // main window no need to notify host, since host knows hide first
+    // main window notify host temporarily, since host background may failed
+    // need to SetActive(false) for host session before background
+    res = static_cast<WMError>(SetActive(false));
+    if (res != WMError::WM_OK) {
+        return res;
     }
+    res = static_cast<WMError>(hostSession_->Background());
 
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
