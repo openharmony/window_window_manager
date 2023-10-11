@@ -175,6 +175,7 @@ struct SessionInfo {
     int32_t ancoSceneState;
     bool isClearSession = false;
     std::string sessionAffinity;
+    int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
 };
 
 enum class SessionFlag : uint32_t {

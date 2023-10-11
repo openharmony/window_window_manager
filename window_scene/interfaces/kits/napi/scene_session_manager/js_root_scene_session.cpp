@@ -260,9 +260,15 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
     if (info.persistentId_ == 0) {
+        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (info.reuse) {
-            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+            if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+                sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
+                    info.sessionAffinity);
+            } else {
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
+                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+            }
         }
         if (sceneSession == nullptr) {
             WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
