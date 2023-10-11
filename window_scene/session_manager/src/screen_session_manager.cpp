@@ -579,14 +579,20 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
     property.SetPhyHeight(screenCapability.GetPhyHeight());
+    property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
-    property.CalcDefaultDisplayOrientation();
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
     }
     property.SetRefreshRate(screenRefreshRate);
+
+    if (foldScreenController_ != nullptr && screenId == 0) {
+        screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
+        property.SetBounds(screenBounds);
+    }
+    property.CalcDefaultDisplayOrientation();
 
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);

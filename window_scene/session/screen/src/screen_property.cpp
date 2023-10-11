@@ -48,6 +48,16 @@ RRect ScreenProperty::GetBounds() const
     return bounds_;
 }
 
+void ScreenProperty::SetPhyBounds(const RRect& phyBounds)
+{
+    phyBounds_ = phyBounds;
+}
+
+RRect ScreenProperty::GetPhyBounds() const
+{
+    return phyBounds_;
+}
+
 float ScreenProperty::GetDensity()
 {
     return virtualPixelRatio_;
