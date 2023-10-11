@@ -262,6 +262,8 @@ public:
     WSRectF UpdateHotRect(const WSRect& rect);
     WSError RaiseToAppTopForPointDown();
 
+    void NotifyForegroundInteractiveStatus(bool interactive);
+
 protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     void UpdateSessionState(SessionState state);

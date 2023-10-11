@@ -69,6 +69,8 @@ public:
     void AfterBackground() override;
     void AfterFocused() override;
     void AfterUnfocused() override;
+    void AfterResumed() override;
+    void AfterPaused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnTouchOutside() const override;

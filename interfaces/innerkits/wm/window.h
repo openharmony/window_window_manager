@@ -107,6 +107,14 @@ public:
      * @brief Notify caller that window is inactive.
      */
     virtual void AfterInactive() {}
+    /**
+     * @brief Notify caller that window is resumed.
+     */
+    virtual void AfterResumed() {}
+    /**
+     * @brief Notify caller that window is paused.
+     */
+    virtual void AfterPaused() {}
 };
 
 /**

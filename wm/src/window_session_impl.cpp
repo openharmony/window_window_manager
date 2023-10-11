@@ -473,6 +473,22 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
+{
+    WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return;
+    }
+    if (state_ == WindowState::STATE_SHOWN) {
+        if (interactive) {
+            NotifyAfterResumed();
+        } else {
+            NotifyAfterPaused();
+        }
+    }
+}
+
 WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
 {
     return WSError::WS_OK;
@@ -1080,6 +1096,18 @@ void WindowSessionImpl::NotifyBackgroundFailed(WMError ret)
 {
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER_WITH_PARAM(BackgroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+}
+
+void WindowSessionImpl::NotifyAfterResumed()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyAfterPaused()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
 }
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
