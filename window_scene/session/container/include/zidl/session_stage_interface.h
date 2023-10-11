@@ -63,6 +63,7 @@ public:
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
+    virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

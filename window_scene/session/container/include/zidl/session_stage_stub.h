@@ -51,6 +51,7 @@ private:
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

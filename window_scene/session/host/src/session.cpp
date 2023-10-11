@@ -788,6 +788,15 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+void Session::NotifyForegroundInteractiveStatus(bool interactive)
+{
+    if (!IsSessionValid() || !sessionStage_) {
+        return;
+    }
+    WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
+    sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+}
+
 void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
 {
     pendingSessionActivationFunc_ = func;

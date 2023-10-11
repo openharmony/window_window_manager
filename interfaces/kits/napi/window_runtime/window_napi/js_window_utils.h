@@ -62,6 +62,8 @@ enum class LifeCycleEventType : uint32_t {
     ACTIVE,
     INACTIVE,
     BACKGROUND,
+    RESUMED,
+    PAUSED,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
