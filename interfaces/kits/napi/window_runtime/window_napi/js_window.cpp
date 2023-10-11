@@ -770,10 +770,14 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    auto winType = windowToken_->GetType();
-    if (!WindowHelper::IsSystemWindow(winType)) {
-        WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-        errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    if (windowToken_ == nullptr) {
+        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    } else {
+        auto winType = windowToken_->GetType();
+        if (!WindowHelper::IsSystemWindow(winType)) {
+            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+        }
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
