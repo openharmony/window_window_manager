@@ -1326,6 +1326,24 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
+{
+    if (alpha < 0 || alpha > 1.0) {
+        WLOGFE("OnSetSystemSceneOcclusionAlpha property is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        WLOGFE("surfaceNode_ is null");
+        return;
+    }
+    uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
+    surfaceNode_->SetAbilityBGAlpha(alpha8bit);
+    if (leashWinSurfaceNode_ != nullptr) {
+        leashWinSurfaceNode_->SetAbilityBGAlpha(alpha8bit);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     return PostSyncTask([weakThis = wptr(this), needDefaultAnimationFlag]() {
