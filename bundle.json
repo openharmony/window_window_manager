@@ -72,7 +72,8 @@
         ],
         "third_party": [
           "libjpeg-turbo",
-          "libxml2"
+          "libxml2",
+          "bounds_checking_function"
         ]
       },
       "build": {
