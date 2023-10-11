@@ -42,6 +42,9 @@ public:
     void SetBounds(const RRect& bounds);
     RRect GetBounds() const;
 
+    void SetPhyBounds(const RRect& phyBounds);
+    RRect GetPhyBounds() const;
+
     float GetDensity();
 
     void SetPhyWidth(uint32_t phyWidth);
@@ -92,6 +95,7 @@ private:
     }
     float rotation_ { 0.0f };
     RRect bounds_;
+    RRect phyBounds_;
 
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
