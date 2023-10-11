@@ -165,6 +165,7 @@ public:
     const std::string& GetWindowName() const;
     void UpdateNativeVisibility(bool visible);
     void SetPrivacyMode(bool isPrivacy);
+    void SetSystemSceneOcclusionAlpha(double alpha);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
