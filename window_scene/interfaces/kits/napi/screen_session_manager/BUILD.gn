@@ -40,7 +40,9 @@ ohos_shared_library("screensessionmanager_napi") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "napi:ace_napi",
+    "power_manager:powermgr_client",
   ]
 
   relative_install_dir = "module"

@@ -18,6 +18,7 @@
 #include <js_runtime_utils.h>
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
+#include "shutdown/shutdown_client.h"
 #include "window_manager_hilog.h"
 
 #include "interfaces/include/ws_common.h"
@@ -56,6 +57,10 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UpdateScreenRotationProperty);
     BindNativeFunction(env, exportObj, "getCurvedScreenCompressionArea", moduleName,
         JsScreenSessionManager::GetCurvedCompressionArea);
+    BindNativeFunction(env, exportObj, "registerShutdownCallback", moduleName,
+        JsScreenSessionManager::RegisterShutdownCallback);
+    BindNativeFunction(env, exportObj, "unRegisterShutdownCallback", moduleName,
+        JsScreenSessionManager::UnRegisterShutdownCallback);
     return NapiGetUndefined(env);
 }
 
@@ -131,6 +136,85 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsScreenSessionManager::OnScreenDisconnect", env_,
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
+{
+    if (!shutdownCallback_) {
+        return false;
+    }
+    std::shared_ptr<NativeReference> callback_ = shutdownCallback_;
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [callback_, isReboot](napi_env env, NapiAsyncTask& task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env, isReboot)};
+            napi_value method = callback_->GetNapiValue();
+            if (method == nullptr) {
+                WLOGFE("Failed to get method callback from object!");
+                return;
+            }
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+        }
+    );
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSessionManager::OnTakeOverShutdown", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    return true;
+}
+
+
+napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("Register RegisterShutdownCallback.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterShutdownCallback(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("Register UnRegisterShutdownCallback.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
+}
+
+ 
+napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnRegisterShutdownCallback");
+    if (shutdownCallback_ != nullptr) {
+        WLOGFE("Failed to register callback, callback exits");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
+        return NapiGetUndefined(env);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    napi_value value = argv[0];
+    if (!NapiIsCallable(env, value)) {
+        WLOGFE("Failed to register callback, param is not callable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
+    shutdownCallback_ = callbackRef;
+    PowerMgr::ShutdownClient::GetInstance().RegisterShutdownCallback(this, PowerMgr::ShutdownPriority::LOW);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnUnRegisterShutdownCallback");
+    PowerMgr::ShutdownClient::GetInstance().UnRegisterShutdownCallback(this);
+    shutdownCallback_ = nullptr;
+    return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
