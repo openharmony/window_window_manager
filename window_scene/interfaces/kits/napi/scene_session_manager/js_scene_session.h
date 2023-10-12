@@ -53,7 +53,7 @@ private:
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
 
-    bool IsCallbackRegistered(const std::string& type, napi_value jsListenerObject);
+    bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
 
     void ProcessPendingSceneSessionActivationRegister();
