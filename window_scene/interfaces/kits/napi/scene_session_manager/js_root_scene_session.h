@@ -35,7 +35,7 @@ public:
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info);
-    bool IsCallbackRegistered(std::string type, napi_value jsListenerObject);
+    bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
     void PendingSessionActivation(SessionInfo& info);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
 

@@ -626,7 +626,7 @@ napi_value JsSceneSession::SetZOrder(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetZOrder(env, info) : nullptr;
 }
 
-bool JsSceneSession::IsCallbackRegistered(const std::string& type, napi_value jsListenerObject)
+bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         return false;
@@ -634,7 +634,7 @@ bool JsSceneSession::IsCallbackRegistered(const std::string& type, napi_value js
 
     for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
         bool isEquals = false;
-        napi_strict_equals(env_, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
         if (isEquals) {
             WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;
@@ -680,7 +680,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         WLOGFE("[NAPI]callback type is not supported, type = %{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
-    if (IsCallbackRegistered(cbType, value)) {
+    if (IsCallbackRegistered(env, cbType, value)) {
         WLOGFE("[NAPI]callback is registered, type = %{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
