@@ -14,6 +14,7 @@
  */
 
 #include "js_window_extension_context.h"
+#include "js_window_extension.h"
 
 #include <js_runtime_utils.h>
 #include <js_extension_context.h>
@@ -74,13 +75,9 @@ private:
         if (!CheckWantParam(env, argv[0], want)) {
             return false;
         }
-        if (argc > 1) {
-            napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, argv[1], &valueType);
-            if (valueType == napi_object) {
-                WLOGI("OnStartAbility start options is used.");
-                AppExecFwk::UnwrapStartOptions(env, argv[1], startOptions);
-            }
+        if (argc > 1 && GetType(env, argv[1]) == napi_object) {
+            WLOGI("OnStartAbility start options is used.");
+            AppExecFwk::UnwrapStartOptions(env, argv[1], startOptions);
         }
         return true;
     }
@@ -96,7 +93,7 @@ private:
             want.GetElement().GetAbilityName().c_str());
         return true;
     }
-    
+
     napi_value OnStartAbility(napi_env env, napi_callback_info info)
     {
         WLOGI("OnStartAbility is called");
