@@ -192,18 +192,18 @@ HWTEST_F(UtilsAllTest, SRHOnImageAvailable, Function | SmallTest | Level2)
     ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
 }
 /**
- * @tc.name: SRHOnImageAvailable01
- * @tc.desc: test SurfaceReaderHandlerImpl::OnImageAvailable
+ * @tc.name: SRHGetPixelMap01
+ * @tc.desc: test SurfaceReaderHandlerImpl::GetPixelMap
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SRHResetFlag, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
 {
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
-    surfaceReaderHandlerImpl->ResetFlag();
+    surfaceReaderHandlerImpl->GetPixelMap();
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
     surfaceReaderHandlerImpl->flag_ = true;
-    surfaceReaderHandlerImpl->ResetFlag();
+    surfaceReaderHandlerImpl->GetPixelMap();
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
 }
 }
