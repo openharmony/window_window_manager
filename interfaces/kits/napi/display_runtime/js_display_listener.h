@@ -33,7 +33,7 @@ public:
     ~JsDisplayListener() override = default;
     void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
-    void RemoveCallback(const std::string& type, napi_value jsListenerObject);
+    void RemoveCallback(napi_env env, const std::string& type, napi_value jsListenerObject);
     void OnCreate(DisplayId id) override;
     void OnDestroy(DisplayId id) override;
     void OnChange(DisplayId id) override;
