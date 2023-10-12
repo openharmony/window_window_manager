@@ -176,7 +176,6 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
     }
 
     napi_value value = argv[1];
-
     if (!NapiIsCallable(env, value)) {
         WLOGFE("Failed to register callback, callback is not callable!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
