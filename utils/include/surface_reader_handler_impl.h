@@ -26,7 +26,6 @@ class SurfaceReaderHandlerImpl : public SurfaceReaderHandler {
 public:
     bool OnImageAvailable(sptr<Media::PixelMap> pixelMap) override;
     bool IsImageOk();
-    void ResetFlag();
     sptr<Media::PixelMap> GetPixelMap();
 
 private:
