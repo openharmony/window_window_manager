@@ -102,13 +102,21 @@ ohos_shared_library("sms") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
+  if (is_standard_system) {
+    external_deps += [ "init:libbegetutil" ]
+  } else {
+    external_deps += [ "init_lite:libbegetutil" ]
+  }
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
