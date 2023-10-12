@@ -22,7 +22,7 @@ static napi_module g_displayModule = {
     .nm_modname = "display",
 };
 
-extern "C" __attribute__((constructor)) void NAPI_application_screenmanager_AutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_application_displaymanager_AutoRegister()
 {
     napi_module_register(&g_displayModule);
 }

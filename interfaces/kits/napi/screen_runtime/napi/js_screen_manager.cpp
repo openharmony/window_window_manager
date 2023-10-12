@@ -264,7 +264,7 @@ DmErrorCode UnRegisterScreenListenerWithType(napi_env env, const std::string& ty
         bool isEquals = false;
         napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            it->second->RemoveCallback(type, value);
+            it->second->RemoveCallback(env, type, value);
             if (type == EVENT_CONNECT || type == EVENT_DISCONNECT || type == EVENT_CHANGE) {
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
                 ret = DM_JS_TO_ERROR_CODE_MAP.at(
