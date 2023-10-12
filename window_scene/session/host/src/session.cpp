@@ -456,6 +456,11 @@ bool Session::IsSystemSession() const
     return sessionInfo_.isSystem_;
 }
 
+bool Session::IsTerminated() const
+{
+    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating);
+}
+
 WSError Session::SetPointerStyle(MMI::WindowArea area)
 {
     WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",

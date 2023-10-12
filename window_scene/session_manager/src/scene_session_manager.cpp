@@ -3436,6 +3436,9 @@ sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObje
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(),
         [targetToken](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+            if (pair.second->IsTerminated()) {
+                return false;
+            }
             if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 return pair.second->GetAbilityToken() == targetToken;
             }
@@ -3454,32 +3457,35 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         WLOGFE("BindDialogTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-
     if (targetToken == nullptr) {
         WLOGFE("Target token is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto scnSession = GetSceneSession(static_cast<int32_t>(persistentId));
-    if (scnSession == nullptr) {
-        WLOGFE("Session is nullptr, persistentId:%{public}" PRIu64, persistentId);
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (scnSession->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFE("Session is not dialog window, window type:%{public}u", scnSession->GetWindowType());
+
+    auto task = [this, persistentId, targetToken]() {
+        auto scnSession = GetSceneSession(static_cast<int32_t>(persistentId));
+        if (scnSession == nullptr) {
+            WLOGFE("Session is nullptr, persistentId:%{public}" PRIu64, persistentId);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (scnSession->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+            WLOGFE("Session is not dialog window, window type:%{public}u", scnSession->GetWindowType());
+            return WSError::WS_OK;
+        }
+        scnSession->dialogTargetToken_ = targetToken;
+        sptr<SceneSession> parentSession = FindMainWindowWithToken(targetToken);
+        if (parentSession == nullptr) {
+            scnSession->NotifyDestroy();
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        scnSession->SetParentSession(parentSession);
+        scnSession->SetParentPersistentId(parentSession->GetPersistentId());
+        UpdateParentSessionForDialog(scnSession, scnSession->GetSessionProperty());
+        WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
+            persistentId, parentSession->GetPersistentId());
         return WSError::WS_OK;
-    }
-    scnSession->dialogTargetToken_ = targetToken;
-    sptr<SceneSession> parentSession = FindMainWindowWithToken(targetToken);
-    if (parentSession == nullptr) {
-        scnSession->NotifyDestroy();
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    scnSession->SetParentSession(parentSession);
-    scnSession->SetParentPersistentId(parentSession->GetPersistentId());
-    UpdateParentSessionForDialog(scnSession, scnSession->GetSessionProperty());
-    WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
-        persistentId, parentSession->GetPersistentId());
-    return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
