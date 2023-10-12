@@ -272,7 +272,7 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
             continue;
         }
         if (moduleName.compare(moduleName.length() - suffix.length(), suffix.length(), suffix) == 0) {
-            WLOGFE("Found test module name: %{public}s", moduleName.c_str());
+            WLOGFI("Found test module name: %{public}s", moduleName.c_str());
             return true;
         }
     }
