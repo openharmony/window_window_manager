@@ -103,7 +103,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (IsCallbackRegistered(cbType, value)) {
+    if (IsCallbackRegistered(env, cbType, value)) {
         return NapiGetUndefined(env);
     }
     if (rootSceneSession_ == nullptr) {
@@ -167,7 +167,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     std::shared_ptr<NativeReference> contentStorage = nullptr;
     if (storage != nullptr) {
         napi_ref ref = nullptr;
-        napi_create_reference(env_, storage, 1, &ref);
+        napi_create_reference(env, storage, 1, &ref);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
     }
 
@@ -187,7 +187,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     return result;
 }
 
-bool JsRootSceneSession::IsCallbackRegistered(std::string type, napi_value jsListenerObject)
+bool JsRootSceneSession::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
@@ -196,7 +196,7 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, napi_value jsLis
 
     for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
         bool isEquals = false;
-        napi_strict_equals(env_, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
         if (isEquals) {
             WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;

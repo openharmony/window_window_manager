@@ -408,7 +408,7 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSendTouchEvent(env, info) : nullptr;
 }
 
-bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, napi_value jsListenerObject)
+bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         return false;
@@ -416,7 +416,7 @@ bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, napi_v
 
     for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
         bool isEquals = false;
-        napi_strict_equals(env_, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
         if (isEquals) {
             WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;
@@ -444,15 +444,13 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
-    bool isCallable = false;
-    napi_is_callable(env, value, &isCallable);
-    if (value == nullptr || !isCallable) {
+    if (value == nullptr || !NapiIsCallable(env, value)) {
         WLOGFE("[NAPI]Callback is nullptr or not callable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (IsCallbackRegistered(cbType, value)) {
+    if (IsCallbackRegistered(env, cbType, value)) {
         return NapiGetUndefined(env);
     }
 
@@ -597,7 +595,7 @@ napi_value JsSceneSessionManager::CreateWindowModes(napi_env env,
     napi_create_array_with_length(env, windowModes.size(), &arrayValue);
     auto index = 0;
     for (const auto& windowMode : windowModes) {
-        napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<uint32_t>(windowMode)));
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(windowMode)));
     }
     return arrayValue;
 }
