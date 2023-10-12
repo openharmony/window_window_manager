@@ -320,6 +320,13 @@ void JsWindowExtension::OnWindowCreated() const
         std::make_unique<AbilityRuntime::NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+napi_valuetype GetType(napi_env env, napi_value value)
+{
+    napi_valuetype res = napi_undefined;
+    napi_typeof(env, value, &res);
+    return res;
+}
+
 napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const* argv, size_t argc) const
 {
     WLOGI("called (%{public}s), begin", name);
@@ -340,13 +347,7 @@ napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const* a
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, name, &method);
-    if (method == nullptr) {
-        WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
-        return nullptr;
-    }
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, method, &valueType);
-    if (valueType != napi_function) {
+    if (method == nullptr || GetType(env, method) != napi_function) {
         WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
         return nullptr;
     }
