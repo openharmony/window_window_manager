@@ -336,7 +336,7 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
         bool isEquals = false;
         napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            it->second->RemoveCallback(type, value);
+            it->second->RemoveCallback(env, type, value);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
