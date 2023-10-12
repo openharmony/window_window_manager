@@ -29,7 +29,7 @@ public:
     ~JsScreenListener() override = default;
     void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
-    void RemoveCallback(const std::string& type, napi_value jsListenerObject);
+    void RemoveCallback(napi_env env, const std::string& type, napi_value jsListenerObject);
     void OnConnect(ScreenId id) override;
     void OnDisconnect(ScreenId id) override;
     void OnChange(ScreenId id) override;

@@ -44,7 +44,7 @@ void JsScreenListener::RemoveAllCallback()
     jsCallBack_.clear();
 }
 
-void JsScreenListener::RemoveCallback(const std::string& type, napi_value jsListenerObject)
+void JsScreenListener::RemoveCallback(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     auto it = jsCallBack_.find(type);
@@ -55,7 +55,7 @@ void JsScreenListener::RemoveCallback(const std::string& type, napi_value jsList
     auto& listeners = it->second;
     for (auto iter = listeners.begin(); iter != listeners.end();) {
         bool isEquals = false;
-        napi_strict_equals(env_, jsListenerObject, (*iter)->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, (*iter)->GetNapiValue(), &isEquals);
         if (isEquals) {
             listeners.erase(iter);
         } else {
