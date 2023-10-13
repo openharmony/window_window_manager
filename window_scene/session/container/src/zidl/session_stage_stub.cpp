@@ -55,6 +55,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTouchOutside),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE),
         &SessionStageStub::HandleUpdateWindowMode),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
+        &SessionStageStub::HandleNotifyForegroundInteractiveStatus),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -215,4 +217,13 @@ int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel&
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("NotifyForegroundInteractiveStatus!");
+    bool interactive = data.ReadBool();
+    NotifyForegroundInteractiveStatus(interactive);
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen

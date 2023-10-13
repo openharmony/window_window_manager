@@ -104,6 +104,7 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
+    void NotifyForegroundInteractiveStatus(bool interactive) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -218,6 +219,8 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterResumed();
+    void NotifyAfterPaused();
 
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability);

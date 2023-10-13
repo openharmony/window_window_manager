@@ -1143,6 +1143,32 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive)
+{
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession, interactive]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return;
+        }
+        auto persistentId = scnSession->GetPersistentId();
+        WLOGFI("notify interactive session persistentId: %{public}d", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:NotifyForegroundInteractiveStatus (%d )", persistentId);
+        if (!GetSceneSession(persistentId)) {
+            WLOGFE("session is invalid with %{public}d", persistentId);
+            return;
+        }
+        const auto& state = scnSession->GetSessionState();
+        if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) &&
+            (scnSession->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
+            scnSession->NotifyForegroundInteractiveStatus(interactive);
+        }
+    };
+
+    taskScheduler_->PostAsyncTask(task);
+}
+
 WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyDialogWithMainWindow");
