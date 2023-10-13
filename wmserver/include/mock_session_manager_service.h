@@ -47,6 +47,7 @@ private:
     class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         void OnRemoteDied(const wptr<IRemoteObject>& object) override;
+        bool IsSceneBoardTestMode();
     };
 
     sptr<IRemoteObject> sessionManagerService_;
