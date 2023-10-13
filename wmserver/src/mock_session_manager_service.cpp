@@ -17,16 +17,20 @@
 
 #include <unistd.h>
 
+#include <bundle_mgr_interface.h>
 #include <system_ability_definition.h>
 #include <cinttypes>
 #include <csignal>
 #include <iomanip>
+#include <ipc_skeleton.h>
+#include <iservice_registry.h>
 #include <map>
 #include <sstream>
 
 #include "mock_screen_manager_service.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
+#include "parameters.h"
 #include "root_scene.h"
 #include "string_ex.h"
 #include "wm_common.h"
@@ -44,6 +48,9 @@ const char DEFAULT_STRING[] = "error";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
+const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
+const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
@@ -53,6 +60,11 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
     auto sessionManagerService = object.promote();
     if (!sessionManagerService) {
         WLOGFE("sessionManagerService is null");
+        return;
+    }
+
+    if (IsSceneBoardTestMode()) {
+        WLOGFI("SceneBoard is testing, do not kill foundation.");
         return;
     }
     WLOGFI("SessionManagerService died, restart foundation now!");
@@ -219,6 +231,52 @@ void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
 
 void MockSessionManagerService::ShowAceDumpHelp(std::string& dumpInfo)
 {
+}
+
+bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode() 
+{
+    if (!OHOS::system::GetBoolParameter(KEY_SCENE_BOARD_TEST_ENABLE, false)) {
+        WLOGFD("SceneBoard testmode is disabled.");
+        return false;
+    }
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        WLOGFE("Failed to get SystemAbilityManager.");
+        return false;
+    }
+
+    auto bmsObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsObj == nullptr) {
+        WLOGFE("Failed to get BundleManagerService.");
+        return false;
+    }
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
+    AppExecFwk::BundleInfo bundleInfo;
+    int uid = IPCSkeleton::GetCallingUid();
+    int userId = uid / 200000;
+    bool result = bundleMgr_->GetBundleInfo(SCENE_BOARD_BUNDLE_NAME,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, userId);
+    if (!result) {
+        WLOGFE("Failed to query bundleInfo, userId:%{public}d", userId);
+        return false;
+    }
+    auto hapModulesList = bundleInfo.hapModuleInfos;
+    if (hapModulesList.empty()) {
+        WLOGFE("hapModulesList is empty");
+        return false;
+    }
+    std::string suffix = TEST_MODULE_NAME_SUFFIX;
+    for (auto hapModule: hapModulesList) {
+        std::string moduleName = hapModule.moduleName;
+        if (moduleName.length() < suffix.length()) {
+            continue;
+        }
+        if (moduleName.compare(moduleName.length() - suffix.length(), suffix.length(), suffix) == 0) {
+            WLOGFI("Found test module name: %{public}s", moduleName.c_str());
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS
