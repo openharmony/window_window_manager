@@ -52,6 +52,8 @@ private:
 
     FoldStatus TransferAngleToScreenState(float, int) const;
 
+    void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
+
     FoldScreenSensorManager();
 
     ~FoldScreenSensorManager() = default;

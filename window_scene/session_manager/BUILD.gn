@@ -168,6 +168,7 @@ ohos_shared_library("screen_session_manager") {
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "ipc:ipc_core",
