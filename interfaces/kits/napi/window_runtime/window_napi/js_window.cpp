@@ -3173,13 +3173,13 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
 void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode &errCode, int32_t &subWindowId)
 {
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to subWindowId");
+        WLOGFE("Failed to get subWindowId");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     } else {
         int32_t resultValue = 0;
         napi_get_value_int32(env, nativeVal, &resultValue);
         if (resultValue <= 0) {
-            WLOGFE("Failed to convert parameter to subWindowId");
+            WLOGFE("Failed to get subWindowId due to resultValue less than or equal to 0");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             subWindowId = resultValue;
@@ -3355,9 +3355,7 @@ napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
             WLOGFE("Failed to convert parameter to touchable");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
-            uint32_t resultValue = 0;
-            napi_get_value_uint32(env, nativeVal, &resultValue);
-            callingWindow = resultValue;
+            napi_get_value_uint32(env, nativeVal, &callingWindow);
         }
     }
 
@@ -4092,7 +4090,7 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetCornerRadius invalid radius");
+        WLOGFE("SetCornerRadius invalid radius due to nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
@@ -4183,7 +4181,7 @@ napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetBlur invalid radius");
+        WLOGFE("SetBlur invalid radius due to nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
@@ -4221,7 +4219,7 @@ napi_value JsWindow::OnSetBackdropBlur(napi_env env, napi_callback_info info)
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetBackdropBlur invalid radius");
+        WLOGFE("SetBackdropBlur invalid radius due to nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
@@ -4260,7 +4258,7 @@ napi_value JsWindow::OnSetBackdropBlurStyle(napi_env env, napi_callback_info inf
 
     napi_value nativeMode = argv[0];
     if (nativeMode == nullptr) {
-        WLOGFE("SetBackdropBlurStyle Invalid window blur style");
+        WLOGFE("SetBackdropBlurStyle Invalid window blur style due to nativeMode is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t resultValue = 0;
