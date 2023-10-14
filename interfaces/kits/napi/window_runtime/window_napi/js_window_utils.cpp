@@ -20,6 +20,7 @@
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
+#include "js_window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -508,13 +509,6 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
         napi_set_element(env, array, index++, CreateJsSystemBarRegionTintObject(env, tints[i]));
     }
     return objValue;
-}
-
-static napi_valuetype GetType(napi_env env, napi_value value)
-{
-    napi_valuetype res = napi_undefined;
-    napi_typeof(env, value, &res);
-    return res;
 }
 
 bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,

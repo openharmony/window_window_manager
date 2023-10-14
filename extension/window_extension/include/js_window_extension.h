@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace Rosen {
+napi_valuetype GetType(napi_env env, napi_value value);
 class JsWindowExtension : public WindowExtension {
 public:
     explicit JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime);

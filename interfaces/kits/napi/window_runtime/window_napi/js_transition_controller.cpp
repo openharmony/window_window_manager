@@ -19,6 +19,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
+#include "js_window.h"
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -53,19 +54,6 @@ napi_value JsTransitionContext::CompleteTransition(napi_env env, napi_callback_i
     WLOGI("[NAPI]CompleteTransition");
     JsTransitionContext* me = CheckParamsAndGetThis<JsTransitionContext>(env, info);
     return (me != nullptr) ? me->OnCompleteTransition(env, info) : nullptr;
-}
-
-static napi_value NapiGetUndefined(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_get_undefined(env, &result);
-    return result;
-}
-
-static napi_value NapiThrowError(napi_env env, WmErrorCode errCode)
-{
-    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
-    return NapiGetUndefined(env);
 }
 
 napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback_info info)
@@ -248,18 +236,11 @@ void JsTransitionController::CallJsMethod(const std::string& methodName, napi_va
     }
     napi_value method = nullptr;
     napi_get_named_property(env_, jsControllerObj, methodName.c_str(), &method);
-    if (method == nullptr) {
+    if (method == nullptr || GetType(env_, method) == napi_undefined) {
         WLOGFE("Failed to get %{public}s from object", methodName.c_str());
         return;
     }
-    napi_valuetype type = napi_undefined;
-    napi_typeof(env_, method, &type);
-    if (type == napi_undefined) {
-        WLOGFE("Failed to get %{public}s from object", methodName.c_str());
-        return;
-    }
-    napi_value returnVal = nullptr;
-    napi_call_function(env_, jsControllerObj, method, argc, argv, &returnVal);
+    napi_call_function(env_, jsControllerObj, method, argc, argv, nullptr);
 }
 
 void JsTransitionController::SetJsController(std::shared_ptr<NativeReference> jsVal)
