@@ -52,6 +52,7 @@ public:
         TRANS_ID_UPDATE_ZOOM_TRANSFORM,
         TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
         TRANS_ID_CONSUME_KEY_EVENT,
+        TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS,
     };
 
     virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
@@ -79,6 +80,7 @@ public:
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
+    virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

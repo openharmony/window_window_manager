@@ -200,6 +200,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             ConsumeKeyEvent(event);
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS: {
+            bool interactive = data.ReadBool();
+            NotifyForegroundInteractiveStatus(interactive);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
