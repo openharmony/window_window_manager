@@ -14,6 +14,7 @@
  */
 
 #include "session/host/include/scene_session.h"
+#include <parameters.h>
 
 #include <algorithm>
 #include <hitrace_meter.h>
@@ -947,7 +948,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             if (!isNew) {
                 moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
             }
-            if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+            auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+            if (!isPhone && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 return WSError::WS_OK;
             }
