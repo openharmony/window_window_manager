@@ -14,6 +14,7 @@
  */
 
 #include <cmath>
+#include <hisysevent.h>
 
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "window_manager_hilog.h"
@@ -95,7 +96,7 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         WLOGFE("Invalid angle value, angle is %{public}f.", angle);
         return;
     }
-    WLOGFI("angle vlaue in PostureData is: %{public}f.", angle);
+    WLOGFD("angle vlaue in PostureData is: %{public}f.", angle);
     HandleSensorData(angle, DEFAULT_HALL);
 }
 
@@ -111,6 +112,7 @@ void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
     }
     if (mState_ != nextState) {
         WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+        ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
         mState_ = nextState;
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
         if (foldScreenPolicy_ != nullptr) {
@@ -154,6 +156,23 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
         }
     }
     return state;
+}
+
+void FoldScreenSensorManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle)
+{
+    WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
+            currentStatus, nextStatus, postureAngle);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "NOTIFY_FOLD_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "CURRENT_FOLD_STATUS", currentStatus,
+        "NEXT_FOLD_STATUS", nextStatus,
+        "SENSOR_POSTURE", postureAngle);
+
+    if (ret != 0) {
+        WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
 }
 } // Rosen
 } // OHOS
