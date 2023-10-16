@@ -29,7 +29,6 @@ namespace Rosen {
 #define WINDOW_EXPORT __attribute__((visibility("default")))
 #endif
 WINDOW_EXPORT napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene);
-WINDOW_EXPORT NativeValue* CreateJsWindowStage(NativeEngine &Engine, std::shared_ptr<Rosen::WindowScene> windowScene);
 class JsWindowStage {
 public:
     explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
