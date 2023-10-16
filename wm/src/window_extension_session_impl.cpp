@@ -145,13 +145,6 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
     WLOGFD("Backpressed event is not cosumed");
 }
 
-WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
-    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
-{
-    return NapiSetUIContent(contentInfo, reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(storage),
-        isdistributed, ability);
-}
-
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
     napi_env env, napi_value storage, bool isdistributed, AppExecFwk::Ability* ability)
 {

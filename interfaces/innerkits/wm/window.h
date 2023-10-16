@@ -26,8 +26,6 @@
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
-class NativeEngine;
-class NativeValue;
 namespace OHOS::MMI {
     class PointerEvent;
     class KeyEvent;
@@ -1093,12 +1091,6 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
-        NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr)
-    {
-        return WMError::WM_OK;
-    }
-
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr)
     {
