@@ -27,13 +27,11 @@
 #include <ability_info.h>
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
-#include <display_power_mgr_client.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <parameters.h>
 #include "parameter.h"
 #include <pointer_event.h>
-#include <power_mgr_client.h>
 #include <resource_manager.h>
 #include <running_lock.h>
 #include <session_info.h>
@@ -43,6 +41,14 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+#include <display_power_mgr_client.h>
+#endif
+
+#ifdef POWER_MANAGER_ENABLE
+#include <power_mgr_client.h>
+#endif
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -1984,6 +1990,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
 
 void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
 {
+#ifdef POWER_MANAGER_ENABLE
     auto task = [this, sceneSession]() {
         if (sceneSession == nullptr) {
             WLOGFE("session is invalid");
@@ -2000,10 +2007,14 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
         IPCSkeleton::SetCallingIdentity(identity);
     };
     taskScheduler_->PostAsyncTask(task);
+#else
+    WLOGFD("Can not found the sub system of PowerMgr");
+#endif
 }
 
 void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
 {
+#ifdef POWER_MANAGER_ENABLE
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession, requireLock]() {
         auto scnSession = weakSceneSession.promote();
@@ -2040,6 +2051,9 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         }
     };
     taskScheduler_->PostAsyncTask(task);
+#else
+    WLOGFD("Can not found the sub system of PowerMgr");
+#endif
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
@@ -2052,6 +2066,7 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
         return WSError::WS_DO_NOTHING;
     }
     sceneSession->SetBrightness(brightness);
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness) {
         if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
@@ -2062,6 +2077,9 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
             SetDisplayBrightness(brightness);
         }
     }
+#else
+    WLOGFD("Can not found the sub system of DisplayPowerMgr");
+#endif
     brightnessSessionId_ = sceneSession->GetPersistentId();
     return WSError::WS_OK;
 }
