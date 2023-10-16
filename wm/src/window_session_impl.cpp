@@ -1394,7 +1394,10 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (uiContent_ != nullptr) {
-            WLOGFD("Transfer pointer event to uiContent");
+            if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+                WLOGFI("InputTracking id:%{public}d, WindowSessionImpl::NotifyPointerEvent",
+                    pointerEvent->GetId());
+            }
             (void)uiContent_->ProcessPointerEvent(pointerEvent);
         } else {
             WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
