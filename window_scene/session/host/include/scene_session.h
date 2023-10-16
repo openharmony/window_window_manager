@@ -226,7 +226,7 @@ private:
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
-    bool needDefaultAnimationFlag_ = false;
+    bool needDefaultAnimationFlag_ = true;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
