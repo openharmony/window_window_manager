@@ -126,3 +126,14 @@ START_WINDOW:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: The event is application startup request window}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   WINDOW_NAME: {type: STRING, desc: window name}
+
+NOTIFY_FOLD_STATE_CHANGE:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: notify fold status change}
+  CURRENT_FOLD_STATUS: {type: INT32, desc: current fold status}
+  NEXT_FOLD_STATUS: {type: INT32, desc: next fold status}
+  SENSOR_POSTURE: {type: FLOAT, desc: sensor posture status}
+
+FOLD_STATE_CHANGE_BEGIN:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: fold status change begin}
+  POWER_OFF_SCREEN: {type: INT32, desc: power off screen id}
+  POWER_ON_SCREEN: {type: INT32, desc: power on screen id}

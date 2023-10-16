@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <hisysevent.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/dual_display_device_policy.h"
 #include "session/screen/include/screen_session.h"
@@ -49,6 +50,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
+                ReportFoldStatusChangeBegin((int32_t)screenIdFull, (int32_t)screenIdMain);
                 #ifdef TP_FEATURE_ENABLE
                 RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, mainTpChange.c_str());
                 #endif
@@ -67,6 +69,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 break;
             }
             case FoldDisplayMode::FULL: {
+                ReportFoldStatusChangeBegin((int32_t)screenIdMain, (int32_t)screenIdFull);
                 #ifdef TP_FEATURE_ENABLE
                 RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, fullTpChange.c_str());
                 #endif
@@ -138,6 +141,21 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 
     if (tempDisplayMode != currentDisplayMode_) {
         ChangeScreenDisplayMode(tempDisplayMode);
+    }
+}
+
+void DualDisplayDevicePolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
+{
+    WLOGI("ReportFoldStatusChangeBegin offScreen: %{public}d, onScreen: %{public}d", offScreen, onScreen);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "FOLD_STATE_CHANGE_BEGIN",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "POWER_OFF_SCREEN", offScreen,
+        "POWER_ON_SCREEN", onScreen);
+
+    if (ret != 0) {
+        WLOGE("ReportFoldStatusChangeBegin Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 } // namespace OHOS::Rosen
