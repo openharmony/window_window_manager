@@ -208,6 +208,7 @@ public:
     bool IsSessionValid() const;
     bool IsActive() const;
     bool IsSystemSession() const;
+    bool IsTerminated() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
