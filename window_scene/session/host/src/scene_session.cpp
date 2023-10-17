@@ -905,9 +905,19 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFE("pointerEvent is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+
+    bool isSystemWindow = GetSessionInfo().isSystem_;
+    SessionState sessionState = GetSessionState();
+    WindowType windowType = GetWindowType();
+    if (!isSystemWindow && WindowHelper::IsMainWindow(windowType) &&
+        sessionState != SessionState::STATE_FOREGROUND &&
+        sessionState != SessionState::STATE_ACTIVE) {
+        WLOGFE("current session state is %{public}u", static_cast<uint32_t>(sessionState));
+        return WSError::WS_DO_NOTHING;
+    }
+
     int32_t action = pointerEvent->GetPointerAction();
     {
-        bool isSystemWindow = GetSessionInfo().isSystem_;
         if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW &&
             (!isSystemWindow)) {
             std::lock_guard<std::mutex> guard(enterSessionMutex_);
