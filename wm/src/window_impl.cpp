@@ -3237,6 +3237,19 @@ void WindowImpl::NotifyBackground()
     NotifyAfterBackground();
 }
 
+void WindowImpl::NotifyForegroundInteractiveStatus(bool interactive)
+{
+    WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
+    if (!IsWindowValid() || state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
+    if (interactive) {
+        NotifyAfterResumed();
+    } else {
+        NotifyAfterPaused();
+    }
+}
+
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
 {
     if (surfaceNode_ == nullptr) {
