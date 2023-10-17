@@ -261,6 +261,7 @@ public:
     void NotifyBackground();
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
+    void NotifyForegroundInteractiveStatus(bool interactive);
 
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -451,6 +452,16 @@ private:
         if (needNotifyUiContent) {
             CALL_UI_CONTENT(UnFocus);
         }
+    }
+    inline void NotifyAfterResumed()
+    {
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners);
+    }
+    inline void NotifyAfterPaused()
+    {
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
     }
     inline void NotifyBeforeDestroy(std::string windowName)
     {

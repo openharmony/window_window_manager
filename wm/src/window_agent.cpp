@@ -255,5 +255,15 @@ void WindowAgent::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event)
     }
     window_->ConsumeKeyEvent(event);
 }
+
+void WindowAgent::NotifyForegroundInteractiveStatus(bool interactive)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->NotifyForegroundInteractiveStatus(interactive);
+}
+
 } // namespace Rosen
 } // namespace OHOS

@@ -53,6 +53,7 @@ public:
     MOCK_METHOD2(UpdateZoomTransform, WMError(const Transform& trans, bool isDisplayZoomOn));
     MOCK_METHOD1(RestoreSplitWindowMode, WMError(uint32_t mode));
     MOCK_METHOD1(ConsumeKeyEvent, void(std::shared_ptr<MMI::KeyEvent> event));
+    MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
