@@ -4487,12 +4487,6 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
     return g_jsWindowMap[windowName];
 }
 
-// to do
-napi_value CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
-{
-    return CreateJsWindowObject(reinterpret_cast<napi_env>(&engine), window);
-}
-
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
 {
     std::string windowName = window->GetWindowName();
