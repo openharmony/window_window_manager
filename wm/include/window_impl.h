@@ -262,8 +262,6 @@ public:
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
 
-    virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
-        NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,

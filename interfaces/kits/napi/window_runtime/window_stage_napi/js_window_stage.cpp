@@ -575,13 +575,6 @@ napi_value JsWindowStage::OnDisableWindowDecor(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
-// to do
-NativeValue* CreateJsWindowStage(NativeEngine &Engine, std::shared_ptr<Rosen::WindowScene> windowScene)
-{
-    return reinterpret_cast<NativeValue*>(
-        CreateJsWindowStage(reinterpret_cast<napi_env>(&Engine), windowScene));
-}
-
 napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene)
 {
     WLOGFD("[NAPI]CreateJsWindowStage");

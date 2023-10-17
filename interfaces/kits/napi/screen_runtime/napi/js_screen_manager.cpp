@@ -686,17 +686,17 @@ DmErrorCode GetVirtualScreenOptionFromJs(napi_env env, napi_value optionObject, 
     }
     option.density_ = static_cast<float>(densityValue);
 
-    napi_value surfaceIdNativeValue = nullptr;
-    napi_get_named_property(env, optionObject, "surfaceId", &surfaceIdNativeValue);
-    if (!GetSurfaceFromJs(env, surfaceIdNativeValue, option.surface_)) {
+    napi_value surfaceIdNapiValue = nullptr;
+    napi_get_named_property(env, optionObject, "surfaceId", &surfaceIdNapiValue);
+    if (!GetSurfaceFromJs(env, surfaceIdNapiValue, option.surface_)) {
         return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return DmErrorCode::DM_OK;
 }
 
-bool GetSurfaceFromJs(napi_env env, napi_value surfaceIdNativeValue, sptr<Surface>& surface)
+bool GetSurfaceFromJs(napi_env env, napi_value surfaceIdNapiValue, sptr<Surface>& surface)
 {
-    if (surfaceIdNativeValue == nullptr || GetType(env, surfaceIdNativeValue) != napi_string) {
+    if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
         WLOGFE("Failed to convert parameter to surface. Invalidate params.");
         return false;
     }
@@ -704,7 +704,7 @@ bool GetSurfaceFromJs(napi_env env, napi_value surfaceIdNativeValue, sptr<Surfac
     char buffer[PATH_MAX];
     size_t length = 0;
     uint64_t surfaceId = 0;
-    if (napi_get_value_string_utf8(env, surfaceIdNativeValue, buffer, PATH_MAX, &length) != napi_ok) {
+    if (napi_get_value_string_utf8(env, surfaceIdNapiValue, buffer, PATH_MAX, &length) != napi_ok) {
         WLOGFE("Failed to convert parameter to surface.");
         return false;
     }
