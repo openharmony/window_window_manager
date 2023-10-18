@@ -225,6 +225,8 @@ public:
     uint32_t GetZOrder() const;
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
+    virtual void SetFloatingScale(float floatingScale);
+    float GetFloatingScale() const;
 
     void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func);
     void NotifyCallingSessionUpdateRect();
@@ -331,6 +333,7 @@ protected:
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
+    float floatingScale_ = 1.0f;
 
 private:
     bool CheckDialogOnForeground();

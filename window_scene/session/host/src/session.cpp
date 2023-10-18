@@ -1602,4 +1602,14 @@ bool Session::GetBufferAvailable() const
 {
     return bufferAvailable_;
 }
+
+void Session::SetFloatingScale(float floatingScale)
+{
+    floatingScale_ = floatingScale;
+}
+
+float Session::GetFloatingScale() const
+{
+    return floatingScale_;
+}
 } // namespace OHOS::Rosen
