@@ -83,7 +83,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
-        type == WindowType::WINDOW_TYPE_SYSTEM_TOAST)) {
+        type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_PIP)) {
         WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
@@ -147,7 +147,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type)) {
+        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
             WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
             auto mainWindow = FindMainWindowWithContext();
