@@ -1253,9 +1253,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         scnSession->GetCloseAbilityWantAndClean(scnSessionInfo->want);
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
-        }
         if (scnSessionInfo->isClearSession) {
             scnSessionInfo->resultCode = -1;
         }
@@ -1263,6 +1260,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
+                NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
+            }
             sceneSessionMap_.erase(persistentId);
             systemTopSceneSessionMap_.erase(persistentId);
             nonSystemFloatSceneSessionMap_.erase(persistentId);
