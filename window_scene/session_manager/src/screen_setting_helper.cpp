@@ -26,6 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Screen
 
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
 {
+#ifdef POWER_MANAGER_ENABLE
     PowerMgr::SettingProvider& provider = PowerMgr::SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     int32_t value;
     ErrCode ret = provider.GetIntValue(key, value);
@@ -35,6 +36,10 @@ bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
     }
     dpi = static_cast<uint32_t>(value);
     return true;
+#else
+    WLOGFW("Can not find the sub system of PowerMgr");
+    return false;
+#endif
 }
 } // namespace Rosen
 } // namespace OHOS

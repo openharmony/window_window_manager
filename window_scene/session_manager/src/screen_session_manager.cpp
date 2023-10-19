@@ -2226,6 +2226,10 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         WLOGFW("SetFoldDisplayMode foldScreenController_ is null");
         return;
     }
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SetFoldDisplayMode permission denied!");
+        return;
+    }
     foldScreenController_->SetDisplayMode(displayMode);
 }
 

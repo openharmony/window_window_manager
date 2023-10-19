@@ -61,6 +61,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::RegisterShutdownCallback);
     BindNativeFunction(env, exportObj, "unRegisterShutdownCallback", moduleName,
         JsScreenSessionManager::UnRegisterShutdownCallback);
+    BindNativeFunction(env, exportObj, "getPhyScreenProperty", moduleName,
+        JsScreenSessionManager::GetPhyScreenProperty);
     return NapiGetUndefined(env);
 }
 
@@ -177,7 +179,13 @@ napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi
     return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
 }
 
- 
+napi_value JsScreenSessionManager::GetPhyScreenProperty(napi_env env, napi_callback_info info)
+{
+    WLOGD("Register GetPhyScreenProperty.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPhyScreenProperty(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnRegisterShutdownCallback");
@@ -327,5 +335,28 @@ napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, cons
     napi_value result = nullptr;
     napi_create_uint32(env, ScreenSessionManager::GetInstance().GetCurvedCompressionArea(), &result);
     return result;
+}
+
+napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnGetPhyScreenProperty");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    return JsScreenUtils::CreateJsScreenProperty(env, screenProperty);
 }
 } // namespace OHOS::Rosen

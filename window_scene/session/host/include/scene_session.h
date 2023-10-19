@@ -153,6 +153,7 @@ public:
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
     WSError NotifyTouchOutside();
+    void SetFloatingScale(float floatingScale) override;
 
     static MaximizeMode maximizeMode_;
 
@@ -165,6 +166,7 @@ public:
     const std::string& GetWindowName() const;
     void UpdateNativeVisibility(bool visible);
     void SetPrivacyMode(bool isPrivacy);
+    void SetSystemSceneOcclusionAlpha(double alpha);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
