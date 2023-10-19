@@ -1337,6 +1337,7 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
         return;
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
+    WLOGFI("surfaceNode SetAbilityBGAlpha=%{public}u.", alpha8bit);
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
     if (leashWinSurfaceNode_ != nullptr) {
         leashWinSurfaceNode_->SetAbilityBGAlpha(alpha8bit);
