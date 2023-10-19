@@ -327,6 +327,7 @@ private:
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     bool needUpdateSessionRect_ = false;
     int32_t currentUserId_;
+    bool gestureNavigationEnabled_ {true};
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
@@ -375,6 +376,7 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
+    void NotifyStatusBarEnabledChange(bool enable);
 };
 } // namespace OHOS::Rosen
 
