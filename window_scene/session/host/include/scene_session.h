@@ -153,6 +153,7 @@ public:
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
     WSError NotifyTouchOutside();
+    void SetFloatingScale(float floatingScale) override;
 
     static MaximizeMode maximizeMode_;
 
