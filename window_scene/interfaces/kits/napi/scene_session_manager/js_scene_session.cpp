@@ -83,6 +83,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha", moduleName,
         JsSceneSession::SetSystemSceneOcclusionAlpha);
+    BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
 
     return objValue;
 }
@@ -622,6 +623,13 @@ napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSetSystemSceneOcclusionAlpha(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetFocusable");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetShowRecent(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetShowRecent");
@@ -809,6 +817,36 @@ napi_value JsSceneSession::OnSetSystemSceneOcclusionAlpha(napi_env env, napi_cal
     }
     session->SetSystemSceneOcclusionAlpha(alpha);
     WLOGFI("[NAPI]OnSetSystemSceneOcclusionAlpha end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetFocusable(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isFocusable = false;
+    if (!ConvertFromJsValue(env, argv[0], isFocusable)) {
+        WLOGFE("[NAPI]Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetFocusable(isFocusable);
+    WLOGFI("[NAPI]OnSetFocusable end");
     return NapiGetUndefined(env);
 }
 

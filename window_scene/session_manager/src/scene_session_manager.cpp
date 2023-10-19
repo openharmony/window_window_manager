@@ -29,6 +29,7 @@
 #include <bundle_mgr_interface.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
+#include <hisysevent.h>
 #include <parameters.h>
 #include "parameter.h"
 #include <pointer_event.h>
@@ -873,6 +874,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
 {
     RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
+    RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterInputMethodUpdateFunc(sceneSession);
     RegisterInputMethodShownFunc(sceneSession);
     RegisterInputMethodHideFunc(sceneSession);
@@ -2575,6 +2577,268 @@ void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
     RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
 }
 
+// ordered vector by compare func
+std::vector<std::pair<int32_t, sptr<SceneSession>>> SceneSessionManager::GetSceneSessionVector(CmpFunc cmp)
+{
+    std::vector<std::pair<int32_t, sptr<SceneSession>>> ret;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto& iter : sceneSessionMap_) {
+            ret.push_back(iter);
+        }
+    }
+    std::sort(ret.begin(), ret.end(), cmp);
+    return ret;
+}
+
+void SceneSessionManager::TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom)
+{
+    if (isFromTopToBottom) {
+        TraverseSessionTreeFromTopToBottom(func);
+    } else {
+        TraverseSessionTreeFromBottomToTop(func);
+    }
+    return;
+}
+
+void SceneSessionManager::TraverseSessionTreeFromTopToBottom(TraverseFunc func)
+{
+    CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
+        uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
+        uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
+        return lhsZOrder < rhsZOrder;
+    };
+    auto sceneSessionVector = GetSceneSessionVector(cmp);
+
+    for (auto iter = sceneSessionVector.rbegin(); iter != sceneSessionVector.rend(); ++iter) {
+        auto session = iter->second;
+        if (session == nullptr) {
+            WLOGFE("session is nullptr");
+            continue;
+        }
+        if (func(session)) {
+            return;
+        }
+    }
+    return;
+}
+
+void SceneSessionManager::TraverseSessionTreeFromBottomToTop(TraverseFunc func)
+{
+    // std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
+        uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
+        uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
+        return lhsZOrder < rhsZOrder;
+    };
+    auto sceneSessionVector = GetSceneSessionVector(cmp);
+    // std::map<int32_t, sptr<SceneSession>>::iterator iter;
+    for (auto iter = sceneSessionVector.begin(); iter != sceneSessionVector.end(); ++iter) {
+        auto session = iter->second;
+        if (session == nullptr) {
+            WLOGFE("session is nullptr");
+            continue;
+        }
+        if (func(session)) {
+            return;
+        }
+    }
+    return;
+}
+
+WSError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground)
+{
+    auto task = [this, persistentId, isFocused, byForeground]() {
+        if (isFocused) {
+            RequestSessionFocus(persistentId, byForeground);
+        } else {
+            RequestSessionUnfocus(persistentId);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground)
+{
+    WLOGFI("RequestSessionFocus, id: %{public}d, by foreground: %{public}d", persistentId, byForeground);
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("id is invalid!");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (persistentId == focusedSessionId_) {
+        WLOGFD("request id has been focused!");
+        return WSError::WS_DO_NOTHING;
+    }
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sceneSession->GetFocusable()) {
+        WLOGFD("session is not focusable!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!IsSessionVisible(sceneSession)) {
+        WLOGFD("session is not visible!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+        GetSceneSession(sceneSession->GetParentPersistentId()) &&
+        !IsSessionVisible(GetSceneSession(sceneSession->GetParentPersistentId()))) {
+            WLOGFD("parent session id: %{public}d is not visible!", sceneSession->GetParentPersistentId());
+            return WSError::WS_DO_NOTHING;
+    }
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        ProcessDialogRequestFocus(sceneSession) == WSError::WS_OK) {
+            return WSError::WS_DO_NOTHING;
+    }
+    // app session will prevent lower zOrder request focus
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    if (byForeground && focusedSession && focusedSession->IsAppSession()
+        && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
+            WLOGFD("session %{public}d zOrder is lower than focused session %{public}d", persistentId, focusedSessionId_);
+            return WSError::WS_DO_NOTHING;
+    }
+    ShiftFocus(sceneSession);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
+{
+    WLOGFI("RequestSessionUnfocus, id: %{public}d", persistentId);
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("id is invalid");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (persistentId != focusedSessionId_) {
+        WLOGFD("unfocused id cannot request unfocus!");
+        return WSError::WS_DO_NOTHING;
+    }
+    auto nextSession = GetNextFocusableSession(persistentId);
+    return ShiftFocus(nextSession);
+}
+
+sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persistentId)
+{
+    WLOGFD("GetNextFocusableSession, id: %{public}d", persistentId);
+    bool previousFocusedSessionFound = false;
+    sptr<SceneSession> ret = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &ret](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            return false;
+        }
+        bool parentVisible = true;
+        if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
+            session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+            GetSceneSession(session->GetParentPersistentId()) &&
+            !IsSessionVisible(GetSceneSession(session->GetParentPersistentId()))) {
+                parentVisible = false;
+        }
+        if (previousFocusedSessionFound && session->GetFocusable() && IsSessionVisible(session) && parentVisible) {
+            ret = session;
+            return true;
+        }
+        if (session->GetPersistentId() == persistentId) {
+            previousFocusedSessionFound = true;
+        }
+        return false;
+    };
+    TraverseSessionTree(func, true);
+    return ret;
+}
+
+void SceneSessionManager::SetShiftFocusListener(const ProcessShiftFocusFunc& func)
+{
+    WLOGFD("SetShiftFocusListener");
+    shiftFocusFunc_ = func;
+}
+
+WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
+{
+    // unfocus
+    int32_t focusedId = focusedSessionId_;
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    UpdateFocusStatus(focusedSession, false);
+    // focus
+    int32_t nextId = INVALID_SESSION_ID;
+    if (nextSession == nullptr) {
+        std::string sessionLog(GetAllSessionFocusInfo());
+        WLOGFW("ShiftFocus to nullptr! id: %{public}d, info: %{public}s", focusedSessionId_, sessionLog.c_str());
+    } else {
+        nextId = nextSession->GetPersistentId();
+    }
+    UpdateFocusStatus(nextSession, true);
+    WLOGFI("ShiftFocus, focusedId: %{public}d, nextId: %{public}d", focusedId, nextId);
+    if (shiftFocusFunc_ != nullptr) {
+        shiftFocusFunc_(nextId);
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        if (isFocused) {
+            SetFocusedSession(INVALID_SESSION_ID);
+        }
+        return;
+    }
+    // @todo: +name
+    WLOGFD("Update focus, id: %{public}d, isFocused: %{public}u, isSystem: %{public}d",
+        sceneSession->GetPersistentId(), static_cast<uint32_t>(isFocused), sceneSession->GetSessionInfo().isSystem_);
+    // set focused
+    if (isFocused) {
+        SetFocusedSession(sceneSession->GetPersistentId());
+        UpdateBrightness(focusedSessionId_);
+        FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
+    }
+    // notify window manager
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(
+        sceneSession->GetWindowId(),
+        static_cast<DisplayId>(0),
+        sceneSession->GetCallingPid(),
+        sceneSession->GetCallingUid(),
+        sceneSession->GetWindowType(),
+        sceneSession->GetAbilityToken()
+    );
+    SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
+    WSError res = WSError::WS_OK;
+    res = sceneSession->UpdateFocus(isFocused);
+    if (res != WSError::WS_OK) {
+        return;
+    }
+    // notify listenerController
+    if (listenerController_ != nullptr && !sceneSession->GetSessionInfo().isSystem_) {
+        if (isFocused) {
+            WLOGFD("NotifySessionFocused, id: %{public}d", sceneSession->GetPersistentId());
+            listenerController_->NotifySessionFocused(sceneSession->GetPersistentId());
+        } else {
+            WLOGFD("NotifySessionUnfocused, id: %{public}d", sceneSession->GetPersistentId());
+            listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
+        }
+    }
+    return;
+}
+
+std::string SceneSessionManager::GetAllSessionFocusInfo()
+{
+    std::ostringstream os;
+    auto func = [&os](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            WLOGE("sceneSession is nullptr");
+            return false;
+        }
+        os << "WindowName: " << session->GetWindowName() << ", id: " << session->GetPersistentId() <<
+           " ,focusable: "<< session->GetFocusable() << ";";
+        return false;
+    };
+    TraverseSessionTree(func, true);
+    return os.str();
+}
+
 WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
@@ -2726,6 +2990,19 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
     WLOGFD("RegisterSessionStateChangeFunc success");
 }
 
+void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    NotifyRequestFocusStatusNotifyManagerFunc func = [this](int32_t persistentId, const bool isFocused) {
+        this->RequestFocusStatus(persistentId, isFocused);
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetRequestFocusStatusNotifyManagerListener(func);
+    WLOGFD("RegisterSessionUpdateFocusStatusFunc success");
+}
+
 void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
 {
     WLOGFD("Session state change, id: %{public}d, state:%{public}u", persistentId, state);
@@ -2736,6 +3013,7 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
+            RequestSessionFocus(persistentId, true);
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
@@ -2745,6 +3023,7 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
             }
             break;
         case SessionState::STATE_BACKGROUND:
+            RequestSessionUnfocus(persistentId);
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
@@ -2764,6 +3043,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         WLOGFD("session is nullptr");
         return;
     }
+
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
             WLOGFD("sub session is nullptr");
@@ -2780,11 +3060,39 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
     }
 }
 
+WSError SceneSessionManager::ProcessDialogRequestFocus(sptr<SceneSession>& sceneSession)
+{
+    // focus must on dialog when APP_MAIN_WINDOW go foreground
+    std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
+    if (std::find_if(dialogVec.begin(), dialogVec.end(),
+        [this](sptr<Session>& iter) { return iter && iter->GetPersistentId() == focusedSessionId_; })
+        != dialogVec.end()) {
+            WLOGFD("dialog id: %{public}d has been focused!", focusedSessionId_);
+            return WSError::WS_OK;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    for (auto dialog : dialogVec) {
+        if (dialog == nullptr) {
+            continue;
+        }
+        // no need to consider order, since rule of zOrder
+        if (RequestSessionFocus(dialog->GetPersistentId()) == WSError::WS_OK) {
+            ret = WSError::WS_OK;
+        }
+    }
+    return ret;
+}
+
 void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFD("session is nullptr");
         return;
+    }
+    // sub session request unfocus
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    if (focusedSession && focusedSession->GetParentPersistentId() == sceneSession->GetPersistentId()) {
+        RequestSessionUnfocus(focusedSessionId_);
     }
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
