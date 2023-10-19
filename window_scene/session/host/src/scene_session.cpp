@@ -1584,12 +1584,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
 
 WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (handler == nullptr) {
-        WLOGFE("TerminateSession handler null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    PostTask([weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -1618,12 +1613,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             session->terminateSessionFunc_(info);
         }
         return WSError::WS_OK;
-    };
-    if (!handler->PostTask(task)) {
-        WLOGFE("TerminateSession failed to post Perforback");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
-
+    });
     return WSError::WS_OK;
 }
 
