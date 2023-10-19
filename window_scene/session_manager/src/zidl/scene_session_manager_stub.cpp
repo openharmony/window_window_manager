@@ -111,6 +111,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleRegisterCollaborator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
         &SceneSessionManagerStub::HandleUnregisterCollaborator),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER),
+        &SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -619,6 +621,15 @@ int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel &data, M
     int32_t type = data.ReadInt32();
     const WSError& ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    bool haveAvoidAreaListener = data.ReadBool();
+    WSError errCode = UpdateSessionTouchOutsideListener(persistentId, haveAvoidAreaListener);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
