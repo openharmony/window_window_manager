@@ -1210,6 +1210,16 @@ void SceneSession::SetZOrder(uint32_t zOrder)
     }
 }
 
+void SceneSession::SetFloatingScale(float floatingScale)
+{
+    if (floatingScale_ != floatingScale) {
+        Session::SetFloatingScale(floatingScale);
+        if (specificCallback_ != nullptr) {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+        }
+    }
+}
+
 void SceneSession::SetParentPersistentId(int32_t parentId)
 {
     auto property = GetSessionProperty();
