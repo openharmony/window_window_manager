@@ -148,6 +148,12 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 JsSceneSession::~JsSceneSession()
 {
     WLOGD("~JsSceneSession");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->UnregisterSessionStateChangeListenser();
 }
 
 void JsSceneSession::ClearCbMap(bool needRemove)
