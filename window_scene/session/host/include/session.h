@@ -46,6 +46,7 @@ class RSTransaction;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
+using NotifyRequestFocusStatusNotifyManagerFunc = std::function<void(int32_t persistentId, const bool isFocused)>;
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
@@ -63,6 +64,7 @@ using NotifyCallingSessionUpdateRectFunc = std::function<void(const int32_t& per
 using NotifyCallingSessionForegroundFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
+using NotifyUILostFocusFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -161,6 +163,8 @@ public:
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
+    void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
+    void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -190,6 +194,8 @@ public:
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick();
+    void NotifyRequestFocusStatusNotifyManager(bool isFocused);
+    void NotifyUILostFocus();
     void PresentFoucusIfNeed(int32_t pointerAcrion);
     WSError UpdateFocus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
@@ -209,6 +215,7 @@ public:
     bool IsActive() const;
     bool IsSystemSession() const;
     bool IsTerminated() const;
+    bool IsSessionForeground() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
@@ -271,7 +278,6 @@ protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
-    void UpdateSessionFocusable(bool isFocusable);
     void UpdateSessionTouchable(bool touchable);
 
     WSRectF UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area);
@@ -307,6 +313,8 @@ protected:
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
+    NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
+    NotifyUILostFocusFunc lostFocusFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;

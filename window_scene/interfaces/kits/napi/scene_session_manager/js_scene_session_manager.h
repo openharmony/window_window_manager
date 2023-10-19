@@ -56,6 +56,7 @@ public:
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
+    static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -84,15 +85,18 @@ private:
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
+    napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
+    void OnShiftFocus(int32_t persistentId);
     void ProcessCreateSpecificSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
+    void ProcessShiftFocus();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

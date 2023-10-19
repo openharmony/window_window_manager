@@ -308,12 +308,6 @@ void Session::UpdateSessionState(SessionState state)
     NotifySessionStateChange(state);
 }
 
-void Session::UpdateSessionFocusable(bool isFocusable)
-{
-    GetSessionProperty()->SetFocusable(isFocusable);
-    NotifySessionFocusableChange(isFocusable);
-}
-
 void Session::UpdateSessionTouchable(bool touchable)
 {
     GetSessionProperty()->SetTouchable(touchable);
@@ -322,10 +316,11 @@ void Session::UpdateSessionTouchable(bool touchable)
 
 WSError Session::SetFocusable(bool isFocusable)
 {
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
+    WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
+    GetSessionProperty()->SetFocusable(isFocusable);
+    if (isFocused_ && !GetFocusable()) {
+        NotifyRequestFocusStatusNotifyManager(false);
     }
-    UpdateSessionFocusable(isFocusable);
     return WSError::WS_OK;
 }
 
@@ -459,6 +454,11 @@ bool Session::IsSystemSession() const
 bool Session::IsTerminated() const
 {
     return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating);
+}
+
+bool Session::IsSessionForeground() const
+{
+    return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
 
 WSError Session::SetPointerStyle(MMI::WindowArea area)
@@ -673,11 +673,10 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         SetActive(true);
     }
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-        if (GetParentSession() && (GetParentSession()->GetSessionState() != SessionState::STATE_FOREGROUND ||
-            GetParentSession()->GetSessionState() != SessionState::STATE_ACTIVE)) {
-                SetSessionState(SessionState::STATE_BACKGROUND);
-            }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
+        !GetParentSession()->IsSessionForeground()) {
+            WLOGFD("parent state is not foreground");
+            SetSessionState(SessionState::STATE_BACKGROUND);
     }
 
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -1344,6 +1343,16 @@ void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStat
     NotifySessionStateChange(state_);
 }
 
+void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func)
+{
+    requestFocusStatusNotifyManagerFunc_ = func;
+}
+
+void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
+{
+    lostFocusFunc_ = func;
+}
+
 void Session::NotifySessionStateChange(const SessionState& state)
 {
     WLOGFD("state: %{public}u", static_cast<uint32_t>(state));
@@ -1396,12 +1405,33 @@ void Session::NotifyClick()
     }
 }
 
+void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused)
+{
+    WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
+    if (requestFocusStatusNotifyManagerFunc_) {
+        requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused);
+    }
+}
+
+void Session::NotifyUILostFocus()
+{
+    WLOGFD("NotifyUILostFocus id: %{public}d", GetPersistentId());
+    if (lostFocusFunc_) {
+        lostFocusFunc_();
+    }
+}
+
 void Session::PresentFoucusIfNeed(int32_t pointerAction)
 {
-    if ((!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) &&
-        (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
-        NotifyClick();
+    WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true);
+        }
+        if (!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) {
+            NotifyClick();
+        }
     }
 }
 
@@ -1413,6 +1443,9 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    if (!isFocused_) {
+        NotifyUILostFocus();
+    }
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
