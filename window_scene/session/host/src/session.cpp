@@ -1336,6 +1336,13 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
 {
     sessionStateChangeFunc_ = func;
     NotifySessionStateChange(state_);
+    WLOGFD("SetSessionStateChangeListenser, id: %{public}d", GetPersistentId());
+}
+
+void Session::UnregisterSessionStateChangeListenser()
+{
+    sessionStateChangeFunc_ = nullptr;
+    WLOGFD("UnregisterSessionStateChangeListenser, id: %{public}d", GetPersistentId());
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
