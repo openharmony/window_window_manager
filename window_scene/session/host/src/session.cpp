@@ -1187,8 +1187,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         }
     }
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
-            "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
+        WLOGFW("InputTracking id:%{public}d, The pointerEvent does not report normally,"
+            "bundleName:%{public}s not reponse, pid:%{public}d, persistentId:%{public}d",
+            pointerEvent->GetId(), callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
     PresentFoucusIfNeed(pointerAction);
@@ -1196,8 +1197,10 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
-        WLOGFE("TransferPointer failed, ret:%{public}d", ret);
+        WLOGFE("InputTracking id:%{public}d, TransferPointer failed, ret:%{public}d ",
+            pointerEvent->GetId(), ret);
         return ret;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
@@ -1513,7 +1516,7 @@ WSError Session::ProcessBackEvent()
 WSError Session::MarkProcessed(int32_t eventId)
 {
     int32_t persistentId = GetPersistentId();
-    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    WLOGFI("InputTracking persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }
