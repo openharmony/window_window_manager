@@ -400,5 +400,11 @@ WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t& persistentId, boo
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionAvoidAreaListener(persistentId, haveListener));
 }
+
+WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
+}
 } // namespace Rosen
 } // namespace OHOS

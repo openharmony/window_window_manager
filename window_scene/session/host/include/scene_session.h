@@ -59,6 +59,7 @@ using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
+using NotifyTouchOutsideFunc = std::function<void()>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -87,6 +88,7 @@ public:
         NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
+        NotifyTouchOutsideFunc OnTouchOutside_;
     };
 
     // func for change window scene pattern property
@@ -152,7 +154,8 @@ public:
     void SetZOrder(uint32_t zOrder) override;
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
-    WSError NotifyTouchOutside();
+    void NotifyTouchOutside();
+    bool CheckOutTouchOutsideRegister();
     void SetFloatingScale(float floatingScale) override;
 
     static MaximizeMode maximizeMode_;
