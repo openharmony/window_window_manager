@@ -237,6 +237,25 @@ HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
     EXPECT_EQ(res, -1);
 }
 
+
+/**
+ * @tc.name: OnRemoteRequest09
+ * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS);
+    int res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
 }
 }
 }

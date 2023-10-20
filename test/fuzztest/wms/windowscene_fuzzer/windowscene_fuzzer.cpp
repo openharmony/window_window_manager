@@ -54,6 +54,12 @@ public:
     virtual void AfterInactive() override
     {
     }
+    virtual void AfterResumed() override
+    {
+    }
+    virtual void AfterPaused() override
+    {
+    }
 };
 
 template<class T>

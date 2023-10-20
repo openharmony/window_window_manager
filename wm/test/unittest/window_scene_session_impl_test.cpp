@@ -44,6 +44,8 @@ public:
     MOCK_METHOD1(ForegroundFailed, void(int32_t));
     MOCK_METHOD0(AfterActive, void(void));
     MOCK_METHOD0(AfterInactive, void(void));
+    MOCK_METHOD0(AfterResumed, void(void));
+    MOCK_METHOD0(AfterPaused, void(void));
 };
 
 class WindowSceneSessionImplTest : public testing::Test {

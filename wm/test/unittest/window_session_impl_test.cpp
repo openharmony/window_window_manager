@@ -40,6 +40,8 @@ public:
     MOCK_METHOD1(ForegroundFailed, void(int32_t));
     MOCK_METHOD0(AfterActive, void(void));
     MOCK_METHOD0(AfterInactive, void(void));
+    MOCK_METHOD0(AfterResumed, void(void));
+    MOCK_METHOD0(AfterPaused, void(void));
 };
 
 class WindowSessionImplTest : public testing::Test {
@@ -972,6 +974,29 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterUnfocused, Function | SmallTest | Lev
     ASSERT_EQ(res, 0);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterUnfocused end";
+}
+
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: NotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyForegroundInteractiveStatus");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    int res = 0;
+    window->NotifyForegroundInteractiveStatus(true);
+    window->NotifyForegroundInteractiveStatus(false);
+    ASSERT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus end";
 }
 
 /**
