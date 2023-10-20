@@ -1079,12 +1079,19 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     scnSession->NotifyActivation();
     scnSessionInfo->isNewWant = isNewActive;
-    if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
+    bool isCollaboratorType = CheckCollaboratorType(scnSession->GetCollaboratorType());
+    if (isCollaboratorType) {
         scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
+    int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
     auto sessionInfo = scnSession->GetSessionInfo();
+    if (isCollaboratorType) {
+        WindowInfoReporter::GetInstance().ReportContainerStartBegin(scnSessionInfo->persistentId,
+            sessionInfo.bundleName_, timestamp);
+    }
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
         WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
     }
