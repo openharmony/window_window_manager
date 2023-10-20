@@ -37,7 +37,8 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "floatCornerRadius", CreateJsValue(env, config.floatCornerRadius_));
     napi_set_named_property(env, objValue, "focusedShadow", CreateShadowValue(env, config, true));
     napi_set_named_property(env, objValue, "unfocusedShadow", CreateShadowValue(env, config, false));
-    napi_set_named_property(env, objValue, "keyboardAnimation", CreateKeyboardAnimationValue(env, config));
+    napi_set_named_property(env, objValue, "keyboardAnimationIn", CreateKeyboardAnimationValue(env, config.keyboardAnimationIn_));
+    napi_set_named_property(env, objValue, "keyboardAnimationOut", CreateKeyboardAnimationValue(env, config.keyboardAnimationOut_));
     napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
     return objValue;
 }
@@ -91,7 +92,7 @@ napi_value JsWindowSceneConfig::CreateWindowAnimationValue(napi_env env, const A
 }
 
 napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
-    const AppWindowSceneConfig& config)
+    const KeyboardSceneAnimationConfig& config)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -100,13 +101,12 @@ napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
         return NapiGetUndefined(env);
     }
 
-    napi_set_named_property(env, objValue, "curveType", CreateJsValue(env, config.keyboardAnimation_.curveType_));
-    napi_set_named_property(env, objValue, "ctrlX1", CreateJsValue(env, config.keyboardAnimation_.ctrlX1_));
-    napi_set_named_property(env, objValue, "ctrlY1", CreateJsValue(env, config.keyboardAnimation_.ctrlY1_));
-    napi_set_named_property(env, objValue, "ctrlX2", CreateJsValue(env, config.keyboardAnimation_.ctrlX2_));
-    napi_set_named_property(env, objValue, "ctrlY2", CreateJsValue(env, config.keyboardAnimation_.ctrlY2_));
-    napi_set_named_property(env, objValue, "durationIn", CreateJsValue(env, config.keyboardAnimation_.durationIn_));
-    napi_set_named_property(env, objValue, "durationOut", CreateJsValue(env, config.keyboardAnimation_.durationOut_));
+    napi_set_named_property(env, objValue, "curveType", CreateJsValue(env, config.curveType_));
+    napi_set_named_property(env, objValue, "ctrlX1", CreateJsValue(env, config.ctrlX1_));
+    napi_set_named_property(env, objValue, "ctrlY1", CreateJsValue(env, config.ctrlY1_));
+    napi_set_named_property(env, objValue, "ctrlX2", CreateJsValue(env, config.ctrlX2_));
+    napi_set_named_property(env, objValue, "ctrlY2", CreateJsValue(env, config.ctrlY2_));
+    napi_set_named_property(env, objValue, "duration", CreateJsValue(env, config.duration_));
 
     return objValue;
 }
