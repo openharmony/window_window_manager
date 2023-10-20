@@ -65,6 +65,7 @@ void CheckWindowAgentFunctionsPart1(sptr<WindowAgent> agent, const uint8_t* data
     startPos += GetObject<uint32_t>(modeSupportInfo, data + startPos, size - startPos);
     agent->UpdateWindowModeSupportInfo(modeSupportInfo);
     agent->UpdateFocusStatus(boolVal);
+    agent->NotifyForegroundInteractiveStatus(boolVal);
 
     sptr<AvoidArea> avoidArea = new AvoidArea();
     startPos += GetObject<OHOS::Rosen::Rect>(rect, data + startPos, size - startPos);

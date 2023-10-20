@@ -402,6 +402,24 @@ HWTEST_F(WindowAgentTest, ConsumeKeyEvent, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
 }
 
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: NotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAgentTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+{
+    auto res = 0;
+    bool interactive = false;
+    windowAgent_->NotifyForegroundInteractiveStatus(interactive);
+    ASSERT_EQ(0, res);
+
+    interactive = true;
+    windowAgent_->window_ = nullptr;
+    windowAgent_->NotifyForegroundInteractiveStatus(interactive);
+    ASSERT_EQ(0, res);
+}
+
 }
 }
 }
