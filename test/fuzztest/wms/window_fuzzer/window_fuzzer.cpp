@@ -195,6 +195,14 @@ public:
     void AfterInactive()  override
     {
     }
+
+    void AfterResumed() override
+    {
+    }
+
+    void AfterPaused()  override
+    {
+    }
 };
 
 template<class T>
@@ -449,6 +457,7 @@ void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data,
     bool boolVal;
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->UpdateActiveStatus(boolVal);
+    window->NotifyForegroundInteractiveStatus(boolVal);
 
     Transform trans;
     startPos += GetObject(trans, data + startPos, size - startPos);
