@@ -4367,6 +4367,20 @@ sptr<SceneSession> SceneSessionManager::FindSessionByAffinity(std::string affini
     return session;
 }
 
+void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
+{
+    WLOGFI("run PreloadInLakeApp");
+    auto iter = collaboratorMap_.find(CollaboratorType::RESERVE_TYPE);
+    if (iter == collaboratorMap_.end()) {
+        WLOGFE("Fail to found collaborator with type: RESERVE_TYPE");
+        return;
+    }
+    auto collaborator = iter->second;
+    if (collaborator != nullptr) {
+        collaborator->NotifyPreloadAbility(bundleName);
+    }
+}
+
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
     WLOGFI("run PendingSessionToForeground");

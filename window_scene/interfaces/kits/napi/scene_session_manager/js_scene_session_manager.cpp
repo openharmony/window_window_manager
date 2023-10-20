@@ -99,6 +99,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetRootSceneUIContext);
     BindNativeFunction(env, exportObj, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
     BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
+    BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
 
     return NapiGetUndefined(env);
 }
@@ -455,6 +456,13 @@ napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback
     WLOGI("[NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::PreloadInLakeApp(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]PreloadInLakeApp");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnPreloadInLakeApp(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1398,6 +1406,28 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string bundleName = "";
+    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        WLOGFE("[NAPI]Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().PreloadInLakeApp(bundleName);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
