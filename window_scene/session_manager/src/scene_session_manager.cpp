@@ -4380,6 +4380,7 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
         collaborator->NotifyPreloadAbility(bundleName);
     }
 }
+
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
     WLOGFI("run PendingSessionToForeground");
