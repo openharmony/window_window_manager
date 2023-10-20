@@ -1834,6 +1834,25 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionDestruction, Function | Sma
 }
 
 /**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: SceneSesionManager notify scene session interactive status
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level3)
+{
+    bool interactive = false;
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    int ret = 0;
+    ssm_->NotifyForegroundInteractiveStatus(scensession, interactive);
+    ASSERT_EQ(ret, 0);
+    delete scensession;
+}
+
+/**
  * @tc.name: AddClientDeathRecipient
  * @tc.desc: SceneSesionManager add client death recipient
  * @tc.type: FUNC

@@ -239,6 +239,19 @@ HWTEST_F(SessionStageProxyTest, UpdateWindowMode, Function | SmallTest | Level1)
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->UpdateWindowMode(mode);
 }
+
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: test function : NotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+{
+    bool interactive = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+}
+
 }
 }
 }

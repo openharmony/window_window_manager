@@ -284,6 +284,20 @@ HWTEST_F(WindowProxyTest, NotifyScreenshot, Function | SmallTest | Level2)
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+{
+    ASSERT_NE(windowProxy_, nullptr);
+    WMError err = WMError::WM_OK;
+    bool interactive = false;
+    windowProxy_->NotifyForegroundInteractiveStatus(interactive);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
 }
 }
 }
