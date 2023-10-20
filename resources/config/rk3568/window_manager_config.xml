@@ -54,14 +54,24 @@
     </windowAnimation>
     <!--keyboard animation config-->
     <keyboardAnimation>
-        <timing>
-            <!--duration of animation when add keyboard, unit is ms-->
-            <durationIn>150</durationIn>
-            <!--duration of animation when remove keyboard, unit is ms-->
-            <durationOut>150</durationOut>
-            <!--friction curve-->
-            <curve name="cubic">0.2 0.0 0.2 1.0</curve>
-        </timing>
+        <!--animation when add keyboard-->
+        <animationIn>
+            <timing>
+                <!--animation duration, unit is ms-->
+                <duration>150</duration>
+                <!--friction curve-->
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationIn>
+        <!--animation when remove keyboard-->
+        <animationOut>
+            <timing>
+                <!--animation duration, unit is ms-->
+                <duration>150</duration>
+                <!--friction curve-->
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationOut>
     </keyboardAnimation>
     <!--startWindowTransitionAnimation enable is true means startWindow replace with alpha animation-->
     <startWindowTransitionAnimation enable="false">
