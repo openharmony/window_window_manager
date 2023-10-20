@@ -29,6 +29,10 @@ namespace OHOS::Rosen {
 
 using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
 
+using NotifyWindowDragHotAreaFunc = std::function<void(int32_t type, const SizeChangeReason& reason)>;
+
+const int32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = -1;
+
 enum class AreaType : uint32_t {
     UNDEFINED = 0,
     LEFT = 1 << 0,
@@ -60,6 +64,7 @@ public:
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
     void ClacFirstMoveTargetRect(const WSRect& windowRect);
+    void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
 
 private:
     struct MoveDragProperty {
@@ -155,6 +160,11 @@ private:
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     MoveTempProperty moveTempProperty_;
+
+    void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
+    int32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
+    NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

@@ -58,6 +58,7 @@ public:
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
+    static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -88,6 +89,7 @@ private:
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
+    napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);

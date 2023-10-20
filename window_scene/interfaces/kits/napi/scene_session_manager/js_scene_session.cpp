@@ -53,6 +53,7 @@ const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientation
 const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
 const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
+const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 } // namespace
 
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
@@ -134,6 +135,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         { RAISE_ABOVE_TARGET_CB,                 &JsSceneSession::ProcessRaiseAboveTargetRegister },
         { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister },
         { TOUCH_OUTSIDE_CB,                      &JsSceneSession::ProcessTouchOutsideRegister },
+        { WINDOW_DRAG_HOT_AREA_CB,               &JsSceneSession::ProcessWindowDragHotAreaRegister }
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -157,6 +159,70 @@ JsSceneSession::~JsSceneSession()
     }
     session->UnregisterSessionStateChangeListenser();
 }
+
+void JsSceneSession::ProcessWindowDragHotAreaRegister()
+{
+    WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
+    NotifyWindowDragHotAreaFunc func = [this](int32_t type, const SizeChangeReason& reason) {
+        this->OnWindowDragHotArea(type, reason);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetWindowDragHotAreaListener(func);
+}
+
+void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason)
+{
+    WLOGFI("[NAPI]OnWindowDragHotArea");
+    auto iter = jsCbMap_.find(WINDOW_DRAG_HOT_AREA_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    WSRect rect = session->GetSessionTargetRect();
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallBack, eng = env_, type, reason, rect](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            napi_value jsHotAreaType = CreateJsValue(env, type);
+            if (jsHotAreaType == nullptr) {
+                WLOGFE("[NAPI]jsHotAreaType is nullptr");
+                return;
+            }
+            napi_value jsHotAreaReason = CreateJsValue(env, reason);
+            if (jsHotAreaReason == nullptr) {
+                WLOGFE("[NAPI]jsHotAreaReason is nullptr");
+                return;
+            }
+            napi_value jsHotAreaRect = CreateJsSessionRect(env, rect);
+            if (jsHotAreaRect == nullptr) {
+                WLOGFE("[NAPI]jsHotAreaRect is nullptr");
+                return;
+            }
+            napi_value argv[] = {
+                [0] = jsHotAreaType,
+                [1] = jsHotAreaReason,
+                [2] = jsHotAreaRect
+            };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSession::onWindowDragHotArea", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 
 void JsSceneSession::ClearCbMap(bool needRemove)
 {

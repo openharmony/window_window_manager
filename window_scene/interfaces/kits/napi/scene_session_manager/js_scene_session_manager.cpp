@@ -100,7 +100,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
     BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
-
+    BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     return NapiGetUndefined(env);
 }
 
@@ -435,6 +435,13 @@ napi_value JsSceneSessionManager::UpdateWindowMode(napi_env env, napi_callback_i
     WLOGI("[NAPI]UpdateWindowMode");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateWindowMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::AddWindowDragHotArea(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]AddWindowDragHotArea");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnAddWindowDragHotArea(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetRootSceneUIContext(napi_env env, napi_callback_info info)
@@ -1302,6 +1309,37 @@ napi_value JsSceneSessionManager::OnUpdateWindowMode(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnAddWindowDragHotArea(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t type;
+    if (!ConvertFromJsValue(env, argv[0], type)) {
+        WLOGFE("[NAPI]Failed to convert parameter to type");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WSRect area;
+    napi_value nativeObj = argv[1];
+    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, area)) {
+        WLOGFE("[NAPI]Failed to convert parameter to area");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().AddWindowDragHotArea(type, area);
     return NapiGetUndefined(env);
 }
 
