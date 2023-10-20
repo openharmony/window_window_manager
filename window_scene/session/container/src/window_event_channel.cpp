@@ -55,8 +55,9 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
-        WLOGFD("Dispatch by skipping receipt, action:%{public}s, eventId:%{public}d, persistentId:%{public}d",
-            pointerEvent->DumpPointerAction(), pointerEvent->GetId(), sessionStage_->GetPersistentId());
+        WLOGFI("InputTracking id:%{public}d, Dispatch by skipping receipt, action:%{public}s,"
+            " persistentId:%{public}d", pointerEvent->GetId(),
+            pointerEvent->DumpPointerAction(), sessionStage_->GetPersistentId());
     } else {
         DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(pointerEvent->GetId(), sessionStage_);
         pointerEvent->SetProcessedCallback(dispatchCallback_);

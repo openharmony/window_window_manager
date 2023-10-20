@@ -3237,6 +3237,19 @@ void WindowImpl::NotifyBackground()
     NotifyAfterBackground();
 }
 
+void WindowImpl::NotifyForegroundInteractiveStatus(bool interactive)
+{
+    WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
+    if (!IsWindowValid() || state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
+    if (interactive) {
+        NotifyAfterResumed();
+    } else {
+        NotifyAfterPaused();
+    }
+}
+
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
 {
     if (surfaceNode_ == nullptr) {
@@ -3391,6 +3404,7 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_SYSTEM_FLOAT:
         case WindowType::WINDOW_TYPE_FLOAT_CAMERA:
         case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:

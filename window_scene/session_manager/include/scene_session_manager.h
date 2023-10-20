@@ -62,11 +62,14 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
+using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
+using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
+using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -106,6 +109,7 @@ public:
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
+    void SetShiftFocusListener(const ProcessShiftFocusFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
@@ -122,6 +126,7 @@ public:
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info);
+    WSError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false);
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -227,6 +232,18 @@ private:
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
 
+    std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
+    void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
+    void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
+    void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
+    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = false);
+    WSError RequestSessionUnfocus(int32_t persistentId);
+    sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
+    WSError ShiftFocus(sptr<SceneSession>& nextSession);
+    void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
+    std::string GetAllSessionFocusInfo();
+    void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();
     void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession, bool isInputUpdated = false);
@@ -318,6 +335,7 @@ private:
     ProcessOutsideDownEventFunc outsideDownEventFunc_;
     DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
+    ProcessShiftFocusFunc shiftFocusFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
@@ -341,6 +359,7 @@ private:
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocus(sptr<SceneSession>& sceneSession);
     sptr<ISessionChangeListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 

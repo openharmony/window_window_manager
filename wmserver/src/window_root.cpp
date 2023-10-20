@@ -571,6 +571,18 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
             container->SetDisplayOrientationFromWindow(node, true);
         }
     }
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+        std::vector<sptr<WindowNode>> windowNodes;
+        container->TraverseContainer(windowNodes);
+        for (auto& winNode : windowNodes) {
+            if (winNode && WindowHelper::IsMainWindow(winNode->GetWindowType()) &&
+                winNode->isVisible_ && winNode->GetWindowToken()) {
+                winNode->GetWindowToken()->NotifyForegroundInteractiveStatus(false);
+            }
+        }
+    }
+
     return WMError::WM_OK;
 }
 
@@ -780,6 +792,18 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
         }
         HandleKeepScreenOn(windowId, false);
     }
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+        std::vector<sptr<WindowNode>> windowNodes;
+        container->TraverseContainer(windowNodes);
+        for (auto& winNode : windowNodes) {
+            if (winNode && WindowHelper::IsMainWindow(winNode->GetWindowType()) &&
+                winNode->isVisible_ && winNode->GetWindowToken()) {
+                winNode->GetWindowToken()->NotifyForegroundInteractiveStatus(true);
+            }
+        }
+    }
+
     return res;
 }
 

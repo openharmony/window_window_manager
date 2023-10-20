@@ -54,6 +54,7 @@ private:
         { WindowType::WINDOW_TYPE_SEARCHING_BAR,        105 },
         { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,  106 },
         { WindowType::WINDOW_TYPE_FLOAT,                107 },
+        { WindowType::WINDOW_TYPE_SYSTEM_FLOAT,         107 },
         { WindowType::WINDOW_TYPE_FLOAT_CAMERA,         107 },
         { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,   108 },
         { WindowType::WINDOW_TYPE_TOAST,                109 },

@@ -19,7 +19,9 @@
 #include <map>
 #include <refbase.h>
 
+#ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
+#endif
 
 #include "dm_common.h"
 #include "window_manager_hilog.h"
@@ -59,7 +61,9 @@ public:
     static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
     static DisplayOrientation ConvertRotationToDisplayOrientation(Rotation rotation);
 private:
+#ifdef SENSOR_ENABLE
     static void HandleGravitySensorEventCallback(SensorEvent *event);
+#endif
     static Rotation GetCurrentDisplayRotation();
     static Orientation GetPreferredOrientation();
     static void SetScreenRotation(Rotation targetRotation);
