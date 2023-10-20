@@ -46,6 +46,7 @@ const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string ARG_DUMP_HELP = "-h";
+const std::string SHIFT_FOCUS_CB = "shiftFocus";
 } // namespace
 
 napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
@@ -97,6 +98,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getRootSceneUIContext", moduleName,
         JsSceneSessionManager::GetRootSceneUIContext);
     BindNativeFunction(env, exportObj, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
+    BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
 
     return NapiGetUndefined(env);
@@ -110,6 +112,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
         { OUTSIDE_DOWN_EVENT_CB, &JsSceneSessionManager::ProcessOutsideDownEvent },
+        { SHIFT_FOCUS_CB, &JsSceneSessionManager::ProcessShiftFocus },
     };
 }
 
@@ -222,6 +225,27 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
+{
+    WLOGFI("[NAPI]OnShiftFocus");
+    auto iter = jsCbMap_.find(SHIFT_FOCUS_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [this, persistentId, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(eng, persistentId)};
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnShiftFocus", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
 {
     NotifyCreateSpecificSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -256,6 +280,15 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
         this->OnOutsideDownEvent(x, y);
     };
     SceneSessionManager::GetInstance().SetOutsideDownEventListener(func);
+}
+
+void JsSceneSessionManager::ProcessShiftFocus()
+{
+    ProcessShiftFocusFunc func = [this](int32_t persistentId) {
+        WLOGFD("ProcessShiftFocus called");
+        this->OnShiftFocus(persistentId);
+    };
+    SceneSessionManager::GetInstance().SetShiftFocusListener(func);
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -416,6 +449,13 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
     WLOGI("[NAPI]SendTouchEvent");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSendTouchEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]RequestFocusStatus");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::PreloadInLakeApp(napi_env env, napi_callback_info info)
@@ -1330,6 +1370,42 @@ napi_value JsSceneSessionManager::OnSendTouchEvent(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SendTouchEvent(pointerEvent, zIndex);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 3) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isFocused = false;
+    if (!ConvertFromJsValue(env, argv[1], isFocused)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isFocused");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool byForeground = false;
+    if (!ConvertFromJsValue(env, argv[2], byForeground)) {
+        WLOGFE("[NAPI]Failed to convert parameter to byForeground");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground);
     return NapiGetUndefined(env);
 }
 

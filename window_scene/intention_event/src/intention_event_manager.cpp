@@ -138,6 +138,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 
     int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent", pointerEvent->GetId());
+    }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         int32_t pointerId = pointerEvent->GetPointerId();
@@ -166,6 +169,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGFE("focusedSceneSession is null");
         return;
     }
+    WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent",
+        keyEvent->GetId());
     if (focusedSceneSession->GetSessionInfo().isSystem_) {
         bool inputMethodHasProcessed = false;
 #ifdef IMF_ENABLE

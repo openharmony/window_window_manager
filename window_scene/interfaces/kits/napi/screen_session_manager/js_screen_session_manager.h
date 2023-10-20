@@ -41,12 +41,14 @@ private:
     static napi_value GetCurvedCompressionArea(napi_env env, napi_callback_info info);
     static napi_value RegisterShutdownCallback(napi_env env, napi_callback_info info);
     static napi_value UnRegisterShutdownCallback(napi_env env, napi_callback_info info);
+    static napi_value GetPhyScreenProperty(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
     napi_value OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info);
     napi_value OnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
     napi_value OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
+    napi_value OnGetPhyScreenProperty(napi_env env, const napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

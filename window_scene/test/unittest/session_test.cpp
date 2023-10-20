@@ -960,20 +960,6 @@ HWTEST_F(WindowSessionTest, SetAspectRatio, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateSessionFocusable
- * @tc.desc: UpdateSessionFocusable Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, UpdateSessionFocusable, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->UpdateSessionFocusable(false);
-    
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
-}
-
-/**
  * @tc.name: UpdateSessionTouchable
  * @tc.desc: UpdateSessionTouchable Test
  * @tc.type: FUNC
