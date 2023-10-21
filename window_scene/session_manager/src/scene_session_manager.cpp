@@ -1428,6 +1428,12 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
 {
     auto task = [this, persistentId]() {
+        int32_t callingSessionId = persistentId;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (callingSession_ != nullptr && sceneSession != nullptr &&
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            callingSessionId = callingSession_->GetPersistentId();
+        }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
             auto sceneSession = item.second;
@@ -1440,6 +1446,15 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();
+            if ((!sceneSession->CheckOutTouchOutsideRegister()) &&
+                (touchOutsideListenerSessionSet_.find(sessionId) == touchOutsideListenerSessionSet_.end())) {
+                WLOGD("id:%{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
+                continue;
+            }
+            if (sessionId == callingSessionId) {
+                WLOGD("id:%{public}d is callingSession, don't notify.", sessionId);
+                continue;
+            }
             if (sessionId != persistentId) {
                 sceneSession->NotifyTouchOutside();
             }
@@ -4546,6 +4561,26 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 
     taskScheduler_->PostAsyncTask(task);
     return;
+}
+
+WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
+{
+    auto task = [this, persistentId, haveListener]() {
+        WLOGFI("UpdateSessionTouchOutsideListener persistentId: %{public}d haveListener:%{public}d",
+            persistentId, haveListener);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFD("sceneSession is nullptr.");
+            return WSError::WS_DO_NOTHING;
+        }
+        if (haveListener) {
+            touchOutsideListenerSessionSet_.insert(persistentId);
+        } else {
+            touchOutsideListenerSessionSet_.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)

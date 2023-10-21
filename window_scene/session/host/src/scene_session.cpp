@@ -1495,12 +1495,25 @@ Rect SceneSession::GetHotAreaRect(int32_t action)
     return hotAreaRect;
 }
 
-WSError SceneSession::NotifyTouchOutside()
+void SceneSession::NotifyTouchOutside()
 {
-    if (!sessionStage_) {
-        return WSError::WS_ERROR_NULLPTR;
+    WLOGFD("id: %{public}d NotifyTouchOutside", GetPersistentId());
+    if (sessionStage_) {
+        WLOGFD("Notify sessionStage TouchOutside");
+        sessionStage_->NotifyTouchOutside();
     }
-    return sessionStage_->NotifyTouchOutside();
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
+        WLOGFD("Notify sessionChangeCallback TouchOutside");
+        sessionChangeCallback_->OnTouchOutside_();
+    }
+}
+
+bool SceneSession::CheckOutTouchOutsideRegister()
+{
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
+        return true;
+    }
+    return false;
 }
 
 void SceneSession::SetRequestedOrientation(Orientation orientation)

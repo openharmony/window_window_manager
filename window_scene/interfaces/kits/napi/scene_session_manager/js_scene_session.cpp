@@ -52,6 +52,7 @@ const std::string SHOW_WHEN_LOCKED_CB = "sessionShowWhenLockedChange";
 const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientationChange";
 const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
 const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
+const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 } // namespace
 
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
@@ -131,7 +132,8 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         { SHOW_WHEN_LOCKED_CB,                   &JsSceneSession::ProcessShowWhenLockedRegister },
         { REQUESTED_ORIENTATION_CHANGE_CB,       &JsSceneSession::ProcessRequestedOrientationChange },
         { RAISE_ABOVE_TARGET_CB,                 &JsSceneSession::ProcessRaiseAboveTargetRegister },
-        { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister }
+        { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister },
+        { TOUCH_OUTSIDE_CB,                      &JsSceneSession::ProcessTouchOutsideRegister },
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -592,6 +594,41 @@ void JsSceneSession::OnForceHideChange(bool hide)
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsSceneSession::OnForceHideChange", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::ProcessTouchOutsideRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->OnTouchOutside_ = std::bind(&JsSceneSession::OnTouchOutside, this);
+    WLOGFD("ProcessTouchOutsideRegister success");
+}
+
+void JsSceneSession::OnTouchOutside()
+{
+    WLOGFI("[NAPI]OnTouchOutside");
+    auto iter = jsCbMap_.find(TOUCH_OUTSIDE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            napi_value argv[] = {};
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSession::OnTouchOutside", env_,
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
