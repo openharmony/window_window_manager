@@ -94,7 +94,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("Property is null");
         return;
     }
-
+    SessionInfo sessionInfo;
+    sessionINfo.bundleName_ = option->GetBundleName();
+    property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -465,7 +467,8 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
-            "UID", getuid());
+            "UID", getuid(),
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_);
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
