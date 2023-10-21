@@ -84,6 +84,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
         config.SurfaceNodeName = name;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
+    SetCollaboratorType(info.collaboratorType_);
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -1539,6 +1540,7 @@ int32_t SceneSession::GetCollaboratorType() const
 void SceneSession::SetCollaboratorType(int32_t collaboratorType)
 {
     collaboratorType_ = collaboratorType;
+    sessionInfo_.collaboratorType_ = collaboratorType;
 }
 
 void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const
