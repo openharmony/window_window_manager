@@ -85,6 +85,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_ASPECT_RATIO = 1 << 16,
     ACTION_UPDATE_MAXIMIZE_STATE = 1 << 17,
     ACTION_UPDATE_SYSTEM_PRIVACY_MODE = 1 << 18,
+    ACTION_UPDATE_SNAPSHOT_SKIP = 1 << 19,
 };
 
 struct ModeChangeHotZonesConfig {
