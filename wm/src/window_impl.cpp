@@ -2905,7 +2905,8 @@ void WindowImpl::UpdateFocusStatus(bool focused)
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
-            "UID", getuid());
+            "UID", getuid(),
+            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_);
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
