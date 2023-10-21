@@ -86,6 +86,7 @@ public:
         TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND,
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
+        TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,

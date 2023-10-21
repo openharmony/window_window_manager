@@ -162,6 +162,7 @@ public:
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
+    WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution);
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState);
@@ -327,6 +328,7 @@ private:
     std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
+    std::set<int32_t> touchOutsideListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
