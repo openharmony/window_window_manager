@@ -260,7 +260,7 @@ void WindowInfoReporter::ReportRecordedInfos()
     ClearRecordedInfos();
 }
 
-void ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp)
+void WindowInfoReporter::ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp)
 {
     std::string eventName = "CONTAINER_START_BEGIN";
     int32_t ret = HiSysEventWrite(
