@@ -5048,4 +5048,11 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
 }
+
+void SceneSessionManager::AddWindowDragHotArea(int32_t type, WSRect& area)
+{
+    WLOGFI("run AddWindowDragHotArea, type: %{public}d,posX: %{public}d,posY: %{public}d,width: %{public}d,"
+        "height: %{public}d", type, area.posX_, area.posY_, area.width_, area.height_);
+    SceneSession::windowDragHotAreaMap_.insert({type, area});
+}
 } // namespace OHOS::Rosen
