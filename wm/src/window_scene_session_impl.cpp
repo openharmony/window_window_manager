@@ -1935,6 +1935,16 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     WMError ret = UpdateWindowModeImmediately(mode);
+
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        statusProperty.enable_ = false;
+        ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), GetWindowId());
+        }
+    }
     return static_cast<WSError>(ret);
 }
 
