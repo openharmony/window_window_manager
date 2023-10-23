@@ -1413,12 +1413,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         WLOGFE("property is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    bool onlySkipSnapshot = property->GetOnlySkipSnapshot();
-    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
-        if (!onlySkipSnapshot && !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
-    }
+
     uint32_t windowId = property->GetWindowId();
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -1528,15 +1523,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
             node->GetWindowProperty()->SetPrivacyMode(isPrivacyMode);
             node->GetWindowProperty()->SetSystemPrivacyMode(isPrivacyMode);
-            node->GetWindowProperty()->SetOnlySkipSnapshot(onlySkipSnapshot);
             node->surfaceNode_->SetSecurityLayer(isPrivacyMode);
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
             RSTransaction::FlushImplicitTransaction();
-            if (!onlySkipSnapshot) {
-                UpdatePrivateStateAndNotify(node);
-            }
+            UpdatePrivateStateAndNotify(node);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE: {
@@ -1549,6 +1541,17 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             }
             RSTransaction::FlushImplicitTransaction();
             UpdatePrivateStateAndNotify(node);
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP: {
+            bool isSnapshotSkip = property->GetSnapshotSkip() || property->GetSystemPrivacyMode();
+            node->GetWindowProperty()->SetSnapshotSkip(isSnapshotSkip);
+            node->GetWindowProperty()->SetSystemPrivacyMode(isSnapshotSkip);
+            node->surfaceNode_->SetSkipLayer(isSnapshotSkip);
+            if (node->leashWinSurfaceNode_ != nullptr) {
+                node->leashWinSurfaceNode_->SetSkipLayer(isSnapshotSkip);
+            }
+            RSTransaction::FlushImplicitTransaction();
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {

@@ -1778,14 +1778,13 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
-    property_->SetOnlySkipSnapshot(false);
     property_->SetPrivacyMode(isPrivacyMode);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
 bool WindowImpl::IsPrivacyMode() const
 {
-    return property_->GetPrivacyMode() && !property_->GetOnlySkipSnapshot();
+    return property_->GetPrivacyMode();
 }
 
 void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
@@ -1801,9 +1800,8 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    property_->SetOnlySkipSnapshot(true);
-    property_->SetPrivacyMode(isSkip);
-    auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    property_->SetSnapshotSkip(isSkip);
+    auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
     WLOGFD("id : %{public}u, set snapshot skip end. isSkip:%{public}u, systemPrivacyMode:%{public}u, ret:%{public}u",
         GetWindowId(), isSkip, property_->GetSystemPrivacyMode(), ret);
     return WMError::WM_OK;
