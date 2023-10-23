@@ -237,7 +237,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
     EXPECT_EQ(res, -1);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest09
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
