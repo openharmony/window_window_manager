@@ -951,6 +951,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property->GetWindowType()) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (CheckDialogOnForeground()) {
+            WLOGFI("There is at least one active dialog window in the main winodw.");
+            return WSError::WS_OK;
+        }
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);

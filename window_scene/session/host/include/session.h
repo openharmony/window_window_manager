@@ -285,6 +285,7 @@ protected:
     WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area);
     void UpdatePointerArea(const WSRect& rect);
+    bool CheckDialogOnForeground();
 
     using Task = std::function<void()>;
     void PostTask(Task&& task, int64_t delayTime = 0);
@@ -345,7 +346,6 @@ protected:
     float floatingScale_ = 1.0f;
 
 private:
-    bool CheckDialogOnForeground();
     void HandleDialogForeground();
     void HandleDialogBackground();
     void HandlePointDownDialog(int32_t pointAction);
