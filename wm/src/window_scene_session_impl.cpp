@@ -1070,6 +1070,11 @@ bool WindowSceneSessionImpl::IsFullScreen() const
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
+    if (GetMode() == WindowMode::WINDOW_MODE_FLOATING
+        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        /* FloatingWindow skip for Phone*/
+        return false;
+    }
     bool enable = WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
