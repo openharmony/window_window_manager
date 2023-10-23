@@ -1026,6 +1026,11 @@ bool SceneSession::IsDecorEnable()
         WLOGE("property is nullptr");
         return false;
     }
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING
+        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        /* FloatingWindow skip for Phone */
+        return false;
+    }
     return WindowHelper::IsMainWindow(property->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
 }
