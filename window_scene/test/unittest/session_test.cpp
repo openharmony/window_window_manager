@@ -867,6 +867,28 @@ HWTEST_F(WindowSessionTest, IsActive, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsSessionForeground01
+ * @tc.desc: IsSessionForeground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSessionForeground, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(true, session_->IsSessionForeground());
+    session_->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_EQ(true, session_->IsSessionForeground());
+    session_->state_ = SessionState::STATE_INACTIVE;
+    ASSERT_EQ(false, session_->IsSessionForeground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    ASSERT_EQ(false, session_->IsSessionForeground());
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(false, session_->IsSessionForeground());
+    session_->state_ = SessionState::STATE_CONNECT;
+    ASSERT_EQ(false, session_->IsSessionForeground());
+}
+
+/**
  * @tc.name: SetFocusable01
  * @tc.desc: SetFocusable, normal scene
  * @tc.type: FUNC
