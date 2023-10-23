@@ -1658,7 +1658,7 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    surfaceNode_->SetSkipLayer(isSkip || property_->GetSystemPrivacyMode());
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }

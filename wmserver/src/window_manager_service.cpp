@@ -1241,6 +1241,13 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+
+    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE && 
+        !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
+        WLOGFE("Set privacy mode permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
     windowProperty->isSystemCalling_ = Permission::IsSystemCalling();
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
         return PostSyncTask([this, windowProperty, action]() mutable {
