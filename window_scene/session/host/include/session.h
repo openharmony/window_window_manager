@@ -118,6 +118,7 @@ public:
         Accessibility::AccessibilityElementInfo& info);
     virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info);
+    virtual WSError NotifyClientToUpdateRect() { return WSError::WS_OK; };
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
