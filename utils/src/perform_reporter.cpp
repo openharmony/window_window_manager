@@ -28,6 +28,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowInfoReporter)
 
 constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
 constexpr char EVENT_KEY_WINDOW_NAME[] = "WINDOW_NAME";
+constexpr char EVENT_KEY_MISSION_ID[] = "MISSION_ID";
+constexpr char EVENT_KEY_TIMESTAMP[] = "TIMESTAMP";
 
 /**
  * @brief Construct a new Perform Reporter:: Perform Reporter object
@@ -256,6 +258,20 @@ void WindowInfoReporter::ReportRecordedInfos()
     Report("WM_REPORT_WINDOW_DESTORY", GetMsgString(windowDestoryReportInfos_));
     Report("WM_REPORT_HIDE_NAVIGATIONBAR", GetMsgString(windowNavigationBarReportInfos_));
     ClearRecordedInfos();
+}
+
+void WindowInfoReporter::ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp)
+{
+    std::string eventName = "CONTAINER_START_BEGIN";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_MISSION_ID, missionId,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_TIMESTAMP, timestamp);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
 }
 
 void WindowInfoReporter::Report(const std::string& reportTag, const std::string& msg)
