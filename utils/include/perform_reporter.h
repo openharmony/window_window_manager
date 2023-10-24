@@ -67,6 +67,7 @@ public:
     // report when application startup request window
     void ReportStartWindow(const std::string& bundleName, const std::string& windowName);
     void ReportRecordedInfos();
+    void ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
