@@ -130,6 +130,8 @@ public:
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
+    void SetScreenLocked(const bool isScreenLocked);
+    bool IsScreenLocked() const;
 
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
@@ -245,6 +247,8 @@ private:
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterScreenLockedStateNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
 
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();
@@ -345,6 +349,7 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    bool isScreenLocked_ {false};
     bool isPrepareTerminateEnable_ {false};
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     bool needUpdateSessionRect_ = false;

@@ -875,6 +875,8 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
+    RegisterScreenLockedStateNotifyManagerFunc(sceneSession);
+    RegisterGetStateFromManagerFunc(sceneSession);
     RegisterInputMethodUpdateFunc(sceneSession);
     RegisterInputMethodShownFunc(sceneSession);
     RegisterInputMethodHideFunc(sceneSession);
@@ -2974,6 +2976,16 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
+{
+    isScreenLocked_ = isScreenLocked;
+}
+
+bool SceneSessionManager::IsScreenLocked() const
+{
+    return isScreenLocked_;
+}
+
 void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 {
     WLOGFE("RegisterWindowChanged in");
@@ -3030,6 +3042,39 @@ void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<Scene
     }
     sceneSession->SetRequestFocusStatusNotifyManagerListener(func);
     WLOGFD("RegisterSessionUpdateFocusStatusFunc success");
+}
+
+void SceneSessionManager::RegisterScreenLockedStateNotifyManagerFunc(sptr<SceneSession>& sceneSession) {
+    NotifyScreenLockedStateNotifyManagerFunc func = [this](const bool isScreenLocked) {
+        this->SetScreenLocked(isScreenLocked);
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetScreenLockedStateNotifyManagerListener(func);
+    WLOGFD("RegisterScreenLockedStateNotifyManagerFunc success");
+}
+
+void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    GetStateFromManagerFunc func = [this](const ManagerState key) {
+        switch (key)
+        {
+        case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
+            return this->IsScreenLocked();
+            break;
+        default:
+            return false;
+            break;
+        }
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetGetStateFromManagerListener(func);
+    WLOGFD("RegisterGetStateFromManagerFunc success");
 }
 
 void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)

@@ -2551,6 +2551,19 @@ HWTEST_F(SceneSessionManagerTest, UpdateWindowMode, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetScreenLocked && IsScreenLocked
+ * @tc.desc: SceneSesionManager update screen locked state
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, IsScreenLocked, Function | SmallTest | Level3)
+{
+    ssm_->SetScreenLocked(true);
+    EXPECT_TRUE(ssm_->IsScreenLocked());
+    ssm_->SetScreenLocked(false);
+    EXPECT_FALSE(ssm_->IsScreenLocked());
+}
+
+/**
  * @tc.name: UpdatePrivateStateAndNotify
  * @tc.desc: SceneSesionManager update private state and notify
  * @tc.type: FUNC
