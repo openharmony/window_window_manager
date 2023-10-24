@@ -663,7 +663,11 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
-    UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
+    if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
+        UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
+    } else {
+        NotifyClientToUpdateRect();
+    }
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
