@@ -113,6 +113,15 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
 
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
+    // return when screen is locked and show without ShowWhenLocked flag
+    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
+        !IsShowWhenLocked()) {
+            WLOGFW("Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
+                GetPersistentId());
+            return WSError::WS_ERROR_INVALID_SHOW_WHEN_LOCKED;
+    }
+
     PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1306,6 +1315,11 @@ std::string SceneSession::GetUpdatedIconPath()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
+    // screenLocked state change
+    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        NotifyScreenLockedStateNotifyManager(isVisible_);
+    }
+
     if (specificCallback_ == nullptr) {
         WLOGFW("specific callback is null.");
         return;
