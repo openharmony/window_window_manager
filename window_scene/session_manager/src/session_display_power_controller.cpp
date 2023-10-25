@@ -45,8 +45,6 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             {
                 displayState_ = state;
             }
-            ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-                EventStatus::BEGIN);
             break;
         }
         case DisplayState::OFF: {
