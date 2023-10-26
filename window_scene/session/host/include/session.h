@@ -47,6 +47,7 @@ using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyRequestFocusStatusNotifyManagerFunc = std::function<void(int32_t persistentId, const bool isFocused)>;
+using NotifyScreenLockedStateNotifyManagerFunc = std::function<void(const bool isScreenLocked)>;
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
@@ -65,6 +66,7 @@ using NotifyCallingSessionForegroundFunc = std::function<void(const int32_t& per
 using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
+using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 
 class ILifecycleListener {
 public:
@@ -165,7 +167,9 @@ public:
     void UnregisterSessionStateChangeListenser();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
+    void SetScreenLockedStateNotifyManagerListener(const NotifyScreenLockedStateNotifyManagerFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
+    void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -196,7 +200,9 @@ public:
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick();
     void NotifyRequestFocusStatusNotifyManager(bool isFocused);
+    void NotifyScreenLockedStateNotifyManager(bool isScreenLocked);
     void NotifyUILostFocus();
+    bool GetStateFromManager(const ManagerState key);
     void PresentFoucusIfNeed(int32_t pointerAcrion);
     WSError UpdateFocus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
@@ -316,7 +322,9 @@ protected:
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
+    NotifyScreenLockedStateNotifyManagerFunc screenLockedStateNotifyManagerFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
+    GetStateFromManagerFunc getStateFromManagerFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;
