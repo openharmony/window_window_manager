@@ -54,6 +54,7 @@ enum class WSError : int32_t {
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
+    WS_ERROR_INVALID_SHOW_WHEN_LOCKED,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -142,6 +143,10 @@ enum AncoSceneState: int32_t {
 enum SessionOperationType : int32_t {
     TYPE_DEFAULT = 0,
     TYPE_CLEAR,
+};
+
+enum class ManagerState : uint32_t {
+    MANAGER_STATE_SCREEN_LOCKED = 0,
 };
 
 struct SessionInfo {
