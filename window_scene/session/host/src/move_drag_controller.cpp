@@ -23,6 +23,8 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
 #include "session_manager/include/screen_session_manager.h"
+#include <ui/rs_surface_node.h>
+#include "window.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -163,6 +165,29 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
         isSendHotAreaMessage, reason);
     if (windowDragHotAreaFunc_ && isSendHotAreaMessage) {
         windowDragHotAreaFunc_(windowDragHotAreaType_, reason);
+    }
+}
+
+void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
+        return;
+    }
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        Gravity dragGravity = GRAVITY_MAP.at(type_);
+        if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
+            WLOGFI("setFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
+            surfaceNode->SetFrameGravity(dragGravity);
+        }
+        return;
+    }
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
+        WLOGFI("recover gravity to TOP_LEFT");
     }
 }
 
