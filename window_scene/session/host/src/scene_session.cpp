@@ -965,6 +965,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             }
             auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
             if (!isPhone && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+                moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 return WSError::WS_OK;
             }
