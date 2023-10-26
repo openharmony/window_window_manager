@@ -360,16 +360,13 @@ bool Session::GetTouchable() const
 
 WSError Session::SetVisible(bool isVisible)
 {
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    isVisible_ = isVisible;
+    isRSVisible_ = isVisible;
     return WSError::WS_OK;
 }
 
 bool Session::GetVisible() const
 {
-    return isVisible_;
+    return isRSVisible_;
 }
 
 int32_t Session::GetWindowId() const
