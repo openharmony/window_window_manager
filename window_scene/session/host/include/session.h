@@ -247,6 +247,7 @@ public:
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
+    WSError UpdateMaximizeMode(bool isMaximize);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
         return std::vector<Rect>();

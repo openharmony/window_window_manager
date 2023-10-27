@@ -1626,6 +1626,21 @@ WindowMode Session::GetWindowMode()
     return property->GetWindowMode();
 }
 
+WSError Session::UpdateMaximizeMode(bool isMaximize)
+{
+    WLOGFD("Session update maximize mode, isMaximize: %{public}d", isMaximize);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
+    if (isMaximize) {
+        mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        mode = MaximizeMode::MODE_FULL_FILL;
+    }
+    return sessionStage_->UpdateMaximizeMode(mode);
+}
+
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;

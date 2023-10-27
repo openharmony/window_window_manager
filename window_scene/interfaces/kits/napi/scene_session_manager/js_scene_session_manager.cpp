@@ -102,6 +102,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
+    BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
     return NapiGetUndefined(env);
 }
 
@@ -478,6 +479,13 @@ napi_value JsSceneSessionManager::PreloadInLakeApp(napi_env env, napi_callback_i
     WLOGI("[NAPI]PreloadInLakeApp");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnPreloadInLakeApp(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]UpdateMaximizeMode");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateMaximizeMode(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1496,6 +1504,35 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().PreloadInLakeApp(bundleName);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isMaximize = false;
+    if (!ConvertFromJsValue(env, argv[1], isMaximize)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isMaximize");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateMaximizeMode(persistentId, isMaximize);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
