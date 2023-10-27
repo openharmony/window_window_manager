@@ -162,6 +162,16 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
 
     /**
+     * @brief resize virtual screen
+     *
+     * @param screenId the id of virtual screen to be resized.
+     * @param width the new width.
+     * @param height the new height.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError resizeVirtualScreen(ScreenId screenId, uint32_t width, unit32_t height);
+
+    /**
      * @brief Set the screen power states for all screens.
      *
      * @param state Screen power state.
