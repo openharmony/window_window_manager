@@ -101,6 +101,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
+    BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
     return NapiGetUndefined(env);
 }
 
@@ -463,6 +464,13 @@ napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback
     WLOGI("[NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetScreenLocked(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetScreenLocked");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetScreenLocked(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::PreloadInLakeApp(napi_env env, napi_callback_info info)
@@ -1444,6 +1452,28 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSetScreenLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isScreenLocked = false;
+    if (!ConvertFromJsValue(env, argv[0], isScreenLocked)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isScreenLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetScreenLocked(isScreenLocked);
     return NapiGetUndefined(env);
 }
 
