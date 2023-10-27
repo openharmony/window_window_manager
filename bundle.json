@@ -120,6 +120,16 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/utils:libwmutil",
+            "header": {
+              "header_files": [
+                "singleton_container.h"
+              ],
+              "header_base": "//foundation/window/window_manager/utils/include"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/dm:libdm",
             "header": {
               "header_files": [
