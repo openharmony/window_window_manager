@@ -247,7 +247,6 @@ private:
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
-    void RegisterScreenLockedStateNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
 
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);

@@ -1321,10 +1321,6 @@ std::string SceneSession::GetUpdatedIconPath()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
-    // screenLocked state change
-    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        NotifyScreenLockedStateNotifyManager(isVisible_);
-    }
 
     if (specificCallback_ == nullptr) {
         WLOGFW("specific callback is null.");

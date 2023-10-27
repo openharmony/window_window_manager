@@ -875,7 +875,6 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
-    RegisterScreenLockedStateNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterInputMethodUpdateFunc(sceneSession);
     RegisterInputMethodShownFunc(sceneSession);
@@ -3050,18 +3049,6 @@ void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<Scene
     }
     sceneSession->SetRequestFocusStatusNotifyManagerListener(func);
     WLOGFD("RegisterSessionUpdateFocusStatusFunc success");
-}
-
-void SceneSessionManager::RegisterScreenLockedStateNotifyManagerFunc(sptr<SceneSession>& sceneSession) {
-    NotifyScreenLockedStateNotifyManagerFunc func = [this](const bool isScreenLocked) {
-        this->SetScreenLocked(isScreenLocked);
-    };
-    if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
-        return;
-    }
-    sceneSession->SetScreenLockedStateNotifyManagerListener(func);
-    WLOGFD("RegisterScreenLockedStateNotifyManagerFunc success");
 }
 
 void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession)
