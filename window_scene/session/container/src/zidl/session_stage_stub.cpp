@@ -57,6 +57,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateWindowMode),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
         &SessionStageStub::HandleNotifyForegroundInteractiveStatus),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIP_ALREADY_EXISTS),
+        &SessionStageStub::HandleNotifyPipAlreadyExists),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -126,6 +128,14 @@ int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& re
 {
     WLOGFD("Notify Destroy");
     WSError errCode = NotifyDestroy();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPipAlreadyExists(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Notify Pip AlreadyExists");
+    WSError errCode = NotifyCloseExistPipWindow();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
