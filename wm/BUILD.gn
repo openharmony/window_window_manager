@@ -46,6 +46,9 @@ ohos_static_library("libwm_static") {
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
+    "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_manager.cpp",
+    "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
@@ -164,6 +167,9 @@ ohos_shared_library("libwm") {
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
+    "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_manager.cpp",
+    "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",

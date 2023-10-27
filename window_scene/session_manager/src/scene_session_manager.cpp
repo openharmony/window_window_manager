@@ -1347,6 +1347,15 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property) {
             info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
         }
+        if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+            for (const auto& iter: sceneSessionMap_) {
+                auto& session = iter.second;
+                if (session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+                    session->NotifyCloseExistPipWindow();
+                    break;
+                }
+            }
+        }
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
