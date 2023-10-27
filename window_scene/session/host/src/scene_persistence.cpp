@@ -23,7 +23,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScenePersistence" };
 constexpr const char* UNDERLINE_SEPARATOR = "_";
-constexpr const char* IMAGE_SUFFIX = ".jpg";
+constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
 } // namespace
 
@@ -65,7 +65,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
 
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
-    option.format = "image/jpeg";
+    option.format = "image/png";
     option.quality = IMAGE_QUALITY;
     option.numberHint = 1;
     std::set<std::string> formats;
@@ -98,7 +98,7 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
 
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
-    option.format = "image/jpeg";
+    option.format = "image/png";
     option.quality = IMAGE_QUALITY;
     option.numberHint = 1;
     std::set<std::string> formats;
