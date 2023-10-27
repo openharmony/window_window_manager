@@ -1355,11 +1355,6 @@ void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocu
     requestFocusStatusNotifyManagerFunc_ = func;
 }
 
-void Session::SetScreenLockedStateNotifyManagerListener(const NotifyScreenLockedStateNotifyManagerFunc& func)
-{
-    screenLockedStateNotifyManagerFunc_ = func;
-}
-
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
 {
     lostFocusFunc_ = func;
@@ -1427,15 +1422,6 @@ void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused)
     WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
     if (requestFocusStatusNotifyManagerFunc_) {
         requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused);
-    }
-}
-
-void Session::NotifyScreenLockedStateNotifyManager(bool isScreenLocked)
-{
-    WLOGFD("NotifyScreenLockedStateNotifyManager id: %{public}d, isScreenLocked: %{public}d",
-        GetPersistentId(), isScreenLocked);
-    if (screenLockedStateNotifyManagerFunc_) {
-        screenLockedStateNotifyManagerFunc_(isScreenLocked);
     }
 }
 
