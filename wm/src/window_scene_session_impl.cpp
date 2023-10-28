@@ -438,6 +438,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return ret;
     }
     UpdateTitleButtonVisibility();
+    property_->SetTextFieldPositionY(textFieldPositionY_);
+    property_->SetTextFieldHeight(textFieldHeight_);
     ret = static_cast<WMError>(hostSession_->Foreground(property_));
     if (ret == WMError::WM_OK) {
         // update sub window state if this is main window

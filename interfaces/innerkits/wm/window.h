@@ -1376,6 +1376,13 @@ public:
      * @return True means floating window of app type, false means the opposite.
      */
     virtual bool IsFloatingWindowAppType() const { return false; }
+
+    /**
+     * @brief Set Text Field Avoid Info.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WMError::WM_OK; }
 };
 }
 }

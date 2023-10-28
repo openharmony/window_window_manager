@@ -127,6 +127,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
                 session->setWindowScenePatternFunc_->setOpacityFunc_(0.0f);
             }
         }
+        weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -1806,5 +1807,11 @@ void SceneSession::SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFun
     if (moveDragController_) {
         moveDragController_->SetWindowDragHotAreaFunc(func);
     }
+}
+WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    textFieldPositionY_ = textFieldPositionY;
+    textFieldHeight_ = textFieldHeight;
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
