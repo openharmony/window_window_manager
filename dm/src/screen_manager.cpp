@@ -486,6 +486,12 @@ DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
     return SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
 }
 
+DMError ScreenManager::DisableMirror(bool disableOrNot)
+{
+    WLOGFI("Disable mirror %{public}d", disableOrNot);
+    return SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(disableOrNot);
+}
+
 DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     WLOGFI("screens.size=%{public}llu", (unsigned long long)screens.size());

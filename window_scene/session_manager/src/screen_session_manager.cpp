@@ -1170,6 +1170,29 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::DisableMirror(bool disableOrNot)
+{
+    WLOGFI("SCB:ScreenSessionManager::DisableMirror %{public}d", disableOrNot);
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFI("DisableMirror permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB:ScreenSessionManager::DisableMirror enter %{public}d", disableOrNot);
+    disableMirrorOrNot_ = disableOrNot;
+    if (disableOrNot) {
+        std::vector<ScreenId> screenIds;
+        auto allScreenIds = GetAllScreenIds();
+        for (auto screenId : allScreenIds) {
+            auto screen = GetScreenSession(screenId);
+            if (screen && screen->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                screenIds.push_back(screenId);
+            }
+        }
+        StopMirror(screenIds);
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
                                          ScreenId& screenGroupId)
 {
@@ -1177,6 +1200,10 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("SCB:ScreenSessionManager::MakeMirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (disableMirrorOrNot_) {
+        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
     }
     WLOGFI("SCB:ScreenSessionManager::MakeMirror mainScreenId :%{public}" PRIu64"", mainScreenId);
     auto allMirrorScreenIds = GetAllValidScreenIds(mirrorScreenIds);
@@ -1834,12 +1861,28 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
 {
     WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
+    if (disableDisplaySnapshotOrNot_) {
+        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled!");
+        return nullptr;
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", displayId);
     auto res = GetScreenSnapshot(displayId);
     if (res != nullptr) {
         NotifyScreenshot(displayId);
     }
     return res;
+}
+
+DMError ScreenSessionManager::DisableDisplaySnapshot(bool disableOrNot)
+{
+    WLOGFD("SCB: ScreenSessionManager::DisableDisplaySnapshot %{public}d", disableOrNot);
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("DisableDisplaySnapshot permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: ScreenSessionManager::DisableDisplaySnapshot enter %{public}d", disableOrNot);
+    disableDisplaySnapshotOrNot_ = disableOrNot;
+    return DMError::DM_OK;
 }
 
 bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)

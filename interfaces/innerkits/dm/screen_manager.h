@@ -129,6 +129,14 @@ public:
     DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
 
     /**
+     * @brief Disable/enable global mirror screen.
+     *
+     * @param disableOrNot disable mirror screen or not.
+     * @return DM_OK means disable or enable mirror success, others means failed.
+     */
+    DMError DisableMirror(bool disableOrNot);
+
+    /**
      * @brief Remove virtual screen from group.
      *
      * @param screens Screen ids.
