@@ -394,7 +394,7 @@ private:
     int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
-    bool isVisible_ {false};
+    bool isRSVisible_ {false};
     bool needNotify_ {true};
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };
