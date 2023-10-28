@@ -182,6 +182,8 @@ public:
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
 
+    void RegisterSettingDpiObserver();
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -250,6 +252,8 @@ private:
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
+    std::atomic<uint32_t> cachedSettingDpi_ {0};
+    uint32_t defaultDpi {0};
 
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
