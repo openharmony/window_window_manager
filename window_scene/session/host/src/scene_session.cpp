@@ -473,7 +473,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newReason = SizeChangeReason::UNDEFINED;
                 WLOGFD("Input rect has totally changed, need to modify reason, id: %{public}d",
                     session->GetPersistentId());
-            } else {
+            } else if (rect.width_ > 0 && rect.height_ > 0) {
                 newWinRect.width_ = rect.width_;
                 newWinRect.height_ = rect.height_;
                 newRequestRect.width_ = rect.width_;
