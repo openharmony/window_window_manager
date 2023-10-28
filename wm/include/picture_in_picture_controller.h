@@ -16,6 +16,8 @@
 #ifndef OHOS_PICTURE_IN_PICTURE_CONTROLLER_H
 #define OHOS_PICTURE_IN_PICTURE_CONTROLLER_H
 
+#define PIP_WINDOW_NAME "pip_window"
+
 #include <event_handler.h>
 #include <refbase.h>
 #include "picture_in_picture_option.h"
@@ -52,7 +54,7 @@ private:
 
     sptr<Window> window_;
     int32_t windowId_;
-    Rect windowRect_ = {};
+    Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
 
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;

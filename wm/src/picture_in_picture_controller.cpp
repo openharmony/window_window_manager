@@ -62,9 +62,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         WLOGFE("Get WindowOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    windowRect_.width_ = DEFAULT_WIDTH;
-    windowRect_.height_ = DEFAULT_HEIGHT;
-    windowOption->SetWindowName("pip_window");
+    windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     windowOption->SetWindowRect(windowRect_);
