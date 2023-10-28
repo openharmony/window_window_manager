@@ -525,6 +525,13 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
+DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
+        screenId, width, height);
+    return DMError::DM_OK;
+}
+
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("state:%{public}u, reason:%{public}u", state, reason);

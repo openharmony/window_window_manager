@@ -55,6 +55,9 @@ public:
     const std::string defaultName_ = "virtualScreen01";
     const float defaultDensity_ = 2.0;
     const int32_t defaultFlags_ = 0;
+    const ScreenId testVirtualScreenId_ = 2;
+    const uint32_t testVirtualScreenWidth_ = 1920;
+    const uint32_t testVirtualScreenHeight_ = 1080;
     static sptr<Display> defaultDisplay_;
     static uint32_t defaultWidth_;
     static uint32_t defaultHeight_;
@@ -462,6 +465,17 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
     std::vector<ScreenId> mirrorScreenIds {0, 1, 2, 3, 4, 5};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
     ASSERT_EQ(DMError::DM_OK, err);
+}
+
+/**
+ * @tc.name: ResizeVirtualScreen
+ * @tc.desc: resize virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | SmallTest | Level1)
+{
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().ResizeVirtualScreen(testVirtualScreenId_,
+        testVirtualScreenWidth_, testVirtualScreenHeight_));
 }
 }
 } // namespace Rosen
