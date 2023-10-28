@@ -89,6 +89,7 @@ public:
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
+        TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -156,6 +157,9 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+
+    // unique screen
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
 };
 } // namespace OHOS::Rosen
 

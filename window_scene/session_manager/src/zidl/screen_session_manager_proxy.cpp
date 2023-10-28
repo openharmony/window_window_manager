@@ -1356,4 +1356,37 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     }
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
+
+DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+{
+    WLOGFI("ScreenSessionManagerProxy::MakeUniqueScreen");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("make unique screen failed: remote is null");
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("MakeUniqueScreen writeInterfaceToken failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (!data.WriteUint32(screenIds.size())) {
+        WLOGFE("MakeUniqueScreen write screenIds size failed");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    bool res = data.WriteUInt64Vector(screenIds);
+    if (!res) {
+        WLOGFE("MakeUniqueScreen fail: write screens failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("MakeUniqueScreen fail: SendRequest failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

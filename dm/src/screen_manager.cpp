@@ -28,8 +28,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
-    const static uint32_t MAX_SCREEN_SIZE = 32;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
+const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
 public:
@@ -450,6 +450,21 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
     if (screenGroupId == SCREEN_ID_INVALID) {
         WLOGFI("Make expand failed");
     }
+    return ret;
+}
+
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+{
+    WLOGFI("start Make UniqueScreen");
+    if (screenIds.empty()) {
+        WLOGFI("screenIds is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenIds.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("Make UniqueScreen failed. The screenIds size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
     return ret;
 }
 
