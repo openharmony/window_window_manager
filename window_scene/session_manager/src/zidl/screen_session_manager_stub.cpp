@@ -216,6 +216,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_DISABLE_MIRROR: {
+            DMError ret = DisableMirror(data.ReadBool());
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
@@ -264,6 +269,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
+            DMError ret = DisableDisplaySnapshot(data.ReadBool());
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
