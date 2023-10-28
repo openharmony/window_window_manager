@@ -182,6 +182,9 @@ public:
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
 
+    // make unique screen
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -203,6 +206,9 @@ private:
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
     bool SetScreenPower(ScreenPowerStatus status);
+
+    // notify scb virtual screen change
+    void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
