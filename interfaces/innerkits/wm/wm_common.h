@@ -596,7 +596,7 @@ enum class PipWindowState : uint32_t {
 /**
  * @brief Enumerates picture in picture template type.
  */
-enum class PictureInPictureTemplateType : int32_t {
+enum class PipTemplateType : int32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
@@ -605,12 +605,12 @@ enum class PictureInPictureTemplateType : int32_t {
 /**
  * @brief Enumerates picture in picture state.
  */
-enum class PictureInPictureState : int32_t {
-    WILL_START = 1,
+enum class PipState : int32_t {
+    ABOUT_TO_START = 1,
     STARTED = 2,
-    WILL_STOP = 3,
+    ABOUT_TO_STOP = 3,
     STOPPED = 4,
-    RESTORE = 5,
+    ABOUT_TO_RESTORE = 5,
     ERROR = 6,
 };
 

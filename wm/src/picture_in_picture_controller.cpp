@@ -62,8 +62,8 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         WLOGFE("Get WindowOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    windowRect_.width_ = 800;
-    windowRect_.height_ = 600;
+    windowRect_.width_ = DEFAULT_WIDTH;
+    windowRect_.height_ = DEFAULT_HEIGHT;
     windowOption->SetWindowName("pip_window");
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -75,7 +75,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     window_ = window;
-    window_->SetCornerRadius(winCorner_);
+    window_->SetCornerRadius(DEFAULT_WINDOW_CONOR);
     PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), thisController);
     return WMError::WM_OK;
 }
@@ -162,7 +162,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         };
     if (handler_ && needAnim) {
         WLOGFD("Window destroy async");
-        handler_->PostTask(task, "pip_controller_stop_window", 400);
+        handler_->PostTask(task, "StopPictureInPicture", DEFAULT_TIME_DELAY);
     } else {
         WLOGFD("Window destroy sync");
         task();

@@ -24,7 +24,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-constexpr int32_t ARGC_ONE = 1;
 
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
@@ -44,7 +43,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     uint32_t width;
     uint32_t height;
 
-    napi_get_named_property(env, optionObject, "ctx", &contextPtrValue);
+    napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
@@ -88,41 +87,48 @@ void JsPipWindowManager::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<JsPipWindowManager>(static_cast<JsPipWindowManager*>(data));
 }
 
-napi_value JsPipWindowManager::IsPictureInPictureEnabled(napi_env env, napi_callback_info info)
+napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info info)
 {
     JsPipWindowManager* me = CheckParamsAndGetThis<JsPipWindowManager>(env, info);
-    return (me != nullptr) ? me->OnIsPictureInPictureEnabled(env, info) : nullptr;
+    return (me != nullptr) ? me->OnIsPipEnabled(env, info) : nullptr;
 }
 
-napi_value JsPipWindowManager::OnIsPictureInPictureEnabled(napi_env env, napi_callback_info info)
+napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
     WLOGFD("OnIsSupportPictureInPicture");
     bool state = true;
     return CreateJsValue(env, state);
 }
 
-napi_value JsPipWindowManager::CreatePictureInPictureController(napi_env env, napi_callback_info info)
+napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_info info)
 {
     JsPipWindowManager* me = CheckParamsAndGetThis<JsPipWindowManager>(env, info);
-    return (me != nullptr) ? me->OnCreatePictureInPictureController(env, info) : nullptr;
+    return (me != nullptr) ? me->OnCreatePipController(env, info) : nullptr;
 }
 
-napi_value JsPipWindowManager::OnCreatePictureInPictureController(napi_env env, napi_callback_info info)
+napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
     WLOGI("OnCreatePictureInPictureController is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        WLOGFE("Argc count is invalid: %{public}zu", argc);
+    if (argc < 1) {
         return NapiThrowInvalidParam(env);
     }
     napi_value config = argv[0];
+    if (config == nullptr) {
+        WLOGFE("Failed to convert object to CreateWindow");
+        return NapiThrowInvalidParam(env);
+    }
     PipOption pipOption;
     int32_t errCode = GetPictureInPictureOptionFromJs(env, config, pipOption);
     if (errCode == -1) {
         WLOGFE("Configuration is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
+    }
+    napi_value callback = nullptr;
+    if (argc > 1) {
+        callback = GetType(env, argv[1]) == napi_function ? argv[1] : nullptr; // 1: index of callback
     }
     NapiAsyncTask::CompleteCallback complete =
         [pipOption](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -134,8 +140,8 @@ napi_value JsPipWindowManager::OnCreatePictureInPictureController(napi_env env, 
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));
         };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipWindowManager::OnCreatePictureInPictureController", env,
-        CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    NapiAsyncTask::Schedule("JsPipWindowManager::OnCreatePipController", env,
+        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -149,9 +155,8 @@ napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)
     std::unique_ptr<JsPipWindowManager> jsPipManager = std::make_unique<JsPipWindowManager>();
     napi_wrap(env, exportObj, jsPipManager.release(), JsPipWindowManager::Finalizer, nullptr, nullptr);
     const char* moduleName = "JsPipWindowManager";
-    BindNativeFunction(env, exportObj, "create", moduleName, JsPipWindowManager::CreatePictureInPictureController);
-    BindNativeFunction(env, exportObj, "isPictureInPictureEnabled", moduleName,
-        JsPipWindowManager::IsPictureInPictureEnabled);
+    BindNativeFunction(env, exportObj, "create", moduleName, JsPipWindowManager::CreatePipController);
+    BindNativeFunction(env, exportObj, "isPipEnabled", moduleName, JsPipWindowManager::IsPipEnabled);
     InitEnums(env, exportObj);
     return NapiGetUndefined(env);
 }

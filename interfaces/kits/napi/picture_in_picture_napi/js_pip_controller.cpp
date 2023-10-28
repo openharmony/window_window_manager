@@ -30,10 +30,10 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "jsPipController"};
 }
 
-void BindJsPipControllerFunctions(napi_env env, napi_value object, const char *moduleName)
+void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
-    BindNativeFunction(env, object, "startPictureInPicture", moduleName, JsPipController::StartPictureInPicture);
-    BindNativeFunction(env, object, "stopPictureInPicture", moduleName, JsPipController::StopPictureInPicture);
+    BindNativeFunction(env, object, "startPip", moduleName, JsPipController::StartPictureInPicture);
+    BindNativeFunction(env, object, "stopPip", moduleName, JsPipController::StopPictureInPicture);
     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
@@ -49,7 +49,7 @@ napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureContro
     std::unique_ptr<JsPipController> jsPipController = std::make_unique<JsPipController>(pipController);
     napi_wrap(env, objValue, jsPipController.release(), JsPipController::Finalizer, nullptr, nullptr);
 
-    BindJsPipControllerFunctions(env, objValue, "JsPipController");
+    BindFunctions(env, objValue, "JsPipController");
     return objValue;
 }
 
@@ -76,6 +76,13 @@ napi_value JsPipController::StartPictureInPicture(napi_env env, napi_callback_in
 napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_info info)
 {
     WLOGI("OnStartPictureInPicture is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = nullptr;
+    if (argc > 0) {
+        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
+    }
     NapiAsyncTask::CompleteCallback complete =
         [this](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (this->pipController_ == nullptr) {
@@ -85,8 +92,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
             }
             WMError errCode = this->pipController_->StartPictureInPicture();
             if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                        WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStartPictureInPicture failed."));
                 return;
             }
@@ -95,7 +101,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsPipController::OnStartPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -108,6 +114,13 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     WLOGI("OnStopPictureInPicture is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = nullptr;
+    if (argc > 0) {
+        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
+    }
     NapiAsyncTask::CompleteCallback complete =
         [this](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (this->pipController_ == nullptr) {
@@ -117,8 +130,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
             }
             WMError errCode = this->pipController_->StopPictureInPicture(true);
             if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                        WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStopPictureInPicture failed."));
                 return;
             }
@@ -127,7 +139,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsPipController::OnStopPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -173,12 +185,12 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
         return NapiThrowInvalidParam(env);
     }
     uint32_t width = 0;
-    if (!ConvertFromJsValue(env, argv[0], width) || width == 0) {
+    if (!ConvertFromJsValue(env, argv[0], width) || width <= 0) {
         WLOGFE("Failed to convert parameter to uint32_t or parameter is invalid");
         return NapiThrowInvalidParam(env);
     }
     uint32_t height = 0;
-    if (!ConvertFromJsValue(env, argv[1], height) || height == 0) {
+    if (!ConvertFromJsValue(env, argv[1], height) || height <= 0) {
         WLOGFE("Failed to convert parameter to uint32_t or parameter is invalid");
         return NapiThrowInvalidParam(env);
     }
