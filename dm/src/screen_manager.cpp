@@ -525,7 +525,8 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
-DMError ScreenManager::resizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) {
+DMError ScreenManager::resizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
     WLOGFI("resizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
         screenId, width, height);
     return DMError::DM_OK;
