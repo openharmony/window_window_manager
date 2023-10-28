@@ -23,6 +23,7 @@ namespace Rosen {
 napi_value NapiGetUndefined(napi_env env);
 napi_value NapiThrowInvalidParam(napi_env env);
 napi_status InitEnums(napi_env env, napi_value exports);
+napi_valuetype GetType(napi_env env, napi_value value);
 }
 }
 #endif //OHOS_JS_PIP_UTILS_H

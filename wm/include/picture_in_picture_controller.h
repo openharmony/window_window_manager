@@ -26,6 +26,10 @@ namespace OHOS {
 namespace Rosen {
 class PictureInPictureController : virtual public RefBase {
 public:
+    constexpr static int32_t DEFAULT_WIDTH = 800;
+    constexpr static int32_t DEFAULT_HEIGHT = 600;
+    constexpr static int32_t DEFAULT_TIME_DELAY = 400;
+    constexpr static float DEFAULT_WINDOW_CONOR = 40.0f;
     PictureInPictureController(sptr<PipOption> pipOption, int32_t mainWindowId);
     ~PictureInPictureController();
     WMError StartPictureInPicture();
@@ -50,7 +54,6 @@ private:
     int32_t windowId_;
     Rect windowRect_ = {};
     bool isAutoStartEnabled_ = false;
-    const float winCorner_ = 40.0f;
 
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
