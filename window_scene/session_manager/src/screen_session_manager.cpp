@@ -193,6 +193,8 @@ void ScreenSessionManager::ConfigureScreenScene()
         WLOGFD("densityDpi = %u", densityDpi);
         if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
             isDensityDpiLoad_ = true;
+            defaultDpi = densityDpi;
+            cachedSettingDpi_ = defaultDpi;
             densityDpi_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         }
     }
@@ -731,6 +733,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         WLOGFI("ScreenSessionManager BootFinishedCallback boot animation finished");
         that.SetDpiFromSettingData();
+        that.RegisterSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -742,19 +745,29 @@ void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScre
     foldScreenPowerInit_ = foldScreenPowerInit;
 }
 
+void ScreenSessionManager::RegisterSettingDpiObserver()
+{
+    WLOGFI("Register Setting Dpi Observer");
+    PowerMgr::SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+    ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+}
+
 void ScreenSessionManager::SetDpiFromSettingData()
 {
     uint32_t settingDpi;
     bool ret = ScreenSettingHelper::GetSettingDpi(settingDpi);
     if (!ret) {
-        WLOGFW("get setting dpi failed");
+        WLOGFW("get setting dpi failed,use default dpi");
+        settingDpi = defaultDpi;
     } else {
         WLOGFI("get setting dpi success,settingDpi: %{public}u", settingDpi);
-        if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
-            float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
-            ScreenId defaultScreenId = GetDefaultScreenId();
-            SetVirtualPixelRatio(defaultScreenId, dpi);
-        }
+    }
+    if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE
+        && cachedSettingDpi_ != settingDpi) {
+        cachedSettingDpi_ = settingDpi;
+        float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+        ScreenId defaultScreenId = GetDefaultScreenId();
+        SetVirtualPixelRatio(defaultScreenId, dpi);
     }
 }
 

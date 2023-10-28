@@ -24,6 +24,37 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSettingHelper" };
 }
 
+sptr<PowerMgr::SettingObserver> ScreenSettingHelper::dpiObserver_;
+
+void ScreenSettingHelper::RegisterSettingDpiObserver(PowerMgr::SettingObserver::UpdateFunc func)
+{
+    if (dpiObserver_) {
+        WLOGFD("setting dpi observer is already registered");
+        return;
+    }
+    PowerMgr::SettingProvider& provider = PowerMgr::SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
+    ErrCode ret = provider.RegisterObserver(dpiObserver_);
+    if (ret != ERR_OK) {
+        WLOGFW("register setting dpi observer failed, ret=%{public}d", ret);
+        dpiObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingDpiObserver()
+{
+    if (dpiObserver_ == nullptr) {
+        WLOGFD("dpiObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    PowerMgr::SettingProvider& provider = PowerMgr::SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.UnregisterObserver(dpiObserver_);
+    if (ret != ERR_OK) {
+        WLOGFW("unregister setting dpi observer failed, ret=%{public}d", ret);
+    }
+    dpiObserver_ = nullptr;
+}
+
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
 {
 #ifdef POWER_MANAGER_ENABLE
