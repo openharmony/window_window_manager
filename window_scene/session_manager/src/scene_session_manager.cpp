@@ -4100,10 +4100,6 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         }
         sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
         RelayoutKeyBoard(sceneSession);
-        if (callingSession_ == nullptr) {
-            WLOGFD("callingSession_ is nullptr");
-            callingSession_ = GetSceneSession(focusedSessionId_);
-        }
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             WLOGFD("input method is float mode");
             sceneSession->SetWindowAnimationFlag(false);
