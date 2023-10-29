@@ -103,6 +103,8 @@ public:
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
+
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
 };
 
 } // namespace Rosen

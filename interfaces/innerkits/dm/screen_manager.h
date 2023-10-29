@@ -113,6 +113,14 @@ public:
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
     /**
+    * @brief Make screens as unique-screen.
+    *
+    * @param screenIds Unique screen ids.
+    * @return DM_OK means make unique screen success, others means make unique failed.
+    */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
      * @brief Stop expand screens.
      *
      * @param expandScreenIds Expand screen ids.
