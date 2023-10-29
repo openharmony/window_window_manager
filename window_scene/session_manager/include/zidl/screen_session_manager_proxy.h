@@ -105,6 +105,9 @@ public:
     FoldStatus GetFoldStatus() override;
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+
+    // unique screen
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

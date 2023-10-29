@@ -245,6 +245,28 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     }
 }
 
+void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent)
+{
+    WLOGFI("Notify scb virtual screen change, ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
+        static_cast<int>(screenEvent));
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is nullptr");
+        return;
+    }
+    if (screenEvent == ScreenEvent::CONNECTED) {
+        for (auto listener : screenConnectionListenerList_) {
+            listener->OnScreenConnect(screenSession);
+        }
+        screenSession->Connect();
+    } else if (screenEvent == ScreenEvent::DISCONNECTED) {
+        for (auto listener : screenConnectionListenerList_) {
+            listener->OnScreenDisconnect(screenSession);
+        }
+        screenSession->Disconnect();
+    }
+}
+
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
     WLOGFI("SCB: On screen change. ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
@@ -1138,6 +1160,11 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         WLOGFE("destroy virtual screen permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+
+    // virtual screen destroy callback to notify scb
+    WLOGFI("destroy callback virtual screen");
+    OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
+
     WLOGI("SCB: ScreenSessionManager::DestroyVirtualScreen Enter");
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
@@ -1271,6 +1298,41 @@ DMError ScreenSessionManager::StopScreens(const std::vector<ScreenId>& screenIds
             NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
         }
     }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+{
+    WLOGFI("SCB:ScreenSessionManager::MakeUniqueScreen enter!");
+    if (screenIds.empty()) {
+        WLOGFE("screen is empty");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId mainScreenId = GetDefaultScreenId();
+    ScreenId uniqueScreenId = screenIds[0];
+    WLOGFI("MainScreenId %{public}" PRIu64" unique screenId %{public}" PRIu64".", mainScreenId, uniqueScreenId);
+
+    auto defaultScreen = GetDefaultScreenSession();
+    if (!defaultScreen) {
+        WLOGFE("Default screen is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto group = GetAbstractScreenGroup(defaultScreen->groupSmsId_);
+    if (group == nullptr) {
+        group = AddToGroupLocked(defaultScreen);
+        if (group == nullptr) {
+            WLOGFE("group is nullptr");
+            return DMError::DM_ERROR_NULLPTR;
+        }
+        NotifyScreenGroupChanged(defaultScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+    }
+    Point point;
+    std::vector<Point> startPoints;
+    startPoints.insert(startPoints.begin(), screenIds.size(), point);
+    ChangeScreenGroup(group, screenIds, startPoints, true, ScreenCombination::SCREEN_UNIQUE);
+
+    // virtual screen create callback to notify scb
+    OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
     return DMError::DM_OK;
 }
 

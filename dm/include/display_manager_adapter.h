@@ -119,6 +119,9 @@ public:
     virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
     virtual DMError SetScreenColorTransform(ScreenId screenId);
+
+    // unique screen
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
