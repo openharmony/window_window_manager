@@ -1080,19 +1080,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     scnSession->NotifyActivation();
     scnSessionInfo->isNewWant = isNewActive;
-    bool isCollaboratorType = CheckCollaboratorType(scnSession->GetCollaboratorType());
-    if (isCollaboratorType) {
+    if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
         scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
-    int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
     auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
     auto sessionInfo = scnSession->GetSessionInfo();
-    if (isCollaboratorType) {
-        WindowInfoReporter::GetInstance().ReportContainerStartBegin(scnSessionInfo->persistentId,
-            sessionInfo.bundleName_, timestamp);
-    }
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
         WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
     }
@@ -4977,6 +4970,11 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     if (collaborator != nullptr) {
+        {
+            std::shared_lock<std::shared_mutex> lock(containerStartAbilityTimeLock_);
+            containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+        }
         collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), accessTokenIDEx);
     }
@@ -5003,6 +5001,14 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
     sceneSession->SetSelfToken(abilitySessionInfo->sessionToken);
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
+        int32_t missionId = abilitySessionInfo->persistenId;
+        std::string bundleName = sessionInfo.bundleName_;
+        int64_t timestamp;
+        {
+            std::shared_lock<std::shared_mutex> lock(containerStartAbilityTimeLock_);
+            timestamp = containerStartAbilityTime;
+        }
+        WindowInfoReporter::GetInstance().ReportContainerStartBegin(missionId, bundleName, timestamp);
         collaborator->NotifyMissionCreated(abilitySessionInfo);
     }
 }
