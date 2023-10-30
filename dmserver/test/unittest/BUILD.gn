@@ -217,10 +217,6 @@ config("dmserver_unittest_common_public_config") {
     "../../../utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
   ]
-
-  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
-    include_dirs += [ "${sensor_path}/interfaces/native/include" ]
-  }
 }
 
 ohos_static_library("dmserver_unittest_common") {
