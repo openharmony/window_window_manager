@@ -121,6 +121,7 @@ public:
     WMError SetAlpha(float alpha) override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
 protected:
     void DestroySubWindow();

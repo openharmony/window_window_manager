@@ -18,14 +18,19 @@
 #include <cstdint>
 #include <string>
 
+#include "setting_observer.h"
+
 namespace OHOS {
 namespace Rosen {
 class ScreenSettingHelper {
 public:
+    static void RegisterSettingDpiObserver(PowerMgr::SettingObserver::UpdateFunc func);
+    static void UnregisterSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+    static sptr<PowerMgr::SettingObserver> dpiObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

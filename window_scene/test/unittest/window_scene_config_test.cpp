@@ -78,14 +78,22 @@ const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
     </windowAnimation>
     <!--keyboard animation config-->
     <keyboardAnimation>
-        <timing>
-            <!--duration of animation when add keyboard, unit is ms-->
-            <durationIn>500</durationIn>
-            <!--duration of animation when remove keyboard, unit is ms-->
-            <durationOut>300</durationOut>
-            <!--friction curve-->
-            <curve name="cubic">0.2 0.0 0.2 1.0</curve>
-        </timing>
+        <animationIn>
+            <timing>
+                <!--duration of animation when add keyboard, unit is ms-->
+                <duration>500</duration>
+                <!--friction curve-->
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationIn>
+        <animationOut>
+            <timing>
+                <!--duration of animation when remove keyboard, unit is ms-->
+                <duration>300</duration>
+                <!--friction curve-->
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationOut>
     </keyboardAnimation>
     <!--enable/disable remote animation-->
     <remoteAnimation enable="true"></remoteAnimation>

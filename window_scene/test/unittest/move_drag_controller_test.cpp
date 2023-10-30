@@ -14,8 +14,11 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 #include <pointer_event.h>
 #include "session/host/include/move_drag_controller.h"
+#include "session/host/include/session.h"
+#include "ui/rs_surface_node.h"
 #include "window_manager_hilog.h"
 #include "session/host/include/scene_session.h"
 
@@ -151,6 +154,41 @@ HWTEST_F(MoveDragControllerTest, SetAspectRatio, Function | SmallTest | Level1)
 {
     int32_t res = 0;
     moveDragController->SetAspectRatio(0.5);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: UpdateGravityWhenDrag
+ * @tc.desc: test function : UpdateGravityWhenDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, Function | SmallTest | Level1)
+{
+    int32_t res = 0;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+    ASSERT_EQ(0, res);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+    ASSERT_EQ(0, res);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+    ASSERT_EQ(0, res);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+    ASSERT_EQ(0, res);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
 }
 
