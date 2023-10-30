@@ -1942,7 +1942,8 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
+        && system::GetParameter("const.product.devicetype", "unknown") == "pc") {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         statusProperty.enable_ = false;
         ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
