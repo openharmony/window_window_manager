@@ -206,6 +206,7 @@ public:
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
     void PreloadInLakeApp(const std::string& bundleName);
     void AddWindowDragHotArea(int32_t type, WSRect& area);
+    WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:

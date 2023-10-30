@@ -1656,5 +1656,10 @@ void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& p
 {
     WLOGFD("DumpSessionElementInfo");
 }
+
+WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
