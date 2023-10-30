@@ -134,7 +134,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         [pipOption](napi_env env, NapiAsyncTask& task, int32_t status) {
             sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
             auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption.GetContext());
-            sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithContext(context->lock());
+            sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetTopWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
                 new PictureInPictureController(pipOptionPtr, mainWindow->GetPersistentId());
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));

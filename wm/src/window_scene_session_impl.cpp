@@ -1470,26 +1470,6 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
     WLOGFE("Cannot find Window!");
     return nullptr;
 }
-sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithContext(
-    const std::shared_ptr<AbilityRuntime::Context>& context)
-{
-    if (windowSessionMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
-        return nullptr;
-    }
-    uint32_t mainWinId = INVALID_WINDOW_ID;
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
-            mainWinId = win->GetWindowId();
-            WLOGI("GetMainWindow Find MainWinId:%{public}u.", mainWinId);
-            return win;
-        }
-    }
-    WLOGFE("Cannot find mainWindow!");
-    return nullptr;
-}
-
 
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
