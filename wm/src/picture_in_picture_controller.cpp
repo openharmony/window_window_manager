@@ -30,8 +30,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureController"};
 }
 
-PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, int32_t windowId)
-    : weakRef_(this), pipOption_(pipOption), windowId_(windowId)
+PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId)
+    : weakRef_(this), pipOption_(pipOption), mainWindowId_(windowId)
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -55,7 +55,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         WLOGFE("Get call Window failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    windowId_ = callWindow->GetWindowId();
+    mainWindowId_ = callWindow->GetWindowId();
 
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
