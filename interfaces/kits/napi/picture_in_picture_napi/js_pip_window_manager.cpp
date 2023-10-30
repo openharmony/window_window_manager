@@ -132,9 +132,14 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         callback = GetType(env, argv[1]) == napi_function ? argv[1] : nullptr; // 1: index of callback
     }
     NapiAsyncTask::CompleteCallback complete =
-        [pipOption](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption.GetContext());
+            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
+            if (context == nullptr) {
+                WMError err = WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(err), "Invalid context"));
+                return;
+            }
             sptr<Window> mainWindow = Window::GetTopWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
                 new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId());
