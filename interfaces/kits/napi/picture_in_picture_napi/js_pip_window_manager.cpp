@@ -95,7 +95,7 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGFD("OnIsSupportPictureInPicture");
+    WLOGFD("OnIsPipEnabled called");
     bool state = true;
     return CreateJsValue(env, state);
 }
@@ -108,16 +108,17 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
 
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnCreatePictureInPictureController is called");
+    WLOGI("OnCreatePipController called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
+        WLOGFE("Missing args when creating pipController");
         return NapiThrowInvalidParam(env);
     }
     napi_value config = argv[0];
     if (config == nullptr) {
-        WLOGFE("Failed to convert object to CreateWindow");
+        WLOGFE("Failed to convert object to pip Configuration");
         return NapiThrowInvalidParam(env);
     }
     PipOption pipOption;

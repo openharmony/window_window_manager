@@ -78,6 +78,7 @@ static napi_value ExportPictureInPictureState(napi_env env)
     napi_object_freeze(env, result);
     return result;
 }
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
