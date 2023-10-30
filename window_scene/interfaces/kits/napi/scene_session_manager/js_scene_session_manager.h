@@ -21,9 +21,11 @@
 #include "interfaces/include/ws_common.h"
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+#include "interfaces/kits/napi/scene_session_manager/js_scene_utils.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
 #include "ability_info.h"
+#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
@@ -114,6 +116,7 @@ private:
     std::map<std::string, Func> listenerFunc_;
 
     sptr<RootScene> rootScene_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 
