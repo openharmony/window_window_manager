@@ -147,6 +147,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
     }
+    taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
 
 JsSceneSession::~JsSceneSession()
@@ -188,39 +189,30 @@ void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& r
     }
     WSRect rect = session->GetSessionTargetRect();
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_, type, reason, rect](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsHotAreaType = CreateJsValue(env, type);
-            if (jsHotAreaType == nullptr) {
-                WLOGFE("[NAPI]jsHotAreaType is nullptr");
-                return;
-            }
-            napi_value jsHotAreaReason = CreateJsValue(env, reason);
-            if (jsHotAreaReason == nullptr) {
-                WLOGFE("[NAPI]jsHotAreaReason is nullptr");
-                return;
-            }
-            napi_value jsHotAreaRect = CreateJsSessionRect(env, rect);
-            if (jsHotAreaRect == nullptr) {
-                WLOGFE("[NAPI]jsHotAreaRect is nullptr");
-                return;
-            }
-            napi_value argv[] = {
-                [0] = jsHotAreaType,
-                [1] = jsHotAreaReason,
-                [2] = jsHotAreaRect
-            };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::onWindowDragHotArea", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_, type, reason, rect]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsHotAreaType = CreateJsValue(env, type);
+        if (jsHotAreaType == nullptr) {
+            WLOGFE("[NAPI]jsHotAreaType is nullptr");
+            return;
+        }
+        napi_value jsHotAreaReason = CreateJsValue(env, reason);
+        if (jsHotAreaReason == nullptr) {
+            WLOGFE("[NAPI]jsHotAreaReason is nullptr");
+            return;
+        }
+        napi_value jsHotAreaRect = CreateJsSessionRect(env, rect);
+        if (jsHotAreaRect == nullptr) {
+            WLOGFE("[NAPI]jsHotAreaRect is nullptr");
+            return;
+        }
+        napi_value argv[] = {[0] = jsHotAreaType, [1] = jsHotAreaReason, [2] = jsHotAreaRect};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 
@@ -230,14 +222,11 @@ void JsSceneSession::ClearCbMap(bool needRemove)
         return;
     }
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WLOGFI("clear callbackMap");
-            this->jsCbMap_.clear();
-    });
-    napi_ref callback = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JsSceneSession::ClearCbMap", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [this]() {
+        WLOGFI("clear callbackMap");
+        this->jsCbMap_.clear();
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
@@ -266,18 +255,12 @@ void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFla
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [isNeedDefaultAnimationFlag, jsCallBack, eng = env_](
-            napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionDefaultAnimationFlagObj = CreateJsValue(env, isNeedDefaultAnimationFlag);
-            napi_value argv[] = { jsSessionDefaultAnimationFlagObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnDefaultAnimationFlagChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [isNeedDefaultAnimationFlag, jsCallBack, env = env_]() {
+        napi_value jsSessionDefaultAnimationFlagObj = CreateJsValue(env, isNeedDefaultAnimationFlag);
+        napi_value argv[] = {jsSessionDefaultAnimationFlagObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
@@ -535,17 +518,13 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [eventId, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionStateObj = CreateJsValue(env, eventId);
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
+    auto task = [eventId, jsCallBack, env = env_]() {
+        napi_value jsSessionStateObj = CreateJsValue(env, eventId);
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSessionEvent", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::ProcessBackPressedRegister()
@@ -647,20 +626,16 @@ void JsSceneSession::OnForceHideChange(bool hide)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [hide, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionForceHideObj = CreateJsValue(env, hide);
-            napi_value argv[] = { jsSessionForceHideObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnForceHideChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [hide, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionForceHideObj = CreateJsValue(env, hide);
+        napi_value argv[] = {jsSessionForceHideObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::ProcessTouchOutsideRegister()
@@ -682,20 +657,15 @@ void JsSceneSession::OnTouchOutside()
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value argv[] = {};
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnTouchOutside", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
@@ -975,27 +945,22 @@ void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSess
 
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [this, weakSession, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto specificSession = weakSession.promote();
-            if (specificSession == nullptr) {
-                WLOGFE("[NAPI]root session or target session or env is nullptr");
-                return;
-            }
-            napi_value jsSceneSessionObj = Create(eng, specificSession);
-            if (jsSceneSessionObj == nullptr || !jsCallBack) {
-                WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
-                return;
-            }
-            WLOGFI("CreateJsSceneSessionObject success");
-            napi_value argv[] = { jsSceneSessionObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnCreateSpecificSession", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [this, weakSession, jsCallBack, env = env_]() {
+        auto specificSession = weakSession.promote();
+        if (specificSession == nullptr) {
+            WLOGFE("[NAPI]root session or target session or env is nullptr");
+            return;
+        }
+        napi_value jsSceneSessionObj = Create(env, specificSession);
+        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+            WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+            return;
+        }
+        WLOGFI("CreateJsSceneSessionObject success");
+        napi_value argv[] = {jsSceneSessionObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
@@ -1014,27 +979,22 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [this, weakSession, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto specificSession = weakSession.promote();
-            if (specificSession == nullptr) {
-                WLOGFE("[NAPI]root session or target session or env is nullptr");
-                return;
-            }
-            napi_value jsSceneSessionObj = Create(eng, specificSession);
-            if (jsSceneSessionObj == nullptr || !jsCallBack) {
-                WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
-                return;
-            }
-            WLOGFI("CreateJsSceneSessionObject success");
-            napi_value argv[] = { jsSceneSessionObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnBindDialogTarget", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [this, weakSession, jsCallBack, env = env_]() {
+        auto specificSession = weakSession.promote();
+        if (specificSession == nullptr) {
+            WLOGFE("[NAPI]root session or target session or env is nullptr");
+            return;
+        }
+        napi_value jsSceneSessionObj = Create(env, specificSession);
+        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+            WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+            return;
+        }
+        WLOGFI("CreateJsSceneSessionObject success");
+        napi_value argv[] = {jsSceneSessionObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSessionStateChange(const SessionState& state)
@@ -1045,21 +1005,16 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [state, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionStateObj = CreateJsValue(env, state);
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSessionStateChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [state, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionStateObj = CreateJsValue(env, state);
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
@@ -1074,22 +1029,17 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [rect, reason, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionStateObj = CreateJsSessionRect(env, rect);
-            napi_value sizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
-            napi_value argv[] = { jsSessionStateObj, sizeChangeReason };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSessionRectChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [rect, reason, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionStateObj = CreateJsSessionRect(env, rect);
+        napi_value sizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
+        napi_value argv[] = {jsSessionStateObj, sizeChangeReason};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnRaiseToTop()
@@ -1100,20 +1050,15 @@ void JsSceneSession::OnRaiseToTop()
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value argv[] = {};
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnRaiseToTop", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnRaiseToTopForPointDown()
@@ -1124,20 +1069,15 @@ void JsSceneSession::OnRaiseToTopForPointDown()
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value argv[] = {};
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnRaiseToTopForPointDown", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
@@ -1148,28 +1088,20 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_, subWindowId](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSceneSessionObj = CreateJsValue(env, subWindowId);
-            if (jsSceneSessionObj == nullptr) {
-                WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
-                return;
-            }
-            napi_value argv[] = {
-                [0]=CreateJsError(env, 0),
-                [1]=jsSceneSessionObj
-            };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnRaiseAboveTarget", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_, subWindowId]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSceneSessionObj = CreateJsValue(env, subWindowId);
+        if (jsSceneSessionObj == nullptr) {
+            WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
+            return;
+        }
+        napi_value argv[] = {[0] = CreateJsError(env, 0), [1] = jsSceneSessionObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 
@@ -1181,21 +1113,16 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [isFocusable, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionFocusableObj = CreateJsValue(env, isFocusable);
-            napi_value argv[] = { jsSessionFocusableObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSessionFocusableChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [isFocusable, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionFocusableObj = CreateJsValue(env, isFocusable);
+        napi_value argv[] = {jsSessionFocusableObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSessionTouchableChange(bool touchable)
@@ -1206,21 +1133,16 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [touchable, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionTouchableObj = CreateJsValue(env, touchable);
-            napi_value argv[] = { jsSessionTouchableObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSessionTouchableChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [touchable, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionTouchableObj = CreateJsValue(env, touchable);
+        napi_value argv[] = {jsSessionTouchableObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnClick()
@@ -1231,20 +1153,15 @@ void JsSceneSession::OnClick()
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value argv[] = { };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnClick", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
@@ -1297,29 +1214,24 @@ void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
     }
     auto jsCallBack = iter->second;
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [sessionInfo, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            if (sessionInfo == nullptr) {
-                WLOGFE("[NAPI]sessionInfo is nullptr");
-                return;
-            }
-            napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionInfo };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::PendingSessionActivation", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_env& env_ref = env_;
+    auto task = [sessionInfo, jsCallBack, env_ref]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env_ref, NapiGetUndefined(env_ref), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnBackPressed(bool needMoveToBackground)
@@ -1330,21 +1242,16 @@ void JsSceneSession::OnBackPressed(bool needMoveToBackground)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [needMoveToBackground, jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsNeedMoveToBackgroundObj = CreateJsValue(env, needMoveToBackground);
-            napi_value argv[] = { jsNeedMoveToBackgroundObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnBackPressed", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [needMoveToBackground, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsNeedMoveToBackgroundObj = CreateJsValue(env, needMoveToBackground);
+        napi_value argv[] = {jsNeedMoveToBackgroundObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
@@ -1357,29 +1264,24 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
     }
     auto jsCallBack = iter->second;
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [sessionInfo, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            if (sessionInfo == nullptr) {
-                WLOGFE("[NAPI]sessionInfo is nullptr");
-                return;
-            }
-            napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionInfo };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::TerminateSession", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [sessionInfo, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller)
@@ -1391,25 +1293,20 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [needStartCaller, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsNeedStartCaller = CreateJsValue(env, needStartCaller);
-            if (jsNeedStartCaller == nullptr) {
-                WLOGFE("[NAPI]this target jsNeedStartCaller is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsNeedStartCaller };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::TerminateSessionNew", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [needStartCaller, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsNeedStartCaller = CreateJsValue(env, needStartCaller);
+        if (jsNeedStartCaller == nullptr) {
+            WLOGFE("[NAPI]this target jsNeedStartCaller is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsNeedStartCaller};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType)
@@ -1421,25 +1318,20 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [terminateType, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsTerminateType = CreateJsValue(env, static_cast<int32_t>(terminateType));
-            if (jsTerminateType == nullptr) {
-                WLOGFE("[NAPI]this target jsTerminateType is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsTerminateType  };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::terminateSessionTotal", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [terminateType, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsTerminateType = CreateJsValue(env, static_cast<int32_t>(terminateType));
+        if (jsTerminateType == nullptr) {
+            WLOGFE("[NAPI]this target jsTerminateType is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsTerminateType};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::UpdateSessionLabel(const std::string &label)
@@ -1450,25 +1342,20 @@ void JsSceneSession::UpdateSessionLabel(const std::string &label)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [label, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsLabel = CreateJsValue(env, label);
-            if (jsLabel == nullptr) {
-                WLOGFE("[NAPI]this target jsLabel is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsLabel  };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::UpdateSessionLabel", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [label, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsLabel = CreateJsValue(env, label);
+        if (jsLabel == nullptr) {
+            WLOGFE("[NAPI]this target jsLabel is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsLabel};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::ProcessUpdateSessionLabelRegister()
@@ -1509,25 +1396,20 @@ void JsSceneSession::UpdateSessionIcon(const std::string &iconPath)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [iconPath, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsIconPath = CreateJsValue(env, iconPath);
-            if (jsIconPath == nullptr) {
-                WLOGFE("[NAPI]this target jsIconPath is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsIconPath  };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::UpdateSessionIcon", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [iconPath, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsIconPath = CreateJsValue(env, iconPath);
+        if (jsIconPath == nullptr) {
+            WLOGFE("[NAPI]this target jsIconPath is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsIconPath};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSessionException(const SessionInfo& info)
@@ -1540,29 +1422,24 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
     }
     auto jsCallBack = iter->second;
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [sessionInfo, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            if (sessionInfo == nullptr) {
-                WLOGFE("[NAPI]sessionInfo is nullptr");
-                return;
-            }
-            napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionInfo };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::TerminateSession", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [sessionInfo, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
@@ -1576,29 +1453,24 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
     }
     auto jsCallBack = iter->second;
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [sessionInfo, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            if (sessionInfo == nullptr) {
-                WLOGFE("[NAPI]sessionInfo is nullptr");
-                return;
-            }
-            napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionInfo };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::PendingSessionToForeground", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [sessionInfo, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info)
@@ -1612,29 +1484,24 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
     }
     auto jsCallBack = iter->second;
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [sessionInfo, jsCallBack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            if (sessionInfo == nullptr) {
-                WLOGFE("[NAPI]sessionInfo is nullptr");
-                return;
-            }
-            napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionInfo };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::PendingSessionToBackgroundForDelegator", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [sessionInfo, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
@@ -1645,21 +1512,16 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, propertyMap, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
-            if (jsSessionStateObj == nullptr) {
-                WLOGFE("[NAPI]jsSessionStateObj is nullptr");
-                return;
-            }
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnSystemBarPropertyChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, propertyMap, env = env_]() {
+        napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
+        if (jsSessionStateObj == nullptr) {
+            WLOGFE("[NAPI]jsSessionStateObj is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnNeedAvoid(bool status)
@@ -1670,17 +1532,12 @@ void JsSceneSession::OnNeedAvoid(bool status)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, needAvoid = status, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionStateObj = CreateJsValue(env, needAvoid);
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnNeedAvoid", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, needAvoid = status, env = env_]() {
+        napi_value jsSessionStateObj = CreateJsValue(env, needAvoid);
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnIsCustomAnimationPlaying(bool status)
@@ -1691,17 +1548,12 @@ void JsSceneSession::OnIsCustomAnimationPlaying(bool status)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, isPlaying = status, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionStateObj = CreateJsValue(env, isPlaying);
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnIsCustomAnimationPlaying", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, isPlaying = status, env = env_]() {
+        napi_value jsSessionStateObj = CreateJsValue(env, isPlaying);
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
@@ -1712,17 +1564,12 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
         return;
     }
     auto jsCallBack = iter->second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, flag = showWhenLocked, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionStateObj = CreateJsValue(env, flag);
-            napi_value argv[] = { jsSessionStateObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnShowWhenLocked", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, flag = showWhenLocked, env = env_]() {
+        napi_value jsSessionStateObj = CreateJsValue(env, flag);
+        napi_value argv[] = {jsSessionStateObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
@@ -1739,18 +1586,13 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
     }
     uint32_t value = static_cast<uint32_t>(WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(
         static_cast<Orientation>(orientation)));
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, rotation = value, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
-            napi_value argv[] = { jsSessionRotationObj };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-            WLOGFI("[NAPI]change rotation success %{public}u", rotation);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnReuqestedOrientationChange", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, rotation = value, env = env_]() {
+        napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
+        napi_value argv[] = {jsSessionRotationObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        WLOGFI("[NAPI]change rotation success %{public}u", rotation);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 napi_value JsSceneSession::OnSetShowRecent(napi_env env, napi_callback_info info)
