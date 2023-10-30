@@ -85,7 +85,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
 
     screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
-        screenChangeListener->OnConnect();
+        screenChangeListener->OnConnect(screenId_);
     }
 }
 
@@ -193,7 +193,7 @@ void ScreenSession::Connect()
 {
     screenState_ = ScreenState::CONNECTION;
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnConnect();
+        listener->OnConnect(screenId_);
     }
 }
 
@@ -204,7 +204,7 @@ void ScreenSession::Disconnect()
         if (!listener) {
             continue;
         }
-        listener->OnDisconnect();
+        listener->OnDisconnect(screenId_);
     }
 }
 
@@ -214,7 +214,7 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
         if (!listener) {
             continue;
         }
-        listener->OnPropertyChange(newProperty, reason);
+        listener->OnPropertyChange(newProperty, reason, screenId_);
     }
 }
 
@@ -241,11 +241,13 @@ float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
 void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 {
     float rotation = ConvertRotationToFloat(sensorRotation);
+    SensorRotationChange(rotation);
+}
+
+void ScreenSession::SensorRotationChange(float sensorRotation)
+{
     for (auto& listener : screenChangeListenerList_) {
-        if (!listener) {
-            continue;
-        }
-        listener->OnSensorRotationChange(rotation);
+        listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
 }
 
@@ -253,11 +255,13 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation)
 {
     Rotation rotationAfter = CalcRotation(orientation);
     float screenRotation = ConvertRotationToFloat(rotationAfter);
+    ScreenOrientationChange(screenRotation);
+}
+
+void ScreenSession::ScreenOrientationChange(float orientation)
+{
     for (auto& listener : screenChangeListenerList_) {
-        if (!listener) {
-            continue;
-        }
-        listener->OnScreenOrientationChange(screenRotation);
+        listener->OnScreenOrientationChange(orientation, screenId_);
     }
 }
 
@@ -337,7 +341,7 @@ void ScreenSession::SetScreenRotationLocked(bool isLocked)
         if (!listener) {
             continue;
         }
-        listener->OnScreenRotationLockedChange(isLocked);
+        listener->OnScreenRotationLockedChange(isLocked, screenId_);
     }
 }
 

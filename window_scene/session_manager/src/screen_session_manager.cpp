@@ -245,15 +245,15 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
         return;
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
-        for (auto listener : screenConnectionListenerList_) {
-            listener->OnScreenConnect(screenSession);
+        if (clientProxy_) {
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
         }
-        screenSession->Connect();
-    } else if (screenEvent == ScreenEvent::DISCONNECTED) {
-        for (auto listener : screenConnectionListenerList_) {
-            listener->OnScreenDisconnect(screenSession);
+        return;
+    }
+    if (screenEvent == ScreenEvent::DISCONNECTED) {
+        if (clientProxy_) {
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
         }
-        screenSession->Disconnect();
     }
 }
 
@@ -598,6 +598,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
 
     sptr<ScreenSession> session = new ScreenSession(screenId, property, GetDefaultScreenId());
+    session->RegisterScreenChangeListener(this);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     screenSessionMap_[screenId] = session;
@@ -2470,6 +2471,47 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     for (auto& agent: agents) {
         agent->NotifyDisplayModeChanged(displayMode);
     }
+}
+
+void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    ScreenId screenId)
+{
+    WLOGFI("screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnPropertyChanged(screenId, newProperty, reason);
+}
+
+void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId screenId)
+{
+    WLOGFI("screenId: %{public}" PRIu64 " sensorRotation: %{public}f", screenId, sensorRotation);
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
+}
+
+void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
+{
+    WLOGFI("screenId: %{public}" PRIu64 " screenOrientation: %{public}f", screenId, screenOrientation);
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnScreenOrientationChanged(screenId, screenOrientation);
+}
+
+void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
+{
+    WLOGFI("screenId: %{public}" PRIu64 " isLocked: %{public}d", screenId, isLocked);
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)

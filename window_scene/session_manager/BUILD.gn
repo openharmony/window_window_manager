@@ -83,6 +83,7 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
   ]
 

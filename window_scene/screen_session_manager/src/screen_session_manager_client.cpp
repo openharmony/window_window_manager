@@ -103,6 +103,47 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     return iter->second;
 }
 
+void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
+    const ScreenProperty& property, ScreenPropertyChangeReason reason)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->PropertyChange(property, reason);
+}
+
+void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->SensorRotationChange(sensorRotation);
+}
+
+void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->ScreenOrientationChange(screenOrientation);
+}
+
+void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->SetScreenRotationLocked(isLocked);
+}
+
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
 {
     displayChangeListener_ = listener;

@@ -28,6 +28,11 @@ public:
     virtual ~ScreenSessionManagerClientProxy() = default;
 
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent) override;
+    void OnPropertyChanged(ScreenId screenId,
+        const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
+    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
+    void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
+    void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     void OnScreenshot(DisplayId displayId) override;

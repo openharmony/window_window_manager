@@ -176,6 +176,14 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void RegisterSettingDpiObserver();
 
+    void OnConnect(ScreenId screenId) override {}
+    void OnDisconnect(ScreenId screenId) override {}
+    void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        ScreenId screenId) override;
+    void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
+    void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
+    void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
+
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;

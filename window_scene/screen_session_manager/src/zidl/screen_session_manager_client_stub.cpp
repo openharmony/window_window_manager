@@ -25,6 +25,14 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Scree
 const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSessionManagerClientStub::stubFuncMap_ {
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnPropertyChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnSensorRotationChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnScreenOrientationChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ROTATION_LOCKED_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnScreenRotationLockedChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnDisplayStateChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_SHOT),
@@ -56,6 +64,47 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
     OnScreenConnectionChanged(screenId, screenEvent);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnPropertyChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenProperty property;
+    if (!RSMarshallingHelper::Unmarshalling(data, property)) {
+        WLOGFE("Read property failed");
+        return ERR_INVALID_DATA;
+    }
+    auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
+    OnPropertyChanged(screenId, property, reason);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnSensorRotationChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto sensorRotation = data.ReadFloat();
+    OnSensorRotationChanged(screenId, sensorRotation);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenOrientationChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnScreenOrientationChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto screenOrientation = data.ReadFloat();
+    OnScreenOrientationChanged(screenId, screenOrientation);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenRotationLockedChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnScreenRotationLockedChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto isLocked = data.ReadBool();
+    OnScreenRotationLockedChanged(screenId, isLocked);
     return ERR_NONE;
 }
 
