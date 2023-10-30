@@ -604,7 +604,8 @@ struct AsyncInfo {
     std::function<void()> func;
 };
 
-void NapiAsyncWork(napi_env env, std::function<void()> task) {
+void NapiAsyncWork(napi_env env, std::function<void()> task)
+{
     napi_value resource = nullptr;
     AsyncInfo* info = new AsyncInfo();
     info->env = env;
@@ -639,7 +640,6 @@ inline std::shared_ptr<OHOS::AppExecFwk::EventHandler> MainThreadScheduler::GetM
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     return handler_;
 }
-
 
 void MainThreadScheduler::PostMainThreadTask(Task&& task, int64_t delayTime)
 {
