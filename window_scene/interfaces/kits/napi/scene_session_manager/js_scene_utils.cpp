@@ -627,7 +627,8 @@ MainThreadScheduler::MainThreadScheduler(napi_env env)
     GetMainEventHandler();
 }
 
-inline std::shared_ptr<OHOS::AppExecFwk::EventHandler> MainThreadScheduler::GetMainEventHandler() {
+inline std::shared_ptr<OHOS::AppExecFwk::EventHandler> MainThreadScheduler::GetMainEventHandler()
+{
     if (handler_ != nullptr) {
         return handler_;
     }
