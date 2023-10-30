@@ -1092,7 +1092,8 @@ public:
      * @return WMError
      */
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr)
+        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
     }
