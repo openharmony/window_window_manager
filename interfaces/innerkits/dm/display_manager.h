@@ -171,6 +171,14 @@ public:
         const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
+     * @brief Disable/enable global screenshot.
+     *
+     * @param disableOrNot disable screenshot or not.
+     * @return DM_OK means disable or enable screenshot success, others means failed.
+     */
+    DMError DisableScreenshot(bool disableOrNot);
+
+    /**
      * @brief Begin to wake up screen.
      *
      * @param reason Reason for power state change.

@@ -51,6 +51,9 @@ Display::~Display()
 
 DisplayId Display::GetId() const
 {
+    if (pImpl_->GetDisplayInfo() == nullptr) {
+        return DisplayId(0);
+    }
     return pImpl_->GetDisplayInfo()->GetDisplayId();
 }
 

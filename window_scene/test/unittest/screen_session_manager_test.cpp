@@ -799,6 +799,18 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTes
     }
     ASSERT_NE(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
 }
+
+/**
+ * @tc.name: MakeUniqueScreen
+ * @tc.desc: Make unique screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Level3)
+{
+    vector<ScreenId> screenIds;
+    screenIds.clear();
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

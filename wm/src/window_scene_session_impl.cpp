@@ -1977,5 +1977,16 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
     }
     return WMError::WM_OK;
 }
+
+WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    WLOGFI("UpdateMaximizeMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    if (uiContent_ == nullptr) {
+        WLOGFE("UpdateMaximizeMode uiContent_ is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    uiContent_->UpdateMaximizeMode(mode);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
