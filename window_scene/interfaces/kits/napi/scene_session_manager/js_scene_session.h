@@ -26,6 +26,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_session.h"
 #include "js_scene_utils.h"
+#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
@@ -132,6 +133,7 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     using Func = void(JsSceneSession::*)();
     std::map<std::string, Func> listenerFunc_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 
