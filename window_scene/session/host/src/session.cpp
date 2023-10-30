@@ -360,16 +360,13 @@ bool Session::GetTouchable() const
 
 WSError Session::SetVisible(bool isVisible)
 {
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    isVisible_ = isVisible;
+    isRSVisible_ = isVisible;
     return WSError::WS_OK;
 }
 
 bool Session::GetVisible() const
 {
-    return isVisible_;
+    return isRSVisible_;
 }
 
 int32_t Session::GetWindowId() const
@@ -1363,11 +1360,6 @@ void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocu
     requestFocusStatusNotifyManagerFunc_ = func;
 }
 
-void Session::SetScreenLockedStateNotifyManagerListener(const NotifyScreenLockedStateNotifyManagerFunc& func)
-{
-    screenLockedStateNotifyManagerFunc_ = func;
-}
-
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
 {
     lostFocusFunc_ = func;
@@ -1435,15 +1427,6 @@ void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused)
     WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
     if (requestFocusStatusNotifyManagerFunc_) {
         requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused);
-    }
-}
-
-void Session::NotifyScreenLockedStateNotifyManager(bool isScreenLocked)
-{
-    WLOGFD("NotifyScreenLockedStateNotifyManager id: %{public}d, isScreenLocked: %{public}d",
-        GetPersistentId(), isScreenLocked);
-    if (screenLockedStateNotifyManagerFunc_) {
-        screenLockedStateNotifyManagerFunc_(isScreenLocked);
     }
 }
 
@@ -1646,6 +1629,21 @@ WindowMode Session::GetWindowMode()
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
     return property->GetWindowMode();
+}
+
+WSError Session::UpdateMaximizeMode(bool isMaximize)
+{
+    WLOGFD("Session update maximize mode, isMaximize: %{public}d", isMaximize);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
+    if (isMaximize) {
+        mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        mode = MaximizeMode::MODE_FULL_FILL;
+    }
+    return sessionStage_->UpdateMaximizeMode(mode);
 }
 
 void Session::SetZOrder(uint32_t zOrder)

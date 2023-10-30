@@ -317,8 +317,7 @@ struct KeyboardSceneAnimationConfig {
     float ctrlY1_ = 0.0f;
     float ctrlX2_ = 0.2f;
     float ctrlY2_ = 1.0f;
-    uint32_t durationIn_ = 150; // default durationIn time
-    uint32_t durationOut_ = 150; // default durationOut time
+    uint32_t duration_ = 150;
 };
 
 struct WindowAnimationConfig {
@@ -352,7 +351,8 @@ struct AppWindowSceneConfig {
 
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
-    KeyboardSceneAnimationConfig keyboardAnimation_;
+    KeyboardSceneAnimationConfig keyboardAnimationIn_;
+    KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
 };

@@ -52,9 +52,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     : Session(info)
 {
     GeneratePersistentId(false, info.persistentId_);
-    if (!info.bundleName_.empty()) {
-        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
-    }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     SetMoveDragCallback();
@@ -74,14 +71,14 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
 
     if (WindowHelper::IsMainWindow(GetWindowType())) {
-        Rosen::RSSurfaceNodeConfig leashWinconfig;
-        leashWinconfig.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
-        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(leashWinconfig,
-            Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
+        RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
+        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
     }
 
     if (sessionInfo_.isSystem_) {
-        Rosen::RSSurfaceNodeConfig config;
+        RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
@@ -473,7 +470,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newReason = SizeChangeReason::UNDEFINED;
                 WLOGFD("Input rect has totally changed, need to modify reason, id: %{public}d",
                     session->GetPersistentId());
-            } else {
+            } else if (rect.width_ > 0 && rect.height_ > 0) {
                 newWinRect.width_ = rect.width_;
                 newWinRect.height_ = rect.height_;
                 newRequestRect.width_ = rect.width_;
@@ -1321,10 +1318,6 @@ std::string SceneSession::GetUpdatedIconPath()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
-    // screenLocked state change
-    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        NotifyScreenLockedStateNotifyManager(isVisible_);
-    }
 
     if (specificCallback_ == nullptr) {
         WLOGFW("specific callback is null.");

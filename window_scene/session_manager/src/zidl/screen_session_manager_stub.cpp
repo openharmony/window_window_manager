@@ -21,6 +21,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerStub"};
+const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -216,6 +217,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_DISABLE_MIRROR: {
+            DMError ret = DisableMirror(data.ReadBool());
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
@@ -264,6 +270,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
+            DMError ret = DisableDisplaySnapshot(data.ReadBool());
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
@@ -390,6 +401,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN: {
+            std::vector<ScreenId> uniqueScreenIds;
+            uint32_t size = data.ReadUint32();
+            if (size > MAX_SCREEN_SIZE) {
+                WLOGFE("screenIds size is bigger than %{public}u", MAX_SCREEN_SIZE);
+                break;
+            }
+            if (!data.ReadUInt64Vector(&uniqueScreenIds)) {
+                WLOGFE("failed to receive unique screens in stub");
+                break;
+            }
+            DMError ret = MakeUniqueScreen(uniqueScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:

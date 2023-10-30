@@ -43,6 +43,7 @@ public:
     MOCK_METHOD0(NotifyTouchOutside, WSError(void));
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
+    MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
 };
 } // namespace Rosen
 } // namespace OHOS
