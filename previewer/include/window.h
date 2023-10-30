@@ -201,7 +201,8 @@ public:
     virtual void NotifyTouchDialogTarget() = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
+        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr) = 0;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability = nullptr)
     {

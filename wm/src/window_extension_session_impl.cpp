@@ -146,7 +146,7 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
-    napi_env env, napi_value storage, bool isdistributed, AppExecFwk::Ability* ability)
+    napi_env env, napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("WindowExtensionSessionImpl NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
@@ -162,6 +162,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    uiContent->SetParentToken(token);
     uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
