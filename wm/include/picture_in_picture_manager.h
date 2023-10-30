@@ -39,7 +39,7 @@ public:
     static void RemoveCurrentPipController();
     static void RemoveCurrentPipControllerSafety();
 
-    static bool IsCurrentWindow(int32_t windowId);
+    static bool IsAttachedPipWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
 
     static void DoRestore();

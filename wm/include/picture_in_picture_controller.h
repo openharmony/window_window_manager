@@ -32,14 +32,14 @@ public:
     constexpr static int32_t DEFAULT_HEIGHT = 600;
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
     constexpr static float DEFAULT_WINDOW_CONOR = 40.0f;
-    PictureInPictureController(sptr<PipOption> pipOption, int32_t mainWindowId);
+    PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId);
     ~PictureInPictureController();
     WMError StartPictureInPicture();
     WMError StopPictureInPicture(bool needAnim);
 
-    sptr<Window> GetWindow();
-    int32_t GetWindowId();
-    void SetWindow(sptr<Window> window);
+    sptr<Window> GetPipWindow();
+    uint32_t GetMainWindowId();
+    void SetPipWindow(sptr<Window> window);
 
     void SetAutoStartEnabled(bool enable);
     void IsAutoStartEnabled(bool& enable) const;
@@ -53,7 +53,7 @@ private:
     sptr<PipOption> pipOption_;
 
     sptr<Window> window_;
-    int32_t windowId_;
+    uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
 

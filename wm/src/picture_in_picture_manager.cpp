@@ -21,11 +21,10 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
-	constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureManager"};
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::curPipController_ = nullptr;
@@ -100,17 +99,17 @@ void PictureInPictureManager::RemoveCurrentPipControllerSafety()
     if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
         return;
     }
-    PictureInPictureManager::curPipController_->SetWindow(nullptr);
+    PictureInPictureManager::curPipController_->SetPipWindow(nullptr);
     PictureInPictureManager::RemoveCurrentPipController();
 }
 
-bool PictureInPictureManager::IsCurrentWindow(int32_t windowId)
+bool PictureInPictureManager::IsAttachedPipWindow(uint32_t windowId)
 {
-    WLOGD("IsCurrentWindow is called");
+    WLOGD("IsAttachedPipWindow is called");
     if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
         return false;
     }
-    return PictureInPictureManager::curPipController_->GetWindowId() == windowId;
+    return PictureInPictureManager::curPipController_->GetMainWindowId() == windowId;
 }
 
 sptr<Window> PictureInPictureManager::GetCurrentWindow()
@@ -119,7 +118,7 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
     if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
         return nullptr;
     }
-    return PictureInPictureManager::curPipController_->GetWindow();
+    return PictureInPictureManager::curPipController_->GetPipWindow();
 }
 
 void PictureInPictureManager::DoRestore()
@@ -139,19 +138,16 @@ void PictureInPictureManager::DoClose(bool needAnim)
 void PictureInPictureManager::DoStartMove()
 {
     WLOGD("DoStartMove is called");
-    // TODO: Add startMove
 }
 
 void PictureInPictureManager::DoScale()
 {
     WLOGD("DoScale is called");
-    // TODO: Add scale
 }
 
 void PictureInPictureManager::DoActionEvent()
 {
     WLOGD("DoActionEvent is called");
-    // TODO: Add action event
 }
 }
 }

@@ -185,12 +185,12 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
         return NapiThrowInvalidParam(env);
     }
     uint32_t width = 0;
-    if (!ConvertFromJsValue(env, argv[0], width) || width <= 0) {
+    if (!ConvertFromJsValue(env, argv[0], width) || width == 0) {
         WLOGFE("Failed to convert parameter to uint32_t or parameter is invalid");
         return NapiThrowInvalidParam(env);
     }
     uint32_t height = 0;
-    if (!ConvertFromJsValue(env, argv[1], height) || height <= 0) {
+    if (!ConvertFromJsValue(env, argv[1], height) || height == 0) {
         WLOGFE("Failed to convert parameter to uint32_t or parameter is invalid");
         return NapiThrowInvalidParam(env);
     }

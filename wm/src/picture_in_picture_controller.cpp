@@ -91,7 +91,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow()
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     PictureInPictureManager::SetCurrentPipController(this);
-    WLOGFD("ShowPictureInPictureWindow success");
     return WMError::WM_OK;
 }
 
@@ -99,7 +98,8 @@ WMError PictureInPictureController::StartPictureInPicture()
 {
     WLOGI("StartPictureInPicture is called");
     sptr<PictureInPictureController> thisController = this;
-    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTING) {
+    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTING ||
+        PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTED) {
         WLOGFE("Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
@@ -109,7 +109,7 @@ WMError PictureInPictureController::StartPictureInPicture()
             WLOGFE("Repeat start request");
             return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
         }
-        if (PictureInPictureManager::IsCurrentWindow(windowId_)) {
+        if (PictureInPictureManager::IsAttachedPipWindow(mainWindowId_)) {
             PictureInPictureManager::RemoveCurrentPipController();
             PictureInPictureManager::SetCurrentPipController(thisController);
             return ShowPictureInPictureWindow();
@@ -117,8 +117,7 @@ WMError PictureInPictureController::StartPictureInPicture()
         PictureInPictureManager::DoClose(false);
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STARTING);
-    WMError errCode = WMError::WM_OK;
-    errCode = CreatePictureInPictureWindow();
+    WMError errCode = CreatePictureInPictureWindow();
     if (errCode != WMError::WM_OK) {
         PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
         WLOGFE("Create pip window failed");
@@ -141,13 +140,13 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         WLOGFE("window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPING) {
+    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPING ||
+        PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPED) {
         WLOGFE("Repeat stop request");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
-    auto task =
-        [this]() {
+    auto task = [this]() {
             if (window_->Destroy() != WMError::WM_OK) {
                 PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
                 WLOGFE("Window destroy failed");
@@ -168,21 +167,21 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
     return WMError::WM_OK;
 }
 
-sptr<Window> PictureInPictureController::GetWindow()
+sptr<Window> PictureInPictureController::GetPipWindow()
 {
     WLOGFD("GetWindow is called");
     return window_;
 }
 
-int32_t PictureInPictureController::GetWindowId()
+uint32_t PictureInPictureController::GetMainWindowId()
 {
-    WLOGFD("GetWindowId is called");
-    return windowId_;
+    WLOGFD("GetMainWindowId is called");
+    return mainWindowId_;
 }
 
-void PictureInPictureController::SetWindow(sptr<Window> window)
+void PictureInPictureController::SetPipWindow(sptr<Window> window)
 {
-    WLOGFD("SetWindow is called");
+    WLOGFD("SetPipWindow is called");
     window_ = window;
 }
 
