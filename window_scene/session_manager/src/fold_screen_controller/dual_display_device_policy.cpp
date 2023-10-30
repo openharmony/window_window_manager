@@ -54,17 +54,16 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 #ifdef TP_FEATURE_ENABLE
                 RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, mainTpChange.c_str());
                 #endif
-                //off full screen
+                // off full screen
                 RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
-                //on main screen
-                RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
-                WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
-
-                screenSession->SetDisplayNodeScreenId(screenIdMain);
                 screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenIdMain);
                 screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
                 screenSession->PropertyChange(screenSession->GetScreenProperty(),
                     ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+                // on main screen
+                RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
+                WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
+                screenSession->SetDisplayNodeScreenId(screenIdMain);
                 screenId_ = screenIdMain;
                 break;
             }
@@ -73,17 +72,16 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 #ifdef TP_FEATURE_ENABLE
                 RSInterfaces::GetInstance().SetTpFeatureConfig(tpType, fullTpChange.c_str());
                 #endif
-                //off main screen
+                // off main screen
                 RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
-                //on full screen
-                RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
-                WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
-
-                screenSession->SetDisplayNodeScreenId(screenIdFull);
                 screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenIdFull);
                 screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
                 screenSession->PropertyChange(screenSession->GetScreenProperty(),
                     ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+                // on full screen
+                RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
+                WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
+                screenSession->SetDisplayNodeScreenId(screenIdFull);
                 screenId_ = screenIdFull;
                 break;
             }
