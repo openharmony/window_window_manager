@@ -17,6 +17,7 @@
 
 #include <js_runtime_utils.h>
 
+#include "display_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
@@ -355,7 +356,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenSessionManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
+    DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
 }
 

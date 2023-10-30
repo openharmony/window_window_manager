@@ -60,6 +60,11 @@ protected:
 private:
     void ConnectToServer();
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent) override;
+    void OnPropertyChanged(ScreenId screenId,
+        const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
+    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
+    void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
+    void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
 
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;

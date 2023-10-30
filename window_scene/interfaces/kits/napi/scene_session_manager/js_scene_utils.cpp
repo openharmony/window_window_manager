@@ -17,6 +17,7 @@
 
 #include <iomanip>
 
+#include <event_handler.h>
 #include <js_runtime_utils.h>
 
 #include "display_manager.h"
