@@ -32,7 +32,7 @@ public:
 
 private:
     static napi_value CreateShadowValue(napi_env env, const AppWindowSceneConfig& config, bool focused);
-    static napi_value CreateKeyboardAnimationValue(napi_env env, const AppWindowSceneConfig& config);
+    static napi_value CreateKeyboardAnimationValue(napi_env env, const KeyboardSceneAnimationConfig& config);
     static napi_value CreateWindowAnimationValue(napi_env env, const AppWindowSceneConfig& config);
 };
 } // namespace OHOS::Rosen

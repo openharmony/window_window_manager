@@ -460,26 +460,40 @@ bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigI
 
 void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
 {
-    WindowSceneConfig::ConfigItem item = animationConfig["timing"];
+    LoadKeyboardAnimation(animationConfig["animationIn"]["timing"], appWindowSceneConfig_.keyboardAnimationIn_);
+    LoadKeyboardAnimation(animationConfig["animationOut"]["timing"], appWindowSceneConfig_.keyboardAnimationOut_);
+
+    const auto& defaultAnimation = appWindowSceneConfig_.keyboardAnimationIn_;
+    systemConfig_.keyboardAnimationConfig_.curveType_ = defaultAnimation.curveType_;
+    systemConfig_.keyboardAnimationConfig_.curveParams_.assign({
+        defaultAnimation.ctrlX1_,
+        defaultAnimation.ctrlY1_,
+        defaultAnimation.ctrlX2_,
+        defaultAnimation.ctrlY2_,
+    });
+    systemConfig_.keyboardAnimationConfig_.durationIn_ = appWindowSceneConfig_.keyboardAnimationIn_.duration_;
+    systemConfig_.keyboardAnimationConfig_.durationOut_ = appWindowSceneConfig_.keyboardAnimationOut_.duration_;
+}
+
+void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item,
+    KeyboardSceneAnimationConfig& config)
+{
     if (item.IsMap() && item.mapValue_->count("curve")) {
-        std::string curveType = CreateCurve(item["curve"]);
-        appWindowSceneConfig_.keyboardAnimation_.curveType_ = curveType;
-        systemConfig_.keyboardAnimationConfig_.curveType_ = curveType;
-    }
-    item = animationConfig["timing"]["durationIn"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1) { // durationIn
-            appWindowSceneConfig_.keyboardAnimation_.durationIn_ = static_cast<uint32_t>(numbers[0]);
-            systemConfig_.keyboardAnimationConfig_.durationIn_ = static_cast<uint32_t>(numbers[0]);
+        const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
+        config.curveType_ = curveType;
+        if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
+            config.ctrlX1_ = curveParams[0];
+            config.ctrlY1_ = curveParams[1];
+            config.ctrlX2_ = curveParams[2];
+            config.ctrlY2_ = curveParams[3];
         }
     }
-    item = animationConfig["timing"]["durationOut"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1) { // durationOut
-            appWindowSceneConfig_.keyboardAnimation_.durationOut_ = static_cast<uint32_t>(numbers[0]);
-            systemConfig_.keyboardAnimationConfig_.durationOut_ = static_cast<uint32_t>(numbers[0]);
+
+    const WindowSceneConfig::ConfigItem& duration = item["duration"];
+    if (duration.IsInts()) {
+        auto numbers = *duration.intsValue_;
+        if (numbers.size() == 1) {
+            config.duration_ = static_cast<uint32_t>(numbers[0]);
         }
     }
 }
@@ -497,14 +511,6 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation()
         return;
     }
 
-    appWindowSceneConfig_.keyboardAnimation_.curveType_ = CURVETYPE;
-    appWindowSceneConfig_.keyboardAnimation_.ctrlX1_ = CTRLX1;
-    appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = CTRLY1;
-    appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = CTRLX2;
-    appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = CTRLY2;
-    appWindowSceneConfig_.keyboardAnimation_.durationIn_ = DURATION;
-    appWindowSceneConfig_.keyboardAnimation_.durationOut_ = DURATION;
-
     systemConfig_.keyboardAnimationConfig_.curveType_ = CURVETYPE;
     std::vector<float> keyboardCurveParams = {CTRLX1, CTRLY1, CTRLX2, CTRLY2};
     systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
@@ -517,7 +523,14 @@ void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigI
 {
     WindowSceneConfig::ConfigItem item = windowAnimationConfig["timing"];
     if (item.IsMap() && item.mapValue_->count("curve")) {
-        appWindowSceneConfig_.windowAnimation_.curveType_ = CreateCurve(item["curve"], "windowAnimation");
+        const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
+        appWindowSceneConfig_.windowAnimation_.curveType_ = curveType;
+        if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
+            appWindowSceneConfig_.windowAnimation_.ctrlX1_ = curveParams[0];
+            appWindowSceneConfig_.windowAnimation_.ctrlY1_ = curveParams[1];
+            appWindowSceneConfig_.windowAnimation_.ctrlX2_ = curveParams[2];
+            appWindowSceneConfig_.windowAnimation_.ctrlY2_ = curveParams[3];
+        }
     }
     item = windowAnimationConfig["timing"]["duration"];
     if (item.IsInts() && item.intsValue_->size() == 1) {
@@ -560,7 +573,7 @@ void SceneSessionManager::ConfigStartingWindowAnimation(const WindowSceneConfig:
     }
     item = configItem["timing"];
     if (item.IsMap() && item.mapValue_->count("curve")) {
-        config.curve_ = CreateCurve(item["curve"]);
+        config.curve_ = std::get<std::string>(CreateCurve(item["curve"]));
     }
     item = configItem["timing"]["duration"];
     if (item.IsInts() && item.intsValue_->size() == 1) {
@@ -576,8 +589,8 @@ void SceneSessionManager::ConfigStartingWindowAnimation(const WindowSceneConfig:
     }
 }
 
-std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig,
-    const std::string& nodeName)
+std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
+    const WindowSceneConfig::ConfigItem& curveConfig)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
         "linear", "spring", "interactiveSpring", "interpolatingSpring" };
@@ -585,32 +598,23 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
     std::string curveName = "easeOut";
     const auto& nameItem = curveConfig.GetProp("name");
     if (!nameItem.IsString()) {
-        return curveName;
+        return {curveName, {}};
     }
+    
     std::string name = nameItem.stringValue_;
-    if (name == "cubic" && curveConfig.IsFloats() && curveConfig.floatsValue_->size() == CUBIC_CURVE_DIMENSION) {
-        const auto& numbers = *curveConfig.floatsValue_;
-        curveName = name;
-        if (nodeName == "windowAnimation") {
-            appWindowSceneConfig_.windowAnimation_.ctrlX1_ = numbers[0]; // 0 ctrlX1
-            appWindowSceneConfig_.windowAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
-            appWindowSceneConfig_.windowAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
-            appWindowSceneConfig_.windowAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
-        } else {
-            appWindowSceneConfig_.keyboardAnimation_.ctrlX1_ = numbers[0]; // 0 ctrlX1
-            appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
-            appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
-            appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
+    std::vector<float> curveParams;
 
-            systemConfig_.keyboardAnimationConfig_.curveParams_.assign(numbers.begin(), numbers.end());
-        }
+    if (name == "cubic" && curveConfig.IsFloats() && curveConfig.floatsValue_->size() == CUBIC_CURVE_DIMENSION) {
+        curveName = name;
+        curveParams = *curveConfig.floatsValue_;
     } else {
         auto iter = curveSet.find(name);
         if (iter != curveSet.end()) {
             curveName = name;
         }
     }
-    return curveName;
+
+    return {curveName, curveParams};
 }
 
 void SceneSessionManager::ConfigWindowSizeLimits()
