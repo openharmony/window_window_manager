@@ -38,13 +38,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
 };
 
 void DisplayManagerAgentProxyTest::SetUpTestCase()
 {
-
-
 }
 
 void DisplayManagerAgentProxyTest::TearDownTestCase()
@@ -53,7 +50,6 @@ void DisplayManagerAgentProxyTest::TearDownTestCase()
 
 void DisplayManagerAgentProxyTest::SetUp()
 {
-   
 }
 
 void DisplayManagerAgentProxyTest::TearDown()
