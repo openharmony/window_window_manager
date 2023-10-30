@@ -19,7 +19,7 @@
 #include "js_pip_utils.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
-#include "window_scene_session_impl.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -134,9 +134,9 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         [pipOption](napi_env env, NapiAsyncTask& task, int32_t status) {
             sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
             auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption.GetContext());
-            sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetTopWindowWithContext(context->lock());
+            sptr<Window> mainWindow = Window::GetTopWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
-                new PictureInPictureController(pipOptionPtr, mainWindow->GetPersistentId());
+                new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId());
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));
         };
     napi_value result = nullptr;
