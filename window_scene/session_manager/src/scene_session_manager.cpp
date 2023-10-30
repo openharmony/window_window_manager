@@ -5109,4 +5109,20 @@ void SceneSessionManager::AddWindowDragHotArea(int32_t type, WSRect& area)
         "height: %{public}d", type, area.posX_, area.posY_, area.width_, area.height_);
     SceneSession::windowDragHotAreaMap_.insert({type, area});
 }
+
+WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMaximize)
+{
+    auto task = [this, persistentId, isMaximize]() -> WSError {
+        WLOGFD("update maximize mode, id: %{public}d, isMaximize: %{public}d", persistentId, isMaximize);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFE("could not find window, persistentId:%{public}d", persistentId);
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        sceneSession->UpdateMaximizeMode(isMaximize);
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
