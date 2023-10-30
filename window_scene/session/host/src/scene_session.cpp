@@ -52,9 +52,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     : Session(info)
 {
     GeneratePersistentId(false, info.persistentId_);
-    if (!info.bundleName_.empty()) {
-        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
-    }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     SetMoveDragCallback();
@@ -74,14 +71,14 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
 
     if (WindowHelper::IsMainWindow(GetWindowType())) {
-        Rosen::RSSurfaceNodeConfig leashWinconfig;
-        leashWinconfig.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
-        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(leashWinconfig,
-            Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
+        RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
+        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
     }
 
     if (sessionInfo_.isSystem_) {
-        Rosen::RSSurfaceNodeConfig config;
+        RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
