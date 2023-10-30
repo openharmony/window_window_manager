@@ -4953,12 +4953,13 @@ bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         WLOGFE("CheckIfReuseSession not collaborator!");
         return false;
     }
-    NotifyStartAbility(collaboratorType, sessionInfo);
     sessionInfo.collaboratorType_ = collaboratorType;
     sessionInfo.sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
         WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionInfo.sessionAffinity.c_str());
         sessionInfo.reuse = true;
+    } else {
+        NotifyStartAbility(collaboratorType, sessionInfo);
     }
     WLOGFI("CheckIfReuseSession end");
     return true;
