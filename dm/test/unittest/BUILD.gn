@@ -30,7 +30,7 @@ group("unittest") {
     ":dm_screen_manager_test",
     ":dm_screen_test",
     ":dm_screenshot_test",
-    ":dm_display_manager_agent_proxy_test"
+    ":dm_display_manager_agent_proxy_test",
   ]
 }
 
