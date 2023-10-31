@@ -139,8 +139,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         WLOGFE("window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPING ||
-        PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPED) {
+    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPING) {
         WLOGFE("Repeat stop request");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
