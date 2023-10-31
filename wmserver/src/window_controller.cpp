@@ -485,7 +485,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const Rect& safeRect = WindowHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
-        occupiedArea, safeRect.height_);
+        safeRect, safeRect.height_);
 
     if (WindowNodeContainer::GetAnimateTransactionEnabled()) {
         auto syncTransactionController = RSSyncTransactionController::GetInstance();
