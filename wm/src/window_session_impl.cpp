@@ -422,7 +422,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(300);
+        protocol.SetDuration(400);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
