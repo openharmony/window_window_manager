@@ -98,8 +98,7 @@ WMError PictureInPictureController::StartPictureInPicture()
 {
     WLOGI("StartPictureInPicture is called");
     sptr<PictureInPictureController> thisController = this;
-    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTING ||
-        PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTED) {
+    if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTING) {
         WLOGFE("Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
