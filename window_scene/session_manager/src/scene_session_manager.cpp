@@ -4979,13 +4979,12 @@ bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         WLOGFE("CheckIfReuseSession not collaborator!");
         return false;
     }
+    NotifyStartAbility(collaboratorType, sessionInfo);
     sessionInfo.collaboratorType_ = collaboratorType;
     sessionInfo.sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
         WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionInfo.sessionAffinity.c_str());
         sessionInfo.reuse = true;
-    } else {
-        NotifyStartAbility(collaboratorType, sessionInfo);
     }
     WLOGFI("CheckIfReuseSession end");
     return true;
@@ -5008,6 +5007,11 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     if (collaborator != nullptr) {
+        std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+        if (affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
+            WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
+            return;
+        }
         collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), accessTokenIDEx);
     }
