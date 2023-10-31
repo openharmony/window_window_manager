@@ -30,6 +30,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     FOLD_SCREEN_EXPAND,
     SCREEN_CONNECT,
     SCREEN_DISCONNECT,
+    FOLD_SCREEN_FOLDING,
 };
 class ScreenProperty {
 public:
