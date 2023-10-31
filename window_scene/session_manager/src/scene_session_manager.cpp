@@ -3116,7 +3116,6 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         WLOGFD("session is nullptr");
         return;
     }
-
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
             WLOGFD("sub session is nullptr");
@@ -3130,6 +3129,22 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
         HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn());
         UpdatePrivateStateAndNotify(subSession->GetPersistentId());
+    }
+    std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
+    for (const auto& dialog : dialogVec) {
+        if (dialog == nullptr) {
+            WLOGFD("dialog is nullptr");
+            continue;
+        }
+        const auto& state = dialog->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            WLOGFD("dialog is not active");
+            continue;
+        }
+        auto dialogSession = GetSceneSession(dialog->GetPersistentId());
+        NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        HandleKeepScreenOn(dialogSession, dialogSession->IsKeepScreenOn());
+        UpdatePrivateStateAndNotify(dialog->GetPersistentId());
     }
 }
 
@@ -3180,6 +3195,17 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
         HandleKeepScreenOn(subSession, false);
         UpdatePrivateStateAndNotify(subSession->GetPersistentId());
+    }
+    std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
+    for (const auto& dialog : dialogVec) {
+        if (dialog == nullptr) {
+            WLOGFD("dialog is nullptr");
+            continue;
+        }
+        auto dialogSession = GetSceneSession(dialog->GetPersistentId());
+        NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        HandleKeepScreenOn(dialogSession, false);
+        UpdatePrivateStateAndNotify(dialog->GetPersistentId());
     }
 }
 
