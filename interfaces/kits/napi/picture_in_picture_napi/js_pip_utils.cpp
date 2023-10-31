@@ -82,8 +82,8 @@ static napi_value ExportPictureInPictureState(napi_env env)
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
-        DECLARE_NAPI_PROPERTY("PipTemplateType", ExportPictureInPictureTemplateType(env)),
-        DECLARE_NAPI_PROPERTY("PipState", ExportPictureInPictureState(env)),
+        DECLARE_NAPI_PROPERTY("PiPTemplateType", ExportPictureInPictureTemplateType(env)),
+        DECLARE_NAPI_PROPERTY("PiPState", ExportPictureInPictureState(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);

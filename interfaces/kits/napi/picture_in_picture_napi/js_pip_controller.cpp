@@ -32,8 +32,8 @@ namespace {
 
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
-    BindNativeFunction(env, object, "startPip", moduleName, JsPipController::StartPictureInPicture);
-    BindNativeFunction(env, object, "stopPip", moduleName, JsPipController::StopPictureInPicture);
+    BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
+    BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);
     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
