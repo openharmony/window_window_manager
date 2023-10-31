@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 #include "display_manager_proxy.h"
-#include "window_scene.h"
-#include <gtest/gtest.h>
-#include "zidl/display_manager_agent_proxy.h"
-#include "hilog/log.h"
 #include "display_manager_adapter.h"
+#include "display_manager.h"
+#include <gtest/gtest.h>
+#include "hilog/log.h"
 #include <iremote_broker.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-#include "display_manager.h"
+#include "scene_board_judgement.h"
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
+#include "window_scene.h"
+#include "zidl/display_manager_agent_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
