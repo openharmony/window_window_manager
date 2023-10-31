@@ -162,7 +162,7 @@ napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsPipManager.release(), JsPipWindowManager::Finalizer, nullptr, nullptr);
     const char* moduleName = "JsPipWindowManager";
     BindNativeFunction(env, exportObj, "create", moduleName, JsPipWindowManager::CreatePipController);
-    BindNativeFunction(env, exportObj, "isPipEnabled", moduleName, JsPipWindowManager::IsPipEnabled);
+    BindNativeFunction(env, exportObj, "isPiPEnabled", moduleName, JsPipWindowManager::IsPipEnabled);
     InitEnums(env, exportObj);
     return NapiGetUndefined(env);
 }
