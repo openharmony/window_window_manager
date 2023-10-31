@@ -68,11 +68,11 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
         ScreenId screenIdMain = 5;
         int64_t timeStamp = 50;
         SetFoldScreenPowerInit([&]() {
-			#ifdef TP_FEATURE_ENABLE
-			int32_t tpType = 12;
-			std::string fullTpChange = "0";
-			std::string mainTpChange = "1";
-			#endif
+            #ifdef TP_FEATURE_ENABLE
+            int32_t tpType = 12;
+            std::string fullTpChange = "0";
+            std::string mainTpChange = "1";
+            #endif
             WLOGFI("ScreenSessionManager Fold Screen Power Init 1.");
             #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
