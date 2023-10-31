@@ -210,7 +210,7 @@ private:
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
-
+    void ClosePipWindowIfExist(WindowType type);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
