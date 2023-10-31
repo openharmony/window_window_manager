@@ -2736,13 +2736,25 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
         ProcessDialogRequestFocus(sceneSession) == WSError::WS_OK) {
             return WSError::WS_DO_NOTHING;
     }
-    // app session will prevent lower zOrder request focus
+    // app session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (byForeground && focusedSession && focusedSession->IsAppSession()
         && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            WLOGFD("session %{public}d zOrder is lower than focused session %{public}d", persistentId, focusedSessionId_);
+            WLOGFD("session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
             return WSError::WS_DO_NOTHING;
     }
+    // drop down panel will block lower zOrder request focus
+    bool isTypeBlocked = sceneSession->IsAppSession() ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN;
+    if (byForeground && focusedSession && focusedSession->GetSessionInfo().isSystem_ &&
+        (focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_PANEL ||
+        focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) && isTypeBlocked &&
+        sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
+            WLOGFD("session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
+            return WSError::WS_DO_NOTHING;
+    }
+
     ShiftFocus(sceneSession);
     return WSError::WS_OK;
 }
