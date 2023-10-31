@@ -1286,6 +1286,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             sceneSessionMap_.erase(persistentId);
             systemTopSceneSessionMap_.erase(persistentId);
             nonSystemFloatSceneSessionMap_.erase(persistentId);
+        } else {
+            // if terminate, set want to null. so start from recent, start a new one.
+            scnSession->SetSessionInfoWant(nullptr);
         }
         if (listenerController_ != nullptr) {
             NotifySessionForCallback(scnSession, needRemoveSession);
