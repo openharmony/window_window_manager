@@ -1698,6 +1698,7 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseAboveTarget01, Function | SmallTest | 
  */
 HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | SmallTest | Level2)
 {
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 start";
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowTag(WindowTag::MAIN_WINDOW);
     option->SetWindowName("FindParentSessionByParentId02");
@@ -1705,6 +1706,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | S
     ASSERT_NE(nullptr, parentscenesession);
 
     ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(0));
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
 }
 
 /**
