@@ -39,7 +39,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
 
     void* contextPtr = nullptr;
     std::string navigationId;
-    uint32_t templateTyle;
+    uint32_t templateType;
     uint32_t width;
     uint32_t height;
 
@@ -54,7 +54,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
         WLOGFE("Failed to convert navigationIdValue to stringType");
         return -1;
     }
-    if (!ConvertFromJsValue(env, templateTypeValue, templateTyle)) {
+    if (!ConvertFromJsValue(env, templateTypeValue, templateType)) {
         WLOGFE("Failed to convert templateTypeValue to uint32_tType");
         return -1;
     }
@@ -68,7 +68,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     }
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
-    option.SetPipTemplate(templateTyle);
+    option.SetPipTemplate(templateType);
     option.SetContentSize(width, height);
     return 0;
 }
