@@ -210,6 +210,7 @@ private:
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
