@@ -1580,7 +1580,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
-    if (persistentId != INVALID_SESSION_ID) {
+    if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(g_persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;
         return;
@@ -1597,6 +1597,7 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     persistentId_ = isExtension ? static_cast<uint32_t>(
         g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     g_persistentIdSet.insert(g_persistentId);
+    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
