@@ -1307,7 +1307,9 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
-    hostSession_->GetGlobalMaximizeMode(mode);
+    if (hostSession_) {
+        hostSession_->GetGlobalMaximizeMode(mode);
+    }
     return mode;
 }
 
