@@ -628,21 +628,21 @@ MainThreadScheduler::MainThreadScheduler(napi_env env)
     GetMainEventHandler();
 }
 
-inline std::shared_ptr<OHOS::AppExecFwk::EventHandler> MainThreadScheduler::GetMainEventHandler()
+inline void MainThreadScheduler::GetMainEventHandler()
 {
     if (handler_ != nullptr) {
-        return handler_;
+        return;
     }
     auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
     if (runner == nullptr) {
-        return nullptr;
+        return;
     }
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
-    return handler_;
 }
 
 void MainThreadScheduler::PostMainThreadTask(Task&& task, int64_t delayTime)
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     GetMainEventHandler();
     if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
