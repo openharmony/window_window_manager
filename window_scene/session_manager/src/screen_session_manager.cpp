@@ -67,6 +67,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
         ScreenId screenIdFull = 0;
         ScreenId screenIdMain = 5;
         int64_t timeStamp = 50;
+        rsInterface_.SetScreenCorrection(screenIdFull, ScreenRotation::ROTATION_270);
         SetFoldScreenPowerInit([&]() {
             #ifdef TP_FEATURE_ENABLE
             int32_t tpType = 12;
