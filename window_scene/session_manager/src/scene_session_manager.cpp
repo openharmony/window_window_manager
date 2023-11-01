@@ -600,7 +600,7 @@ std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
     if (!nameItem.IsString()) {
         return {curveName, {}};
     }
-    
+
     std::string name = nameItem.stringValue_;
     std::vector<float> curveParams;
 
@@ -819,7 +819,8 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
-    if (sessionInfo.persistentId_ != 0) {
+    if (sessionInfo.persistentId_ != 0 &&
+        sessionInfo.bundleName_.find("hmsapp.samplemanagement") == std::string::npos) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
