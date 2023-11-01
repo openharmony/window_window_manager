@@ -387,10 +387,9 @@ HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, Function | SmallTest 
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    Orientation orientation = session->GetOrientation();
-    Orientation res = orientation;
-    session->SetScreenRequestedOrientation(res);
-    session->property_.SetScreenRequestedOrientation(orientation);
+    Orientation orientation = Orientation::UNSPECIFIED;
+    session->SetScreenRequestedOrientation(orientation);
+    Orientation res =session->GetScreenRequestedOrientation();
     ASSERT_EQ(res, orientation);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation end";
 }
@@ -404,10 +403,10 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLocked, Function | SmallTest | Leve
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLocked start";
     bool isLocked = true;
-    int res = 0;
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->SetScreenRotationLocked(isLocked);
-    ASSERT_EQ(res, 0);
+    bool res = session->IsScreenRotationLocked();
+    ASSERT_EQ(res, isLocked);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLocked end";
 }
 
@@ -420,10 +419,10 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, Function | SmallTest 
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLockedFromJs start";
     bool isLocked = true;
-    int res = 0;
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->SetScreenRotationLockedFromJs(isLocked);
-    ASSERT_EQ(res, 0);
+    bool res = session->IsScreenRotationLocked();
+    ASSERT_EQ(res, isLocked);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLockedFromJs end";
 }
 
@@ -465,9 +464,8 @@ HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetVirtualPixelRatio start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     float virtualPixelRatio = 1;
-    float res = virtualPixelRatio;
     session->SetVirtualPixelRatio(virtualPixelRatio);
-    session->property_.SetVirtualPixelRatio(res);
+    float res = session->property_.GetVirtualPixelRatio();
     ASSERT_EQ(res, virtualPixelRatio);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetVirtualPixelRatio end";
 }
