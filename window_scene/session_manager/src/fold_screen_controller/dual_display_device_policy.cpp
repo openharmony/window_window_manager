@@ -59,7 +59,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenIdMain);
                 screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
                 screenSession->PropertyChange(screenSession->GetScreenProperty(),
-                    ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+                    ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
                 // on main screen
                 RSInterfaces::GetInstance().SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
                 WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
