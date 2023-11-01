@@ -290,6 +290,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         WLOGFE("[NAPI]New JsWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    windowManagerListener->SetMainEventHandler();
     WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
