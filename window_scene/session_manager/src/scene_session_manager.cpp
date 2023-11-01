@@ -1242,6 +1242,13 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
     }
 }
 
+void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
+{
+    sceneSessionMap_.erase(persistentId);
+    systemTopSceneSessionMap_.erase(persistentId);
+    nonSystemFloatSceneSessionMap_.erase(persistentId);
+}
+
 WSError SceneSessionManager::RequestSceneSessionDestruction(
     const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
 {
@@ -1283,9 +1290,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
                 NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
             }
-            sceneSessionMap_.erase(persistentId);
-            systemTopSceneSessionMap_.erase(persistentId);
-            nonSystemFloatSceneSessionMap_.erase(persistentId);
+            EraseSceneSessionMapById(persistentId);
         } else {
             // if terminate, set want to null. so start from recent, start a new one.
             scnSession->SetSessionInfoWant(nullptr);
@@ -5011,7 +5016,7 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     if (collaborator != nullptr) {
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
-        if (affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
+        if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
             WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
             return;
         }
