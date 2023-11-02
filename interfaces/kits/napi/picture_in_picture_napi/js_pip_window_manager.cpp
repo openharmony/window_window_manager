@@ -42,7 +42,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     uint32_t templateType;
     uint32_t width;
     uint32_t height;
-
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
@@ -96,8 +95,7 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
     WLOGFD("OnIsPipEnabled called");
-    bool state = true;
-    return CreateJsValue(env, state);
+    return CreateJsValue(env, true);
 }
 
 napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_info info)

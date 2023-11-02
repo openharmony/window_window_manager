@@ -36,27 +36,20 @@ public:
     ~PictureInPictureController();
     WMError StartPictureInPicture();
     WMError StopPictureInPicture(bool needAnim);
-
     sptr<Window> GetPipWindow();
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
-
     void SetAutoStartEnabled(bool enable);
     void IsAutoStartEnabled(bool& enable) const;
     void UpdateContentSize(uint32_t width, uint32_t height);
 private:
     WMError CreatePictureInPictureWindow();
-    WMError ShowPictureInPictureWindow();
-
     wptr<PictureInPictureController> weakRef_ = nullptr;
-
     sptr<PipOption> pipOption_;
-
     sptr<Window> window_;
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
-
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
 } // namespace Rosen

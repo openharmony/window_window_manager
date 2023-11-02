@@ -141,7 +141,6 @@ public:
     void UpdateWindowSizeLimits();
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
-    WSError NotifyCloseExistPipWindow() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
