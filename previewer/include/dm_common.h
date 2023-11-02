@@ -251,6 +251,27 @@ enum class ScreenSourceMode: uint32_t {
     SCREEN_EXTEND = 2,
     SCREEN_ALONE = 3,
 };
+
+/**
+ * @brief Enumerates the fold status.
+ */
+enum class FoldStatus: uint32_t {
+    UNKNOWN = 0,
+    EXPAND = 1,
+    FOLDED = 2,
+    HALF_FOLD = 3,
+};
+
+/**
+ * @brief Enumerates the fold display mode.
+ */
+enum class FoldDisplayMode: uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,
+    MAIN = 2,
+    SUB = 3,
+    COORDINATION = 4,
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

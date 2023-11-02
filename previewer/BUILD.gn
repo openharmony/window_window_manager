@@ -65,6 +65,7 @@ if (!ispreview) {
       "src/window_model.cpp",
       "src/window_option.cpp",
       "src/window_scene.cpp",
+      "src/window_display.cpp",
     ]
 
     include_dirs = [
