@@ -1307,7 +1307,9 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
-    hostSession_->GetGlobalMaximizeMode(mode);
+    if (hostSession_) {
+        hostSession_->GetGlobalMaximizeMode(mode);
+    }
     return mode;
 }
 
@@ -1942,7 +1944,8 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
+        && system::GetParameter("const.product.devicetype", "unknown") == "pc") {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         statusProperty.enable_ = false;
         ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
@@ -1976,6 +1979,17 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         }
     }
     return WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    WLOGFI("UpdateMaximizeMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    if (uiContent_ == nullptr) {
+        WLOGFE("UpdateMaximizeMode uiContent_ is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    uiContent_->UpdateMaximizeMode(mode);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -636,6 +636,8 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             [[fallthrough]];
         case ScreenCombination::SCREEN_EXPAND:
             break;
+        case ScreenCombination::SCREEN_UNIQUE:
+            break;
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
                 WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");

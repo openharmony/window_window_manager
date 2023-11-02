@@ -596,3 +596,59 @@ napi_value SessionTypeInit(napi_env env)
     return objValue;
 }
 } // namespace OHOS::Rosen
+
+
+struct AsyncInfo {
+    napi_env env;
+    napi_async_work work;
+    std::function<void()> func;
+};
+
+void NapiAsyncWork(napi_env env, std::function<void()> task)
+{
+    napi_value resource = nullptr;
+    AsyncInfo* info = new AsyncInfo();
+    info->env = env;
+    info->func = task;
+    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
+    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
+    },
+    [](napi_env env, napi_status status, void* data) {
+        AsyncInfo* info = (AsyncInfo*)data;
+        info->func();
+        napi_delete_async_work(env, info->work);
+    }, (void*)info, &info->work);
+    napi_queue_async_work(env, info->work);
+    delete info;
+}
+
+MainThreadScheduler::MainThreadScheduler(napi_env env)
+    : env_(env)
+{
+    GetMainEventHandler();
+}
+
+inline void MainThreadScheduler::GetMainEventHandler()
+{
+    if (handler_ != nullptr) {
+        return;
+    }
+    auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (runner == nullptr) {
+        return;
+    }
+    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+}
+
+void MainThreadScheduler::PostMainThreadTask(Task&& task, int64_t delayTime)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    GetMainEventHandler();
+    if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
+    } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->PostTask(std::move(task), OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        NapiAsyncWork(env_, task);
+    }
+}

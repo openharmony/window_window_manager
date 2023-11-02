@@ -59,6 +59,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyForegroundInteractiveStatus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
         &SessionStageStub::HandleNotifyConfigurationUpdated),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE),
+        &SessionStageStub::HandleUpdateMaximizeMode),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -235,4 +237,12 @@ int SessionStageStub::HandleNotifyConfigurationUpdated(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateMaximizeMode!");
+    MaximizeMode mode = static_cast<MaximizeMode>(data.ReadUint32());
+    WSError errCode = UpdateMaximizeMode(mode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

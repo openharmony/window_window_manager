@@ -173,4 +173,17 @@ constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 } // namespace OHOS::Rosen
 
+
+class MainThreadScheduler {
+public:
+    using Task = std::function<void()>;
+    explicit MainThreadScheduler(napi_env env);
+    void PostMainThreadTask(Task&& task, int64_t delayTime = 0);
+private:
+    void GetMainEventHandler();
+    napi_env env_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
+    std::recursive_mutex mutex_;
+};
+
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
