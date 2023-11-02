@@ -53,9 +53,16 @@ FoldStatus PreviewerDisplay::GetFoldStatus() const
     return foldStatus;
 }
 
-void RegisterStatusChangedCallback(const DisplayCallback& callBack)
+void PreviewerDisplay::RegisterStatusChangedCallback(const DisplayCallback callback)
 {
-    displayCallback_ = callBack;
+    displayCallback_.push_back(std::move(callback));
+}
+
+void PreviewerDisplay::OnRegisterStatusChangedCallback(const FoldStatus& foldStatus) const
+{
+    for(const auto& callback : displayCallback_) {
+        callback(foldStatus);
+    }
 }
 
 } // namespace Previewer

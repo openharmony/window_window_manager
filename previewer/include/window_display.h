@@ -17,21 +17,14 @@
 #define WINDOW_DISPLAY_H
 
 #include <string>
+#include <vector>
 #include <functional>
 
 #include "window.h"
 
 namespace OHOS {
 namespace Previewer {
-/**
- * @brief Enumerates the fold status.
-*/
-enum class FoldStatus : uint32_t {
-    UNKNOWN = 0,
-    EXPAND = 1,
-    FOLDED = 2,
-    HALF_FOLD = 3,
-};
+using namespace OHOS::Rosen;
 
 class WINDOW_EXPORT PreviewerDisplay {
 using DisplayCallback = std::function<void(const FoldStatus&)>;
@@ -45,7 +38,8 @@ public:
 
     bool IsFoldable() const;
     FoldStatus GetFoldStatus() const;
-    void RegisterStatusChangedCallback(const DisplayCallback& callBack);
+    void RegisterStatusChangedCallback(const DisplayCallback callback);
+    void OnRegisterStatusChangedCallback(const FoldStatus& foldStatus) const;
 
 private:
     PreviewerWindow() = default;
@@ -53,7 +47,7 @@ private:
 
     bool foldable = false;
     FoldStatus foldStatus = FoldStatus::UNKNOWN;
-    DisplayCallback displayCallback_;
+    std::vector<DisplayCallback> displayCallback_;
 };
 } // namespace Previewer
 } // namespace OHOS
