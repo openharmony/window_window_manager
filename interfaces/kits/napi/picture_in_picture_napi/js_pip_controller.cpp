@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-constexpr size_t ARGC_TWO = 2;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "jsPipController"};
 }

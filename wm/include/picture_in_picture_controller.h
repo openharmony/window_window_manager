@@ -48,7 +48,6 @@ private:
     sptr<PipOption> pipOption_;
     sptr<Window> window_;
     uint32_t mainWindowId_;
-    Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
