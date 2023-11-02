@@ -415,6 +415,13 @@ DMError DisplayManagerAdapter::HasPrivateWindow(DisplayId displayId, bool& hasPr
     return displayManagerServiceProxy_->HasPrivateWindow(displayId, hasPrivateWindow);
 }
 
+DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->HasImmersiveWindow(immersive);
+}
+
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
