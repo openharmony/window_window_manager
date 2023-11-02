@@ -42,6 +42,7 @@ public:
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
     void NotifyBackpressedEvent(bool& isConsumed) override;
+    void NotifyConfigurationUpdated() override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
