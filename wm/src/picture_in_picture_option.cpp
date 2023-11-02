@@ -62,5 +62,5 @@ void PipOption::GetContentSize(uint32_t& width, uint32_t& height)
     width = contentWidth_;
     height = contentHeight_;
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

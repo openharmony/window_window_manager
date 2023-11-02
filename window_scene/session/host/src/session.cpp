@@ -1028,14 +1028,6 @@ void Session::NotifyScreenshot()
     sessionStage_->NotifyScreenshot();
 }
 
-WSError Session::NotifyCloseExistPipWindow()
-{
-    if (!sessionStage_) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyCloseExistPipWindow();
-}
-
 WSError Session::NotifyDestroy()
 {
     if (!sessionStage_) {

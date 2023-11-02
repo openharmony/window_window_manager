@@ -37,7 +37,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;
     WSError NotifyDestroy() override;
-    WSError NotifyCloseExistPipWindow() override;
     void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
