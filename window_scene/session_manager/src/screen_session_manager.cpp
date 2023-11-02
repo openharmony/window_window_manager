@@ -1168,7 +1168,7 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId scre
         WLOGFE("SetVirtualMirrorScreenBufferRotation: No corresponding rsId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    res = rsInterface_.SetVirtualMirrorScreenBufferRotation(rsScreenId, bufferRotation);
+    res = rsInterface_.SetVirtualMirrorScreenBufferRotation(rsScreenId, autoRotate);
     if (!res) {
         WLOGE("SetVirtualMirrorScreenBufferRotation failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
