@@ -233,7 +233,7 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
 int SessionStageStub::HandleNotifyConfigurationUpdated(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleNotifyConfigurationUpdated!");
-    NotifyConfigurationUpdated(interactive);
+    NotifyConfigurationUpdated();
     return ERR_NONE;
 }
 
