@@ -1384,8 +1384,7 @@ HWTEST_F(WindowSessionImplTest, UpdateWindowMode, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateWindowMode");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     WindowMode mode = WindowMode{0};
     auto ret = window->UpdateWindowMode(mode);
@@ -1404,8 +1403,7 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateDensity");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     int ret = 0;
     window->UpdateDensity();
@@ -1424,8 +1422,7 @@ HWTEST_F(WindowSessionImplTest, IsFloatingWindowAppType, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("IsFloatingWindowAppType");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     window->IsFloatingWindowAppType();
     ASSERT_NE(window, nullptr);
@@ -1443,8 +1440,7 @@ HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetRequestedOrientation");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(window->GetRequestedOrientation(), Orientation::BEGIN);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 end";
@@ -1461,8 +1457,7 @@ HWTEST_F(WindowSessionImplTest, GetRequestWindowState, Function | SmallTest | Le
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetRequestWindowState");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     auto ret = window->GetRequestWindowState();
     ASSERT_EQ(ret, WindowState::STATE_INITIAL);
@@ -1480,8 +1475,7 @@ HWTEST_F(WindowSessionImplTest, GetFocusable, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetFocusable");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option); 
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option); 
     ASSERT_NE(window, nullptr);
     bool ret = window->GetFocusable();
     ASSERT_EQ(ret, true);
