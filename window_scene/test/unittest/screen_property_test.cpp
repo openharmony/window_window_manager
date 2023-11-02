@@ -131,6 +131,7 @@ HWTEST_F(ScreenPropertyTest, CalculateXYDpi, Function | SmallTest | Level2)
     phyHeight = 1;
     property->CalculateXYDpi(phyWidth, phyHeight);
     ASSERT_EQ(ret, 0);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: CalculateXYDpi end";
 }
 
@@ -147,6 +148,7 @@ HWTEST_F(ScreenPropertyTest, SetOffsetX, Function | SmallTest | Level2)
     property->SetOffsetX(offsetX);
     int32_t ret = property->GetOffsetX();
     ASSERT_EQ(ret, offsetX);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetX end";
 }
 
@@ -163,6 +165,7 @@ HWTEST_F(ScreenPropertyTest, SetOffsetY, Function | SmallTest | Level2)
     property->SetOffsetY(offsetY);
     int32_t ret = property->GetOffsetY();
     ASSERT_EQ(ret, offsetY);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetY end";
 }
 
@@ -182,6 +185,7 @@ HWTEST_F(ScreenPropertyTest, SetOffset, Function | SmallTest | Level2)
     int32_t ret_y = property->GetOffsetY();
     ASSERT_EQ(ret_x, offsetX);
     ASSERT_EQ(ret_y, offsetY);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffset end";
 }
 
@@ -198,6 +202,7 @@ HWTEST_F(ScreenPropertyTest, SetScreenRequestedOrientation, Function | SmallTest
     property->SetScreenRequestedOrientation(orientation);
     Orientation ret = property->GetScreenRequestedOrientation();
     ASSERT_EQ(ret, orientation);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRequestedOrientation end";
 }
 } // namespace
