@@ -224,6 +224,12 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
 };
 
+enum class BrokerStates: uint32_t {
+    BROKER_UNKOWN = 1,
+    BROKER_STARTED = 0,
+    BROKER_NOT_START = -1,
+};
+
 inline bool GreatOrEqual(double left, double right)
 {
     constexpr double epsilon = -0.00001f;
