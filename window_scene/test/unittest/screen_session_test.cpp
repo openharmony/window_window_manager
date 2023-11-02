@@ -389,7 +389,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, Function | SmallTest 
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     Orientation orientation = Orientation::UNSPECIFIED;
     session->SetScreenRequestedOrientation(orientation);
-    Orientation res =session->GetScreenRequestedOrientation();
+    Orientation res = session->GetScreenRequestedOrientation();
     ASSERT_EQ(res, orientation);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation end";
 }
