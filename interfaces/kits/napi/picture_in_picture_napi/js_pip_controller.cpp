@@ -42,15 +42,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController)
 {
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-
-    WLOGI("CreateJsPipController");
-    std::unique_ptr<JsPipController> jsPipController = std::make_unique<JsPipController>(pipController);
-    napi_wrap(env, objValue, jsPipController.release(), JsPipController::Finalizer, nullptr, nullptr);
-
-    BindFunctions(env, objValue, "JsPipController");
-    return objValue;
+    return NapiGetUndefined(env);
 }
 
 JsPipController::JsPipController(const sptr<PictureInPictureController>& pipController) : pipController_(pipController)
