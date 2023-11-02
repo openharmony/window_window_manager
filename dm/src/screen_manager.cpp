@@ -547,6 +547,11 @@ DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, ui
     return DMError::DM_OK;
 }
 
+DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenBufferRotation(screenId, rotation);
+}
+
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
