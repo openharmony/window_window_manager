@@ -154,6 +154,7 @@ public:
 
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState requestState_ { WindowState::STATE_INITIAL };
+    WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
 protected:
     WMError Connect();

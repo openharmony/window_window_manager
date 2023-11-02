@@ -799,6 +799,39 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTes
     }
     ASSERT_NE(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
 }
+
+/**
+ * @tc.name: MakeUniqueScreen
+ * @tc.desc: Make unique screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Level3)
+{
+    vector<ScreenId> screenIds;
+    screenIds.clear();
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
+}
+
+/**
+ * @tc.name: DisableDisplaySnapshot
+ * @tc.desc: DisableDisplaySnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisableDisplaySnapshot, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(DMError::DM_OK, ssm_->DisableDisplaySnapshot(false));
+}
+
+/**
+ * @tc.name: DisableMirror
+ * @tc.desc: DisableMirror test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisableMirror, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(DMError::DM_OK, ssm_->DisableMirror(false));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

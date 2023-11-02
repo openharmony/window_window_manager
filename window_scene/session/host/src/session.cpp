@@ -360,16 +360,13 @@ bool Session::GetTouchable() const
 
 WSError Session::SetVisible(bool isVisible)
 {
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    isVisible_ = isVisible;
+    isRSVisible_ = isVisible;
     return WSError::WS_OK;
 }
 
 bool Session::GetVisible() const
 {
-    return isVisible_;
+    return isRSVisible_;
 }
 
 int32_t Session::GetWindowId() const
@@ -1365,11 +1362,6 @@ void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocu
     requestFocusStatusNotifyManagerFunc_ = func;
 }
 
-void Session::SetScreenLockedStateNotifyManagerListener(const NotifyScreenLockedStateNotifyManagerFunc& func)
-{
-    screenLockedStateNotifyManagerFunc_ = func;
-}
-
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
 {
     lostFocusFunc_ = func;
@@ -1437,15 +1429,6 @@ void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused)
     WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
     if (requestFocusStatusNotifyManagerFunc_) {
         requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused);
-    }
-}
-
-void Session::NotifyScreenLockedStateNotifyManager(bool isScreenLocked)
-{
-    WLOGFD("NotifyScreenLockedStateNotifyManager id: %{public}d, isScreenLocked: %{public}d",
-        GetPersistentId(), isScreenLocked);
-    if (screenLockedStateNotifyManagerFunc_) {
-        screenLockedStateNotifyManagerFunc_(isScreenLocked);
     }
 }
 
@@ -1607,7 +1590,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
-    if (persistentId != INVALID_SESSION_ID) {
+    if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(g_persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;
         return;
@@ -1624,6 +1607,7 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     persistentId_ = isExtension ? static_cast<uint32_t>(
         g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     g_persistentIdSet.insert(g_persistentId);
+    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
@@ -1648,6 +1632,21 @@ WindowMode Session::GetWindowMode()
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
     return property->GetWindowMode();
+}
+
+WSError Session::UpdateMaximizeMode(bool isMaximize)
+{
+    WLOGFD("Session update maximize mode, isMaximize: %{public}d", isMaximize);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
+    if (isMaximize) {
+        mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        mode = MaximizeMode::MODE_FULL_FILL;
+    }
+    return sessionStage_->UpdateMaximizeMode(mode);
 }
 
 void Session::SetZOrder(uint32_t zOrder)

@@ -521,6 +521,11 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     return dstScreenshot;
 }
 
+DMError DisplayManager::DisableScreenshot(bool disableOrNot)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().DisableDisplaySnapshot(disableOrNot);
+}
+
 sptr<Display> DisplayManager::GetDefaultDisplay()
 {
     return pImpl_->GetDefaultDisplay();

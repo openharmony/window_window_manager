@@ -47,6 +47,7 @@ public:
     WSError UpdateWindowMode(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyConfigurationUpdated() override;
+    WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
