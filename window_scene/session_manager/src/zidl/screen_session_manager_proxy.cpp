@@ -1247,6 +1247,33 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
     return info;
 }
+
+DMError ScreenSessionManagerProxy::HasImmersiveWindow(bool& immersive)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    immersive = reply.ReadBool();
+    return ret;
+}
+
 DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     sptr<IRemoteObject> remote = Remote();
