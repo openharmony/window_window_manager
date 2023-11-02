@@ -87,6 +87,7 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
                                          const sptr<IRemoteObject>& displayManagerAgent) override;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
