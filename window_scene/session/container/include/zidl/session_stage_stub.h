@@ -52,6 +52,7 @@ private:
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyConfigurationUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

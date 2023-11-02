@@ -57,6 +57,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateWindowMode),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
         &SessionStageStub::HandleNotifyForegroundInteractiveStatus),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
+        &SessionStageStub::HandleNotifyConfigurationUpdated),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE),
         &SessionStageStub::HandleUpdateMaximizeMode),
 };
@@ -225,6 +227,13 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     WLOGFD("NotifyForegroundInteractiveStatus!");
     bool interactive = data.ReadBool();
     NotifyForegroundInteractiveStatus(interactive);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyConfigurationUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyConfigurationUpdated!");
+    NotifyConfigurationUpdated();
     return ERR_NONE;
 }
 

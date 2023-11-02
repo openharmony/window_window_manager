@@ -17,6 +17,8 @@
 
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
+#include "app_mgr_client.h"
+#include "app_mgr_constants.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -143,6 +145,21 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
         isConsumed = uiContent_->ProcessBackPressed();
     }
     WLOGFD("Backpressed event is not cosumed");
+}
+
+void WindowExtensionSessionImpl::NotifyConfigurationUpdated()
+{
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    if (appMgrClient->ConnectAppMgrService() != AppExecFwk::AppMgrResultCode::RESULT_OK) {
+        WLOGFE("Failed to connnect AppManagerService");
+        return;
+    }
+    auto systemConfig = AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    auto newConfig = std::make_shared<AppExecFwk::Configuration>(systemConfig);
+    if (uiContent_) {
+        uiContent_->UpdateConfiguration(newConfig);
+    }
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
