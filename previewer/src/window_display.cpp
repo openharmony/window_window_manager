@@ -24,15 +24,14 @@ PreviewerDisplay& PreviewerDisplay::GetInstance()
     return instance;
 }
 
-void PreviewerDisplay::SetFoldable(const bool value)
+void PreviewerDisplay::SetFoldable(const bool foldable)
 {
-    WLOGFI("SetFoldable value: %s",value ? "true" : "false");
-    foldable = value;
+    foldable_ = foldable;
 }
 
-void PreviewerDisplay::SetFoldStatus(const FoldStatus value)
+void PreviewerDisplay::SetFoldStatus(const FoldStatus foldStatus)
 {
-    foldStatus = value;
+    foldStatus_ = foldStatus;
 }
 
 void PreviewerDisplay::ExecStatusChangedCallback()
@@ -40,30 +39,22 @@ void PreviewerDisplay::ExecStatusChangedCallback()
     if(!displayCallback_){
         return;
     }
-    displayCallback_();
+    displayCallback_(GetFoldStatus());
 }
 
 bool PreviewerDisplay::IsFoldable() const
 {
-    return foldable;
+    return foldable_;
 }
 
 FoldStatus PreviewerDisplay::GetFoldStatus() const
 {
-    return foldStatus;
+    return foldStatus_;
 }
 
 void PreviewerDisplay::RegisterStatusChangedCallback(const DisplayCallback callback)
 {
-    displayCallback_.push_back(std::move(callback));
+    displayCallback_ = std::move(callback);
 }
-
-void PreviewerDisplay::OnRegisterStatusChangedCallback(const FoldStatus& foldStatus) const
-{
-    for(const auto& callback : displayCallback_) {
-        callback(foldStatus);
-    }
-}
-
 } // namespace Previewer
 } // namespace OHOS

@@ -32,22 +32,21 @@ using DisplayCallback = std::function<void(const FoldStatus&)>;
 public:
     static PreviewerDisplay& GetInstance();
 
-    void SetFoldable(const bool value);
-    void SetFoldStatus(const FoldStatus value);
+    void SetFoldable(const bool foldable);
+    void SetFoldStatus(const FoldStatus foldStatus);
     void ExecStatusChangedCallback();
 
     bool IsFoldable() const;
     FoldStatus GetFoldStatus() const;
     void RegisterStatusChangedCallback(const DisplayCallback callback);
-    void OnRegisterStatusChangedCallback(const FoldStatus& foldStatus) const;
 
 private:
     PreviewerWindow() = default;
     ~PreviewerDisplay() = default;
 
-    bool foldable = false;
-    FoldStatus foldStatus = FoldStatus::UNKNOWN;
-    std::vector<DisplayCallback> displayCallback_;
+    bool foldable_ = false;
+    FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
+    DisplayCallback displayCallback_;
 };
 } // namespace Previewer
 } // namespace OHOS
