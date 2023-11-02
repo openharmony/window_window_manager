@@ -41,7 +41,6 @@ ohos_static_library("libwm_static") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${ability_runtime_path}/interfaces/kits/native/configuration/include",
   ]
 
   sources = [
@@ -161,8 +160,6 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${ability_runtime_path}/interfaces/kits/native/configuration/include",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/include/app_manager",
   ]
 
   sources = [
