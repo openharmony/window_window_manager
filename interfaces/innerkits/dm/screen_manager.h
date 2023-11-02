@@ -188,6 +188,15 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
 
     /**
+     * @brief Set buffer auto rotate
+     *
+     * @param screenId Screen id.
+     * @param bufferRotation auto rotate
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation);
+
+    /**
      * @brief Set the screen power states for all screens.
      *
      * @param state Screen power state.
