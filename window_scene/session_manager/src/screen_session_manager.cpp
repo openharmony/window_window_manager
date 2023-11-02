@@ -1154,6 +1154,29 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SetVirtualMirrorScreenBufferRotation denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: ScreenSessionManager::SetVirtualMirrorScreenBufferRotation ENTER");
+
+    bool res = false;
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGFE("SetVirtualMirrorScreenBufferRotation: No corresponding rsId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    res = rsInterface_.SetVirtualMirrorScreenBufferRotation(rsScreenId, autoRotate);
+    if (!res) {
+        WLOGE("SetVirtualMirrorScreenBufferRotation failed in RenderService");
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetVirtualMirrorScreenBufferRotation success");
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
     if (!SessionPermission::IsSystemCalling()) {

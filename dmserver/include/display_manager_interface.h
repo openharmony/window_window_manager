@@ -57,6 +57,7 @@ public:
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
         TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE,
+        TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
@@ -103,6 +104,7 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
