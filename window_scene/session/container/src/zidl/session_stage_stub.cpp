@@ -142,14 +142,6 @@ int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("Notify Pip AlreadyExists");
-    WSError errCode = NotifyCloseExistPipWindow();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Notify touch dialog target");
