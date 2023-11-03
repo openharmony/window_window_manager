@@ -26,7 +26,7 @@ void PipOption::SetContext(void* contextPtr)
     contextPtr_ = contextPtr;
 }
 
-void PipOption::SetNavigationId(const std::string navigationId)
+void PipOption::SetNavigationId(const std::string& navigationId)
 {
     navigationId_ = navigationId;
 }

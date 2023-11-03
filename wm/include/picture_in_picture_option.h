@@ -25,7 +25,7 @@ public:
     explicit PipOption();
     virtual ~PipOption() = default;
     void SetContext(void* contextPtr);
-    void SetNavigationId(const std::string navigationId);
+    void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
     void SetContentSize(uint32_t width, uint32_t height);
     void* GetContext() const;
