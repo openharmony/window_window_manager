@@ -642,7 +642,6 @@ inline void MainThreadScheduler::GetMainEventHandler()
 
 void MainThreadScheduler::PostMainThreadTask(Task&& task, int64_t delayTime)
 {
-    std::unique_lock<std::recursive_mutex> lock(mutex_);
     GetMainEventHandler();
     if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();

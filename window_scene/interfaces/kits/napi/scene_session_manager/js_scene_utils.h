@@ -183,7 +183,6 @@ private:
     void GetMainEventHandler();
     napi_env env_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
-    std::recursive_mutex mutex_;
 };
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
