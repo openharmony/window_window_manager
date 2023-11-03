@@ -56,6 +56,8 @@ const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 } // namespace
 
+std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
     WLOGI("[NAPI]Create");
@@ -86,7 +88,12 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha", moduleName,
         JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
-
+    napi_ref jsRef = nullptr; 
+    napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
+    if (status != napi_ok) {
+        WLOGFE("do not get ref ");
+    }
+    jsSceneSessionMap_[session->GetPersistentId()] = jsRef;
     return objValue;
 }
 
@@ -216,15 +223,18 @@ void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& r
 }
 
 
-void JsSceneSession::ClearCbMap(bool needRemove)
+void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
 {
     if (!needRemove) {
         return;
     }
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    auto task = [this]() {
+    auto task = [this, persistentId]() {
         WLOGFI("clear callbackMap");
-        this->jsCbMap_.clear();
+        jsCbMap_.clear();
+        auto iter = jsSceneSessionMap_.find(persistentId);
+        if (iter != jsSceneSessionMap_.end()) {
+            napi_delete_reference(env_, iter->second);
+        }
     };
     taskScheduler_->PostMainThreadTask(task);
 }
