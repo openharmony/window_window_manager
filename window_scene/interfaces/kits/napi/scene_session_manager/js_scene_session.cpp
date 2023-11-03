@@ -165,7 +165,7 @@ JsSceneSession::~JsSceneSession()
         WLOGFE("session is nullptr");
         return;
     }
-    session->UnregisterSessionStateChangeListenser();
+    session->UnregisterSessionChangeListeners();
 }
 
 void JsSceneSession::ProcessWindowDragHotAreaRegister()

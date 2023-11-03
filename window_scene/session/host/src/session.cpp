@@ -1345,10 +1345,13 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     WLOGFD("SetSessionStateChangeListenser, id: %{public}d", GetPersistentId());
 }
 
-void Session::UnregisterSessionStateChangeListenser()
+void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
-    WLOGFD("UnregisterSessionStateChangeListenser, id: %{public}d", GetPersistentId());
+    sessionFocusableChangeFunc_ = nullptr;
+    sessionTouchableChangeFunc_ = nullptr;
+    clickFunc_ = nullptr;
+    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
