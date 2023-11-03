@@ -2975,9 +2975,9 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
         WLOGFE("Failed to get pointerItem");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto displayX = pointerItem.GetDisplayX();
-    auto displayY = pointerItem.GetDisplayY();
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SendTouchEvent [%d, %d]", displayX, displayY);
+    auto windowX = pointerItem.GetWindowX();
+    auto windowY = pointerItem.GetWindowY();
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SendTouchEvent [%d, %d]", windowX, windowY);
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [id, session] : sceneSessionMap_) {
@@ -2988,7 +2988,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
             if (zOrder <= targetZIndex || zOrder >= zIndex) {
                 continue;
             }
-            if (!session->GetSessionRect().IsInRegion(displayX, displayY)) {
+            if (!session->GetSessionRect().IsInRegion(windowX, windowY)) {
                 continue;
             }
             targetZIndex = zOrder;
@@ -2998,8 +2998,8 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
     if (!targetSession) {
         return WSError::WS_DO_NOTHING;
     }
-    WLOGFI("Send touch event to session with id: %{public}" PRIu32 " zIndex: %{public}u",
-        targetSession->GetPersistentId(), targetZIndex);
+    WLOGFI("Send touch event to session with id: %{public}d, zIndex: %{public}u, "
+        "windowX: %{public}d, windowY: %{public}d", targetSession->GetPersistentId(), targetZIndex, windowX, windowY);
     targetSession->TransferPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
