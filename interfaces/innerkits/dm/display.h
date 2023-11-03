@@ -134,6 +134,15 @@ public:
      * @return Cutout info of the display.
      */
     sptr<CutoutInfo> GetCutoutInfo() const;
+
+    /**
+     * @brief Judge if current display has immersive window.
+     * @param immersive The flag to represent if current display has immersive window.
+     *
+     * @return DM error codes.
+     */
+    DMError HasImmersiveWindow(bool& immersive);
+
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);

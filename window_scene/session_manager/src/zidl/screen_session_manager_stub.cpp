@@ -374,6 +374,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(hasPrivateWindow);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            bool immersive = false;
+            DMError ret = HasImmersiveWindow(immersive);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(immersive);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN: {
             std::string dumpInfo;
             DumpAllScreensInfo(dumpInfo);

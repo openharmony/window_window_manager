@@ -81,6 +81,13 @@ napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
 
+napi_value JsDisplay::HasImmersiveWindow(napi_env env, napi_callback_info info)
+{
+    WLOGI("HasImmersiveWindow is called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnHasImmersiveWindow(env, info) : nullptr;
+}
+
 napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
@@ -112,6 +119,35 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsDisplay::OnGetCutoutInfo",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnHasImmersiveWindow is called");
+    NapiAsyncTask::CompleteCallback complete =
+        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
+            bool immersive = false;
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->HasImmersiveWindow(immersive));
+            if (ret == DmErrorCode::DM_OK) {
+                task.Resolve(env, CreateJsValue(env, immersive));
+                WLOGI("JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d", immersive);
+            } else {
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(ret), "JsDisplay::OnHasImmersiveWindow failed."));
+            }
+        };
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
+        GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
+        lastParam = argv[ARGC_ONE - 1];
+    }
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplay::OnHasImmersiveWindow",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -241,6 +277,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
         napi_wrap(env, objValue, jsDisplay.release(), JsDisplay::Finalizer, nullptr, nullptr);
         BindNativeFunction(env, objValue, "getCutoutInfo", "JsDisplay", JsDisplay::GetCutoutInfo);
+        BindNativeFunction(env, objValue, "hasImmersiveWindow", "JsDisplay", JsDisplay::HasImmersiveWindow);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);
