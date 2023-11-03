@@ -1225,13 +1225,6 @@ WSError WindowSessionImpl::NotifyCloseExistPipWindow()
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyCloseExistPipWindow()
-{
-    WLOGFE("WindowSessionImpl::NotifyCloseExistPipWindow");
-    PictureInPictureManager::DoClose(false);
-    return WSError::WS_OK;
-}
-
 void WindowSessionImpl::NotifyTouchDialogTarget()
 {
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
