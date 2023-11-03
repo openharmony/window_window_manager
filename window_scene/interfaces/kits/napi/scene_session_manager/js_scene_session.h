@@ -38,7 +38,7 @@ public:
     static napi_value Create(napi_env env, const sptr<SceneSession>& session);
     static void Finalizer(napi_env env, void* data, void* hint);
 
-    void ClearCbMap(bool needRemove);
+    void ClearCbMap(bool needRemove, int32_t persistentId);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
@@ -134,6 +134,7 @@ private:
     using Func = void(JsSceneSession::*)();
     std::map<std::string, Func> listenerFunc_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+    static std::map<int32_t, napi_ref> jsSceneSessionMap_;
 };
 } // namespace OHOS::Rosen
 
