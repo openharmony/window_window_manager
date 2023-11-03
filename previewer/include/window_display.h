@@ -41,7 +41,7 @@ public:
     void RegisterStatusChangedCallback(const DisplayCallback callback);
 
 private:
-    PreviewerWindow() = default;
+    PreviewerDisplay() = default;
     ~PreviewerDisplay() = default;
 
     bool foldable_ = false;
