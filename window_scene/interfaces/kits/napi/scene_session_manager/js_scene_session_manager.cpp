@@ -1017,9 +1017,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
     auto localScheduler = SceneSessionManager::GetInstance().GetTaskScheduler();
-    auto clearTask = [jsSceneSession, needRemoveSession] () {
+    auto clearTask = [jsSceneSession, needRemoveSession, persistentId = sceneSession->GetParentPersistentId()] () {
         if (jsSceneSession != nullptr) {
-            jsSceneSession->ClearCbMap(needRemoveSession);
+            jsSceneSession->ClearCbMap(needRemoveSession, persistentId);
         }
     };
     localScheduler->PostAsyncTask(clearTask);
