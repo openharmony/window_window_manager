@@ -19,7 +19,7 @@
 static napi_module g_winManagerModule = {
     .nm_filename = "module/libpipwindow_napi.so/PipWindow.js",
     .nm_register_func = OHOS::Rosen::JsPipWindowManagerInit,
-    .nm_modname = "PipWindow",
+    .nm_modname = "PiPWindow",
 };
 
 extern "C" __attribute__((constructor)) void NAPI_application_pipWindow_AutoRegister()
