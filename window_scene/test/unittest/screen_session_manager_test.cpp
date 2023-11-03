@@ -853,6 +853,17 @@ HWTEST_F(ScreenSessionManagerTest, DisableMirror, Function | SmallTest | Level3)
     ASSERT_EQ(DMError::DM_OK, ssm_->DisableMirror(false));
 }
 
+/**
+ * @tc.name: HasImmersiveWindow
+ * @tc.desc: HasImmersiveWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Level3)
+{
+    bool immersive = false;
+    ASSERT_EQ(DMError::DM_OK, ssm_->HasImmersiveWindow(immersive));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
