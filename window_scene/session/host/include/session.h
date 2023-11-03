@@ -184,6 +184,7 @@ public:
     void ClearDialogVector();
     void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
+    WSError NotifyCloseExistPipWindow();
 
     void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
     WSError PendingSessionToForeground();
