@@ -50,6 +50,10 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
+    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_) {
+        WLOGFD("[NAPI]no need to change size");
+        return;
+    }
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, eng = env_] () {
         auto thisListener = self.promote();
@@ -81,6 +85,8 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         NapiAsyncTask::Schedule("JsWindowListener::OnSizeChange",
             env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
     }
+    currentWidth_ = rect.width_;
+    currentHeight_ = rect.height_;
 }
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
