@@ -100,6 +100,8 @@ public:
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
 
+    void LockFoldDisplayStatus(bool locked) override {}
+
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
     bool IsFoldable() override { return false; };

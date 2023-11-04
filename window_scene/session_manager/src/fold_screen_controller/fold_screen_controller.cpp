@@ -65,6 +65,15 @@ void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
     foldScreenPolicy_->ChangeScreenDisplayMode(displayMode);
 }
 
+void FoldScreenController::LockDisplayStatus(bool locked)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("LockDisplayStatus: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->LockDisplayStatus(locked);
+}
+
 FoldDisplayMode FoldScreenController::GetDisplayMode()
 {
     if (foldScreenPolicy_ == nullptr) {

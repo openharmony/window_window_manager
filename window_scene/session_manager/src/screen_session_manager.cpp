@@ -2364,6 +2364,19 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     foldScreenController_->SetDisplayMode(displayMode);
 }
 
+void ScreenSessionManager::LockFoldDisplayStatus(bool locked)
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("LockFoldDisplayStatus foldScreenController_ is null");
+        return;
+    }
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("LockFoldDisplayStatus permission denied!");
+        return;
+    }
+    foldScreenController_->LockDisplayStatus(locked);
+}
+
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
     if (foldScreenController_ == nullptr) {
