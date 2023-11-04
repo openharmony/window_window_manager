@@ -35,7 +35,7 @@ public:
     void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
