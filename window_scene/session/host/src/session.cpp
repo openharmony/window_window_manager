@@ -1110,6 +1110,55 @@ bool Session::CheckDialogOnForeground()
     return false;
 }
 
+bool Session::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    auto windowType = GetWindowType();
+    bool isSystemWindow = GetSessionInfo().isSystem_;
+    auto sessionState = GetSessionState();
+    int32_t action = pointerEvent->GetPointerAction();
+    if (!isSystemWindow && WindowHelper::IsMainWindow(windowType) &&
+        sessionState != SessionState::STATE_FOREGROUND &&
+        sessionState != SessionState::STATE_ACTIVE &&
+        action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        WLOGFW("Current Session Info: [persistentId: %{public}d, isSystemWindow: %{public}d,"
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), isSystemWindow, state_, action);
+        return false;
+    }
+    return true;
+}
+
+bool Session::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    if (GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return true;
+    }
+
+    auto currentRect = winRect_;
+    if (!isRSVisible_ || currentRect.width_ == 0 || currentRect.height_ == 0) {
+        WLOGE("Error size： [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
+            " persistentId: %{public}d",
+            currentRect.width_, currentRect.height_, isRSVisible_, GetPersistentId());
+        return false;
+    }
+
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        WLOGFW("Dialog parent is null");
+        return false;
+    }
+    auto parentSessionState = parentSession->GetSessionState();
+    if ((parentSessionState != SessionState::STATE_FOREGROUND &&
+        parentSessionState != SessionState::STATE_ACTIVE) ||
+        (state_ != SessionState::STATE_FOREGROUND &&
+        state_ != SessionState::STATE_ACTIVE)) {
+        WLOGFE("Dialog's parent info : [persistentId: %{publicd}d, state:%{public}d];"
+            "Dialog info:[persistentId: %{publicd}d, state:%{public}d]",
+            parentSession->GetPersistentId(), parentSessionState, GetPersistentId(), state_);
+        return false;
+    }
+    return true;
+}
+
 const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
 {
     const std::map<MMI::WindowArea, const char*> areaMap = {
@@ -1244,6 +1293,12 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
+
+    if (!CheckKeyEventDispatch(keyEvent)) {
+        WLOGFW("Do not dispatch the key event.");
+        return WSError::WS_DO_NOTHING;
+    }
+
     WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
