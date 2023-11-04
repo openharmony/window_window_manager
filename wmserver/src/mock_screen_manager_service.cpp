@@ -34,6 +34,8 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
+const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockScreenManagerService)
@@ -67,7 +69,11 @@ void MockScreenManagerService::ShowHelpInfo(std::string& dumpInfo)
         .append(" -f                             ")
         .append("|switch the screen to full display mode\n")
         .append(" -m                             ")
-        .append("|switch the screen to main display mode\n");
+        .append("|switch the screen to main display mode\n")
+        .append(" -l                             ")
+        .append("|lock the screen display status\n")
+        .append(" -u                             ")
+        .append("|unlock the screen display status\n");
 }
 
 void MockScreenManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
@@ -147,6 +153,12 @@ int MockScreenManagerService::Dump(int fd, const std::vector<std::u16string>& ar
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
+    } else if (params.size() == 1 && (params[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
+                || params[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
+        int errCode = LockFoldDisplayStatus(params[0]);
+        if (errCode != 0) {
+            ShowIllegalArgsInfo(dumpInfo);
+        }
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -217,6 +229,25 @@ int MockScreenManagerService::SetFoldDisplayMode(const std::string& modeParam)
     }
     sptr<IScreenSessionManager> screenSessionManagerProxy = iface_cast<IScreenSessionManager>(screenSessionManager_);
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
+    return 0;
+}
+
+int MockScreenManagerService::LockFoldDisplayStatus(const std::string& lockParam)
+{
+    if (lockParam.empty()) {
+        return -1;
+    }
+    bool lockDisplayStatus = false;
+    if (lockParam == ARG_LOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = true;
+    } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = false;
+    } else {
+        WLOGFW("LockFoldDisplayStatus status not support");
+        return -1;
+    }
+    sptr<IScreenSessionManager> screenSessionManagerProxy = iface_cast<IScreenSessionManager>(screenSessionManager_);
+    screenSessionManagerProxy->LockFoldDisplayStatus(lockDisplayStatus);
     return 0;
 }
 } // namespace Rosen

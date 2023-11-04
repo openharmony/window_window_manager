@@ -174,6 +174,8 @@ public:
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
 
+    void LockFoldDisplayStatus(bool locked) override;
+
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;

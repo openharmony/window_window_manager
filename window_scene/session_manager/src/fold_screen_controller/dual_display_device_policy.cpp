@@ -142,6 +142,12 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
     }
 }
 
+void DualDisplayDevicePolicy::LockDisplayStatus(bool locked)
+{
+    WLOGI("DualDisplayDevicePolicy LockDisplayStatus locked: %{public}d", locked);
+    lockDisplayStatus_ = locked;
+}
+
 void DualDisplayDevicePolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
 {
     WLOGI("ReportFoldStatusChangeBegin offScreen: %{public}d, onScreen: %{public}d", offScreen, onScreen);

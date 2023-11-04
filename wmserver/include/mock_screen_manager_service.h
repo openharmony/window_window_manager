@@ -45,7 +45,7 @@ private:
     int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
-
+    int LockFoldDisplayStatus(const std::string& lockParam);
     void InitScreenSessionManager();
 
     static inline SingletonDelegator<MockScreenManagerService> delegator;
