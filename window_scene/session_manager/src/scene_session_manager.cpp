@@ -5025,11 +5025,9 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     if (collaborator != nullptr) {
-        {
-            std::shared_lock<std::shared_mutex> lock(containerStartAbilityTimeLock_);
-            containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()).count();
-        }
+        containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
             WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
@@ -5063,12 +5061,9 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
     if (collaborator != nullptr) {
         int32_t missionId = abilitySessionInfo->persistentId;
         std::string bundleName = sessionInfo.bundleName_;
-        int64_t timestamp;
-        {
-            std::shared_lock<std::shared_mutex> lock(containerStartAbilityTimeLock_);
-            timestamp = containerStartAbilityTime;
-        }
+        int64_t timestamp = containerStartAbilityTime;
         WindowInfoReporter::GetInstance().ReportContainerStartBegin(missionId, bundleName, timestamp);
+
         collaborator->NotifyMissionCreated(abilitySessionInfo);
     }
 }
