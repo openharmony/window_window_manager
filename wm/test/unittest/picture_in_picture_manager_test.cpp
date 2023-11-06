@@ -21,8 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class PictureInPictureManagerTest : public testing::Test
-{
+class PictureInPictureManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();

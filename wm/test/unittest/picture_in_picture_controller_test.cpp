@@ -24,8 +24,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class MockWindow : public Window
-{
+class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
@@ -35,8 +34,7 @@ public:
     MOCK_METHOD0(Destroy, WMError());
 };
 
-class PictureInPictureControllerTest : public testing::Test
-{
+class PictureInPictureControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
