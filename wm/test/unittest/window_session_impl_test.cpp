@@ -1372,6 +1372,115 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     retCode = window->HideNonSystemFloatingWindows(false);
     ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
 }
+
+/**
+ * @tc.name: UpdateWindowModetest01
+ * @tc.desc: UpdateWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateWindowMode, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateWindowModetest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateWindowMode");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    WindowMode mode = WindowMode{0};
+    auto ret = window->UpdateWindowMode(mode);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateWindowModetest01 end";
+}
+
+/**
+ * @tc.name: UpdateDensitytest01
+ * @tc.desc: UpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDensitytest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateDensity");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    int ret = 0;
+    window->UpdateDensity();
+    ASSERT_EQ(ret, 0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDensitytest01 end";
+}
+
+/**
+ * @tc.name: IsFloatingWindowAppTypetest01
+ * @tc.desc: IsFloatingWindowAppType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, IsFloatingWindowAppType, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFloatingWindowAppTypetest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("IsFloatingWindowAppType");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->IsFloatingWindowAppType();
+    ASSERT_NE(window, nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFloatingWindowAppTypetest01 end";
+}
+
+/**
+ * @tc.name: GetRequestedOrientationtest01
+ * @tc.desc: GetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetRequestedOrientation");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(window->GetRequestedOrientation(), Orientation::BEGIN);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 end";
+}
+
+/**
+ * @tc.name: GetRequestWindowStatetest01
+ * @tc.desc: GetRequestWindowState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetRequestWindowState, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestWindowStatetest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetRequestWindowState");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    auto ret = window->GetRequestWindowState();
+    ASSERT_EQ(ret, WindowState::STATE_INITIAL);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestWindowStatetest01 end";
+}
+
+/**
+ * @tc.name: GetFocusabletest01
+ * @tc.desc: GetFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetFocusable, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetFocusabletest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetFocusable");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool ret = window->GetFocusable();
+    ASSERT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetFocusabletest01 end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
