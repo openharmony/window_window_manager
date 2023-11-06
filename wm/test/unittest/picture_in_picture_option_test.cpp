@@ -16,6 +16,9 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_option.h"
 
+using namespace testing;
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Rosen {
 class PictureInPictureOptionTest : public testing::Test {
