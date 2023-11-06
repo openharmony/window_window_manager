@@ -394,8 +394,7 @@ private:
     const int32_t BROKER_RESERVE_UID = 5005;
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
-    std::shared_mutex containerStartAbilityTimeLock_;
-    int64_t containerStartAbilityTime = -1;
+    std::atomic<int64_t> containerStartAbilityTime { 0 };
 
     void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
