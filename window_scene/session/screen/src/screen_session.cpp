@@ -140,6 +140,16 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
     return DMError::DM_OK;
 }
 
+std::string ScreenSession::GetName()
+{
+    return name_;
+}
+
+void ScreenSession::SetName(std::string name)
+{
+    name_ = name;
+}
+
 ScreenId ScreenSession::GetScreenId()
 {
     return screenId_;
