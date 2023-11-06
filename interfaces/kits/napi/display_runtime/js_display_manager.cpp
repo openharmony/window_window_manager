@@ -225,6 +225,12 @@ napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
                 task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
                 WLOGI("GetAllDisplays success");
             } else {
+                auto errorPending = false;
+                napi_is_exception_pending(env,&errorPending);
+                if (errorPending) {
+                    napi_value exception = nullptr;
+                    napi_get_and_clear_last_exception(env,&exception);
+                }
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
                     "JsDisplayManager::OnGetAllDisplays failed."));
