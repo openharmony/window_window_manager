@@ -80,6 +80,7 @@ public:
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenType(ScreenType type);
 
+    std::string GetName();
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
     void UpdatePropertyByActiveMode();
@@ -106,6 +107,7 @@ public:
     bool IsScreenRotationLocked();
     void UpdatePropertyAfterRotation(RRect bounds, int rotation);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
+    void SetName(std::string name);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
