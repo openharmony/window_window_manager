@@ -28,8 +28,6 @@ class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD5(NapiSetUIContent, WMError(const std::string& contentInfo, napi_env env, napi_value storage,
-        bool isDistributed, AppExecFwk::Ability* ability));
     MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
     MOCK_METHOD0(Destroy, WMError());
 };
