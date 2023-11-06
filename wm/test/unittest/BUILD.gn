@@ -303,7 +303,7 @@ ohos_unittest("wm_root_scene_test") {
 ohos_unittest("wm_picture_in_picture_controller_test") {
   module_out_path = module_out_path
 
-  sources = [ "wm_picture_in_picture_controller_test.cpp" ]
+  sources = [ "picture_in_picture_controller_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -316,7 +316,7 @@ ohos_unittest("wm_picture_in_picture_controller_test") {
 ohos_unittest("wm_picture_in_picture_manager_test") {
   module_out_path = module_out_path
 
-  sources = [ "wm_picture_in_picture_manager_test.cpp" ]
+  sources = [ "picture_in_picture_manager_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -329,7 +329,7 @@ ohos_unittest("wm_picture_in_picture_manager_test") {
 ohos_unittest("wm_picture_in_picture_option_test") {
   module_out_path = module_out_path
 
-  sources = [ "wm_picture_in_picture_option_test.cpp" ]
+  sources = [ "picture_in_picture_option_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
