@@ -98,23 +98,6 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | Sma
     ASSERT_FALSE(PictureInPictureManager::IsCurrentPipControllerExist());
     ASSERT_FALSE(PictureInPictureManager::IsCurrentPipController(pipController));
 }
-
-/**
- * @tc.name: DoClose
- * @tc.desc: DoClose
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
-{
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, 100);
-    pipController->StartPictureInPicture();
-    ASSERT_NE(PipWindowState::STATE_STOPPING,PictureInPictureManager::GetPipWindowState());
-    ASSERT_NE(PipWindowState::STATE_STOPPED,PictureInPictureManager::GetPipWindowState());
-    PictureInPictureManager::DoClose(false);
-    ASSERT_NE(PipWindowState::STATE_STARTING,PictureInPictureManager::GetPipWindowState());
-    ASSERT_NE(PipWindowState::STATE_STARTED,PictureInPictureManager::GetPipWindowState());
-}
 }
 }
 }

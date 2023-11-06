@@ -95,7 +95,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(false));
     pipControl->window_ = mw;
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
-    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, pipControl->StopPictureInPicture(false));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(false));
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STARTED);
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     pipControl->StopPictureInPicture(false);
