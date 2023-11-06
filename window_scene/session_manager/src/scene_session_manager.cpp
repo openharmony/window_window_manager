@@ -2209,6 +2209,7 @@ WSError SceneSessionManager::SetFocusedSession(int32_t persistentId)
         WLOGI("Focus scene not change, id: %{public}d", focusedSessionId_);
         return WSError::WS_DO_NOTHING;
     }
+    lastFocusedSessionId_ = focusedSessionId_;
     focusedSessionId_ = persistentId;
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession && IsSessionVisible(sceneSession)) {
@@ -2773,6 +2774,14 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
     if (persistentId != focusedSessionId_) {
         WLOGFD("unfocused id cannot request unfocus!");
         return WSError::WS_DO_NOTHING;
+    }
+    // if pop menu created by desktop request unfocus, back to desktop
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    auto lastSession = GetSceneSession(lastFocusedSessionId_);
+    if (focusedSession && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
+        lastSession && lastSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP &&
+        RequestSessionFocus(lastFocusedSessionId_) == WSError::WS_OK) {
+            return WSError::WS_OK;
     }
     auto nextSession = GetNextFocusableSession(persistentId);
     return ShiftFocus(nextSession);
