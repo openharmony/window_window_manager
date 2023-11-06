@@ -24,7 +24,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class MockWindow :: public Window
+class MockWindow : public Window
 {
 public:
     MockWindow() {};
@@ -71,7 +71,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
 {
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
-    spte<PipOption> option = new PipOption();
+    sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow());
     pipControl->window_ = mw;
@@ -90,16 +90,16 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
 {
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
-    spte<PipOption> option = new PipOption();
+    sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(false));
     pipControl->window_ = mw;
-    PictureInPictureManager::SetPipWindowState(PipWindowState::STATE::STOPPING);
+    PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, pipControl->StopPictureInPicture(false));
-    PictureInPictureManager::SetPipWindowState(PipWindowState::STATE::STARTED);
+    PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STARTED);
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     pipControl->StopPictureInPicture(false);
-    ASSERT_EQ(PipWindowState::STATE_UNDEFINED, PictureInPictureManager.GetPipWindowState());
+    ASSERT_EQ(PipWindowState::STATE_UNDEFINED, PictureInPictureManager::GetPipWindowState());
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(false));
 }
