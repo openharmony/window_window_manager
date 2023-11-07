@@ -1382,7 +1382,7 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     }
     for (const auto& iter: sceneSessionMap_) {
         auto& session = iter.second;
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        if (!session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
             session->NotifyCloseExistPipWindow();
             break;
         }
