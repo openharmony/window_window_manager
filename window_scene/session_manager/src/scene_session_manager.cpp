@@ -1354,6 +1354,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property) {
             info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
         }
+        ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
@@ -1376,6 +1377,20 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     };
 
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
+{
+    if (type != WindowType::WINDOW_TYPE_PIP) {
+        return;
+    }
+    for (const auto& iter: sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+            session->NotifyCloseExistPipWindow();
+            break;
+        }
+    }
 }
 
 bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const
