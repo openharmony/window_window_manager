@@ -73,7 +73,6 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     window_ = window;
-    window_->SetCornerRadius(DEFAULT_WINDOW_CONOR);
     PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), thisController);
     return WMError::WM_OK;
 }
@@ -144,11 +143,15 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
-    auto task = [this]() {
+    auto task = []() {
+            if (!window_) {
+                WLOGFE("StopPictureInPicture failed, window is null");
+                return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+            }
             if (window_->Destroy() != WMError::WM_OK) {
                 PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
                 WLOGFE("Window destroy failed");
-                return;
+                return WMError::WM_ERROR_PIP_DESTROY_FAILED;
             }
             PictureInPictureManager::RemoveCurrentPipController();
             PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());

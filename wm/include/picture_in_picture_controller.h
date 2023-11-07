@@ -31,7 +31,6 @@ public:
     constexpr static int32_t DEFAULT_WIDTH = 800;
     constexpr static int32_t DEFAULT_HEIGHT = 600;
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
-    constexpr static float DEFAULT_WINDOW_CONOR = 40.0f;
     PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId);
     ~PictureInPictureController();
     WMError StartPictureInPicture();

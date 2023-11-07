@@ -43,19 +43,19 @@ PictureInPictureManager::~PictureInPictureManager()
 
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
 {
-    WLOGD("PutPipControllerInfo is called");
+    WLOGD("PutPipControllerInfo is called, windowId %{public}u", windowId);
     PictureInPictureManager::windowToControllerMap_.insert(std::make_pair(windowId, pipController));
 }
 
 void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 {
-    WLOGD("RemovePipControllerInfo is called");
+    WLOGD("RemovePipControllerInfo is called, windowId %{public}u", windowId);
     PictureInPictureManager::windowToControllerMap_.erase(windowId);
 }
 
 void PictureInPictureManager::SetPipWindowState(PipWindowState pipWindowState)
 {
-    WLOGD("SetPipWindowState is called");
+    WLOGD("SetPipWindowState is called, state %{public}u", pipWindowState);
     std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
     PictureInPictureManager::pipWindowState_ = pipWindowState;
 }
@@ -63,6 +63,7 @@ void PictureInPictureManager::SetPipWindowState(PipWindowState pipWindowState)
 PipWindowState PictureInPictureManager::GetPipWindowState()
 {
     WLOGD("GetPipWindowState is called");
+    std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
     return PictureInPictureManager::pipWindowState_;
 }
 
