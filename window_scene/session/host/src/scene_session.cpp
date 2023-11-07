@@ -210,6 +210,11 @@ WSError SceneSession::Disconnect()
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->NotifyCallingSessionBackground();
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && session->sessionChangeCallback_ &&
+            session->sessionChangeCallback_->clearCallbackFunc_) {
+            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
+            WLOGFD("ClearCallbackMap, id: %{public}d", session->GetPersistentId());
+        }
         return WSError::WS_OK;
     });
     return WSError::WS_OK;
