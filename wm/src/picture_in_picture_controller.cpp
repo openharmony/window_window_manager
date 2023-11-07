@@ -108,6 +108,7 @@ WMError PictureInPictureController::StartPictureInPicture()
             return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
         }
         if (PictureInPictureManager::IsAttachedPipWindow(mainWindowId_)) {
+            window_ = PictureInPictureManager::GetCurrentWindow();
             PictureInPictureManager::RemoveCurrentPipController();
             PictureInPictureManager::SetCurrentPipController(thisController);
             return ShowPictureInPictureWindow();
