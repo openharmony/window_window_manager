@@ -234,6 +234,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         auto iter = jsSceneSessionMap_.find(persistentId);
         if (iter != jsSceneSessionMap_.end()) {
             napi_delete_reference(env_, iter->second);
+            jsSceneSessionMap_.erase(iter);
         }
     };
     taskScheduler_->PostMainThreadTask(task);
