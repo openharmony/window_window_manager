@@ -88,7 +88,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha", moduleName,
         JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
-    napi_ref jsRef = nullptr; 
+    napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
         WLOGFE("do not get ref ");
@@ -151,6 +151,8 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         if (session != nullptr) {
             session->RegisterSessionChangeCallback(sessionchangeCallback);
         }
+        sessionchangeCallback->clearCallbackFunc_ = std::bind(&JsSceneSession::ClearCbMap, this,
+            std::placeholders::_1, std::placeholders::_2);
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
     }
