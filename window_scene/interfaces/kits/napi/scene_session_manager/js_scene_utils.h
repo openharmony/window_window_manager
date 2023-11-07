@@ -56,6 +56,7 @@ enum class JsSessionType : uint32_t {
     TYPE_SYSTEM_TOAST,
     TYPE_SYSTEM_FLOAT,
     TYPE_PIP,
+    TYPE_THEME_EDITOR,
 };
 
 // should same with bundlemanager ability info
@@ -104,6 +105,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,             JsSessionType::TYPE_SYSTEM_TOAST            },
     { WindowType::WINDOW_TYPE_SYSTEM_FLOAT,             JsSessionType::TYPE_SYSTEM_FLOAT            },
     { WindowType::WINDOW_TYPE_PIP,                      JsSessionType::TYPE_PIP                     },
+    { WindowType::WINDOW_TYPE_THEME_EDITOR,             JsSessionType::TYPE_THEME_EDITOR            },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -135,6 +137,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_SYSTEM_TOAST,             WindowType::WINDOW_TYPE_SYSTEM_TOAST,           },
     { JsSessionType::TYPE_SYSTEM_FLOAT,             WindowType::WINDOW_TYPE_SYSTEM_FLOAT,           },
     { JsSessionType::TYPE_PIP,                      WindowType::WINDOW_TYPE_PIP,                    },
+    { JsSessionType::TYPE_THEME_EDITOR,             WindowType::WINDOW_TYPE_THEME_EDITOR            },
 };
 
 const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSION_MAP {
