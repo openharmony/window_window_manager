@@ -1382,6 +1382,11 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
     startPoints.insert(startPoints.begin(), screenIds.size(), point);
     ChangeScreenGroup(group, screenIds, startPoints, true, ScreenCombination::SCREEN_UNIQUE);
 
+    auto uniqueScreenSession = GetScreenSession(uniqueScreenId);
+    if (uniqueScreenSession != nullptr) {
+        uniqueScreenSession->SetName("HiCar");
+    }
+
     // virtual screen create callback to notify scb
     OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
     return DMError::DM_OK;
@@ -1579,6 +1584,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->activeIdx_ = 0;
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetVirtualPixelRatio(option.density_);
+    screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
     return screenSession;
 }
 
