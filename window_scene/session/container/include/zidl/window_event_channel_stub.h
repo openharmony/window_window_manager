@@ -41,6 +41,10 @@ private:
     int HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusActiveEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusStateEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferSearchElementInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferSearchElementInfosByText(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_STUB_H
