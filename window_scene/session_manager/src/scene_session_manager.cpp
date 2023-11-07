@@ -132,6 +132,10 @@ std::string GetCurrentTime()
         static_cast<uint64_t>(tn.tv_nsec);
     return std::to_string(uTime);
 }
+int Comp(const std::pair<uint64_t, WindowVisibilityState> &a, const std::pair<uint64_t, WindowVisibilityState> &b)
+{
+    return a.first < b.first;
+}
 } // namespace
 
 SceneSessionManager& SceneSessionManager::GetInstance()
@@ -4330,34 +4334,39 @@ std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId
     return taskScheduler_->PostSyncTask(task);
 }
 
-std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowVisibilityChangeInfo(
+std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::GetWindowVisibilityChangeInfo(
     std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo;
-    VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
-    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
-    VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
+    VisibleData& rsVisibleData = occlusionData->GetVisibleData();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.reserve(rsVisibleData.size());
+    for (auto iter = rsVisibleData.begin(); iter != rsVisibleData.end(); iter++) {
+        currVisibleData.emplace_back(iter->first, static_cast<WindowVisibilityState>(iter->second));
+    }
+    std::sort(currVisibleData.begin(), currVisibleData.end(), Comp);
     uint32_t i, j;
     i = j = 0;
-    for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
-        if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
-            visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+    for (; i < lastVisibleData_.size() && j < currVisibleData.size();) {
+        if (lastVisibleData_[i].first < currVisibleData[j].first) {
+            visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             i++;
-        } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
-            visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+        } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
+            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             j++;
         } else {
+            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             i++;
             j++;
         }
     }
-    for (; i < lastVisibleWindow.size(); ++i) {
-        visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+    for (; i < lastVisibleData_.size(); ++i) {
+        visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     }
-    for (; j < currentVisibleWindow.size(); ++j) {
-        visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+    for (; j < currVisibleData.size(); ++j) {
+        visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
     }
-    lastOcclusionData_ = occlusionData;
+    lastVisibleData_ = currVisibleData;
     return visibilityChangeInfo;
 }
 
@@ -4391,27 +4400,29 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         return;
     }
 
-    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(weakOcclusionData);
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo =
+        GetWindowVisibilityChangeInfo(weakOcclusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
 #ifdef MEMMGR_WINDOW_ENABLE
     std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
 #endif
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
-        bool isVisible = elem.second;
+        WindowVisibilityState visibleState = elem.second;
+        bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
             continue;
         }
         session->SetVisible(isVisible);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
-            session->GetCallingUid(), isVisible, session->GetWindowType()));
+            session->GetCallingUid(), visibleState, session->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible));
 #endif
-        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
-            session->GetWindowId(), isVisible);
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, visibleState:%{public}d",
+            session->GetWindowId(), visibleState);
         CheckAndNotifyWaterMarkChangedResult();
     }
         if (windowVisibilityInfos.size() != 0) {
@@ -4447,7 +4458,8 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
         sceneSession->SetVisible(false);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
-            sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
+            WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
         CheckAndNotifyWaterMarkChangedResult();
