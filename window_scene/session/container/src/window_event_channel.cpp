@@ -213,4 +213,59 @@ WSError WindowEventChannel::TransferFocusState(bool focusState)
     sessionStage_->NotifyFocusStateEvent(focusState);
     return WSError::WS_OK;
 }
+
+WSError WindowEventChannel::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    WLOGFD("WindowEventChannel TransferSearchElementInfo begin eleId: %{public}d, mode:%{public}d", elementId, mode);
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("WindowEventChannel TransferSearchElementInfo end eleId: %{public}d, mode:%{public}d", elementId, mode);
+    return sessionStage_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
+}
+
+WSError WindowEventChannel::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    WLOGFD("WindowEventChannel TransferSearchElementInfosByText begin elementId: %{public}d, text:%{public}s",
+        elementId, text.c_str());
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("WindowEventChannel TransferSearchElementInfosByText end elementId: %{public}d, text:%{public}s",
+        elementId, text.c_str());
+    return sessionStage_->NotifySearchElementInfosByText(elementId, text, baseParent, infos);
+}
+
+WSError WindowEventChannel::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    WLOGFD("WindowEventChannel TransferFindFocusedElementInfo begin elementId: %{public}d, focusType:%{public}d",
+        elementId, focusType);
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("WindowEventChannel TransferFindFocusedElementInfo end elementId: %{public}d, focusType:%{public}d",
+        elementId, focusType);
+    return sessionStage_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info);
+}
+
+WSError WindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    WLOGFD("WindowEventChannel TransferFocusMoveSearch begin elementId: %{public}d, direction:%{public}d",
+        elementId, direction);
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("WindowEventChannel TransferFocusMoveSearch end elementId: %{public}d, direction:%{public}d",
+        elementId, direction);
+    return sessionStage_->NotifyFocusMoveSearch(elementId, direction, baseParent, info);
+}
+
 } // namespace OHOS::Rosen
