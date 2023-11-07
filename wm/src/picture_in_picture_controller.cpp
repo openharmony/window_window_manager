@@ -165,7 +165,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         handler_->PostTask(task, "StopPictureInPicture", DEFAULT_TIME_DELAY);
     } else {
         WLOGFD("Window destroy sync");
-        task();
+        return task();
     }
     return WMError::WM_OK;
 }
