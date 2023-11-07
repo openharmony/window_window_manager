@@ -157,6 +157,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
             PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
             window_ = nullptr;
             PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPED);
+            return WSError::WS_OK;
         };
     if (handler_ && needAnim) {
         WLOGFD("Window destroy async");
