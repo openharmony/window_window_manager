@@ -11,24 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-
-group("window_scene") {
-  public_deps = [
-    "intention_event:libintention_event",
-    "session:scene_session",
-    "session:screen_session",
-    "session_manager:scene_session_manager",
-    "session_manager:screen_session_manager",
-    "session_manager:session_manager",
-    "session_manager_service:session_manager_service",
-  ]
-}
-
-group("test") {
+group("fuzztest") {
   testonly = true
-  deps = [
-    "test/fuzztest:fuzztest",
-    "test/unittest:unittest",
-  ]
+
+  deps = [ "scenesessionmanager_fuzzer:fuzztest" ]
 }
