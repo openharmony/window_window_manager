@@ -29,6 +29,50 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
 }
 
+static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionObject, PipOption& option)
+{
+    napi_value contextPtrValue = nullptr;
+    napi_value navigationIdValue = nullptr;
+    napi_value templateTypeValue = nullptr;
+    napi_value widthValue = nullptr;
+    napi_value heightValue = nullptr;
+
+    void* contextPtr = nullptr;
+    std::string navigationId;
+    uint32_t templateType;
+    uint32_t width;
+    uint32_t height;
+
+    napi_get_named_property(env, optionObject, "context", &contextPtrValue);
+    napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
+    napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
+    napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
+    napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
+
+    napi_unwrap(env, contextPtrValue, &contextPtr);
+    if (!ConvertFromJsValue(env, navigationIdValue, navigationId)) {
+        WLOGFE("Failed to convert navigationIdValue to stringType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, templateTypeValue, templateType)) {
+        WLOGFE("Failed to convert templateTypeValue to uint32_tType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, widthValue, width)) {
+        WLOGFE("Failed to convert widthValue to uint32_tType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, heightValue, height)) {
+        WLOGFE("Failed to convert heightValue to uint32_tType");
+        return -1;
+    }
+    option.SetContext(contextPtr);
+    option.SetNavigationId(navigationId);
+    option.SetPipTemplate(templateType);
+    option.SetContentSize(width, height);
+    return 0;
+}
+
 JsPipWindowManager::JsPipWindowManager()
 {
 }
@@ -64,7 +108,46 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
     WLOGI("OnCreatePipController called");
-    return NapiGetUndefined(env);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Missing args when creating pipController");
+        return NapiThrowInvalidParam(env);
+    }
+    napi_value config = argv[0];
+    if (config == nullptr) {
+        WLOGFE("Failed to convert object to pip Configuration");
+        return NapiThrowInvalidParam(env);
+    }
+    PipOption pipOption;
+    int32_t errCode = GetPictureInPictureOptionFromJs(env, config, pipOption);
+    if (errCode == -1) {
+        WLOGFE("Configuration is invalid: %{public}zu", argc);
+        return NapiThrowInvalidParam(env);
+    }
+    napi_value callback = nullptr;
+    if (argc > 1) {
+        callback = GetType(env, argv[1]) == napi_function ? argv[1] : nullptr; // 1: index of callback
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
+            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
+            if (context == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+                    WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
+                return;
+            }
+            sptr<Window> mainWindow = Window::GetTopWindowWithContext(context->lock());
+            sptr<PictureInPictureController> pipController =
+                new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId());
+            task.Resolve(env, CreateJsPipControllerObject(env, pipController));
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsPipWindowManager::OnCreatePipController", env,
+        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)

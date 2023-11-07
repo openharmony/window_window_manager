@@ -31,7 +31,6 @@ public:
     constexpr static int32_t DEFAULT_WIDTH = 800;
     constexpr static int32_t DEFAULT_HEIGHT = 600;
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
-    constexpr static float DEFAULT_WINDOW_CONOR = 40.0f;
     PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId);
     ~PictureInPictureController();
     WMError StartPictureInPicture();
@@ -44,10 +43,12 @@ public:
     void UpdateContentSize(uint32_t width, uint32_t height);
 private:
     WMError CreatePictureInPictureWindow();
+    WMError ShowPictureInPictureWindow();
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
     sptr<Window> window_;
     uint32_t mainWindowId_;
+    Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
