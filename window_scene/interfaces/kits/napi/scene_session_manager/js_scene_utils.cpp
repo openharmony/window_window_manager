@@ -640,9 +640,15 @@ inline void MainThreadScheduler::GetMainEventHandler()
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
 }
 
-void MainThreadScheduler::PostMainThreadTask(Task&& task, int64_t delayTime)
+void MainThreadScheduler::PostMainThreadTask(Task&& localTask, int64_t delayTime)
 {
     GetMainEventHandler();
+    auto task = [env = env_, localTask] () {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        localTask();
+        napi_close_handle_scope(env, scope);
+    };
     if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
     } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {

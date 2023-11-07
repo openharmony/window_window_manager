@@ -178,7 +178,7 @@ class MainThreadScheduler {
 public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
-    void PostMainThreadTask(Task&& task, int64_t delayTime = 0);
+    void PostMainThreadTask(Task&& localTask, int64_t delayTime = 0);
 private:
     void GetMainEventHandler();
     napi_env env_;
