@@ -1239,6 +1239,7 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
 
 void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
+    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     sceneSessionMap_.erase(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
@@ -1281,7 +1282,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
         if (needRemoveSession) {
-            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
                 NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
             }
