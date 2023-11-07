@@ -19,7 +19,10 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include "session_manager/include/screen_session_manager.h"
+
+#ifdef POWER_MANAGER_ENABLE
 #include "shutdown/takeover_shutdown_callback_stub.h"
+#endif
 
 namespace OHOS::Rosen {
 class JsScreenSessionManager final : public IScreenConnectionListener,

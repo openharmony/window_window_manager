@@ -18,12 +18,15 @@
 #include <js_runtime_utils.h>
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
-#include "shutdown/shutdown_client.h"
 #include "window_manager_hilog.h"
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+
+#ifdef POWER_MANAGER_ENABLE
+#include "shutdown/shutdown_client.h"
+#endif
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -213,14 +216,22 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
     napi_create_reference(env, value, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     shutdownCallback_ = callbackRef;
+#ifdef POWER_MANAGER_ENABLE
     PowerMgr::ShutdownClient::GetInstance().RegisterShutdownCallback(this, PowerMgr::ShutdownPriority::LOW);
+#else
+    WLOGFD("Can not find the sub system of PowerMgr");
+#endif
     return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnUnRegisterShutdownCallback");
+#ifdef POWER_MANAGER_ENABLE
     PowerMgr::ShutdownClient::GetInstance().UnRegisterShutdownCallback(this);
+#else
+    WLOGFD("Can not find the sub system of PowerMgr");
+#endif
     shutdownCallback_ = nullptr;
     return NapiGetUndefined(env);
 }
