@@ -267,7 +267,6 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2
  */
 HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
 {
-    // test
     bool immersive = false;
     DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
     ASSERT_EQ(ret, DMError::DM_OK);
