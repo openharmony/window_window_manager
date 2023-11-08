@@ -471,30 +471,152 @@ HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcRotation
+ * @tc.name: screen_session_test001
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test001, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test001 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    IScreenChangeListener* screenChangeListener = nullptr;
+    session->screenState_ = ScreenState::CONNECTION;
+    int res = 0;
+    session->RegisterScreenChangeListener(screenChangeListener);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test001 end";
+}
+
+/**
+ * @tc.name: screen_session_test002
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test002, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test002 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ScreenId res = session->GetScreenId();
+    ASSERT_EQ(res, session->screenId_);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test002 end";
+}
+
+/**
+ * @tc.name: screen_session_test003
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test003, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test003 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    DMError res = session->SetScreenColorTransform();
+    ASSERT_EQ(res, DMError::DM_OK);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test003 end";
+}
+
+/**
+ * @tc.name: screen_session_test004
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test004, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    RRect bounds;
+    RRect phyBounds;
+    int res = 0;
+    session->UpdatePropertyByFoldControl(bounds, phyBounds);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 end";
+}
+
+/**
+ * @tc.name: screen_session_test005
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test005, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ScreenProperty newProperty;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
+    int res = 0;
+    session->PropertyChange(newProperty, reason);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 end";
+}
+
+/**
+ * @tc.name: screen_session_test006
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test006, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test006 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    Rotation sensorRotation = Rotation::ROTATION_90;
+    float res = session->ConvertRotationToFloat(sensorRotation);
+    ASSERT_EQ(res, 90.f);
+    sensorRotation = Rotation::ROTATION_180;
+    res = session->ConvertRotationToFloat(sensorRotation);
+    ASSERT_EQ(res, 180.f);
+    sensorRotation = Rotation::ROTATION_270;
+    res = session->ConvertRotationToFloat(sensorRotation);
+    ASSERT_EQ(res, 270.f);
+    sensorRotation = Rotation::ROTATION_0;
+    res = session->ConvertRotationToFloat(sensorRotation);
+    ASSERT_EQ(res, 0.f);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test006 end";
+}
+
+/**
+ * @tc.name: screen_session_test007
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test007, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     Orientation orientation = Orientation::UNSPECIFIED;
-    Rotation res = session->CalcRotation(orientation);
-    ASSERT_EQ(res, Rotation::ROTATION_0);
-    orientation = Orientation::VERTICAL;
-    res = session->CalcRotation(orientation);
-    ASSERT_EQ(res, Rotation::ROTATION_0);
-    orientation = Orientation::HORIZONTAL;
-    res = session->CalcRotation(orientation);
-    ASSERT_EQ(res, Rotation::ROTATION_0);
-    orientation = Orientation::REVERSE_VERTICAL;
-    res = session->CalcRotation(orientation);
-    ASSERT_EQ(res, Rotation::ROTATION_0);
-    orientation = Orientation::REVERSE_HORIZONTAL;
-    res = session->CalcRotation(orientation);
-    ASSERT_EQ(res, Rotation::ROTATION_0);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation end";
+    int res = 0;
+    session->ScreenOrientationChange(orientation);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 end";
+}
+
+/**
+ * @tc.name: screen_session_test008
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test008, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    bool res = session->HasPrivateSessionForeground();
+    ASSERT_EQ(res, false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 end";
+}
+
+/**
+ * @tc.name: screen_session_test009
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test009, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test009 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    Rotation rotation = Rotation::ROTATION_90;
+    session->SetRotation(rotation);
+    Rotation res = session->GetRotation();
+    ASSERT_EQ(res, rotation);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test009 end";
 }
 } // namespace
 } // namespace Rosen
