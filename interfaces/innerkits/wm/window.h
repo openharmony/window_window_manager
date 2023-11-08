@@ -58,6 +58,7 @@ namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
+using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1377,6 +1378,13 @@ public:
      * @return True means floating window of app type, false means the opposite.
      */
     virtual bool IsFloatingWindowAppType() const { return false; }
+
+    /**
+     * @brief Register transfer component data callback.
+     *
+     * @param func Function to notify transfer component data.
+     */
+    virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
 };
 }
 }

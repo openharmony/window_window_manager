@@ -45,6 +45,7 @@ private:
     int HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
     int HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyTransferComponentDataSync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);

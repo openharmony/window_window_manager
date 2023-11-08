@@ -85,6 +85,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleTransferExtensionData),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
         &SessionStub::HandleNotifyRemoteReady),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON),
+        &SessionStub::HandleNotifyAsyncOn),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
+        &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied)
 };
@@ -455,6 +459,18 @@ int SessionStub::HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& rep
 {
     WLOGFD("HandleNotifyRemoteReady!");
     NotifyRemoteReady();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifySyncOn(MessageParcel& data, MessageParcel& reply)
+{
+    NotifySyncOn();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyAsyncOn(MessageParcel& data, MessageParcel& reply)
+{
+    NotifyAsyncOn();
     return ERR_NONE;
 }
 
