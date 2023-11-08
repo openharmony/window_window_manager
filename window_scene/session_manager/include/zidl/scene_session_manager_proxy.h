@@ -34,6 +34,7 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false) override;
 
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

@@ -240,4 +240,16 @@ WMError SessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObje
     }
     return static_cast<WMError>(sceneSessionManagerProxy_->BindDialogTarget(persistentId, targetToken));
 }
+
+WMError SessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused)
+{
+    WLOGFD("RequestFocusStatus");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    GetSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_DO_NOTHING;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->RequestFocusStatus(persistentId, isFocused));
+}
 } // namespace OHOS::Rosen

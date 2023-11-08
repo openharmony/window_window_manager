@@ -126,7 +126,7 @@ public:
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info);
-    WSError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false);
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false);
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
