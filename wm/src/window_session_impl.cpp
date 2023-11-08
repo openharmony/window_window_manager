@@ -475,7 +475,22 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
+    isFocused_ = isFocused;
     return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsFocused() const
+{
+    return isFocused_;
+}
+
+WMError WindowSessionImpl::RequestFocus() const
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFD("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SessionManager::GetInstance().RequestFocusStatus(GetPersistentId(), true);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)

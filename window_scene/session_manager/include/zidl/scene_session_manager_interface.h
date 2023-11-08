@@ -50,6 +50,7 @@ public:
         TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION,
         TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION,
         TRANS_ID_UPDATE_PROPERTY,
+        TRANS_ID_REQUEST_FOCUS,
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_BIND_DIALOG_TARGET,
@@ -141,6 +142,7 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override { return WMError::WM_OK; }
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
+    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false) = 0;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override { return WMError::WM_OK; }
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
