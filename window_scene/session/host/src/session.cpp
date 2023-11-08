@@ -1760,54 +1760,40 @@ float Session::GetFloatingScale() const
 WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("TransferSearchElementInfo begin, elementId:%{public}d, mode:%{public}d, baseParent:%{public}d",
-        elementId, mode, baseParent);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("TransferSearchElementInfo end, elementId:%{public}d, mode:%{public}d, infos.size:%{public}d",
-        elementId, mode, infos.size());
     return windowEventChannel_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
 }
 
 WSError Session::TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("TransferSearchElementInfosByText begin, elementId:%{public}d, text:%{public}s, baseParent:%{public}d",
-        elementId, text.c_str(), baseParent);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("TransferSearchElementInfosByText end, elementId:%{public}d, text:%{public}s, infos.size:%{public}d",
-        elementId, text.c_str(), infos.size());
     return windowEventChannel_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
 }
 
 WSError Session::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("TransferFindFocusedElementInfo begin, elementId:%{public}d, focusType:%{public}d, baseParent:%{public}d",
-        elementId, focusType, baseParent);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("TransferFindFocusedElementInfo end, elementId:%{public}d, focusType:%{public}d", elementId, focusType);
     return windowEventChannel_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
 }
 
 WSError Session::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("TransferFocusMoveSearch begin, elementId:%{public}d, direction:%{public}d, baseParent:%{public}d",
-        elementId, direction, baseParent);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("TransferFocusMoveSearch end, elementId:%{public}d, direction:%{public}d", elementId, direction);
     return windowEventChannel_->TransferFindFocusedElementInfo(elementId, direction, baseParent, info);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,22 +14,19 @@
  */
 
 #include "accessibility_element_info_parcel.h"
-#include "parcel_util.h"
+#include "parcel_utils.h"
 #include "window_manager_hilog.h"
 
 using namespace OHOS::Accessibility;
 namespace OHOS::Rosen {
-/* AccessibilityElementInfoParcel       Parcel struct                 */
 AccessibilityElementInfoParcel::AccessibilityElementInfoParcel(
     const Accessibility::AccessibilityElementInfo &elementInfo)
 {
-    WLOGFD();
-
     Accessibility::AccessibilityElementInfo *self = this;
     *self = elementInfo;
 }
 
-bool AccessibilityElementInfoParcel::ReadFromParcelFirstPart(Parcel &parcel)
+bool AccessibilityElementInfoParcel::ReadFromParcelFirstPart(Parcel& parcel)
 {
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pageId_);
     int32_t textMoveStep = STEP_CHARACTER;
@@ -50,7 +47,7 @@ bool AccessibilityElementInfoParcel::ReadFromParcelFirstPart(Parcel &parcel)
     return true;
 }
 
-bool AccessibilityElementInfoParcel::ReadFromParcelSecondPart(Parcel &parcel)
+bool AccessibilityElementInfoParcel::ReadFromParcelSecondPart(Parcel& parcel)
 {
     int32_t operationsSize = 0;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, operationsSize);
@@ -95,7 +92,7 @@ bool AccessibilityElementInfoParcel::ReadFromParcelSecondPart(Parcel &parcel)
     return true;
 }
 
-bool AccessibilityElementInfoParcel::ReadFromParcelThirdPart(Parcel &parcel)
+bool AccessibilityElementInfoParcel::ReadFromParcelThirdPart(Parcel& parcel)
 {
     sptr<RangeInfoParcel> rangeInfo = parcel.ReadStrongParcelable<RangeInfoParcel>();
     if (!rangeInfo) {
@@ -128,9 +125,8 @@ bool AccessibilityElementInfoParcel::ReadFromParcelThirdPart(Parcel &parcel)
     return true;
 }
 
-bool AccessibilityElementInfoParcel::ReadFromParcel(Parcel &parcel)
+bool AccessibilityElementInfoParcel::ReadFromParcel(Parcel& parcel)
 {
-    WLOGFD();
     if (!ReadFromParcelFirstPart(parcel)) {
         return false;
     }
@@ -143,7 +139,7 @@ bool AccessibilityElementInfoParcel::ReadFromParcel(Parcel &parcel)
     return true;
 }
 
-bool AccessibilityElementInfoParcel::MarshallingFirstPart(Parcel &parcel) const
+bool AccessibilityElementInfoParcel::MarshallingFirstPart(Parcel& parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pageId_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(textMoveStep_));
@@ -168,7 +164,7 @@ bool AccessibilityElementInfoParcel::MarshallingFirstPart(Parcel &parcel) const
     return true;
 }
 
-bool AccessibilityElementInfoParcel::MarshallingSecondPart(Parcel &parcel) const
+bool AccessibilityElementInfoParcel::MarshallingSecondPart(Parcel& parcel) const
 {
     RectParcel boundsParcel(bounds_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &boundsParcel);
@@ -214,7 +210,6 @@ bool AccessibilityElementInfoParcel::MarshallingSecondPart(Parcel &parcel) const
 
 bool AccessibilityElementInfoParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     if (!MarshallingFirstPart(parcel)) {
         return false;
     }
@@ -240,17 +235,14 @@ sptr<AccessibilityElementInfoParcel> AccessibilityElementInfoParcel::Unmarshalli
     return accessibilityInfo;
 }
 
-AccessibleActionParcel::AccessibleActionParcel(const AccessibleAction &action)
+AccessibleActionParcel::AccessibleActionParcel(const AccessibleAction& action)
 {
-    WLOGFD();
-
     AccessibleAction *self = this;
     *self = action;
 }
 
-bool AccessibleActionParcel::ReadFromParcel(Parcel &parcel)
+bool AccessibleActionParcel::ReadFromParcel(Parcel& parcel)
 {
-    WLOGFD();
     int32_t type = ActionType::ACCESSIBILITY_ACTION_INVALID;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, type);
     actionType_ = static_cast<ActionType>(type);
@@ -260,7 +252,6 @@ bool AccessibleActionParcel::ReadFromParcel(Parcel &parcel)
 
 bool AccessibleActionParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(actionType_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String, parcel, description_);
 
@@ -269,7 +260,6 @@ bool AccessibleActionParcel::Marshalling(Parcel &parcel) const
 
 sptr<AccessibleActionParcel> AccessibleActionParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGFD();
     sptr<AccessibleActionParcel> accessibleOperation = new(std::nothrow) AccessibleActionParcel();
     if (!accessibleOperation) {
         WLOGFE("Failed to create accessibleOperation.");
@@ -282,17 +272,14 @@ sptr<AccessibleActionParcel> AccessibleActionParcel::Unmarshalling(Parcel& parce
     return accessibleOperation;
 }
 
-RangeInfoParcel::RangeInfoParcel(const RangeInfo &rangeInfo)
+RangeInfoParcel::RangeInfoParcel(const RangeInfo& rangeInfo)
 {
-    WLOGFD();
-
     RangeInfo *self = this;
     *self = rangeInfo;
 }
 
-bool RangeInfoParcel::ReadFromParcel(Parcel &parcel)
+bool RangeInfoParcel::ReadFromParcel(Parcel& parcel)
 {
-    WLOGFD();
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, min_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, max_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, current_);
@@ -302,7 +289,6 @@ bool RangeInfoParcel::ReadFromParcel(Parcel &parcel)
 
 bool RangeInfoParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, min_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, max_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, current_);
@@ -312,7 +298,6 @@ bool RangeInfoParcel::Marshalling(Parcel &parcel) const
 
 sptr<RangeInfoParcel> RangeInfoParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGFD();
     sptr<RangeInfoParcel> rangeInfo = new(std::nothrow) RangeInfoParcel();
     if (!rangeInfo) {
         WLOGFE("Failed to create rangeInfo.");
@@ -325,17 +310,14 @@ sptr<RangeInfoParcel> RangeInfoParcel::Unmarshalling(Parcel& parcel)
     return rangeInfo;
 }
 
-GridInfoParcel::GridInfoParcel(const GridInfo &gridInfo)
+GridInfoParcel::GridInfoParcel(const GridInfo& gridInfo)
 {
-    WLOGFD();
-
     GridInfo *self = this;
     *self = gridInfo;
 }
 
 bool GridInfoParcel::ReadFromParcel(Parcel &parcel)
 {
-    WLOGFD();
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rowCount_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, columnCount_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, selectionMode_);
@@ -345,7 +327,6 @@ bool GridInfoParcel::ReadFromParcel(Parcel &parcel)
 
 bool GridInfoParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rowCount_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, columnCount_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, selectionMode_);
@@ -355,7 +336,6 @@ bool GridInfoParcel::Marshalling(Parcel &parcel) const
 
 sptr<GridInfoParcel> GridInfoParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGFD();
     sptr<GridInfoParcel> grid = new(std::nothrow) GridInfoParcel();
     if (!grid) {
         WLOGFE("Failed to create grid.");
@@ -368,17 +348,14 @@ sptr<GridInfoParcel> GridInfoParcel::Unmarshalling(Parcel& parcel)
     return grid;
 }
 
-GridItemInfoParcel::GridItemInfoParcel(const GridItemInfo &itemInfo)
+GridItemInfoParcel::GridItemInfoParcel(const GridItemInfo& itemInfo)
 {
-    WLOGFD();
-
     GridItemInfo *self = this;
     *self = itemInfo;
 }
 
-bool GridItemInfoParcel::ReadFromParcel(Parcel &parcel)
+bool GridItemInfoParcel::ReadFromParcel(Parcel& parcel)
 {
-    WLOGFD();
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, heading_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, columnIndex_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rowIndex_);
@@ -391,7 +368,6 @@ bool GridItemInfoParcel::ReadFromParcel(Parcel &parcel)
 
 bool GridItemInfoParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, heading_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, columnIndex_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rowIndex_);
@@ -404,7 +380,6 @@ bool GridItemInfoParcel::Marshalling(Parcel &parcel) const
 
 sptr<GridItemInfoParcel> GridItemInfoParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGFD();
     sptr<GridItemInfoParcel> gridItem = new(std::nothrow) GridItemInfoParcel();
     if (!gridItem) {
         WLOGFE("Failed to create gridItem.");
@@ -417,17 +392,14 @@ sptr<GridItemInfoParcel> GridItemInfoParcel::Unmarshalling(Parcel& parcel)
     return gridItem;
 }
 
-RectParcel::RectParcel(const Rect &rect)
+RectParcel::RectParcel(const Rect& rect)
 {
-    WLOGFD();
-
     Rect *self = this;
     *self = rect;
 }
 
-bool RectParcel::ReadFromParcel(Parcel &parcel)
+bool RectParcel::ReadFromParcel(Parcel& parcel)
 {
-    WLOGFD();
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, leftTopX_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, leftTopY_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rightBottomX_);
@@ -437,7 +409,6 @@ bool RectParcel::ReadFromParcel(Parcel &parcel)
 
 bool RectParcel::Marshalling(Parcel &parcel) const
 {
-    WLOGFD();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, leftTopX_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, leftTopY_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rightBottomX_);
@@ -447,7 +418,6 @@ bool RectParcel::Marshalling(Parcel &parcel) const
 
 sptr<RectParcel> RectParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGFD();
     sptr<RectParcel> rect = new(std::nothrow) RectParcel();
     if (!rect) {
         WLOGFE("Failed to create rect.");
