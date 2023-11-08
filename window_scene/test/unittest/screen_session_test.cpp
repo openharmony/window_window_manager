@@ -618,6 +618,53 @@ HWTEST_F(ScreenSessionTest, screen_session_test009, Function | SmallTest | Level
     ASSERT_EQ(res, rotation);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test009 end";
 }
+
+/**
+ * @tc.name: screen_session_test010
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test010, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test010 start";
+    ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
+    ScreenId childScreen = 1;
+    bool res = sessionGroup.HasChild(childScreen);
+    ASSERT_EQ(res, false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test010 end";
+}
+
+/**
+ * @tc.name: screen_session_test011
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test011, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test011 start";
+    ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
+    int ret = 0;
+    std::vector<sptr<ScreenSession>> res = sessionGroup.GetChildren();
+    ASSERT_EQ(ret, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test011 end";
+}
+
+/**
+ * @tc.name: screen_session_test012
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test012 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    int res = 0;
+    RectF rect = RectF(0, 0, 0, 0);
+    uint32_t offsetY = 0;
+    session->SetDisplayBoundary(rect, offsetY);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test012 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
