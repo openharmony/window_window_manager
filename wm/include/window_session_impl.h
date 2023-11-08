@@ -93,6 +93,8 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
+    bool IsFocused() const override;
+    WMError RequestFocus() const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -190,6 +192,7 @@ protected:
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
+    bool isFocused_ { false };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 
