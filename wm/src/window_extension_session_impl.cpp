@@ -100,7 +100,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);
-    hostSession_->NotifyRemoteReady();
+    hostSession_->NotifyAsyncOn();
 }
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
@@ -109,6 +109,27 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
         notifyTransferComponentDataFunc_(wantParams);
     }
     return WSError::WS_OK;
+}
+
+WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
+    const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
+{
+    if (notifyTransferComponentDataForResultFunc_) {
+        reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
+        return WSErrorCode::WS_OK;
+    }
+    return WSErrorCode::WS_ERROR_NOT_REGISTER_SYNC_CALLBACK;
+}
+
+void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
+    const NotifyTransferComponentDataForResultFunc& func)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return;
+    }
+    notifyTransferComponentDataForResultFunc_ = std::move(func);
+    hostSession_->NotifySyncOn();
 }
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
