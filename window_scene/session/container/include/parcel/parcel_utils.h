@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PARCEL_UTIL_H
-#define PARCEL_UTIL_H
+#ifndef PARCEL_UTILS_H
+#define PARCEL_UTILS_H
 
 #include "parcel.h"
 #include "window_manager_hilog.h"
@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "parcelutil"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ParcelUtils"};
 }
 #define READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(type, parcel, data)            \
     do {                                                                    \
@@ -40,11 +40,11 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "parcelu
         }                                                                       \
     } while (0)
 
-inline bool ContainerSecurityVerify(Parcel &parcel, int readContainerSize, size_t val_size)
+inline bool ContainerSecurityVerify(Parcel &parcel, int readContainerSize, size_t valSize)
 {
     size_t readAbleDataSize = (parcel).GetReadableBytes();
     size_t readSize = static_cast<size_t>(readContainerSize);
-    if ((readSize > readAbleDataSize) || (val_size < readSize)) {
+    if ((readSize > readAbleDataSize) || (valSize < readSize)) {
         WLOGFE("Failed to read container, readSize = %{public}zu, readAbleDataSize = %{public}zu",
             readSize, readAbleDataSize);
         return false;
@@ -53,4 +53,4 @@ inline bool ContainerSecurityVerify(Parcel &parcel, int readContainerSize, size_
 }
 } // namespace Rosen
 } // namespace OHOS
-#endif // PARCEL_UTIL_H
+#endif // PARCEL_UTILS_H

@@ -29,7 +29,6 @@ config("libdm_public_config") {
   include_dirs = [
     "../interfaces/innerkits/dm",
     "../utils/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
     "${multimedia_path}/interfaces/innerkits/include",
   ]
 }
@@ -62,7 +61,6 @@ ohos_static_library("libdm_static") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "accessibility:accessibility_common",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
@@ -103,7 +101,6 @@ ohos_shared_library("libdm") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "accessibility:accessibility_common",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",

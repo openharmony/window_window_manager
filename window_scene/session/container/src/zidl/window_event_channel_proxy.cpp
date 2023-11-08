@@ -31,6 +31,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
+constexpr int32_t MAX_COUNT = 9 * 9 * 1000000;
 }
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -179,6 +180,10 @@ WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::Accessibi
         WLOGFE("GetElementInfos failed to read count");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (count > MAX_COUNT) {
+        WLOGFE("GetElementInfos count over size");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     infos.clear();
     for (int i = 0; i < count; i++) {
         sptr<AccessibilityElementInfoParcel> infoPtr =
@@ -187,14 +192,12 @@ WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::Accessibi
             infos.push_back(*infoPtr);
         }
     }
-    WLOGFD("GetElementInfos end");
     return WSError::WS_OK;
 }
 
 WSError WindowEventChannelProxy::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("TransferSearchElementInfo begin");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -220,14 +223,12 @@ WSError WindowEventChannelProxy::TransferSearchElementInfo(int32_t elementId, in
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    WLOGFD("TransferSearchElementInfo end");
     return GetElementInfos(reply, infos);
 }
 
 WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
     int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("TransferSearchElementInfosByText begin");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -254,26 +255,22 @@ WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int32_t elemen
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    WLOGFD("TransferSearchElementInfosByText end");
     return GetElementInfos(reply, infos);
 }
 
 WSError GetElementInfo(MessageParcel& reply, Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("GetElementInfo begin");
     sptr<AccessibilityElementInfoParcel> infoPtr =
         reply.ReadStrongParcelable<AccessibilityElementInfoParcel>();
     if (infoPtr != nullptr) {
         info = *infoPtr;
     }
-    WLOGFD("GetElementInfo end");
     return WSError::WS_OK;
 }
 
 WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("TransferFindFocusedElementInfo begin");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -299,14 +296,12 @@ WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int32_t elementI
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    WLOGFD("TransferFindFocusedElementInfo end");
     return GetElementInfo(reply, info);
 }
 
 WSError WindowEventChannelProxy::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("TransferFocusMoveSearch begin");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -332,7 +327,6 @@ WSError WindowEventChannelProxy::TransferFocusMoveSearch(int32_t elementId, int3
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    WLOGFD("TransferFocusMoveSearch end");
     return GetElementInfo(reply, info);
 }
 

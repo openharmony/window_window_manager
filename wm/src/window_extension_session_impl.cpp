@@ -235,7 +235,6 @@ WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int
         WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    //SearchElementInfoByAccessibilityId
     return WSError::WS_OK;
 }
 
@@ -248,8 +247,6 @@ WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int32_t eleme
         WLOGFE("NotifySearchElementInfosByText error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-
-    //SearchElementInfosByText
     return WSError::WS_OK;
 }
 
@@ -262,7 +259,6 @@ WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int32_t element
         WLOGFE("NotifyFindFocusedElementInfo error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    //FindFocusedElementInfo
     return WSError::WS_OK;
 }
 
@@ -275,7 +271,6 @@ WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int
         WLOGFE("NotifyFocusMoveSearch error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    //FocusMoveSearch
     return WSError::WS_OK;
 }
 } // namespace Rosen
