@@ -108,6 +108,7 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
 HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
 {
     ASSERT_FALSE(SnapShotUtils::RGBA8888ToRGB888(nullptr, nullptr, -1));
+    int t = 0;
 }
 
 /**
