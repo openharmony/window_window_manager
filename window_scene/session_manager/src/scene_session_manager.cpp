@@ -2708,7 +2708,7 @@ void SceneSessionManager::TraverseSessionTreeFromBottomToTop(TraverseFunc func)
     return;
 }
 
-WSError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground)
+WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground)
 {
     auto task = [this, persistentId, isFocused, byForeground]() {
         if (isFocused) {
@@ -2718,7 +2718,7 @@ WSError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         }
     };
     taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    return WMError::WM_OK;
 }
 
 WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground)

@@ -36,6 +36,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         &SceneSessionManagerStub::HandleUpdateProperty),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
+        &SceneSessionManagerStub::HandleRequestFocusStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
         &SceneSessionManagerStub::HandleRegisterWindowManagerAgent),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
@@ -193,6 +195,16 @@ int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessagePa
         WLOGFW("Property not exist!");
     }
     const WMError& ret = UpdateProperty(property, action);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRequestFocusStatus!");
+    int32_t persistentId = data.ReadInt32();
+    bool isFocused = data.ReadBool();
+    const WMError& ret = RequestFocusStatus(persistentId, isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
