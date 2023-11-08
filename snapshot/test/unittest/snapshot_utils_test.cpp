@@ -108,7 +108,16 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
 HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
 {
     ASSERT_FALSE(SnapShotUtils::RGBA8888ToRGB888(nullptr, nullptr, -1));
-    int t = 0;
+}
+
+/**
+ * @tc.name: RGB565ToRGB888
+ * @tc.desc: RGB565 to RGB888 using invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, Function | SmallTest | Level3)
+{
+    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(nullptr, nullptr, -1));
 }
 
 /**
