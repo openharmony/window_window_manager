@@ -1764,4 +1764,45 @@ float Session::GetFloatingScale() const
 {
     return floatingScale_;
 }
+
+WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+}
+
+WSError Session::TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+}
+
+WSError Session::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+}
+
+WSError Session::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFindFocusedElementInfo(elementId, direction, baseParent, info);
+}
+
 } // namespace OHOS::Rosen

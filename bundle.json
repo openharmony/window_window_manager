@@ -68,7 +68,8 @@
           "previewer",
           "hilog",
           "memmgr_plugin",
-          "data_share"
+          "data_share",
+          "accessibility"
         ],
         "third_party": [
           "libjpeg-turbo",

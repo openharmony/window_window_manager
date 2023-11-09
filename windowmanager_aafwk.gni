@@ -26,6 +26,8 @@ screenlock_mgr_path = "//base/theme/screenlock_mgr"
 multimedia_path = "//foundation/multimedia/image_framework"
 multimodalinput_path = "//foundation/multimodalinput"
 sensor_path = "//base/sensors/sensor"
+accessibility_path = "//foundation/barrierfree/accessibility"
+
 declare_args() {
   efficiency_manager_enable = true
   window_manager_feature_subscribe_motion = false
