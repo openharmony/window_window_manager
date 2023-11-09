@@ -207,6 +207,9 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     void AddWindowDragHotArea(int32_t type, WSRect& area);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
+    WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
+    WSRect GetAINavigationBarArea();
+
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -363,6 +366,9 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+
+    bool isAINavigationBarVisible_ = false;
+    WSRect currAINavigationBarArea_;
 
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;

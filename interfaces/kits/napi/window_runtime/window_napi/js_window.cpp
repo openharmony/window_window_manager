@@ -304,7 +304,7 @@ napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAvoidArea");
+    WLOGI("GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -2193,7 +2193,8 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         uint32_t resultValue = 0;
         napi_get_value_uint32(env, nativeMode, &resultValue);
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType > AvoidAreaType::TYPE_KEYBOARD) || (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
+        errCode = ((avoidAreaType > AvoidAreaType::TYPE_AI_NAVIGATION_BAR) ||
+                   (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
