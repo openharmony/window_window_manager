@@ -250,7 +250,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenOrientationChange(float screenRotation)
+void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -262,7 +262,7 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, screenSessionWeak, screenRotation](
+        [jsCallbackRef, callbackType, screenSessionWeak, screenOrientation](
             napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
@@ -278,7 +278,7 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
                 WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
-            napi_value argv[] = { CreateJsValue(env, screenRotation) };
+            napi_value argv[] = { CreateJsValue(env, screenOrientation) };
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 

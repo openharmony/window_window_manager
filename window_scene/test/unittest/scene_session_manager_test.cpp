@@ -26,14 +26,13 @@
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
 
-const std::string EMPTY_DEVICE_ID = "";
-
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
+    const std::string EMPTY_DEVICE_ID = "";
     constexpr int WAIT_SLEEP_TIME = 1;
     using ConfigItem = WindowSceneConfig::ConfigItem;
     ConfigItem ReadConfig(const std::string& xmlStr)
@@ -678,7 +677,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml01, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml02
- * @tc.desc: call defaultWindowMode 
+ * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml02, Function | SmallTest | Level3)
@@ -734,7 +733,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml03, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml04
- * @tc.desc: call defaultMaximizeMode 
+ * @tc.desc: call defaultMaximizeMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml04, Function | SmallTest | Level3)
@@ -762,7 +761,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml04, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml05
- * @tc.desc: call maxFloatingWindowSize 
+ * @tc.desc: call maxFloatingWindowSize
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml05, Function | SmallTest | Level3)
