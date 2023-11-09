@@ -56,7 +56,7 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
 
     // do snapshot if no cache
     if (pixelMap == nullptr) {
-        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(surfaceNode, pixelMap, 300); // snapshot time out 300ms
+        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(surfaceNode, pixelMap, 2000); // snapshot time out 2000ms
         if (!snapSucc) {
             return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
         }
