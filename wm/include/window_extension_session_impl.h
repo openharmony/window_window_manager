@@ -16,6 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 
+#include <list>
+
+#include "accessibility_element_info.h"
 #include "window_session_impl.h"
 
 namespace OHOS {
@@ -38,6 +41,15 @@ public:
         napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+
+    WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
+    WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;

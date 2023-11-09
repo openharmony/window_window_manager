@@ -12,9 +12,11 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../windowmanager_aafwk.gni")
 
 config("intention_event_public_config") {
   include_dirs = [
+    "${accessibility_path}/interfaces/innerkits/common/include/",
     "anr_manager/include",
     "event_stage/include",
     "timer_manager/include",
@@ -43,6 +45,7 @@ ohos_shared_library("intention_event_anr_manager") {
 
   external_deps = [
     "ability_base:want",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hicollie:libhicollie",

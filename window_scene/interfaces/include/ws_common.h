@@ -54,6 +54,7 @@ enum class WSError : int32_t {
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
+    WS_ERROR_NO_UI_CONTENT_ERROR,
     WS_ERROR_INVALID_SHOW_WHEN_LOCKED,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
