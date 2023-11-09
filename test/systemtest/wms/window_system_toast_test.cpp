@@ -34,8 +34,8 @@ class WindowSystemToastWindowTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
     static inline Rect displayRect_ {0, 0, 0, 0};

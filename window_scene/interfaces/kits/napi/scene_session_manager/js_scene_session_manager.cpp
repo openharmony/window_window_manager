@@ -41,6 +41,9 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int WAIT_FOR_SECONDS = 2;
+constexpr int MIN_ARG_COUNT = 3;
+constexpr int ARG_INDEX_1 = 1;
+constexpr int ARG_INDEX_2 = 2;
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
@@ -1408,7 +1411,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) {
+    if (argc < MIN_ARG_COUNT) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1422,14 +1425,14 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     bool isFocused = false;
-    if (!ConvertFromJsValue(env, argv[1], isFocused)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isFocused)) {
         WLOGFE("[NAPI]Failed to convert parameter to isFocused");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool byForeground = false;
-    if (!ConvertFromJsValue(env, argv[2], byForeground)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], byForeground)) {
         WLOGFE("[NAPI]Failed to convert parameter to byForeground");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));

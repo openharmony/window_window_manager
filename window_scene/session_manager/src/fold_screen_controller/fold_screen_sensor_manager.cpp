@@ -20,7 +20,7 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 
-void SensorPostureDataCallback(SensorEvent *event)
+static void SensorPostureDataCallback(SensorEvent *event)
 {
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(event);
 }
