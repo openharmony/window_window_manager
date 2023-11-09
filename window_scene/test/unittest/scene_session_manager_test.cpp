@@ -2845,6 +2845,18 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
     result = ssm_->LockSession(sessionId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: UpdateImmersiveState
+ * @tc.desc: test UpdateImmersiveState
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->UpdateImmersiveState();
+    ASSERT_EQ(ret, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
