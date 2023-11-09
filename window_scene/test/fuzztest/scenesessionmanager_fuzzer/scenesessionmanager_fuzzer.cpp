@@ -65,7 +65,7 @@ std::pair<sptr<ISceneSessionManager>, sptr<IRemoteObject>> GetProxy()
 
     sptr<IRemoteObject> remoteObject3 = sessionManagerServiceProxy->GetSceneSessionManager();
     if (!remoteObject3) {
-        WLOGFE("Get scene session manager proxy failed, scene session manager service is nullptr");
+        WLOGFE("Get scene session manager proxy failed, nullptr");
         return {nullptr, nullptr};
     }
     auto sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject3);
