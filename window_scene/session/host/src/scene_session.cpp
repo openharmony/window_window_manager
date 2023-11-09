@@ -777,6 +777,12 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
+void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
+{
+    WSRect barArea = specificCallback_->onGetAINavigationBarArea_();
+    CalculateAvoidAreaRect(rect, barArea, avoidArea);
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     return PostSyncTask([weakThis = wptr(this), type]() -> AvoidArea {
@@ -799,6 +805,10 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             }
             case AvoidAreaType::TYPE_CUTOUT: {
                 session->GetCutoutAvoidArea(rect, avoidArea);
+                return avoidArea;
+            }
+            case AvoidAreaType::TYPE_AI_NAVIGATION_BAR: {
+                session->GetAINavigationBarArea(rect, avoidArea);
                 return avoidArea;
             }
             default: {
