@@ -205,6 +205,23 @@ HWTEST_F(ScreenPropertyTest, SetScreenRequestedOrientation, Function | SmallTest
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRequestedOrientation end";
 }
+
+/**
+ * @tc.name: GetPhyHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPhyHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhyHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    uint32_t phyHeight = 1;
+    property->SetPhyHeight(phyHeight);
+    int32_t ret = property->GetPhyHeight();
+    ASSERT_EQ(ret, phyHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhyHeight end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
