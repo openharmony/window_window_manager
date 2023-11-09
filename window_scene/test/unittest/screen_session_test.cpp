@@ -478,8 +478,8 @@ HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
 HWTEST_F(ScreenSessionTest, screen_session_test001, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test001 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     IScreenChangeListener* screenChangeListener = nullptr;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->screenState_ = ScreenState::CONNECTION;
     int res = 0;
     session->RegisterScreenChangeListener(screenChangeListener);
@@ -643,9 +643,8 @@ HWTEST_F(ScreenSessionTest, screen_session_test011, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test011 start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
-    int ret = 0;
     std::vector<sptr<ScreenSession>> res = sessionGroup.GetChildren();
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(res.empty(), true);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test011 end";
 }
 
