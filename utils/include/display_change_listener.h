@@ -39,6 +39,7 @@ public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
     virtual void OnScreenshot(DisplayId displayId) = 0;
+    virtual void OnImmersiveStateChange(bool& immersive) { return; }
 };
 }
 }
