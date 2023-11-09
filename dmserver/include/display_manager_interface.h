@@ -39,6 +39,7 @@ public:
         TRANS_ID_GET_DISPLAY_BY_ID,
         TRANS_ID_GET_DISPLAY_BY_SCREEN,
         TRANS_ID_GET_DISPLAY_SNAPSHOT,
+        TRANS_ID_DISABLE_DISPLAY_SNAPSHOT,
         TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT,
         TRANS_ID_WAKE_UP_BEGIN,
@@ -56,6 +57,7 @@ public:
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
         TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE,
+        TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
@@ -77,10 +79,12 @@ public:
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
         TRANS_ID_HAS_PRIVATE_WINDOW,
         TRANS_ID_GET_CUTOUT_INFO,
+        TRANS_ID_HAS_IMMERSIVE_WINDOW,
         TRANS_ID_ADD_SURFACE_NODE,
         TRANS_ID_REMOVE_SURFACE_NODE,
         TRANS_ID_SCREEN_STOP_MIRROR,
         TRANS_ID_SCREEN_STOP_EXPAND,
+        TRANS_ID_SCREEN_DISABLE_MIRROR,
         TRANS_ID_SCENE_BOARD_SCREEN_BASE = 2000,
         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
@@ -89,6 +93,7 @@ public:
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
+        TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -100,9 +105,11 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
+    virtual DMError DisableDisplaySnapshot(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
@@ -139,6 +146,7 @@ public:
         ScreenId& screenGroupId) = 0;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) = 0;
+    virtual DMError DisableMirror(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
@@ -156,6 +164,11 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+
+    virtual DMError HasImmersiveWindow(bool& immersive) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    // unique screen
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
 };
 } // namespace OHOS::Rosen
 

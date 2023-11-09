@@ -37,6 +37,7 @@ private:
 
     int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);

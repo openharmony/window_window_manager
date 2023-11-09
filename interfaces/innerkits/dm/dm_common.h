@@ -93,6 +93,7 @@ enum class DMError : int32_t {
     DM_ERROR_INVALID_CALLING = 200,
     DM_ERROR_INVALID_PERMISSION = 201,
     DM_ERROR_NOT_SYSTEM_APP = 202,
+    DM_ERROR_DEVICE_NOT_SUPPORT = 801,
     DM_ERROR_UNKNOWN = -1,
 };
 
@@ -130,6 +131,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_ERROR_INVALID_CALLING,                 DmErrorCode::DM_ERROR_INVALID_CALLING       },
     {DMError::DM_ERROR_NOT_SYSTEM_APP,                  DmErrorCode::DM_ERROR_NOT_SYSTEM_APP        },
     {DMError::DM_ERROR_UNKNOWN,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_DEVICE_NOT_SUPPORT,              DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT    },
 };
 
 using DisplayStateCallback = std::function<void(DisplayState)>;

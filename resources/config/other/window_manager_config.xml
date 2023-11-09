@@ -27,10 +27,17 @@
         <scale>0.7 0.7</scale>
     </windowAnimation>
     <keyboardAnimation>
-        <timing>
-            <durationIn>500</durationIn>
-            <durationOut>300</durationOut>
-            <curve name="cubic">0.2 0.0 0.2 1.0</curve>
-        </timing>
+        <animationIn>
+            <timing>
+                <duration>500</duration>
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationIn>
+        <animationOut>
+            <timing>
+                <duration>300</duration>
+                <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+            </timing>
+        </animationOut>
     </keyboardAnimation>
  </Configs>

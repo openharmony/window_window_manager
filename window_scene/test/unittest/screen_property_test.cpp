@@ -113,6 +113,115 @@ HWTEST_F(ScreenPropertyTest, SetBounds, Function | SmallTest | Level2)
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetBounds end";
 }
+
+/**
+ * @tc.name: CalculateXYDpi
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, CalculateXYDpi, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: CalculateXYDpi start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    uint32_t phyWidth = 0;
+    uint32_t phyHeight = 0;
+    int ret = 0;
+    property->CalculateXYDpi(phyWidth, phyHeight);
+    phyWidth = 1;
+    phyHeight = 1;
+    property->CalculateXYDpi(phyWidth, phyHeight);
+    ASSERT_EQ(ret, 0);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: CalculateXYDpi end";
+}
+
+/**
+ * @tc.name: SetOffsetX
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetOffsetX, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetX start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    int32_t offsetX = 0;
+    property->SetOffsetX(offsetX);
+    int32_t ret = property->GetOffsetX();
+    ASSERT_EQ(ret, offsetX);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetX end";
+}
+
+/**
+ * @tc.name: SetOffsetY
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetOffsetY, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetY start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    int32_t offsetY = 0;
+    property->SetOffsetY(offsetY);
+    int32_t ret = property->GetOffsetY();
+    ASSERT_EQ(ret, offsetY);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffsetY end";
+}
+
+/**
+ * @tc.name: SetOffset
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetOffset, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffset start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    int32_t offsetX = 0;
+    int32_t offsetY = 0;
+    property->SetOffset(offsetX, offsetY);
+    int32_t ret_x = property->GetOffsetX();
+    int32_t ret_y = property->GetOffsetY();
+    ASSERT_EQ(ret_x, offsetX);
+    ASSERT_EQ(ret_y, offsetY);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOffset end";
+}
+
+/**
+ * @tc.name: SetScreenRequestedOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetScreenRequestedOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRequestedOrientation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    Orientation orientation = Orientation::UNSPECIFIED;
+    property->SetScreenRequestedOrientation(orientation);
+    Orientation ret = property->GetScreenRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRequestedOrientation end";
+}
+
+/**
+ * @tc.name: GetPhyHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPhyHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhyHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    uint32_t phyHeight = 1;
+    property->SetPhyHeight(phyHeight);
+    int32_t ret = property->GetPhyHeight();
+    ASSERT_EQ(ret, phyHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhyHeight end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

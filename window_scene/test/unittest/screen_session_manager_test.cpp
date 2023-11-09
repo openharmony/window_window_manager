@@ -148,6 +148,27 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: AutoRotate
+ * @tc.desc: ScreenSesionManager SetVirtualMirrorScreenBufferRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AutoRotate, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testAutoRotate";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+
+    auto result1 = ssm_->SetVirtualMirrorScreenBufferRotation(VIRTUAL_SCREEN_ID, true);
+    ASSERT_EQ(DMError::DM_OK, result1);
+    auto result2 = ssm_->SetVirtualMirrorScreenBufferRotation(VIRTUAL_SCREEN_ID, false);
+    ASSERT_EQ(DMError::DM_OK, result2);
+}
+
+/**
  * @tc.name: GetScreenSession
  * @tc.desc: GetScreenSession virtual screen
  * @tc.type: FUNC
@@ -799,6 +820,50 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTes
     }
     ASSERT_NE(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
 }
+
+/**
+ * @tc.name: MakeUniqueScreen
+ * @tc.desc: Make unique screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Level3)
+{
+    vector<ScreenId> screenIds;
+    screenIds.clear();
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
+}
+
+/**
+ * @tc.name: DisableDisplaySnapshot
+ * @tc.desc: DisableDisplaySnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisableDisplaySnapshot, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(DMError::DM_OK, ssm_->DisableDisplaySnapshot(false));
+}
+
+/**
+ * @tc.name: DisableMirror
+ * @tc.desc: DisableMirror test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisableMirror, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(DMError::DM_OK, ssm_->DisableMirror(false));
+}
+
+/**
+ * @tc.name: HasImmersiveWindow
+ * @tc.desc: HasImmersiveWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Level3)
+{
+    bool immersive = false;
+    ASSERT_EQ(DMError::DM_OK, ssm_->HasImmersiveWindow(immersive));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

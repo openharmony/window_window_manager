@@ -57,7 +57,7 @@ public:
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
@@ -94,6 +94,8 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
+    bool IsFocused() const override;
+    WMError RequestFocus() const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -142,6 +144,7 @@ public:
     void UpdateWindowSizeLimits();
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
+    WSError NotifyCloseExistPipWindow() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
@@ -155,6 +158,7 @@ public:
 
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState requestState_ { WindowState::STATE_INITIAL };
+    WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
     double textFieldPositionY_ = 0;
     double textFieldHeight_ = 0;
@@ -192,6 +196,7 @@ protected:
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
+    bool isFocused_ { false };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 

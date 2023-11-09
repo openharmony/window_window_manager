@@ -20,6 +20,8 @@
 #include <struct_multimodal.h>
 
 #include "common/include/window_session_property.h"
+#include "property/rs_properties_def.h"
+#include "window.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -65,6 +67,8 @@ public:
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
     void ClacFirstMoveTargetRect(const WSRect& windowRect);
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
+    void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode);
 
 private:
     struct MoveDragProperty {
@@ -165,6 +169,17 @@ private:
     void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
     int32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
+
+    const std::map<AreaType, Gravity> GRAVITY_MAP = {
+        {AreaType::LEFT,            Gravity::RIGHT},
+        {AreaType::TOP,             Gravity::BOTTOM},
+        {AreaType::RIGHT,           Gravity::LEFT},
+        {AreaType::BOTTOM,          Gravity::TOP},
+        {AreaType::LEFT_TOP,        Gravity::BOTTOM_RIGHT},
+        {AreaType::RIGHT_TOP,       Gravity::BOTTOM_LEFT},
+        {AreaType::RIGHT_BOTTOM,    Gravity::TOP_LEFT},
+        {AreaType::LEFT_BOTTOM,     Gravity::TOP_RIGHT}
+    };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

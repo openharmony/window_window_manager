@@ -20,6 +20,9 @@ group("unittest") {
 
   deps = [
     ":wm_input_transfer_station_test",
+    ":wm_picture_in_picture_controller_test",
+    ":wm_picture_in_picture_manager_test",
+    ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
     ":wm_window_agent_test",
     ":wm_window_effect_test",
@@ -67,7 +70,11 @@ ohos_unittest("wm_window_impl_test") {
 
   deps = [ ":wm_unittest_common" ]
 
+  include_dirs =
+      [ "${accessibility_path}/interfaces/innerkits/common/include/" ]
+
   external_deps = [
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
@@ -188,6 +195,7 @@ ohos_unittest("wm_window_impl_listener_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -297,6 +305,45 @@ ohos_unittest("wm_root_scene_test") {
   ]
 }
 
+ohos_unittest("wm_picture_in_picture_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "picture_in_picture_controller_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_picture_in_picture_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "picture_in_picture_manager_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_picture_in_picture_option_test") {
+  module_out_path = module_out_path
+
+  sources = [ "picture_in_picture_option_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
@@ -325,6 +372,7 @@ config("wm_unittest_common_public_config") {
     "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
 
     # abilityContext end
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -363,6 +411,7 @@ ohos_static_library("wm_unittest_common") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_base",
     "image_framework:image_native",
     "ipc:ipc_single",

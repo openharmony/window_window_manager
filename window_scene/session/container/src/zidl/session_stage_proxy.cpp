@@ -22,6 +22,7 @@
 #include <message_parcel.h>
 
 #include "window_manager_hilog.h"
+#include "ws_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -154,6 +155,25 @@ WSError SessionStageProxy::NotifyDestroy()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::NotifyCloseExistPipWindow()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CLOSE_EXIST_PIP_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 void SessionStageProxy::NotifyTouchDialogTarget()
 {
     MessageParcel data;
@@ -217,6 +237,40 @@ WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& 
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
+}
+
+WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                               AAFwk::WantParams& reWantParams)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    if (!data.WriteParcelable(&wantParams)) {
+        WLOGFE("wantParams write failed.");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    int sendCode = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return static_cast<WSErrorCode>(sendCode);
+    }
+
+    std::shared_ptr<AAFwk::WantParams> readWantParams(reply.ReadParcelable<AAFwk::WantParams>());
+    if (readWantParams == nullptr) {
+        WLOGFE("readWantParams is nullptr");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    reWantParams = *readWantParams;
+    return WSErrorCode::WS_OK;
 }
 
 void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
@@ -368,4 +422,44 @@ void SessionStageProxy::NotifyForegroundInteractiveStatus(bool interactive)
     }
 }
 
+WSError SessionStageProxy::UpdateMaximizeMode(MaximizeMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("UpdateMaximizeMode WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+        WLOGFE("UpdateMaximizeMode Write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("UpdateMaximizeMode SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+void SessionStageProxy::NotifyConfigurationUpdated()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace OHOS::Rosen

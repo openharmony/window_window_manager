@@ -58,6 +58,7 @@ namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
+using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1092,7 +1093,8 @@ public:
      * @return WMError
      */
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr)
+        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
     }
@@ -1383,6 +1385,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WMError::WM_OK; }
+
+    /**
+     * @brief Register transfer component data callback.
+     *
+     * @param func Function to notify transfer component data.
+     */
+    virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
 };
 }
 }
