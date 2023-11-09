@@ -1402,11 +1402,18 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
 
 void Session::UnregisterSessionChangeListeners()
 {
-    sessionStateChangeFunc_ = nullptr;
-    sessionFocusableChangeFunc_ = nullptr;
-    sessionTouchableChangeFunc_ = nullptr;
-    clickFunc_ = nullptr;
-    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        session->sessionStateChangeFunc_ = nullptr;
+        session->sessionFocusableChangeFunc_ = nullptr;
+        session->sessionTouchableChangeFunc_ = nullptr;
+        session->clickFunc_ = nullptr;
+        WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
+    });
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
@@ -1432,13 +1439,22 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    WLOGFD("state: %{public}u", static_cast<uint32_t>(state));
-    if (sessionStateChangeFunc_) {
-        sessionStateChangeFunc_(state);
-    }
-    if (sessionStateChangeNotifyManagerFunc_) {
-        sessionStateChangeNotifyManagerFunc_(GetPersistentId(), state);
-    }
+    PostTask([weakThis = wptr(this), state]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        WLOGD("Session::NotifySessionStateChange: session info: [state: %{public}u, persistent: %{public}d]",
+            static_cast<uint32_t>(state), session->GetPersistentId());
+        if (session->sessionStateChangeFunc_) {
+            session->sessionStateChangeFunc_(state);
+        }
+
+        if (session->sessionStateChangeNotifyManagerFunc_) {
+            session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
+        }
+    });
 }
 
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
