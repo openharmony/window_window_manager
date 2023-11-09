@@ -15,13 +15,14 @@
 
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
-
+#include <list>
 #include <mutex>
 #include <shared_mutex>
 #include <vector>
 
 #include <event_handler.h>
 
+#include "accessibility_element_info.h"
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
@@ -65,6 +66,7 @@ using NotifyCallingSessionForegroundFunc = std::function<void(const int32_t& per
 using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
+using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 
 class ILifecycleListener {
 public:
@@ -103,10 +105,20 @@ public:
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+
+    virtual WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos);
+    virtual WSError TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos);
+    virtual WSError TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info);
+    virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info);
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusStateEvent(bool focusState);
+    WSError UpdateConfiguration();
 
     int32_t GetPersistentId() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
@@ -162,10 +174,11 @@ public:
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
-    void UnregisterSessionStateChangeListenser();
+    void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
+    void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -182,6 +195,7 @@ public:
     void ClearDialogVector();
     void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
+    WSError NotifyCloseExistPipWindow();
 
     void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
     WSError PendingSessionToForeground();
@@ -197,6 +211,7 @@ public:
     void NotifyClick();
     void NotifyRequestFocusStatusNotifyManager(bool isFocused);
     void NotifyUILostFocus();
+    bool GetStateFromManager(const ManagerState key);
     void PresentFoucusIfNeed(int32_t pointerAcrion);
     WSError UpdateFocus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
@@ -244,6 +259,7 @@ public:
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
+    WSError UpdateMaximizeMode(bool isMaximize);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
         return std::vector<Rect>();
@@ -286,6 +302,8 @@ protected:
     WSRectF UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area);
     void UpdatePointerArea(const WSRect& rect);
     bool CheckDialogOnForeground();
+    bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
 
     using Task = std::function<void()>;
     void PostTask(Task&& task, int64_t delayTime = 0);
@@ -317,6 +335,7 @@ protected:
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
+    GetStateFromManagerFunc getStateFromManagerFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;
@@ -390,7 +409,7 @@ private:
     int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
-    bool isVisible_ {false};
+    bool isRSVisible_ {false};
     bool needNotify_ {true};
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };

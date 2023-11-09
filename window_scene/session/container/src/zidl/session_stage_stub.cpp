@@ -43,6 +43,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateFocus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
+        &SessionStageStub::HandleNotifyTransferComponentDataSync),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
@@ -57,6 +59,12 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateWindowMode),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
         &SessionStageStub::HandleNotifyForegroundInteractiveStatus),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
+        &SessionStageStub::HandleNotifyConfigurationUpdated),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE),
+        &SessionStageStub::HandleUpdateMaximizeMode),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CLOSE_EXIST_PIP_WINDOW),
+        &SessionStageStub::HandleNotifyCloseExistPipWindow),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -130,6 +138,14 @@ int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Notify Pip AlreadyExists");
+    WSError errCode = NotifyCloseExistPipWindow();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Notify touch dialog target");
@@ -157,6 +173,25 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
     WSError errCode = NotifyTransferComponentData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyTransferComponentDataSync(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return static_cast<int>(WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED);
+    }
+    AAFwk::WantParams reWantParams;
+    WSErrorCode errCode = NotifyTransferComponentDataSync(*wantParams, reWantParams);
+    if (errCode != WSErrorCode::WS_OK) {
+        return static_cast<int>(errCode);
+    }
+    if (!reply.WriteParcelable(&reWantParams)) {
+        WLOGFE("reWantParams write failed.");
+        return static_cast<int>(WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED);
+    }
+    return static_cast<int>(WSErrorCode::WS_OK);
 }
 
 int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply)
@@ -226,4 +261,19 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyConfigurationUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyConfigurationUpdated!");
+    NotifyConfigurationUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateMaximizeMode!");
+    MaximizeMode mode = static_cast<MaximizeMode>(data.ReadUint32());
+    WSError errCode = UpdateMaximizeMode(mode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

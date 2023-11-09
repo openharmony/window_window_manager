@@ -28,8 +28,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
-    const static uint32_t MAX_SCREEN_SIZE = 32;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
+const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
 public:
@@ -453,6 +453,21 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
     return ret;
 }
 
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+{
+    WLOGFI("start Make UniqueScreen");
+    if (screenIds.empty()) {
+        WLOGFI("screenIds is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenIds.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("Make UniqueScreen failed. The screenIds size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
+    return ret;
+}
+
 DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId)
 {
     WLOGFI("Make mirror for screen: %{public}" PRIu64"", mainScreenId);
@@ -484,6 +499,12 @@ DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
         return DMError::DM_OK;
     }
     return SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+}
+
+DMError ScreenManager::DisableMirror(bool disableOrNot)
+{
+    WLOGFI("Disable mirror %{public}d", disableOrNot);
+    return SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(disableOrNot);
 }
 
 DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
@@ -523,6 +544,18 @@ DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
 DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
+}
+
+DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
+        screenId, width, height);
+    return DMError::DM_OK;
+}
+
+DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenBufferRotation(screenId, rotation);
 }
 
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)

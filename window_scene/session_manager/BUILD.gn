@@ -51,6 +51,8 @@ config("session_manager_public_config") {
 
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
+
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 

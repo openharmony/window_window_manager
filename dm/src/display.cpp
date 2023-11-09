@@ -51,6 +51,9 @@ Display::~Display()
 
 DisplayId Display::GetId() const
 {
+    if (pImpl_->GetDisplayInfo() == nullptr) {
+        return DisplayId(0);
+    }
     return pImpl_->GetDisplayInfo()->GetDisplayId();
 }
 
@@ -143,4 +146,10 @@ sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
 }
+
+DMError Display::HasImmersiveWindow(bool& immersive)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+}
+
 } // namespace OHOS::Rosen

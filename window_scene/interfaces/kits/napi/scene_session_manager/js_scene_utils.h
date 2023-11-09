@@ -54,6 +54,7 @@ enum class JsSessionType : uint32_t {
     TYPE_NEGATIVE_SCREEN,
     TYPE_VOICE_INTERACTION,
     TYPE_SYSTEM_TOAST,
+    TYPE_SYSTEM_FLOAT,
     TYPE_PIP,
 };
 
@@ -101,6 +102,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,          JsSessionType::TYPE_NEGATIVE_SCREEN         },
     { WindowType::WINDOW_TYPE_VOICE_INTERACTION,        JsSessionType::TYPE_VOICE_INTERACTION       },
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,             JsSessionType::TYPE_SYSTEM_TOAST            },
+    { WindowType::WINDOW_TYPE_SYSTEM_FLOAT,             JsSessionType::TYPE_SYSTEM_FLOAT            },
     { WindowType::WINDOW_TYPE_PIP,                      JsSessionType::TYPE_PIP                     },
 };
 
@@ -131,6 +133,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_NEGATIVE_SCREEN,          WindowType::WINDOW_TYPE_NEGATIVE_SCREEN         },
     { JsSessionType::TYPE_VOICE_INTERACTION,        WindowType::WINDOW_TYPE_VOICE_INTERACTION       },
     { JsSessionType::TYPE_SYSTEM_TOAST,             WindowType::WINDOW_TYPE_SYSTEM_TOAST,           },
+    { JsSessionType::TYPE_SYSTEM_FLOAT,             WindowType::WINDOW_TYPE_SYSTEM_FLOAT,           },
     { JsSessionType::TYPE_PIP,                      WindowType::WINDOW_TYPE_PIP,                    },
 };
 
@@ -169,5 +172,17 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 } // namespace OHOS::Rosen
+
+
+class MainThreadScheduler {
+public:
+    using Task = std::function<void()>;
+    explicit MainThreadScheduler(napi_env env);
+    void PostMainThreadTask(Task&& localTask, int64_t delayTime = 0);
+private:
+    void GetMainEventHandler();
+    napi_env env_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
+};
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H

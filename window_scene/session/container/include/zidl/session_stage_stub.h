@@ -45,6 +45,7 @@ private:
     int HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
     int HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyTransferComponentDataSync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
@@ -52,6 +53,9 @@ private:
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyConfigurationUpdated(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

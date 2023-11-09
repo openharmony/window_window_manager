@@ -54,6 +54,8 @@ enum class WSError : int32_t {
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
+    WS_ERROR_NO_UI_CONTENT_ERROR,
+    WS_ERROR_INVALID_SHOW_WHEN_LOCKED,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -79,6 +81,8 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
     WS_ERROR_TIMEOUT = 901,
+    WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
+    WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
     WS_ERROR_STATE_ABNORMALLY = 1300002,
     WS_ERROR_SYSTEM_ABNORMALLY = 1300003,
@@ -144,6 +148,10 @@ enum SessionOperationType : int32_t {
     TYPE_CLEAR,
 };
 
+enum class ManagerState : uint32_t {
+    MANAGER_STATE_SCREEN_LOCKED = 0,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -152,6 +160,7 @@ struct SessionInfo {
     bool isSystem_ = false;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
+    sptr<IRemoteObject> rootToken_ = nullptr;
 
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
@@ -312,8 +321,7 @@ struct KeyboardSceneAnimationConfig {
     float ctrlY1_ = 0.0f;
     float ctrlX2_ = 0.2f;
     float ctrlY2_ = 1.0f;
-    uint32_t durationIn_ = 150; // default durationIn time
-    uint32_t durationOut_ = 150; // default durationOut time
+    uint32_t duration_ = 150;
 };
 
 struct WindowAnimationConfig {
@@ -347,7 +355,8 @@ struct AppWindowSceneConfig {
 
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
-    KeyboardSceneAnimationConfig keyboardAnimation_;
+    KeyboardSceneAnimationConfig keyboardAnimationIn_;
+    KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
 };

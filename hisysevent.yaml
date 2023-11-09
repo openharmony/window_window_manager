@@ -113,6 +113,7 @@ FOCUS_WINDOW:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: Window focus changed}
   PID: {type: INT32, desc: app pid}
   UID: {type: INT32, desc: app uid}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
 
 APPLICATION_BLOCK_INPUT:
   __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}

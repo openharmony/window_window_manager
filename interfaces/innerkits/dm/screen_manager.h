@@ -113,6 +113,14 @@ public:
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
     /**
+    * @brief Make screens as unique-screen.
+    *
+    * @param screenIds Unique screen ids.
+    * @return DM_OK means make unique screen success, others means make unique failed.
+    */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
      * @brief Stop expand screens.
      *
      * @param expandScreenIds Expand screen ids.
@@ -127,6 +135,14 @@ public:
      * @return DM_OK means stop mirror success, others means stop mirror failed.
      */
     DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
+
+    /**
+     * @brief Disable/enable global mirror screen.
+     *
+     * @param disableOrNot disable mirror screen or not.
+     * @return DM_OK means disable or enable mirror success, others means failed.
+     */
+    DMError DisableMirror(bool disableOrNot);
 
     /**
      * @brief Remove virtual screen from group.
@@ -160,6 +176,25 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+
+    /**
+     * @brief Resize virtual screen
+     *
+     * @param screenId the id of virtual screen to be resized.
+     * @param width the new width.
+     * @param height the new height.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
+
+    /**
+     * @brief Set buffer auto rotate
+     *
+     * @param screenId Screen id.
+     * @param bufferRotation auto rotate
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation);
 
     /**
      * @brief Set the screen power states for all screens.

@@ -60,6 +60,7 @@ using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
+using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -89,6 +90,7 @@ public:
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
+        ClearCallbackMapFunc clearCallbackFunc_;
     };
 
     // func for change window scene pattern property

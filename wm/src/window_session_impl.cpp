@@ -42,6 +42,7 @@
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
+#include "picture_in_picture_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -94,7 +95,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("Property is null");
         return;
     }
-
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = option->GetBundleName();
+    property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -399,8 +402,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
-    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, wmReason);
+    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
+        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
 }
 
@@ -420,7 +424,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(300);
+        protocol.SetDuration(400);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -465,12 +469,28 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
-            "UID", getuid());
+            "UID", getuid(),
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_);
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
     }
+    isFocused_ = isFocused;
     return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsFocused() const
+{
+    return isFocused_;
+}
+
+WMError WindowSessionImpl::RequestFocus() const
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFD("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SessionManager::GetInstance().RequestFocusStatus(GetPersistentId(), true);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
@@ -557,7 +577,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, AppExecFwk::Ability* ability)
+    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
 }
@@ -1214,6 +1234,13 @@ WSError WindowSessionImpl::NotifyDestroy()
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::NotifyCloseExistPipWindow()
+{
+    WLOGFD("WindowSessionImpl::NotifyCloseExistPipWindow");
+    PictureInPictureManager::DoClose(false);
+    return WSError::WS_OK;
+}
+
 void WindowSessionImpl::NotifyTouchDialogTarget()
 {
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
@@ -1659,6 +1686,11 @@ KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("DumpSessionElementInfo");
+}
+
+WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

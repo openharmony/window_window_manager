@@ -37,8 +37,11 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;
     WSError NotifyDestroy() override;
+    WSError NotifyCloseExistPipWindow() override;
     void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
+    WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                AAFwk::WantParams& reWantParams) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyScreenshot() override;
@@ -46,6 +49,8 @@ public:
     WSError NotifyTouchOutside() override;
     WSError UpdateWindowMode(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
+    void NotifyConfigurationUpdated() override;
+    WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
