@@ -169,7 +169,6 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
-    void SetImmersiveState(bool immersive);
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -269,7 +268,6 @@ private:
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
-    bool isImmersive_ = false;
 
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;

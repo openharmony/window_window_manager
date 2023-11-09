@@ -2246,7 +2246,9 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
 {
-    immersive = isImmersive_;
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnImmersiveStateChange(immersive);
+    }
     return DMError::DM_OK;
 }
 
@@ -2439,11 +2441,6 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     for (auto& agent: agents) {
         agent->NotifyDisplayModeChanged(displayMode);
     }
-}
-
-void ScreenSessionManager::SetImmersiveState(bool immersive)
-{
-    isImmersive_ = immersive;
 }
 
 } // namespace OHOS::Rosen
