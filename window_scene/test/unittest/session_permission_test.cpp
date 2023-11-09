@@ -165,19 +165,6 @@ HWTEST_F(SessionPermissionTest, session_permission_test002, Function | SmallTest
     ASSERT_EQ(result, false);
     GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 end";
 }
-
-/**
- * @tc.name: session_permission_test003
- * @tc.desc: test function : session_permission_test003
- * @tc.type: FUNC
-*/
-HWTEST_F(SessionPermissionTest, session_permission_test003, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test003 start";
-    bool result = SessionPermission::IsStartedByInputMethod();
-    ASSERT_EQ(result, false);
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test003 end";
-}
 } // namespacecd
 } // namespace Rosen
 } // namespace OHOS

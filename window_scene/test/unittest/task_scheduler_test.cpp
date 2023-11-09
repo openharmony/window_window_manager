@@ -16,7 +16,6 @@
 #include "common/include/task_scheduler.h"
 #include <gtest/gtest.h>
 
-// using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
