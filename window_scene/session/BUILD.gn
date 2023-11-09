@@ -70,6 +70,7 @@ ohos_shared_library("scene_session") {
       [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_start_setting",
