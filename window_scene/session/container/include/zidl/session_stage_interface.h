@@ -88,6 +88,11 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
+    virtual WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                        AAFwk::WantParams& reWantParams)
+    {
+        return WSErrorCode::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

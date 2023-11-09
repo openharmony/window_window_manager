@@ -78,11 +78,36 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
     return WSError::WS_OK;
 }
 
+WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                        AAFwk::WantParams& reWantParams)
+{
+    if (!IsSessionValid()) {
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+    return sessionStage_->NotifyTransferComponentDataSync(wantParams, reWantParams);
+}
+
 void ExtensionSession::NotifyRemoteReady()
 {
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->notifyRemoteReadyFunc_ != nullptr) {
         extSessionEventCallback_->notifyRemoteReadyFunc_();
+    }
+}
+
+void ExtensionSession::NotifySyncOn()
+{
+    if (extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->notifySyncOnFunc_ != nullptr) {
+        extSessionEventCallback_->notifySyncOnFunc_();
+    }
+}
+
+void ExtensionSession::NotifyAsyncOn()
+{
+    if (extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->notifyAsyncOnFunc_ != nullptr) {
+        extSessionEventCallback_->notifyAsyncOnFunc_();
     }
 }
 
