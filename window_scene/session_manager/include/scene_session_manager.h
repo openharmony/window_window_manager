@@ -186,7 +186,7 @@ public:
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 
-    void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
+    void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> sceneSession,
         const WSRect& rect, const WSRect& occupiedArea);
     void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info);

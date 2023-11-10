@@ -136,6 +136,12 @@ public:
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 
+    void SetTextFieldPositionY(double textFieldPositionY);
+    void SetTextFieldHeight(double textFieldHeight);
+
+    double GetTextFieldPositionY() const;
+    double GetTextFieldHeight() const;
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -179,6 +185,9 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
+
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
 };
 
 struct SystemSessionConfig : public Parcelable {

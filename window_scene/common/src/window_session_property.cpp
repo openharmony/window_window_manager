@@ -495,7 +495,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
-        parcel.WriteBool(isSystemCalling_);
+        parcel.WriteBool(isSystemCalling_) &&
+        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -539,6 +540,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetSystemCalling(parcel.ReadBool());
+    property->SetTextFieldPositionY(parcel.ReadDouble());
+    property->SetTextFieldHeight(parcel.ReadDouble());
     return property;
 }
 
@@ -577,6 +580,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
     isSystemCalling_ = property->isSystemCalling_;
+    textFieldPositionY_ = property->textFieldPositionY_;
+    textFieldHeight_ = property->textFieldHeight_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -587,6 +592,26 @@ void WindowSessionProperty::SetTransform(const Transform& trans)
 const Transform& WindowSessionProperty::GetTransform() const
 {
     return trans_;
+}
+
+void WindowSessionProperty::SetTextFieldPositionY(double textFieldPositionY)
+{
+    textFieldPositionY_ = textFieldPositionY;
+}
+
+void WindowSessionProperty::SetTextFieldHeight(double textFieldHeight)
+{
+    textFieldHeight_ = textFieldHeight;
+}
+
+double WindowSessionProperty::GetTextFieldPositionY() const
+{
+    return textFieldPositionY_;
+}
+
+double WindowSessionProperty::GetTextFieldHeight() const
+{
+    return textFieldHeight_;
 }
 } // namespace Rosen
 } // namespace OHOS

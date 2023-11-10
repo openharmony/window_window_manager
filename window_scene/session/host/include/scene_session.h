@@ -239,6 +239,10 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
+public:
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
+    WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

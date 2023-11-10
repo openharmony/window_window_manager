@@ -960,6 +960,7 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
         return;
     }
     callingSession_ = GetSceneSession(focusedSessionId_);
+    callingSession_->SetTextFieldAvoidInfo(scnSession->textFieldPositionY_, scnSession->textFieldHeight_);
     ResizeSoftInputCallingSessionIfNeed(scnSession);
 }
 
@@ -4109,29 +4110,29 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     if (!isInputUpdated) {
         callingWindowRestoringRect_ = callingSessionRect;
     }
-    NotifyOccupiedAreaChangeInfo(callingSession_, newRect, softInputSessionRect);
+    NotifyOccupiedAreaChangeInfo(sceneSession, newRect, softInputSessionRect);
     if (isCallingSessionFloating) {
         needUpdateSessionRect_ = true;
         callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
     }
 }
 
-void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
+void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> sceneSession,
     const WSRect& rect, const WSRect& occupiedArea)
 {
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
-    const WSRect& lastSafeRect = callingSession->GetLastSafeRect();
+    const WSRect& lastSafeRect = callingSession_->GetLastSafeRect();
     if (lastSafeRect == safeRect) {
         WLOGFI("NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
         return;
     }
-    callingSession->SetLastSafeRect(safeRect);
+    callingSession_->SetLastSafeRect(safeRect);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
-        SessionHelper::TransferToRect(safeRect), safeRect.height_);
+        SessionHelper::TransferToRect(safeRect), safeRect.height_, sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
     WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
-    callingSession->NotifyOccupiedAreaChangeInfo(info);
+    callingSession_->NotifyOccupiedAreaChangeInfo(info);
 }
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
