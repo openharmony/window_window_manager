@@ -63,6 +63,7 @@ public:
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WSError::WS_OK; }
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }

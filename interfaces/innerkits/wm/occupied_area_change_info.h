@@ -29,6 +29,8 @@ public:
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
         : type_(type), rect_(rect), safeHeight_(safeHeight) {};
+    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight, double textFieldPositionY, double textFieldHeight)
+    : type_(type), rect_(rect), safeHeight_(safeHeight), textFieldPositionY_(textFieldPositionY), textFieldHeight_(textFieldHeight) {};
     ~OccupiedAreaChangeInfo() = default;
 
     virtual bool Marshalling(Parcel& parcel) const
@@ -36,7 +38,8 @@ public:
         return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
             parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
             parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-            parcel.WriteUint32(safeHeight_);
+            parcel.WriteUint32(safeHeight_) &&
+            parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
     }
    
     static OccupiedAreaChangeInfo* Unmarshalling(Parcel& parcel)
@@ -52,12 +55,16 @@ public:
         }
         occupiedAreaChangeInfo->type_ = static_cast<OccupiedAreaType>(parcel.ReadUint32());
         occupiedAreaChangeInfo->safeHeight_ = parcel.ReadUint32();
+        occupiedAreaChangeInfo->textFieldPositionY_ = parcel.ReadDouble();
+        occupiedAreaChangeInfo->textFieldHeight_ = parcel.ReadDouble();
         return occupiedAreaChangeInfo;
     }
 
     OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
     Rect rect_ = { 0, 0, 0, 0 };
     uint32_t safeHeight_ = 0;
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_OCCUPIED_AREA_CHANGE_INFO_H

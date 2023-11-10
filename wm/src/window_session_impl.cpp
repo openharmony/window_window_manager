@@ -1658,6 +1658,13 @@ WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBar
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    textFieldPositionY_ = textFieldPositionY;
+    textFieldHeight_ = textFieldHeight;
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
     WLOGFD("NotifyOccupiedAreaChangeInfo, safeHeight: %{public}u "
