@@ -850,6 +850,11 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
         WLOGFE("fail to update screen rotation property, cannot find screen %{public}" PRIu64"", screenId);
         return;
     }
+    bool needNotifyAvoidArea = false;
+    if (screenSession->GetScreenProperty().GetBounds() == bounds &&
+        screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
+        needNotifyAvoidArea = true;
+    }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation);
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
@@ -858,6 +863,11 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
     }
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    if (needNotifyAvoidArea) {
+        std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+        NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
+            emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    }
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
