@@ -1035,6 +1035,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
+    VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1046,6 +1047,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
+    VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
 }
 
 void WindowSessionImpl::NotifyAfterFocused()
@@ -1544,6 +1546,12 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return VsyncStation::GetInstance().GetVSyncPeriod();
+}
+
+void WindowSessionImpl::FlushFrameRate(uint32_t rate)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    VsyncStation::GetInstance().FlushFrameRate(rate);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
