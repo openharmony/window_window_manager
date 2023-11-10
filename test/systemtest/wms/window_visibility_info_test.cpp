@@ -60,8 +60,9 @@ void VisibilityChangedListenerImpl::OnWindowVisibilityChanged(
     WLOGI("size:%{public}zu", windowVisibilityInfo.size());
     windowVisibilityInfos_ = std::move(windowVisibilityInfo);
     for (auto& info : windowVisibilityInfos_) {
-        WLOGI("windowId:%{public}u, isVisible_:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
-            info->windowId_, info->isVisible_, info->pid_, info->uid_, static_cast<uint32_t>(info->windowType_));
+        WLOGI("windowId:%{public}u, visibleState:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
+            info->windowId_, static_cast<uint32_t>(info->visibilityState_), info->pid_, info->uid_,
+            static_cast<uint32_t>(info->windowType_));
     }
     isCallbackCalled_ = true;
     cv_.notify_all();

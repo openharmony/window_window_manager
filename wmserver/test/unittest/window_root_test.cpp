@@ -112,7 +112,7 @@ HWTEST_F(WindowRootTest, WindowRootTest02, Function | SmallTest | Level2)
     node = windowRoot_->GetWindowForDumpAceHelpInfo();
     ASSERT_NE(node, nullptr);
     windowRoot_->DestroyWindowInner(windowNode);
-    windowNode->isVisible_ = true;
+    windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     windowRoot_->DestroyWindowInner(windowNode);
 }
 
@@ -361,8 +361,9 @@ HWTEST_F(WindowRootTest, WindowRootTest15, Function | SmallTest | Level2)
 
     ASSERT_EQ(true, true);
 
-    windowRoot_->lastOcclusionData_ =  std::make_shared<RSOcclusionData>();
-    windowRoot_->lastOcclusionData_->visibleData_ = {1, 2, 3}; //1, 2, 3
+    windowRoot_->lastVisibleData_.emplace_back(1, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 1 is surafceId
+    windowRoot_->lastVisibleData_.emplace_back(2, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 2 is surafceId
+    windowRoot_->lastVisibleData_.emplace_back(3, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 3 is surafceId
     windowRoot_->GetVisibilityWindowInfo(infos);
 }
 
@@ -554,7 +555,7 @@ HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallT
 
     auto windowNode = new (std::nothrow)WindowNode();
     ASSERT_NE(windowNode, nullptr);
-    windowNode->isVisible_ = true;
+    windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     windowNode->SetDisplayId(displayInfo->GetDisplayId());
     windowNode->property_->flags_ |= static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
     container->appWindowNode_->children_.push_back(windowNode);
@@ -594,9 +595,9 @@ HWTEST_F(WindowRootTest, GetWindowVisibilityChangeInfo, Function | SmallTest | L
     std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
     ASSERT_NE(occlusionData, nullptr);
     windowRoot_->GetWindowVisibilityChangeInfo(occlusionData);
-    windowRoot_->lastOcclusionData_ = std::make_shared<RSOcclusionData>();
-    windowRoot_->lastOcclusionData_->visibleData_ = {1, 2, 3}; //1, 2, 3
-    occlusionData->visibleData_ = {4, 5, 6}; //4, 5, 6
+    occlusionData->visibleData_.emplace_back(4, ALL_VISIBLE); // 4 is surfaceid
+    occlusionData->visibleData_.emplace_back(5, ALL_VISIBLE); // 5 is surfaceid
+    occlusionData->visibleData_.emplace_back(6, ALL_VISIBLE); // 6 is surfaceid
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->GetWindowVisibilityChangeInfo(occlusionData);
 }
@@ -611,9 +612,9 @@ HWTEST_F(WindowRootTest, NotifyWindowVisibilityChange, Function | SmallTest | Le
     std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
     ASSERT_NE(occlusionData, nullptr);
     windowRoot_->NotifyWindowVisibilityChange(occlusionData);
-    windowRoot_->lastOcclusionData_ = std::make_shared<RSOcclusionData>();
-    windowRoot_->lastOcclusionData_->visibleData_ = {1, 2, 3}; //1, 2, 3
-    occlusionData->visibleData_ = {4, 5, 6}; //4, 5, 6
+    occlusionData->visibleData_.emplace_back(4, ALL_VISIBLE); // 4 is surfaceid
+    occlusionData->visibleData_.emplace_back(5, ALL_VISIBLE); // 5 is surfaceid
+    occlusionData->visibleData_.emplace_back(6, ALL_VISIBLE); // 6 is surfaceid
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->NotifyWindowVisibilityChange(occlusionData);
 }
@@ -1826,8 +1827,8 @@ HWTEST_F(WindowRootTest, GetVisibilityWindowInfo01, Function | SmallTest | Level
     sptr<WindowNode> node = new WindowNode();
     windowRoot_->AddSurfaceNodeIdWindowNodePair(node->GetDisplayId(), node);
     std::vector<sptr<WindowVisibilityInfo>> infos = {};
-    windowRoot_->lastOcclusionData_ =  std::make_shared<RSOcclusionData>();
-    windowRoot_->lastOcclusionData_->visibleData_ = {node->GetDisplayId()};
+    windowRoot_->lastVisibleData_.clear();
+    windowRoot_->lastVisibleData_.emplace_back(node->GetDisplayId(), WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->GetVisibilityWindowInfo(infos);
 }

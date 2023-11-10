@@ -883,6 +883,25 @@ HWTEST_F(WindowNodeTest, SetTransform01, Function | SmallTest | Level1)
     ASSERT_EQ(1.0f, resultWorldTransformMat4.mat_[3][0]);
     ASSERT_EQ(1.0f, resultWorldTransformMat4.mat_[3][1]);
 }
+
+/**
+ * @tc.name: GetVisibilityState001
+ * @tc.desc: SetVisibilityState & GetVisibilityState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
+{
+    std::string windowName = "WindowNode32";
+    auto property = CreateWindowProperty(7, windowName);
+    ASSERT_NE(nullptr, property);
+
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    ASSERT_NE(nullptr, windowNode);
+
+    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_MAX);
+    windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
+    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
+}
 }
 }
 }

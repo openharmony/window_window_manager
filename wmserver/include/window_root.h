@@ -136,7 +136,7 @@ private:
     void MoveNotShowingWindowToDefaultDisplay(DisplayId defaultDisplayId, DisplayId displayId);
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
         sptr<WindowNodeContainer>& container);
-    std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     bool CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
@@ -145,7 +145,7 @@ private:
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     std::map<uint64_t, sptr<WindowNode>> surfaceIdWindowNodeMap_;
-    std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
+    std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
     bool lastWaterMarkShowStates_ { false };

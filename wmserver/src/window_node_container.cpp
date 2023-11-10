@@ -1963,7 +1963,8 @@ bool WindowNodeContainer::HasPrivateWindow()
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     for (const auto& node : windowNodes) {
-        if (node->isVisible_ && node->GetWindowProperty()->GetPrivacyMode()) {
+        if (node && node->GetVisibilityState() < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION &&
+            node->GetWindowProperty()->GetPrivacyMode()) {
             WLOGI("window name %{public}s", node->GetWindowName().c_str());
             return true;
         }
