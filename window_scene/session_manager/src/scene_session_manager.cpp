@@ -4743,6 +4743,34 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     taskScheduler_->PostSyncTask(task);
 }
 
+void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("SceneSessionManager::ProcessUpdateRotationChange displayInfo is nullptr.");
+        return;
+    }
+    auto task = [this, displayInfo]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto &item : sceneSessionMap_) {
+            auto scnSession = item.second;
+            if (scnSession == nullptr) {
+                WLOGFE("SceneSessionManager::ProcessUpdateRotationChange null scene session");
+                continue;
+            }
+            if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+                scnSession->UpdateRotationAvoidArea();
+                WLOGFD("UpdateRotationAvoidArea name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                    "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
+                    scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
+            }
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
+}
+
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -4750,6 +4778,11 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     switch (type) {
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
+                displayInfo, displayInfoMap, type);
+            break;
+        }
+        case DisplayStateChangeType::UPDATE_ROTATION: {
+            SceneSessionManager::GetInstance().ProcessUpdateRotationChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
             break;
         }

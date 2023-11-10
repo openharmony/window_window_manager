@@ -192,6 +192,8 @@ public:
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+    void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void RegisterWindowChanged(const WindowChangedFunc& func);
