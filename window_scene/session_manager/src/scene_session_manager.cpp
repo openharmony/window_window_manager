@@ -1355,7 +1355,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
-        info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
+        if (property) {
+            info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
+        }
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
@@ -1363,7 +1365,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         auto errCode = sceneSession->Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
-        persistentId = property->GetPersistentId();
+        if (property) {
+            persistentId = property->GetPersistentId();
+        }
         if (createSpecificSessionFunc_ && info.windowType_ != static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG)) {
             createSpecificSessionFunc_(sceneSession);
         }
@@ -1817,6 +1821,10 @@ WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         auto weakSession = weak.promote();
         if (weakSession == nullptr) {
             WLOGFE("the session is nullptr");
+            return WMError::WM_DO_NOTHING;
+        }
+        if (property == nullptr) {
+            WLOGFE("the property is nullptr");
             return WMError::WM_DO_NOTHING;
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
