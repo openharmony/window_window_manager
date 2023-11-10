@@ -24,7 +24,7 @@ namespace {
 bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteUint32(windowId_) && parcel.WriteInt32(pid_) &&
-           parcel.WriteInt32(uid_) && parcel.WriteBool(isVisible_) &&
+           parcel.WriteInt32(uid_) && parcel.WriteUint32(static_cast<uint32_t>(visibilityState_)) &&
            parcel.WriteUint32(static_cast<uint32_t>(windowType_));
 }
 
@@ -35,12 +35,15 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
         WLOGFE("window visibility info is nullptr.");
         return nullptr;
     }
+
+    uint32_t visibilityState = 0;
     bool res = parcel.ReadUint32(windowVisibilityInfo->windowId_) && parcel.ReadInt32(windowVisibilityInfo->pid_) &&
-        parcel.ReadInt32(windowVisibilityInfo->uid_) && parcel.ReadBool(windowVisibilityInfo->isVisible_);
+        parcel.ReadInt32(windowVisibilityInfo->uid_) && parcel.ReadUint32(visibilityState);
     if (!res) {
         delete windowVisibilityInfo;
         return nullptr;
     }
+    windowVisibilityInfo->visibilityState_ = static_cast<WindowVisibilityState>(visibilityState);
     windowVisibilityInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
     return windowVisibilityInfo;
 }
