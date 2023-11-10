@@ -21,6 +21,7 @@ FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+void FoldScreenPolicy::LockDisplayStatus(bool locked) { lockDisplayStatus_ = locked; }
 FoldStatus FoldScreenPolicy::GetFoldStatus() { return FoldStatus::UNKNOWN; }
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }

@@ -850,6 +850,11 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
         WLOGFE("fail to update screen rotation property, cannot find screen %{public}" PRIu64"", screenId);
         return;
     }
+    bool needNotifyAvoidArea = false;
+    if (screenSession->GetScreenProperty().GetBounds() == bounds &&
+        screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
+        needNotifyAvoidArea = true;
+    }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation);
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
@@ -858,6 +863,11 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
     }
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    if (needNotifyAvoidArea) {
+        std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+        NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
+            emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    }
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
@@ -2246,7 +2256,9 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
 {
-    immersive = isImmersive_;
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnImmersiveStateChange(immersive);
+    }
     return DMError::DM_OK;
 }
 
@@ -2376,6 +2388,19 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     foldScreenController_->SetDisplayMode(displayMode);
 }
 
+void ScreenSessionManager::LockFoldDisplayStatus(bool locked)
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("LockFoldDisplayStatus foldScreenController_ is null");
+        return;
+    }
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("LockFoldDisplayStatus permission denied!");
+        return;
+    }
+    foldScreenController_->LockDisplayStatus(locked);
+}
+
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
     if (foldScreenController_ == nullptr) {
@@ -2439,11 +2464,6 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     for (auto& agent: agents) {
         agent->NotifyDisplayModeChanged(displayMode);
     }
-}
-
-void ScreenSessionManager::SetImmersiveState(bool immersive)
-{
-    isImmersive_ = immersive;
 }
 
 } // namespace OHOS::Rosen

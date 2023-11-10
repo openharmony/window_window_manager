@@ -260,6 +260,18 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2
     }
 }
 
+/**
+ * @tc.name: HasImmersiveWindow
+ * @tc.desc: test HasImmersiveWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
+{
+    bool immersive = false;
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
 }
 }
 }

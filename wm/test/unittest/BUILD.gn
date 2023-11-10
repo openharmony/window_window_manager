@@ -70,7 +70,11 @@ ohos_unittest("wm_window_impl_test") {
 
   deps = [ ":wm_unittest_common" ]
 
+  include_dirs =
+      [ "${accessibility_path}/interfaces/innerkits/common/include/" ]
+
   external_deps = [
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
@@ -191,6 +195,7 @@ ohos_unittest("wm_window_impl_listener_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -367,6 +372,7 @@ config("wm_unittest_common_public_config") {
     "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
 
     # abilityContext end
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -405,6 +411,7 @@ ohos_static_library("wm_unittest_common") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_base",
     "image_framework:image_native",
     "ipc:ipc_single",

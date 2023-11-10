@@ -28,7 +28,7 @@ public:
     void SendSensorResult(FoldStatus foldStatus) override;
     FoldDisplayMode GetScreenDisplayMode() override;
     FoldStatus GetFoldStatus() override;
-
+    void LockDisplayStatus(bool locked) override;
 private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
 };

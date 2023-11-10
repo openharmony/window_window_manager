@@ -19,6 +19,7 @@ ohos_shared_library("libintention_event") {
     "./include",
     "${window_base_path}/wm/include",
     "${window_base_path}/window_scene/session/host/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [ "src/intention_event_manager.cpp" ]
@@ -31,6 +32,7 @@ ohos_shared_library("libintention_event") {
   ]
 
   external_deps = [
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",

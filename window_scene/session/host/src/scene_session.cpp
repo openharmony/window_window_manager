@@ -1353,6 +1353,13 @@ bool SceneSession::IsVisible() const
     return isVisible_;
 }
 
+void SceneSession::UpdateRotationAvoidArea()
+{
+    if (specificCallback_) {
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    }
+}
+
 void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
     auto property = GetSessionProperty();
