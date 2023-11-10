@@ -886,6 +886,12 @@ public:
      */
     virtual int64_t GetVSyncPeriod() { return 0; }
     /**
+     * @brief flush frame rate of linker.
+     *
+     * @param rate frame rate.
+     */
+    virtual void FlushFrameRate(uint32_t rate) {}
+    /**
      * @brief Update Configuration.
      *
      * @param configuration Window configuration.
