@@ -593,6 +593,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetBounds(screenBounds);
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
+        property.SetDefaultDensity(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
     }
