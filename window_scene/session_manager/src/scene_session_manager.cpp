@@ -1341,6 +1341,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -1351,9 +1355,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
-        if (property) {
-            info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
-        }
+        info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
@@ -1361,9 +1363,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         auto errCode = sceneSession->Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
-        if (property) {
-            persistentId = property->GetPersistentId();
-        }
+        persistentId = property->GetPersistentId();
         if (createSpecificSessionFunc_ && info.windowType_ != static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG)) {
             createSpecificSessionFunc_(sceneSession);
         }
@@ -1800,6 +1800,10 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -1813,10 +1817,6 @@ WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         auto weakSession = weak.promote();
         if (weakSession == nullptr) {
             WLOGFE("the session is nullptr");
-            return WMError::WM_DO_NOTHING;
-        }
-        if (property == nullptr) {
-            WLOGFE("the property is nullptr");
             return WMError::WM_DO_NOTHING;
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
