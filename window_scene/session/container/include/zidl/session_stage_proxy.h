@@ -40,6 +40,8 @@ public:
     WSError NotifyCloseExistPipWindow() override;
     void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
+    WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                AAFwk::WantParams& reWantParams) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyScreenshot() override;

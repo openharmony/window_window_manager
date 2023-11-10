@@ -43,6 +43,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateFocus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
+        &SessionStageStub::HandleNotifyTransferComponentDataSync),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
@@ -171,6 +173,25 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
     WSError errCode = NotifyTransferComponentData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyTransferComponentDataSync(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return static_cast<int>(WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED);
+    }
+    AAFwk::WantParams reWantParams;
+    WSErrorCode errCode = NotifyTransferComponentDataSync(*wantParams, reWantParams);
+    if (errCode != WSErrorCode::WS_OK) {
+        return static_cast<int>(errCode);
+    }
+    if (!reply.WriteParcelable(&reWantParams)) {
+        WLOGFE("reWantParams write failed.");
+        return static_cast<int>(WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED);
+    }
+    return static_cast<int>(WSErrorCode::WS_OK);
 }
 
 int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply)

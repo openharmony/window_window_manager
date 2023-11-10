@@ -100,7 +100,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);
-    hostSession_->NotifyRemoteReady();
+    hostSession_->NotifyAsyncOn();
 }
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
@@ -109,6 +109,27 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
         notifyTransferComponentDataFunc_(wantParams);
     }
     return WSError::WS_OK;
+}
+
+WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
+    const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
+{
+    if (notifyTransferComponentDataForResultFunc_) {
+        reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
+        return WSErrorCode::WS_OK;
+    }
+    return WSErrorCode::WS_ERROR_NOT_REGISTER_SYNC_CALLBACK;
+}
+
+void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
+    const NotifyTransferComponentDataForResultFunc& func)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return;
+    }
+    notifyTransferComponentDataForResultFunc_ = std::move(func);
+    hostSession_->NotifySyncOn();
 }
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
@@ -223,6 +244,54 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     property_->SetWindowRect(wmRect);
     NotifySizeChange(wmRect, wmReason);
     UpdateViewportConfig(wmRect, wmReason);
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    WLOGFD("NotifySearchElementInfoByAccessibilityId begin, eleId:%{public}d, mode:%{public}d, baseParent:%{public}d",
+        elementId, mode, baseParent);
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    WLOGFD("NotifySearchElementInfosByText begin, elementId:%{public}d, text:%{public}s, baseParent:%{public}d",
+        elementId, text.c_str(), baseParent);
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifySearchElementInfosByText error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
+{
+    WLOGFD("NotifyFindFocusedElementInfo begin, elementId:%{public}d, focusType:%{public}d, baseParent:%{public}d",
+        elementId, focusType, baseParent);
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifyFindFocusedElementInfo error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    WLOGFD("NotifyFocusMoveSearch begin, elementId:%{public}d, direction:%{public}d, baseParent:%{public}d",
+        elementId, direction, baseParent);
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifyFocusMoveSearch error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
     return WSError::WS_OK;
 }
 } // namespace Rosen

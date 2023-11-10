@@ -90,6 +90,10 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         WLOGFI("SensorEvent dataLen less than posture data size.");
         return;
     }
+    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
+        WLOGFI("SensorEvent display status is locked.");
+        return;
+    }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     float angle = (*postureData).angle;
     if (std::isless(angle, ANGLE_MIN_VAL) || std::isgreater(angle, ANGLE_MAX_VAL)) {

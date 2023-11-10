@@ -94,6 +94,7 @@ public:
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
+        TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -162,6 +163,8 @@ public:
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
+
+    virtual void LockFoldDisplayStatus(bool locked) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 

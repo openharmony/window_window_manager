@@ -1154,7 +1154,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         return WSError::WS_OK;
     };
 
-    UpdateImmersiveState();
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -1240,6 +1239,7 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
 
 void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
+    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     sceneSessionMap_.erase(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
@@ -1282,7 +1282,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
         if (needRemoveSession) {
-            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
                 NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
             }
@@ -1294,7 +1293,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (listenerController_ != nullptr) {
             NotifySessionForCallback(scnSession, needRemoveSession);
         }
-        UpdateImmersiveState();
         return WSError::WS_OK;
     };
 
@@ -2983,7 +2981,6 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
-    UpdateImmersiveState();
     return sceneSession->UpdateWindowMode(mode);
 }
 
@@ -3150,7 +3147,6 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
         default:
             break;
     }
-    UpdateImmersiveState();
 }
 
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
@@ -4776,6 +4772,34 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     taskScheduler_->PostSyncTask(task);
 }
 
+void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("SceneSessionManager::ProcessUpdateRotationChange displayInfo is nullptr.");
+        return;
+    }
+    auto task = [this, displayInfo]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto &item : sceneSessionMap_) {
+            auto scnSession = item.second;
+            if (scnSession == nullptr) {
+                WLOGFE("SceneSessionManager::ProcessUpdateRotationChange null scene session");
+                continue;
+            }
+            if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+                scnSession->UpdateRotationAvoidArea();
+                WLOGFD("UpdateRotationAvoidArea name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                    "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
+                    scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
+            }
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
+}
+
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -4783,6 +4807,11 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     switch (type) {
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
+                displayInfo, displayInfoMap, type);
+            break;
+        }
+        case DisplayStateChangeType::UPDATE_ROTATION: {
+            SceneSessionManager::GetInstance().ProcessUpdateRotationChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
             break;
         }
@@ -5240,7 +5269,13 @@ WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMax
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::UpdateImmersiveState() {
+void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
+{
+    immersive = SceneSessionManager::GetInstance().UpdateImmersiveState();
+}
+
+bool SceneSessionManager::UpdateImmersiveState()
+{
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
         auto sceneSession = item->second;
@@ -5266,13 +5301,12 @@ void SceneSessionManager::UpdateImmersiveState() {
         auto sysBarProperty = property->GetSystemBarProperty();
         if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
             WLOGFD("Current window is immersive");
-            ScreenSessionManager::GetInstance().SetImmersiveState(true);
-            return;
+            return true;
         } else {
             WLOGFD("Current window is not immersive");
             break;
         }
     }
-    ScreenSessionManager::GetInstance().SetImmersiveState(false);
+    return false;
 }
 } // namespace OHOS::Rosen

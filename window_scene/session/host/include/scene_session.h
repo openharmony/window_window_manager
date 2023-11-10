@@ -173,6 +173,7 @@ public:
     bool IsKeepScreenOn() const;
     const std::string& GetWindowName() const;
     void UpdateNativeVisibility(bool visible);
+    void UpdateRotationAvoidArea();
     void SetPrivacyMode(bool isPrivacy);
     void SetSystemSceneOcclusionAlpha(double alpha);
     bool IsVisible() const;

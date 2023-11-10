@@ -17,7 +17,9 @@
 #define OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H
 
 #include <iremote_broker.h>
+#include <list>
 
+#include "accessibility_element_info.h"
 #include "interfaces/include/ws_common.h"
 
 namespace OHOS::MMI {
@@ -39,6 +41,14 @@ public:
     virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
     virtual WSError TransferFocusState(bool focusState) = 0;
+    virtual WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) = 0;
+    virtual WSError TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) = 0;
+    virtual WSError TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) = 0;
+    virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H

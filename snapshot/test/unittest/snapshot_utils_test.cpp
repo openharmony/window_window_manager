@@ -111,6 +111,16 @@ HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: RGB565ToRGB888
+ * @tc.desc: RGB565 to RGB888 using invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, Function | SmallTest | Level3)
+{
+    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(nullptr, nullptr, -1));
+}
+
+/**
  * @tc.name: WriteRgb888ToJpeg01
  * @tc.desc: write rgb888 to jpeg using invalid data
  * @tc.type: FUNC

@@ -76,6 +76,7 @@ public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     virtual void OnScreenshot(DisplayId displayId) override;
+    virtual void OnImmersiveStateChange(bool& immersive) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -192,6 +193,8 @@ public:
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+    void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void RegisterWindowChanged(const WindowChangedFunc& func);
@@ -209,6 +212,7 @@ public:
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
     WSRect GetAINavigationBarArea();
+    bool UpdateImmersiveState();
 
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
@@ -320,7 +324,6 @@ private:
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     void CleanUserMap();
-    void UpdateImmersiveState();
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
