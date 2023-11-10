@@ -76,6 +76,7 @@ public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     virtual void OnScreenshot(DisplayId displayId) override;
+    virtual void OnImmersiveStateChange(bool& immersive) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -209,6 +210,7 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     void AddWindowDragHotArea(int32_t type, WSRect& area);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
+    bool UpdateImmersiveState();
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -319,7 +321,6 @@ private:
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     void CleanUserMap();
-    void UpdateImmersiveState();
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
