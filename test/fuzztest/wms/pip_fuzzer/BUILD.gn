@@ -1,0 +1,89 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/features.gni")
+import("//build/test.gni")
+import("../../../../windowmanager_aafwk.gni")
+
+module_output_path = "window_manager/window_manager"
+
+##############################fuzztest##########################################
+ohos_fuzztest("PipFuzzTest") {
+  fuzz_config_file = "."
+  module_out_path = module_output_path
+  include_dirs = [
+    "../../../../wm/include",
+    "../../../../dm/include",
+    "../../../../wmserver/include",
+    "../../../../interfaces/innerkits/dm",
+    "//commonlibrary/c_utils/base/include",
+    "../../../../extension/extension_connection/include",
+    "../../../../interfaces/innerkits/extension",
+    "../../../../utils/include",
+
+    # for abilityContext
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "//base/global/resource_management/interfaces/inner_api/include",
+    "//third_party/node/deps/icu-small/source/common",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+    # abilityContext end
+  ]
+
+  configs = [
+    "../..:configs_cc_ld",
+    "../../../../resources/config/build:coverage_flags",
+    "../../../../resources/config/build:testcase_flags",
+  ]
+
+  sources = [ "pip_fuzzer.cpp" ]
+  deps = [
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/wm:libwm",
+  ]
+
+  public_deps = [ "//foundation/arkui/napi:ace_napi" ]
+  external_deps = [
+    "ability_base:base",
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:napi_base_context",
+    "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "window_manager:libwindow_extension_client",
+  ]
+}
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = []
+
+  deps += [
+    # deps file
+    ":PipFuzzTest",
+  ]
+}
+###############################################################################

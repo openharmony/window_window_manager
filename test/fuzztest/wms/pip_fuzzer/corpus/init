@@ -11,16 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("fuzztest") {
-  testonly = true
-
-  deps = [
-    "pip_fuzzer:fuzztest",
-    "window_fuzzer:fuzztest",
-    "windowagent_fuzzer:fuzztest",
-    "windowipc_fuzzer:fuzztest",
-    "windowmanager_fuzzer:fuzztest",
-    "windowscene_fuzzer:fuzztest",
-    "windowutilmath_fuzzer:fuzztest",
-  ]
-}
+PIPFUZZ
