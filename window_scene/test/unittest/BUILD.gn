@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_distributed_client_test",
     ":ws_dual_display_device_policy_test",
     ":ws_event_stage_test",
     ":ws_extension_session_manager_test",
@@ -289,6 +290,7 @@ ohos_unittest("ws_screen_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -595,7 +597,7 @@ ohos_unittest("ws_session_stub_test") {
 ohos_unittest("ws_distributed_client_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stub_test.cpp" ]
+  sources = [ "distributed_client_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
