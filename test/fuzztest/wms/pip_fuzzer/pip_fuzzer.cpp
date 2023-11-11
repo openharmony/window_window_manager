@@ -14,24 +14,10 @@
  */
 
 #include "marshalling_helper.h"
-
 #include <securec.h>
 #include <iremote_broker.h>
-#include <iservice_registry.h>
-
 #include "ability_context.h"
 #include "ability_context_impl.h"
-#include "js_runtime.h"
-#include <want.h>
-#include "window.h"
-#include "window_accessibility_controller.h"
-#include "window_impl.h"
-#include "window_manager.h"
-#include "window_extension_connection.h"
-#include "window_adapter.h"
-#include "wm_common.h"
-#include "window_option.h"
-
 #include "pip_fuzzer.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
@@ -61,10 +47,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     std::string name = "PipFuzzTest";
     size_t startPos = 0;
-    sptr<PipOption> option = nullptr;
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    sptr<PipOption> option = new PipOption();
+    AbilityRuntime::Context* context = nullptr;
     startPos += GetObject(context, data + startPos, size - startPos);
-    option->SetContext(context);
+    option->SetContext(static_cast<void*>(context));
     std::string navigationId = "nav_id";
     option->SetNavigationId(navigationId);
     uint32_t templateType = 0;
