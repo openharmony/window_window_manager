@@ -26,6 +26,10 @@
 using namespace testing;
 using namespace testing::ext;
 
+// using namespace FRAME_TRACE;
+using namespace testing;
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -82,6 +86,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos, Function | SmallTest | Level2)
     EXPECT_EQ(distributedClient_->GetMissionInfos("", 0, missionInfos), AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos end.";
 }
+}
 
 /**
  * @tc.name: GetRemoteMissionSnapshotInfo
@@ -109,7 +114,6 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | 
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), 0);
     GTEST_LOG_(INFO) << "DistributedClientTest ReadMissionInfosFromParcel end.";
-}
 }
 }
 }
