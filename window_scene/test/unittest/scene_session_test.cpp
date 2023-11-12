@@ -2228,6 +2228,64 @@ HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
     res = session->RemoveSubSession(subSession->GetPersistentId());
     ASSERT_EQ(res, true);
 }
+/**
+ * @tc.name: NotifySessionForeground01
+ * @tc.desc: NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifySessionForeground, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    int ret = 1;
+
+    scensession->sessionStage_ = mockSessionStage;
+    scensescensession->NotifySessionForeground(reason, withAnimation);
+    ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: NotifySessionBackground01
+ * @tc.desc: NotifySessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifySessionBackground, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    int ret = 1;
+
+    scensession->sessionStage_ = mockSessionStage;
+    scensescensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+    ASSERT_EQ(ret, 1);
+}
 }
 }
 }

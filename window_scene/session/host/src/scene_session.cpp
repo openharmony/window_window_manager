@@ -1826,6 +1826,23 @@ void SceneSession::SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFun
         moveDragController_->SetWindowDragHotAreaFunc(func);
     }
 }
+
+void SceneSession::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    return sessionStage_->NotifySessionForeground(reason, withAnimation);
+}
+
+void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
+
 WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
 {
     textFieldPositionY_ = textFieldPositionY;

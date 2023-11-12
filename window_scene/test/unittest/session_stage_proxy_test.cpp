@@ -252,6 +252,31 @@ HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, Function | Sm
     sessionStage_->NotifyForegroundInteractiveStatus(interactive);
 }
 
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: test function : NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | Level1)
+{
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifySessionForeground(reason, withAnimation);
+}
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: test function : NotifySessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | Level1)
+{
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
 }
 }
 }

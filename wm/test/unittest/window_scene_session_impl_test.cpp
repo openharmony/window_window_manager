@@ -1807,6 +1807,44 @@ HWTEST_F(WindowSceneSessionImplTest, BindDialogTarget01, Function | SmallTest | 
     ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
 }
 
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, NotifySessionForeground, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    WMError ret = windowscenesession->Show(reason, withAnimation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: NotifySessionBackground
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, NotifySessionBackground, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    WMError ret = windowscenesession->Hide(reason, withAnimation, isFromInnerkits);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

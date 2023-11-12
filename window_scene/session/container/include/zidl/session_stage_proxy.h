@@ -51,6 +51,8 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyConfigurationUpdated() override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
+    void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
+    void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

@@ -414,6 +414,9 @@ private:
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void NotifyStatusBarEnabledChange(bool enable);
+    void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
+    void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
+                                bool isFromInnerkits);
 };
 } // namespace OHOS::Rosen
 

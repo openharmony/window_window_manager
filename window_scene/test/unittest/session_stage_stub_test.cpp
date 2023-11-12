@@ -296,6 +296,39 @@ HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyForegroundInteractiveStatus(data, reply));
 }
 
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: test function : NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionForeground(data, reply));
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: test function : NotifySessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
+}
+
 }
 }
 }
