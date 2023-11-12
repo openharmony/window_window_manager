@@ -258,10 +258,15 @@ private:
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = false);
+    WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId);
+    WSError RequestFocusBasicCheck(int32_t persistentId);
+    WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground);
+
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     WSError ShiftFocus(sptr<SceneSession>& nextSession);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
+    void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
@@ -369,6 +374,8 @@ private:
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    bool needBlockNotifyFocusStatusUntilForeground_ {false};
+    bool needBlockNotifyUnfocusStatus_ {false};
     bool isScreenLocked_ {false};
     bool isPrepareTerminateEnable_ {false};
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
@@ -391,7 +398,7 @@ private:
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocus(sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<ISessionChangeListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 

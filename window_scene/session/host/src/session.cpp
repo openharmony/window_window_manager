@@ -1599,6 +1599,11 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyFocusStatus(bool isFocused)
+{
     if (!isFocused_) {
         NotifyUILostFocus();
     }
