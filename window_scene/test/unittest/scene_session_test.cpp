@@ -2236,7 +2236,7 @@ HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, NotifySessionForeground, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
+    info.abilityName_ = "Foreground01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
@@ -2253,7 +2253,7 @@ HWTEST_F(SceneSessionTest, NotifySessionForeground, Function | SmallTest | Level
     int ret = 1;
 
     scensession->sessionStage_ = mockSessionStage;
-    scensescensession->NotifySessionForeground(reason, withAnimation);
+    scensession->NotifySessionForeground(reason, withAnimation);
     ASSERT_EQ(ret, 1);
 }
 
@@ -2283,7 +2283,7 @@ HWTEST_F(SceneSessionTest, NotifySessionBackground, Function | SmallTest | Level
     int ret = 1;
 
     scensession->sessionStage_ = mockSessionStage;
-    scensescensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
 }
 }

@@ -5310,13 +5310,13 @@ bool SceneSessionManager::UpdateImmersiveState()
 }
 
 void SceneSessionManager::NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason,
-                                                bool withAnimation)
+    bool withAnimation)
 {
     session->NotifySessionForeground(reason, withAnimation);
 }
 
 void SceneSessionManager::NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason,
-                                                bool withAnimation, bool isFromInnerkits)
+    bool withAnimation, bool isFromInnerkits)
 {
     session->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
