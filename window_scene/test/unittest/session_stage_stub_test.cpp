@@ -301,7 +301,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -317,7 +317,7 @@ HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | 
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
