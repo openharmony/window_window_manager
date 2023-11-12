@@ -1993,5 +1993,17 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
     uiContent_->UpdateMaximizeMode(mode);
     return WSError::WS_OK;
 }
+
+void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("NotifySessionForeground");
+    Show(reason, withAnimation);
+}
+
+void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    WLOGFI("NotifySessionBackground");
+    Hide(reason, withAnimation, isFromInnerkits);
+}
 } // namespace Rosen
 } // namespace OHOS

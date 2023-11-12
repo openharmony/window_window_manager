@@ -65,6 +65,10 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateMaximizeMode),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CLOSE_EXIST_PIP_WINDOW),
         &SessionStageStub::HandleNotifyCloseExistPipWindow),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FOREGROUND),
+        &SessionStageStub::HandleNotifySessionForeground),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_BACKGROUND),
+        &SessionStageStub::HandleNotifySessionBackground),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -274,6 +278,25 @@ int SessionStageStub::HandleUpdateMaximizeMode(MessageParcel& data, MessageParce
     MaximizeMode mode = static_cast<MaximizeMode>(data.ReadUint32());
     WSError errCode = UpdateMaximizeMode(mode);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifySessionForeground");
+    uint32_t reason = data.ReadUint32();
+    bool withAnimation = data.ReadBool();
+    NotifySessionForeground(reason, withAnimation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySessionBackground(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifySessionBackground");
+    uint32_t reason = data.ReadUint32();
+    bool withAnimation = data.ReadBool();
+    bool isFromInnerkits = data.ReadBool();
+    NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -294,5 +294,13 @@ WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int
     }
     return WSError::WS_OK;
 }
+
+void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+}
+
+void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+}
 } // namespace Rosen
 } // namespace OHOS

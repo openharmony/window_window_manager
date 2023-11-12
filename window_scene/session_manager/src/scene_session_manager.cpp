@@ -245,6 +245,15 @@ void SceneSessionManager::ConfigWindowSceneXml()
         ConfigDecor(item);
     }
 
+    item = config["backgroundswitch"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] == 1) {
+            systemConfig_.backgroundswitch = true;
+        }
+    }
+    WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
+
     item = config["defaultWindowMode"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
@@ -1095,6 +1104,10 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
     auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+    if (systemConfig_.backgroundswitch) {
+        WLOGFD("RequestSceneSessionActivationInner: %{public}d", systemConfig_.backgroundswitch);
+        scnSession->NotifySessionForeground(1, true);
+    }
     auto sessionInfo = scnSession->GetSessionInfo();
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
         WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
@@ -1146,11 +1159,17 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
 
-        if (!isDelegator) {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        if (systemConfig_.backgroundswitch) {
+            WLOGFD("RequestSceneSessionBackground: %{public}d", systemConfig_.backgroundswitch);
+            scnSession->NotifySessionBackground(1, true, true);
         } else {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo, true);
+            if (!isDelegator) {
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+            } else {
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo, true);
+            }
         }
+
         if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
             auto sessionInfo = scnSession->GetSessionInfo();
             WindowInfoReporter::GetInstance().InsertHideReportInfo(sessionInfo.bundleName_);
@@ -5288,5 +5307,17 @@ bool SceneSessionManager::UpdateImmersiveState()
         }
     }
     return false;
+}
+
+void SceneSessionManager::NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason,
+                                                bool withAnimation)
+{
+    session->NotifySessionForeground(reason, withAnimation);
+}
+
+void SceneSessionManager::NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason,
+                                                bool withAnimation, bool isFromInnerkits)
+{
+    session->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 } // namespace OHOS::Rosen
