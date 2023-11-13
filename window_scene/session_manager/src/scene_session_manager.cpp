@@ -1363,6 +1363,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -1822,6 +1826,10 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
