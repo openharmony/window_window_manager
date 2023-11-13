@@ -648,6 +648,14 @@ bool ScreenSessionManager::WakeUpEnd()
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendBegin(%u)", reason);
+    WLOGFI("ScreenSessionManager::SuspendBegin block screen power change is true");
+    blockScreenPowerChange_ = true;
+    auto suspendBeginTask = [this]() {
+        WLOGFI("ScreenSessionManager::SuspendBegin delay task start");
+        blockScreenPowerChange_ = false;
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF);
+    };
+    taskScheduler_->PostTask(suspendBeginTask, "suspendBeginTask", 1500);
     sessionDisplayPowerController_->SuspendBegin(reason);
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN);
 }
@@ -655,6 +663,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 bool ScreenSessionManager::SuspendEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
+    blockScreenPowerChange_ = false;
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
 }
 
@@ -682,6 +691,10 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenPowerStatus status;
+    if (blockScreenPowerChange_) {
+        WLOGFI("ScreenSessionManager::SetScreenPowerForAll block screen power change");
+        return true;
+    }
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             if (keyguardDrawnDone_) {
@@ -802,6 +815,20 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
             SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON);
             needScreenOnWhenKeyguardNotify_ = false;
         }
+    }
+
+    if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
+        WLOGFI("ScreenSessionManager::NotifyDisplayEvent screen lock suspend");
+        taskScheduler_->RemoveTask("suspendBeginTask");
+        blockScreenPowerChange_ = false;
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_SUSPEND);
+    }
+
+    if (event == DisplayEvent::SCREEN_LOCK_OFF) {
+        WLOGFI("ScreenSessionManager::NotifyDisplayEvent screen lock off");
+        taskScheduler_->RemoveTask("suspendBeginTask");
+        blockScreenPowerChange_ = false;
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF);
     }
 }
 

@@ -72,6 +72,8 @@ enum class DisplayState : uint32_t {
 enum class DisplayEvent : uint32_t {
     UNLOCK,
     KEYGUARD_DRAWN,
+    SCREEN_LOCK_SUSPEND,
+    SCREEN_LOCK_OFF,
 };
 
 /**
