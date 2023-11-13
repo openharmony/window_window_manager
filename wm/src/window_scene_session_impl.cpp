@@ -178,9 +178,11 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
 void WindowSceneSessionImpl::UpdateWindowState()
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
-    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+    {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    }
     state_ = WindowState::STATE_CREATED;
     requestState_ = WindowState::STATE_CREATED;
     if (WindowHelper::IsMainWindow(GetType())) {
@@ -654,8 +656,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
-    windowSessionMap_.erase(property_->GetWindowName());
+	{
+	    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+	    windowSessionMap_.erase(property_->GetWindowName());
+	}
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     hostSession_ = nullptr;
     return res;
