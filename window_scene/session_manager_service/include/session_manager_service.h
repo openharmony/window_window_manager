@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
 
 #include "session_manager_service_stub.h"
+
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
@@ -25,13 +26,9 @@ WM_DECLARE_SINGLE_INSTANCE(SessionManagerService)
 public:
     void Init();
     sptr<IRemoteObject> GetSceneSessionManager() override;
-    sptr<IRemoteObject> GetScreenSessionManagerService() override;
 
 private:
-    std::recursive_mutex mutex_;
-
     sptr<IRemoteObject> sceneSessionManagerObj_;
-    sptr<IRemoteObject> screenSessionManagerObj_;
 };
 } // namesapce OHOS::Rosen
 

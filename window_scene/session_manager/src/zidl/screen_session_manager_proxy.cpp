@@ -14,6 +14,10 @@
  */
 
 #include "zidl/screen_session_manager_proxy.h"
+
+#include "common/rs_rect.h"
+#include "transaction/rs_marshalling_helper.h"
+
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -1525,5 +1529,170 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
         return DMError::DM_ERROR_NULLPTR;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient>& client)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!client || !data.WriteRemoteObject(client->AsObject())) {
+        WLOGFE("WriteRemoteObject failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CLIENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+ScreenProperty ScreenSessionManagerProxy::GetScreenProperty(ScreenId screenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return {};
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return {};
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return {};
+    }
+    ScreenProperty screenProperty;
+    if (!RSMarshallingHelper::Unmarshalling(reply, screenProperty)) {
+        WLOGFE("Read screenProperty failed");
+        return {};
+    }
+    return screenProperty;
+}
+
+std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenId screenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return nullptr;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_NODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return nullptr;
+    }
+
+    auto displayNode = RSDisplayNode::Unmarshalling(reply);
+    if (!displayNode) {
+        WLOGFE("displayNode is null");
+        return nullptr;
+    }
+    return displayNode;
+}
+
+void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, bounds)) {
+        WLOGFE("Write bounds failed");
+        return;
+    }
+    if (!data.WriteFloat(rotation)) {
+        WLOGFE("Write rotation failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+uint32_t ScreenSessionManagerProxy::GetCurvedCompressionArea()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return 0;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return 0;
+    }
+
+    return reply.ReadUint32();
+}
+
+ScreenProperty ScreenSessionManagerProxy::GetPhyScreenProperty(ScreenId screenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return {};
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return {};
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHY_SCREEN_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return {};
+    }
+    ScreenProperty screenProperty;
+    if (!RSMarshallingHelper::Unmarshalling(reply, screenProperty)) {
+        WLOGFE("Read screenProperty failed");
+        return {};
+    }
+    return screenProperty;
+}
+
+void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(hasPrivate)) {
+        WLOGFE("Write hasPrivate failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 } // namespace OHOS::Rosen

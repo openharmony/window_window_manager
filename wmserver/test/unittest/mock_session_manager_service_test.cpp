@@ -16,7 +16,6 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 #include "mock_session_manager_service.h"
-#include "mock_screen_manager_service.h"
 #include "display_manager.h"
 #include "window_agent.h"
 #include "window_impl.h"
@@ -159,69 +158,14 @@ HWTEST_F(MockSessionManagerServiceTest, Dump, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnStart2
- * @tc.desc: on start
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, OnStart2, Function | SmallTest | Level2)
-{
-    MockScreenManagerService* mService = new MockScreenManagerService();
-    mService->OnStart();
-    sptr<IRemoteObject> sessionManagerService = nullptr;
-    ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
-}
-
-/**
- * @tc.name: GetScreenDumpInfo
- * @tc.desc: get screen dump info
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, GetScreenDumpInfo2, Function | SmallTest | Level2)
-{
-    MockScreenManagerService* mService = new MockScreenManagerService();
-    std::vector<std::string> params;
-    std::string info;
-    auto ret = WMError::WM_OK;
-    mService->GetScreenDumpInfo(params, info);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: Dump
- * @tc.desc: Dump
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, Dump2, Function | SmallTest | Level2)
-{
-    MockScreenManagerService* mService = new MockScreenManagerService();
-    std::vector<std::u16string> args;
-    auto ret = 0;
-    ret = mService->Dump(0, args);
-    ASSERT_NE(0, ret);
-}
-
-/**
  * @tc.name: SetSessionManagerService
  * @tc.desc: SetSessionManagerService
  * @tc.type: FUNC
  */
 HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
 {
-    MockScreenManagerService* mService = new MockScreenManagerService();
-    mService->SetSessionManagerService(MockScreenManagerService::GetInstance().screenSessionManager_);
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
-}
-
-/**
- * @tc.name: GetSceneSessionManager
- * @tc.desc: GetSceneSessionManager
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, GetSceneSessionManager, Function | SmallTest | Level2)
-{
-    MockSessionManagerService* mService = new MockSessionManagerService();
-    ASSERT_EQ(MockScreenManagerService::GetInstance().screenSessionManager_, mService->GetSceneSessionManager());
 }
 }
 }

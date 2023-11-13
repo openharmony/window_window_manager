@@ -18,7 +18,6 @@
 #include "ability_manager_client.h"
 
 #include "session_manager/include/scene_session_manager.h"
-#include "session_manager/include/screen_session_manager.h"
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
@@ -30,21 +29,10 @@ void SessionManagerService::Init()
 
 sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (sceneSessionManagerObj_) {
         return sceneSessionManagerObj_;
     }
     sceneSessionManagerObj_ = SceneSessionManager::GetInstance().AsObject();
     return sceneSessionManagerObj_;
-}
-
-sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (screenSessionManagerObj_) {
-        return screenSessionManagerObj_;
-    }
-    screenSessionManagerObj_ = ScreenSessionManager::GetInstance().AsObject();
-    return screenSessionManagerObj_;
 }
 } // namesapce OHOS::Rosen

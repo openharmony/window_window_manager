@@ -30,6 +30,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "display_info.h"
 #include "display_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "session_permission.h"

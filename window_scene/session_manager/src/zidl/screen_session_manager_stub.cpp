@@ -15,7 +15,10 @@
 
 #include "zidl/screen_session_manager_stub.h"
 
+#include "common/rs_rect.h"
 #include <ipc_skeleton.h>
+#include "transaction/rs_marshalling_helper.h"
+
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -435,6 +438,59 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             DMError ret = MakeUniqueScreen(uniqueScreenIds);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_CLIENT: {
+            auto remoteObject = data.ReadRemoteObject();
+            auto clientProxy = iface_cast<IScreenSessionManagerClient>(remoteObject);
+            if (!clientProxy) {
+                WLOGFE("clientProxy is null");
+                break;
+            }
+            SetClient(clientProxy);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            if (!RSMarshallingHelper::Marshalling(reply, GetScreenProperty(screenId))) {
+                WLOGFE("Write screenProperty failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_NODE: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto displayNode = GetDisplayNode(screenId);
+            if (!displayNode || !displayNode->Marshalling(reply)) {
+                WLOGFE("Write displayNode failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            RRect bounds;
+            if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
+                WLOGFE("Read bounds failed");
+                break;
+            }
+            auto rotation = data.ReadFloat();
+            UpdateScreenRotationProperty(screenId, bounds, rotation);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {
+            auto area = GetCurvedCompressionArea();
+            reply.WriteUint32(area);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_PHY_SCREEN_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            if (!RSMarshallingHelper::Marshalling(reply, GetPhyScreenProperty(screenId))) {
+                WLOGFE("Write screenProperty failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE: {
+            auto hasPrivate = data.ReadBool();
+            SetScreenPrivacyState(hasPrivate);
             break;
         }
         default:

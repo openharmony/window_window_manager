@@ -24,7 +24,9 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession" };
 }
 
-ScreenSession::ScreenSession()
+ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
+    const std::shared_ptr<RSDisplayNode>& displayNode)
+    : screenId_(screenId), property_(property), displayNode_(displayNode)
 {}
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
