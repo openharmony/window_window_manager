@@ -201,6 +201,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniHeightOfMainWindow_ = 0;
     uint32_t miniWidthOfSubWindow_ = 0;
     uint32_t miniHeightOfSubWindow_ = 0;
+    bool backgroundswitch = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -230,6 +231,7 @@ struct SystemSessionConfig : public Parcelable {
             return nullptr;
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
+        config->backgroundswitch = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());

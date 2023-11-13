@@ -2857,6 +2857,41 @@ HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | L
     ssm_->UpdateImmersiveState();
     ASSERT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: SceneSesionManager NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionForeground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scensession = nullptr;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, scensession);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    scensession->NotifySessionForeground(reason, withAnimation);
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: SceneSesionManager NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionBackground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scensession = nullptr;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, scensession);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
