@@ -139,31 +139,6 @@ napi_value JsPipManager::OnProcessScale(napi_env env, napi_callback_info info)
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnInitXComponentController");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 2) {
-        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
-        return NapiThrowInvalidParam(env);
-    }
-    napi_value xComponentController = argv[0];
-    void* xComponentControllerResult = nullptr;
-    napi_unwrap(env, xComponentController, &xComponentControllerResult);
-    int32_t windowId = 0;
-    if (!ConvertFromJsValue(env, argv[1], windowId)) {
-        WLOGFE("[NAPI]Failed to convert windowId to int");
-        return NapiGetUndefined(env);
-    }
-    sptr<PictureInPictureController> controller = PictureInPictureManager::GetPipControllerInfo(windowId);
-    if(controller == nullptr) {
-        WLOGFE("[NAPI]Failed to get pipController");
-        return NapiGetUndefined(env);
-    }
-    WMError err = controller->SetXComponentController(xComponentController);
-    if (err != WMError::WM_OK) {
-        WLOGFE("SetXComponentController failed");
-    }
     return NapiGetUndefined(env);
 }
 
