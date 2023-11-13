@@ -33,7 +33,6 @@ ohos_shared_library("session_manager_service") {
 
   deps = [
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [

@@ -16,13 +16,11 @@
 #include "js_screen_session_manager.h"
 
 #include <js_runtime_utils.h>
-#include "session/screen/include/screen_session.h"
-#include "session_manager/include/screen_session_manager.h"
-#include "window_manager_hilog.h"
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+#include "window_manager_hilog.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
@@ -36,8 +34,6 @@ const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 } // namespace
 
 JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env) {}
-
-JsScreenSessionManager::~JsScreenSessionManager() {}
 
 napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
 {
@@ -73,11 +69,10 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
 
 void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGD("Finalizer.");
     std::unique_ptr<JsScreenSessionManager>(static_cast<JsScreenSessionManager*>(data));
 }
 
-void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
+void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
         return;
@@ -111,7 +106,7 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSession)
+void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
         return;
@@ -291,8 +286,7 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
     napi_create_reference(env, value, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     screenConnectionCallback_ = callbackRef;
-    sptr<IScreenConnectionListener> screenConnectionListener(this);
-    ScreenSessionManager::GetInstance().RegisterScreenConnectionListener(screenConnectionListener);
+    ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionListener(this);
     return NapiGetUndefined(env);
 }
 
@@ -331,7 +325,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
+    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
     return NapiGetUndefined(env);
 }
 
@@ -376,7 +370,7 @@ napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, cons
 {
     WLOGD("[NAPI]OnGetCurvedCompressionArea");
     napi_value result = nullptr;
-    napi_create_uint32(env, ScreenSessionManager::GetInstance().GetCurvedCompressionArea(), &result);
+    napi_create_uint32(env, ScreenSessionManagerClient::GetInstance().GetCurvedCompressionArea(), &result);
     return result;
 }
 
@@ -399,7 +393,7 @@ napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const na
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().GetPhyScreenProperty(screenId);
     return JsScreenUtils::CreateJsScreenProperty(env, screenProperty);
 }
 } // namespace OHOS::Rosen
