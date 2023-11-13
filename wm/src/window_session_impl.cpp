@@ -1668,8 +1668,8 @@ WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBar
 
 WMError WindowSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
 {
-    textFieldPositionY_ = textFieldPositionY;
-    textFieldHeight_ = textFieldHeight;
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
     return WMError::WM_OK;
 }
 

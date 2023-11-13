@@ -163,9 +163,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
 
-    double textFieldPositionY_ = 0;
-    double textFieldHeight_ = 0;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
