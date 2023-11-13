@@ -40,6 +40,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleBackground),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
         &SessionStub::HandleDisconnect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW),
+        &SessionStub::HandleShow),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
+        &SessionStub::HandleHide),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
@@ -47,10 +51,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSessionEvent),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
-        &SessionStub::HandleCreateAndConnectSpecificSession),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
-        &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED),
@@ -157,6 +157,29 @@ int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
     const WSError& errCode = Disconnect();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Show!");
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+        property = new WindowSessionProperty();
+    }
+    const WSError& errCode = Show(property);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Hide!");
+    const WSError& errCode = Hide();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -281,54 +304,6 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
     const WSError& errCode = UpdateSessionRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleCreateAndConnectSpecificSession!");
-    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
-    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
-    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-        WLOGFE("Failed to read scene session stage object or event channel object!");
-        return ERR_INVALID_DATA;
-    }
-
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
-    } else {
-        WLOGFW("Property not exist!");
-    }
-
-    sptr<IRemoteObject> token = nullptr;
-    if (property && property->GetTokenState()) {
-        token = data.ReadRemoteObject();
-    } else {
-        WLOGI("accept token is nullptr");
-    }
-
-    auto persistentId = INVALID_SESSION_ID;
-    sptr<ISession> sceneSession;
-    CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession, token);
-    if (sceneSession== nullptr) {
-        return ERR_INVALID_STATE;
-    }
-    reply.WriteInt32(persistentId);
-    reply.WriteRemoteObject(sceneSession->AsObject());
-    reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply)
-{
-    auto persistentId = data.ReadUint32();
-    const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
-    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 

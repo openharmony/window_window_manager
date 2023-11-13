@@ -28,7 +28,7 @@ const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
-const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
 const std::string RAISE_TO_TOP_POINT_DOWN_CB = "raiseToTopForPointDown";
@@ -118,7 +118,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
         { SESSION_EVENT_CB,                      &JsSceneSession::ProcessSessionEventRegister },
         { SESSION_RECT_CHANGE_CB,                &JsSceneSession::ProcessSessionRectChangeRegister },
-        { CREATE_SPECIFIC_SCENE_CB,              &JsSceneSession::ProcessCreateSpecificSessionRegister },
+        { CREATE_SUB_SESSION_CB,                 &JsSceneSession::ProcessCreateSubSessionRegister },
         { BIND_DIALOG_TARGET_CB,                 &JsSceneSession::ProcessBindDialogTargetRegister },
         { RAISE_TO_TOP_CB,                       &JsSceneSession::ProcessRaiseToTopRegister },
         { RAISE_TO_TOP_POINT_DOWN_CB,            &JsSceneSession::ProcessRaiseToTopForPointDownRegister },
@@ -171,6 +171,7 @@ JsSceneSession::~JsSceneSession()
         return;
     }
     session->UnregisterSessionChangeListeners();
+    SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
@@ -307,16 +308,18 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
     WLOGFD("ProcessSessionStateChangeRegister success");
 }
 
-void JsSceneSession::ProcessCreateSpecificSessionRegister()
+void JsSceneSession::ProcessCreateSubSessionRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    NotifyCreateSubSessionFunc func = [this](const sptr<SceneSession>& sceneSession) {
+        this->OnCreateSubSession(sceneSession);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->onCreateSpecificSession_ = std::bind(&JsSceneSession::OnCreateSpecificSession,
-        this, std::placeholders::_1);
-    WLOGFD("ProcessCreateSpecificSessionRegister success");
+    SceneSessionManager::GetInstance().RegisterCreateSubSessionListener(session->GetPersistentId(), func);
+    WLOGFD("ProcessCreateSubSessionRegister success, id: %{public}d", session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessBindDialogTargetRegister()
@@ -982,20 +985,20 @@ napi_value JsSceneSession::OnUpdateSizeChangeReason(napi_env env, napi_callback_
     return NapiGetUndefined(env);
 }
 
-void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSession)
+void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
 {
-    WLOGFD("OnCreateSpecificSession");
     if (sceneSession == nullptr) {
-        WLOGFI("[NAPI]sceneSession is nullptr");
+        WLOGFE("[NAPI]sceneSession is nullptr");
         return;
     }
 
-    WLOGFD("[NAPI]OnCreateSpecificSession");
-    auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
+    auto iter = jsCbMap_.find(CREATE_SUB_SESSION_CB);
     if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
         return;
     }
 
+    WLOGFD("[NAPI]OnCreateSubSession, id: %{public}d", sceneSession->GetPersistentId());
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
@@ -1009,7 +1012,7 @@ void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSess
             WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("CreateJsSceneSessionObject success");
+        WLOGFI("CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
