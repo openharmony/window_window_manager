@@ -221,8 +221,6 @@ bool AccessibilityElementInfoParcel::Marshalling(Parcel &parcel) const
 
 sptr<AccessibilityElementInfoParcel> AccessibilityElementInfoParcel::Unmarshalling(Parcel& parcel)
 {
-    WLOGD();
-
     sptr<AccessibilityElementInfoParcel> accessibilityInfo = new(std::nothrow) AccessibilityElementInfoParcel();
     if (!accessibilityInfo) {
         WLOGFE("Failed to create accessibilityInfo.");
