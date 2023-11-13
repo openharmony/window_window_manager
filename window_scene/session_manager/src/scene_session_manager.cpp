@@ -62,9 +62,12 @@
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
+#include "session/host/include/main_session.h"
+#include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
-#include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
+#include "session/host/include/sub_session.h"
+#include "session/host/include/system_session.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -829,6 +832,29 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
     return taskScheduler_->PostSyncTask(task);
 }
 
+sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
+    sptr<SceneSession> sceneSession = nullptr;
+    if (sessionInfo.isSystem_) {
+        sceneSession = new (std::nothrow) SCBSystemSession(sessionInfo, specificCb);
+        WLOGFI("Create SCBSystemSession, type: %{public}d", sessionInfo.windowType_);
+    } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+        sceneSession = new (std::nothrow) MainSession(sessionInfo, specificCb);
+        WLOGFI("Create MainSession");
+    } else if (property != nullptr && SessionHelper::IsSubWindow(property->GetWindowType())) {
+        sceneSession = new (std::nothrow) SubSession(sessionInfo, specificCb);
+        WLOGFI("Create SubSession, type: %{public}d", property->GetWindowType());
+    } else if (property != nullptr && SessionHelper::IsSystemWindow(property->GetWindowType())) {
+        sceneSession = new (std::nothrow) SystemSession(sessionInfo, specificCb);
+        WLOGFI("Create SystemSession, type: %{public}d", property->GetWindowType());
+    } else {
+        WLOGFE("Invalid window type");
+    }
+    return sceneSession;
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -841,12 +867,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
     }
 
-    sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
-    auto task = [this, sessionInfo, specificCb, property]() {
+    auto task = [this, sessionInfo, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, \
             appIndex: %{public}d, type %{public}u", sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_);
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCb);
+        sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
