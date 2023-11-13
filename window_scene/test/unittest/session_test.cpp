@@ -52,6 +52,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
+    WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -110,6 +112,12 @@ WSError TestWindowEventChannel::TransferFindFocusedElementInfo(int32_t elementId
 
 WSError TestWindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t baseParent)
 {
     return WSError::WS_OK;
 }

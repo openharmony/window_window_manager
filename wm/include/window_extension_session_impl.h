@@ -54,6 +54,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
+    WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionAguments,
+        int32_t action, int32_t baseParent) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
