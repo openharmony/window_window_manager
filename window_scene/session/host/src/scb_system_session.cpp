@@ -15,6 +15,7 @@
 
 #include "session/host/include/scb_system_session.h"
 
+#include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -25,6 +26,14 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SCBSys
 SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
+    auto name = sessionInfo_.bundleName_;
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    if (sessionInfo_.isSystem_) {
+        RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = name;
+        surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+    }
     WLOGFD("Create SCBSystemSession");
 }
 

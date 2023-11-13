@@ -797,6 +797,18 @@ WSError Session::Disconnect()
     return WSError::WS_OK;
 }
 
+WSError Session::Show(sptr<WindowSessionProperty> property)
+{
+    WLOGFD("Show session, id: %{public}d", GetPersistentId());
+    return WSError::WS_OK;
+}
+
+WSError Session::Hide()
+{
+    WLOGFD("Hide session, id: %{public}d", GetPersistentId());
+    return WSError::WS_OK;
+}
+
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
@@ -1438,7 +1450,7 @@ WSError Session::UpdateConfiguration()
     return WSError::WS_OK;
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot()
+std::shared_ptr<Media::PixelMap> Session::Snapshot() const
 {
     if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         return nullptr;

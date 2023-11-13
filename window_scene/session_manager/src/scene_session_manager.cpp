@@ -786,7 +786,7 @@ WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSessio
             WLOGFE("Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        parentSession->BindDialogTarget(sceneSession);
+        parentSession->BindDialogSessionTarget(sceneSession);
         parentSession->BindDialogToParentSession(sceneSession);
         sceneSession->SetParentSession(parentSession);
         WLOGFD("Update parent of dialog success, id %{public}d, parentId %{public}d",
@@ -1431,30 +1431,27 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
-        // create specific session
-        SessionInfo info;
-        if (property) {
-            info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
-        }
-        ClosePipWindowIfExist(property->GetWindowType());
-        sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
-        if (sceneSession == nullptr) {
+        if (property == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        auto errCode = sceneSession->Connect(
+        const auto& type = property->GetWindowType();
+        // create specific session
+        SessionInfo info;
+        info.windowType_ = static_cast<uint32_t>(type);
+        ClosePipWindowIfExist(type);
+        sptr<SceneSession> newSession = RequestSceneSession(info, property);
+        if (newSession == nullptr) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto errCode = newSession->Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
         if (property) {
             persistentId = property->GetPersistentId();
         }
-        if (createSpecificSessionFunc_ && info.windowType_ != static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG)) {
-            createSpecificSessionFunc_(sceneSession);
-        }
-        session = sceneSession;
-        AddClientDeathRecipient(sessionStage, sceneSession);
-        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            auto sessionInfo = sceneSession->GetSessionInfo();
-            WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
-        }
+
+        NotifyCreateSpecificSession(newSession, property, type);
+        session = newSession;
+        AddClientDeathRecipient(sessionStage, newSession);
         return errCode;
     };
 
@@ -1507,9 +1504,96 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     return false;
 }
 
-void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func)
+void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func)
 {
-    createSpecificSessionFunc_ = func;
+    createSystemSessionFunc_ = func;
+}
+
+void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
+    const NotifyCreateSubSessionFunc& func)
+{
+    WLOGFI("RegisterCreateSubSessionListener, id: %{public}d", persistentId);
+    auto task = [this, persistentId, func]() {
+        auto iter = createSubSessionFuncMap_.find(persistentId);
+        if (iter == createSubSessionFuncMap_.end()) {
+            createSubSessionFuncMap_.insert(std::make_pair(persistentId, func));
+        } else {
+            WLOGFW("CreateSubSessionListener is existed, id: %{public}d", persistentId);
+        }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
+    sptr<WindowSessionProperty> property, const WindowType& type)
+{
+    if (newSession == nullptr) {
+        WLOGFE("newSession is nullptr");
+        return;
+    }
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return;
+    }
+    if (SessionHelper::IsSystemWindow(type)) {
+        if (createSystemSessionFunc_ && type != WindowType::WINDOW_TYPE_DIALOG) {
+            createSystemSessionFunc_(newSession);
+            WLOGFD("Create system session, id:%{public}d, type: %{public}d", newSession->GetPersistentId(), type);
+        } else {
+            WLOGFW("Didn't create jsSceneSession for this system type, id:%{public}d, type: %{public}d",
+                newSession->GetPersistentId(), type);
+            return;
+        }
+    } else if (SessionHelper::IsSubWindow(type)) {
+        NotifyCreateSubSession(property->GetParentPersistentId(), newSession);
+        WLOGFD("Notify sub jsSceneSession, id:%{public}d, parentId: %{public}d, type: %{public}d",
+            newSession->GetPersistentId(), property->GetParentPersistentId(), type);
+    } else {
+        WLOGFW("Invalid session type, id:%{public}d, type: %{public}d", newSession->GetPersistentId(), type);
+    }
+}
+
+void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session)
+{
+    if (session == nullptr) {
+        WLOGFE("SubSession is nullptr");
+        return;
+    }
+    auto iter = createSubSessionFuncMap_.find(persistentId);
+    if (iter == createSubSessionFuncMap_.end()) {
+        WLOGFW("Can't find CreateSubSessionListener, parentId: %{public}d", persistentId);
+        return;
+    }
+
+    auto parentSession = GetSceneSession(persistentId);
+    if (parentSession == nullptr) {
+        WLOGFE("Can't find CreateSubSessionListener, parentId: %{public}d, subId: %{public}d",
+            persistentId, session->GetPersistentId());
+        return;
+    }
+    parentSession->AddSubSession(session);
+    session->SetParentSession(parentSession);
+    if (iter->second) {
+        iter->second(session);
+    }
+    WLOGFD("NotifyCreateSubSession success, parentId: %{public}d, subId: %{public}d",
+        persistentId, session->GetPersistentId());
+}
+
+void SceneSessionManager::UnregisterCreateSubSessionListener(int32_t persistentId)
+{
+    WLOGFI("UnregisterCreateSubSessionListener, id: %{public}d", persistentId);
+    auto task = [this, persistentId]() {
+        auto iter = createSubSessionFuncMap_.find(persistentId);
+        if (iter != createSubSessionFuncMap_.end()) {
+            createSubSessionFuncMap_.erase(persistentId);
+        } else {
+            WLOGFW("Can't find CreateSubSessionListener, id: %{public}d", persistentId);
+        }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::NotifyStatusBarEnabledChange(bool enable)
@@ -1619,15 +1703,21 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         }
         ret = sceneSession->Disconnect();
         sceneSession->ClearSpecificSessionCbMap();
+        if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
+            auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
+            if (parentSession != nullptr) {
+                WLOGFD("Find parentSession, id: %{public}d", persistentId);
+                parentSession->RemoveSubSession(sceneSession->GetPersistentId());
+            } else {
+                WLOGFW("ParentSession is nullptr, id: %{public}d", persistentId);
+            }
+        }
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
             systemTopSceneSessionMap_.erase(persistentId);
             nonSystemFloatSceneSessionMap_.erase(persistentId);
-        }
-        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            auto sessionInfo = sceneSession->GetSessionInfo();
-            WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
+            UnregisterCreateSubSessionListener(persistentId);
         }
         return ret;
     };
@@ -1887,7 +1977,8 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     return abilityInfo;
 }
 
-WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
 {
     if (property == nullptr) {
         WLOGFE("property is nullptr");
@@ -4132,10 +4223,10 @@ sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObje
     return iter->second;
 }
 
-WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("BindDialogTarget permission denied!");
+        WLOGFE("BindDialogSessionTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (targetToken == nullptr) {

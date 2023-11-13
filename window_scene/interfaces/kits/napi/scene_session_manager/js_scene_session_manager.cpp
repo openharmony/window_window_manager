@@ -44,7 +44,7 @@ constexpr int WAIT_FOR_SECONDS = 2;
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
-const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
@@ -118,30 +118,30 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
 JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
     listenerFunc_ = {
-        { CREATE_SPECIFIC_SCENE_CB, &JsSceneSessionManager::ProcessCreateSpecificSessionRegister },
+        { CREATE_SYSTEM_SESSION_CB,     &JsSceneSessionManager::ProcessCreateSystemSessionRegister },
         { STATUS_BAR_ENABLED_CHANGE_CB, &JsSceneSessionManager::ProcessStatusBarEnabledChangeListener},
+        { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
+        { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
+        { SHOW_PIP_MAIN_WINDOW_CB,      &JsSceneSessionManager::ProcessShowPiPMainWindow },
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
-        { OUTSIDE_DOWN_EVENT_CB, &JsSceneSessionManager::ProcessOutsideDownEvent },
-        { SHIFT_FOCUS_CB, &JsSceneSessionManager::ProcessShiftFocus },
-        { SHOW_PIP_MAIN_WINDOW_CB, &JsSceneSessionManager::ProcessShowPiPMainWindow },
     };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
 
-void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sceneSession)
+void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFI("[NAPI]sceneSession is nullptr");
         return;
     }
-
-    WLOGFD("[NAPI]OnCreateSpecificSession");
-    auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
+    auto iter = jsCbMap_.find(CREATE_SYSTEM_SESSION_CB);
     if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
         return;
     }
 
+    WLOGFD("[NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
@@ -158,7 +158,7 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnCreateSpecificSession");
+    taskScheduler_->PostMainThreadTask(task, "OnCreateSystemSession");
 }
 
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
@@ -251,13 +251,13 @@ void JsSceneSessionManager::OnShowPiPMainWindow(int32_t persistentId)
     taskScheduler_->PostMainThreadTask(task, "OnShowPiPMainWindow, persistentId:" + std::to_string(persistentId));
 }
 
-void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
+void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
-    NotifyCreateSpecificSessionFunc func = [this](const sptr<SceneSession>& session) {
-        WLOGFD("NotifyCreateSpecificSessionFunc");
-        this->OnCreateSpecificSession(session);
+    NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
+        WLOGFD("NotifyCreateSystemSessionFunc");
+        this->OnCreateSystemSession(session);
     };
-    SceneSessionManager::GetInstance().SetCreateSpecificSessionListener(func);
+    SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
 }
 
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()

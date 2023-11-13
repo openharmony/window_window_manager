@@ -491,7 +491,7 @@ WMError WindowSessionImpl::RequestFocus() const
         WLOGFD("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SessionManager::GetInstance().RequestFocusStatus(GetPersistentId(), true);
+    return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
@@ -1564,7 +1564,7 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SessionManager::GetInstance().UpdateProperty(property_, action);
+    return SingletonContainer::Get<WindowAdapter>().UpdateSessionProperty(property_, action);
 }
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
@@ -1661,7 +1661,7 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
-    return SessionManager::GetInstance().SetSessionGravity(GetPersistentId(),
+    return SingletonContainer::Get<WindowAdapter>().SetSessionGravity(GetPersistentId(),
         static_cast<SessionGravity>(gravity), percent);
 }
 
