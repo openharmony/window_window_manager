@@ -39,7 +39,7 @@ ohos_shared_library("pip_napi") {
     "../../../../../wm:libwm",
   ]
 
-   external_deps = [
+  external_deps = [
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
