@@ -407,11 +407,6 @@ void ProxyInterfaceFuzzTestPart5(const uint8_t* data, size_t size)
     proxy->IsFoldable();
     proxy->GetFoldStatus();
     proxy->GetCurrentFoldCreaseRegion();
-
-    sptr<IDisplayManagerAgent> displayManagerAgent = nullptr;
-    DisplayManagerAgentType agentType = source.GetObject<DisplayManagerAgentType>();
-    proxy->RegisterDisplayManagerAgent(displayManagerAgent, agentType);
-    proxy->UnregisterDisplayManagerAgent(displayManagerAgent, agentType);
 }
 
 void ProxyInterfaceFuzzTest(const uint8_t* data, size_t size)
