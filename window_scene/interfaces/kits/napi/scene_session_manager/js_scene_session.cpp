@@ -1624,7 +1624,6 @@ napi_value JsSceneSession::OnSetShowRecent(napi_env env, napi_callback_info info
             WLOGFE("[NAPI]Failed to convert parameter to bool");
             return NapiGetUndefined(env);
         }
-        WLOGFI("[NAPI]set showRecent to %{public}u", showRecent);
     }
     session->SetShowRecent(showRecent);
     return NapiGetUndefined(env);
