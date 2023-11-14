@@ -1241,6 +1241,10 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (!accessTokenIdMaps_.isExist(windowProperty->GetWindowId(), IPCSkeleton::GetCallingTokenID())) {
+        WLOGI("Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
 
     if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE && 
         !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
