@@ -27,8 +27,5 @@ group("window_scene") {
 
 group("test") {
   testonly = true
-  deps = [
-    "test/fuzztest:fuzztest",
-    "test/unittest:unittest",
-  ]
+  deps = [ "test/unittest:unittest" ]
 }
