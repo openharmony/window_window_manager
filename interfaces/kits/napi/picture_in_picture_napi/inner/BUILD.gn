@@ -18,7 +18,6 @@ config("pip_manager_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "../../../../../wm/include",
-    "${arkui_path}/ace_engine/interface/inner_api/ace",
   ]
 }
 
