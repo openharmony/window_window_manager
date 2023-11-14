@@ -20,9 +20,8 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-namespace
-{
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};   
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -40,12 +39,10 @@ napi_value NapiThrowInvalidParam(napi_env env)
 
 JsPipManager::JsPipManager()
 {
-    
 }
 
 JsPipManager::~JsPipManager()
 {
-
 }
 
 void JsPipManager::Finalizer(napi_env env, void* data, void* hint)
@@ -101,9 +98,9 @@ napi_value JsPipManager::OnTriggerAction(napi_env env, napi_callback_info info)
         return NapiThrowInvalidParam(env);
     }
     std::string actionName = "";
-    if(!ConvertFromJsValue(env, argv[0], actionName)) {
+    if (!ConvertFromJsValue(env, argv[0], actionName)) {
         WLOGFE("[NAPI]Failed to convert params to string");
-         return NapiGetUndefined(env);
+        return NapiGetUndefined(env);
     }
     PictureInPictureManager::DoActionEvent(actionName);
     return NapiGetUndefined(env);
