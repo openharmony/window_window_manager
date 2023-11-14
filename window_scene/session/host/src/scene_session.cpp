@@ -83,6 +83,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
     SetCollaboratorType(info.collaboratorType_);
+    WLOGFD("Create SceneSession");
+}
+
+SceneSession::~SceneSession()
+{
+    WLOGD("~SceneSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -1079,16 +1085,16 @@ void SceneSession::FixRectByLimits(WindowLimits limits, WSRect& rect, float rati
         limits.maxHeight_ = SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr);
     }
     if (static_cast<uint32_t>(rect.height_) > limits.maxHeight_) {
-        rect.height_ = limits.maxHeight_;
+        rect.height_ = static_cast<int32_t>(limits.maxHeight_);
         rect.width_ = floor(rect.height_ * ratio);
     } else if (static_cast<uint32_t>(rect.width_) > limits.maxWidth_) {
-        rect.width_ = limits.maxWidth_;
+        rect.width_ = static_cast<int32_t>(limits.maxWidth_);
         rect.height_ = floor(rect.width_ / ratio);
     } else if (static_cast<uint32_t>(rect.width_) < limits.minWidth_) {
-        rect.width_ = limits.minWidth_;
+        rect.width_ = static_cast<int32_t>(limits.minWidth_);
         rect.height_ = ceil(rect.width_ / ratio);
     } else if (static_cast<uint32_t>(rect.height_) < limits.minHeight_) {
-        rect.height_ = limits.minHeight_;
+        rect.height_ = static_cast<int32_t>(limits.minHeight_);
         rect.width_ = ceil(rect.height_ * ratio);
     }
     if (isDecor) {

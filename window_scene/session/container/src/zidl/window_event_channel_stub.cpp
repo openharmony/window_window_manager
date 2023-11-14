@@ -135,7 +135,6 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
 
 int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleTransferSearchElementInfo begin");
     int32_t elementId = 0;
     if (!data.ReadInt32(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -162,7 +161,6 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
         WLOGFE("Failed to write count!");
         return ERR_INVALID_DATA;
     }
-    WLOGFD("HandleTransferSearchElementInfo count:%{public}d, infos.size:%{public}d", count, infos.size());
     for (auto &info : infos) {
         AccessibilityElementInfoParcel infoParcel(info);
         if (!reply.WriteParcelable(&infoParcel)) {
@@ -170,13 +168,11 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
             return ERR_INVALID_DATA;
         }
     }
-    WLOGFD("HandleTransferSearchElementInfo end, errorCode:%{public}d", static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleTransferSearchElementInfosByText begin");
     int32_t elementId = 0;
     if (!data.ReadInt32(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -210,13 +206,11 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
             return ERR_INVALID_DATA;
         }
     }
-    WLOGFD("HandleTransferSearchElementInfosByText end");
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleTransferFindFocusedElementInfo begin");
     int32_t elementId = 0;
     if (!data.ReadInt32(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -243,13 +237,11 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;
     }
-    WLOGFD("HandleTransferFindFocusedElementInfo end");
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleTransferFocusMoveSearch begin");
     int32_t elementId = 0;
     if (!data.ReadInt32(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -276,7 +268,6 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;
     }
-    WLOGFD("HandleTransferFocusMoveSearch end");
     return ERR_NONE;
 }
 }

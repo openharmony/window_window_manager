@@ -3685,5 +3685,12 @@ void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     needDefaultAnimation_= needDefaultAnimation;
 }
+
+WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

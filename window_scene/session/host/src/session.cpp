@@ -1803,7 +1803,6 @@ WSError Session::TransferFocusMoveSearch(int32_t elementId, int32_t direction, i
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return windowEventChannel_->TransferFindFocusedElementInfo(elementId, direction, baseParent, info);
+    return windowEventChannel_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
 }
-
 } // namespace OHOS::Rosen

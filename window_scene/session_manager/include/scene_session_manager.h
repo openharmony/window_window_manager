@@ -69,7 +69,8 @@ using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::s
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
-using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs)>;
+using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
+    std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -417,6 +418,7 @@ private:
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
+    sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
 };
 } // namespace OHOS::Rosen
 

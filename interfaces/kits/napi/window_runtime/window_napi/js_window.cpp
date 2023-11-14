@@ -3045,7 +3045,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Window set dragEnabled failed"));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "set dragEnabled failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] set dragEnabled end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());

@@ -66,7 +66,7 @@ void JsScreenListener::RemoveCallback(napi_env env, const std::string& type, nap
         static_cast<uint32_t>(listeners.size()));
 }
 
-void JsScreenListener::CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc)
+void JsScreenListener::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)
 {
     if (methodName.empty()) {
         WLOGFE("empty method name str, call method failed");

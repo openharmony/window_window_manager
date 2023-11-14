@@ -23,6 +23,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "mission_listener_interface.h"
+#include "window_manager_hilog.h"
 #include "ws_common.h"
 
 namespace OHOS {
@@ -67,6 +68,7 @@ private:
     void CallListeners(F func, Args&& ... args)
     {
         std::lock_guard<ffrt::mutex> guard(listenerLock_);
+        WLOG_I("CallListeners size: %{public}d ", static_cast<int32_t>(sessionListeners_.size()));
         for (auto listener : sessionListeners_) {
             if (listener) {
                 (listener->*func)(std::forward<Args>(args)...);

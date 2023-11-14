@@ -62,9 +62,12 @@
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
+#include "session/host/include/main_session.h"
+#include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
-#include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
+#include "session/host/include/sub_session.h"
+#include "session/host/include/system_session.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -829,6 +832,29 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
     return taskScheduler_->PostSyncTask(task);
 }
 
+sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
+    sptr<SceneSession> sceneSession = nullptr;
+    if (sessionInfo.isSystem_) {
+        sceneSession = new (std::nothrow) SCBSystemSession(sessionInfo, specificCb);
+        WLOGFI("Create SCBSystemSession, type: %{public}d", sessionInfo.windowType_);
+    } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+        sceneSession = new (std::nothrow) MainSession(sessionInfo, specificCb);
+        WLOGFI("Create MainSession");
+    } else if (property != nullptr && SessionHelper::IsSubWindow(property->GetWindowType())) {
+        sceneSession = new (std::nothrow) SubSession(sessionInfo, specificCb);
+        WLOGFI("Create SubSession, type: %{public}d", property->GetWindowType());
+    } else if (property != nullptr && SessionHelper::IsSystemWindow(property->GetWindowType())) {
+        sceneSession = new (std::nothrow) SystemSession(sessionInfo, specificCb);
+        WLOGFI("Create SystemSession, type: %{public}d", property->GetWindowType());
+    } else {
+        WLOGFE("Invalid window type");
+    }
+    return sceneSession;
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -841,12 +867,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
     }
 
-    sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
-    auto task = [this, sessionInfo, specificCb, property]() {
+    auto task = [this, sessionInfo, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, \
             appIndex: %{public}d, type %{public}u", sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_);
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCb);
+        sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
@@ -1363,6 +1388,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -1822,6 +1851,10 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -2759,12 +2792,8 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (!sceneSession->GetFocusable()) {
-        WLOGFD("session is not focusable!");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!IsSessionVisible(sceneSession)) {
-        WLOGFD("session is not visible!");
+    if (!sceneSession->GetFocusable() || !IsSessionVisible(sceneSession)) {
+        WLOGFD("session is not focusable or not visible!");
         return WSError::WS_DO_NOTHING;
     }
     if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
@@ -4152,7 +4181,8 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     }
     callingSession_->SetLastSafeRect(safeRect);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
-        SessionHelper::TransferToRect(safeRect), safeRect.height_, sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
+        SessionHelper::TransferToRect(safeRect), safeRect.height_,
+        sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
     WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
     callingSession_->NotifyOccupiedAreaChangeInfo(info);

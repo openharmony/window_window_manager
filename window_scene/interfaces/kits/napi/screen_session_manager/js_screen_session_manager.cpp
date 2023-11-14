@@ -66,6 +66,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UnRegisterShutdownCallback);
     BindNativeFunction(env, exportObj, "getPhyScreenProperty", moduleName,
         JsScreenSessionManager::GetPhyScreenProperty);
+    BindNativeFunction(env, exportObj, "notifyScreenLockEvent", moduleName,
+        JsScreenSessionManager::NotifyScreenLockEvent);
     return NapiGetUndefined(env);
 }
 
@@ -330,6 +332,36 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
         return NapiGetUndefined(env);
     }
     ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::NotifyScreenLockEvent(napi_env env, napi_callback_info info)
+{
+    WLOGD("Notify screen lock event.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenLockEvent(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
+    const napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t event;
+    if (!ConvertFromJsValue(env, argv[0], event)) {
+        WLOGFE("[NAPI]Failed to convert parameter to display event");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
 }
 
