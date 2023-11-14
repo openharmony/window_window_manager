@@ -221,7 +221,7 @@ void JsTransitionController::AnimationForHidden()
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsTransitionController::CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc)
+void JsTransitionController::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)
 {
     WLOGI("Call js function:%{public}s.", methodName.c_str());
     auto self = jsTransControllerObj_.lock();

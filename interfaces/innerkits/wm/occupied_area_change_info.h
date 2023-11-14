@@ -29,8 +29,13 @@ public:
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
         : type_(type), rect_(rect), safeHeight_(safeHeight) {};
-    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight, double textFieldPositionY, double textFieldHeight)
-    : type_(type), rect_(rect), safeHeight_(safeHeight), textFieldPositionY_(textFieldPositionY), textFieldHeight_(textFieldHeight) {};
+    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect,
+                            double textFieldPositionY, double textFieldHeight)
+        : type_(type), rect_(rect), textFieldPositionY_(textFieldPositionY), textFieldHeight_(textFieldHeight) {};
+    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight,
+                           double textFieldPositionY, double textFieldHeight)
+        : type_(type), rect_(rect), safeHeight_(safeHeight),
+          textFieldPositionY_(textFieldPositionY), textFieldHeight_(textFieldHeight) {};
     ~OccupiedAreaChangeInfo() = default;
 
     virtual bool Marshalling(Parcel& parcel) const

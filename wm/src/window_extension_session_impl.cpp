@@ -250,48 +250,44 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
 WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
     int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("NotifySearchElementInfoByAccessibilityId begin, eleId:%{public}d, mode:%{public}d, baseParent:%{public}d",
-        elementId, mode, baseParent);
     if (uiContent_ == nullptr) {
         WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
+    uiContent_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int32_t elementId, const std::string& text,
     int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    WLOGFD("NotifySearchElementInfosByText begin, elementId:%{public}d, text:%{public}s, baseParent:%{public}d",
-        elementId, text.c_str(), baseParent);
     if (uiContent_ == nullptr) {
         WLOGFE("NotifySearchElementInfosByText error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
+    uiContent_->SearchElementInfosByText(elementId, text, baseParent, infos);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("NotifyFindFocusedElementInfo begin, elementId:%{public}d, focusType:%{public}d, baseParent:%{public}d",
-        elementId, focusType, baseParent);
     if (uiContent_ == nullptr) {
         WLOGFE("NotifyFindFocusedElementInfo error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
+    uiContent_->FindFocusedElementInfo(elementId, focusType, baseParent, info);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
-    WLOGFD("NotifyFocusMoveSearch begin, elementId:%{public}d, direction:%{public}d, baseParent:%{public}d",
-        elementId, direction, baseParent);
     if (uiContent_ == nullptr) {
         WLOGFE("NotifyFocusMoveSearch error, no uiContent_");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
+    uiContent_->FocusMoveSearch(elementId, direction, baseParent, info);
     return WSError::WS_OK;
 }
 

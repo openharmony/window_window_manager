@@ -42,7 +42,7 @@ public:
     void OnDisplayModeChanged(FoldDisplayMode displayMode) override;
 
 private:
-    void CallJsMethod(const std::string& methodName, napi_value const* argv = nullptr, size_t argc = 0);
+    void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);
     napi_env env_ = nullptr;
     std::mutex mtx_;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
