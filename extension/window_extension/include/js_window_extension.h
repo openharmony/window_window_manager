@@ -84,7 +84,7 @@ public:
     virtual void OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 private:
     void GetSrcPath(std::string& srcPath) const;
-    napi_value CallJsMethod(const char* name, napi_value const* argv = nullptr, size_t argc = 0) const;
+    napi_value CallJsMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0) const;
     void OnWindowCreated() const;
     void BindContext(napi_env env, napi_value obj);
 

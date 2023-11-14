@@ -1242,7 +1242,8 @@ void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
             WLOGFE("[NAPI]this target session info is nullptr");
         }
         napi_value argv[] = {jsSessionInfo};
-        napi_call_function(env_ref, NapiGetUndefined(env_ref), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        napi_call_function(env_ref, NapiGetUndefined(env_ref),
+            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task);
 }

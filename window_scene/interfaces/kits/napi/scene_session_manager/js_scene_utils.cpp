@@ -605,7 +605,7 @@ struct AsyncInfo {
     std::function<void()> func;
 };
 
-void NapiAsyncWork(napi_env env, std::function<void()> task)
+static void NapiAsyncWork(napi_env env, std::function<void()> task)
 {
     napi_value resource = nullptr;
     AsyncInfo* info = new AsyncInfo();
