@@ -15,6 +15,8 @@
 
 #include "mock_session_manager_service.h"
 
+#include <fcntl.h>
+#include <securec.h>
 #include <unistd.h>
 
 #include <bundle_mgr_interface.h>
@@ -37,6 +39,9 @@
 #include "ws_common.h"
 #include "session_manager_service_interface.h"
 #include "scene_session_manager_interface.h"
+
+#define PATH_LEN 1024
+#define O_RDWR   02
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +73,8 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
         return;
     }
     WLOGFI("SessionManagerService died, restart foundation now!");
+    uint32_t pid = getpid();
+    MockSessionManagerService::WriteStringToFile(pid, "0");
     _exit(0);
 }
 
@@ -277,6 +284,24 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
         }
     }
     return false;
+}
+
+void MockSessionManagerService::WriteStringToFile(uint32_t pid, const char* str)
+{
+    char file[PATH_LEN] = {0};
+    if (snprintf_s(file, PATH_LEN, PATH_LEN - 1, "/proc/%d/unexpected_die_catch", pid) == -1) {
+        WLOGFI("failed to build path for %d.", pid);
+    }
+    int fd = open(file, O_RDWR);
+    if (fd == -1) {
+        return;
+    }
+    if (write(fd, str, strlen(str)) < 0) {
+        WLOGFI("failed to write 0 for %s", file);
+        close(fd);
+        return;
+    }
+    close(fd);
 }
 } // namespace Rosen
 } // namespace OHOS
