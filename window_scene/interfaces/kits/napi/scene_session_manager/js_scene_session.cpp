@@ -1616,7 +1616,17 @@ napi_value JsSceneSession::OnSetShowRecent(napi_env env, napi_callback_info info
         WLOGFE("[NAPI]session is null");
         return NapiGetUndefined(env);
     }
-    session->SetShowRecent(true);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    bool showRecent = true;
+    if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[0], showRecent)) {
+            WLOGFE("[NAPI]Failed to convert parameter to bool");
+            return NapiGetUndefined(env);
+        }
+    }
+    session->SetShowRecent(showRecent);
     return NapiGetUndefined(env);
 }
 
