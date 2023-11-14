@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include <optional>
-
+#include <shared_mutex>
 #include <ability_context.h>
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
@@ -192,6 +192,8 @@ protected:
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    // protect windowSessionMap_
+    static std::shared_mutex windowSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;

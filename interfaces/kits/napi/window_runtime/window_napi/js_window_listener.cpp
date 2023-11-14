@@ -29,7 +29,7 @@ JsWindowListener::~JsWindowListener()
     WLOGI("[NAPI]~JsWindowListener");
 }
 
-void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* argv, size_t argc)
+void JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
     WLOGFD("[NAPI]CallJsMethod methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {

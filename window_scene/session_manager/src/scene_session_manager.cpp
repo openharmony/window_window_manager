@@ -2792,12 +2792,8 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (!sceneSession->GetFocusable()) {
-        WLOGFD("session is not focusable!");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!IsSessionVisible(sceneSession)) {
-        WLOGFD("session is not visible!");
+    if (!sceneSession->GetFocusable() || !IsSessionVisible(sceneSession)) {
+        WLOGFD("session is not focusable or not visible!");
         return WSError::WS_DO_NOTHING;
     }
     if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||

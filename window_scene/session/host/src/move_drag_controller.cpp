@@ -374,9 +374,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     FixTranslateByLimits(tranX, tranY);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         targetRect.posX_ += tranX;
-        targetRect.width_ -= static_cast<uint32_t>(tranX);
+        targetRect.width_ -= tranX;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        targetRect.width_ += static_cast<uint32_t>(tranX);
+        targetRect.width_ += tranX;
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
         targetRect.posY_ += tranY;
@@ -459,18 +459,18 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
-        minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_ - limits_.maxWidth_);
-        maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_ - limits_.minWidth_);
+        minTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.maxWidth_);
+        maxTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.minWidth_);
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        minTranX_ = static_cast<int32_t>(limits_.minWidth_ - moveDragProperty_.originalRect_.width_);
-        maxTranX_ = static_cast<int32_t>(limits_.maxWidth_ - moveDragProperty_.originalRect_.width_);
+        minTranX_ = static_cast<int32_t>(limits_.minWidth_) - moveDragProperty_.originalRect_.width_;
+        maxTranX_ = static_cast<int32_t>(limits_.maxWidth_) - moveDragProperty_.originalRect_.width_;
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
-        minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_ - limits_.maxHeight_);
-        maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_ - limits_.minHeight_);
+        minTranY_ = moveDragProperty_.originalRect_.height_ - static_cast<int32_t>(limits_.maxHeight_);
+        maxTranY_ = moveDragProperty_.originalRect_.height_ - static_cast<int32_t>(limits_.minHeight_);
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        minTranY_ = static_cast<int32_t>(limits_.minHeight_ - moveDragProperty_.originalRect_.height_);
-        maxTranY_ = static_cast<int32_t>(limits_.maxHeight_ - moveDragProperty_.originalRect_.height_);
+        minTranY_ = static_cast<int32_t>(limits_.minHeight_) - moveDragProperty_.originalRect_.height_;
+        maxTranY_ = static_cast<int32_t>(limits_.maxHeight_) - moveDragProperty_.originalRect_.height_;
     }
 }
 

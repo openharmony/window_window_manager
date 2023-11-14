@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 #include "iremote_object.h"
 #include "platform/image_native/pixel_map.h"
