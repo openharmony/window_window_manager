@@ -16,9 +16,7 @@ import("../../../../../windowmanager_aafwk.gni")
 
 config("pip_manager_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "../../../../../wm/include",
-  ]
+  include_dirs = [ "../../../../../wm/include", ]
 }
 
 ohos_shared_library("pip_napi") {
