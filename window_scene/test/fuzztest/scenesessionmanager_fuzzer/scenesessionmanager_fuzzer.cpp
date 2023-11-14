@@ -79,6 +79,16 @@ std::pair<sptr<ISceneSessionManager>, sptr<IRemoteObject>> GetProxy()
     return {sceneSessionManagerProxy, remoteObject3};
 }
 
+template<class T>
+T* UnmarshallingDataTo(const uint8_t* data, size_t size)
+{
+    MessageParcel parcel;
+    if (data) {
+        parcel.WriteBuffer(data, size);
+    }
+    return T::Unmarshalling(parcel);
+}
+
 void IPCFuzzTest(const uint8_t* data, size_t size)
 {
     auto [proxy, remoteObject] = GetProxy();
@@ -226,7 +236,7 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
     int32_t persistentId = source.GetObject<int32_t>();
     proxy->DestroyAndDisconnectSpecificSession(persistentId);
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = UnmarshallingDataTo<WindowSessionProperty>(data, size);
     WSPropertyChangeAction action = source.GetObject<WSPropertyChangeAction>();
     proxy->UpdateProperty(property, action);
 
@@ -245,7 +255,9 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
     bool enable = source.GetObject<bool>();
     proxy->SetGestureNavigaionEnabled(enable);
 
-    std::vector<sptr<AccessibilityWindowInfo>> windowInfos;
+    std::vector<sptr<AccessibilityWindowInfo>> windowInfos{
+        UnmarshallingDataTo<AccessibilityWindowInfo>(data, size)
+    };
     proxy->GetAccessibilityWindowInfo(windowInfos);
 }
 
@@ -330,49 +342,11 @@ void ProxyInterfaceFuzzTestPart4(const uint8_t* data, size_t size)
 
     DataSource source(data, size);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = UnmarshallingDataTo<AAFwk::SessionInfo>(data, size);
     bool needStartCaller = source.GetObject<bool>();
     proxy->TerminateSessionNew(abilitySessionInfo, needStartCaller);
 
-    sptr<ISessionChangeListener> sessionChangeListener = nullptr;
-    proxy->RegisterSessionListener(sessionChangeListener);
-    proxy->UnregisterSessionListener();
-
-    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
-    WindowManagerAgentType agentType = source.GetObject<WindowManagerAgentType>();
-    proxy->RegisterWindowManagerAgent(agentType, windowManagerAgent);
-    proxy->UnregisterWindowManagerAgent(agentType, windowManagerAgent);
-
-    sptr<ISessionListener> sessionListener = nullptr;
-    proxy->RegisterSessionListener(sessionListener);
-    proxy->UnRegisterSessionListener(sessionListener);
-
-    int32_t type = source.GetObject<int32_t>();
-    sptr<AAFwk::IAbilityManagerCollaborator> impl = nullptr;
-    proxy->RegisterIAbilityManagerCollaborator(type, impl);
-    proxy->UnregisterIAbilityManagerCollaborator(type);
-}
-
-void ProxyInterfaceFuzzTestPart5(const uint8_t* data, size_t size)
-{
-    auto [proxy, remoteObject] = GetProxy();
-    if (!proxy || !remoteObject) {
-        return;
-    }
-
-    DataSource source(data, size);
-
-    sptr<ISessionStage> sessionStage = nullptr;
-    sptr<IWindowEventChannel> eventChannel = nullptr;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    int32_t persistentId = source.GetObject<int32_t>();
-    sptr<ISession> session = nullptr;
-
-    proxy->CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, session, token);
-
     std::string label = source.GetString();
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     proxy->SetSessionLabel(token, label);
@@ -381,8 +355,8 @@ void ProxyInterfaceFuzzTestPart5(const uint8_t* data, size_t size)
     ContinueState continueState = source.GetObject<ContinueState>();
     proxy->SetSessionContinueState(token, continueState);
 
-    uint64_t persistentId2 = source.GetObject<uint64_t>();
-    proxy->BindDialogTarget(persistentId2, token);
+    uint64_t persistentId = source.GetObject<uint64_t>();
+    proxy->BindDialogTarget(persistentId, token);
 
     proxy->PendingSessionToForeground(token);
     proxy->PendingSessionToBackgroundForDelegator(token);
@@ -395,7 +369,6 @@ void ProxyInterfaceFuzzTest(const uint8_t* data, size_t size)
     ProxyInterfaceFuzzTestPart2(data, size);
     ProxyInterfaceFuzzTestPart3(data, size);
     ProxyInterfaceFuzzTestPart4(data, size);
-    ProxyInterfaceFuzzTestPart5(data, size);
 }
 }
 
