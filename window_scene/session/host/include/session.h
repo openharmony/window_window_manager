@@ -306,6 +306,7 @@ protected:
     bool CheckDialogOnForeground();
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    bool IsTopDialog() const;
 
     using Task = std::function<void()>;
     void PostTask(Task&& task, int64_t delayTime = 0);
