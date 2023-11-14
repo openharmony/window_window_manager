@@ -11,12 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("fuzztest") {
-  testonly = true
-
-  deps = [
-    "scenesessionmanager_fuzzer:fuzztest",
-    "screensessionmanager_fuzzer:fuzztest",
-    "sessioninterface_fuzzer:fuzztest",
-  ]
-}
+FUZZ
