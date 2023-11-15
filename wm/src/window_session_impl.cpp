@@ -747,7 +747,6 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         WLOGFE("This is not main window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
