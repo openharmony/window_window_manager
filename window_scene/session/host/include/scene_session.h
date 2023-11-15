@@ -44,6 +44,7 @@ using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<Scene
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
+using GetAINavigationBarArea = std::function<WSRect()>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -73,6 +74,7 @@ public:
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
+        GetAINavigationBarArea onGetAINavigationBarArea_;
     };
 
     // callback for notify SceneBoard
@@ -131,6 +133,7 @@ public:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError OnShowWhenLocked(bool showWhenLocked);
