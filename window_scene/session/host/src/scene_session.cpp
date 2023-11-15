@@ -999,6 +999,17 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return WSError::WS_OK;
         }
     }
+    
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_PIP && WindowHelper::IsPipWindow(property->GetWindowType())) {
+        WLOGFD("WINDOW_MODE_PIP");
+        if (!moveDragController_) {
+            WLOGE("moveDragController_ is null");
+            return Session::TransferPointerEvent(pointerEvent);
+        }
+        if (moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
+            return WSError::WS_OK;
+        }
+    }
 
     bool raiseEnabled = (WindowHelper::IsSubWindow(property->GetWindowType()) ||
         property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && property->GetRaiseEnabled() &&
@@ -1184,6 +1195,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
+    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1227,6 +1241,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         leashWinSurfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("PipWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
