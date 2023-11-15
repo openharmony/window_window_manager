@@ -106,6 +106,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
     BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
+    BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
+        JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     return NapiGetUndefined(env);
 }
 
@@ -465,6 +467,13 @@ napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback
     WLOGI("[NAPI]UpdateMaximizeMode");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateMaximizeMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]NotifyAINavigationBarShowStatus");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyAINavigationBarShowStatus(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1514,4 +1523,34 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
     SceneSessionManager::GetInstance().UpdateMaximizeMode(persistentId, isMaximize);
     return NapiGetUndefined(env);
 }
+
+napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isVisible = false;
+    if (!ConvertFromJsValue(env, argv[0], isVisible)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isVisible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WSRect barArea;
+    if (argv[1] == nullptr || !ConvertRectInfoFromJs(env, argv[1], barArea)) {
+        WLOGFE("[NAPI]Failed to convert parameter to barArea");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea);
+    return NapiGetUndefined(env);
+}
+
 } // namespace OHOS::Rosen

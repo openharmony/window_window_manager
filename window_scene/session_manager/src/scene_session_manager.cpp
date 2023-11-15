@@ -807,6 +807,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onSessionTouchOutside_ = std::bind(&SceneSessionManager::NotifySessionTouchOutside,
         this, std::placeholders::_1);
+    specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
     return specificCb;
 }
 
@@ -4698,7 +4699,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
     for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         ret = UpdateSessionAvoidAreaIfNeed(
@@ -4741,6 +4742,38 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 
     taskScheduler_->PostAsyncTask(task);
     return;
+}
+
+WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea)
+{
+    WLOGFI("NotifyAINavigationBarShowStatus: isVisible: %{public}u, area{%{public}d,%{public}d,%{public}d,%{public}d}",
+        isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
+    auto task = [this, isVisible, barArea]() {
+        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarArea_ != barArea) {
+            isAINavigationBarVisible_ = isVisible;
+            currAINavigationBarArea_ = barArea;
+            if (!isVisible && !barArea.IsEmpty()) {
+                WLOGFD("NotifyAINavigationBarShowStatus: barArea should be empty if invisible");
+                currAINavigationBarArea_ = WSRect();
+            }
+            for (auto persistentId : avoidAreaListenerSessionSet_) {
+                auto sceneSession = GetSceneSession(persistentId);
+                if (sceneSession == nullptr) {
+                    continue;
+                }
+                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
+                UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
+                                             AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSRect SceneSessionManager::GetAINavigationBarArea()
+{
+    return currAINavigationBarArea_;
 }
 
 WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)

@@ -63,6 +63,7 @@ public:
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
+    static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -96,6 +97,7 @@ private:
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
+    napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
