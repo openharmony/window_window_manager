@@ -724,14 +724,16 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
     }
-    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-          system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
         if (display) {
             vpr = display->GetVirtualPixelRatio();
         }
         avoidArea.topRect_.height_ = vpr * 32;
-        return avoidArea;
+        return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
