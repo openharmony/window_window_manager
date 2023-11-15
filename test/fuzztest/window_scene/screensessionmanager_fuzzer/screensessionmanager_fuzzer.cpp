@@ -301,7 +301,6 @@ void ProxyInterfaceFuzzTestPart2(const uint8_t* data, size_t size)
     screenOption.width_ = source.GetObject<uint32_t>();
     screenOption.height_ = source.GetObject<uint32_t>();
     screenOption.density_ = source.GetObject<float>();
-    screenOption.surface_ = nullptr;
     screenOption.flags_ = source.GetObject<int32_t>();
     screenOption.isForShot_ = source.GetObject<bool>();
     sptr<IRemoteObject> displayManagerAgent = nullptr;
@@ -318,8 +317,8 @@ void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)
     DataSource source(data, size);
 
     ScreenId screenId = source.GetObject<ScreenId>();
-    sptr<IBufferProducer> surface = nullptr;
-    proxy->SetVirtualScreenSurface(screenId, surface);
+    sptr<IBufferProducer> bufferProducer = nullptr;
+    proxy->SetVirtualScreenSurface(screenId, bufferProducer);
     proxy->DestroyVirtualScreen(screenId);
 
     ScreenId mainScreenId = source.GetObject<ScreenId>();
