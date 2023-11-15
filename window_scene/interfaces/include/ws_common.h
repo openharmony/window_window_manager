@@ -161,6 +161,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
+    uint64_t screenId_ = 0;
 
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
     std::shared_ptr<AAFwk::Want> closeAbilityWant;

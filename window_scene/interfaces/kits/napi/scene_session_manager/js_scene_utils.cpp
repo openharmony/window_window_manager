@@ -180,6 +180,19 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
     return true;
 }
 
+bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, JsScreenId) != napi_undefined) {
+        int32_t screenId = 0;
+        if (!ConvertFromJsValue(env, JsScreenId, screenId)) {
+            WLOGFE("[NAPI]Failed to convert parameter to screenId");
+            return false;
+        }
+        sessionInfo.screenId_ = static_cast<uint64_t>(screenId);
+    }
+    return true;
+}
+
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -198,6 +211,8 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
     napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
 
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
@@ -221,6 +236,9 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
         return false;
     }
     if (!IsJsSessionTypeUndefind(env, jsSessionType, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsScreenIdUndefind(env, jsSessionType, sessionInfo)) {
         return false;
     }
     return true;
@@ -394,6 +412,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callState_)));
     napi_set_named_property(env, objValue, "windowMode",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.windowMode)));
+    napi_set_named_property(env, objValue, "screenId",
+        CreateJsValue(env, static_cast<int32_t>(sessionInfo.screenId_)));
     return objValue;
 }
 
