@@ -151,7 +151,7 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnCreateSpecificSession");
 }
 
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
@@ -167,7 +167,7 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
         napi_value argv[] = {CreateJsValue(env, enable)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnStatusBarEnabledUpdate, Enable" + std::to_string(enable));
 }
 
 void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
@@ -183,7 +183,7 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
         napi_value argv[] = {CreateJsValue(env, enable)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnGestureNavigationEnabledUpdate" + std::to_string(enable));
 }
 
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
@@ -208,7 +208,8 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
         napi_value argv[] = {objValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    std::string info = "OnOutsideDownEvent:[" + std::to_string(x) + ", " + std::to_string(y) + "]";
+    taskScheduler_->PostMainThreadTask(task, info);
 }
 
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
@@ -224,7 +225,7 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
         napi_value argv[] = {CreateJsValue(env, persistentId)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
 }
 
 void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
