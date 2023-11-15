@@ -221,6 +221,10 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
+        if (!parcel.WriteBool(backgroundswitch)) {
+            return false;
+        }
+        
         return true;
     }
 
@@ -231,7 +235,6 @@ struct SystemSessionConfig : public Parcelable {
             return nullptr;
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
-        config->backgroundswitch = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
@@ -242,6 +245,7 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->backgroundswitch = parcel.ReadBool();
         return config;
     }
 };
