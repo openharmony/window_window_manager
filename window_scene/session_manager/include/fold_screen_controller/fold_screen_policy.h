@@ -33,7 +33,7 @@ public:
     virtual ScreenId GetCurrentScreenId();
     virtual void LockDisplayStatus(bool locked);
 
-    ScreenId screenId_;
+    ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
