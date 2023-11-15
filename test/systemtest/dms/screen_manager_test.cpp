@@ -64,6 +64,8 @@ public:
     const uint32_t maxWaitCount_ = 20;
     const uint32_t execTimes_ = 10;
     const uint32_t acquireFrames_ = 1;
+    const uint32_t resizeScreenWidth = 1000;
+    const uint32_t resizeScreenHeight = 1000;
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time
     static constexpr uint32_t TEST_SLEEP_S_LONG = 10; // test sleep for 10 seconds
     static constexpr long TIME_OUT = 1000;
@@ -1029,6 +1031,41 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     sleep(TEST_SLEEP_S);
 
     (void)system("param set rosen.uni.partialrender.enabled 4");
+}
+
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+    std::vector<ExpandOption> options = {{defaultDisplayId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
+    sleep(TEST_SLEEP_S);
+
+    DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualDisplayId, resizeScreenWidth, resizeScreenHeight);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_OK, res);
+
+    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
+    ASSERT_EQ(resizeScreenWidth, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeight, screen->GetHeight());
+
+    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_OK, res);
 }
 }
 } // namespace Rosen
