@@ -18,6 +18,8 @@
 
 #include <iremote_proxy.h>
 #include <list>
+#include <map>
+
 #include "accessibility_element_info.h"
 #include "interfaces/include/ws_common.h"
 #include "window_event_channel_interface.h"
@@ -43,6 +45,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
+    WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent) override;
 private:
     static inline BrokerDelegator<WindowEventChannelProxy> delegator_;
 };
