@@ -30,17 +30,25 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionInterfaceFuzzTest"};
 }
 
+static std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext =
+    std::make_shared<AbilityRuntime::AbilityContextImpl>();
+static sptr<WindowSessionImpl> savedWindow;
+
 std::pair<sptr<ISession>, sptr<IRemoteObject>> GetProxy()
 {
+    if (savedWindow) {
+        savedWindow->Destroy();
+        savedWindow = nullptr;
+    }
+
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("test");
+    option->SetWindowName("SessionInterfaceFuzzTest");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
 
-    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
-
     sptr<WindowSessionImpl> window = new WindowSceneSessionImpl(option);
-    if (window->Create(abilityContext, nullptr) != WMError::WM_OK) {
-        WLOGFE("Failed to create window");
+    WMError err = window->Create(abilityContext, nullptr);
+    if (err != WMError::WM_OK) {
+        WLOGFE("Failed to create window: %{public}d", static_cast<int>(err));
         return {nullptr, nullptr};
     }
 
@@ -51,6 +59,7 @@ std::pair<sptr<ISession>, sptr<IRemoteObject>> GetProxy()
     }
 
     sptr<SessionProxy> proxy = new SessionProxy(session->AsObject());
+    savedWindow = window;
 
     WLOGFD("GetProxy success");
 
