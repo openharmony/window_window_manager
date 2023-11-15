@@ -548,9 +548,7 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
 
 DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
-    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
-        screenId, width, height);
-    return DMError::DM_OK;
+    return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
 }
 
 DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)

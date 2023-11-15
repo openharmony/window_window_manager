@@ -1217,6 +1217,26 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId scre
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
+        screenId, width, height);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("ResizeVirtualScreen: no such screen.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGFE("ResizeVirtualScreen: No corresponding rsId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    rsInterface_.ResizeVirtualScreen(rsScreenId, width, height);
+    screenSession->Resize(width, height);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE);
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
     if (!SessionPermission::IsSystemCalling()) {

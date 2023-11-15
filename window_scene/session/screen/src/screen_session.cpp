@@ -798,4 +798,14 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
     property_.SetOffsetY(offsetY);
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
 }
+
+void ScreenSession::Resize(uint32_t width, uint32_t height)
+{
+    sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
+    if (screenMode != nullptr) {
+        screenMode->width_ = width;
+        screenMode->height_ = height;
+        UpdatePropertyByActiveMode;
+    }
+}
 } // namespace OHOS::Rosen
