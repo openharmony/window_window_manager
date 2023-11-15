@@ -5126,13 +5126,13 @@ bool SceneSessionManager::CheckCollaboratorType(int32_t type)
     return true;
 }
 
-bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
+BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 {
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
         WLOGFE("CheckIfReuseSession abilityInfo is nullptr!");
-        return false;
+        return BrokerStates::BROKER_UNKOWN;
     }
     sessionInfo.abilityInfo = abilityInfo;
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
@@ -5143,9 +5143,9 @@ bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     }
     if (!CheckCollaboratorType(collaboratorType)) {
         WLOGFE("CheckIfReuseSession not collaborator!");
-        return false;
+        return BrokerStates::BROKER_UNKOWN;
     }
-    NotifyStartAbility(collaboratorType, sessionInfo);
+    BrokerStates resultValue = NotifyStartAbility(collaboratorType, sessionInfo);
     sessionInfo.collaboratorType_ = collaboratorType;
     sessionInfo.sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
@@ -5153,16 +5153,16 @@ bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         sessionInfo.reuse = true;
     }
     WLOGFI("CheckIfReuseSession end");
-    return true;
+    return resultValue;
 }
 
-void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
+BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifyStartAbility");
     auto iter = collaboratorMap_.find(collaboratorType);
     if (iter == collaboratorMap_.end()) {
         WLOGFE("Fail to found collaborator with type: %{public}d", collaboratorType);
-        return;
+        return BrokerStates::BROKER_UNKOWN;
     }
     if (sessionInfo.want == nullptr) {
         WLOGFI("sessionInfo.want is nullptr, init");
@@ -5179,11 +5179,18 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
             WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
-            return;
+            return BrokerStates::BROKER_UNKOWN;
         }
-        collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
+        int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), accessTokenIDEx);
+        WLOGFI("NotifyStartAbility ret: %{public}d", ret);
+        if (ret == 0) {
+            return BrokerStates::BROKER_STARTED;
+        } else {
+            return BrokerStates::BROKER_NOT_START;
+        }
     }
+    return BrokerStates::BROKER_UNKOWN;
 }
 
 void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
@@ -5293,7 +5300,12 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     }
     if (sessionAffinity.empty()) {
         WLOGFI("PreHandleCollaborator sessionAffinity: %{public}s", sessionAffinity.c_str());
-        NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+        BrokerStates notifyReturn = NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+        if (notifyReturn != BrokerStates::BROKER_STARTED) {
+            WLOGFI("PreHandleCollaborator cant notify");
+            return;
+        } 
+
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
         WLOGFI("broker persistentId: %{public}d",

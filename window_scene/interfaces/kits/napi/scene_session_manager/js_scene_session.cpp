@@ -1183,7 +1183,11 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     if (info.persistentId_ == 0) {
-        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        if (result == BrokerStates::BROKER_NOT_START) {
+            WLOGE("[NAPI] The BrokerStates is not opened");
+            return;
+        }
         sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
             WLOGFI("session need to be reusesd.");
