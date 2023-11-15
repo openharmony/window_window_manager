@@ -56,6 +56,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "eventhandler:libeventhandler",
     "graphic_2d:window_animation",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",

@@ -24,6 +24,7 @@
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_common.h"
+#include "hitrace_meter.h"
 
 namespace OHOS::Rosen {
 enum class JsSessionType : uint32_t {
@@ -181,7 +182,7 @@ class MainThreadScheduler {
 public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
-    void PostMainThreadTask(Task&& localTask, int64_t delayTime = 0);
+    void PostMainThreadTask(Task&& localTask, std::string traceInfo = "Unnamed", int64_t delayTime = 0);
 private:
     void GetMainEventHandler();
     napi_env env_;
