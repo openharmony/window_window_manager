@@ -41,6 +41,7 @@ config("session_public_config") {
 ohos_shared_library("scene_session") {
   sources = [
     "container/src/parcel/accessibility_element_info_parcel.cpp",
+    "container/src/parcel/accessibility_event_info_parcel.cpp",
     "container/src/window_event_channel.cpp",
     "container/src/zidl/session_stage_proxy.cpp",
     "container/src/zidl/session_stage_stub.cpp",

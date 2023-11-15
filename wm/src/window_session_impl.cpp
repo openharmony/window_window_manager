@@ -44,6 +44,9 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -1706,6 +1709,12 @@ void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& p
 WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 {
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
