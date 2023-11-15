@@ -553,6 +553,13 @@ DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, ui
     return DMError::DM_OK;
 }
 
+DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshRate)
+{
+    WLOGFI("SetVirtualScreenRefreshRate, screenId: %{public}" PRIu64", refreshRate: %{public}u.",
+        screenId, refreshRate);
+    return DMError::DM_OK;
+}
+
 DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenBufferRotation(screenId, rotation);
