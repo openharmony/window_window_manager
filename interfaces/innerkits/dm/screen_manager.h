@@ -188,6 +188,15 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
 
     /**
+     * @brief Set virtual screen refresh rate.
+     *
+     * @param screenId screen id.
+     * @param refreshRate the new refresh rate.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshRate);
+
+    /**
      * @brief Set buffer auto rotate
      *
      * @param screenId Screen id.
