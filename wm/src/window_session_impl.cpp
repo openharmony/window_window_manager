@@ -1692,6 +1692,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
                 system::GetParameter("const.product.devicetype", "unknown") == "phone") {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
+                continue;
             }
             listener->OnSizeChange(info);
         }
