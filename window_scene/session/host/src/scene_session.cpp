@@ -750,8 +750,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-          system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         return;
     }
     std::vector<sptr<SceneSession>> inputMethodVector =
