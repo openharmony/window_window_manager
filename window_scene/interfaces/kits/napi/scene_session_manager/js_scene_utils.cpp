@@ -641,10 +641,11 @@ inline void MainThreadScheduler::GetMainEventHandler()
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
 }
 
-void MainThreadScheduler::PostMainThreadTask(Task&& localTask, int64_t delayTime)
+void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
 {
     GetMainEventHandler();
-    auto task = [env = env_, localTask] () {
+    auto task = [env = env_, localTask, traceInfo] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         localTask();
