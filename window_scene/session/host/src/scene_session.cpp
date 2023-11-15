@@ -726,7 +726,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
         if (display) {
@@ -752,7 +752,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         return;
     }
