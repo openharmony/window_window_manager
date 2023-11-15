@@ -44,82 +44,82 @@ PictureInPictureManager::~PictureInPictureManager()
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
 {
     WLOGD("PutPipControllerInfo is called, windowId %{public}u", windowId);
-    PictureInPictureManager::windowToControllerMap_.insert(std::make_pair(windowId, pipController));
+    windowToControllerMap_.insert(std::make_pair(windowId, pipController));
 }
 
 void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 {
     WLOGD("RemovePipControllerInfo is called, windowId %{public}u", windowId);
-    PictureInPictureManager::windowToControllerMap_.erase(windowId);
+    windowToControllerMap_.erase(windowId);
 }
 
 void PictureInPictureManager::SetPipWindowState(PipWindowState pipWindowState)
 {
     WLOGD("SetPipWindowState is called, state %{public}u", pipWindowState);
     std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
-    PictureInPictureManager::pipWindowState_ = pipWindowState;
+    pipWindowState_ = pipWindowState;
 }
 
 PipWindowState PictureInPictureManager::GetPipWindowState()
 {
     WLOGD("GetPipWindowState is called");
     std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
-    return PictureInPictureManager::pipWindowState_;
+    return pipWindowState_;
 }
 
 bool PictureInPictureManager::IsCurrentPipControllerExist()
 {
     WLOGD("IsCurrentPipControllerExist is called");
-    return PictureInPictureManager::curPipController_ != nullptr;
+    return curPipController_ != nullptr;
 }
 
 bool PictureInPictureManager::IsCurrentPipController(wptr<PictureInPictureController> pipController)
 {
     WLOGD("IsCurrentPipController is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+    if (!IsCurrentPipControllerExist()) {
         return false;
     }
-    return pipController.GetRefPtr() == PictureInPictureManager::curPipController_.GetRefPtr();
+    return pipController.GetRefPtr() == curPipController_.GetRefPtr();
 }
 
 void PictureInPictureManager::SetCurrentPipController(sptr<PictureInPictureController> pipController)
 {
     WLOGD("SetCurrentPipController is called");
-    PictureInPictureManager::curPipController_ = pipController;
+    curPipController_ = pipController;
 }
 
 void PictureInPictureManager::RemoveCurrentPipController()
 {
     WLOGD("RemoveCurrentPipController is called");
-    PictureInPictureManager::curPipController_ = nullptr;
+    curPipController_ = nullptr;
 }
 
 void PictureInPictureManager::RemoveCurrentPipControllerSafety()
 {
     WLOGD("RemoveCurrentPipControllerSafety is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+    if (!IsCurrentPipControllerExist()) {
         return;
     }
-    PictureInPictureManager::curPipController_->SetPipWindow(nullptr);
-    PictureInPictureManager::RemoveCurrentPipController();
+    curPipController_->SetPipWindow(nullptr);
+    RemoveCurrentPipController();
 }
 
 bool PictureInPictureManager::IsAttachedPipWindow(uint32_t windowId)
 {
     WLOGD("IsAttachedPipWindow is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+    if (!IsCurrentPipControllerExist()) {
         return false;
     }
-    return PictureInPictureManager::curPipController_->GetMainWindowId() == windowId;
+    return curPipController_->GetMainWindowId() == windowId;
 }
 
 sptr<Window> PictureInPictureManager::GetCurrentWindow()
 {
     WLOGD("GetCurrentWindow is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+    if (!IsCurrentPipControllerExist()) {
         return nullptr;
     }
-    return PictureInPictureManager::curPipController_->GetPipWindow();
+    return curPipController_->GetPipWindow();
 }
 
 void PictureInPictureManager::DoRestore()
@@ -133,7 +133,7 @@ void PictureInPictureManager::DoClose(bool needAnim)
     if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
         return;
     }
-    PictureInPictureManager::curPipController_->StopPictureInPicture(needAnim);
+    curPipController_->StopPictureInPicture(needAnim);
 }
 
 void PictureInPictureManager::DoStartMove()
@@ -146,7 +146,7 @@ void PictureInPictureManager::DoScale()
     WLOGD("DoScale is called");
 }
 
-void PictureInPictureManager::DoActionEvent()
+void PictureInPictureManager::DoActionEvent(std::string actionName)
 {
     WLOGD("DoActionEvent is called");
 }

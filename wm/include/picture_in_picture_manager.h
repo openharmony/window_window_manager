@@ -46,7 +46,7 @@ public:
     static void DoClose(bool needAnim);
     static void DoStartMove();
     static void DoScale();
-    static void DoActionEvent();
+    static void DoActionEvent(std::string actionName);
 private:
     static sptr<PictureInPictureController> curPipController_;
     static sptr<PictureInPictureController> activePipController_;
