@@ -720,12 +720,11 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    auto session = weakThis.promote();
     float vpr = 3.5f; // 3.5f: default pixel ratio
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
     }
-    if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
           system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
         if (display) {
@@ -749,8 +748,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    auto session = weakThis.promote();
-    if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
           system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         return;
     }
