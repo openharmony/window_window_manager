@@ -277,6 +277,17 @@ void Session::NotifyExtensionDied()
     }
 }
 
+void Session::NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevelVec);
+        }
+    }
+}
+
 float Session::GetAspectRatio() const
 {
     return aspectRatio_;

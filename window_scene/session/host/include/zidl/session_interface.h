@@ -23,7 +23,9 @@
 #include "common/include/window_session_property.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
-
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 class ISession : public IRemoteBroker {
@@ -68,10 +70,17 @@ public:
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
     virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
+    virtual WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec)
+    {
+        return WSError::WS_OK;
+    }
     virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}
+    virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) {}
 };
 } // namespace OHOS::Rosen
 
