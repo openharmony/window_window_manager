@@ -64,7 +64,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
     if (foldScreenFlag) {
-        foldScreenController_ = new (std::nothrow) FoldScreenController();
+        foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_);
         ScreenId screenIdFull = 0;
         ScreenId screenIdMain = 5;
         int64_t timeStamp = 50;
@@ -278,6 +278,22 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         WLOGFE("screenSession is nullptr");
         return;
     }
+    //if SetDisplayMode failed, try again
+    if (foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
+        auto foldStatus = GetFoldStatus();
+        switch (foldStatus) {
+            case FoldStatus::EXPAND: {
+                foldScreenController_->SetDisplayMode(FoldDisplayMode::FULL);
+                break;
+            }
+            case FoldStatus::FOLDED: {
+                foldScreenController_->SetDisplayMode(FoldDisplayMode::MAIN);
+                break;
+            }
+            default:
+                break;
+        }
+    }
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0) {
@@ -328,6 +344,7 @@ sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     GetDefaultScreenId();
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
