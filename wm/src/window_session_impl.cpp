@@ -21,6 +21,7 @@
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
+#include <parameters.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -746,7 +747,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         WLOGFE("This is not main window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-    
+
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
@@ -1688,6 +1689,11 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
+            if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+                system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+                listener->OnSizeChange(occupiedAreaChangeInfo);
+            }
             listener->OnSizeChange(info);
         }
     }

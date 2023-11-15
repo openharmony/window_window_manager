@@ -894,7 +894,9 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
         mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
+        !(mode == WindowMode::WINDOW_MODE_FLOATING &&
+          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
         WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
