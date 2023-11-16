@@ -2026,7 +2026,6 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     hostSession_->NotifyPiPWindowPrepareClose();
     WLOGFD("NotifyPrepareClosePiPWindow end");
     return WMError::WM_OK;
-
 }
 } // namespace Rosen
 } // namespace OHOS

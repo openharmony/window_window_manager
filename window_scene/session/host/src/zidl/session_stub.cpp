@@ -502,6 +502,7 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
     WLOGFD("HandleTransferAccessibilityEvent end!");
     return ERR_NONE;
 }
+
 int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply) 
 {
     WLOGFD("HandleNotifyPiPWindowPrepareClose");
