@@ -419,6 +419,47 @@ HWTEST_F(WindowSessionTest, CheckDialogOnForeground, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: IsTopDialog
+ * @tc.desc: check func IsTopDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsTopDialog, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->dialogVec_.clear();
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+
+    sptr<Session> dialogSession1 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession1, nullptr);
+    dialogSession1->persistentId_ = 33;
+    dialogSession1->SetParentSession(session_);
+    dialogSession1->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(dialogSession1);
+
+    sptr<Session> dialogSession2 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession2, nullptr);
+    dialogSession2->persistentId_ = 34;
+    dialogSession2->SetParentSession(session_);
+    dialogSession2->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(dialogSession2);
+
+    sptr<Session> dialogSession3 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession3, nullptr);
+    dialogSession3->persistentId_ = 35;
+    dialogSession3->SetParentSession(session_);
+    dialogSession3->state_ = SessionState::STATE_INACTIVE;
+    session_->dialogVec_.push_back(dialogSession3);
+
+    ASSERT_EQ(false, dialogSession3->IsTopDialog());
+    ASSERT_EQ(true, dialogSession2->IsTopDialog());
+    ASSERT_EQ(false, dialogSession1->IsTopDialog());
+    session_->dialogVec_.clear();
+}
+
+/**
  * @tc.name: NotifyDestroy
  * @tc.desc: check func NotifyDestroy
  * @tc.type: FUNC

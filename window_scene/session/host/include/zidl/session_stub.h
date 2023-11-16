@@ -68,11 +68,11 @@ private:
     int HandleNotifySyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAsyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
+    static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
-
-    static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
 };
 } // namespace OHOS::Rosen
 

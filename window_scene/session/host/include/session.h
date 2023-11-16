@@ -76,6 +76,8 @@ public:
     virtual void OnBackground() = 0;
     virtual void OnDisconnect() = 0;
     virtual void OnExtensionDied() = 0;
+    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) = 0;
 };
 
 class Session : public SessionStub {
@@ -102,6 +104,8 @@ public:
     void NotifyBackground();
     void NotifyDisconnect();
     void NotifyExtensionDied() override;
+    void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -308,6 +312,7 @@ protected:
     bool CheckDialogOnForeground();
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    bool IsTopDialog() const;
 
     using Task = std::function<void()>;
     void PostTask(Task&& task, int64_t delayTime = 0);
