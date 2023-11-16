@@ -5396,4 +5396,14 @@ void SceneSessionManager::NotifySessionBackground(const sptr<SceneSession>& sess
 {
     session->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
+
+WSError SceneSessionManager::UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window, persistentId:%{public}d", persistentId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    return sceneSession->UpdateTitleInTargetPos(isShow, height);
+}
 } // namespace OHOS::Rosen
