@@ -721,6 +721,7 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     float vpr = 3.5f; // 3.5f: default pixel ratio
+    int32_t floatingBarHeight = 32; // 32: floating windowBar Height
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
     }
@@ -732,7 +733,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (display) {
             vpr = display->GetVirtualPixelRatio();
         }
-        avoidArea.topRect_.height_ = vpr * 32;
+        avoidArea.topRect_.height_ = vpr * floatingBarHeight;
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
