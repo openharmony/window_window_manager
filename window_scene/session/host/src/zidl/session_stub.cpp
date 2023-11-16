@@ -503,10 +503,10 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply) 
+int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleNotifyPiPWindowPrepareClose");
     NotifyPiPWindowPrepareClose();
     return ERR_NONE;
-}    
+}
 } // namespace OHOS::Rosen

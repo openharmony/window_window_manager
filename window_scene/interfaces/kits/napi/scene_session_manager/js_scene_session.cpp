@@ -1727,9 +1727,8 @@ void JsSceneSession::OnPrepareClosePiPSession()
         });
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnPrepareClosePiPSession", env_, 
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));    
-    
+    NapiAsyncTask::Schedule("JsSceneSession::OnPrepareClosePiPSession", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
