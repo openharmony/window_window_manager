@@ -291,6 +291,33 @@ WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int
     return WSError::WS_OK;
 }
 
+WSError WindowExtensionSessionImpl::NotifyExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionAguments, int32_t action,
+    int32_t baseParent)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifyExecuteAction error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
+    bool ret = uiContent_->NotifyExecuteAction(elementId, actionAguments, action, baseParent);
+    if (!ret) {
+        WLOGFE("NotifyExecuteAction fail");
+        return WSError::WS_ERROR_INTERNAL_ERROR;
+    }
+    return WSError::WS_OK;
+}
+
+WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    WLOGFD("TransferAccessibilityEvent IN, vec.size:%{public}d", uiExtensionIdLevelVec.size());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+}
+
 void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
 }

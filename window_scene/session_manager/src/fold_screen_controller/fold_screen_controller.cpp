@@ -99,7 +99,11 @@ FoldStatus FoldScreenController::GetFoldStatus()
 
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 {
-    return nullptr;
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("GetFoldStatus: foldScreenPolicy_ is null");
+        return nullptr;
+    }
+    return foldScreenPolicy_->GetCurrentFoldCreaseRegion();
 }
 
 ScreenId FoldScreenController::GetCurrentScreenId()

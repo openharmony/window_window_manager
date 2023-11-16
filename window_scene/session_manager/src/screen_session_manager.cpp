@@ -636,6 +636,9 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
 bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:WakeUpBegin(%u)", reason);
+    WLOGFI("ScreenSessionManager::WakeUpBegin remove suspend begin task");
+    blockScreenPowerChange_ = false;
+    taskScheduler_->RemoveTask("suspendBeginTask");
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN);
 }
 

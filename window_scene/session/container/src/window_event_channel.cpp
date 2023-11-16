@@ -254,4 +254,14 @@ WSError WindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t d
     return sessionStage_->NotifyFocusMoveSearch(elementId, direction, baseParent, info);
 }
 
+WSError WindowEventChannel::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action,
+    int32_t baseParent)
+{
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyExecuteAction(elementId, actionArguments, action, baseParent);
+}
 } // namespace OHOS::Rosen
