@@ -24,4 +24,5 @@ FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMod
 FoldStatus FoldScreenPolicy::GetFoldStatus() { return FoldStatus::UNKNOWN; }
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
+sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; };
 } // namespace OHOS::Rosen

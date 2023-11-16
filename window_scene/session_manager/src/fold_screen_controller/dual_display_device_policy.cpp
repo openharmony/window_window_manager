@@ -144,6 +144,29 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
     }
 }
 
+sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
+{
+    ScreenId screenIdFull = 0;
+    ScreenId screenIdMain = 5;
+    int32_t foldCreaseRegionPosX = 0;
+    int32_t foldCreaseRegionPosY = 1096;
+    int32_t foldCreaseRegionPosWidth = 2496;
+    int32_t foldCreaseRegionPosHeight = 56;
+
+    WLOGI("GetCurrentFoldCreaseRegion");
+    if (screenId_ == screenIdMain)
+    {
+        WLOGI("GetCurrentFoldCreaseRegion is invalid");
+        return nullptr;
+    }
+
+    std::vector<DMRect> rect ={{foldCreaseRegionPosX, foldCreaseRegionPosY,
+                                foldCreaseRegionPosWidth, foldCreaseRegionPosHeight}}
+    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
+
+    return currentFoldCreaseRegion_
+}
+
 void DualDisplayDevicePolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
 {
     WLOGI("ReportFoldStatusChangeBegin offScreen: %{public}d, onScreen: %{public}d", offScreen, onScreen);
