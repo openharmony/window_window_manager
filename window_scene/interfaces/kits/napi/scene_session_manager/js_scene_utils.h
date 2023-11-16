@@ -175,6 +175,8 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
+} // namespace OHOS::Rosen
+
 
 class MainThreadScheduler {
 public:
@@ -186,5 +188,5 @@ private:
     napi_env env_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
-} // namespace OHOS::Rosen
+
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
