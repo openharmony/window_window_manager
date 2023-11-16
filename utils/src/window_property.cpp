@@ -736,7 +736,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel) && zoomTrans_.Marshalling(parcel) &&
         parcel.WriteBool(isDisplayZoomOn_) && parcel.WriteString(abilityInfo_.bundleName_) &&
         parcel.WriteString(abilityInfo_.abilityName_) && parcel.WriteInt32(abilityInfo_.missionId_) &&
-        parcel.WriteBool(isSnapshotSkip_);
+        parcel.WriteBool(isSnapshotSkip_) &&
+        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -794,6 +795,8 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     AbilityInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadInt32() };
     property->SetAbilityInfo(info);
     property->SetSnapshotSkip(parcel.ReadBool());
+    property->SetTextFieldPositionY(parcel.ReadDouble());
+    property->SetTextFieldHeight(parcel.ReadDouble());
     return property;
 }
 
@@ -994,6 +997,27 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     reCalcuZoomTransformMat_ = true;
     abilityInfo_ = property->abilityInfo_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
+    textFieldPositionY_ = property->textFieldPositionY_;
+    textFieldHeight_ = property->textFieldHeight_;
+}
+void WindowProperty::SetTextFieldPositionY(double textFieldPositionY)
+{
+    textFieldPositionY_ = textFieldPositionY;
+}
+
+void WindowProperty::SetTextFieldHeight(double textFieldHeight)
+{
+    textFieldHeight_ = textFieldHeight;
+}
+
+double WindowProperty::GetTextFieldPositionY() const
+{
+    return textFieldPositionY_;
+}
+
+double WindowProperty::GetTextFieldHeight() const
+{
+    return textFieldHeight_;
 }
 }
 }

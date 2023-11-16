@@ -74,6 +74,36 @@ public:
         r.posY_ = rect.posY_;
         return r;
     }
+
+    static inline bool IsBelowSystemWindow(WindowType type)
+    {
+        return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
+    }
+
+    static inline bool IsAboveSystemWindow(WindowType type)
+    {
+        return (type >= WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE && type < WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
+    }
+
+    static inline bool IsSystemSubWindow(WindowType type)
+    {
+        return (type >= WindowType::SYSTEM_SUB_WINDOW_BASE && type < WindowType::SYSTEM_SUB_WINDOW_END);
+    }
+
+    static inline bool IsSystemWindow(WindowType type)
+    {
+        return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type) || IsSystemSubWindow(type));
+    }
+
+    static inline bool IsMainWindow(WindowType type)
+    {
+        return (type >= WindowType::APP_MAIN_WINDOW_BASE && type < WindowType::APP_MAIN_WINDOW_END);
+    }
+
+    static inline bool IsSubWindow(WindowType type)
+    {
+        return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
+    }
 };
 } // Rosen
 } // OHOS

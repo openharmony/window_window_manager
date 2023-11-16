@@ -1,0 +1,61 @@
+# Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../../windowmanager_aafwk.gni")
+
+config("pip_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "../../../../wm/include",
+    "${arkui_path}/ace_engine/interface/inner_api/ace",
+  ]
+}
+
+ohos_shared_library("pipwindow_napi") {
+  sources = [
+    "js_pip_controller.cpp",
+    "js_pip_utils.cpp",
+    "js_pip_window_manager.cpp",
+    "js_pipwindow_module.cpp",
+  ]
+
+  configs = [
+    ":pip_config",
+    "../../../../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    "../../../../dm:libdm",
+    "../../../../utils:libwmutil",
+    "../../../../wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "image_framework:image",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module"
+  part_name = "window_manager"
+  subsystem_name = "window"
+}

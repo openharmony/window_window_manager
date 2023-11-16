@@ -21,9 +21,11 @@
 #include "interfaces/include/ws_common.h"
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+#include "interfaces/kits/napi/scene_session_manager/js_scene_utils.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
 #include "ability_info.h"
+#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
@@ -57,8 +59,11 @@ public:
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
+    static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
+    static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
+    static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -88,8 +93,11 @@ private:
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
+    napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
+    napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
@@ -112,6 +120,7 @@ private:
     std::map<std::string, Func> listenerFunc_;
 
     sptr<RootScene> rootScene_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 

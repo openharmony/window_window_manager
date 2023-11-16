@@ -30,8 +30,6 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "maxAppWindowNumber",                           WindowSceneConfig::ValueType::INTS },
     { "modeChangeHotZones",                           WindowSceneConfig::ValueType::INTS },
     { "duration",                                     WindowSceneConfig::ValueType::INTS },
-    { "durationIn",                                   WindowSceneConfig::ValueType::INTS },
-    { "durationOut",                                  WindowSceneConfig::ValueType::INTS },
     { "defaultWindowMode",                            WindowSceneConfig::ValueType::INTS },
     { "dragFrameGravity",                             WindowSceneConfig::ValueType::INTS },
     { "floatingBottomPosY",                           WindowSceneConfig::ValueType::INTS },
@@ -45,6 +43,8 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "subWindowSizeLimits",                          WindowSceneConfig::ValueType::MAP },
     { "windowAnimation",                              WindowSceneConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowSceneConfig::ValueType::MAP },
+    { "animationIn",                                  WindowSceneConfig::ValueType::MAP },
+    { "animationOut",                                 WindowSceneConfig::ValueType::MAP },
     { "timing",                                       WindowSceneConfig::ValueType::MAP },
     { "windowEffect",                                 WindowSceneConfig::ValueType::MAP },
     { "appWindows",                                   WindowSceneConfig::ValueType::MAP },
@@ -78,6 +78,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "stretchable",                                  WindowSceneConfig::ValueType::UNDIFINED },
     { "remoteAnimation",                              WindowSceneConfig::ValueType::UNDIFINED },
     { "configMainFloatingWindowAbove",                WindowSceneConfig::ValueType::UNDIFINED },
+    { "backgroundswitch",                             WindowSceneConfig::ValueType::INTS },
 };
 
 std::vector<std::string> WindowSceneConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)

@@ -79,8 +79,10 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
-    void CallJsMethod(const char* methodName, napi_value const* argv = nullptr, size_t argc = 0);
+    void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
 private:
+    uint32_t currentWidth_ = 0;
+    uint32_t currentHeight_ = 0;
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     napi_env env_ = nullptr;

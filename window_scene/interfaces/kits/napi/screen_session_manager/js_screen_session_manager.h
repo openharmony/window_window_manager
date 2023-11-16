@@ -19,7 +19,10 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include "session_manager/include/screen_session_manager.h"
+
+#ifdef POWER_MANAGER_ENABLE
 #include "shutdown/takeover_shutdown_callback_stub.h"
+#endif
 
 namespace OHOS::Rosen {
 class JsScreenSessionManager final : public IScreenConnectionListener,
@@ -42,6 +45,7 @@ private:
     static napi_value RegisterShutdownCallback(napi_env env, napi_callback_info info);
     static napi_value UnRegisterShutdownCallback(napi_env env, napi_callback_info info);
     static napi_value GetPhyScreenProperty(napi_env env, napi_callback_info info);
+    static napi_value NotifyScreenLockEvent(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -49,6 +53,7 @@ private:
     napi_value OnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
     napi_value OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
     napi_value OnGetPhyScreenProperty(napi_env env, const napi_callback_info info);
+    napi_value OnNotifyScreenLockEvent(napi_env env, const napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

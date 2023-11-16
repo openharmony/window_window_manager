@@ -327,7 +327,7 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
-napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const* argv, size_t argc) const
+napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const * argv, size_t argc) const
 {
     WLOGI("called (%{public}s), begin", name);
 

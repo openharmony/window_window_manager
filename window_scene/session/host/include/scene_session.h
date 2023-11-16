@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 #include "iremote_object.h"
 #include "platform/image_native/pixel_map.h"
@@ -43,6 +44,7 @@ using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<Scene
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
+using GetAINavigationBarArea = std::function<WSRect()>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -60,6 +62,7 @@ using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
+using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -71,6 +74,7 @@ public:
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
+        GetAINavigationBarArea onGetAINavigationBarArea_;
     };
 
     // callback for notify SceneBoard
@@ -89,6 +93,7 @@ public:
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
+        ClearCallbackMapFunc clearCallbackFunc_;
     };
 
     // func for change window scene pattern property
@@ -97,7 +102,7 @@ public:
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
-    virtual ~SceneSession() = default;
+    virtual ~SceneSession();
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -128,6 +133,7 @@ public:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -168,6 +174,7 @@ public:
     bool IsKeepScreenOn() const;
     const std::string& GetWindowName() const;
     void UpdateNativeVisibility(bool visible);
+    void UpdateRotationAvoidArea();
     void SetPrivacyMode(bool isPrivacy);
     void SetSystemSceneOcclusionAlpha(double alpha);
     bool IsVisible() const;
@@ -202,6 +209,8 @@ public:
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     WSRect GetSessionTargetRect();
+    void NotifySessionForeground(uint32_t reason, bool withAnimation);
+    void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
@@ -236,6 +245,10 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
+public:
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
+    WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

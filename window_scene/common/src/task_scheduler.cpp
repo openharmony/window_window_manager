@@ -29,7 +29,7 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 
 void TaskScheduler::PostAsyncTask(Task&& task, int64_t delayTime)
 {
-    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+    if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
         return task();
     }
     handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -45,7 +45,7 @@ void TaskScheduler::PostVoidSyncTask(Task&& task)
 
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
-    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+    if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
         return task();
     }
     handler_->PostTask(std::move(task), name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);

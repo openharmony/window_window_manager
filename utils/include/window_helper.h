@@ -38,6 +38,11 @@ public:
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
+    static inline bool IsDialogWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_DIALOG;
+    }
+
     static inline bool IsAppWindow(WindowType type)
     {
         return (IsMainWindow(type) || IsSubWindow(type));
@@ -46,6 +51,11 @@ public:
     static inline bool IsAppFloatingWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    }
+
+    static inline bool IsPipWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_PIP);
     }
 
     static inline bool IsBelowSystemWindow(WindowType type)

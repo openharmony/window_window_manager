@@ -15,6 +15,7 @@
 
 #include "session/container/include/zidl/window_event_channel_proxy.h"
 #include "session/container/include/zidl/window_event_ipc_interface_code.h"
+#include "session/container/include/parcel/accessibility_element_info_parcel.h"
 
 #include <axis_event.h>
 #include <ipc_types.h>
@@ -22,12 +23,15 @@
 #include <message_option.h>
 #include <message_parcel.h>
 #include <pointer_event.h>
+#include <vector>
 
+#include "accessibility_element_info_parcel.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
+constexpr int32_t MAX_COUNT = 9 * 9 * 1000000;
 }
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -161,6 +165,209 @@ WSError WindowEventChannelProxy::TransferFocusState(bool focusState)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    int32_t count = 0;
+    if (!reply.ReadInt32(count)) {
+        WLOGFE("GetElementInfos failed to read count");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (count > MAX_COUNT) {
+        WLOGFE("GetElementInfos count over size");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    infos.clear();
+    for (int i = 0; i < count; i++) {
+        sptr<AccessibilityElementInfoParcel> infoPtr =
+            reply.ReadStrongParcelable<AccessibilityElementInfoParcel>();
+        if (infoPtr != nullptr) {
+            infos.push_back(*infoPtr);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannelProxy::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(mode)) {
+        WLOGFE("Write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return GetElementInfos(reply, infos);
+}
+
+WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(text)) {
+        WLOGFE("Write text failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT), data, reply,
+        option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return GetElementInfos(reply, infos);
+}
+
+WSError GetElementInfo(MessageParcel& reply, Accessibility::AccessibilityElementInfo& info)
+{
+    sptr<AccessibilityElementInfoParcel> infoPtr =
+        reply.ReadStrongParcelable<AccessibilityElementInfoParcel>();
+    if (infoPtr != nullptr) {
+        info = *infoPtr;
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(focusType)) {
+        WLOGFE("Write focusType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO), data, reply,
+        option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return GetElementInfo(reply, info);
+}
+
+WSError WindowEventChannelProxy::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(direction)) {
+        WLOGFE("Write direction failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return GetElementInfo(reply, info);
+}
+
+WSError WindowEventChannelProxy::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action,
+    int32_t baseParent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(action)) {
+        WLOGFE("Write action failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    std::vector<std::string> actionArgumentsKey {};
+    std::vector<std::string> actionArgumentsValue {};
+    for (auto iter = actionArguments.begin(); iter != actionArguments.end(); iter++) {
+        actionArgumentsKey.push_back(iter->first);
+        actionArgumentsValue.push_back(iter->second);
+    }
+    if (!data.WriteStringVector(actionArgumentsKey)) {
+        WLOGFE("actionArgumentsKey write error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteStringVector(actionArgumentsValue)) {
+        WLOGFE("actionArgumentsValue write error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

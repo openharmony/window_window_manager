@@ -68,7 +68,8 @@
           "previewer",
           "hilog",
           "memmgr_plugin",
-          "data_share"
+          "data_share",
+          "accessibility"
         ],
         "third_party": [
           "libjpeg-turbo",
@@ -116,6 +117,16 @@
                 "occupied_area_change_info.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/utils:libwmutil",
+            "header": {
+              "header_files": [
+                "singleton_container.h"
+              ],
+              "header_base": "//foundation/window/window_manager/utils/include"
             }
           },
           {

@@ -43,6 +43,10 @@ public:
     MOCK_METHOD0(NotifyTouchOutside, WSError(void));
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
+    MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
+    MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
+    MOCK_METHOD2(NotifySessionForeground, void(uint32_t reason, bool withAnimation));
+    MOCK_METHOD3(NotifySessionBackground, void(uint32_t reason, bool withAnimation, bool isFromInnerkits));
 };
 } // namespace Rosen
 } // namespace OHOS

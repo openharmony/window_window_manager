@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_distributed_client_test",
     ":ws_dual_display_device_policy_test",
     ":ws_event_stage_test",
     ":ws_extension_session_manager_test",
@@ -45,11 +46,13 @@ group("unittest") {
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
+    ":ws_session_permission_test",
     ":ws_session_proxy_test",
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_test",
     ":ws_session_stub_test",
     ":ws_session_test",
+    ":ws_task_scheduler_test",
     ":ws_timer_manager_test",
     ":ws_window_event_channel_proxy_test",
     ":ws_window_event_channel_stub_test",
@@ -63,6 +66,32 @@ ohos_unittest("ws_dual_display_device_policy_test") {
   module_out_path = module_out_path
 
   sources = [ "dual_display_device_policy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_task_scheduler_test") {
+  module_out_path = module_out_path
+
+  sources = [ "task_scheduler_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_permission_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_permission_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -220,6 +249,7 @@ ohos_unittest("ws_session_test") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -289,6 +319,7 @@ ohos_unittest("ws_screen_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -592,6 +623,19 @@ ohos_unittest("ws_session_stub_test") {
   ]
 }
 
+ohos_unittest("ws_distributed_client_test") {
+  module_out_path = module_out_path
+
+  sources = [ "distributed_client_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -635,6 +679,8 @@ config("ws_unittest_common_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 

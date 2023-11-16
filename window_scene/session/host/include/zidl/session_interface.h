@@ -63,12 +63,15 @@ public:
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WSError::WS_OK; }
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
     virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
     virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
+    virtual void NotifySyncOn() {}
+    virtual void NotifyAsyncOn() {}
 };
 } // namespace OHOS::Rosen
 

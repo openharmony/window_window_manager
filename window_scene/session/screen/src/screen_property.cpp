@@ -63,6 +63,16 @@ float ScreenProperty::GetDensity()
     return virtualPixelRatio_;
 }
 
+float ScreenProperty::GetDefaultDensity()
+{
+    return defaultDensity_;
+}
+
+void ScreenProperty::SetDefaultDensity(float defaultDensity)
+{
+    defaultDensity_ = defaultDensity;
+}
+
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
 {
     phyWidth_ = phyWidth;
@@ -196,6 +206,7 @@ void ScreenProperty::UpdateVirtualPixelRatio(const RRect& bounds)
     } else {
         virtualPixelRatio_ = ELSE_SCREEN_DENSITY;
     }
+    defaultDensity_ = virtualPixelRatio_;
 }
 
 void ScreenProperty::CalcDefaultDisplayOrientation()

@@ -74,6 +74,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_NEGATIVE_SCREEN,
     WINDOW_TYPE_SYSTEM_TOAST,
     WINDOW_TYPE_SYSTEM_FLOAT,
+    WINDOW_TYPE_PIP,
+    WINDOW_TYPE_THEME_EDITOR,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -168,6 +170,11 @@ enum class WMError : int32_t {
     WM_ERROR_IPC_FAILED,
     WM_ERROR_NEED_REPORT_END,
     WM_ERROR_START_ABILITY_FAILED,
+    WM_ERROR_PIP_DESTROY_FAILED,
+    WM_ERROR_PIP_STATE_ABNORMALLY,
+    WM_ERROR_PIP_CREATE_FAILED,
+    WM_ERROR_PIP_INTERNAL_ERROR,
+    WM_ERROR_PIP_REPEAT_OPERATION,
 };
 
 /**
@@ -189,6 +196,11 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_INVALID_DISPLAY = 1300008,
     WM_ERROR_INVALID_PARENT = 1300009,
     WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
+    WM_ERROR_PIP_DESTROY_FAILED = 1300011,
+    WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
+    WM_ERROR_PIP_CREATE_FAILED = 1300013,
+    WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
+    WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
 };
 
 /**
@@ -216,6 +228,11 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
     {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED   },
+    {WMError::WM_ERROR_PIP_DESTROY_FAILED,             WmErrorCode::WM_ERROR_PIP_DESTROY_FAILED     },
+    {WMError::WM_ERROR_PIP_STATE_ABNORMALLY,           WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_PIP_CREATE_FAILED,              WmErrorCode::WM_ERROR_PIP_CREATE_FAILED      },
+    {WMError::WM_ERROR_PIP_INTERNAL_ERROR,             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR     },
+    {WMError::WM_ERROR_PIP_REPEAT_OPERATION,           WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION   },
 };
 
 /**
@@ -456,6 +473,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
     TYPE_KEYBOARD,         // area for soft input keyboard
+    TYPE_AI_NAVIGATION_BAR, // area for AI navigation bar
 };
 
 /**
@@ -564,6 +582,38 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
     WINDOW_UPDATE_PROPERTY,
+};
+
+/**
+ * @brief Enumerates picture in picture window state.
+ */
+enum class PipWindowState : uint32_t {
+    STATE_UNDEFINED = 0,
+    STATE_STARTING = 1,
+    STATE_STARTED = 2,
+    STATE_STOPPING = 3,
+    STATE_STOPPED = 4,
+};
+
+/**
+ * @brief Enumerates picture in picture template type.
+ */
+enum class PipTemplateType : int32_t {
+    VIDEO_PLAY = 0,
+    VIDEO_CALL = 1,
+    VIDEO_MEETING = 2,
+};
+
+/**
+ * @brief Enumerates picture in picture state.
+ */
+enum class PipState : int32_t {
+    ABOUT_TO_START = 1,
+    STARTED = 2,
+    ABOUT_TO_STOP = 3,
+    STOPPED = 4,
+    ABOUT_TO_RESTORE = 5,
+    ERROR = 6,
 };
 
 using OnCallback = std::function<void(int64_t)>;

@@ -229,6 +229,49 @@ HWTEST_F(DisplayManagerAdapterTest, Clear01, Function | SmallTest | Level2)
     SingletonContainer::Get<ScreenManagerAdapter>().Clear();
     ASSERT_FALSE(SingletonContainer::Get<ScreenManagerAdapter>().isProxyValid_);
 }
+
+/**
+ * @tc.name: DisableDisplaySnapshot
+ * @tc.desc: DisableDisplaySnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, DisableDisplaySnapshot, Function | SmallTest | Level2)
+{
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().DisableDisplaySnapshot(false);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, ret);
+    } else {
+        ASSERT_NE(DMError::DM_OK, ret);
+    }
+}
+
+/**
+ * @tc.name: DisableMirror
+ * @tc.desc: DisableMirror test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2)
+{
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(false);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, ret);
+    } else {
+        ASSERT_NE(DMError::DM_OK, ret);
+    }
+}
+
+/**
+ * @tc.name: HasImmersiveWindow
+ * @tc.desc: test HasImmersiveWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
+{
+    bool immersive = false;
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
 }
 }
 }

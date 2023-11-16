@@ -591,6 +591,59 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_NEGATIVE_SCREEN", JsSessionType::TYPE_NEGATIVE_SCREEN);
     SetTypeProperty(objValue, env, "TYPE_VOICE_INTERACTION", JsSessionType::TYPE_VOICE_INTERACTION);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_TOAST", JsSessionType::TYPE_SYSTEM_TOAST);
+    SetTypeProperty(objValue, env, "TYPE_SYSTEM_FLOAT", JsSessionType::TYPE_SYSTEM_FLOAT);
+    SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
+    SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     return objValue;
+}
+
+void NapiAsyncWork(napi_env env, std::function<void()> localTask)
+{
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [localTask](napi_env env, NapiAsyncTask& task, int32_t status) {
+            localTask();
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSession::backUpTasks", env,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+MainThreadScheduler::MainThreadScheduler(napi_env env)
+    : env_(env)
+{
+    GetMainEventHandler();
+}
+
+inline void MainThreadScheduler::GetMainEventHandler()
+{
+    if (handler_ != nullptr) {
+        return;
+    }
+    auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (runner == nullptr) {
+        return;
+    }
+    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+}
+
+void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
+{
+    GetMainEventHandler();
+    auto task = [env = env_, localTask, traceInfo] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        localTask();
+        napi_close_handle_scope(env, scope);
+    };
+    if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
+    } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->PostTask(std::move(task), OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        NapiAsyncWork(env_, task);
+    }
 }
 } // namespace OHOS::Rosen

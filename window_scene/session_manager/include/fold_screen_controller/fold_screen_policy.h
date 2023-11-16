@@ -33,6 +33,7 @@ public:
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    virtual void LockDisplayStatus(bool locked);
 
     ScreenId screenId_;
     ScreenProperty screenProperty_;
@@ -40,6 +41,7 @@ public:
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
+    bool lockDisplayStatus_ = false;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H

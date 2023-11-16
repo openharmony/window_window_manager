@@ -175,6 +175,18 @@ HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
     auto vpr = defaultDisplay_->GetVirtualPixelRatio();
     ASSERT_EQ(vpr * DOT_PER_INCH, dpi);
 }
+
+/**
+ * @tc.name: HasImmersiveWindow
+ * @tc.desc: test HasImmersiveWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
+{
+    bool immersive = false;
+    DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
