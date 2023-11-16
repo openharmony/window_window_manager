@@ -305,7 +305,7 @@ int SessionStageStub::HandleUpdateTitleInTargetPos(MessageParcel& data, MessageP
 {
     WLOGFD("HandleUpdateTitleInTargetPos!");
     bool isShow = data.ReadBool();
-    int32_t height = data.ReadUint32();
+    int32_t height = data.ReadInt32();
     WSError errCode = UpdateTitleInTargetPos(isShow, height);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
