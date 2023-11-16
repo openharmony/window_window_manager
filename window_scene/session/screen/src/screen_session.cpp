@@ -805,7 +805,7 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
     if (screenMode != nullptr) {
         screenMode->width_ = width;
         screenMode->height_ = height;
-        UpdatePropertyByActiveMode;
+        UpdatePropertyByActiveMode();
     }
 }
 } // namespace OHOS::Rosen

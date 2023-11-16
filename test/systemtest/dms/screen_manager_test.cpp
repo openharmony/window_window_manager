@@ -64,8 +64,10 @@ public:
     const uint32_t maxWaitCount_ = 20;
     const uint32_t execTimes_ = 10;
     const uint32_t acquireFrames_ = 1;
-    const uint32_t resizeScreenWidth = 1000;
-    const uint32_t resizeScreenHeight = 1000;
+    const uint32_t resizeScreenWidthTestOne_ = 1000;
+    const uint32_t resizeScreenHeightTestOne_ = 1000;
+    const uint32_t resizeScreenWidthTestTwo_ = 1;
+    const uint32_t resizeScreenHeightTestTwo_ = 1;
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time
     static constexpr uint32_t TEST_SLEEP_S_LONG = 10; // test sleep for 10 seconds
     static constexpr long TIME_OUT = 1000;
@@ -1033,7 +1035,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     (void)system("param set rosen.uni.partialrender.enabled 4");
 }
 
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1055,17 +1057,82 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | MediumTest | Level1)
     ScreenManager::GetInstance().MakeExpand(options, expansionId);
     sleep(TEST_SLEEP_S);
 
-    DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualDisplayId, resizeScreenWidth, resizeScreenHeight);
+    DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId,
+        resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_OK, res);
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
-    ASSERT_EQ(resizeScreenWidth, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeight, screen->GetHeight());
+    ASSERT_TRUE(screen);
+    ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
 
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+}
+
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+    std::vector<ExpandOption> options = {{defaultDisplayId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
+    sleep(TEST_SLEEP_S);
+
+    DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId,
+        resizeScreenWidthTestTwo_, resizeScreenHeightTestTwo_);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_OK, res);
+
+    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
+    ASSERT_TRUE(screen);
+    ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
+
+    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+}
+
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+    std::vector<ExpandOption> options = {{defaultDisplayId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
+    sleep(TEST_SLEEP_S);
+
+    DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId + 1,
+        resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 }
 } // namespace Rosen
