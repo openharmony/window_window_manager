@@ -1705,13 +1705,13 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         return;
     }
     sessionchangeCallback->onPrepareClosePiPSession_ = std::bind(&JsSceneSession::OnPrepareClosePiPSession, this);
-    WLOGFD("ProcessPrepareClosePiPSessionRegister success")
+    WLOGFD("ProcessPrepareClosePiPSessionRegister success");
 }
 
 void JsSceneSession::OnPrepareClosePiPSession()
 {
     WLOGFI("[NAPI]OnPrepareClosePiPSession");
-    auto iter = jsCbMap.find(PREPARE_CLOSE_PIPSESSION);
+    auto iter = jsCbMap_.find(PREPARE_CLOSE_PIP_SESSION);
     if (iter == jsCbMap_.end()){
         return;
     }
