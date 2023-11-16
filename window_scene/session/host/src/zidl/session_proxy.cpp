@@ -832,4 +832,20 @@ WSError SessionProxy::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+void SessionProxy::NotifyPiPWindowPrepareClose()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GesDescriptor())) {
+        WLOGFE("writeInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

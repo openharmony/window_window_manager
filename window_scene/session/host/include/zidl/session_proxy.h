@@ -64,6 +64,8 @@ public:
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     void NotifyExtensionDied() override;
+
+    void NotifyPiPWindowPrepareClose() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

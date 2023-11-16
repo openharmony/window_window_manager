@@ -72,6 +72,9 @@ public:
     virtual void NotifyExtensionDied() {}
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}
+
+    // PictureInPicture
+    virtual void NotifyPiPWindowPrepareClose() {}
 };
 } // namespace OHOS::Rosen
 

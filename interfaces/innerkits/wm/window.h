@@ -1398,6 +1398,13 @@ public:
      * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
+
+    /**
+     * @brief Notify prepare to close window
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
 };
 }
 }
