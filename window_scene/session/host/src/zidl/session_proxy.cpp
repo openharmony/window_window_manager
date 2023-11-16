@@ -838,7 +838,7 @@ void SessionProxy::NotifyPiPWindowPrepareClose()
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GesDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("writeInterfaceToken failed");
         return;
     }

@@ -70,7 +70,7 @@ private:
     int HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
-    int HandleNotifyPiPWindowPrepareClose(MessageParce& data, MessageParcel& reply);
+    int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
 
     static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
 };

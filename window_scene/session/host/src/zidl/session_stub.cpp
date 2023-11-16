@@ -90,7 +90,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
-        &SessionStub::HandleNotifyExtensionDied)
+        &SessionStub::HandleNotifyExtensionDied),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
         &SessionStub::HandleNotifyPiPWindowPrepareClose)
 };
