@@ -1717,5 +1717,10 @@ void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimat
 {
     WLOGFD("NotifySessionBackground");
 }
+
+WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

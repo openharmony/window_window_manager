@@ -1854,4 +1854,14 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
     }
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
 }
+
+WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    WLOGFD("Session update title in target position, id: %{public}d, isShow: %{public}d, height: %{public}d",
+        GetPersistentId(), isShow, height);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateTitleInTargetPos(isShow, height);
+}
 } // namespace OHOS::Rosen
