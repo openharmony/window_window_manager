@@ -1500,6 +1500,7 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("make unique screen failed: remote is null");
+        return nullptr;
     }
 
     MessageParcel data;
