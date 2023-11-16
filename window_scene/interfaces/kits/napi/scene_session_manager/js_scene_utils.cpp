@@ -596,18 +596,31 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     return objValue;
 }
+} // namespace OHOS::Rosen
 
-void NapiAsyncWork(napi_env env, std::function<void()> localTask)
+
+struct AsyncInfo {
+    napi_env env;
+    napi_async_work work;
+    std::function<void()> func;
+};
+
+void NapiAsyncWork(napi_env env, std::function<void()> task)
 {
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [localTask](napi_env env, NapiAsyncTask& task, int32_t status) {
-            localTask();
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::backUpTasks", env,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_value resource = nullptr;
+    AsyncInfo* info = new AsyncInfo();
+    info->env = env;
+    info->func = task;
+    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
+    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
+    },
+    [](napi_env env, napi_status status, void* data) {
+        AsyncInfo* info = (AsyncInfo*)data;
+        info->func();
+        napi_delete_async_work(env, info->work);
+    }, (void*)info, &info->work);
+    napi_queue_async_work(env, info->work);
+    delete info;
 }
 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
@@ -646,4 +659,3 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         NapiAsyncWork(env_, task);
     }
 }
-} // namespace OHOS::Rosen
