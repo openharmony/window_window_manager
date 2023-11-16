@@ -655,7 +655,7 @@ DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.writeInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
