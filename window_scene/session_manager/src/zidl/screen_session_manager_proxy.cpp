@@ -648,7 +648,7 @@ DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("ScreenSessionManagerProxy::ResizeVirtualScreen: remote is nullptr");
-        retrun DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
     MessageParcel data;
