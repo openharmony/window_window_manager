@@ -83,7 +83,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
-        type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT)) {
+        type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
+        type == WindowType::WINDOW_TYPE_PIP)) {
         WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
@@ -92,6 +93,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint32_t parentId)
 {
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& item : windowSessionMap_) {
         if (item.second.second && item.second.second->GetProperty() &&
             item.second.second->GetWindowId() == parentId &&
@@ -107,6 +109,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
 {
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -147,7 +150,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type)) {
+        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
             WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
             auto mainWindow = FindMainWindowWithContext();
@@ -175,8 +178,11 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
 void WindowSceneSessionImpl::UpdateWindowState()
 {
-    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+    {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    }
     state_ = WindowState::STATE_CREATED;
     requestState_ = WindowState::STATE_CREATED;
     if (WindowHelper::IsMainWindow(GetType())) {
@@ -489,7 +495,6 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         return res;
     }
     res = static_cast<WMError>(hostSession_->Background());
-
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(GetType())) {
@@ -651,7 +656,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-    windowSessionMap_.erase(property_->GetWindowName());
+	{
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        windowSessionMap_.erase(property_->GetWindowName());
+	}
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     hostSession_ = nullptr;
     return res;
@@ -1070,6 +1078,11 @@ bool WindowSceneSessionImpl::IsFullScreen() const
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
+    if (GetMode() == WindowMode::WINDOW_MODE_FLOATING
+        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        /* FloatingWindow skip for Phone*/
+        return false;
+    }
     bool enable = WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
@@ -1301,7 +1314,9 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
-    hostSession_->GetGlobalMaximizeMode(mode);
+    if (hostSession_) {
+        hostSession_->GetGlobalMaximizeMode(mode);
+    }
     return mode;
 }
 
@@ -1423,6 +1438,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
 void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     WLOGD("notify scene ace update config");
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
@@ -1431,6 +1447,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -1450,6 +1467,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -1936,7 +1954,8 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
+        && system::GetParameter("const.product.devicetype", "unknown") == "pc") {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         statusProperty.enable_ = false;
         ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
@@ -1970,6 +1989,29 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         }
     }
     return WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    WLOGFI("UpdateMaximizeMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    if (uiContent_ == nullptr) {
+        WLOGFE("UpdateMaximizeMode uiContent_ is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    uiContent_->UpdateMaximizeMode(mode);
+    return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("NotifySessionForeground");
+    Show(reason, withAnimation);
+}
+
+void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    WLOGFI("NotifySessionBackground");
+    Hide(reason, withAnimation, isFromInnerkits);
 }
 } // namespace Rosen
 } // namespace OHOS

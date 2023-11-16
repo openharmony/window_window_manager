@@ -260,7 +260,12 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
     if (info.persistentId_ == 0) {
-        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        if (result == BrokerStates::BROKER_NOT_START) {
+            WLOGE("[NAPI] The BrokerStates is not opened");
+            return nullptr;
+        }
+
         if (info.reuse) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(

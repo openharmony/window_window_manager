@@ -47,6 +47,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     napi_wrap(env, objValue, jsScreenSession.release(), JsScreenSession::Finalizer, nullptr, nullptr);
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetScreenId())));
+    napi_set_named_property(env, objValue, "name",
+        CreateJsValue(env, static_cast<std::string>(screenSession->GetName())));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
@@ -250,7 +252,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenOrientationChange(float screenRotation)
+void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -262,7 +264,7 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, screenSessionWeak, screenRotation](
+        [jsCallbackRef, callbackType, screenSessionWeak, screenOrientation](
             napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
@@ -278,7 +280,7 @@ void JsScreenSession::OnScreenOrientationChange(float screenRotation)
                 WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
-            napi_value argv[] = { CreateJsValue(env, screenRotation) };
+            napi_value argv[] = { CreateJsValue(env, screenOrientation) };
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         });
 

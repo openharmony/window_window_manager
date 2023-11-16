@@ -528,7 +528,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, AppExecFwk::Ability* ability)
+    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
 }
@@ -2903,7 +2903,8 @@ void WindowImpl::UpdateFocusStatus(bool focused)
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
-            "UID", getuid());
+            "UID", getuid(),
+            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_);
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
@@ -3683,6 +3684,13 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
 void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     needDefaultAnimation_= needDefaultAnimation;
+}
+
+WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

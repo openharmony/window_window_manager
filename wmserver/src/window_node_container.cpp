@@ -1429,8 +1429,14 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         if (avoidType == AvoidControlType::AVOID_NODE_ADD || avoidType == AvoidControlType::AVOID_NODE_UPDATE) {
             overlapRect = WindowHelper::GetOverlap(keyRect, callingRect, callingRect.posX_, callingRect.posY_);
         }
-
-        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
+        double textFieldPositionY = 0.0;
+        double textFieldHeight = 0.0;
+        if (node->GetWindowProperty() != nullptr) {
+            textFieldPositionY = node->GetWindowProperty()->GetTextFieldPositionY();
+            textFieldHeight = node->GetWindowProperty()->GetTextFieldHeight();
+        }
+        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
+            overlapRect, textFieldPositionY, textFieldHeight);
         if (isAnimateTransactionEnabled_) {
             auto syncTransactionController = RSSyncTransactionController::GetInstance();
             if (syncTransactionController) {
@@ -1963,7 +1969,8 @@ bool WindowNodeContainer::HasPrivateWindow()
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     for (const auto& node : windowNodes) {
-        if (node->isVisible_ && node->GetWindowProperty()->GetPrivacyMode()) {
+        if (node && node->GetVisibilityState() < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION &&
+            node->GetWindowProperty()->GetPrivacyMode()) {
             WLOGI("window name %{public}s", node->GetWindowName().c_str());
             return true;
         }

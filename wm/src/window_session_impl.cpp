@@ -42,11 +42,13 @@
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
+#include "picture_in_picture_manager.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
+constexpr int32_t ANIMATION_TIME = 400;
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -59,6 +61,7 @@ std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::scr
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
+std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
@@ -94,7 +97,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("Property is null");
         return;
     }
-
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = option->GetBundleName();
+    property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -228,6 +233,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& name = property_->GetWindowName();
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     // check window name, same window names are forbidden
     if (windowSessionMap_.find(name) != windowSessionMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name.c_str());
@@ -345,7 +351,10 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         requestState_ = WindowState::STATE_DESTROYED;
     }
     hostSession_ = nullptr;
-    windowSessionMap_.erase(property_->GetWindowName());
+    {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        windowSessionMap_.erase(property_->GetWindowName());
+    }
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     return WMError::WM_OK;
 }
@@ -399,8 +408,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
-    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, wmReason);
+    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
+        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
 }
 
@@ -420,7 +430,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(300);
+        protocol.SetDuration(ANIMATION_TIME);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -465,12 +475,28 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
-            "UID", getuid());
+            "UID", getuid(),
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_);
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
     }
+    isFocused_ = isFocused;
     return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsFocused() const
+{
+    return isFocused_;
+}
+
+WMError WindowSessionImpl::RequestFocus() const
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFD("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SessionManager::GetInstance().RequestFocusStatus(GetPersistentId(), true);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
@@ -522,7 +548,7 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
     if (context_.get() == nullptr) {
         return INVALID_SESSION_ID;
     }
-
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
             winPair.second.second->GetProperty() &&
@@ -557,7 +583,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, AppExecFwk::Ability* ability)
+    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
 }
@@ -1015,6 +1041,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
+    VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1026,6 +1053,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
+    VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
 }
 
 void WindowSessionImpl::NotifyAfterFocused()
@@ -1211,6 +1239,13 @@ WSError WindowSessionImpl::NotifyDestroy()
             listener->OnDialogDeathRecipient();
         }
     }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyCloseExistPipWindow()
+{
+    WLOGFD("WindowSessionImpl::NotifyCloseExistPipWindow");
+    PictureInPictureManager::DoClose(false);
     return WSError::WS_OK;
 }
 
@@ -1519,6 +1554,12 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
     return VsyncStation::GetInstance().GetVSyncPeriod();
 }
 
+void WindowSessionImpl::FlushFrameRate(uint32_t rate)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    VsyncStation::GetInstance().FlushFrameRate(rate);
+}
+
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
     WLOGFD("UpdateProperty, action:%{public}u", action);
@@ -1531,6 +1572,7 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
 {
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     auto iter = windowSessionMap_.find(name);
     if (iter == windowSessionMap_.end()) {
         return nullptr;
@@ -1631,6 +1673,13 @@ WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBar
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
     WLOGFD("NotifyOccupiedAreaChangeInfo, safeHeight: %{public}u "
@@ -1652,6 +1701,21 @@ KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("DumpSessionElementInfo");
+}
+
+WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
+{
+    return WSError::WS_OK;
+}
+
+void WindowSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    WLOGFD("NotifySessionForeground");
+}
+
+void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    WLOGFD("NotifySessionBackground");
 }
 } // namespace Rosen
 } // namespace OHOS

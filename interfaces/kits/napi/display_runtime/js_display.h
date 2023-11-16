@@ -40,9 +40,12 @@ public:
     ~JsDisplay();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value GetCutoutInfo(napi_env env, napi_callback_info info);
+    static napi_value HasImmersiveWindow(napi_env env, napi_callback_info info);
+
 private:
     sptr<Display> display_ = nullptr;
     napi_value OnGetCutoutInfo(napi_env env, napi_callback_info info);
+    napi_value OnHasImmersiveWindow(napi_env env, napi_callback_info info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

@@ -15,7 +15,6 @@
 
 #include "session_listener_controller.h"
 
-#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +67,7 @@ WSError SessionListenerController::AddSessionListener(const sptr<ISessionListene
     if (listenerObject) {
         listenerObject->AddDeathRecipient(listenerDeathRecipient_);
     }
+    WLOGFI("Add SessionListener");
     sessionListeners_.emplace_back(listener);
 
     return WSError::WS_OK;
@@ -86,6 +86,7 @@ void SessionListenerController::DelSessionListener(const sptr<ISessionListener>&
                                return (item && item->AsObject() == listener->AsObject());
                            });
     if (it != sessionListeners_.end()) {
+        WLOGFI("Delete SessionListener");
         sessionListeners_.erase(it);
     }
 }
@@ -328,6 +329,7 @@ void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote
                                return (item && item->AsObject() == remoteObj);
                            });
     if (it != sessionListeners_.end()) {
+        WLOGFI("Died Delete SessionListener");
         sessionListeners_.erase(it);
     }
 }

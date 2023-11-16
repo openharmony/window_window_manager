@@ -32,6 +32,7 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtensionContext"};
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    constexpr int32_t MIN_ARG_COUNT = 2;
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -100,7 +101,7 @@ private:
         size_t argc = 4;
         napi_value argv[4] = {nullptr};
         napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-        if (argc < 2) { // at least two argc
+        if (argc < MIN_ARG_COUNT) { // at least two argc
             WLOGFE("Start ability failed, not enough params.");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return NapiGetUndefined(env);

@@ -61,6 +61,8 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
+    virtual DMError DisableDisplaySnapshot(bool disableOrNot);
+    virtual DMError HasImmersiveWindow(bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
@@ -96,6 +98,7 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation);
@@ -105,6 +108,7 @@ public:
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
+    virtual DMError DisableMirror(bool disableOrNot);
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
@@ -119,6 +123,9 @@ public:
     virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
     virtual DMError SetScreenColorTransform(ScreenId screenId);
+
+    // unique screen
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

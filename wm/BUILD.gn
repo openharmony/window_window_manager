@@ -41,11 +41,15 @@ ohos_static_library("libwm_static") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
+    "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_manager.cpp",
+    "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
@@ -86,10 +90,12 @@ ohos_static_library("libwm_static") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -159,11 +165,15 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
+    "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_manager.cpp",
+    "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
@@ -204,10 +214,12 @@ ohos_shared_library("libwm") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

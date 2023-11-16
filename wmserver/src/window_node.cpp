@@ -421,5 +421,15 @@ void WindowNode::GetWindowGravity(WindowGravity& gravity, uint32_t& percent) con
 {
     property_->GetWindowGravity(gravity, percent);
 }
+
+void WindowNode::SetVisibilityState(WindowVisibilityState state)
+{
+    visibilityState_ = state;
+}
+
+WindowVisibilityState WindowNode::GetVisibilityState() const
+{
+    return visibilityState_;
+}
 } // namespace Rosen
 } // namespace OHOS

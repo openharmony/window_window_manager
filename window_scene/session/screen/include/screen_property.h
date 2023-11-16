@@ -30,6 +30,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     FOLD_SCREEN_EXPAND,
     SCREEN_CONNECT,
     SCREEN_DISCONNECT,
+    FOLD_SCREEN_FOLDING,
 };
 class ScreenProperty {
 public:
@@ -46,6 +47,8 @@ public:
     RRect GetPhyBounds() const;
 
     float GetDensity();
+    float GetDefaultDensity();
+    void SetDefaultDensity(float defaultDensity);
 
     void SetPhyWidth(uint32_t phyWidth);
     int32_t GetPhyWidth() const;
@@ -102,6 +105,7 @@ private:
 
     uint32_t refreshRate_ { 0 };
     float virtualPixelRatio_ { 1.0f };
+    float defaultDensity_ { 1.0f };
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };

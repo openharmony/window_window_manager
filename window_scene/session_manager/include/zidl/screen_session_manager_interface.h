@@ -38,6 +38,10 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) override { return nullptr; }
@@ -96,6 +100,8 @@ public:
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
 
+    void LockFoldDisplayStatus(bool locked) override {}
+
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
     bool IsFoldable() override { return false; };
@@ -103,6 +109,8 @@ public:
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
+
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
 };
 
 } // namespace Rosen

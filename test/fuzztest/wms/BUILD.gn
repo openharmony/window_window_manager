@@ -15,6 +15,7 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "pip_fuzzer:fuzztest",
     "window_fuzzer:fuzztest",
     "windowagent_fuzzer:fuzztest",
     "windowipc_fuzzer:fuzztest",

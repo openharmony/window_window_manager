@@ -20,7 +20,7 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 
-void SensorPostureDataCallback(SensorEvent *event)
+static void SensorPostureDataCallback(SensorEvent *event)
 {
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(event);
 }
@@ -88,6 +88,10 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(PostureData)) {
         WLOGFI("SensorEvent dataLen less than posture data size.");
+        return;
+    }
+    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
+        WLOGFI("SensorEvent display status is locked.");
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);

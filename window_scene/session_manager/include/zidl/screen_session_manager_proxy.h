@@ -61,9 +61,12 @@ public:
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
 
+    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override;
+
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
+    DMError DisableMirror(bool disableOrNot) override;
 
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                ScreenId& screenGroupId) override;
@@ -74,6 +77,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
+    DMError DisableDisplaySnapshot(bool disableOrNot) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
@@ -90,6 +94,7 @@ public:
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    virtual DMError HasImmersiveWindow(bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
 
@@ -98,6 +103,8 @@ public:
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
 
+    void LockFoldDisplayStatus(bool locked) override;
+
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
@@ -105,6 +112,9 @@ public:
     FoldStatus GetFoldStatus() override;
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+
+    // unique screen
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

@@ -44,6 +44,16 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
+    WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
+    WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
+    WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -78,6 +88,36 @@ WSError TestWindowEventChannel::TransferFocusState(bool foucsState)
 }
 
 WSError TestWindowEventChannel::TransferBackpressedEventForConsumed(bool& isConsumed)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t baseParent)
 {
     return WSError::WS_OK;
 }
@@ -379,6 +419,47 @@ HWTEST_F(WindowSessionTest, CheckDialogOnForeground, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: IsTopDialog
+ * @tc.desc: check func IsTopDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsTopDialog, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->dialogVec_.clear();
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+
+    sptr<Session> dialogSession1 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession1, nullptr);
+    dialogSession1->persistentId_ = 33;
+    dialogSession1->SetParentSession(session_);
+    dialogSession1->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(dialogSession1);
+
+    sptr<Session> dialogSession2 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession2, nullptr);
+    dialogSession2->persistentId_ = 34;
+    dialogSession2->SetParentSession(session_);
+    dialogSession2->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(dialogSession2);
+
+    sptr<Session> dialogSession3 = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession3, nullptr);
+    dialogSession3->persistentId_ = 35;
+    dialogSession3->SetParentSession(session_);
+    dialogSession3->state_ = SessionState::STATE_INACTIVE;
+    session_->dialogVec_.push_back(dialogSession3);
+
+    ASSERT_EQ(false, dialogSession3->IsTopDialog());
+    ASSERT_EQ(true, dialogSession2->IsTopDialog());
+    ASSERT_EQ(false, dialogSession1->IsTopDialog());
+    session_->dialogVec_.clear();
+}
+
+/**
  * @tc.name: NotifyDestroy
  * @tc.desc: check func NotifyDestroy
  * @tc.type: FUNC
@@ -672,6 +753,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
+    sessionConfig.backgroundswitch = true;
     sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
@@ -732,6 +814,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
+    sessionConfig.backgroundswitch = true;
     sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
@@ -789,6 +872,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
+    sessionConfig.backgroundswitch = true;
     sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);

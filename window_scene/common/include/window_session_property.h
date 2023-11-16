@@ -136,6 +136,12 @@ public:
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 
+    void SetTextFieldPositionY(double textFieldPositionY);
+    void SetTextFieldHeight(double textFieldHeight);
+
+    double GetTextFieldPositionY() const;
+    double GetTextFieldHeight() const;
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -179,6 +185,9 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
+
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
 };
 
 struct SystemSessionConfig : public Parcelable {
@@ -192,6 +201,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniHeightOfMainWindow_ = 0;
     uint32_t miniWidthOfSubWindow_ = 0;
     uint32_t miniHeightOfSubWindow_ = 0;
+    bool backgroundswitch = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -211,6 +221,10 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
+        if (!parcel.WriteBool(backgroundswitch)) {
+            return false;
+        }
+        
         return true;
     }
 
@@ -231,6 +245,7 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->backgroundswitch = parcel.ReadBool();
         return config;
     }
 };

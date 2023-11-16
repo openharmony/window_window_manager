@@ -304,7 +304,7 @@ napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAvoidArea");
+    WLOGI("GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -1520,7 +1520,8 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     if (isLoadedByName) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetUIContentByName(contextUrl, env, nativeStorage, ability));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage, false, ability));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage, false, nullptr, ability));
     }
     if (ret == WmErrorCode::WM_OK) {
         task.Resolve(env, NapiGetUndefined(env));
@@ -2192,7 +2193,8 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         uint32_t resultValue = 0;
         napi_get_value_uint32(env, nativeMode, &resultValue);
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType > AvoidAreaType::TYPE_KEYBOARD) || (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
+        errCode = ((avoidAreaType > AvoidAreaType::TYPE_AI_NAVIGATION_BAR) ||
+                   (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -3044,7 +3046,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Window set dragEnabled failed"));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "set dragEnabled failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] set dragEnabled end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());

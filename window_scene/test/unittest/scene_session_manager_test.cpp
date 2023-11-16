@@ -26,14 +26,13 @@
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
 
-const std::string EMPTY_DEVICE_ID = "";
-
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
+    const std::string EMPTY_DEVICE_ID = "";
     constexpr int WAIT_SLEEP_TIME = 1;
     using ConfigItem = WindowSceneConfig::ConfigItem;
     ConfigItem ReadConfig(const std::string& xmlStr)
@@ -678,7 +677,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml01, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml02
- * @tc.desc: call defaultWindowMode 
+ * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml02, Function | SmallTest | Level3)
@@ -734,7 +733,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml03, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml04
- * @tc.desc: call defaultMaximizeMode 
+ * @tc.desc: call defaultMaximizeMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml04, Function | SmallTest | Level3)
@@ -762,7 +761,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml04, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml05
- * @tc.desc: call maxFloatingWindowSize 
+ * @tc.desc: call maxFloatingWindowSize
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml05, Function | SmallTest | Level3)
@@ -798,11 +797,18 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation01, Function | SmallTes
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
             "<keyboardAnimation>"
-                "<timing>"
-                    "<durationIn>abv</durationIn>"
-                    "<durationOut>abc</durationOut>"
-                    "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                "</timing>"
+                "<animationIn>"
+                    "<timing>"
+                        "<duration>abv</duration>"
+                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                    "</timing>"
+                "</animationIn>"
+                "<animationOut>"
+                    "<timing>"
+                        "<duration>abv</duration>"
+                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                    "</timing>"
+                "</animationOut>"
             "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
@@ -813,11 +819,18 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation01, Function | SmallTes
     std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
             "<keyboardAnimation>"
-                "<timing>"
-                    "<durationIn>500</durationIn>"
-                    "<durationOut>300</durationOut>"
-                    "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                "</timing>"
+                "<animationIn>"
+                    "<timing>"
+                        "<duration>500</duration>"
+                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                    "</timing>"
+                "</animationIn>"
+                "<animationOut>"
+                    "<timing>"
+                        "<duration>300</duration>"
+                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                    "</timing>"
+                "</animationOut>"
             "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
@@ -838,11 +851,17 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation02, Function | SmallTes
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
             "<keyboardAnimation>"
-                "<timing>"
-                    "<durationIn>500</durationIn>"
-                    "<durationIn>600</durationIn>"
-                    "<durationOut>300</durationOut>"
-                "</timing>"
+                "<animationIn>"
+                    "<timing>"
+                        "<duration>500</duration>"
+                        "<duration>600</duration>"
+                    "</timing>"
+                "</animationIn>"
+                "<animationOut>"
+                    "<timing>"
+                        "<duration>300</duration>"
+                    "</timing>"
+                "</animationOut>"
             "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
@@ -862,11 +881,17 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation03, Function | SmallTes
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
             "<keyboardAnimation>"
-                "<timing>"
-                    "<durationIn>500</durationIn>"
-                    "<durationOut>300</durationOut>"
-                    "<durationOut>400</durationOut>"
-                "</timing>"
+                "<animationIn>"
+                    "<timing>"
+                        "<duration>500</duration>"
+                    "</timing>"
+                "</animationIn>"
+                "<animationOut>"
+                    "<timing>"
+                        "<duration>300</duration>"
+                        "<duration>400</duration>"
+                    "</timing>"
+                "</animationOut>"
             "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
@@ -877,8 +902,8 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation03, Function | SmallTes
 }
 
 /**
- * @tc.name: ConfigKeyboardAnimation03
- * @tc.desc: call maxFloatingWindowSize default
+ * @tc.name: ConfigKeyboardAnimation04
+ * @tc.desc: call ConfigKeyboardAnimation default
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation04, Function | SmallTest | Level3)
@@ -886,11 +911,11 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation04, Function | SmallTes
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
             "<keyboardAnimation>"
-                "<timing>"
-                    "<durationIn>500</durationIn>"
-                    "<durationOut>300</durationOut>"
-                    "<durationOut>400</durationOut>"
-                "</timing>"
+                "<animationIn>"
+                    "<timing>"
+                        "<duration>500</duration>"
+                    "</timing>"
+                "</animationIn>"
             "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
@@ -1616,27 +1641,25 @@ HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation, Function | Smal
 HWTEST_F(SceneSessionManagerTest, CreateCurve, Function | SmallTest | Level3)
 {
     WindowSceneConfig::ConfigItem curveConfig;
-    std::string nodeName;
-    std::string result01 = ssm_->CreateCurve(curveConfig, nodeName);
+    std::string result01 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
     ASSERT_EQ(result01, "easeOut");
 
     std::string value02 = "userName";
     curveConfig.SetValue(value02);
     curveConfig.SetValue({{"name", curveConfig}});
-    std::string result02 = ssm_->CreateCurve(curveConfig, nodeName);
+    std::string result02 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
     ASSERT_EQ(result02, "easeOut");
 
     std::string value03 = "interactiveSpring";
     curveConfig.SetValue(value03);
     curveConfig.SetValue({{"name", curveConfig}});
-    std::string result03 = ssm_->CreateCurve(curveConfig, nodeName);
+    std::string result03 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
     ASSERT_EQ(result03, "easeOut");
 
     std::string value04 = "cubic";
     curveConfig.SetValue(value04);
     curveConfig.SetValue({{"name", curveConfig}});
-    nodeName = "windowAnimation";
-    std::string result04 = ssm_->CreateCurve(curveConfig, nodeName);
+    std::string result04 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
     ASSERT_EQ(result04, "easeOut");
 }
 
@@ -2411,13 +2434,13 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
     int32_t focusedSession_ = ssm_->GetFocusedSession();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t persistentId_ = INVALID_SESSION_ID;
-    WSError result01 = ssm_->RequestFocusStatus(persistentId_, true);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+    WMError result01 = ssm_->RequestFocusStatus(persistentId_, true);
+    EXPECT_EQ(result01, WMError::WM_OK);
     persistentId_ = 10000;
-    WSError result02 = ssm_->RequestFocusStatus(persistentId_, true);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_SESSION);
-    WSError result03 = ssm_->RequestFocusStatus(persistentId_, false);
-    EXPECT_EQ(result03, WSError::WS_DO_NOTHING);
+    WMError result02 = ssm_->RequestFocusStatus(persistentId_, true);
+    EXPECT_EQ(result02, WMError::WM_OK);
+    WMError result03 = ssm_->RequestFocusStatus(persistentId_, false);
+    EXPECT_EQ(result03, WMError::WM_OK);
 }
 
 /**
@@ -2548,6 +2571,19 @@ HWTEST_F(SceneSessionManagerTest, UpdateWindowMode, Function | SmallTest | Level
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
     std::function<void(int32_t persistentId, WindowUpdateType type)> func = WindowChangedFuncTest;
     ssm_->RegisterWindowChanged(func);
+}
+
+/**
+ * @tc.name: SetScreenLocked && IsScreenLocked
+ * @tc.desc: SceneSesionManager update screen locked state
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, IsScreenLocked, Function | SmallTest | Level3)
+{
+    ssm_->SetScreenLocked(true);
+    EXPECT_TRUE(ssm_->IsScreenLocked());
+    ssm_->SetScreenLocked(false);
+    EXPECT_FALSE(ssm_->IsScreenLocked());
 }
 
 /**
@@ -2807,6 +2843,53 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
     result = ssm_->LockSession(sessionId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: UpdateImmersiveState
+ * @tc.desc: test UpdateImmersiveState
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->UpdateImmersiveState();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: SceneSesionManager NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionForeground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scensession = nullptr;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, scensession);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    scensession->NotifySessionForeground(reason, withAnimation);
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: SceneSesionManager NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionBackground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scensession = nullptr;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, scensession);
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 }
 } // namespace Rosen

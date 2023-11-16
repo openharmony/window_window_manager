@@ -16,6 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 
+#include <list>
+
+#include "accessibility_element_info.h"
 #include "window_session_impl.h"
 
 namespace OHOS {
@@ -33,18 +36,37 @@ public:
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
+    WSErrorCode NotifyTransferComponentDataSync(
+        const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) override;
+    void RegisterTransferComponentDataForResultListener(
+        const NotifyTransferComponentDataForResultFunc& func) override;
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+
+    WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
+    WSError NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
+    WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info) override;
+    WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionAguments,
+        int32_t action, int32_t baseParent) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
     void NotifyBackpressedEvent(bool& isConsumed) override;
+    void NotifyConfigurationUpdated() override;
+    void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
+    void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
+    NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
