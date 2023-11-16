@@ -1533,7 +1533,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
         }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
-            auto sceneSession = item.second;
+            sceneSession = item.second;
             if (sceneSession == nullptr) {
                 continue;
             }
