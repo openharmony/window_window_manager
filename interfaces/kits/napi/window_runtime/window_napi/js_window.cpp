@@ -1548,17 +1548,11 @@ napi_value JsWindow::LoadContentScheduleOld(napi_env env, napi_callback_info inf
         WLOGFE("Failed to convert parameter to context url");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    napi_value storage = nullptr;
     napi_value callBack = nullptr;
     if (argc == 2) { // 2 param num
         callBack = argv[1];
     }
     std::shared_ptr<NativeReference> contentStorage = nullptr;
-    if (storage != nullptr) {
-        napi_ref result = nullptr;
-        napi_create_reference(env, storage, 1, &result);
-        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
-    }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = [weakToken, contentStorage, contextUrl, errCode, isLoadedByName](
                                                napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1702,17 +1696,11 @@ napi_value JsWindow::OnSetUIContent(napi_env env, napi_callback_info info)
         WLOGFE("Failed to convert parameter to context url");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    napi_value storage = nullptr;
     napi_value callBack = nullptr;
     if (argc >= 2) { // 2 param num
         callBack = argv[1];
     }
     std::shared_ptr<NativeReference> contentStorage = nullptr;
-    if (storage != nullptr) {
-        napi_ref result = nullptr;
-        napi_create_reference(env, storage, 1, &result);
-        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
-    }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
