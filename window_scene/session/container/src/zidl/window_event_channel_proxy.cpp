@@ -330,4 +330,49 @@ WSError WindowEventChannelProxy::TransferFocusMoveSearch(int32_t elementId, int3
     return GetElementInfo(reply, info);
 }
 
+WSError WindowEventChannelProxy::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action,
+    int32_t baseParent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(elementId)) {
+        WLOGFE("Write elementId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(action)) {
+        WLOGFE("Write action failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    std::vector<std::string> actionArgumentsKey {};
+    std::vector<std::string> actionArgumentsValue {};
+    for (auto iter = actionArguments.begin(); iter != actionArguments.end(); iter++) {
+        actionArgumentsKey.push_back(iter->first);
+        actionArgumentsValue.push_back(iter->second);
+    }
+    if (!data.WriteStringVector(actionArgumentsKey)) {
+        WLOGFE("actionArgumentsKey write error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteStringVector(actionArgumentsValue)) {
+        WLOGFE("actionArgumentsValue write error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(baseParent)) {
+        WLOGFE("Write baseParent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen

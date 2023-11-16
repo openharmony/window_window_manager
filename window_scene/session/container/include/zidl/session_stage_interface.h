@@ -18,6 +18,7 @@
 
 #include <iremote_broker.h>
 #include <list>
+#include <map>
 
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
@@ -68,6 +69,11 @@ public:
     }
     virtual WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent)
     {
         return WSError::WS_OK;
     }

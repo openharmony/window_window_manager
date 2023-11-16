@@ -646,6 +646,7 @@ private:
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    bool needNotifyFocusLater_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

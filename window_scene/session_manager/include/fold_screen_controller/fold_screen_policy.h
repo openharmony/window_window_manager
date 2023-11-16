@@ -19,6 +19,7 @@
 
 #include "dm_common.h"
 #include "session/screen/include/screen_property.h"
+#include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
 class FoldScreenPolicy : public RefBase {
@@ -31,6 +32,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
+    virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void LockDisplayStatus(bool locked);
 
     ScreenId screenId_;
@@ -38,6 +40,7 @@ public:
     mutable std::recursive_mutex displayModeMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
+    sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
 };
 } // namespace OHOS::Rosen

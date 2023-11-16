@@ -719,7 +719,20 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    float vpr = 3.5f; // 3.5f: default pixel ratio
+    int32_t floatingBarHeight = 32; // 32: floating windowBar Height
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+        return;
+    }
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+        if (display) {
+            vpr = display->GetVirtualPixelRatio();
+        }
+        avoidArea.topRect_.height_ = vpr * floatingBarHeight;
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
@@ -737,6 +750,12 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        return;
+    }
     std::vector<sptr<SceneSession>> inputMethodVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (auto& inputMethod : inputMethodVector) {

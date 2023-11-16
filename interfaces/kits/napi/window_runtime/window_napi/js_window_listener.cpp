@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <hitrace_meter.h>
+
 #include "event_handler.h"
+#include "event_runner.h"
 #include "js_window_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
@@ -27,6 +31,15 @@ namespace {
 JsWindowListener::~JsWindowListener()
 {
     WLOGI("[NAPI]~JsWindowListener");
+}
+
+void JsWindowListener::SetMainEventHandler()
+{
+    auto mainRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (mainRunner == nullptr) {
+        return;
+    }
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
 void JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
@@ -56,11 +69,14 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     }
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSizeChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
             WLOGFE("[NAPI]this listener or eng is nullptr");
             return;
         }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
         napi_value objValue = nullptr;
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
@@ -71,19 +87,17 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         napi_set_named_property(eng, objValue, "height", CreateJsValue(eng, rect.height_));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
     } else {
-        std::unique_ptr<NapiAsyncTask::CompleteCallback> complete =
-            std::make_unique<NapiAsyncTask::CompleteCallback>([jsCallback] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
-                jsCallback();
-            });
-        napi_ref callback = nullptr;
-        std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-        NapiAsyncTask::Schedule("JsWindowListener::OnSizeChange",
-            env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        if (!eventHandler_) {
+            WLOGFE("get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(jsCallback, "JsWindowListener::OnSizeChange", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     currentWidth_ = rect.width_;
     currentHeight_ = rect.height_;
@@ -101,6 +115,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
             NapiAsyncTask &task, int32_t status) {
+            
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -170,22 +185,25 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
     WLOGI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, eventType, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
-            thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+    auto task = [self = weakRef_, eventType, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::LifeCycleCallBack");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("[NAPI]this listener or eng is nullptr");
+            return;
         }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::LifeCycleCallBack",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
+        napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
+        thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
+    };
+    if (!eventHandler_) {
+        WLOGFE("get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "JsWindowListener::LifeCycleCallBack", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void JsWindowListener::AfterForeground()
