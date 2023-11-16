@@ -53,7 +53,10 @@ enum class SessionInterfaceCode {
     TRANS_ID_NOTIFY_REMOTE_READY = 502,
     TRANS_ID_NOTIFY_EXTENSION_DIED = 503,
     TRANS_ID_NOTIFY_ASYNC_ON,
-    TRANS_ID_NOTIFY_SYNC_ON
+    TRANS_ID_NOTIFY_SYNC_ON,
+
+    //PictureInPicture
+    TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE = 800
 };
 } // namespace Rosen
 } // namespace OHOS

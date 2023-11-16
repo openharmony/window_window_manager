@@ -93,6 +93,7 @@ private:
     void ProcessForceHideChangeRegister();
     void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessPrepareClosePiPSessionRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
@@ -126,6 +127,7 @@ private:
     void OnForceHideChange(bool hide);
     void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnPrepareClosePiPSession();
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

@@ -54,6 +54,7 @@ const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
 const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
+const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 } // namespace
 
 std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
@@ -142,7 +143,8 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         { RAISE_ABOVE_TARGET_CB,                 &JsSceneSession::ProcessRaiseAboveTargetRegister },
         { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister },
         { TOUCH_OUTSIDE_CB,                      &JsSceneSession::ProcessTouchOutsideRegister },
-        { WINDOW_DRAG_HOT_AREA_CB,               &JsSceneSession::ProcessWindowDragHotAreaRegister }
+        { WINDOW_DRAG_HOT_AREA_CB,               &JsSceneSession::ProcessWindowDragHotAreaRegister },
+        { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -1693,6 +1695,41 @@ napi_value JsSceneSession::OnSetFloatingScale(napi_env env, napi_callback_info i
     }
     session->SetFloatingScale(static_cast<float_t>(floatingScale));
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onPrepareClosePiPSession_ = std::bind(&JsSceneSession::OnPrepareClosePiPSession, this);
+    WLOGFD("ProcessPrepareClosePiPSessionRegister success")
+}
+
+void JsSceneSession::OnPrepareClosePiPSession()
+{
+    WLOGFI("[NAPI]OnPrepareClosePiPSession");
+    auto iter = jsCbMap.find(PREPARE_CLOSE_PIPSESSION);
+    if (iter == jsCbMap_.end()){
+        return;
+    }
+    auto jsCallBack = iter-> second;
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            napi_value argv[] = { };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        });
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSession::OnPrepareClosePiPSession", env_, 
+                        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));    
+    
 }
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const

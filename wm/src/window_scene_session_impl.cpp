@@ -2013,5 +2013,18 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
     WLOGFI("NotifySessionBackground");
     Hide(reason, withAnimation, isFromInnerkits);
 }
+
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+{
+    const WindowType type = GetType();
+    if (!WindowHelper::IsPipWindow(type)) {
+        return WMError::WM_OK;
+    }
+    WLOGFD("NotifyPrepareClosePiPWindow start");
+    hostSession_->NotifyPiPWindowPrepareClose();
+    WLOGFD("NotifyPrepareClosePiPWindow end");
+    return WMError::WM_OK;
+
+}
 } // namespace Rosen
 } // namespace OHOS
