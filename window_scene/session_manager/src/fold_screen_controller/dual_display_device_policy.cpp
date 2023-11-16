@@ -152,17 +152,16 @@ sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
     int32_t foldCreaseRegionPosHeight = 56;
 
     WLOGI("GetCurrentFoldCreaseRegion");
-    if (screenId_ == screenIdMain)
-    {
+    if (screenId_ == screenIdMain){
         WLOGI("GetCurrentFoldCreaseRegion is invalid");
         return nullptr;
     }
 
-    std::vector<DMRect> rect ={{foldCreaseRegionPosX, foldCreaseRegionPosY,
-                                foldCreaseRegionPosWidth, foldCreaseRegionPosHeight}}
+    std::vector<DMRect> rect = {{foldCreaseRegionPosX, foldCreaseRegionPosY,
+                                 foldCreaseRegionPosWidth, foldCreaseRegionPosHeight}}
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 
-    return currentFoldCreaseRegion_
+    return currentFoldCreaseRegion_;
 }
 
 void DualDisplayDevicePolicy::LockDisplayStatus(bool locked)
