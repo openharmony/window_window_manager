@@ -1712,7 +1712,7 @@ void JsSceneSession::OnPrepareClosePiPSession()
 {
     WLOGFI("[NAPI]OnPrepareClosePiPSession");
     auto iter = jsCbMap_.find(PREPARE_CLOSE_PIP_SESSION);
-    if (iter == jsCbMap_.end()){
+    if (iter == jsCbMap_.end()) {
         return;
     }
     auto jsCallBack = iter-> second;
@@ -1728,7 +1728,7 @@ void JsSceneSession::OnPrepareClosePiPSession()
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsSceneSession::OnPrepareClosePiPSession", env_, 
-                        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));    
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));    
     
 }
 
