@@ -1108,9 +1108,10 @@ bool Session::CheckDialogOnForeground()
         WLOGFD("Dialog is empty, id: %{public}d", GetPersistentId());
         return false;
     }
-    for (auto dialogSession : dialogVec_) {
+    for (auto iter = dialogVec_.rbegin(); iter != dialogVec_.rend(); iter++) {
+        auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
-            GetSessionState() == SessionState::STATE_FOREGROUND)) {
+            dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
             dialogSession->NotifyTouchDialogTarget();
             WLOGFD("Notify touch dialog window, id: %{public}d", GetPersistentId());
             return true;
@@ -1168,6 +1169,30 @@ bool Session::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEve
     return true;
 }
 
+bool Session::IsTopDialog() const
+{
+    int32_t currentPersistentId = GetPersistentId();
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        WLOGFI("Dialog's Parent is NULL. id: %{public}d", currentPersistentId);
+        return false;
+    }
+    std::unique_lock<std::mutex> lock(parentSession->dialogVecMutex_);
+    if (parentSession->dialogVec_.size() <= 1) {
+        return true;
+    }
+    auto parentDialogVec = parentSession->dialogVec_;
+    for (auto iter = parentDialogVec.rbegin(); iter != parentDialogVec.rend(); iter++) {
+        auto dialogSession = *iter;
+        if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+            dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
+            WLOGFI("Dialog id: %{public}d, current dialog id: %{public}d", dialogSession->GetPersistentId(), currentPersistentId);
+            return dialogSession->GetPersistentId() == currentPersistentId;
+        }
+    }
+    return false;
+}
+
 const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
 {
     const std::map<MMI::WindowArea, const char*> areaMap = {
@@ -1212,7 +1237,6 @@ void Session::HandlePointDownDialog(int32_t pointAction)
             dialog->PresentFoucusIfNeed(pointAction);
             WLOGFD("Point main window, raise to top and dialog need focus, id: %{public}d, dialogId: %{public}d",
                 GetPersistentId(), dialog->GetPersistentId());
-            break;
         }
     }
 }
@@ -1238,6 +1262,14 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
             WLOGFD("Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
             return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+            parentSession_->HandlePointDownDialog(pointerAction);
+            if (!IsTopDialog()) {
+                WLOGFI("There is at least one active dialog upon this dialog, id: %{public}d", GetPersistentId());
+                return WSError::WS_ERROR_INVALID_PERMISSION;
+            }
         }
     }
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
@@ -1298,9 +1330,16 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-    } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
-        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+            if (!IsTopDialog()) {
+                WLOGFI("There is at least one active dialog upon this dialog");
+                return WSError::WS_ERROR_INVALID_PERMISSION;
+            }
+        }
     }
 
     if (!CheckKeyEventDispatch(keyEvent)) {
