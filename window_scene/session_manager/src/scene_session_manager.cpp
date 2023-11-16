@@ -2986,6 +2986,16 @@ void SceneSessionManager::SetShiftFocusListener(const ProcessShiftFocusFunc& fun
     shiftFocusFunc_ = func;
 }
 
+void SceneSessionManager::SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func)
+{
+    notifySCBAfterFocusedFunc_ = func;
+}
+
+void SceneSessionManager::SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func)
+{
+    notifySCBAfterUnfocusedFunc_ = func;
+}
+
 void SceneSessionManager::SetShowPiPMainWindowListener(const ProcessShowPiPMainWindowFunc& func)
 {
     WLOGFD("SetShowPiPMainWindowListener");
@@ -3007,6 +3017,17 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
         nextId = nextSession->GetPersistentId();
     }
     UpdateFocusStatus(nextSession, true);
+    bool scbPrevFocus = focusedSession && focusedSession->GetSessionInfo().isSystem_;
+    bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;
+    if (!scbPrevFocus && scbCurrFocus) {
+        if (notifySCBAfterFocusedFunc_ != nullptr) {
+            notifySCBAfterFocusedFunc_();
+        }
+    } else if (scbPrevFocus && !scbCurrFocus) {
+        if (notifySCBAfterUnfocusedFunc_ != nullptr) {
+            notifySCBAfterUnfocusedFunc_();
+        }
+    }
     WLOGFI("ShiftFocus, focusedId: %{public}d, nextId: %{public}d", focusedId, nextId);
     return WSError::WS_OK;
 }
