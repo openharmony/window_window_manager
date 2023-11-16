@@ -307,6 +307,17 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int32_t elementId,
     return WSError::WS_OK;
 }
 
+WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    WLOGFD("TransferAccessibilityEvent IN, vec.size:%{public}d", uiExtensionIdLevelVec.size());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+}
+
 void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
 }

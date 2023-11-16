@@ -54,6 +54,9 @@ namespace OHOS::Media {
     class PixelMap;
 }
 
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
@@ -1400,11 +1403,20 @@ public:
     virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
 
     /**
+     * @brief Transfer accessibility event data
+     *
+     * @param func Function to notify transfer component data.
+    */
+    virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+
+    /**
      * @brief Notify prepare to close window
      *
      * @return Errorcode of window.
      */
     virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
+        
 };
 }
 }
