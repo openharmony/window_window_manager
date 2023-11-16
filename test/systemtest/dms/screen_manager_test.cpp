@@ -1067,7 +1067,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level
     ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
     ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
 
-    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
 HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level1)
@@ -1102,10 +1102,10 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
     ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
     ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
 
-    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1132,7 +1132,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
-    DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 }
 } // namespace Rosen
