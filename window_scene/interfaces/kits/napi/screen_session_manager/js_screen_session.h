@@ -28,7 +28,7 @@ public:
     JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
     ~JsScreenSession();
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& session);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
