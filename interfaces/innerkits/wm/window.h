@@ -1409,6 +1409,15 @@ public:
     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+
+    /**
+     * @brief update the pip window instance (w,h,r).
+     *
+     * @param width width of pip window.
+     * @param height width of pip window.
+     * @param reason reason of update.
+     */
+    virtual void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) {}
 };
 }
 }

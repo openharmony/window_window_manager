@@ -211,6 +211,7 @@ public:
     WSRect GetSessionTargetRect();
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
@@ -245,6 +246,13 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
+
+    PiPRectInfo pipRectInfo_;
+    bool InitPiPRectInfo();
+    void ClearPiPRectPivotInfo();
+    void SavePiPRectInfo();
+    void GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect);
+    void ProcessUpdatePiPRect(SizeChangeReason reason);
 public:
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;

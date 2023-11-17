@@ -17,6 +17,7 @@
 
 #include <event_handler.h>
 #include <refbase.h>
+#include <power_mgr_client.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
 #include "window_manager_hilog.h"
@@ -154,6 +155,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
                 WLOGFE("Window destroy failed");
                 return WMError::WM_ERROR_PIP_DESTROY_FAILED;
             }
+            window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW);
             PictureInPictureManager::RemoveCurrentPipController();
             PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
             window_ = nullptr;
@@ -172,7 +174,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
 
 sptr<Window> PictureInPictureController::GetPipWindow()
 {
-    WLOGFD("GetWindow is called");
+    WLOGFD("GetPipWindow is called");
     return window_;
 }
 
@@ -191,6 +193,11 @@ void PictureInPictureController::SetPipWindow(sptr<Window> window)
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
     isAutoStartEnabled_ = enable;
+    if (isAutoStartEnabled_) {
+        PictureInPictureManager::AttachActivePipController(this);
+    } else {
+        PictureInPictureManager::DetachActivePipController(this);
+    }
 }
 
 void PictureInPictureController::IsAutoStartEnabled(bool& enable) const
@@ -200,8 +207,49 @@ void PictureInPictureController::IsAutoStartEnabled(bool& enable) const
 
 void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t height)
 {
-    WLOGI("UpdateDisplaySize is called");
-    return;
+    WLOGI("UpdateContentSize is called");
+    if (window_ == nullptr) {
+        WLOGFE("PiPWindow is not exist");
+        return;
+    }
+    window_->UpdatePiPRect(windowRect_.width_, windowRect_.height_,
+        PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE);
+}
+
+void PictureInPictureController::StartMove()
+{
+    WLOGI("StartMove is called");
+    if (window_ == nullptr) {
+        WLOGFE("PiPWindow is not exist");
+        return;
+    }
+    window_->StartMove();
+    window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_MOVE);
+}
+
+void PictureInPictureController::DoScale()
+{
+    WLOGI("DoScale is called");
+    if (window_ == nullptr) {
+        WLOGFE("PiPWindow is not exist");
+        return;
+    }
+    window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_SCALE_CHANGE);
+}
+
+void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
+{
+    WLOGI("PipMainWindowLifeCycleImpl AfterBackground is called");
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        WLOGFE("screen is off");
+        return;
+    }
+    PictureInPictureManager::AutoStartPipWindow();
+}
+
+void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(int32_t type)
+{
+    WLOGI("PipMainWindowLifeCycleImpl BackgroundFailed is called");
 }
 void PictureInPictureController::StartMove()
 {
