@@ -41,34 +41,13 @@ std::pair<sptr<IScreenSessionManager>, sptr<IRemoteObject>> GetProxy()
         return {nullptr, nullptr};
     }
 
-    sptr<IRemoteObject> remoteObject1 = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject1) {
-        WLOGFE("Remote object1 is nullptr");
-        return {nullptr, nullptr};
-    }
-    auto mockSessionManagerServiceProxy = iface_cast<IMockSessionManagerInterface>(remoteObject1);
-    if (!mockSessionManagerServiceProxy) {
-        WLOGFW("Get mock session manager service proxy failed, nullptr");
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID);
+    if (!remoteObject) {
+        WLOGFE("Remote object is nullptr");
         return {nullptr, nullptr};
     }
 
-    sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy->GetSessionManagerService();
-    if (!remoteObject2) {
-        WLOGFE("Remote object2 is nullptr");
-        return {nullptr, nullptr};
-    }
-    auto sessionManagerServiceProxy = iface_cast<ISessionManagerService>(remoteObject2);
-    if (!sessionManagerServiceProxy) {
-        WLOGFE("sessionManagerServiceProxy is nullptr");
-        return {nullptr, nullptr};
-    }
-
-    sptr<IRemoteObject> remoteObject3 = sessionManagerServiceProxy->GetScreenSessionManagerService();
-    if (!remoteObject3) {
-        WLOGFE("Get screen session manager proxy failed, nullptr");
-        return {nullptr, nullptr};
-    }
-    auto screenSessionManagerProxy = iface_cast<IScreenSessionManager>(remoteObject3);
+    auto screenSessionManagerProxy = iface_cast<IScreenSessionManager>(remoteObject);
     if (!screenSessionManagerProxy) {
         WLOGFE("Get screen session manager proxy failed, nullptr");
         return {nullptr, nullptr};
@@ -76,7 +55,7 @@ std::pair<sptr<IScreenSessionManager>, sptr<IRemoteObject>> GetProxy()
 
     WLOGFD("GetProxy success");
 
-    return {screenSessionManagerProxy, remoteObject3};
+    return {screenSessionManagerProxy, remoteObject};
 }
 
 void IPCFuzzTest(const uint8_t* data, size_t size)
