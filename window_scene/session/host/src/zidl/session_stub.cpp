@@ -488,16 +488,14 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleTransferAccessibilityEvent begin!");
     sptr<AccessibilityEventInfoParcel> infoPtr =
-        reply.ReadStrongParcelable<AccessibilityEventInfoParcel>();
+        data.ReadStrongParcelable<AccessibilityEventInfoParcel>();
     std::vector<int32_t> uiExtensionIdLevelVec;
-    if (!reply.ReadInt32Vector(&uiExtensionIdLevelVec)) {
+    if (!data.ReadInt32Vector(&uiExtensionIdLevelVec)) {
         WLOGFE("read idVect error");
         return ERR_INVALID_DATA;
     }
     NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
-    WLOGFD("HandleTransferAccessibilityEvent end!");
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

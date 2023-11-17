@@ -31,7 +31,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
-constexpr int32_t MAX_COUNT = 9 * 9 * 1000000;
+constexpr int32_t MAX_COUNT = 210 * 9 * 9 * 100000;
 }
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
