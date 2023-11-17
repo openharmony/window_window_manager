@@ -67,8 +67,6 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
     : env_(env), screenSession_(screenSession)
 {}
 
-JsScreenSession::~JsScreenSession() {}
-
 napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
     JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
@@ -204,17 +202,17 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnConnect()
+void JsScreenSession::OnConnect(ScreenId screenId)
 {
     CallJsCallback(ON_CONNECTION_CALLBACK);
 }
 
-void JsScreenSession::OnDisconnect()
+void JsScreenSession::OnDisconnect(ScreenId screenId)
 {
     CallJsCallback(ON_DISCONNECTION_CALLBACK);
 }
 
-void JsScreenSession::OnSensorRotationChange(float sensorRotation)
+void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId screenId)
 {
     const std::string callbackType = ON_SENSOR_ROTATION_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
@@ -252,7 +250,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
+void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -290,7 +288,8 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
+void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    ScreenId screenId)
 {
     const std::string callbackType = ON_PROPERTY_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
@@ -329,7 +328,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenRotationLockedChange(bool isLocked)
+void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
     WLOGD("Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);

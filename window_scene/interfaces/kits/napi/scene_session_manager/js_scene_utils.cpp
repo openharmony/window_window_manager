@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
-#include <iomanip>
-#include <js_runtime_utils.h>
 #include "js_scene_utils.h"
-#include "interfaces/include/ws_common.h"
-#include "session_manager/include/screen_session_manager.h"
+
+#include <iomanip>
+
+#include <event_handler.h>
+#include <js_runtime_utils.h>
+
+#include "display_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -294,12 +297,12 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
-    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!displayInfo) {
-        WLOGFE("[NAPI]Default display info is null");
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        WLOGFE("[NAPI]Default display is null");
         return false;
     }
-    auto vpr = displayInfo->GetVirtualPixelRatio();
+    auto vpr = display->GetVirtualPixelRatio();
     MMI::PointerEvent::PointerItem pointerItem;
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);

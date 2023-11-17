@@ -60,21 +60,6 @@ void ScreenSessionManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: RegisterScreenConnectionListener
- * @tc.desc: RegisterScreenConnectionListener test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, RegisterScreenConnectionListener, Function | SmallTest | Level3)
-{
-    sptr<IScreenConnectionListener> screenConnectionListener = nullptr;
-    ssm_->RegisterScreenConnectionListener(screenConnectionListener);
-    EXPECT_EQ(nullptr, screenConnectionListener);
-
-    ssm_->UnregisterScreenConnectionListener(screenConnectionListener);
-    EXPECT_EQ(nullptr, screenConnectionListener);
-}
-
-/**
  * @tc.name: RegisterDisplayManagerAgent
  * @tc.desc: RegisterDisplayManagerAgent test
  * @tc.type: FUNC
