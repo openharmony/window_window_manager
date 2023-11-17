@@ -107,6 +107,7 @@ public:
     void UpdatePropertyAfterRotation(RRect bounds, int rotation);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void SetName(std::string name);
+    void Resize(uint32_t width, uint32_t height);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
