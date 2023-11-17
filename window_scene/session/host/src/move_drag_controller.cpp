@@ -122,7 +122,11 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
 
     int32_t action = pointerEvent->GetPointerAction();
     if (!GetStartMoveFlag()) {
-        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            WLOGFD("Move event hasPointDown");
+            hasPointDown_ = true;
+        } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             WLOGFD("Reset hasPointDown_ when point up or cancel");

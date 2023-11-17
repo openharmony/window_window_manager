@@ -41,6 +41,7 @@ public:
     void SetAutoStartEnabled(bool enable);
     void IsAutoStartEnabled(bool& enable) const;
     void UpdateContentSize(uint32_t width, uint32_t height);
+    void StartMove();
 private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow();

@@ -203,5 +203,13 @@ void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t heig
     WLOGI("UpdateDisplaySize is called");
     return;
 }
+void PictureInPictureController::StartMove()
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->StartMove();
+}
 } // namespace Rosen
 } // namespace OHOS
