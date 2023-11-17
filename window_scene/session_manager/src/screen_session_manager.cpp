@@ -266,7 +266,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         return;
     }
     //if SetDisplayMode failed, try again
-    if (foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
+    if (foldScreenController_ != nullptr && foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
         auto foldStatus = GetFoldStatus();
         switch (foldStatus) {
             case FoldStatus::EXPAND: {
