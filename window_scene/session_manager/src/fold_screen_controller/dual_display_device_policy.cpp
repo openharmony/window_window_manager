@@ -26,7 +26,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplayDevicePolicy"};
 } // namespace
 
-DualDisplayDevicePolicy::DualDisplayDevicePolicy()
+DualDisplayDevicePolicy::DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex): displayInfoMutex_(displayInfoMutex)
 {
     WLOGI("DualDisplayDevicePolicy created");
 }
@@ -48,6 +48,11 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     }
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        if (currentDisplayMode_ == displayMode) {
+            WLOGFW("ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
+            return;
+        }
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
                 ReportFoldStatusChangeBegin((int32_t)screenIdFull, (int32_t)screenIdMain);

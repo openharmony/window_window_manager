@@ -33,6 +33,7 @@ public:
     void TearDown() override;
 private:
     sptr<DualDisplayDevicePolicy> dualDisplayDevicePolicy_ = nullptr;
+    std::recursive_mutex mutex_;
 };
 
 void DualDisplayDevicePolicyTest::SetUpTestCase()
@@ -45,7 +46,7 @@ void DualDisplayDevicePolicyTest::TearDownTestCase()
 
 void DualDisplayDevicePolicyTest::SetUp()
 {
-    dualDisplayDevicePolicy_ = new (std::nothrow) DualDisplayDevicePolicy();
+    dualDisplayDevicePolicy_ = new (std::nothrow) DualDisplayDevicePolicy(mutex_);
     EXPECT_NE(nullptr, dualDisplayDevicePolicy_);
 }
 
