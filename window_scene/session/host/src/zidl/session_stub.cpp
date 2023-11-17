@@ -95,7 +95,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
-        &SessionStub::HandleTransferAccessibilityEvent)
+        &SessionStub::HandleTransferAccessibilityEvent),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
+        &SessionStub::HandleUpdatePiPRect)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -498,6 +500,17 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
     }
     NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
     WLOGFD("HandleTransferAccessibilityEvent end!");
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdatePiPRect!");
+    uint32_t width = data.ReadUint32();
+    uint32_t height = data.ReadUint32();
+    auto reason = static_cast<PiPRectUpdateReason>(data.ReadInt32());
+    WSError errCode = UpdatePiPRect(width, height, reason);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -81,6 +81,8 @@ public:
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         const std::vector<int32_t>& uiExtensionIdLevelVec) {}
+    virtual WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+        { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 
