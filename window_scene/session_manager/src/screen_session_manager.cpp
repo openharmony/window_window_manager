@@ -748,9 +748,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status)
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
 {
-    auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         WLOGFI("ScreenSessionManager BootFinishedCallback boot animation finished");
+        auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
