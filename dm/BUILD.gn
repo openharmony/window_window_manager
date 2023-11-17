@@ -93,11 +93,7 @@ ohos_shared_library("libdm") {
 
   public_configs = [ ":libdm_public_config" ]
 
-  deps = [
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session_manager:session_manager",
-    "../utils:libwmutil",
-  ]
+  deps = [ "../utils:libwmutil" ]
 
   external_deps = [
     "ability_runtime:ability_manager",

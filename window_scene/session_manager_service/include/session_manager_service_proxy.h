@@ -28,7 +28,6 @@ public:
     virtual ~SessionManagerServiceProxy() = default;
 
     sptr<IRemoteObject> GetSceneSessionManager() override;
-    sptr<IRemoteObject> GetScreenSessionManagerService() override;
 
 private:
     static inline BrokerDelegator<SessionManagerServiceProxy> delegator_;

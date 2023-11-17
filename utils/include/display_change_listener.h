@@ -18,22 +18,10 @@
 
 #include <refbase.h>
 
+#include "display_info.h"
+
 namespace OHOS {
 namespace Rosen {
-enum class DisplayStateChangeType : uint32_t {
-    BEFORE_SUSPEND,
-    BEFORE_UNLOCK,
-    UPDATE_ROTATION,
-    UPDATE_ROTATION_FROM_WINDOW,
-    SIZE_CHANGE,
-    CREATE,
-    DESTROY,
-    FREEZE,
-    UNFREEZE,
-    VIRTUAL_PIXEL_RATIO_CHANGE,
-    DISPLAY_COMPRESS,
-    UNKNOWN,
-};
 class IDisplayChangeListener : public RefBase {
 public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,

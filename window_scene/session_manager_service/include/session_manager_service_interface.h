@@ -25,11 +25,9 @@ public:
 
     enum class SessionManagerServiceMessage : uint32_t {
         TRANS_ID_GET_SCENE_SESSION_MANAGER = 0,
-        TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE,
     };
 
     virtual sptr<IRemoteObject> GetSceneSessionManager() = 0;
-    virtual sptr<IRemoteObject> GetScreenSessionManagerService() = 0;
 };
 } // namespace OHOS::Rosen
 

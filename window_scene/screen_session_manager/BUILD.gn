@@ -14,33 +14,41 @@
 import("//build/ohos.gni")
 import("../../windowmanager_aafwk.gni")
 
-config("session_manager_service_public_config") {
+config("screen_session_manager_client_public_config") {
   include_dirs = [
+    "include",
+    "${window_base_path}/dm/include",
+    "${window_base_path}/dmserver/include",
+    "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
-    "${window_base_path}/window_scene/session_manager_service/include",
+    "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/session_manager/include",
   ]
 }
 
-ohos_shared_library("session_manager_service") {
+ohos_shared_library("screen_session_manager_client") {
   sources = [
-    "src/session_manager_service.cpp",
-    "src/session_manager_service_stub.cpp",
+    "../session_manager/src/zidl/screen_session_manager_proxy.cpp",
+    "src/screen_session_manager_client.cpp",
+    "src/zidl/screen_session_manager_client_stub.cpp",
   ]
 
-  cflags_cc = [ "-std=c++17" ]
-
-  public_configs = [ ":session_manager_service_public_config" ]
+  public_configs = [ ":screen_session_manager_client_public_config" ]
 
   deps = [
-    "${window_base_path}/window_scene/session_manager:scene_session_manager",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/session:screen_session",
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   innerapi_tags = [ "platformsdk" ]

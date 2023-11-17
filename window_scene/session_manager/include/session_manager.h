@@ -21,7 +21,6 @@
 #include "session_manager_service_interface.h"
 #include "mock_session_manager_service_interface.h"
 #include "zidl/scene_session_manager_interface.h"
-#include "zidl/screen_session_manager_interface.h"
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
@@ -46,7 +45,6 @@ public:
     void Clear();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
-    sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
 
 protected:
     SessionManager() = default;
@@ -60,7 +58,6 @@ private:
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
-    sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;

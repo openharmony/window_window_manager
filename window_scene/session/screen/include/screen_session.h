@@ -33,17 +33,15 @@
 #include "event_handler.h"
 
 namespace OHOS::Rosen {
-class IScreenChangeListener : public RefBase {
+class IScreenChangeListener {
 public:
-    IScreenChangeListener() = default;
-    virtual ~IScreenChangeListener() = default;
-
-    virtual void OnConnect() = 0;
-    virtual void OnDisconnect() = 0;
-    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
-    virtual void OnSensorRotationChange(float sensorRotation) = 0;
-    virtual void OnScreenOrientationChange(float screenOrientation) = 0;
-    virtual void OnScreenRotationLockedChange(bool isLocked) = 0;
+    virtual void OnConnect(ScreenId screenId) = 0;
+    virtual void OnDisconnect(ScreenId screenId) = 0;
+    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        ScreenId screenId) = 0;
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
+    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
+    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -54,10 +52,11 @@ enum class ScreenState : int32_t {
 
 class ScreenSession : public RefBase {
 public:
-    explicit ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
-    ScreenSession();
+    ScreenSession() = default;
+    ScreenSession(ScreenId screenId, const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
+    ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
-    ~ScreenSession() = default;
+    virtual ~ScreenSession() = default;
 
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
@@ -127,7 +126,10 @@ public:
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
+    void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation);
+    void ScreenOrientationChange(float orientation);
+
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
     ScreenProperty property_;
