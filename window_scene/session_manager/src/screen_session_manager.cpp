@@ -1196,6 +1196,10 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId scre
 
 DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("ResizeVirtualScreen permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
         screenId, width, height);
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
