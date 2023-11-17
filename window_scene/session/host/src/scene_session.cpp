@@ -1000,7 +1000,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
     
-    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_PIP && WindowHelper::IsPipWindow(property->GetWindowType())) {
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
+        WindowHelper::IsPipWindow(property->GetWindowType())) {
         WLOGFD("WINDOW_MODE_PIP");
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
