@@ -14,12 +14,13 @@
  */
 
 #include "session_manager.h"
+
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "mock_session_manager_service_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
-#include "mock_session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -50,15 +51,6 @@ void SessionManager::ClearSessionManagerProxy()
         sessionManagerServiceProxy_ = nullptr;
     }
     sceneSessionManagerProxy_ = nullptr;
-    screenSessionManagerProxy_ = nullptr;
-}
-
-sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    InitSessionManagerServiceProxy();
-    InitScreenSessionManagerProxy();
-    return screenSessionManagerProxy_;
 }
 
 sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
@@ -98,26 +90,6 @@ void SessionManager::InitSessionManagerServiceProxy()
     sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
-    }
-}
-
-void SessionManager::InitScreenSessionManagerProxy()
-{
-    if (screenSessionManagerProxy_) {
-        return;
-    }
-    if (!sessionManagerServiceProxy_) {
-        WLOGFW("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
-        return;
-    }
-    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenSessionManagerService();
-    if (!remoteObject) {
-        WLOGFW("Get screen session manager proxy failed, screen session manager service is null");
-        return;
-    }
-    screenSessionManagerProxy_ = iface_cast<IScreenSessionManager>(remoteObject);
-    if (!screenSessionManagerProxy_) {
-        WLOGFW("Get screen session manager proxy failed, nullptr");
     }
 }
 

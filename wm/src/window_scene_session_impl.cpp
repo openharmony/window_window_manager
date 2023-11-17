@@ -21,6 +21,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "display_info.h"
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "perform_reporter.h"

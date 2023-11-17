@@ -187,7 +187,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     return result;
 }
 
-bool JsRootSceneSession::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
+bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());

@@ -30,6 +30,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "display_info.h"
 #include "display_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "session_permission.h"
@@ -540,11 +541,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFE("display is null!");
         return;
     }
-    float density = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    auto displayInfo = display->GetDisplayInfo();
+    float density = displayInfo->GetVirtualPixelRatio();
+    int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     config.SetDensity(density);
+    config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
-    WLOGFD("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WLOGFI("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], orientation: %{public}d",
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()

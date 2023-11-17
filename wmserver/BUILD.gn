@@ -87,9 +87,7 @@ config("libmockwms_config") {
 ohos_shared_library("sms") {
   sources = [
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
-    "src/mock_screen_manager_service.cpp",
     "src/mock_session_manager_service.cpp",
-    "src/zidl/mock_screen_manager_service_stub.cpp",
     "src/zidl/mock_session_manager_service_stub.cpp",
   ]
 
