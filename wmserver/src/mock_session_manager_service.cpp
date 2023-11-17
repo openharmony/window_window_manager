@@ -29,7 +29,6 @@
 #include <map>
 #include <sstream>
 
-#include "mock_screen_manager_service.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
 #include "parameters.h"
@@ -92,7 +91,6 @@ bool MockSessionManagerService::RegisterMockSessionManagerService()
         WLOGFE("Publish failed");
     }
     WLOGFI("Publish mock session manager service success");
-    MockScreenManagerService::GetInstance().RegisterMockScreenManagerService();
     return true;
 }
 
@@ -160,7 +158,6 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     }
 
     RegisterMockSessionManagerService();
-    MockScreenManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
     WLOGFI("sessionManagerService set success!");
     return true;
 }
