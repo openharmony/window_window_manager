@@ -2019,7 +2019,7 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
     if (!WindowHelper::IsPipWindow(GetType())) {
-        return WMError::WM_DO_NOTHING,
+        return WMError::WM_DO_NOTHING;
     }
     WLOGFD("NotifyPrepareClosePiPWindow start");
     hostSession_->NotifyPiPWindowPrepareClose();
