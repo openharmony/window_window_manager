@@ -2018,9 +2018,8 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
-    const WindowType type = GetType();
-    if (!WindowHelper::IsPipWindow(type)) {
-        return WMError::WM_OK;
+    if (!WindowHelper::IsPipWindow(GetType())) {
+        return WMError::WM_DO_NOTHING,
     }
     WLOGFD("NotifyPrepareClosePiPWindow start");
     hostSession_->NotifyPiPWindowPrepareClose();

@@ -1716,19 +1716,15 @@ void JsSceneSession::OnPrepareClosePiPSession()
         return;
     }
     auto jsCallBack = iter-> second;
-    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [jsCallBack, eng = env_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!jsCallBack) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value argv[] = { };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSession::OnPrepareClosePiPSession", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnPrepareClosePiPSession");
 }
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
