@@ -1210,7 +1210,8 @@ DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
     }
     rsInterface_.ResizeVirtualScreen(rsScreenId, width, height);
     screenSession->Resize(width, height);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE);
     return DMError::DM_OK;
 }
 
