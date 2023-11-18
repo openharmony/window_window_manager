@@ -399,6 +399,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         WSError ret = session->Session::UpdateRect(rect, reason, rsTransaction);
         if (WindowHelper::IsPipWindow(session->GetWindowType()) && reason == SizeChangeReason::DRAG_END) {
+            session->ClearPiPRectPivotInfo();
             ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
             ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
         }
@@ -1967,7 +1968,7 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
         WLOGE("SceneSessionManager::ProcessUpdatePiPRect not pip window");
         return;
     }
-    auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (!display) {
         WLOGFE("can't find display info");
         return;
