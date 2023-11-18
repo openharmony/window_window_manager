@@ -45,6 +45,7 @@ using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
 using GetAINavigationBarArea = std::function<WSRect()>;
+using RecoveryCallback = std::function<void(int32_t persistentId)>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -76,6 +77,7 @@ public:
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
+        RecoveryCallback onRecoveryPullPiPMainWindow_;
     };
 
     // callback for notify SceneBoard
@@ -215,6 +217,7 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
+    WSError RecoveryPullPiPMainWindow(int32_t persistentId) override;
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;

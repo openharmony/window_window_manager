@@ -104,11 +104,13 @@ private:
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnShiftFocus(int32_t persistentId);
+    void OnShowPiPMainWindow(int32_t persistentId);
     void ProcessCreateSpecificSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
+    void ProcessShowPiPMainWindow();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
