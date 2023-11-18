@@ -93,6 +93,10 @@
 #include "mem_mgr_window_info.h"
 #endif
 
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "suspend_manager_client.h"
+#endif // EFFICIENCY_MANAGER_ENABLE
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
@@ -2938,6 +2942,10 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
         sceneSession->GetWindowType(),
         sceneSession->GetAbilityToken()
     );
+#ifdef EFFICIENCY_MANAGER_ENABLE
+        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(focusChangeInfo->uid_,
+            "", "THAW_BY_FOCUS_CHANGED");
+#endif // EFFICIENCY_MANAGER_ENABLE
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     WSError res = WSError::WS_OK;
     res = sceneSession->UpdateFocus(isFocused);
