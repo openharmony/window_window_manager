@@ -175,6 +175,7 @@ public:
 
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
+    void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
 
     void OnConnect(ScreenId screenId) override {}

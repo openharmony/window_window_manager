@@ -34,6 +34,7 @@
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
 #include "display_info.h"
+#include "display_change_info.h"
 #include "display_change_listener.h"
 
 namespace OHOS::AAFwk {
@@ -214,6 +215,9 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     void AddWindowDragHotArea(int32_t type, WSRect& area);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
+        ScreenId fromScreenId = SCREEN_ID_INVALID);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
     WSRect GetAINavigationBarArea();
     bool UpdateImmersiveState();

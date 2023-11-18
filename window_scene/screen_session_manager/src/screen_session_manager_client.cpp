@@ -198,6 +198,15 @@ ScreenProperty ScreenSessionManagerClient::GetPhyScreenProperty(ScreenId screenI
     return screenSessionManager_->GetPhyScreenProperty(screenId);
 }
 
+void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyDisplayChangeInfoChanged(info);
+}
+
 void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
 {
     if (!screenSessionManager_) {

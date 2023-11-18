@@ -216,6 +216,17 @@ void DisplayManagerAgentController::NotifyFoldStatusChanged(FoldStatus foldStatu
     }
 }
 
+void DisplayManagerAgentController::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyDisplayChangeInfoChanged(info);
+    }
+}
+
 void DisplayManagerAgentController::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);

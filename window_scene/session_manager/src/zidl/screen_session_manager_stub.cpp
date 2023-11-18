@@ -488,6 +488,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO: {
+            sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
+            if (!info) {
+                WLOGFE("Read DisplayChangeInfo failed");
+                return -1;
+            }
+            NotifyDisplayChangeInfoChanged(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE: {
             auto hasPrivate = data.ReadBool();
             SetScreenPrivacyState(hasPrivate);
