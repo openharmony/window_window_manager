@@ -95,7 +95,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
-        &SessionStub::HandleTransferAccessibilityEvent)
+        &SessionStub::HandleTransferAccessibilityEvent),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
+        &SessionStub::HandleNotifyPiPWindowPrepareClose)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -498,6 +500,13 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
     }
     NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
     WLOGFD("HandleTransferAccessibilityEvent end!");
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyPiPWindowPrepareClose");
+    NotifyPiPWindowPrepareClose();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -144,6 +144,10 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
+
+    WLOGFD("StopPictureInPictureWindow notify prepare close window");
+    window_->NotifyPrepareClosePiPWindow();
+    
     auto task = [this]() {
             if (!window_) {
                 WLOGFE("StopPictureInPicture failed, window is null");
