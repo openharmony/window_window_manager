@@ -131,7 +131,7 @@ void PictureInPictureManager::AttachActivePipController(sptr<PictureInPictureCon
 void PictureInPictureManager::DetachActivePipController(sptr<PictureInPictureController> pipController)
 {
     WLOGD("Detach active pipController");
-    if (pipController != nullptr && 
+    if (pipController != nullptr &&
         pipController.GetRefPtr() != activePipController_.GetRefPtr()) {
         WLOGFE("not same pip controller or no active pip controller");
         return;

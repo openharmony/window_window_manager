@@ -224,7 +224,6 @@ void PictureInPictureController::StartMove()
         return;
     }
     window_->StartMove();
-    window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_MOVE);
 }
 
 void PictureInPictureController::DoScale()
@@ -250,14 +249,6 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(int32_t type)
 {
     WLOGI("PipMainWindowLifeCycleImpl BackgroundFailed is called");
-}
-void PictureInPictureController::StartMove()
-{
-    if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
-        return;
-    }
-    window_->StartMove();
 }
 } // namespace Rosen
 } // namespace OHOS
