@@ -80,7 +80,10 @@ public:
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) {}
+    const std::vector<int32_t>& uiExtensionIdLevelVec) {}
+
+    // PictureInPicture
+    virtual void NotifyPiPWindowPrepareClose() {}
 };
 } // namespace OHOS::Rosen
 

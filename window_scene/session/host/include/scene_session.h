@@ -63,6 +63,7 @@ using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
 using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
+using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -94,6 +95,7 @@ public:
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
+        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
     };
 
     // func for change window scene pattern property
@@ -211,6 +213,7 @@ public:
     WSRect GetSessionTargetRect();
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    void NotifyPiPWindowPrepareClose() override;
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
