@@ -426,6 +426,8 @@ private:
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
+
+    void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
 

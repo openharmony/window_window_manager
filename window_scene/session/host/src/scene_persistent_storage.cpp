@@ -74,6 +74,7 @@ void ScenePersistentStorage::InitDir(std::string dir)
     storagePath_ = {
         { ScenePersistentStorageType::ASPECT_RATIO, saveDir_ + "/session_window_aspect_ratio" },
         { ScenePersistentStorageType::MAXIMIZE_STATE, saveDir_ + "/session_window_maximize_state" },
+        { ScenePersistentStorageType::PIP_INFO, saveDir_ + "/session_pip_window_location_info" },
     };
 }
 
