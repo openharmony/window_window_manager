@@ -159,10 +159,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
-
-    WLOGFD("StopPictureInPictureWindow notify prepare close window");
     window_->NotifyPrepareClosePiPWindow();
-    
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -182,7 +179,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW);
+        session->window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW);
         PictureInPictureManager::RemoveCurrentPipController();
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
@@ -190,10 +187,8 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
-        WLOGFD("Window destroy async");
         handler_->PostTask(task, "StopPictureInPicture", DEFAULT_TIME_DELAY);
     } else {
-        WLOGFD("Window destroy sync");
         return task();
     }
     return WMError::WM_OK;
