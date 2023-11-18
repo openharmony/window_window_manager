@@ -1416,7 +1416,15 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
-        
+
+    /**
+     * @brief update the pip window instance (w,h,r).
+     *
+     * @param width width of pip window.
+     * @param height width of pip window.
+     * @param reason reason of update.
+     */
+    virtual void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) {}
 };
 }
 }

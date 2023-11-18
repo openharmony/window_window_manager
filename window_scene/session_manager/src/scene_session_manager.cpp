@@ -84,6 +84,7 @@
 #include "softbus_bus_center.h"
 #include "window_manager.h"
 #include "perform_reporter.h"
+#include "pip_util.h"
 #include "focus_change_info.h"
 
 #include "window_visibility_info.h"
@@ -3186,6 +3187,9 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionForeground(sceneSession);
             }
+            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+                ProcessPiPSessionForeground(sceneSession);
+            }
             break;
         case SessionState::STATE_BACKGROUND:
             RequestSessionUnfocus(persistentId);
@@ -5115,6 +5119,16 @@ WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
         collaboratorMap_.erase(type);
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("pip window not found");
+        return;
+    }
+    WLOGFD("start pip rect");
+    sceneSession->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_START_WINDOW);
 }
 
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)

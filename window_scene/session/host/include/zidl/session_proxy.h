@@ -68,6 +68,7 @@ public:
     void NotifyExtensionDied() override;
 
     void NotifyPiPWindowPrepareClose() override;
+    WSError UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

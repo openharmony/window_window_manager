@@ -42,6 +42,15 @@ public:
     void IsAutoStartEnabled(bool& enable) const;
     void UpdateContentSize(uint32_t width, uint32_t height);
     void StartMove();
+    void DoScale();
+
+    class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
+    public:
+        PipMainWindowLifeCycleImpl() {};
+        ~PipMainWindowLifeCycleImpl() {};
+        void AfterBackground() override;
+        void BackgroundFailed(int32_t type) override;
+    };
 private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow();
