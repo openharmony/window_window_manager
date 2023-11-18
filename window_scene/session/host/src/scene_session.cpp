@@ -28,6 +28,7 @@
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
+#include "pip_util.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
@@ -397,6 +398,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         WSError ret = session->Session::UpdateRect(rect, reason, rsTransaction);
+        if (WindowHelper::IsPipWindow(session->GetWindowType()) && reason == SizeChangeReason::DRAG_END) {
+            session->ClearPiPRectPivotInfo();
+            ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+            ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
@@ -1919,6 +1925,139 @@ WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double te
 {
     textFieldPositionY_ = textFieldPositionY;
     textFieldHeight_ = textFieldHeight;
+    return WSError::WS_OK;
+}
+
+bool SceneSession::InitPiPRectInfo()
+{
+    auto requestRect = GetSessionRequestRect();
+    if (requestRect.width_ == 0 || requestRect.height_ == 0) {
+        return false;
+    }
+    pipRectInfo_.originWidth_ = requestRect.width_;
+    pipRectInfo_.originHeight_ = requestRect.height_;
+    int32_t level = 0;
+    ScenePersistentStorage::Get("pip_window_level", level, ScenePersistentStorageType::PIP_INFO);
+    pipRectInfo_.level_ = static_cast<PiPScaleLevel>(level);
+    return true;
+}
+
+void SceneSession::ClearPiPRectPivotInfo()
+{
+    pipRectInfo_.xPivot_ = PiPScalePivot::UNDEFINED;
+    pipRectInfo_.yPivot_ = PiPScalePivot::UNDEFINED;
+}
+
+void SceneSession::SavePiPRectInfo()
+{
+    auto pipRect = GetSessionRequestRect();
+    ScenePersistentStorage::Insert("pip_window_pos_x", pipRect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_pos_y", pipRect.posY_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_level", static_cast<int32_t>(pipRectInfo_.level_),
+        ScenePersistentStorageType::PIP_INFO);
+}
+
+void SceneSession::GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect)
+{
+    PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect);
+    WLOGD("SceneSession::GetNewPiPRect rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    auto requestRect = GetSessionRequestRect();
+    if (pipRectInfo_.xPivot_ == PiPScalePivot::UNDEFINED || pipRectInfo_.yPivot_ == PiPScalePivot::UNDEFINED) {
+        // If no anchor, create anchor
+        WLOGD("SceneSession::GetNewPiPRect can't find anchor, create it");
+        PiPUtil::UpdateRectPivot(rect.posX_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
+        PiPUtil::UpdateRectPivot(rect.posY_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+    } else {
+        // If it has anchor, location by anchor
+        WLOGD("SceneSession::GetNewPiPRect find anchor, resize");
+        PiPUtil::GetRectByPivot(rect.posX_, requestRect.width_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
+        PiPUtil::GetRectByPivot(rect.posY_, requestRect.height_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+    }
+    PiPUtil::GetValidRect(displayWidth, displayHeight, rect);
+    WLOGD("SceneSession::GetNewPiPRect valid rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
+{
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP) {
+        WLOGE("SceneSessionManager::ProcessUpdatePiPRect not pip window");
+        return;
+    }
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        WLOGFE("can't find display info");
+        return;
+    }
+    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
+
+    // default pos of phone is the right top
+    Rect rect = { 0, 0, pipRectInfo_.originWidth_, pipRectInfo_.originHeight_ };
+    ScenePersistentStorage::Get("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Get("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    if (rect.posX_ == 0) {
+        rect.posX_ = displayWidth - PiPUtil::SAFE_PADDING_HORIZONTAL;
+    }
+    if (rect.posY_ == 0) {
+        rect.posY_ = PiPUtil::SAFE_PADDING_VERTICAL_TOP;
+    }
+    WLOGD("SceneSession::ProcessUpdatePiPRectpip window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+
+    GetNewPiPRect(displayWidth, displayHeight, rect);
+    WLOGD("SceneSession::ProcessUpdatePiPRectpip window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+
+    WSRect newRect = SessionHelper::TransferToWSRect(rect);
+    SetSessionRect(newRect);
+    Session::UpdateRect(newRect, reason);
+    NotifySessionRectChange(newRect, reason);
+}
+
+WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+{
+    PostTask([weakThis = wptr(this), width, height, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGE("SceneSession::UpdatePiPRect session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->isTerminating) {
+            WLOGE("SceneSession::UpdatePiPRect session is terminating");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        switch (reason) {
+            case PiPRectUpdateReason::REASON_PIP_START_WINDOW:
+                session->InitPiPRectInfo();
+                session->ProcessUpdatePiPRect(SizeChangeReason::CUSTOM_ANIMATION_SHOW);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_SCALE_CHANGE:
+                session->pipRectInfo_.level_ = static_cast<PiPScaleLevel>((static_cast<int32_t>(
+                    session->pipRectInfo_.level_) + 1) % static_cast<int32_t>(PiPScaleLevel::COUNT));
+                session->ProcessUpdatePiPRect(SizeChangeReason::TRANSFORM);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE:
+                session->ClearPiPRectPivotInfo();
+                session->pipRectInfo_.originWidth_ = width;
+                session->pipRectInfo_.originHeight_ = height;
+                session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_MOVE:
+                session->ClearPiPRectPivotInfo();
+                break;
+            case PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW:
+                session->ClearPiPRectPivotInfo();
+                session->SavePiPRectInfo();
+                break;
+            default:
+                return WSError::WS_DO_NOTHING;
+        }
+        return WSError::WS_OK;
+    });
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
