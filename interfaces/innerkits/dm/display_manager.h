@@ -25,6 +25,7 @@
 #include "fold_screen_info.h"
 #include "wm_single_instance.h"
 #include "screenshot_info.h"
+#include "display_change_info.h"
 
 namespace OHOS::Rosen {
 class DisplayManager {
@@ -77,6 +78,16 @@ public:
          * @param foldStatus Screen foldStatus.
          */
         virtual void OnFoldStatusChanged(FoldStatus foldStatus) {}
+    };
+
+    class IDisplayUpdateListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when session change display.
+         *
+         * @param infos DisplayChangeInfo.
+         */
+        virtual void OnDisplayUpdate(const sptr<DisplayChangeInfo>& info) {}
     };
 
     class IDisplayModeListener : public virtual RefBase {
@@ -344,6 +355,22 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Register an listener when session changed.
+     *
+     * @param listener IDisplayUpdateListener.
+     * @return DM_OK means register success, others means unregister failed.
+     */
+    DMError RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
+
+    /**
+     * @brief Unregister an listener when session changed.
+     *
+     * @param listener IDisplayUpdateListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
 
     /**
      * @brief Register a listener for the event of dispaly mode changed.

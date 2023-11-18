@@ -918,10 +918,26 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSessionMap_.insert({ persistentId, sceneSession });
         }
         PerformRegisterInRequestSceneSession(sceneSession);
+        NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         WLOGFI("create session persistentId: %{public}d", persistentId);
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
+{
+    sptr<DisplayChangeInfo> info = new (std::nothrow) DisplayChangeInfo();
+    if (!info) {
+        WLOGFE("new info failed");
+        return;
+    }
+    info->action_ = action;
+    info->abilityName_ = sessionInfo.abilityName_;
+    info->bundleName_ = sessionInfo.bundleName_;
+    info->toScreenId_ = sessionInfo.screenId_;
+    info->fromScreenId_ = fromScreenId;
+    ScreenSessionManagerClient::GetInstance().NotifyDisplayChangeInfoChanged(info);
 }
 
 void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession)
@@ -1338,6 +1354,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (scnSessionInfo->isClearSession) {
             scnSessionInfo->resultCode = -1;
         }
+        NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
         if (needRemoveSession) {
@@ -2488,7 +2505,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
     } else {
         sName = session->GetWindowName();
     }
-    uint32_t displayId = 0;
+    uint32_t displayId = session->GetSessionInfo().screenId_;
     uint32_t flag = 0;
     if (session->GetSessionProperty()) {
         flag = session->GetSessionProperty()->GetWindowFlags();
@@ -5397,6 +5414,19 @@ WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMax
         return WSError::WS_OK;
     };
     taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId)
+{
+    auto scnSession = GetSceneSession(persistentId);
+    if (!scnSession) {
+        WLOGFE("session is nullptr");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    auto fromScreenId = scnSession->GetSessionInfo().screenId_;
+    scnSession->SetScreenId(screenId);
+    NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     return WSError::WS_OK;
 }
 

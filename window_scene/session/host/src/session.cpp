@@ -172,6 +172,11 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
 }
 
+void Session::SetScreenId(uint64_t screenId)
+{
+    sessionInfo_.screenId_ = screenId;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;

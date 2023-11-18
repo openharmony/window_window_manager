@@ -123,6 +123,7 @@ public:
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
 };
 } // namespace Rosen
