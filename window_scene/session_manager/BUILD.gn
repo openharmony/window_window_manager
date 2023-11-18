@@ -142,6 +142,11 @@ ohos_shared_library("scene_session_manager") {
     defines += [ "RES_SCHED_ENABLE" ]
   }
 
+  if (efficiency_manager_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
