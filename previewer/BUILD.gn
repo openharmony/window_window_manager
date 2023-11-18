@@ -61,11 +61,11 @@ if (!ispreview) {
       "../utils/src/wm_math.cpp",
       "src/vsync_station.cpp",
       "src/window.cpp",
+      "src/window_display.cpp",
       "src/window_impl.cpp",
       "src/window_model.cpp",
       "src/window_option.cpp",
       "src/window_scene.cpp",
-      "src/window_display.cpp",
     ]
 
     include_dirs = [

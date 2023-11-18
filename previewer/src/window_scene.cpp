@@ -63,10 +63,8 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     Previewer::PreviewerWindow::GetInstance().SetWindowObject(mainWindow_.GetRefPtr());
     mainWindow_->RegisterLifeCycleListener(listener);
 
-    bool foldable = Previewer::PreviewerDisplay::GetInstance().IsFoldable();
-    FoldStatus foldstatus = Previewer::PreviewerDisplay::GetInstance().GetFoldStatus();
     Previewer::PreviewerDisplay::GetInstance().RegisterStatusChangedCallback(
-        [this](FoldStatus status){
+        [this](FoldStatus status) {
             WLOGFI("FoldStatus changed to %{public}d", status);
             if (mainWindow_ == nullptr) {
                 WLOGFE("mainWindow_ is NULL");

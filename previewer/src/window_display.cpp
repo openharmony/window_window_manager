@@ -36,7 +36,7 @@ void PreviewerDisplay::SetFoldStatus(const FoldStatus foldStatus)
 
 void PreviewerDisplay::ExecStatusChangedCallback()
 {
-    if(!displayCallback_){
+    if (!displayCallback_) {
         return;
     }
     displayCallback_(GetFoldStatus());
