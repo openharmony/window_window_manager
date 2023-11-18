@@ -887,6 +887,24 @@ HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Le
     ASSERT_EQ(DMError::DM_OK, ssm_->HasImmersiveWindow(immersive));
 }
 
+/**
+ * @tc.name: SetSpecifiedScreenPower
+ * @tc.desc: ScreenSessionManager screen power
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest | Level3)
+ {
+    ScreenId mainScreenId(DEFAULT_SCREEN_ID);
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
+    ScreenPowerState state = ScreenPowerState::POWER_ON;
+    DisplayState displayState = DisplayState::ON;
+
+    ASSERT_EQ(true, ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
+
+    ASSERT_EQ(false, ssm_->SetDisplayState(displayState));
+    ASSERT_EQ(DisplayState::ON, ssm_->GetDisplayState(0));
+ }
+ 
 }
 } // namespace Rosen
 } // namespace OHOS
