@@ -96,6 +96,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifyExtensionDied),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
         &SessionStub::HandleTransferAccessibilityEvent),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
+        &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         &SessionStub::HandleUpdatePiPRect)
 };
@@ -500,6 +502,13 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
     }
     NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
     WLOGFD("HandleTransferAccessibilityEvent end!");
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyPiPWindowPrepareClose");
+    NotifyPiPWindowPrepareClose();
     return ERR_NONE;
 }
 

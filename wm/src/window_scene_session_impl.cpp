@@ -2021,5 +2021,16 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
     WLOGFI("NotifySessionBackground");
     Hide(reason, withAnimation, isFromInnerkits);
 }
+
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+{
+    if (!WindowHelper::IsPipWindow(GetType())) {
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGFD("NotifyPrepareClosePiPWindow start");
+    hostSession_->NotifyPiPWindowPrepareClose();
+    WLOGFD("NotifyPrepareClosePiPWindow end");
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
