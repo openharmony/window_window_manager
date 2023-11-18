@@ -1865,6 +1865,23 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
     return true;
 }
 
+void SceneSession::NotifyPiPWindowPrepareClose()
+{
+    WLOGFD("NotifyPiPWindowPrepareClose");
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onPrepareClosePiPSession_) {
+            session->sessionChangeCallback_->onPrepareClosePiPSession_();
+        }
+        WLOGFD("NotifyPiPWindowPrepareClose, id: %{public}d", session->GetPersistentId());
+        return;
+    });
+}
+
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
 {
     return subSession_;

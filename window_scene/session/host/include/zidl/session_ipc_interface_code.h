@@ -55,6 +55,9 @@ enum class SessionInterfaceCode {
     TRANS_ID_NOTIFY_ASYNC_ON,
     TRANS_ID_NOTIFY_SYNC_ON,
     TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT,
+
+    //PictureInPicture
+    TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE = 800,
     TRANS_ID_UPDATE_PIP_RECT
 };
 } // namespace Rosen

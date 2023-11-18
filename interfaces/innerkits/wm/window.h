@@ -1401,7 +1401,7 @@ public:
      * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
-    
+
     /**
      * @brief Transfer accessibility event data
      *
@@ -1409,6 +1409,13 @@ public:
     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+
+    /**
+     * @brief Notify prepare to close window
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
 
     /**
      * @brief update the pip window instance (w,h,r).
