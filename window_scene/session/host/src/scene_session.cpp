@@ -1882,6 +1882,23 @@ void SceneSession::NotifyPiPWindowPrepareClose()
     });
 }
 
+WSError SceneSession::RecoveryPullPiPMainWindow(int32_t persistentId)
+{
+    WLOGFD("NotifyRecoveryPullPiPMainWindow");
+    PostTask([weakThis = wptr(this), persistentId]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->specificCallback_ != nullptr) {
+            session->specificCallback_->onRecoveryPullPiPMainWindow_(persistentId);
+        }
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
 {
     return subSession_;

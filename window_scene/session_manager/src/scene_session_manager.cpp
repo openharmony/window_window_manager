@@ -128,6 +128,10 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+constexpr int32_t DEFAULT_POSX = 0;
+constexpr int32_t DEFAULT_POSY = 855;
+constexpr int32_t DEFAULT_WIDTH = 1344;
+constexpr int32_t DEFAULT_HEIGHT = 800;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -808,6 +812,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSessionTouchOutside_ = std::bind(&SceneSessionManager::NotifySessionTouchOutside,
         this, std::placeholders::_1);
     specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
+    specificCb->onRecoveryPullPiPMainWindow_ = std::bind(&SceneSessionManager::RecoveryPullPiPMainWindow,
+        this, std::placeholders::_1);
     return specificCb;
 }
 
@@ -2887,6 +2893,12 @@ void SceneSessionManager::SetShiftFocusListener(const ProcessShiftFocusFunc& fun
 {
     WLOGFD("SetShiftFocusListener");
     shiftFocusFunc_ = func;
+}
+
+void SceneSessionManager::SetShowPiPMainWindowListener(const ProcessShowPiPMainWindowFunc& func)
+{
+    WLOGFD("SetShowPiPMainWindowListener");
+    showPiPMainWindowFunc_ = func;
 }
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
@@ -5129,6 +5141,29 @@ void SceneSessionManager::ProcessPiPSessionForeground(const sptr<SceneSession> s
     }
     WLOGFD("start pip rect");
     sceneSession->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_START_WINDOW);
+}
+
+WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistentId)
+{
+    auto scnSession = GetSceneSession(persistentId);
+    if (scnSession == nullptr) {
+        WLOGFE("scnSession is nullptr, persistentId: %{public}d", persistentId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsPipWindow(scnSession->GetWindowType())) {
+        WLOGFE("not pip window");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!showPiPMainWindowFunc_) {
+        WLOGFE("showPiPMainWindowFunc_ init error, persistentId: %{public}d", persistentId);
+        return WSError::WS_DO_NOTHING;
+    }
+    auto task = [this, scnSession]() {
+        showPiPMainWindowFunc_(scnSession->GetParentPersistentId());
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)
