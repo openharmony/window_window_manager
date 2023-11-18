@@ -74,7 +74,11 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
     WLOGFI("SessionManagerService died, restart foundation now!");
     uint32_t pid = getpid();
     MockSessionManagerService::WriteStringToFile(pid, "0");
-    _exit(0);
+    if (needKillService_) {
+        _exit(0);
+    } else {
+        needKillService_ = true;
+    }
 }
 
 MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
