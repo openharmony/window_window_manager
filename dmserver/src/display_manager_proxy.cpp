@@ -644,6 +644,35 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
     return reply.ReadBool();
 }
 
+bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+     if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
+        WLOGFE("Write ScreenId failed");
+        return false;
+        }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write ScreenPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+     data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
 {
     MessageParcel data;
