@@ -73,6 +73,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
                 return WMError::WM_ERROR_NULLPTR;
             }
             Previewer::PreviewerDisplay::GetInstance().SetFoldStatus(status);
+            return WMError::WM_OK;
         }
     );
 
