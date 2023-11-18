@@ -87,12 +87,14 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (keyEvent != nullptr) {
-        DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
-        WLOGFD("SetProcessedCallback enter");
-        keyEvent->SetProcessedCallback(dispatchCallback_);
-        WLOGFD("SetProcessedCallback leave");
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
+    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
+    WLOGFD("SetProcessedCallback enter");
+    keyEvent->SetProcessedCallback(dispatchCallback_);
+    WLOGFD("SetProcessedCallback leave");
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;

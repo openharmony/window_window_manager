@@ -26,9 +26,9 @@ namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
     JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
-    ~JsScreenSession();
+    virtual ~JsScreenSession() = default;
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& session);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
@@ -39,12 +39,13 @@ private:
     void CallJsCallback(const std::string& callbackType);
     void RegisterScreenChangeListener();
 
-    void OnConnect() override;
-    void OnDisconnect() override;
-    void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) override;
-    void OnSensorRotationChange(float sensorRotation) override;
-    void OnScreenOrientationChange(float screenOrientation) override;
-    void OnScreenRotationLockedChange(bool isLocked) override;
+    void OnConnect(ScreenId screenId) override;
+    void OnDisconnect(ScreenId screenId) override;
+    void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        ScreenId screenId) override;
+    void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
+    void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
+    void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

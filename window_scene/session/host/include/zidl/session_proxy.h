@@ -60,10 +60,14 @@ public:
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
     void NotifyRemoteReady() override;
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     void NotifyExtensionDied() override;
+
+    void NotifyPiPWindowPrepareClose() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

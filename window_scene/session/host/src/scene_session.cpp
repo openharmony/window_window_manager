@@ -30,7 +30,7 @@
 #include "pixel_map.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "display_manager.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -217,7 +217,8 @@ WSError SceneSession::Disconnect()
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->NotifyCallingSessionBackground();
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && session->sessionChangeCallback_ &&
+            session->sessionChangeCallback_->clearCallbackFunc_) {
             session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
             WLOGFD("ClearCallbackMap, id: %{public}d", session->GetPersistentId());
         }
@@ -334,7 +335,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-        auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
             vpr = display->GetVirtualPixelRatio();
             WLOGD("vpr = %{public}f", vpr);
@@ -411,7 +412,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
     GetSessionProperty()->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        auto defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplayInfo == nullptr) {
             WLOGFE("defaultDisplayInfo is nullptr");
             return false;
@@ -719,7 +720,20 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    float vpr = 3.5f; // 3.5f: default pixel ratio
+    int32_t floatingBarHeight = 32; // 32: floating windowBar Height
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+        return;
+    }
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (display) {
+            vpr = display->GetVirtualPixelRatio();
+        }
+        avoidArea.topRect_.height_ = vpr * floatingBarHeight;
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
@@ -737,6 +751,12 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        return;
+    }
     std::vector<sptr<SceneSession>> inputMethodVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (auto& inputMethod : inputMethodVector) {
@@ -759,8 +779,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().
-        GetCutoutInfo(GetSessionProperty()->GetDisplayId());
+    auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
+    sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         WLOGFI("GetCutoutAvoidArea There is no CutoutInfo");
         return;
@@ -916,7 +936,7 @@ WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent
     int32_t mousePointX = pointerItem.GetDisplayX();
     int32_t mousePointY = pointerItem.GetDisplayY();
 
-    auto displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(pointerEvent->GetTargetDisplayId());
+    auto displayInfo = DisplayManager::GetInstance().GetDisplayById(pointerEvent->GetTargetDisplayId());
     if (displayInfo != nullptr) {
         float vpr = displayInfo->GetVirtualPixelRatio();
         if (vpr <= 0) {
@@ -996,6 +1016,18 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if (IsDecorEnable() && moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+            return WSError::WS_OK;
+        }
+    }
+    
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
+        WindowHelper::IsPipWindow(property->GetWindowType())) {
+        WLOGFD("WINDOW_MODE_PIP");
+        if (!moveDragController_) {
+            WLOGE("moveDragController_ is null");
+            return Session::TransferPointerEvent(pointerEvent);
+        }
+        if (moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             return WSError::WS_OK;
         }
     }
@@ -1126,7 +1158,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
         return false;
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-    auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display) {
         vpr = display->GetVirtualPixelRatio();
     }
@@ -1184,6 +1216,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
+    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1227,6 +1262,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         leashWinSurfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("PipWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
@@ -1518,7 +1557,7 @@ Rect SceneSession::GetHotAreaRect(int32_t action)
     WSRect rect = GetSessionRect();
 
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-    auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display) {
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
@@ -1676,6 +1715,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         if (info.want != nullptr) {
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+            info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, 0);
         }
         WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
             appIndex:%{public}d, affinity:%{public}s", info.bundleName_.c_str(), info.moduleName_.c_str(),
@@ -1817,6 +1857,23 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
     WLOGFD("Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
     subSession_.erase(iter);
     return true;
+}
+
+void SceneSession::NotifyPiPWindowPrepareClose()
+{
+    WLOGFD("NotifyPiPWindowPrepareClose");
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onPrepareClosePiPSession_) {
+            session->sessionChangeCallback_->onPrepareClosePiPSession_();
+        }
+        WLOGFD("NotifyPiPWindowPrepareClose, id: %{public}d", session->GetPersistentId());
+        return;
+    });
 }
 
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const

@@ -18,19 +18,22 @@
 #include <refbase.h>
 
 #include "fold_screen_controller/fold_screen_policy.h"
+#include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
 class DualDisplayDevicePolicy : public FoldScreenPolicy {
 public:
-    DualDisplayDevicePolicy();
+    DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex);
     ~DualDisplayDevicePolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
     void SendSensorResult(FoldStatus foldStatus) override;
     FoldDisplayMode GetScreenDisplayMode() override;
     FoldStatus GetFoldStatus() override;
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
 private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
+    std::recursive_mutex& displayInfoMutex_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_DUAL_DISPLAY_DEVICE_POLICY_H

@@ -30,7 +30,7 @@ enum class DisplayDeviceType :uint32_t {
 
 class FoldScreenController : public RefBase {
 public:
-    FoldScreenController();
+    FoldScreenController(std::recursive_mutex& displayInfoMutex);
     virtual ~FoldScreenController();
 
     void SetDisplayMode(const FoldDisplayMode displayMode);
@@ -43,6 +43,7 @@ public:
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
+    std::recursive_mutex& displayInfoMutex_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H

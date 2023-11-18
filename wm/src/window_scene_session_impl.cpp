@@ -21,6 +21,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "display_info.h"
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "perform_reporter.h"
@@ -894,7 +895,9 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
         mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
+        !(mode == WindowMode::WINDOW_MODE_FLOATING &&
+          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
         WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
@@ -1168,7 +1171,7 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
+    if ((WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsPipWindow(GetType())) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -2026,6 +2029,17 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
     }
     uiContent_->UpdateTitleInTargetPos(isShow, height);
     return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+{
+    if (!WindowHelper::IsPipWindow(GetType())) {
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGFD("NotifyPrepareClosePiPWindow start");
+    hostSession_->NotifyPiPWindowPrepareClose();
+    WLOGFD("NotifyPrepareClosePiPWindow end");
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

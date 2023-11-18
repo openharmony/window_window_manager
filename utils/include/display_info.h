@@ -22,7 +22,6 @@
 #include "class_var_definition.h"
 #include "display.h"
 #include "dm_common.h"
-#include "display_change_listener.h"
 #include "noncopyable.h"
 
 namespace OHOS::Rosen {

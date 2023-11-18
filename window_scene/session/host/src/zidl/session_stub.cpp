@@ -22,7 +22,10 @@
 
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
-
+#include "accessibility_event_info_parcel.h"
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
@@ -90,7 +93,11 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
-        &SessionStub::HandleNotifyExtensionDied)
+        &SessionStub::HandleNotifyExtensionDied),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
+        &SessionStub::HandleTransferAccessibilityEvent),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
+        &SessionStub::HandleNotifyPiPWindowPrepareClose)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -478,6 +485,28 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 {
     WLOGFD("called");
     NotifyExtensionDied();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleTransferAccessibilityEvent begin!");
+    sptr<AccessibilityEventInfoParcel> infoPtr =
+        reply.ReadStrongParcelable<AccessibilityEventInfoParcel>();
+    std::vector<int32_t> uiExtensionIdLevelVec;
+    if (!reply.ReadInt32Vector(&uiExtensionIdLevelVec)) {
+        WLOGFE("read idVect error");
+        return ERR_INVALID_DATA;
+    }
+    NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
+    WLOGFD("HandleTransferAccessibilityEvent end!");
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyPiPWindowPrepareClose");
+    NotifyPiPWindowPrepareClose();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
