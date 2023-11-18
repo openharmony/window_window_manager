@@ -21,6 +21,7 @@
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
+#include <parameters.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -29,6 +30,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "display_info.h"
 #include "display_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "session_permission.h"
@@ -44,6 +46,9 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -536,11 +541,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFE("display is null!");
         return;
     }
-    float density = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    auto displayInfo = display->GetDisplayInfo();
+    float density = displayInfo->GetVirtualPixelRatio();
+    int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     config.SetDensity(density);
+    config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
-    WLOGFD("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WLOGFI("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], orientation: %{public}d",
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
@@ -746,7 +754,6 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         WLOGFE("This is not main window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-    
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
@@ -1688,6 +1695,14 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
+            if ((property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+                 property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                 property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+                system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+                listener->OnSizeChange(occupiedAreaChangeInfo);
+                continue;
+            }
             listener->OnSizeChange(info);
         }
     }
@@ -1706,6 +1721,12 @@ void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& p
 WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 {
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)

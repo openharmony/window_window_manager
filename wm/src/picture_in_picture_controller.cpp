@@ -144,6 +144,10 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
+
+    WLOGFD("StopPictureInPictureWindow notify prepare close window");
+    window_->NotifyPrepareClosePiPWindow();
+    
     auto task = [this]() {
             if (!window_) {
                 WLOGFE("StopPictureInPicture failed, window is null");
@@ -202,6 +206,14 @@ void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t heig
 {
     WLOGI("UpdateDisplaySize is called");
     return;
+}
+void PictureInPictureController::StartMove()
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->StartMove();
 }
 } // namespace Rosen
 } // namespace OHOS

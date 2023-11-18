@@ -125,6 +125,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+    WMError NotifyPrepareClosePiPWindow() override;
 
 protected:
     void DestroySubWindow();

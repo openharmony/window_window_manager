@@ -2858,6 +2858,19 @@ HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: NotifyAINavigationBarShowStatus
+ * @tc.desc: test NotifyAINavigationBarShowStatus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, Function | SmallTest | Level3)
+{
+    bool isVisible = false;
+    WSRect barArea = { 0, 0, 320, 240}; // width: 320, height: 240
+    WSError result = ssm_->NotifyAINavigationBarShowStatus(isVisible, barArea);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: SceneSesionManager NotifySessionForeground
  * @tc.type: FUNC

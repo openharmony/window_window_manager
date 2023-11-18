@@ -39,7 +39,6 @@ public:
     virtual void Clear();
 protected:
     bool InitDMSProxy();
-    bool InitSMSProxy();
     std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
@@ -113,6 +112,7 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
     virtual DMError SetScreenRotationLocked(bool isLocked);
     virtual DMError IsScreenRotationLocked(bool& isLocked);
 

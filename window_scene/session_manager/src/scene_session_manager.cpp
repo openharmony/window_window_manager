@@ -60,6 +60,7 @@
 #include "anr_manager.h"
 #include "color_parser.h"
 #include "common/include/session_permission.h"
+#include "display_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/main_session.h"
@@ -71,7 +72,7 @@
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/screen/include/screen_session.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -84,7 +85,6 @@
 #include "window_manager.h"
 #include "perform_reporter.h"
 #include "focus_change_info.h"
-#include "session_manager/include/screen_session_manager.h"
 
 #include "window_visibility_info.h"
 #ifdef MEMMGR_WINDOW_ENABLE
@@ -185,9 +185,8 @@ void SceneSessionManager::Init()
 
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
-    ScreenSessionManager::GetInstance().SetSensorSubscriptionEnabled();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
-    ScreenSessionManager::GetInstance().RegisterDisplayChangeListener(listener);
+    ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
 
     // create handler for inner command at server
@@ -1533,7 +1532,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
         }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
-            auto sceneSession = item.second;
+            sceneSession = item.second;
             if (sceneSession == nullptr) {
                 continue;
             }
@@ -3099,7 +3098,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
     int counts = GetSceneSessionPrivacyModeCount();
     bool hasPrivateWindow = (counts != 0);
-    ScreenSessionManager::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
+    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
 }
 
 int SceneSessionManager::GetSceneSessionPrivacyModeCount()
@@ -4252,7 +4251,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
         return;
     }
 
-    auto defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo == nullptr) {
         WLOGFE("screenSession is null");
         return;

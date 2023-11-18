@@ -49,7 +49,7 @@ public:
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
-    static napi_value SwitchUser(napi_env engin, napi_callback_info info);
+    static napi_value SwitchUser(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);

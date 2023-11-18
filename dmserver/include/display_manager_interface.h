@@ -95,6 +95,14 @@ public:
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
         TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
+        TRANS_ID_SET_CLIENT = 2500,
+        TRANS_ID_GET_SCREEN_PROPERTY,
+        TRANS_ID_GET_DISPLAY_NODE,
+        TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY,
+        TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA,
+        TRANS_ID_GET_PHY_SCREEN_PROPERTY,
+        TRANS_ID_SET_SCREEN_PRIVACY_STATE,
+        TRANS_ID_RESIZE_VIRTUAL_SCREEN,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -151,6 +159,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
