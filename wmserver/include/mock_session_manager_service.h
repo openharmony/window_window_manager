@@ -32,6 +32,12 @@ public:
     sptr<IRemoteObject> GetSceneSessionManager();
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
+    void NotifyNotKillService()
+    {
+        if (smsDeathRecipient_ != nullptr) {
+            smsDeathRecipient_->needKillService_ = false;
+        }
+    }
 
 protected:
     MockSessionManagerService();
@@ -50,6 +56,7 @@ private:
     public:
         void OnRemoteDied(const wptr<IRemoteObject>& object) override;
         bool IsSceneBoardTestMode();
+        bool needKillService_ { true };
     };
 
     sptr<IRemoteObject> sessionManagerService_;
