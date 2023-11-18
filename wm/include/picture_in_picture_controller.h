@@ -23,6 +23,7 @@
 #include "picture_in_picture_option.h"
 #include "window.h"
 #include "wm_common.h"
+#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,6 +44,12 @@ public:
     void UpdateContentSize(uint32_t width, uint32_t height);
     void StartMove();
     void DoScale();
+    void DoActionEvent(std::string& actionName);
+    void RestorePictureInPictureWindow();
+    void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
+    void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);
+    sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
+    sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
 
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
     public:
@@ -56,6 +63,8 @@ private:
     WMError ShowPictureInPictureWindow();
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
+    sptr<IPiPLifeCycle> pipLifeCycleListener_;
+    sptr<IPiPActionObserver> pipActionObserver_;
     sptr<Window> window_;
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};

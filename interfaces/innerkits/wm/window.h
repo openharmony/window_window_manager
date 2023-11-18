@@ -1425,6 +1425,13 @@ public:
      * @param reason reason of update.
      */
     virtual void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) {}
+
+    /**
+     * @brief Recovery pip main window.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError RecoveryPullPiPMainWindow() { return WMError::WM_OK; }
 };
 }
 }

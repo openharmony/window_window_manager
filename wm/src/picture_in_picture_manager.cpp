@@ -170,6 +170,10 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
 void PictureInPictureManager::DoRestore()
 {
     WLOGD("DoRestore is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->RestorePictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoClose(bool needAnim)
@@ -198,6 +202,10 @@ void PictureInPictureManager::DoScale()
 void PictureInPictureManager::DoActionEvent(std::string actionName)
 {
     WLOGD("DoActionEvent is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->DoActionEvent(actionName);
 }
 
 void PictureInPictureManager::AutoStartPipWindow()

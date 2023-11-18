@@ -33,6 +33,13 @@ napi_value NapiThrowInvalidParam(napi_env env)
     return NapiGetUndefined(env);
 }
 
+bool NapiIsCallable(napi_env env, napi_value value)
+{
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
+}
+
 napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
