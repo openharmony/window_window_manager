@@ -72,7 +72,7 @@ public:
     void NotifyDisplayEvent(DisplayEvent event) override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
-    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
+    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyScreenshot(DisplayId displayId);
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
@@ -181,6 +181,8 @@ public:
     void OnDisconnect(ScreenId screenId) override {}
     void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         ScreenId screenId) override;
+    void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
@@ -214,7 +216,7 @@ private:
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
-    bool SetScreenPower(ScreenPowerStatus status);
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);

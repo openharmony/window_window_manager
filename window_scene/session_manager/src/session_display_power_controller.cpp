@@ -48,7 +48,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 displayState_ = state;
             }
             ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-                EventStatus::BEGIN);
+                EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
             break;
         }
         case DisplayState::OFF: {
@@ -57,7 +57,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 displayState_ = state;
             }
             ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
-                EventStatus::BEGIN);
+                EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
             break;
         }
         default: {
@@ -81,7 +81,7 @@ void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
         std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);
         ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
-            EventStatus::BEGIN);
+            EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
         return;
     }
 }
