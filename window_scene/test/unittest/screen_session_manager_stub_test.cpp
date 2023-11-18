@@ -318,6 +318,30 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest11, Function | SmallTest |
 }
 
 /**
+ * @tc.name: OnRemoteRequest12
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    uint32_t code = static_cast<uint32_t>(
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: OnRemoteRequest13
  * @tc.desc: normal function
  * @tc.type: FUNC
