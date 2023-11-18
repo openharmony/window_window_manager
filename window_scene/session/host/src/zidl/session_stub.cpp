@@ -99,7 +99,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
         &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
-        &SessionStub::HandleUpdatePiPRect)
+        &SessionStub::HandleUpdatePiPRect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVERY_PULL_PIP_MAIN_WINDOW),
+        &SessionStub::HandleRecoveryPullPiPMainWindow)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -517,6 +519,19 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     uint32_t height = data.ReadUint32();
     auto reason = static_cast<PiPRectUpdateReason>(data.ReadInt32());
     WSError errCode = UpdatePiPRect(width, height, reason);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyRecoveryPullPiPMainWindow");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        WLOGFE("Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RecoveryPullPiPMainWindow(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
