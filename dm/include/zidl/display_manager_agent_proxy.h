@@ -39,6 +39,7 @@ public:
     virtual void OnScreenshot(sptr<ScreenshotInfo>) override;
     virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) override;
     virtual void NotifyFoldStatusChanged(FoldStatus) override;
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
