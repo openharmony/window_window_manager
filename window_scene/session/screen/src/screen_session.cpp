@@ -290,7 +290,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     Rotation targetRotation = ConvertIntToRotation(rotation);
     Rotation displayScreenRotation = targetRotation;
     if (foldDisplayMode == FoldDisplayMode::FULL) {
-        displayScreenRotation = ConvertIntToRotation((rotation + 90) % 360);
+        displayScreenRotation = ConvertIntToRotation((rotation + 90) % 360); // fold phone need fix 90 degree
     }
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
