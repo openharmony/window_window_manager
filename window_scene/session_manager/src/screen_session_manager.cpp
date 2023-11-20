@@ -883,7 +883,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
         needNotifyAvoidArea = true;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
