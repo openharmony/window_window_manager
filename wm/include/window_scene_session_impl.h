@@ -123,6 +123,7 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
