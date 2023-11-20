@@ -107,6 +107,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;

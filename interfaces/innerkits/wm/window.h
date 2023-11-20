@@ -1432,6 +1432,14 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError RecoveryPullPiPMainWindow() { return WMError::WM_OK; }
+
+    /**
+     * @brief Set to keep keyboard.
+     *
+     * @param isNeedKeepKeyboard true means the keyboard should be preserved, otherwise means the opposite.
+     * @return True means set isNeedKeepKeyboard flag success, others means failed.
+    */
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
 };
 }
 }
