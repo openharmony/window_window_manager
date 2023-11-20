@@ -94,6 +94,7 @@
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
             "//foundation/window/window_manager/utils:libwmutil",
+            "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
           ],
           "service_group": [
@@ -125,6 +126,15 @@
             "header": {
               "header_files": [
                 "singleton_container.h"
+              ],
+              "header_base": "//foundation/window/window_manager/utils/include"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/utils:libwmutil_base",
+            "header": {
+              "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/utils/include"
             }
