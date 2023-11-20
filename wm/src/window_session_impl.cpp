@@ -1739,6 +1739,11 @@ void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimat
     WLOGFD("NotifySessionBackground");
 }
 
+WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
+
 void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason)
 {
     if (IsWindowSessionInvalid()) {

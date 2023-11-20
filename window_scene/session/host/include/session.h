@@ -299,6 +299,7 @@ public:
     WSError RaiseToAppTopForPointDown();
 
     void NotifyForegroundInteractiveStatus(bool interactive);
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height);
 
 protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
