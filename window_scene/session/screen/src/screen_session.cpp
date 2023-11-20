@@ -265,7 +265,7 @@ void ScreenSession::ScreenOrientationChange(float orientation)
     }
 }
 
-Rotation ScreenSession::ConvertIntToRotation(int rotation);
+Rotation ScreenSession::ConvertIntToRotation(int rotation)
 {
     Rotation targetRotation = Rotation::ROTATION_0;
     switch (rotation) {
