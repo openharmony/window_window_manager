@@ -115,6 +115,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleUnregisterCollaborator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER),
         &SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+        &SceneSessionManagerStub::HandleRaiseWindowToTop),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -641,6 +643,14 @@ int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParc
     auto persistentId = data.ReadInt32();
     bool haveAvoidAreaListener = data.ReadBool();
     WSError errCode = UpdateSessionTouchOutsideListener(persistentId, haveAvoidAreaListener);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    WSError errCode = RaiseWindowToTop(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
