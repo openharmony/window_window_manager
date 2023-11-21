@@ -32,6 +32,7 @@
 #include "color_parser.h"
 #include "display_info.h"
 #include "display_manager.h"
+#include "hitrace_meter.h"
 #include "interfaces/include/ws_common.h"
 #include "session_permission.h"
 #include "key_event.h"
@@ -386,21 +387,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    if (GetRect().width_ != 0 && GetRect().height_ != 0 && WindowHelper::IsMainWindow(GetType())) {
-        // 50 session动画阈值
-        int widthRange = 50;
-        int heightRange = 50;
-        if (std::abs((int)(GetRect().width_) - (int)(wmRect.width_)) > widthRange ||
-            std::abs((int)(GetRect().height_) - (int)(wmRect.height_)) > heightRange) {
-            wmReason = wmReason == WindowSizeChangeReason::UNDEFINED ?
-                WindowSizeChangeReason::MAXIMIZE : wmReason;
-        }
-    }
     auto preRect = GetRect();
-    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_ &&
-            (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_)) {
-        wmReason = WindowSizeChangeReason::ROTATION;
-    }
     property_->SetWindowRect(wmRect);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
@@ -413,7 +400,10 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
-    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
+        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
+    WLOGFI("[WMSWinLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
         "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
@@ -1091,7 +1081,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
     };
     if (handler_) {
-        handler_->PostTask(task);
+        handler_->PostSyncTask(task);
     } else {
         task();
     }
@@ -1737,6 +1727,20 @@ void WindowSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimat
 void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     WLOGFD("NotifySessionBackground");
+}
+
+WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("HostSession is invalid");
+        return;
+    }
+    hostSession_->UpdatePiPRect(width, height, reason);
 }
 } // namespace Rosen
 } // namespace OHOS

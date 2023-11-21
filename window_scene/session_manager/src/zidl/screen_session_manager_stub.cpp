@@ -488,9 +488,26 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO: {
+            sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
+            if (!info) {
+                WLOGFE("Read DisplayChangeInfo failed");
+                return -1;
+            }
+            NotifyDisplayChangeInfoChanged(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE: {
             auto hasPrivate = data.ReadBool();
             SetScreenPrivacyState(hasPrivate);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_RESIZE_VIRTUAL_SCREEN: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMError ret = ResizeVirtualScreen(screenId, width, height);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:

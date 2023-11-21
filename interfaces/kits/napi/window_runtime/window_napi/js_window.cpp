@@ -652,6 +652,13 @@ napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetNeedKeepKeyboard");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetNeedKeepKeyboard(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -747,6 +754,8 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 return;
             }
             WMError ret = weakWindow->Show(0, false);
+            WLOGI("Window [%{public}u, %{public}s] show with ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -3224,6 +3233,41 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isNeedKeepKeyboard = false;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to get parameter isNeedKeepKeyboard");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    } else {
+        napi_get_value_bool(env, nativeVal, &isNeedKeepKeyboard);
+    }
+
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetNeedKeepKeyboard(isNeedKeepKeyboard));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window SetNeedKeepKeyboard failed");
+        return NapiThrowError(env, ret);
+    }
+
+    WLOGI("Window [%{public}u, %{public}s] SetNeedKeepKeyboard end, isNeedKeepKeyboard = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isNeedKeepKeyboard);
+
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -4589,6 +4633,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
+    BindNativeFunction(env, object, "setNeedKeepKeyboard", moduleName, JsWindow::SetNeedKeepKeyboard);
 }
 }  // namespace Rosen
 }  // namespace OHOS

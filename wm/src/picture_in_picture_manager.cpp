@@ -19,6 +19,7 @@
 #include "picture_in_picture_controller.h"
 #include "window.h"
 #include "window_manager_hilog.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -32,6 +33,7 @@ sptr<PictureInPictureController> PictureInPictureManager::activePipController_ =
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
 std::mutex PictureInPictureManager::pipWindowStateMutex_;
 PipWindowState PictureInPictureManager::pipWindowState_ = PipWindowState::STATE_UNDEFINED;
+sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 
 PictureInPictureManager::PictureInPictureManager()
 {
@@ -104,6 +106,44 @@ void PictureInPictureManager::RemoveCurrentPipControllerSafety()
     RemoveCurrentPipController();
 }
 
+void PictureInPictureManager::AttachActivePipController(sptr<PictureInPictureController> pipController)
+{
+    WLOGD("Attach active pipController");
+    if (pipController == nullptr) {
+        return;
+    }
+    if (activePipController_ != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
+        sptr<WindowSessionImpl> previousMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+            activePipController_ -> GetMainWindowId());
+        if (previousMainWindow != nullptr) {
+            previousMainWindow -> UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
+        }
+    }
+    activePipController_ = pipController;
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        activePipController_ -> GetMainWindowId());
+    if (mainWindow != nullptr) {
+        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl();
+        mainWindow -> RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
+    }
+}
+
+void PictureInPictureManager::DetachActivePipController(sptr<PictureInPictureController> pipController)
+{
+    WLOGD("Detach active pipController");
+    if (pipController != nullptr &&
+        pipController.GetRefPtr() != activePipController_.GetRefPtr()) {
+        WLOGFE("not same pip controller or no active pip controller");
+        return;
+    }
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        activePipController_ -> GetMainWindowId());
+    if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
+        mainWindow -> UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
+    }
+    activePipController_ = nullptr;
+}
+
 bool PictureInPictureManager::IsAttachedPipWindow(uint32_t windowId)
 {
     WLOGD("IsAttachedPipWindow is called");
@@ -122,9 +162,18 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
     return curPipController_->GetPipWindow();
 }
 
+bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
+{
+    return pipController.GetRefPtr() == activePipController_.GetRefPtr();
+}
+
 void PictureInPictureManager::DoRestore()
 {
     WLOGD("DoRestore is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->RestorePictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoClose(bool needAnim)
@@ -139,6 +188,10 @@ void PictureInPictureManager::DoClose(bool needAnim)
 void PictureInPictureManager::DoStartMove()
 {
     WLOGD("DoStartMove is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->StartMove();
 }
 
 void PictureInPictureManager::DoScale()
@@ -149,6 +202,20 @@ void PictureInPictureManager::DoScale()
 void PictureInPictureManager::DoActionEvent(std::string actionName)
 {
     WLOGD("DoActionEvent is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->DoActionEvent(actionName);
+}
+
+void PictureInPictureManager::AutoStartPipWindow()
+{
+    WLOGD("AutoStartPipWindow is called");
+    if (activePipController_ == nullptr) {
+        WLOGFE("activePipController_ is null");
+        return;
+    }
+    activePipController_ -> StartPictureInPicture();
 }
 }
 }

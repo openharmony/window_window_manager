@@ -21,13 +21,16 @@
 #include "picture_in_picture_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-constexpr size_t ARGC_TWO = 2;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipController"};
+    constexpr int32_t NUMBER_TWO = 2;
+    const std::string STATE_CHANGE_CB = "stateChange";
+    const std::string CONTROL_PANEL_ACTION_EVENT_CB = "controlPanelActionEvent";
 }
 
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
@@ -46,15 +49,24 @@ napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureContro
     napi_create_object(env, &objValue);
 
     WLOGI("CreateJsPipController");
-    std::unique_ptr<JsPipController> jsPipController = std::make_unique<JsPipController>(pipController);
+    std::unique_ptr<JsPipController> jsPipController = std::make_unique<JsPipController>(pipController, env);
     napi_wrap(env, objValue, jsPipController.release(), JsPipController::Finalizer, nullptr, nullptr);
 
     BindFunctions(env, objValue, "JsPipController");
     return objValue;
 }
 
-JsPipController::JsPipController(const sptr<PictureInPictureController>& pipController) : pipController_(pipController)
+JsPipController::JsPipController(const sptr<PictureInPictureController>& pipController, napi_env env)
+    : pipController_(pipController), env_(env)
 {
+    registerFunc_ = {
+        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeRegister},
+        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventRegister},
+    };
+    unRegisterFunc_ = {
+        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeUnRegister},
+        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventUnRegister},
+    };
 }
 
 JsPipController::~JsPipController()
@@ -184,7 +196,7 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_TWO) {
+    if (argc != NUMBER_TWO) {
         WLOGFE("Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
@@ -215,7 +227,110 @@ napi_value JsPipController::RegisterCallback(napi_env env, napi_callback_info in
 napi_value JsPipController::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGI("OnRegisterCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < NUMBER_TWO) {
+        WLOGFE("JsPipController Params not match: %{public}zu", argc);
+        return NapiThrowInvalidParam(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        WLOGFE("Failed to convert parameter to callbackType");
+        return NapiThrowInvalidParam(env);
+    }
+    napi_value value = argv[1];
+    if (value == nullptr || !NapiIsCallable(env, value)) {
+        WLOGFE("Callback is nullptr or not callable");
+        return NapiThrowInvalidParam(env);
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    WmErrorCode ret = RegisterListenerWithType(env, cbType, value);
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("OnRegisterCallback failed");
+        return NapiThrowInvalidParam(env);
+    }
     return NapiGetUndefined(env);
+}
+
+WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::string& type, napi_value value)
+{
+    if (IfCallbackRegistered(env, type, value)) {
+        WLOGFE("Callback already registered!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+    std::shared_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    jsCbMap_[type] = callbackRef;
+    (this->*registerFunc_[type])();
+    return WmErrorCode::WM_OK;
+}
+
+bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGFI("methodName %{public}s not registered!", type.c_str());
+        return false;
+    }
+
+    for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end();  ++iter) {
+        bool isEquals = false;
+        napi_strict_equals(env, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
+        if (isEquals) {
+            WLOGFE("Callback already registered!");
+            return true;
+        }
+    }
+    return false;
+}
+
+void JsPipController::ProcessStateChangeRegister()
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(STATE_CHANGE_CB) == jsCbMap_.end()) {
+        WLOGFE("Register state change error");
+        return;
+    }
+    if (pipController_ == nullptr) {
+        WLOGFE("controller is nullptr");
+        return;
+    }
+    sptr<IPiPLifeCycle> lifeCycle = new JsPipController::PiPLifeCycleImpl(env_, jsCbMap_[STATE_CHANGE_CB]);
+    pipController_->SetPictureInPictureLifecycle(lifeCycle);
+}
+
+void JsPipController::ProcessActionEventRegister()
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_PANEL_ACTION_EVENT_CB) == jsCbMap_.end()) {
+        WLOGFE("Register action event error");
+        return;
+    }
+    if (pipController_ == nullptr) {
+        WLOGFE("controller is nullptr");
+        return;
+    }
+    sptr<IPiPActionObserver> actionObserver =
+        new JsPipController::PiPActionObserverImpl(env_, jsCbMap_[CONTROL_PANEL_ACTION_EVENT_CB]);
+    pipController_->SetPictureInPictureActionObserver(actionObserver);
+}
+
+void JsPipController::ProcessStateChangeUnRegister()
+{
+    if (pipController_ == nullptr) {
+        WLOGFE("controller is nullptr");
+        return;
+    }
+    pipController_->SetPictureInPictureLifecycle(nullptr);
+}
+
+void JsPipController::ProcessActionEventUnRegister()
+{
+    if (pipController_ == nullptr) {
+        WLOGFE("controller is nullptr");
+        return;
+    }
+    pipController_->SetPictureInPictureActionObserver(nullptr);
 }
 
 napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info info)
@@ -227,7 +342,122 @@ napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info 
 napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGI("OnUnregisterCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        WLOGFE("JsPipController Params not match: %{public}zu", argc);
+        return NapiThrowInvalidParam(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        WLOGFE("Failed to convert parameter to string");
+        return NapiThrowInvalidParam(env);
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    WmErrorCode ret = UnRegisterListenerWithType(env, cbType);
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("OnUnregisterCallback failed");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+    }
     return NapiGetUndefined(env);
+}
+
+WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std::string& type)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGFI("methodName %{public}s not registered!", type.c_str());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+    jsCbMap_.erase(type);
+    (this->*unRegisterFunc_[type])();
+    return WmErrorCode::WM_OK;
+}
+
+void CallJsMethod(napi_env env, napi_value method, napi_value const* argv, size_t argc)
+{
+    if (method == nullptr) {
+        WLOGFE("empty method, call method failed");
+        return;
+    }
+    if (env == nullptr) {
+        WLOGFE("env_ nullptr");
+        return;
+    }
+    napi_call_function(env, NapiGetUndefined(env), method, argc, argv, nullptr);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStart()
+{
+    WLOGI("OnPreparePictureInPictureStart");
+    OnPipListenerCallback(PipState::ABOUT_TO_START, 0);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStart()
+{
+    WLOGI("OnPictureInPictureStart");
+    OnPipListenerCallback(PipState::STARTED, 0);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStop()
+{
+    WLOGI("OnPreparePictureInPictureStop");
+    OnPipListenerCallback(PipState::ABOUT_TO_STOP, 0);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStop()
+{
+    WLOGI("OnPictureInPictureStop");
+    OnPipListenerCallback(PipState::STOPPED, 0);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnRestoreUserInterface()
+{
+    WLOGI("OnRestoreUserInterface");
+    OnPipListenerCallback(PipState::ABOUT_TO_RESTORE, 0);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPictureInPictureOperationError(int32_t errorCode)
+{
+    WLOGI("OnPictureInPictureOperationError");
+    OnPipListenerCallback(PipState::ERROR, errorCode);
+}
+
+void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PipState state, int32_t errorCode)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnPipListenerCallback is called, state: %{public}d", static_cast<int32_t>(state));
+    auto jsCallback = jsCallBack_;
+    std::string error = std::to_string(errorCode);
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [jsCallback, state, error] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(state)), CreateJsValue(env, error)};
+            CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsPipController::PiPLifeCycleImpl::OnPipListenerCallback",
+        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
+    auto jsCallback = jsCallBack_;
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [jsCallback, actionEvent] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env, actionEvent)};
+            CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsPipController::PiPActionObserverImpl::OnActionEvent",
+        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS

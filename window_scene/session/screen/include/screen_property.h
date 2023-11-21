@@ -31,6 +31,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     SCREEN_CONNECT,
     SCREEN_DISCONNECT,
     FOLD_SCREEN_FOLDING,
+    VIRTUAL_SCREEN_RESIZE,
 };
 class ScreenProperty {
 public:

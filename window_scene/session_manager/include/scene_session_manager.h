@@ -34,6 +34,7 @@
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
 #include "display_info.h"
+#include "display_change_info.h"
 #include "display_change_listener.h"
 
 namespace OHOS::AAFwk {
@@ -71,6 +72,7 @@ using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateT
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
+using ProcessShowPiPMainWindowFunc = std::function<void(int32_t persistentId)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -112,6 +114,7 @@ public:
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     void SetShiftFocusListener(const ProcessShiftFocusFunc& func);
+    void SetShowPiPMainWindowListener(const ProcessShowPiPMainWindowFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
@@ -202,6 +205,7 @@ public:
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
+    WSError RecoveryPullPiPMainWindow(const int32_t& persistentId);
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid);
     int GetSceneSessionPrivacyModeCount();
@@ -211,10 +215,15 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     void AddWindowDragHotArea(int32_t type, WSRect& area);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
+        ScreenId fromScreenId = SCREEN_ID_INVALID);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
     WSRect GetAINavigationBarArea();
     bool UpdateImmersiveState();
+    WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
+    void NotifyUpdateRectAfterLayout();
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -354,6 +363,7 @@ private:
     DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessShiftFocusFunc shiftFocusFunc_;
+    ProcessShowPiPMainWindowFunc showPiPMainWindowFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
@@ -425,6 +435,8 @@ private:
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
+
+    void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
 

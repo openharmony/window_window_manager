@@ -118,6 +118,7 @@ public:
         Accessibility::AccessibilityElementInfo& info);
     virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info);
+    virtual WSError NotifyClientToUpdateRect() { return WSError::WS_OK; };
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
@@ -146,6 +147,7 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
+    void SetScreenId(uint64_t screenId);
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
@@ -298,6 +300,7 @@ public:
     WSError RaiseToAppTopForPointDown();
 
     void NotifyForegroundInteractiveStatus(bool interactive);
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height);
 
 protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);

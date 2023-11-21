@@ -22,7 +22,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientProxy" };
 } // namespace
 
-void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent)
+void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
+    ScreenId rsId, const std::string& name)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -37,6 +38,14 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
     }
     if (!data.WriteUint8(static_cast<uint8_t>(screenEvent))) {
         WLOGFE("Write screenEvent failed");
+        return;
+    }
+    if (!data.WriteUint64(rsId)) {
+        WLOGFE("Write rsId failed");
+        return;
+    }
+    if (!data.WriteString(name)) {
+        WLOGFE("Write name failed");
         return;
     }
     if (Remote()->SendRequest(

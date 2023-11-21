@@ -45,6 +45,7 @@ using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
 using GetAINavigationBarArea = std::function<WSRect()>;
+using RecoveryCallback = std::function<void(int32_t persistentId)>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -63,6 +64,7 @@ using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
 using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
+using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -75,6 +77,7 @@ public:
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
+        RecoveryCallback onRecoveryPullPiPMainWindow_;
     };
 
     // callback for notify SceneBoard
@@ -94,6 +97,7 @@ public:
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
+        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
     };
 
     // func for change window scene pattern property
@@ -126,6 +130,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
+    WSError NotifyClientToUpdateRect() override;
 
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     WSError OnNeedAvoid(bool status) override;
@@ -211,6 +216,11 @@ public:
     WSRect GetSessionTargetRect();
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    void NotifyPiPWindowPrepareClose() override;
+    WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
+    WSError RecoveryPullPiPMainWindow(int32_t persistentId) override;
+    WSError UpdateSizeChangeReason(SizeChangeReason reason);
+    bool IsDirtyWindow();
 
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
@@ -245,6 +255,17 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
+
+    PiPRectInfo pipRectInfo_;
+    bool InitPiPRectInfo();
+    void ClearPiPRectPivotInfo();
+    void SavePiPRectInfo();
+    void GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect);
+    void ProcessUpdatePiPRect(SizeChangeReason reason);
+    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
+    std::recursive_mutex sizeChangeMutex_;
+    bool isDirty_ = false;
+
 public:
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;

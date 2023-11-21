@@ -72,9 +72,7 @@ void VsyncStation::FlushFrameRate(uint32_t rate)
     if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
         WLOGI("VsyncStation::FlushFrameRate %{public}d", rate);
         FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
-        if (range.IsValid()) {
-            frameRateLinker_->UpdateFrameRateRange(range);
-        }
+        frameRateLinker_->UpdateFrameRateRange(range);
     }
 }
 
