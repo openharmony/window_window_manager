@@ -4643,17 +4643,20 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
-    WLOGFD("run GetFocusSessionToken with focusedSessionId: %{public}d", focusedSessionId_);
-    auto sceneSession = GetSceneSession(focusedSessionId_);
-    if (sceneSession) {
-        token = sceneSession->GetAbilityToken();
-        if (token == nullptr) {
-            WLOGFE("token is nullptr");
-            return WSError::WS_ERROR_INVALID_PARAM;
+    auto task = [this, &token]() {
+        WLOGFD("run GetFocusSessionToken with focusedSessionId: %{public}d", focusedSessionId_);
+        auto sceneSession = GetSceneSession(focusedSessionId_);
+        if (sceneSession) {
+            token = sceneSession->GetAbilityToken();
+            if (token == nullptr) {
+                WLOGFE("token is nullptr");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            return WSError::WS_OK;
         }
-        return WSError::WS_OK;
-    }
-    return WSError::WS_ERROR_INVALID_PARAM;
+        return WSError::WS_ERROR_INVALID_PARAM;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
