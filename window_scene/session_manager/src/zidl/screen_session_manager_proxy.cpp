@@ -451,7 +451,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetSpecifiedScreenPower(ScreenId sc
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
-    data, reply, option) != ERR_NONE) {
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
