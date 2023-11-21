@@ -158,7 +158,6 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 
 sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
 {
-
     ScreenId screenIdMain = 5;
 
     WLOGI("GetCurrentFoldCreaseRegion");
