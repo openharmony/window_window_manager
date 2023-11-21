@@ -47,6 +47,7 @@ public:
     int64_t GetVSyncPeriod() override;
 
     void OnBundleUpdated(const std::string& bundleName);
+    void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
     void SetDisplayDensity(float density)
     {
@@ -79,7 +80,6 @@ public:
     }
 
     static sptr<RootScene> staticRootScene_;
-
 private:
     void RegisterInputEventListener();
 
@@ -90,6 +90,7 @@ private:
     float density_ = 1.0f;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
+    std::function<void()> frameLayoutFinishCb_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
