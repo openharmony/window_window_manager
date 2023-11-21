@@ -87,7 +87,7 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
@@ -104,7 +104,7 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
@@ -133,6 +133,7 @@ public:
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
+    Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
