@@ -79,17 +79,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(SetDisplayState(state));
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
-            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
-            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
-            reply.WriteBool(SetScreenPowerForAll(state, reason));
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint32());
             ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SetSpecifiedScreenPower(screenId, state, reason));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SetScreenPowerForAll(state, reason));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE: {
