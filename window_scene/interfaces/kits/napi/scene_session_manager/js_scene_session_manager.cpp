@@ -819,7 +819,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-
+    rootScene_->SetFrameLayoutFinishCallback([]() {
+        SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+    });
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");

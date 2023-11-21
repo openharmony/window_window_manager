@@ -223,6 +223,7 @@ public:
     bool UpdateImmersiveState();
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
+    void NotifyUpdateRectAfterLayout();
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
