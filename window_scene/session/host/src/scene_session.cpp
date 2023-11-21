@@ -1240,6 +1240,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         WLOGFE("specificCallback_ is null!");
         return;
     }
+    float tmpPosY = 0.0;
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
     for (auto& statusBar : statusBarVector) {
@@ -1249,8 +1250,9 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         WSRect statusBarRect = statusBar->GetSessionRect();
         if ((rect.posY_ < statusBarRect.posY_ + static_cast<int32_t>(statusBarRect.height_)) &&
             (rect.height_ != winRect_.height_ || rect.width_ != winRect_.width_)) {
+            tmpPosY = rect.posY_ + rect.height_;
             rect.posY_ = statusBarRect.posY_ + statusBarRect.height_;
-            rect.height_ = winRect_.height_;
+            rect.height_ = tmpPosY - rect.posY_;
         }
     }
     WLOGFD("after UpdateWinRectForSystemBar rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
