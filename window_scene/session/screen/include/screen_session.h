@@ -53,7 +53,8 @@ enum class ScreenState : int32_t {
 class ScreenSession : public RefBase {
 public:
     ScreenSession() = default;
-    ScreenSession(ScreenId screenId, const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
+    ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
+        const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
     ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
     virtual ~ScreenSession() = default;
@@ -81,6 +82,7 @@ public:
 
     std::string GetName();
     ScreenId GetScreenId();
+    ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
     void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
