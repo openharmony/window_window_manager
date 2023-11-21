@@ -197,6 +197,23 @@ WSError SceneSession::Background()
     return WSError::WS_OK;
 }
 
+void SceneSession::ClearSpecificSessionCbMap()
+{
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("[WMSSystemWin] session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
+            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
+            WLOGFD("[WMSSystemWin] ClearCallbackMap, id: %{public}d", session->GetPersistentId());
+        } else {
+            WLOGFE("[WMSSystemWin] get callback failed, id: %{public}d", session->GetPersistentId());
+        }
+    });
+}
+
 WSError SceneSession::Disconnect()
 {
     PostTask([weakThis = wptr(this)]() {
@@ -218,11 +235,6 @@ WSError SceneSession::Disconnect()
         session->isTerminating = false;
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->NotifyCallingSessionBackground();
-        }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && session->sessionChangeCallback_ &&
-            session->sessionChangeCallback_->clearCallbackFunc_) {
-            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
-            WLOGFD("ClearCallbackMap, id: %{public}d", session->GetPersistentId());
         }
         return WSError::WS_OK;
     });
