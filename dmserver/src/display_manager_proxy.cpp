@@ -653,10 +653,10 @@ bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPower
         WLOGFE("WriteInterfaceToken failed");
         return false;
     }
-     if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
         WLOGFE("Write ScreenId failed");
         return false;
-        }
+    }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
         WLOGFE("Write ScreenPowerState failed");
         return false;
@@ -666,7 +666,7 @@ bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPower
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
-     data, reply, option) != ERR_NONE) {
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
