@@ -692,6 +692,32 @@ void ScreenSessionManager::NotifyScreenshot(DisplayId displayId)
     }
 }
 
+bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFI("SetSpecifiedScreenPower: screen id:%{public}" PRIu64 ", state:%{public}u", screenId, state);
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            break;
+        }
+        default: {
+            WLOGFW("SetScreenPowerStatus state not support");
+            return false;
+        }
+    }
+
+    rsInterface_.SetScreenPowerStatus(screenId, status);
+
+    return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+}
+
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
