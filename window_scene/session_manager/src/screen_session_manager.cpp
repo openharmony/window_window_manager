@@ -246,13 +246,15 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
     }
 }
@@ -284,18 +286,21 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
-                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                    screenSession->GetRSScreenId(), screenSession->GetName());
             }
             return;
         }
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -2576,7 +2581,8 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     clientProxy_ = client;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
-        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED);
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName());
     }
 }
 

@@ -63,7 +63,9 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     WLOGD("HandleOnScreenConnectionChanged");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
-    OnScreenConnectionChanged(screenId, screenEvent);
+    auto rsId = static_cast<ScreenId>(data.ReadUint64());
+    auto name = data.ReadString();
+    OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
     return ERR_NONE;
 }
 
