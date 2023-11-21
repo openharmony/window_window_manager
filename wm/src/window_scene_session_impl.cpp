@@ -1133,6 +1133,10 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         WLOGFW("SetGlobalMaximizeMode fail, not main window");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         SetFullScreen(true);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
@@ -1317,6 +1321,10 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return mode;
+    }
     if (hostSession_) {
         hostSession_->GetGlobalMaximizeMode(mode);
     }
