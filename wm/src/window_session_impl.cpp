@@ -1091,7 +1091,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
     };
     if (handler_) {
-        handler_->PostTask(task);
+        handler_->PostSyncTask(task);
     } else {
         task();
     }
