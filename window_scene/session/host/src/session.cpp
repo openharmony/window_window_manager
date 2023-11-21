@@ -178,11 +178,6 @@ const SessionInfo& Session::GetSessionInfo() const
     return sessionInfo_;
 }
 
-bool GetSessionInfoLockedState() const
-{
-    return sessionInfo_.lockedState;
-}
-
 bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
 {
     return RegisterListenerLocked(lifecycleListeners_, listener);
@@ -1864,7 +1859,7 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
     sessionTouchableChangeFunc_ = func;
-    sessionTouchableChangeFunc_(GetSessionInfoLockedState());
+    sessionTouchableChangeFunc_(sessionInfo_.lockedState);
 }
 
 void Session::NotifySessionInfoLockedStateChange(bool lockedstate)
