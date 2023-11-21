@@ -1113,8 +1113,11 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     WLOGFD("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    DisplayStateCallback displayStateCallback = displayStateCallback_;
+    DisplayStateCallback displayStateCallback = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayStateCallback = displayStateCallback_;
+    }
     if (displayStateCallback) {
         displayStateCallback(state);
         ClearDisplayStateCallback();
