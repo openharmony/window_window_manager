@@ -2444,6 +2444,25 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: RaiseWindowToTop
+ * @tc.desc: SceneSesionManager raise window to top
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level3)
+{
+    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
+    int32_t persistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->RaiseWindowToTop(persistentId_);
+    EXPECT_EQ(result01, WSError::WS_OK);
+    persistentId_ = 10000;
+    WSError result02 = ssm_->RaiseWindowToTop(persistentId_);
+    EXPECT_EQ(result02, WSError::WS_OK);
+    WSError result03 = ssm_->RaiseWindowToTop(persistentId_);
+    EXPECT_EQ(result03, WSError::WS_OK);
+}
+
+/**
  * @tc.name: RegisterSessionExceptionFunc
  * @tc.desc: SceneSesionManager register session expection func
  * @tc.type: FUNC
