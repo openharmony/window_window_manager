@@ -127,7 +127,7 @@ private:
     void OnForceHideChange(bool hide);
     void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
-    void OnSessionInfoLockedStateChange(bool lockedstate);
+    void OnSessionInfoLockedStateChange(bool lockedState);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

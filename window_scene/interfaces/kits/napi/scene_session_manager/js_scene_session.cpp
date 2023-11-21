@@ -228,8 +228,8 @@ void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& r
 
 void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
 {
-    NotifySessionInfoLockedStateChangeFunc func = [this](bool lockedstate) {
-        this->OnSessionInfoLockedStateChange(lockedstate);
+    NotifySessionInfoLockedStateChangeFunc func = [this](bool lockedState) {
+        this->OnSessionInfoLockedStateChange(lockedState);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -240,24 +240,24 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
     WLOGFD("ProcessSessionInfoLockedStateChangeRegister success");
 }
 
-void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedstate)
+void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
 {
-    WLOGFI("[NAPI]OnSessionInfoLockedStateChange, state: %{public}u", lockedstate);
+    WLOGFI("[NAPI]OnSessionInfoLockedStateChange, state: %{public}u", lockedState);
     auto iter = jsCbMap_.find(SESSIONINFO_LOCKEDSTATE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
     }
     auto jsCallBack = iter->second;
-    auto task = [lockedstate, jsCallBack, env = env_]() {
+    auto task = [lockedState, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionInfoLockedStateObj = CreateJsValue(env, lockedstate);
+        napi_value jsSessionInfoLockedStateObj = CreateJsValue(env, lockedState);
         napi_value argv[] = {jsSessionInfoLockedStateObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnSessionInfoLockedStateChange: state " + std::to_string(lockedstate));
+    taskScheduler_->PostMainThreadTask(task, "OnSessionInfoLockedStateChange: state " + std::to_string(lockedState));
 }
 
 void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)

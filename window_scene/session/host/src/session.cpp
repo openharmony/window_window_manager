@@ -133,11 +133,11 @@ void Session::SetSessionInfoContinueState(ContinueState state)
     sessionInfo_.continueState = state;
 }
 
-void Session::SetSessionInfoLockedState(bool lockedstate)
+void Session::SetSessionInfoLockedState(bool lockedState)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.lockedState = lockedstate;
-    NotifySessionInfoLockedStateChange(lockedstate);
+    sessionInfo_.lockedState = lockedState;
+    NotifySessionInfoLockedStateChange(lockedState);
 }
 
 void Session::SetSessionInfoIsClearSession(bool isClearSession)
@@ -1858,15 +1858,15 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
 
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
-    sessionTouchableChangeFunc_ = func;
-    sessionTouchableChangeFunc_(sessionInfo_.lockedState);
+    sessionInfoLockedStateChangeFunc_ = func;
+    sessionInfoLockedStateChangeFunc_(sessionInfo_.lockedState);
 }
 
-void Session::NotifySessionInfoLockedStateChange(bool lockedstate)
+void Session::NotifySessionInfoLockedStateChange(bool lockedState)
 {
-    WLOGFD("Notify sessioninfo lockedstate change: %{public}u", lockedstate);
-    if (sessionTouchableChangeFunc_) {
-        sessionTouchableChangeFunc_(lockedstate);
+    WLOGFD("Notify sessioninfo lockedstate change: %{public}u", lockedState);
+    if (sessionInfoLockedStateChangeFunc_) {
+        sessionInfoLockedStateChangeFunc_(lockedstate);
     }
 }
 } // namespace OHOS::Rosen
