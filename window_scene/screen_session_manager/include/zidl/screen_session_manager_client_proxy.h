@@ -27,7 +27,8 @@ public:
         : IRemoteProxy<IScreenSessionManagerClient>(impl) {}
     virtual ~ScreenSessionManagerClientProxy() = default;
 
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent) override;
+    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
+        ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
