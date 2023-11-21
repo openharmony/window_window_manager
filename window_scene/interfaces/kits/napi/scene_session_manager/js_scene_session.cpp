@@ -236,7 +236,7 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
         WLOGFE("session is nullptr");
         return;
     }
-    session->SetSessionTouchableChangeListener(func);
+    session->SetSessionInfoLockedStateChangeListener(func);
     WLOGFD("ProcessSessionInfoLockedStateChangeRegister success");
 }
 
