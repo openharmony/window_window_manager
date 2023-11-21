@@ -133,10 +133,11 @@ void Session::SetSessionInfoContinueState(ContinueState state)
     sessionInfo_.continueState = state;
 }
 
-void Session::SetSessionInfoLockedState(bool state)
+void Session::SetSessionInfoLockedState(bool lockedstate)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.lockedState = state;
+    sessionInfo_.lockedState = lockedstate;
+    NotifySessionInfoLockedStateChange(lockedstate);
 }
 
 void Session::SetSessionInfoIsClearSession(bool isClearSession)
@@ -175,6 +176,11 @@ void Session::SetSessionInfo(const SessionInfo& info)
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
+}
+
+bool GetSessionInfoLockedState() const
+{
+    return sessionInfo_.lockedState;
 }
 
 bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
@@ -1853,5 +1859,19 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+}
+
+void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
+{
+    sessionTouchableChangeFunc_ = func;
+    sessionTouchableChangeFunc_(GetSessionInfoLockedState());
+}
+
+void Session::NotifySessionInfoLockedStateChange(bool lockedstate)
+{
+    WLOGFD("Notify sessioninfo lockedstate change: %{public}u", lockedstate);
+    if (sessionTouchableChangeFunc_) {
+        sessionTouchableChangeFunc_(lockedstate);
+    }
 }
 } // namespace OHOS::Rosen

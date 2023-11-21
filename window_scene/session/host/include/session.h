@@ -67,6 +67,7 @@ using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
+using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedstate)>;
 
 class ILifecycleListener {
 public:
@@ -136,7 +137,7 @@ public:
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
-    void SetSessionInfoLockedState(bool state);
+    void SetSessionInfoLockedState(bool lockedstate);
     void SetSessionInfoIsClearSession(bool isClearSession);
     void SetSessionInfoAffinity(std::string affinity);
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
@@ -151,6 +152,7 @@ public:
     WSRect GetSessionRect() const;
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    bool GetSessionInfoLockedState() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -228,6 +230,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
+    void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
+    void NotifySessionInfoLockedStateChange(bool lockedstate);
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -358,6 +362,7 @@ protected:
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
+    NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
