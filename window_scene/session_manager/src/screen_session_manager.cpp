@@ -667,6 +667,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::SuspendEnd()
 {
+    WLOGFI("ScreenSessionManager::SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
@@ -674,6 +675,7 @@ bool ScreenSessionManager::SuspendEnd()
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
 {
+    WLOGFI("ScreenSessionManager::SetDisplayState enter");
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
@@ -757,6 +759,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status)
 {
+    WLOGFI("ScreenSessionManager::SetScreenPower enter");
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         WLOGFE("no screen info");
@@ -836,6 +839,7 @@ DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 
 void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 {
+    WLOGFI("ScreenSessionManager::NotifyDisplayEvent receive keyguardDrawnDone");
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
