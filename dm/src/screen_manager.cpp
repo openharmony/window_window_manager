@@ -565,7 +565,7 @@ DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, b
 
 bool ScreenManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFI("screenId:%{public}" PRIu64", state:%{public}u, reason:%{public}u", screenId, state, reason);
+    WLOGFI("screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u", screenId, state, reason);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(screenId, state, reason);
 }
 
