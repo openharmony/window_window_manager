@@ -222,6 +222,7 @@ public:
     bool GetStateFromManager(const ManagerState key);
     void PresentFoucusIfNeed(int32_t pointerAcrion);
     WSError UpdateFocus(bool isFocused);
+    WSError NotifyFocusStatus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
