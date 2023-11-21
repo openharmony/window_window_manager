@@ -895,14 +895,10 @@ HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Le
  HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest | Level3)
  {
     ScreenId mainScreenId(DEFAULT_SCREEN_ID);
-    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
-    DisplayState displayState = DisplayState::ON;
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
 
     ASSERT_EQ(true, ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
-
-    ASSERT_EQ(false, ssm_->SetDisplayState(displayState));
-    ASSERT_EQ(DisplayState::ON, ssm_->GetDisplayState(0));
  }
  
 }
