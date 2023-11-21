@@ -246,13 +246,15 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
     }
 }
@@ -266,7 +268,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         return;
     }
     //if SetDisplayMode failed, try again
-    if (foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
+    if (foldScreenController_ != nullptr && foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
         auto foldStatus = GetFoldStatus();
         switch (foldStatus) {
             case FoldStatus::EXPAND: {
@@ -284,18 +286,21 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
-                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                    screenSession->GetRSScreenId(), screenSession->GetName());
             }
             return;
         }
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -883,7 +888,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
         needNotifyAvoidArea = true;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
@@ -1208,6 +1213,31 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId scre
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     WLOGI("SetVirtualMirrorScreenBufferRotation success");
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("ResizeVirtualScreen permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
+        screenId, width, height);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("ResizeVirtualScreen: no such screen.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGFE("ResizeVirtualScreen: No corresponding rsId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    rsInterface_.ResizeVirtualScreen(rsScreenId, width, height);
+    screenSession->Resize(width, height);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE);
     return DMError::DM_OK;
 }
 
@@ -2478,6 +2508,17 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyDisplayChangeInfoChanged(info);
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     WLOGI("NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
@@ -2540,7 +2581,8 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     clientProxy_ = client;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
-        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED);
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName());
     }
 }
 

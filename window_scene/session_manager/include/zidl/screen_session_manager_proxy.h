@@ -61,6 +61,8 @@ public:
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
 
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
+
     virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override;
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -122,6 +124,7 @@ public:
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
+    void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
 
 private:

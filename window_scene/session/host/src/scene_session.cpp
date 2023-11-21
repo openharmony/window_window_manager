@@ -20,6 +20,7 @@
 #include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <pointer_event.h>
+#include "transaction/rs_sync_transaction_controller.h"
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 
@@ -28,6 +29,7 @@
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
+#include "pip_util.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
@@ -382,23 +384,63 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rect, reason, rsTransaction]() {
+    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
+    if (winRect_ == rect) {
+        WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", GetPersistentId());
+        return WSError::WS_OK;
+    }
+    winRect_ = rect;
+    isDirty_ = true;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WLOGFD("[WMSWinLayout] Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        GetPersistentId(), reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::NotifyClientToUpdateRect()
+{
+    PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            session->GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
+        WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            session->GetPersistentId(), session->reason_, session->winRect_.posX_,
+            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
         bool isMoveOrDrag = session->moveDragController_ &&
             (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
-        if (isMoveOrDrag && reason == SizeChangeReason::UNDEFINED) {
-            WLOGFD("skip redundant rect update!");
+        if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
+            WLOGFD("[WMSWinLayout] skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        WSError ret = session->Session::UpdateRect(rect, reason, rsTransaction);
+        auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+        std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+        if (transactionController) {
+            rsTransaction = transactionController->GetRSTransaction();
+        }
+        WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+        if (WindowHelper::IsPipWindow(session->GetWindowType()) && session->reason_ == SizeChangeReason::DRAG_END) {
+            session->ClearPiPRectPivotInfo();
+            ScenePersistentStorage::Insert("pip_window_pos_x", session->winRect_.posX_,
+                ScenePersistentStorageType::PIP_INFO);
+            ScenePersistentStorage::Insert("pip_window_pos_y", session->winRect_.posY_,
+                ScenePersistentStorageType::PIP_INFO);
+        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+        }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
+            session->GetPersistentId(), session->winRect_.posX_,
+            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
+        // clear after use
+        if (ret == WSError::WS_OK) {
+            session->reason_ = SizeChangeReason::UNDEFINED;
+            session->isDirty_ = false;
         }
         return ret;
     });
@@ -1020,6 +1062,18 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
+        WindowHelper::IsPipWindow(property->GetWindowType())) {
+        WLOGFD("WINDOW_MODE_PIP");
+        if (!moveDragController_) {
+            WLOGE("moveDragController_ is null");
+            return Session::TransferPointerEvent(pointerEvent);
+        }
+        if (moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
+            return WSError::WS_OK;
+        }
+    }
+
     bool raiseEnabled = (WindowHelper::IsSubWindow(property->GetWindowType()) ||
         property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
@@ -1204,6 +1258,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
+    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1219,6 +1276,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         WLOGFE("specificCallback_ is null!");
         return;
     }
+    float tmpPosY = 0.0;
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
     for (auto& statusBar : statusBarVector) {
@@ -1228,8 +1286,9 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         WSRect statusBarRect = statusBar->GetSessionRect();
         if ((rect.posY_ < statusBarRect.posY_ + static_cast<int32_t>(statusBarRect.height_)) &&
             (rect.height_ != winRect_.height_ || rect.width_ != winRect_.width_)) {
+            tmpPosY = rect.posY_ + rect.height_;
             rect.posY_ = statusBarRect.posY_ + statusBarRect.height_;
-            rect.height_ = winRect_.height_;
+            rect.height_ = tmpPosY - rect.posY_;
         }
     }
     WLOGFD("after UpdateWinRectForSystemBar rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -1247,6 +1306,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         leashWinSurfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("PipWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
@@ -1840,6 +1903,40 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
     return true;
 }
 
+void SceneSession::NotifyPiPWindowPrepareClose()
+{
+    WLOGFD("NotifyPiPWindowPrepareClose");
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onPrepareClosePiPSession_) {
+            session->sessionChangeCallback_->onPrepareClosePiPSession_();
+        }
+        WLOGFD("NotifyPiPWindowPrepareClose, id: %{public}d", session->GetPersistentId());
+        return;
+    });
+}
+
+WSError SceneSession::RecoveryPullPiPMainWindow(int32_t persistentId)
+{
+    WLOGFD("NotifyRecoveryPullPiPMainWindow");
+    PostTask([weakThis = wptr(this), persistentId]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->specificCallback_ != nullptr) {
+            session->specificCallback_->onRecoveryPullPiPMainWindow_(persistentId);
+        }
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
 {
     return subSession_;
@@ -1884,5 +1981,170 @@ WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double te
     textFieldPositionY_ = textFieldPositionY;
     textFieldHeight_ = textFieldHeight;
     return WSError::WS_OK;
+}
+
+bool SceneSession::InitPiPRectInfo()
+{
+    auto requestRect = GetSessionRequestRect();
+    if (requestRect.width_ == 0 || requestRect.height_ == 0) {
+        return false;
+    }
+    pipRectInfo_.originWidth_ = requestRect.width_;
+    pipRectInfo_.originHeight_ = requestRect.height_;
+    int32_t level = 0;
+    ScenePersistentStorage::Get("pip_window_level", level, ScenePersistentStorageType::PIP_INFO);
+    pipRectInfo_.level_ = static_cast<PiPScaleLevel>(level);
+    return true;
+}
+
+void SceneSession::ClearPiPRectPivotInfo()
+{
+    pipRectInfo_.xPivot_ = PiPScalePivot::UNDEFINED;
+    pipRectInfo_.yPivot_ = PiPScalePivot::UNDEFINED;
+}
+
+void SceneSession::SavePiPRectInfo()
+{
+    auto pipRect = GetSessionRequestRect();
+    ScenePersistentStorage::Insert("pip_window_pos_x", pipRect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_pos_y", pipRect.posY_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_level", static_cast<int32_t>(pipRectInfo_.level_),
+        ScenePersistentStorageType::PIP_INFO);
+}
+
+void SceneSession::GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect)
+{
+    PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect);
+    WLOGD("SceneSession::GetNewPiPRect rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    auto requestRect = GetSessionRequestRect();
+    if (pipRectInfo_.xPivot_ == PiPScalePivot::UNDEFINED || pipRectInfo_.yPivot_ == PiPScalePivot::UNDEFINED) {
+        // If no anchor, create anchor
+        WLOGD("SceneSession::GetNewPiPRect can't find anchor, create it");
+        PiPUtil::UpdateRectPivot(rect.posX_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
+        PiPUtil::UpdateRectPivot(rect.posY_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+    } else {
+        // If it has anchor, location by anchor
+        WLOGD("SceneSession::GetNewPiPRect find anchor, resize");
+        PiPUtil::GetRectByPivot(rect.posX_, requestRect.width_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
+        PiPUtil::GetRectByPivot(rect.posY_, requestRect.height_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+    }
+    PiPUtil::GetValidRect(displayWidth, displayHeight, rect);
+    WLOGD("SceneSession::GetNewPiPRect valid rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
+{
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP) {
+        WLOGE("SceneSessionManager::ProcessUpdatePiPRect not pip window");
+        return;
+    }
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        WLOGFE("can't find display info");
+        return;
+    }
+    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
+
+    // default pos of phone is the right top
+    Rect rect = { 0, 0, pipRectInfo_.originWidth_, pipRectInfo_.originHeight_ };
+    ScenePersistentStorage::Get("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Get("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    if (rect.posX_ == 0) {
+        rect.posX_ = displayWidth - PiPUtil::SAFE_PADDING_HORIZONTAL;
+    }
+    if (rect.posY_ == 0) {
+        rect.posY_ = PiPUtil::SAFE_PADDING_VERTICAL_TOP;
+    }
+    WLOGD("SceneSession::ProcessUpdatePiPRectpip window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+
+    GetNewPiPRect(displayWidth, displayHeight, rect);
+    WLOGD("SceneSession::ProcessUpdatePiPRectpip window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+    ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+
+    WSRect newRect = SessionHelper::TransferToWSRect(rect);
+    SetSessionRect(newRect);
+    Session::UpdateRect(newRect, reason);
+    NotifySessionRectChange(newRect, reason);
+}
+
+WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+{
+    PostTask([weakThis = wptr(this), width, height, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGE("SceneSession::UpdatePiPRect session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->isTerminating) {
+            WLOGE("SceneSession::UpdatePiPRect session is terminating");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        switch (reason) {
+            case PiPRectUpdateReason::REASON_PIP_START_WINDOW:
+                session->InitPiPRectInfo();
+                session->ProcessUpdatePiPRect(SizeChangeReason::CUSTOM_ANIMATION_SHOW);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_SCALE_CHANGE:
+                session->pipRectInfo_.level_ = static_cast<PiPScaleLevel>((static_cast<int32_t>(
+                    session->pipRectInfo_.level_) + 1) % static_cast<int32_t>(PiPScaleLevel::COUNT));
+                session->ProcessUpdatePiPRect(SizeChangeReason::TRANSFORM);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE:
+                session->ClearPiPRectPivotInfo();
+                session->pipRectInfo_.originWidth_ = width;
+                session->pipRectInfo_.originHeight_ = height;
+                session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
+                break;
+            case PiPRectUpdateReason::REASON_PIP_MOVE:
+                session->ClearPiPRectPivotInfo();
+                break;
+            case PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW:
+                session->ClearPiPRectPivotInfo();
+                session->SavePiPRectInfo();
+                break;
+            default:
+                return WSError::WS_DO_NOTHING;
+        }
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
+{
+    PostTask([weakThis = wptr(this), reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionInfo_.isSystem_) {
+            // system scene no need to update reason
+            return WSError::WS_DO_NOTHING;
+        }
+        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
+        session->reason_ = reason;
+        if (reason != SizeChangeReason::UNDEFINED) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "SceneSession::UpdateSizeChangeReason%d reason:%d",
+                session->GetPersistentId(), static_cast<uint32_t>(reason));
+            WLOGFD("[WMSWinLayout]UpdateSizeChangeReason Id: %{public}d, reason: %{public}d",
+                session->GetPersistentId(), reason);
+        }
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsDirtyWindow()
+{
+    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
+    return isDirty_;
 }
 } // namespace OHOS::Rosen

@@ -24,6 +24,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     "dms:fuzztest",
+    "window_scene:fuzztest",
     "wms:fuzztest",
   ]
 }

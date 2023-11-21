@@ -1171,7 +1171,7 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
+    if ((WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsPipWindow(GetType())) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -1469,6 +1469,11 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 }
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
+{
+    return GetMainWindowWithId(mainWinId);
+}
+
+sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)
 {
     std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
@@ -1914,6 +1919,16 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
+WMError WindowSceneSessionImpl::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+{
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetNeedKeepKeyboard(isNeedKeepKeyboard);
+
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("DumpSessionElementInfo");
@@ -1970,6 +1985,17 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     return static_cast<WSError>(ret);
 }
 
+WMError WindowSceneSessionImpl::RecoveryPullPiPMainWindow()
+{
+    WLOGFI("RecoveryPullPiPMainWindow");
+    if (hostSession_ && property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        hostSession_->RecoveryPullPiPMainWindow(GetPersistentId());
+        return WMError::WM_OK;
+    }
+    WLOGFW("not pip window, nothing to do");
+    return WMError::WM_DO_NOTHING;
+}
+
 WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
 {
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
@@ -2015,6 +2041,31 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
 {
     WLOGFI("NotifySessionBackground");
     Hide(reason, withAnimation, isFromInnerkits);
+}
+
+WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    WLOGFI("UpdateTitleInTargetPos %{public}u isShow %{public}u, height %{public}u", GetWindowId(), isShow, height);
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (uiContent_ == nullptr) {
+        WLOGFE("UpdateTitleInTargetPos uiContent_ is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    uiContent_->UpdateTitleInTargetPos(isShow, height);
+    return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+{
+    if (!WindowHelper::IsPipWindow(GetType())) {
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGFD("NotifyPrepareClosePiPWindow start");
+    hostSession_->NotifyPiPWindowPrepareClose();
+    WLOGFD("NotifyPrepareClosePiPWindow end");
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
