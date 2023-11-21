@@ -206,7 +206,7 @@ public:
     DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation);
 
     /**
-     * @brief Set the screen power states for the specified screens.
+     * @brief Set the screen power state on the specified screen.
      *
      * @param screenId Screen id.
      * @param state Screen power state.
