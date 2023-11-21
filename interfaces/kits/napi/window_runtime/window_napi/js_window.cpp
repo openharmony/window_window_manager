@@ -141,6 +141,13 @@ napi_value JsWindow::HideWithAnimation(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnHideWithAnimation(env, info) : nullptr;
 }
 
+napi_value JsWindow::Recover(napi_env env, napi_callback_info info)
+{
+    WLOGI("Recover");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRecover(env, info) : nullptr;
+}
+
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -965,6 +972,38 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnHideWithAnimation",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr or get invalid param");
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Recover());
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window recover failed"));
+            }
+            WLOGI("Window [%{public}u] recover end, ret = %{public}d", weakWindow->GetWindowId(), ret);
+        };
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (argv[0] != nullptr && GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRecover",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -4513,6 +4552,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "destroyWindow", moduleName, JsWindow::DestroyWindow);
     BindNativeFunction(env, object, "hide", moduleName, JsWindow::Hide);
     BindNativeFunction(env, object, "hideWithAnimation", moduleName, JsWindow::HideWithAnimation);
+    BindNativeFunction(env, object, "recover", moduleName, JsWindow::Recover);
     BindNativeFunction(env, object, "moveTo", moduleName, JsWindow::MoveTo);
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
