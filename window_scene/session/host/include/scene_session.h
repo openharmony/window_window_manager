@@ -222,6 +222,7 @@ public:
     WSError UpdateSizeChangeReason(SizeChangeReason reason);
     bool IsDirtyWindow();
 
+    void ClearSpecificSessionCbMap();
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
