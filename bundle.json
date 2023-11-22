@@ -81,6 +81,7 @@
         "group_type": {
           "base_group": [
             "//foundation/window/window_manager/snapshot:snapshot_display",
+            "//foundation/window/window_manager/setresolution:setresolution_screen",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
             "//foundation/window/window_manager/resources:window_resources",

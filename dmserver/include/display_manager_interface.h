@@ -65,6 +65,7 @@ public:
         TRANS_ID_GET_ALL_SCREEN_INFOS,
         TRANS_ID_SET_ORIENTATION,
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO,
+        TRANS_ID_SET_RESOLUTION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
@@ -162,6 +163,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) = 0;
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
