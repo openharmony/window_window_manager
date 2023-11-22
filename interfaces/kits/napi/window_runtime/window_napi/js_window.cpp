@@ -2190,7 +2190,7 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         uint32_t resultValue = 0;
         napi_get_value_uint32(env, nativeMode, &resultValue);
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType > AvoidAreaType::TYPE_AI_NAVIGATION_BAR) ||
+        errCode = ((avoidAreaType > AvoidAreaType::TYPE_NAVIGATION_INDICATOR) ||
                    (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
