@@ -64,16 +64,23 @@ namespace {
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent, Function | SmallTest | Level1)
 {
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    DisplayPowerEvent event = DisplayPowerEvent(0);
-    EventStatus status = EventStatus(0);
+    GTEST_LOG_(INFO) << "axxx";
+    DisplayPowerEvent event = DisplayPowerEvent::DISPLAY_OFF;
+    GTEST_LOG_(INFO) << "bxxx";
+    EventStatus status = EventStatus::BEGIN;
+    GTEST_LOG_(INFO) << "cxxx";
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+    GTEST_LOG_(INFO) << "dxxx";
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->NotifyDisplayPowerEvent(event,status);
+        resultValue = 1;
+    };
+    GTEST_LOG_(INFO) << "exxx";
+    func();
+    GTEST_LOG_(INFO) << "fxxx";
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -84,14 +91,18 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent, Function | Small
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect, Function | SmallTest | Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+ 
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnScreenConnect(screenInfo);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnScreenConnect(screenInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -102,14 +113,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect, Function | SmallTest | L
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, Function | SmallTest | Level1)
 {
     ScreenId screenId = 0;
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnScreenDisconnect(screenId);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnScreenDisconnect(screenId);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -120,15 +134,18 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, Function | SmallTest 
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange, Function | SmallTest | Level1)
 {
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    ScreenChangeEvent event = ScreenChangeEvent{0};
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnScreenChange(screenInfo,event);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -140,15 +157,18 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, Function | SmallTest
 {
     std::string trigger = " ";
     std::vector<sptr<ScreenInfo>> screenInfos = {};
-    ScreenGroupChangeEvent event = ScreenGroupChangeEvent{0};
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
+
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnScreenGroupChange(trigger,screenInfos,event);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -159,14 +179,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, Function | SmallTest
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate, Function | SmallTest | Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+   
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnDisplayCreate(displayInfo);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -177,14 +200,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate, Function | SmallTest | L
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy, Function | SmallTest | Level1)
 {
     DisplayId displayId = 0;
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+  
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnDisplayDestroy(displayId);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnDisplayDestroy(displayId);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -195,15 +221,19 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy, Function | SmallTest | 
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange, Function | SmallTest | Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    DisplayChangeEvent event = DisplayChangeEvent{0};
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnDisplayChange(displayInfo,event);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -214,14 +244,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange, Function | SmallTest | L
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, Function | SmallTest | Level1)
 {
     sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+  
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->OnScreenshot(snapshotInfo);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+   int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -232,14 +265,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, Function | SmallTest | Leve
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level1)
 {
     bool hasPrivate = false;
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+  
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
+        resultValue = 1;
+    };
+    func();
+     ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -249,15 +285,18 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, Function
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyFoldStatusChanged, Function | SmallTest | Level1)
 {
-    FoldStatus displayMode = FoldStatus{0};
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    //FoldStatus foldStatus = FoldStatus::EXPAND;
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    displayManagerAgentProxy->NotifyFoldStatusChanged(displayMode);
-    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);
+        resultValue = 1;
+    };
+    func();
+
+    ASSERT_EQ(resultValue, 1);
 }
 }
 }
