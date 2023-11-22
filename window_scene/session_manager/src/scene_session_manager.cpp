@@ -4196,11 +4196,13 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
         return;
     }
 
-    // calculate new rect of calling window
     WSRect newRect = callingSessionRect;
-    newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
-    int32_t statusHeight = GetStatusBarHeight();
-    newRect.posY_ = std::max(newRect.posY_, statusHeight);
+    if (isCallingSessionFloating) {
+        // calculate new rect of calling window
+        newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
+        int32_t statusHeight = GetStatusBarHeight();
+        newRect.posY_ = std::max(newRect.posY_, statusHeight);
+    }
 
     if (!isInputUpdated) {
         callingWindowRestoringRect_ = callingSessionRect;
