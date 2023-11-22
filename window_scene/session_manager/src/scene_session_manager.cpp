@@ -1025,6 +1025,10 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
         return;
     }
     callingSession_ = GetSceneSession(focusedSessionId_);
+    if (callingSession_ == nullptr) {
+        WLOGFE("calling session is nullptr");
+        return;
+    }
     callingSession_->SetTextFieldAvoidInfo(scnSession->textFieldPositionY_, scnSession->textFieldHeight_);
     ResizeSoftInputCallingSessionIfNeed(scnSession);
 }
