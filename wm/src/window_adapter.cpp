@@ -406,5 +406,45 @@ WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, 
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
 }
+
+void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel,
+        surfaceNode, property, persistentId, session, token);
+}
+
+void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId);
+}
+
+WMError WindowAdapter::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return windowManagerServiceProxy_->UpdateSessionProperty(property, action);
+}
+
+WMError WindowAdapter::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->SetSessionGravity(persistentId, gravity, percent));
+}
+
+WMError WindowAdapter::BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->BindDialogSessionTarget(persistentId, targetToken));
+}
+
+WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->RequestFocusStatus(persistentId, isFocused));
+}
 } // namespace Rosen
 } // namespace OHOS

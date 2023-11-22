@@ -238,7 +238,7 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
 
     sptr<WindowSessionProperty> property = UnmarshallingDataTo<WindowSessionProperty>(data, size);
     WSPropertyChangeAction action = source.GetObject<WSPropertyChangeAction>();
-    proxy->UpdateProperty(property, action);
+    proxy->UpdateSessionProperty(property, action);
 
     FocusChangeInfo focusInfo;
     proxy->GetFocusWindowInfo(focusInfo);
@@ -356,7 +356,7 @@ void ProxyInterfaceFuzzTestPart4(const uint8_t* data, size_t size)
     proxy->SetSessionContinueState(token, continueState);
 
     uint64_t persistentId = source.GetObject<uint64_t>();
-    proxy->BindDialogTarget(persistentId, token);
+    proxy->BindDialogSessionTarget(persistentId, token);
 
     proxy->PendingSessionToForeground(token);
     proxy->PendingSessionToBackgroundForDelegator(token);
