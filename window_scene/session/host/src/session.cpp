@@ -1866,7 +1866,7 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
 {
     WLOGFD("Notify sessioninfo lockedstate change: %{public}u", lockedState);
     if (sessionInfoLockedStateChangeFunc_) {
-        sessionInfoLockedStateChangeFunc_(lockedstate);
+        sessionInfoLockedStateChangeFunc_(lockedState);
     }
 }
 } // namespace OHOS::Rosen
