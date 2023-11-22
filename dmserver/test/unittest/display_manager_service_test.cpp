@@ -493,7 +493,7 @@ HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Functio
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerServiceTest, OnStop, Function | SmallTest | Level3)
-{   
+{
     dms_->OnStop();
     ASSERT_TRUE(true);
 }
