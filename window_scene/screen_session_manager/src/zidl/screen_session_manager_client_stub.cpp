@@ -27,6 +27,8 @@ const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSession
         &ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnPropertyChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnPowerStatusChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnSensorRotationChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED),
@@ -80,6 +82,16 @@ int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data,
     }
     auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
     OnPropertyChanged(screenId, property, reason);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnPowerStatusChanged");
+    auto event = static_cast<DisplayPowerEvent>(data.ReadUint32());
+    auto status = static_cast<EventStatus>(data.ReadUint32());
+    auto reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    OnPowerStatusChanged(event, status, reason);
     return ERR_NONE;
 }
 

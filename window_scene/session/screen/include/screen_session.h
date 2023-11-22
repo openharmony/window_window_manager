@@ -39,6 +39,8 @@ public:
     virtual void OnDisconnect(ScreenId screenId) = 0;
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         ScreenId screenId) = 0;
+    virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) = 0;
     virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
@@ -127,6 +129,7 @@ public:
     void Connect();
     void Disconnect();
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
+    void PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
