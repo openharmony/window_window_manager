@@ -763,7 +763,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 session->GetCutoutAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
-            case AvoidAreaType::TYPE_AI_NAVIGATION_BAR: {
+            case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
                 session->GetAINavigationBarArea(rect, avoidArea);
                 return avoidArea;
             }
