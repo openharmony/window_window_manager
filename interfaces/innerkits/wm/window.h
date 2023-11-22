@@ -1232,7 +1232,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Recover() { return WMError::WM_OK; }
+    virtual WMError Recover() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
