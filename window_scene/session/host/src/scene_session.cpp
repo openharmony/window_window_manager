@@ -1017,8 +1017,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     int32_t action = pointerEvent->GetPointerAction();
     {
         bool isSystemWindow = GetSessionInfo().isSystem_;
-        if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW &&
-            (!isSystemWindow)) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
             std::lock_guard<std::mutex> guard(enterSessionMutex_);
             WLOGFD("Set enter session, persistentId:%{public}d", GetPersistentId());
             enterSession_ = wptr<SceneSession>(this);
