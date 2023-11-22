@@ -55,7 +55,8 @@ enum class ScreenState : int32_t {
 class ScreenSession : public RefBase {
 public:
     ScreenSession() = default;
-    ScreenSession(ScreenId screenId, const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
+    ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
+        const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
     ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
     virtual ~ScreenSession() = default;
@@ -83,13 +84,14 @@ public:
 
     std::string GetName();
     ScreenId GetScreenId();
+    ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
     void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
@@ -106,7 +108,7 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
@@ -136,6 +138,7 @@ public:
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
+    Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };

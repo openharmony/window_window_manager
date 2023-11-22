@@ -50,6 +50,7 @@ public:
     virtual bool WakeUpEnd() override;
     virtual bool SuspendBegin(PowerStateChangeReason reason) override;
     virtual bool SuspendEnd() override;
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     virtual bool SetDisplayState(DisplayState state) override;
@@ -124,6 +125,7 @@ public:
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
+    void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
 
 private:

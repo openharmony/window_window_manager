@@ -63,13 +63,15 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     ConnectToServer();
 }
 
-void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent)
+void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
+    ScreenId rsId, const std::string& name)
 {
-    WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
+    WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
+        screenId, static_cast<int>(screenEvent), rsId, name.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
         auto screenProperty = screenSessionManager_->GetScreenProperty(screenId);
         auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
-        sptr<ScreenSession> screenSession = new ScreenSession(screenId, screenProperty, displayNode);
+        sptr<ScreenSession> screenSession = new ScreenSession(screenId, rsId, name, screenProperty, displayNode);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
@@ -204,6 +206,15 @@ ScreenProperty ScreenSessionManagerClient::GetPhyScreenProperty(ScreenId screenI
         return {};
     }
     return screenSessionManager_->GetPhyScreenProperty(screenId);
+}
+
+void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyDisplayChangeInfoChanged(info);
 }
 
 void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)

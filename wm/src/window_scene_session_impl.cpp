@@ -1919,6 +1919,16 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
+WMError WindowSceneSessionImpl::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+{
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetNeedKeepKeyboard(isNeedKeepKeyboard);
+
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("DumpSessionElementInfo");
@@ -2031,6 +2041,20 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
 {
     WLOGFI("NotifySessionBackground");
     Hide(reason, withAnimation, isFromInnerkits);
+}
+
+WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    WLOGFI("UpdateTitleInTargetPos %{public}u isShow %{public}u, height %{public}u", GetWindowId(), isShow, height);
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (uiContent_ == nullptr) {
+        WLOGFE("UpdateTitleInTargetPos uiContent_ is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    uiContent_->UpdateTitleInTargetPos(isShow, height);
+    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()

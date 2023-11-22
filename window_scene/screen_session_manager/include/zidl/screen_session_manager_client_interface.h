@@ -39,7 +39,8 @@ public:
         TRANS_ID_ON_IMMERSIVE_STATE_CHANGED,
     };
 
-    virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent) = 0;
+    virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
+        ScreenId rsId, const std::string& name) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,

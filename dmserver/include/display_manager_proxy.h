@@ -62,6 +62,7 @@ public:
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SuspendEnd() override;
+    bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
@@ -84,7 +85,8 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override;
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override;
-
+    DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };

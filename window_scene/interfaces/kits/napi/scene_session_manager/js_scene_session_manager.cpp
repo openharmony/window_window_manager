@@ -107,8 +107,11 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
     BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
+    BindNativeFunction(env, exportObj, "updateSessionDisplayId", moduleName,
+        JsSceneSessionManager::UpdateSessionDisplayId);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
+    BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
     return NapiGetUndefined(env);
 }
 
@@ -497,11 +500,25 @@ napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback
     return (me != nullptr) ? me->OnUpdateMaximizeMode(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::UpdateSessionDisplayId(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]UpdateSessionDisplayId");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateSessionDisplayId(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]NotifyAINavigationBarShowStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyAINavigationBarShowStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::UpdateTitleInTargetPos(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]UpdateTitleInTargetPos");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateTitleInTargetPos(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -802,7 +819,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-
+    rootScene_->SetFrameLayoutFinishCallback([]() {
+        SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+    });
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
@@ -1552,6 +1571,35 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[1], screenId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1578,6 +1626,42 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 3) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isShow = false;
+    if (!ConvertFromJsValue(env, argv[1], isShow)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isShow");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t height;
+    if (!ConvertFromJsValue(env, argv[2], height)) {
+        WLOGFE("[NAPI]Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateTitleInTargetPos(persistentId, isShow, height);
     return NapiGetUndefined(env);
 }
 
