@@ -33,6 +33,7 @@ public:
 private:
     int HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnPropertyChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSensorRotationChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenOrientationChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenRotationLockedChanged(MessageParcel& data, MessageParcel& reply);

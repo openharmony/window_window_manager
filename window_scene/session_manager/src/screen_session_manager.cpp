@@ -641,13 +641,14 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     WLOGFI("ScreenSessionManager::WakeUpBegin remove suspend begin task");
     blockScreenPowerChange_ = false;
     taskScheduler_->RemoveTask("suspendBeginTask");
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN, reason);
 }
 
 bool ScreenSessionManager::WakeUpEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:WakeUpEnd");
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END,
+        PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
@@ -658,11 +659,11 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     auto suspendBeginTask = [this]() {
         WLOGFI("ScreenSessionManager::SuspendBegin delay task start");
         blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF);
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
     };
     taskScheduler_->PostTask(suspendBeginTask, "suspendBeginTask", 1500);
     sessionDisplayPowerController_->SuspendBegin(reason);
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
 }
 
 bool ScreenSessionManager::SuspendEnd()
@@ -670,7 +671,8 @@ bool ScreenSessionManager::SuspendEnd()
     WLOGFI("ScreenSessionManager::SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
+        PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
@@ -717,7 +719,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
     rsInterface_.SetScreenPowerStatus(screenId, status);
 
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
-        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
 
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
@@ -736,7 +738,8 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
             } else {
                 needScreenOnWhenKeyguardNotify_ = true;
                 auto task = [this]() {
-                    SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON);
+                    SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+                        PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                     needScreenOnWhenKeyguardNotify_ = false;
                     keyguardDrawnDone_ = true;
                 };
@@ -754,10 +757,10 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
             return false;
         }
     }
-    return SetScreenPower(status);
+    return SetScreenPower(status, reason);
 }
 
-bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status)
+bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     WLOGFI("ScreenSessionManager::SetScreenPower enter");
     auto screenIds = GetAllScreenIds();
@@ -774,7 +777,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status)
         }
     }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
-        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
@@ -847,7 +850,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         if (needScreenOnWhenKeyguardNotify_) {
             taskScheduler_->RemoveTask("screenOnTask");
             usleep(SLEEP_US);
-            SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON);
+            SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
             needScreenOnWhenKeyguardNotify_ = false;
         }
     }
@@ -856,14 +859,14 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         WLOGFI("ScreenSessionManager::NotifyDisplayEvent screen lock suspend");
         taskScheduler_->RemoveTask("suspendBeginTask");
         blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_SUSPEND);
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_SUSPEND, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
         WLOGFI("ScreenSessionManager::NotifyDisplayEvent screen lock off");
         taskScheduler_->RemoveTask("suspendBeginTask");
         blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF);
+        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
     }
 }
 
@@ -1090,7 +1093,8 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoByDisplayId(DisplayId displa
     return GetScreenInfoById(displayInfo->GetScreenId());
 }
 
-bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
+bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     if (agents.empty()) {
@@ -1099,6 +1103,17 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
     WLOGFI("NotifyDisplayPowerEvent");
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
+    }
+
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        WLOGFE("NotifyDisplayPowerEvent no screen info");
+        return false;
+    }
+
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> screen = GetScreenSession(screenId);
+        screen->PowerStatusChange(event, status, reason);
     }
     return true;
 }
@@ -2570,6 +2585,18 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
         return;
     }
     clientProxy_->OnPropertyChanged(screenId, newProperty, reason);
+}
+
+void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    WLOGFI("event: %{public}d, status: %{public}d, reason: %{public}d", static_cast<int>(event),
+        static_cast<int>(status), static_cast<int>(reason));
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnPowerStatusChanged(event, status, reason);
 }
 
 void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId screenId)

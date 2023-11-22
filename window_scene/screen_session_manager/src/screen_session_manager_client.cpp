@@ -116,6 +116,14 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     screenSession->PropertyChange(property, reason);
 }
 
+void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    for (auto screenSession:screenSessionMap_) {
+        (screenSession.second)->PowerStatusChange(event, status, reason);
+    }
+}
+
 void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
 {
     auto screenSession = GetScreenSession(screenId);

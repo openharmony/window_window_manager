@@ -223,6 +223,16 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
     }
 }
 
+void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnPowerStatusChange(event, status, reason);
+    }
+}
+
 float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
 {
     float rotation = 0.f;
