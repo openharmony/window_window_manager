@@ -1218,7 +1218,6 @@ bool Session::IsTopDialog() const
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
-            WLOGFI("Dialog id: %{public}d, current dialog id: %{public}d", dialogSession->GetPersistentId(), currentPersistentId);
             return dialogSession->GetPersistentId() == currentPersistentId;
         }
     }
@@ -1366,11 +1365,9 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            if (!IsTopDialog()) {
-                WLOGFI("There is at least one active dialog upon this dialog");
-                return WSError::WS_ERROR_INVALID_PERMISSION;
-            }
+        if (parentSession_ && parentSession_->CheckDialogOnForeground() &&
+            !IsTopDialog()) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
 
