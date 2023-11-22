@@ -25,6 +25,12 @@ config("scene_session_manager_napi_config") {
 }
 
 ohos_shared_library("scenesessionmanager_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "js_root_scene_session.cpp",
     "js_scene_session.cpp",
