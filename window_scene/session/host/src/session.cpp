@@ -1504,6 +1504,11 @@ void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocu
     requestFocusStatusNotifyManagerFunc_ = func;
 }
 
+void Session::SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func)
+{
+    requestFocusFunc_ = func;
+}
+
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
 {
     lostFocusFunc_ = func;
@@ -1598,6 +1603,14 @@ bool Session::GetStateFromManager(const ManagerState key)
     }
 }
 
+void Session::NotifyUIRequestFocus()
+{
+    WLOGFD("NotifyUIRequestFocus id: %{public}d", GetPersistentId());
+    if (requestFocusFunc_) {
+        requestFocusFunc_();
+    }
+}
+
 void Session::NotifyUILostFocus()
 {
     WLOGFD("NotifyUILostFocus id: %{public}d", GetPersistentId());
@@ -1628,14 +1641,19 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    // notify scb arkui focus
+    if (isFocused) {
+        if (sessionInfo_.isSystem_) {
+            NotifyUIRequestFocus();
+        }
+    } else {
+         NotifyUILostFocus();
+    }
     return WSError::WS_OK;
 }
 
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
-    if (!isFocused_) {
-        NotifyUILostFocus();
-    }
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }

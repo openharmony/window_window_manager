@@ -293,7 +293,27 @@ void JsSceneSessionManager::ProcessShiftFocus()
         WLOGFD("ProcessShiftFocus called");
         this->OnShiftFocus(persistentId);
     };
+    NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
+        WLOGFD("WMSFocus, scb uicontent focus");
+        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+        if (uiContent == nullptr) {
+            WLOGFE("uiContent is nullptr");
+            return;
+        }
+        uiContent->Focus();
+    };
+    NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
+        WLOGFD("WMSFocus, scb uicontent unfocus");
+        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+        if (uiContent == nullptr) {
+            WLOGFE("uiContent is nullptr");
+            return;
+        }
+        uiContent->UnFocus();
+    };
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
+    SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
+    SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
 }
 
 void JsSceneSessionManager::ProcessShowPiPMainWindow()
