@@ -107,7 +107,8 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const int3
     return static_cast<WSError>(ret);
 }
 
-WMError SceneSessionManagerProxy::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -170,7 +171,7 @@ WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool 
     return static_cast<WMError>(ret);
 }
 
-WSError SceneSessionManagerProxy::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+WSError SceneSessionManagerProxy::BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
 {
     MessageParcel data;
     MessageParcel reply;

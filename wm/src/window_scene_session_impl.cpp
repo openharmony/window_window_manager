@@ -146,8 +146,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         windowSystemConfig_ = parentSession->GetSystemSessionConfig();
         // creat sub session by parent session
-        parentSession->GetHostSession()->CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
-            property_, persistentId, session, token);
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
@@ -164,8 +164,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             }
         }
         PreProcessCreate();
-        SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
-            property_, persistentId, session, token);
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, token);
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
@@ -421,9 +421,10 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
+    const auto& type = GetType();
     WLOGFD("Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u,"
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(),
-        property_->GetPersistentId(), GetType(), reason, state_, requestState_);
+        property_->GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -431,7 +432,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
         NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
@@ -444,10 +445,17 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return ret;
     }
     UpdateTitleButtonVisibility();
-    ret = static_cast<WMError>(hostSession_->Foreground(property_));
+    if (WindowHelper::IsMainWindow(type)) {
+        ret = static_cast<WMError>(hostSession_->Foreground(property_));
+    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        ret = static_cast<WMError>(hostSession_->Show(property_));
+    } else {
+        ret = WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (ret == WMError::WM_OK) {
         // update sub window state if this is main window
-        if (WindowHelper::IsMainWindow(GetType())) {
+        if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         }
         state_ = WindowState::STATE_SHOWN;
@@ -461,17 +469,17 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGFD("id:%{public}d Hide, reason:%{public}u, state:%{public}u, requestState:%{public}u",
-        property_->GetPersistentId(), reason, state_, requestState_);
+    const auto& type = GetType();
+    WLOGFD("Window Hide [id:%{public}d, type: %{public}d, reason:%{public}u, state:%{public}u, "
+        "requestState:%{public}u", property_->GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    WindowState validState = WindowHelper::IsSubWindow(GetType()) ? requestState_ : state_;
+    WindowState validState = WindowHelper::IsSubWindow(type) ? requestState_ : state_;
     if (validState == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFD("window session is alreay hidden [name:%{public}s, id:%{public}d, type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
+        WLOGFD("window session is alreay hidden, id:%{public}d", property_->GetPersistentId());
         return WMError::WM_OK;
     }
 
@@ -487,22 +495,31 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         RSTransaction::FlushImplicitTransaction();
     }
 
-    // delete after replace WSError with WMError
-    // main window no need to notify host, since host knows hide first
-    // main window notify host temporarily, since host background may failed
-    // need to SetActive(false) for host session before background
-    res = static_cast<WMError>(SetActive(false));
-    if (res != WMError::WM_OK) {
-        return res;
+    /*
+     * delete after replace WSError with WMError
+     * main window no need to notify host, since host knows hide first
+     * main window notify host temporarily, since host background may failed
+     * need to SetActive(false) for host session before background
+     */
+
+    if (WindowHelper::IsMainWindow(type)) {
+        res = static_cast<WMError>(SetActive(false));
+        if (res != WMError::WM_OK) {
+            return res;
+        }
+        res = static_cast<WMError>(hostSession_->Background());
+    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        res = static_cast<WMError>(hostSession_->Hide());
+    } else {
+        res = WMError::WM_ERROR_INVALID_WINDOW;
     }
-    res = static_cast<WMError>(hostSession_->Background());
+
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        if (WindowHelper::IsMainWindow(GetType())) {
+        if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
         }
-
-        if (WindowHelper::IsSubWindow(GetType())) {
+        if (WindowHelper::IsSubWindow(type)) {
             if (state_ == WindowState::STATE_SHOWN) {
                 NotifyAfterBackground();
             }
@@ -635,13 +652,13 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
-            SessionManager::GetInstance().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType())) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            parentSession->GetHostSession()->DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
     // delete after replace WSError with WMError
@@ -1891,7 +1908,7 @@ WMError WindowSceneSessionImpl::SetAlpha(float alpha)
 WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
 {
     auto persistentId = property_->GetPersistentId();
-    WMError ret = SessionManager::GetInstance().BindDialogTarget(persistentId, targetToken);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().BindDialogSessionTarget(persistentId, targetToken);
     if (ret != WMError::WM_OK) {
         WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }

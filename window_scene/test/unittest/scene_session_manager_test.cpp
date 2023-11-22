@@ -649,7 +649,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigDecor06, Function | SmallTest | Level3)
 
 /**
  * @tc.name: ConfigWindowSceneXml01
- * @tc.desc: call defaultWindowMode 
+ * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml01, Function | SmallTest | Level3)
@@ -705,7 +705,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml02, Function | SmallTest |
 
 /**
  * @tc.name: ConfigWindowSceneXml03
- * @tc.desc: call defaultMaximizeMode 
+ * @tc.desc: call defaultMaximizeMode
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml03, Function | SmallTest | Level3)
@@ -1907,14 +1907,14 @@ HWTEST_F(SceneSessionManagerTest, DestroySpecificSession, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetCreateSpecificSessionListener
+ * @tc.name: SetCreateSystemSessionListener
  * @tc.desc: SceneSesionManager set create specific session listener
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SetCreateSpecificSessionListener, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetCreateSystemSessionListener, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->SetCreateSpecificSessionListener(nullptr);
+    ssm_->SetCreateSystemSessionListener(nullptr);
     ASSERT_EQ(ret, 0);
 }
 
@@ -2208,15 +2208,15 @@ HWTEST_F(SceneSessionManagerTest, IsSessionClearable, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateProperty
+ * @tc.name: UpdateSessionProperty
  * @tc.desc: SceneSesionManager update property
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateProperty, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateSessionProperty, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    WMError result = ssm_->UpdateProperty(property, action);
+    WMError result = ssm_->UpdateSessionProperty(property, action);
     ASSERT_EQ(result, WMError::WM_OK);
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -2252,7 +2252,7 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty01, Function | SmallTest |
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateProperty(property, action);
+    WMError result = ssm_->UpdateSessionProperty(property, action);
     EXPECT_EQ(result, WMError::WM_OK);
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
@@ -2297,7 +2297,7 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest |
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateProperty(property, action);
+    WMError result = ssm_->UpdateSessionProperty(property, action);
     EXPECT_EQ(result, WMError::WM_OK);
     action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
     ssm_->HandleUpdateProperty(property, action, scensession);
@@ -2324,7 +2324,7 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
     ssm_->HandleKeepScreenOn(scensession, requireLock);
     requireLock = false;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
-    WMError result = ssm_->UpdateProperty(property, action);
+    WMError result = ssm_->UpdateSessionProperty(property, action);
     ASSERT_EQ(result, WMError::WM_OK);
     delete scensession;
     delete property;
@@ -2798,7 +2798,7 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken, Function | SmallTest 
     sptr<SceneSession> result = ssm_->FindMainWindowWithToken(targetToken);
     EXPECT_EQ(result, nullptr);
     uint64_t persistentId = 1423;
-    WSError result01 = ssm_->BindDialogTarget(persistentId, targetToken);
+    WSError result01 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
 }
 

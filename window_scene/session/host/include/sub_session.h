@@ -23,6 +23,9 @@ class SubSession : public SceneSession {
 public:
     SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SubSession();
+
+    WSError Show(sptr<WindowSessionProperty> property) override;
+    WSError Hide() override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H
