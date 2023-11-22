@@ -901,6 +901,11 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
+    return HideWindowFunction(env,info);
+}
+
+napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
+{
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -4467,9 +4472,9 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("minimize the window permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    if (WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        WLOGFE("subWindow hide");
+        return HideWindowFunction(env,info);
     }
 
     size_t argc = 4;
