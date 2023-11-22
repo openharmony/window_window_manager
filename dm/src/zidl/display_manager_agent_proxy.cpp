@@ -289,6 +289,24 @@ void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+void DisplayManagerAgentProxy::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!info->Marshalling(data)) {
+        WLOGFE("Write display change info failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     MessageParcel data;

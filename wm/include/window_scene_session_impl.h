@@ -107,6 +107,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -123,6 +124,7 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;

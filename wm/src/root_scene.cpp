@@ -74,6 +74,7 @@ RootScene::RootScene()
 
 RootScene::~RootScene()
 {
+    uiContent_ = nullptr;
 }
 
 void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
@@ -91,7 +92,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
 
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
-
+    uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     RegisterInputEventListener();
     DelayedSingleton<ANRManager>::GetInstance()->Init();
     DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
@@ -187,6 +188,15 @@ void RootScene::OnBundleUpdated(const std::string& bundleName)
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
+}
+
+void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    frameLayoutFinishCb_ = callback;
+    if (uiContent_) {
+        uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+    }
+    WLOGFI("[WMSWinLayout] SetFrameLayoutFinishCallback end");
 }
 } // namespace Rosen
 } // namespace OHOS

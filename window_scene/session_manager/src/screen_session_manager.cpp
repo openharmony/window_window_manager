@@ -246,13 +246,15 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
     }
 }
@@ -284,18 +286,21 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
-                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+                clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                    screenSession->GetRSScreenId(), screenSession->GetName());
             }
             return;
         }
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED);
+            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                screenSession->GetRSScreenId(), screenSession->GetName());
         }
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -663,6 +668,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::SuspendEnd()
 {
+    WLOGFI("ScreenSessionManager::SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
@@ -671,6 +677,7 @@ bool ScreenSessionManager::SuspendEnd()
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
 {
+    WLOGFI("ScreenSessionManager::SetDisplayState enter");
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
@@ -687,6 +694,32 @@ void ScreenSessionManager::NotifyScreenshot(DisplayId displayId)
     if (clientProxy_) {
         clientProxy_->OnScreenshot(displayId);
     }
+}
+
+bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFI("SetSpecifiedScreenPower: screen id:%{public}" PRIu64 ", state:%{public}u", screenId, state);
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            break;
+        }
+        default: {
+            WLOGFW("SetScreenPowerStatus state not support");
+            return false;
+        }
+    }
+
+    rsInterface_.SetScreenPowerStatus(screenId, status);
+
+    return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
 
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
@@ -729,6 +762,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
+    WLOGFI("ScreenSessionManager::SetScreenPower enter");
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         WLOGFE("no screen info");
@@ -808,6 +842,7 @@ DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 
 void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 {
+    WLOGFI("ScreenSessionManager::NotifyDisplayEvent receive keyguardDrawnDone");
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -886,7 +921,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
         needNotifyAvoidArea = true;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
@@ -2518,6 +2553,17 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyDisplayChangeInfoChanged(info);
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     WLOGI("NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
@@ -2592,7 +2638,8 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     clientProxy_ = client;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
-        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED);
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName());
     }
 }
 

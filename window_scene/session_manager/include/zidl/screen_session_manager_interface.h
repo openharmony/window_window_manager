@@ -74,6 +74,7 @@ public:
     virtual bool WakeUpEnd() override { return false; }
     virtual bool SuspendBegin(PowerStateChangeReason reason) override { return false; }
     virtual bool SuspendEnd() override { return false; }
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override { return false; }
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) override { return false; }
@@ -123,6 +124,7 @@ public:
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
 };
 } // namespace Rosen

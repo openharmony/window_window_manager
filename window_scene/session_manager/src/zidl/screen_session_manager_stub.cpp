@@ -79,6 +79,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(SetDisplayState(state));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint32());
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SetSpecifiedScreenPower(screenId, state, reason));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
             ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
@@ -486,6 +493,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             if (!RSMarshallingHelper::Marshalling(reply, GetPhyScreenProperty(screenId))) {
                 WLOGFE("Write screenProperty failed");
             }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO: {
+            sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
+            if (!info) {
+                WLOGFE("Read DisplayChangeInfo failed");
+                return -1;
+            }
+            NotifyDisplayChangeInfoChanged(info);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE: {

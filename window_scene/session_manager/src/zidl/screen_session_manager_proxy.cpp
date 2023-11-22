@@ -423,6 +423,41 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetDisplayState(DisplayState state)
     return reply.ReadBool();
 }
 
+bool OHOS::Rosen::ScreenSessionManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetSpecifiedScreenPower remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
+        WLOGFE("Write ScreenId failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write ScreenPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1712,6 +1747,26 @@ ScreenProperty ScreenSessionManagerProxy::GetPhyScreenProperty(ScreenId screenId
         return {};
     }
     return screenProperty;
+}
+
+void ScreenSessionManagerProxy::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!info->Marshalling(data)) {
+        WLOGFE("Write display change info failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 
 void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)

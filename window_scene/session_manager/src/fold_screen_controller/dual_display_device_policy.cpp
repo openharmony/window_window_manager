@@ -29,6 +29,20 @@ namespace {
 DualDisplayDevicePolicy::DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex): displayInfoMutex_(displayInfoMutex)
 {
     WLOGI("DualDisplayDevicePolicy created");
+
+    ScreenId screenIdFull = 0;
+    int32_t foldCreaseRegionPosX = 0;
+    int32_t foldCreaseRegionPosY = 1064;
+    int32_t foldCreaseRegionPosWidth = 2496;
+    int32_t foldCreaseRegionPosHeight = 171;
+
+    std::vector<DMRect> rect = {
+        {
+            foldCreaseRegionPosX, foldCreaseRegionPosY,
+            foldCreaseRegionPosWidth, foldCreaseRegionPosHeight
+        }
+    };
+    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
 void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
@@ -149,26 +163,13 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 
 sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
 {
-    ScreenId screenIdFull = 0;
     ScreenId screenIdMain = 5;
-    int32_t foldCreaseRegionPosX = 0;
-    int32_t foldCreaseRegionPosY = 1096;
-    int32_t foldCreaseRegionPosWidth = 2496;
-    int32_t foldCreaseRegionPosHeight = 56;
 
     WLOGI("GetCurrentFoldCreaseRegion");
     if (screenId_ == screenIdMain) {
-        WLOGI("GetCurrentFoldCreaseRegion is invalid");
+        WLOGI("CurrentFoldCreaseRegion is invalid");
         return nullptr;
     }
-
-    std::vector<DMRect> rect = {
-        {
-            foldCreaseRegionPosX, foldCreaseRegionPosY,
-            foldCreaseRegionPosWidth, foldCreaseRegionPosHeight
-        }
-    };
-    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 
     return currentFoldCreaseRegion_;
 }
