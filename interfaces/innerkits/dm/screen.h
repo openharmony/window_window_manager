@@ -230,6 +230,16 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetScreenColorTransform();
+    
+    /**
+     * @brief Set the resolution for the screen.
+     *
+     * @param width width of the screen
+     * @param height height of the screen
+     * @param dpi dpi of the screen
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetResolution(uint32_t width, uint32_t height, uint32_t dpi) const;
 protected:
     // No more methods or variables can be defined here.
     explicit Screen(sptr<ScreenInfo> info);

@@ -338,6 +338,19 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: SetResolution
+ * @tc.desc: SetResolution virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetResolution, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetResolution(2, 100, 100, 0.5));
+}
+
+/**
  * @tc.name: GetScreenColorGamut
  * @tc.desc: GetScreenColorGamut virtual screen
  * @tc.type: FUNC
