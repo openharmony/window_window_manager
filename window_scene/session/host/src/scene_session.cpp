@@ -885,11 +885,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    if (!CheckPointerEventDispatch(pointerEvent)) {
-        WLOGFI("Do not dispatch this pointer event");
-        return WSError::WS_DO_NOTHING;
-    }
-
     int32_t action = pointerEvent->GetPointerAction();
     {
         bool isSystemWindow = GetSessionInfo().isSystem_;
@@ -905,6 +900,12 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             enterSession_ = nullptr;
         }
     }
+
+    if (!CheckPointerEventDispatch(pointerEvent)) {
+        WLOGFI("Do not dispatch this pointer event");
+        return WSError::WS_DO_NOTHING;
+    }
+
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
         specificCallback_->onSessionTouchOutside_(GetPersistentId());
