@@ -16,15 +16,12 @@
 #include "js_pip_manager.h"
 #include "window_manager_hilog.h"
 #include "picture_in_picture_manager.h"
-#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};
-    constexpr int32_t NUMBER_TWO = 2;
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -139,32 +136,6 @@ napi_value JsPipManager::OnProcessScale(napi_env env, napi_callback_info info)
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]JsPipManager::OnInitXComponentController");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != NUMBER_TWO) {
-        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
-        return NapiThrowInvalidParam(env);
-    }
-    napi_value xComponentController = argv[0];
-    std::shared_ptr<XComponentController> xComponentControllerResult =
-        XComponentController::GetXComponentControllerFromNapiValue(xComponentController);
-    int32_t windowId = 0;
-    if (!ConvertFromJsValue(env, argv[1], windowId)) {
-        WLOGFE("[NAPI]Failed to convert params to int32_t");
-        return NapiGetUndefined(env);
-    }
-    sptr<PictureInPictureController> pictureInPictureController =
-        PictureInPictureManager::GetPipControllerInfo(windowId);
-    if (pictureInPictureController == nullptr) {
-        WLOGFE("[NAPI]Failed to get pictureInPictureController");
-        return NapiGetUndefined(env);
-    }
-    WMError errCode = pictureInPictureController->SetXComponentController(xComponentControllerResult);
-    if (errCode != WMError::WM_OK) {
-        WLOGFE("[NAPI]Failed to set xComponentController");
-    }
     return NapiGetUndefined(env);
 }
 

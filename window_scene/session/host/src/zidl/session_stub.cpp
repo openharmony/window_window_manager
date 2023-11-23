@@ -506,8 +506,7 @@ int SessionStub::HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessagePar
         WLOGFE("Read eventId from parcel failed!");
         return ERR_INVALID_DATA;
     }
-    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
-    WSError errCode = RecoveryPullPiPMainWindow(persistentId, rect);
+    WSError errCode = RecoveryPullPiPMainWindow(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
