@@ -89,6 +89,7 @@ public:
         TRANS_ID_UNREGISTER_COLLABORATOR,
         TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
         TRANS_ID_RAISE_WINDOW_TO_TOP,
+        TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -123,6 +124,10 @@ public:
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
+    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override
+    {
+        return WSError::WS_OK;
+    }
 
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;

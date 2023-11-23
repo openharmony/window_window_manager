@@ -231,6 +231,7 @@ public:
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
+    WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
 
     void NotifyUpdateRectAfterLayout();
 public:
