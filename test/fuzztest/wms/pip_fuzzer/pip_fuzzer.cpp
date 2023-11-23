@@ -63,7 +63,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     option->SetContentSize(width, height);
     int32_t windowId;
     startPos += GetObject(windowId, data + startPos, size - startPos);
-    sptr<PictureInPictureController> controller = new PictureInPictureController(option, windowId);
+    napi_env env = nullptr;
+    startPos += GetObject(env, data + startPos, size - startPos);
+    sptr<PictureInPictureController> controller = new PictureInPictureController(option, windowId, env);
     if (controller == nullptr) {
         return false;
     }

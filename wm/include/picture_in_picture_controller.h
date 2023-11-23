@@ -32,7 +32,7 @@ public:
     constexpr static int32_t DEFAULT_WIDTH = 800;
     constexpr static int32_t DEFAULT_HEIGHT = 600;
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
-    PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId);
+    PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture();
     WMError StopPictureInPicture(bool needAnim);
@@ -70,6 +70,7 @@ private:
     Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
     bool isAutoStartEnabled_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    napi_env env_;
 };
 } // namespace Rosen
 } // namespace OHOS

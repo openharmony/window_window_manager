@@ -21,6 +21,7 @@
 namespace OHOS::Rosen {
 class PiPUtil {
 public:
+    static void SetDisplayVpr(const float displayVpr);
     static void UpdateRectPivot(const int32_t start, const uint32_t len, const uint32_t totalLen,
         PiPScalePivot& pivot);
     static void GetRectByPivot(int32_t& start, const uint32_t oldLen, const uint32_t len, const uint32_t totalLen,
@@ -29,7 +30,7 @@ public:
         Rect& rect);
     static bool GetValidRect(const uint32_t width, const uint32_t height, Rect& rect);
 
-    static constexpr int32_t SAFE_PADDING_HORIZONTAL = 12;
+    static constexpr int32_t SAFE_PADDING_HORIZONTAL_VP = 12;
     static constexpr int32_t SAFE_PADDING_VERTICAL_TOP = 150;
     static constexpr int32_t SAFE_PADDING_VERTICAL_BOTTOM = 350;
 };

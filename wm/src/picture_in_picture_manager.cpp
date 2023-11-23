@@ -197,6 +197,10 @@ void PictureInPictureManager::DoStartMove()
 void PictureInPictureManager::DoScale()
 {
     WLOGD("DoScale is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->DoScale();
 }
 
 void PictureInPictureManager::DoActionEvent(std::string actionName)
