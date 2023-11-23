@@ -313,7 +313,6 @@ ohos_unittest("wm_picture_in_picture_controller_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
-    "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -327,7 +326,6 @@ ohos_unittest("wm_picture_in_picture_manager_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
-    "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -341,7 +339,6 @@ ohos_unittest("wm_picture_in_picture_option_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
-    "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
     "hilog:libhilog",
   ]
