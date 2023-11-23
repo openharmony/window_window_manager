@@ -2018,11 +2018,11 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     return static_cast<WSError>(ret);
 }
 
-WMError WindowSceneSessionImpl::RecoveryPullPiPMainWindow()
+WMError WindowSceneSessionImpl::RecoveryPullPiPMainWindow(const Rect& rect)
 {
     WLOGFI("RecoveryPullPiPMainWindow");
     if (hostSession_ && property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        hostSession_->RecoveryPullPiPMainWindow(GetPersistentId());
+        hostSession_->RecoveryPullPiPMainWindow(GetPersistentId(), rect);
         return WMError::WM_OK;
     }
     WLOGFW("not pip window, nothing to do");
