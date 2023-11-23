@@ -51,7 +51,6 @@ public:
     static void DoScale();
     static void DoActionEvent(std::string actionName);
     static void AutoStartPipWindow();
-    static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
 private:
     static sptr<PictureInPictureController> curPipController_;
     static sptr<PictureInPictureController> activePipController_;

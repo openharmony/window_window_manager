@@ -132,6 +132,10 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+constexpr int32_t DEFAULT_POSX = 0;
+constexpr int32_t DEFAULT_POSY = 855;
+constexpr int32_t DEFAULT_WIDTH = 1344;
+constexpr int32_t DEFAULT_HEIGHT = 800;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -813,7 +817,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1);
     specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
     specificCb->onRecoveryPullPiPMainWindow_ = std::bind(&SceneSessionManager::RecoveryPullPiPMainWindow,
-        this, std::placeholders::_1, std::placeholders::_2);
+        this, std::placeholders::_1);
     return specificCb;
 }
 
@@ -5382,7 +5386,7 @@ void SceneSessionManager::ProcessPiPSessionForeground(const sptr<SceneSession> s
     sceneSession->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_START_WINDOW);
 }
 
-WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistentId, const Rect& rect)
+WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistentId)
 {
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
@@ -5397,10 +5401,8 @@ WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistent
         WLOGFE("showPiPMainWindowFunc_ init error, persistentId: %{public}d", persistentId);
         return WSError::WS_DO_NOTHING;
     }
-    auto task = [this, scnSession, rect]() {
+    auto task = [this, scnSession]() {
         showPiPMainWindowFunc_(scnSession->GetParentPersistentId());
-        WSRect rectPos = SessionHelper::TransferToWSRect(rect);
-        scnSession->UpdateSessionRect(rectPos, SizeChangeReason::RECOVER);
         return WSError::WS_OK;
     };
     taskScheduler_->PostAsyncTask(task);
