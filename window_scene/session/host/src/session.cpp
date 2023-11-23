@@ -1874,6 +1874,16 @@ float Session::GetFloatingScale() const
     return floatingScale_;
 }
 
+void Session::SetSCBKeepKeyboard(bool scbKeepKeyboardFlag)
+{
+    scbKeepKeyboardFlag_ = scbKeepKeyboardFlag;
+}
+
+bool Session::GetSCBKeepKeyboardFlag() const
+{
+    return scbKeepKeyboardFlag_;
+}
+
 WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
