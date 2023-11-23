@@ -16,16 +16,19 @@
 #ifndef OHOS_ROSEN_SCREEN_SESSION_MANAGER_INTERFACE_H
 #define OHOS_ROSEN_SCREEN_SESSION_MANAGER_INTERFACE_H
 
+#include <ui/rs_display_node.h>
+
 #include "display_manager_interface.h"
-#include "marshalling_helper.h"
+#include "session/screen/include/screen_property.h"
+#include "zidl/screen_session_manager_client_interface.h"
 
 namespace OHOS {
 namespace Rosen {
+template<typename T>
+class RRectT;
 
 class IScreenSessionManager : public IDisplayManager {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IScreenSessionManager");
-
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
@@ -71,6 +74,7 @@ public:
     virtual bool WakeUpEnd() override { return false; }
     virtual bool SuspendBegin(PowerStateChangeReason reason) override { return false; }
     virtual bool SuspendEnd() override { return false; }
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override { return false; }
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) override { return false; }
@@ -91,6 +95,8 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override {}
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override { return DMError::DM_OK; }
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override { return DMError::DM_OK; }
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width,
+        uint32_t height) override { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override { return DMError::DM_OK; }
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
@@ -111,8 +117,16 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
-};
 
+    virtual void SetClient(const sptr<IScreenSessionManagerClient>& client) {}
+    virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
+    virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
+    virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
+    virtual uint32_t GetCurvedCompressionArea() { return 0; }
+    virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
+    virtual void SetScreenPrivacyState(bool hasPrivate) {}
+};
 } // namespace Rosen
 } // namespace OHOS
 

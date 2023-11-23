@@ -19,12 +19,14 @@
 #include <refbase.h>
 #include <zidl/window_manager_agent_interface.h>
 
+#include "common/include/window_session_property.h"
 #include "window.h"
 #include "zidl/window_interface.h"
 #include "singleton_delegator.h"
 #include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_interface.h"
+
 namespace OHOS {
 namespace Rosen {
 class WMSDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -88,6 +90,16 @@ public:
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     virtual WMError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
+
+    virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr);
+    virtual void DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
+    virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
+    virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
+    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

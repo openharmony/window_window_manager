@@ -26,9 +26,23 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplayDevicePolicy"};
 } // namespace
 
-DualDisplayDevicePolicy::DualDisplayDevicePolicy()
+DualDisplayDevicePolicy::DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex): displayInfoMutex_(displayInfoMutex)
 {
     WLOGI("DualDisplayDevicePolicy created");
+
+    ScreenId screenIdFull = 0;
+    int32_t foldCreaseRegionPosX = 0;
+    int32_t foldCreaseRegionPosY = 1064;
+    int32_t foldCreaseRegionPosWidth = 2496;
+    int32_t foldCreaseRegionPosHeight = 171;
+
+    std::vector<DMRect> rect = {
+        {
+            foldCreaseRegionPosX, foldCreaseRegionPosY,
+            foldCreaseRegionPosWidth, foldCreaseRegionPosHeight
+        }
+    };
+    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
 void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
@@ -48,6 +62,11 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     }
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        if (currentDisplayMode_ == displayMode) {
+            WLOGFW("ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
+            return;
+        }
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
                 ReportFoldStatusChangeBegin((int32_t)screenIdFull, (int32_t)screenIdMain);
@@ -144,26 +163,13 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 
 sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
 {
-    ScreenId screenIdFull = 0;
     ScreenId screenIdMain = 5;
-    int32_t foldCreaseRegionPosX = 0;
-    int32_t foldCreaseRegionPosY = 1096;
-    int32_t foldCreaseRegionPosWidth = 2496;
-    int32_t foldCreaseRegionPosHeight = 56;
 
     WLOGI("GetCurrentFoldCreaseRegion");
     if (screenId_ == screenIdMain) {
-        WLOGI("GetCurrentFoldCreaseRegion is invalid");
+        WLOGI("CurrentFoldCreaseRegion is invalid");
         return nullptr;
     }
-
-    std::vector<DMRect> rect = {
-        {
-            foldCreaseRegionPosX, foldCreaseRegionPosY,
-            foldCreaseRegionPosWidth, foldCreaseRegionPosHeight
-        }
-    };
-    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 
     return currentFoldCreaseRegion_;
 }

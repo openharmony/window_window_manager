@@ -18,13 +18,12 @@
 #include <hitrace_meter.h>
 #include <pointer_event.h>
 #include "input_manager.h"
+#include <ui/rs_surface_node.h>
 
+#include "display_manager.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
-#include "session_manager/include/screen_session_manager.h"
-#include <ui/rs_surface_node.h>
-#include "window.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -123,7 +122,11 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
 
     int32_t action = pointerEvent->GetPointerAction();
     if (!GetStartMoveFlag()) {
-        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            WLOGFD("Move event hasPointDown");
+            hasPointDown_ = true;
+        } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             WLOGFD("Reset hasPointDown_ when point up or cancel");
@@ -291,7 +294,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     InitMoveDragProperty();
     hasPointDown_ = true;
     moveDragProperty_.originalRect_ = originalRect;
-    auto display = ScreenSessionManager::GetInstance().GetDisplayInfoById(pointerEvent->GetTargetDisplayId());
+    auto display = DisplayManager::GetInstance().GetDisplayById(pointerEvent->GetTargetDisplayId());
     if (display) {
         vpr_ = display->GetVirtualPixelRatio();
     } else {
@@ -580,7 +583,7 @@ void MoveDragController::ProcessSessionRectChange(const SizeChangeReason& reason
 float MoveDragController::GetVirtualPixelRatio() const
 {
     float vpr = 1.5;
-    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto displayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (displayInfo != nullptr) {
         vpr = displayInfo->GetVirtualPixelRatio();
     }

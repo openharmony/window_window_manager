@@ -446,21 +446,6 @@ HWTEST_F(SessionProxyTest, UpdateWindowAnimationFlag, Function | SmallTest | Lev
 
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowAnimationFlag end";
 }
-
-/**
- * @tc.name: DestroyAndDisconnectSpecificSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: DestroyAndDisconnectSpecificSession start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    int32_t persistentId = 0;
-    sProxy->DestroyAndDisconnectSpecificSession(persistentId);
-    GTEST_LOG_(INFO) << "SessionProxyTest: DestroyAndDisconnectSpecificSession end";
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

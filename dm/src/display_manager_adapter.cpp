@@ -21,9 +21,7 @@
 
 #include "display_manager.h"
 #include "screen_manager.h"
-#include "session_manager.h"
 #include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -34,16 +32,9 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 #define INIT_PROXY_CHECK_RETURN(ret) \
     do { \
-        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) { \
-            if (!InitDMSProxy()) { \
-                WLOGFE("InitDMSProxy failed!"); \
-                return ret; \
-            } \
-        } else { \
-            if (!InitSMSProxy()) { \
-                WLOGFE("InitSMSProxy failed!"); \
-                return ret; \
-            } \
+        if (!InitDMSProxy()) { \
+            WLOGFE("InitDMSProxy failed!"); \
+            return ret; \
         } \
     } while (false)
 
@@ -166,6 +157,12 @@ DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     WLOGFI("DisplayManagerAdapter::IsScreenRotationLocked");
     return displayManagerServiceProxy_->IsScreenRotationLocked(isLocked);
+}
+
+bool ScreenManagerAdapter::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetSpecifiedScreenPower(screenId, state, reason);
 }
 
 bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
@@ -296,35 +293,6 @@ bool BaseAdapter::InitDMSProxy()
     return true;
 }
 
-bool BaseAdapter::InitSMSProxy()
-{
-    if (isProxyValid_) {
-        return true;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    SessionManager& sessionManager = SessionManager::GetInstance();
-    displayManagerServiceProxy_ = sessionManager.GetScreenSessionManagerProxy();
-    if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
-        WLOGFE("Failed to get system display manager services");
-        return false;
-    }
-
-    dmsDeath_ = new(std::nothrow) DMSDeathRecipient(*this);
-    if (dmsDeath_ == nullptr) {
-        WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
-        return false;
-    }
-
-    sptr<IRemoteObject> remoteObject = displayManagerServiceProxy_->AsObject();
-    if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(dmsDeath_)) {
-        WLOGFE("Failed to add death recipient");
-        return false;
-    }
-    isProxyValid_ = true;
-    return true;
-}
-
 DMSDeathRecipient::DMSDeathRecipient(BaseAdapter& adapter) : adapter_(adapter)
 {
 }
@@ -345,7 +313,6 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     adapter_.Clear();
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
-    SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
     return;
 }
 
@@ -554,6 +521,13 @@ DMError ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virt
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+}
+
+DMError ScreenManagerAdapter::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->ResizeVirtualScreen(screenId, width, height);
 }
 
 DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)

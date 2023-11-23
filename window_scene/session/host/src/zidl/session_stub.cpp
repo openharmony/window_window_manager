@@ -22,7 +22,10 @@
 
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
-
+#include "accessibility_event_info_parcel.h"
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
@@ -37,6 +40,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleBackground),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
         &SessionStub::HandleDisconnect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW),
+        &SessionStub::HandleShow),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
+        &SessionStub::HandleHide),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
@@ -44,10 +51,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSessionEvent),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
-        &SessionStub::HandleCreateAndConnectSpecificSession),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
-        &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED),
@@ -90,7 +93,15 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
-        &SessionStub::HandleNotifyExtensionDied)
+        &SessionStub::HandleNotifyExtensionDied),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
+        &SessionStub::HandleTransferAccessibilityEvent),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
+        &SessionStub::HandleNotifyPiPWindowPrepareClose),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
+        &SessionStub::HandleUpdatePiPRect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVERY_PULL_PIP_MAIN_WINDOW),
+        &SessionStub::HandleRecoveryPullPiPMainWindow)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -146,6 +157,29 @@ int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
     const WSError& errCode = Disconnect();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Show!");
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+        property = new WindowSessionProperty();
+    }
+    const WSError& errCode = Show(property);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Hide!");
+    const WSError& errCode = Hide();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -270,54 +304,6 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
     const WSError& errCode = UpdateSessionRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleCreateAndConnectSpecificSession!");
-    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
-    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
-    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-        WLOGFE("Failed to read scene session stage object or event channel object!");
-        return ERR_INVALID_DATA;
-    }
-
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
-    } else {
-        WLOGFW("Property not exist!");
-    }
-
-    sptr<IRemoteObject> token = nullptr;
-    if (property && property->GetTokenState()) {
-        token = data.ReadRemoteObject();
-    } else {
-        WLOGI("accept token is nullptr");
-    }
-
-    auto persistentId = INVALID_SESSION_ID;
-    sptr<ISession> sceneSession;
-    CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession, token);
-    if (sceneSession== nullptr) {
-        return ERR_INVALID_STATE;
-    }
-    reply.WriteInt32(persistentId);
-    reply.WriteRemoteObject(sceneSession->AsObject());
-    reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply)
-{
-    auto persistentId = data.ReadUint32();
-    const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
-    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 
@@ -478,6 +464,50 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 {
     WLOGFD("called");
     NotifyExtensionDied();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AccessibilityEventInfoParcel> infoPtr =
+        data.ReadStrongParcelable<AccessibilityEventInfoParcel>();
+    std::vector<int32_t> uiExtensionIdLevelVec;
+    if (!data.ReadInt32Vector(&uiExtensionIdLevelVec)) {
+        WLOGFE("read idVect error");
+        return ERR_INVALID_DATA;
+    }
+    NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevelVec);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyPiPWindowPrepareClose");
+    NotifyPiPWindowPrepareClose();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdatePiPRect!");
+    uint32_t width = data.ReadUint32();
+    uint32_t height = data.ReadUint32();
+    auto reason = static_cast<PiPRectUpdateReason>(data.ReadInt32());
+    WSError errCode = UpdatePiPRect(width, height, reason);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyRecoveryPullPiPMainWindow");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        WLOGFE("Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RecoveryPullPiPMainWindow(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -29,6 +29,7 @@ enum class ScenePersistentStorageType : uint32_t {
     UKNOWN = 0,
     ASPECT_RATIO,
     MAXIMIZE_STATE,
+    PIP_INFO,
 };
 
 class ScenePersistentStorage {
@@ -59,6 +60,12 @@ public:
                     key.c_str(), static_cast<int>(value));
                 break;
             }
+            case ScenePersistentStorageType::PIP_INFO: {
+                pref->PutInt(key, value);
+                WLOGD("[ScenePersistentStorage] Insert PicutreInPicture info, key %{public}s, value %{public}d",
+                    key.c_str(), static_cast<int>(value));
+                break;
+            }
             default:
                 WLOGW("[ScenePersistentStorage] Unknown storage type!");
         }
@@ -83,6 +90,12 @@ public:
             case ScenePersistentStorageType::MAXIMIZE_STATE: {
                 value = pref->GetInt(key);
                 WLOGD("[ScenePersistentStorage] Get Maximize state, key: %{public}s, value:%{public}d",
+                    key.c_str(), static_cast<int>(value));
+                break;
+            }
+            case ScenePersistentStorageType::PIP_INFO: {
+                value = pref->GetInt(key);
+                WLOGD("[ScenePersistentStorage] Get PicutreInPicture info, key: %{public}s, value:%{public}d",
                     key.c_str(), static_cast<int>(value));
                 break;
             }

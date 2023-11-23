@@ -23,6 +23,13 @@ class SystemSession : public SceneSession {
 public:
     SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SystemSession();
+
+    WSError Show(sptr<WindowSessionProperty> property) override;
+    WSError Hide() override;
+    WSError Disconnect() override;
+
+private:
+    void UpdateCameraFloatWindowStatus(bool isShowing);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

@@ -18,6 +18,7 @@
 
 #include <iremote_broker.h>
 #include "display_info.h"
+#include "display_change_info.h"
 #include "dm_common.h"
 #include "screen_info.h"
 #include "screenshot_info.h"
@@ -32,6 +33,7 @@ enum class DisplayManagerAgentType : uint32_t {
     SCREENSHOT_EVENT_LISTENER,
     PRIVATE_WINDOW_LISTENER,
     FOLD_STATUS_CHANGED_LISTENER,
+    DISPLAY_UPDATE_LISTENER,
     DISPLAY_MODE_CHANGED_LISTENER,
 };
 
@@ -52,6 +54,7 @@ public:
         TRANS_ID_ON_SCREEN_SHOT,
         TRANS_ID_ON_PRIVATE_WINDOW,
         TRANS_ID_ON_FOLD_STATUS_CHANGED,
+        TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED,
         TRANS_ID_ON_DISPLAY_MODE_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
@@ -67,6 +70,7 @@ public:
     virtual void OnScreenshot(sptr<ScreenshotInfo>) = 0;
     virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) = 0;
     virtual void NotifyFoldStatusChanged(FoldStatus) = 0;
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) = 0;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) = 0;
 };
 } // namespace Rosen

@@ -469,17 +469,6 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: ResizeVirtualScreen
- * @tc.desc: resize virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | SmallTest | Level1)
-{
-    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().ResizeVirtualScreen(testVirtualScreenId_,
-        testVirtualScreenWidth_, testVirtualScreenHeight_));
-}
-
-/**
  * @tc.name: SetVirtualScreenRefreshRate
  * @tc.desc: Set virtual screen refrensh rate.
  * @tc.type: FUNC
