@@ -761,5 +761,14 @@ void WindowManager::OnRemoteDied()
     pImpl_->windowVisibilityListenerAgent_ = nullptr;
     pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
 }
+
+WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("raise window to top failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -88,6 +88,7 @@ public:
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
         TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
+        TRANS_ID_RAISE_WINDOW_TO_TOP,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -184,6 +185,7 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
+    WSError RaiseWindowToTop(int32_t persistentId) override { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

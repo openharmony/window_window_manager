@@ -5725,4 +5725,47 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     // need sync task since animation transcation need
     return taskScheduler_->PostVoidSyncTask(task);
 }
+
+WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
+{
+    WLOGFI("RaiseWindowToTop, id %{public}d", persistentId);
+    auto isSaCall = SessionPermission::IsSACalling();
+    if (!isSaCall) {
+        WLOGFE("The interface only support for sa call");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, persistentId]() {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        if (!IsSessionVisible(sceneSession)) {
+            WLOGFD("session is not visible!");
+            return WSError::WS_DO_NOTHING;
+        }
+        RequestSessionFocus(persistentId);
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
+            sceneSession->RaiseToAppTop();
+        }
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+            WLOGFD("parent session id: %{public}d", sceneSession->GetParentPersistentId());
+            sceneSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        }
+        if (sceneSession == nullptr) {
+            WLOGFE("parent session is nullptr");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            sceneSession->NotifyClick();
+            return WSError::WS_OK;
+        } else {
+            WLOGFE("session is not app main window!");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
