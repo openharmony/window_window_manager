@@ -173,6 +173,11 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
 }
 
+void Session::SetScreenId(uint64_t screenId)
+{
+    sessionInfo_.screenId_ = screenId;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
@@ -274,6 +279,17 @@ void Session::NotifyExtensionDied()
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnExtensionDied();
+        }
+    }
+}
+
+void Session::NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    const std::vector<int32_t>& uiExtensionIdLevelVec)
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevelVec);
         }
     }
 }
@@ -648,7 +664,11 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
-    UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
+    if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
+        UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
+    } else {
+        NotifyClientToUpdateRect();
+    }
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
@@ -775,6 +795,18 @@ WSError Session::Disconnect()
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
+    return WSError::WS_OK;
+}
+
+WSError Session::Show(sptr<WindowSessionProperty> property)
+{
+    WLOGFD("Show session, id: %{public}d", GetPersistentId());
+    return WSError::WS_OK;
+}
+
+WSError Session::Hide()
+{
+    WLOGFD("Hide session, id: %{public}d", GetPersistentId());
     return WSError::WS_OK;
 }
 
@@ -1187,7 +1219,6 @@ bool Session::IsTopDialog() const
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
-            WLOGFI("Dialog id: %{public}d, current dialog id: %{public}d", dialogSession->GetPersistentId(), currentPersistentId);
             return dialogSession->GetPersistentId() == currentPersistentId;
         }
     }
@@ -1335,11 +1366,9 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            if (!IsTopDialog()) {
-                WLOGFI("There is at least one active dialog upon this dialog");
-                return WSError::WS_ERROR_INVALID_PERMISSION;
-            }
+        if (parentSession_ && parentSession_->CheckDialogOnForeground() &&
+            !IsTopDialog()) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
 
@@ -1419,7 +1448,7 @@ WSError Session::UpdateConfiguration()
     return WSError::WS_OK;
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot()
+std::shared_ptr<Media::PixelMap> Session::Snapshot() const
 {
     if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         return nullptr;
@@ -1451,11 +1480,18 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
 
 void Session::UnregisterSessionChangeListeners()
 {
-    sessionStateChangeFunc_ = nullptr;
-    sessionFocusableChangeFunc_ = nullptr;
-    sessionTouchableChangeFunc_ = nullptr;
-    clickFunc_ = nullptr;
-    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        session->sessionStateChangeFunc_ = nullptr;
+        session->sessionFocusableChangeFunc_ = nullptr;
+        session->sessionTouchableChangeFunc_ = nullptr;
+        session->clickFunc_ = nullptr;
+        WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
+    });
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
@@ -1467,6 +1503,11 @@ void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStat
 void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func)
 {
     requestFocusStatusNotifyManagerFunc_ = func;
+}
+
+void Session::SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func)
+{
+    requestFocusFunc_ = func;
 }
 
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
@@ -1481,13 +1522,22 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    WLOGFD("state: %{public}u", static_cast<uint32_t>(state));
-    if (sessionStateChangeFunc_) {
-        sessionStateChangeFunc_(state);
-    }
-    if (sessionStateChangeNotifyManagerFunc_) {
-        sessionStateChangeNotifyManagerFunc_(GetPersistentId(), state);
-    }
+    PostTask([weakThis = wptr(this), state]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        WLOGD("Session::NotifySessionStateChange: session info: [state: %{public}u, persistent: %{public}d]",
+            static_cast<uint32_t>(state), session->GetPersistentId());
+        if (session->sessionStateChangeFunc_) {
+            session->sessionStateChangeFunc_(state);
+        }
+
+        if (session->sessionStateChangeNotifyManagerFunc_) {
+            session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
+        }
+    });
 }
 
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
@@ -1554,6 +1604,14 @@ bool Session::GetStateFromManager(const ManagerState key)
     }
 }
 
+void Session::NotifyUIRequestFocus()
+{
+    WLOGFD("NotifyUIRequestFocus id: %{public}d", GetPersistentId());
+    if (requestFocusFunc_) {
+        requestFocusFunc_();
+    }
+}
+
 void Session::NotifyUILostFocus()
 {
     WLOGFD("NotifyUILostFocus id: %{public}d", GetPersistentId());
@@ -1584,9 +1642,19 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
-    if (!isFocused_) {
-        NotifyUILostFocus();
+    // notify scb arkui focus
+    if (isFocused) {
+        if (sessionInfo_.isSystem_) {
+            NotifyUIRequestFocus();
+        }
+    } else {
+         NotifyUILostFocus();
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyFocusStatus(bool isFocused)
+{
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -1602,6 +1670,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    property_->SetWindowMode(mode);
     if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
@@ -1868,5 +1937,15 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     if (sessionInfoLockedStateChangeFunc_) {
         sessionInfoLockedStateChangeFunc_(lockedState);
     }
+}
+
+WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    WLOGFD("Session update title in target position, id: %{public}d, isShow: %{public}d, height: %{public}d",
+        GetPersistentId(), isShow, height);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
 } // namespace OHOS::Rosen

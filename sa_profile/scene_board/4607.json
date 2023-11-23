@@ -1,0 +1,13 @@
+{
+    "process": "foundation",
+    "systemability": [
+        {
+            "name": 4607,
+            "libpath": "libscreen_session_manager.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "bootphase": "CoreStartPhase",
+            "dump_level": 1
+        }
+    ]
+}

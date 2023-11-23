@@ -27,6 +27,12 @@ config("libdms_public_config") {
 }
 
 ohos_shared_library("libdms") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../dm/src/zidl/display_manager_agent_proxy.cpp",
     "src/abstract_display.cpp",

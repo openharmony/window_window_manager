@@ -20,6 +20,12 @@ config("screen_session_manager_napi_public_config") {
 }
 
 ohos_shared_library("screensessionmanager_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "js_screen_session.cpp",
     "js_screen_session_manager.cpp",
@@ -30,9 +36,10 @@ ohos_shared_library("screensessionmanager_napi") {
   public_configs = [ ":screen_session_manager_napi_public_config" ]
 
   deps = [
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:screen_session",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [

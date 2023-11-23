@@ -141,6 +141,13 @@ napi_value JsWindow::HideWithAnimation(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnHideWithAnimation(env, info) : nullptr;
 }
 
+napi_value JsWindow::Recover(napi_env env, napi_callback_info info)
+{
+    WLOGI("Recover");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRecover(env, info) : nullptr;
+}
+
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -652,6 +659,13 @@ napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetNeedKeepKeyboard");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetNeedKeepKeyboard(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -747,6 +761,8 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 return;
             }
             WMError ret = weakWindow->Show(0, false);
+            WLOGI("Window [%{public}u, %{public}s] show with ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -965,6 +981,38 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnHideWithAnimation",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr or get invalid param");
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Recover());
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window recover failed"));
+            }
+            WLOGI("Window [%{public}u] recover end, ret = %{public}d", weakWindow->GetWindowId(), ret);
+        };
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (argv[0] != nullptr && GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRecover",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -1548,17 +1596,11 @@ napi_value JsWindow::LoadContentScheduleOld(napi_env env, napi_callback_info inf
         WLOGFE("Failed to convert parameter to context url");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    napi_value storage = nullptr;
     napi_value callBack = nullptr;
     if (argc == 2) { // 2 param num
         callBack = argv[1];
     }
     std::shared_ptr<NativeReference> contentStorage = nullptr;
-    if (storage != nullptr) {
-        napi_ref result = nullptr;
-        napi_create_reference(env, storage, 1, &result);
-        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
-    }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = [weakToken, contentStorage, contextUrl, errCode, isLoadedByName](
                                                napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1702,17 +1744,11 @@ napi_value JsWindow::OnSetUIContent(napi_env env, napi_callback_info info)
         WLOGFE("Failed to convert parameter to context url");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    napi_value storage = nullptr;
     napi_value callBack = nullptr;
     if (argc >= 2) { // 2 param num
         callBack = argv[1];
     }
     std::shared_ptr<NativeReference> contentStorage = nullptr;
-    if (storage != nullptr) {
-        napi_ref result = nullptr;
-        napi_create_reference(env, storage, 1, &result);
-        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
-    }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -2193,7 +2229,7 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         uint32_t resultValue = 0;
         napi_get_value_uint32(env, nativeMode, &resultValue);
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType > AvoidAreaType::TYPE_AI_NAVIGATION_BAR) ||
+        errCode = ((avoidAreaType > AvoidAreaType::TYPE_NAVIGATION_INDICATOR) ||
                    (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
@@ -3234,6 +3270,41 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     NapiAsyncTask::Schedule("JsWindow::RaiseAboveTarget",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isNeedKeepKeyboard = false;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to get parameter isNeedKeepKeyboard");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    } else {
+        napi_get_value_bool(env, nativeVal, &isNeedKeepKeyboard);
+    }
+
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetNeedKeepKeyboard(isNeedKeepKeyboard));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window SetNeedKeepKeyboard failed");
+        return NapiThrowError(env, ret);
+    }
+
+    WLOGI("Window [%{public}u, %{public}s] SetNeedKeepKeyboard end, isNeedKeepKeyboard = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isNeedKeepKeyboard);
+
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
@@ -4525,6 +4596,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "destroyWindow", moduleName, JsWindow::DestroyWindow);
     BindNativeFunction(env, object, "hide", moduleName, JsWindow::Hide);
     BindNativeFunction(env, object, "hideWithAnimation", moduleName, JsWindow::HideWithAnimation);
+    BindNativeFunction(env, object, "recover", moduleName, JsWindow::Recover);
     BindNativeFunction(env, object, "moveTo", moduleName, JsWindow::MoveTo);
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
@@ -4601,6 +4673,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
+    BindNativeFunction(env, object, "setNeedKeepKeyboard", moduleName, JsWindow::SetNeedKeepKeyboard);
 }
 }  // namespace Rosen
 }  // namespace OHOS

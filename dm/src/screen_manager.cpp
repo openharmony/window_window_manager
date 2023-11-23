@@ -548,9 +548,7 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
 
 DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
-    WLOGFI("ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
-        screenId, width, height);
-    return DMError::DM_OK;
+    return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
 }
 
 DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshRate)
@@ -563,6 +561,12 @@ DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t r
 DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenBufferRotation(screenId, rotation);
+}
+
+bool ScreenManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFI("screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u", screenId, state, reason);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(screenId, state, reason);
 }
 
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)

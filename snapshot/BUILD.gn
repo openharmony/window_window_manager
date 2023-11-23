@@ -20,6 +20,12 @@ config("snapshot_config") {
 }
 
 ohos_executable("snapshot_display") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   install_enable = true
   sources = [ "src/snapshot_display.cpp" ]
 
@@ -43,6 +49,12 @@ ohos_executable("snapshot_display") {
 }
 
 ohos_shared_library("libsnapshot_util") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [ "src/snapshot_utils.cpp" ]
 
   configs = [

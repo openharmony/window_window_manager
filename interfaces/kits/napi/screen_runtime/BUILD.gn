@@ -21,6 +21,12 @@ config("screen_runtime_config") {
 }
 
 ohos_shared_library("screen_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "napi/js_screen.cpp",
     "napi/js_screen_listener.cpp",

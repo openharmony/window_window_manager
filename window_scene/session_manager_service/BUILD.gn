@@ -22,6 +22,12 @@ config("session_manager_service_public_config") {
 }
 
 ohos_shared_library("session_manager_service") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/session_manager_service.cpp",
     "src/session_manager_service_stub.cpp",
@@ -33,7 +39,6 @@ ohos_shared_library("session_manager_service") {
 
   deps = [
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [

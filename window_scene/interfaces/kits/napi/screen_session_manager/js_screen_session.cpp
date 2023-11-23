@@ -28,6 +28,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScre
 const std::string ON_CONNECTION_CALLBACK = "connect";
 const std::string ON_DISCONNECTION_CALLBACK = "disconnect";
 const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
+const std::string ON_POWER_STATUS_CHANGE_CALLBACK = "powerStatusChange";
 const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
@@ -66,8 +67,6 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
     : env_(env), screenSession_(screenSession)
 {}
-
-JsScreenSession::~JsScreenSession() {}
 
 napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
@@ -204,17 +203,17 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnConnect()
+void JsScreenSession::OnConnect(ScreenId screenId)
 {
     CallJsCallback(ON_CONNECTION_CALLBACK);
 }
 
-void JsScreenSession::OnDisconnect()
+void JsScreenSession::OnDisconnect(ScreenId screenId)
 {
     CallJsCallback(ON_DISCONNECTION_CALLBACK);
 }
 
-void JsScreenSession::OnSensorRotationChange(float sensorRotation)
+void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId screenId)
 {
     const std::string callbackType = ON_SENSOR_ROTATION_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
@@ -252,7 +251,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
+void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -290,7 +289,8 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
+void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    ScreenId screenId)
 {
     const std::string callbackType = ON_PROPERTY_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
@@ -329,7 +329,49 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnScreenRotationLockedChange(bool isLocked)
+void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus eventStatus,
+    PowerStateChangeReason reason)
+{
+    const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
+    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+
+    auto jsCallbackRef = mCallback_[callbackType];
+    wptr<ScreenSession> screenSessionWeak(screenSession_);
+    auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason](
+            napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (jsCallbackRef == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+                return;
+            }
+            auto method = jsCallbackRef->GetNapiValue();
+            if (method == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+                return;
+            }
+            auto screenSession = screenSessionWeak.promote();
+            if (screenSession == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+                return;
+            }
+            napi_value displayPowerEvent = CreateJsValue(env, static_cast<int32_t>(event));
+            napi_value powerEventStatus = CreateJsValue(env, static_cast<int32_t>(eventStatus));
+            napi_value powerStateChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
+            napi_value argv[] = { displayPowerEvent, powerEventStatus, powerStateChangeReason };
+            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::" + callbackType, env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
     WLOGD("Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);

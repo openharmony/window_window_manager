@@ -19,7 +19,11 @@
 #include <iremote_broker.h>
 #include <rs_iwindow_animation_finished_callback.h>
 
+#include "common/include/window_session_property.h"
+#include "interfaces/include/ws_common_inner.h"
 #include "pixel_map.h"
+#include "session/container/include/zidl/session_stage_interface.h"
+#include "session/container/include/zidl/window_event_channel_interface.h"
 #include "window_property.h"
 #include "window_transition_info.h"
 #include "zidl/window_interface.h"
@@ -132,7 +136,31 @@ public:
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
     virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
-    virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
+    virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr) { return WSError::WS_OK; }
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) { return WSError::WS_OK; };
+    virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

@@ -13,21 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
-#define OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
+#ifndef TEST_FUZZTEST_SESSION_INTERFACE_FUZZER_H
+#define TEST_FUZZTEST_SESSION_INTERFACE_FUZZER_H
 
-#include <iremote_stub.h>
-#include "mock_screen_manager_service_interface.h"
+#define FUZZ_PROJECT_NAME "sessioninterface_fuzzer"
 
-namespace OHOS {
-namespace Rosen {
-class MockScreenManagerServiceStub : public IRemoteStub<IMockScreenManagerInterface> {
-public:
-    MockScreenManagerServiceStub() = default;
-    ~MockScreenManagerServiceStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
-};
-}
-}
-#endif // OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
+#endif

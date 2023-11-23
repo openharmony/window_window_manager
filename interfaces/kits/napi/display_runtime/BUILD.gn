@@ -28,6 +28,12 @@ config("display_config") {
 
 ## Build display_napi.so {{{
 ohos_shared_library("display_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "js_display.cpp",
     "js_display_listener.cpp",

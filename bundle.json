@@ -94,6 +94,7 @@
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
             "//foundation/window/window_manager/utils:libwmutil",
+            "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
           ],
           "service_group": [
@@ -125,6 +126,15 @@
             "header": {
               "header_files": [
                 "singleton_container.h"
+              ],
+              "header_base": "//foundation/window/window_manager/utils/include"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/utils:libwmutil_base",
+            "header": {
+              "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/utils/include"
             }
@@ -203,6 +213,15 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/screen_session_manager:screen_session_manager_client",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/window_scene/session_manager:session_manager",
             "header": {
               "header_files": [
@@ -224,8 +243,6 @@
             "name": "//foundation/window/window_manager/wmserver:sms",
             "header": {
               "header_files": [
-                "mock_session_manager_service.h",
-                "mock_screen_manager_service.h"
               ],
               "header_base": "//foundation/window/window_manager/wmserver/include"
             }

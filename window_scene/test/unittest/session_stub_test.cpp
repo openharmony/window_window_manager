@@ -119,10 +119,6 @@ HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleCreateAndConnectSpecificSession(data, reply);
-    ASSERT_EQ(5, res);
-    res = session_->HandleDestroyAndDisconnectSpecificSession(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleRaiseToAppTop(data, reply);
     ASSERT_EQ(0, res);
 }
