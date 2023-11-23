@@ -28,6 +28,12 @@ config("window_scene_common_public_config") {
 
 ## Build libwindow_scene_common.so
 ohos_shared_library("window_scene_common") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
