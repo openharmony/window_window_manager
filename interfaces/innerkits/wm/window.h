@@ -1429,10 +1429,9 @@ public:
     /**
      * @brief Recovery pip main window.
      *
-     * @param Rect of window.
      * @return Errorcode of window.
      */
-    virtual WMError RecoveryPullPiPMainWindow(const Rect& rect) { return WMError::WM_OK; }
+    virtual WMError RecoveryPullPiPMainWindow() { return WMError::WM_OK; }
 
     /**
      * @brief Set to keep keyboard.

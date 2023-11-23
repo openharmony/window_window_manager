@@ -1779,17 +1779,17 @@ void SceneSession::NotifyPiPWindowPrepareClose()
     });
 }
 
-WSError SceneSession::RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect)
+WSError SceneSession::RecoveryPullPiPMainWindow(int32_t persistentId)
 {
     WLOGFD("NotifyRecoveryPullPiPMainWindow");
-    PostTask([weakThis = wptr(this), persistentId, rect]() {
+    PostTask([weakThis = wptr(this), persistentId]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->specificCallback_ != nullptr) {
-            session->specificCallback_->onRecoveryPullPiPMainWindow_(persistentId, rect);
+            session->specificCallback_->onRecoveryPullPiPMainWindow_(persistentId);
         }
         return WSError::WS_OK;
     });
