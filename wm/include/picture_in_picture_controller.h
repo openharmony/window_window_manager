@@ -24,13 +24,13 @@
 #include "window.h"
 #include "wm_common.h"
 #include "picture_in_picture_interface.h"
+#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
+using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
-    constexpr static int32_t DEFAULT_WIDTH = 800;
-    constexpr static int32_t DEFAULT_HEIGHT = 600;
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
     PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId);
     ~PictureInPictureController();
@@ -50,6 +50,7 @@ public:
     void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
+    WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
 
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
     public:
@@ -61,15 +62,21 @@ public:
 private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow();
+    void UpdateXComponentPositionAndSize();
+    void ResetExtController();
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
     sptr<IPiPLifeCycle> pipLifeCycleListener_;
     sptr<IPiPActionObserver> pipActionObserver_;
     sptr<Window> window_;
+    sptr<Window> mainWindow_;
     uint32_t mainWindowId_;
-    Rect windowRect_ = {0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT};
+    Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+
+    std::shared_ptr<XComponentController> pipXComponentController_;
+    std::shared_ptr<XComponentController> mainWindowXComponentController_;
 };
 } // namespace Rosen
 } // namespace OHOS
