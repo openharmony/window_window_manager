@@ -4958,7 +4958,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
+    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         ret = UpdateSessionAvoidAreaIfNeed(
@@ -5020,9 +5020,9 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 if (sceneSession == nullptr) {
                     continue;
                 }
-                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
+                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
                 UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
-                                             AvoidAreaType::TYPE_AI_NAVIGATION_BAR);
+                                             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
             }
         }
     };
