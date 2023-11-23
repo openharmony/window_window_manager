@@ -5021,6 +5021,10 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                     continue;
                 }
                 AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+                if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+                    !avoidArea.rightRect_.IsUninitializedRect()) {
+                    continue;
+                }
                 UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
                                              AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
             }
