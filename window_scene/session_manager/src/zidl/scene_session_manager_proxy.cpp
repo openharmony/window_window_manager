@@ -1216,4 +1216,39 @@ WSError SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t 
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
+
+WSError SceneSessionManagerProxy::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    WLOGFI("run SceneSessionManagerProxy::NotifyWindowExtensionVisibilityChange");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        WLOGFE("pid write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        WLOGFE("uid write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteBool(visible)) {
+        WLOGFE("pid write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
