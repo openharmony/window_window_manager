@@ -62,5 +62,15 @@ void PipOption::GetContentSize(uint32_t& width, uint32_t& height)
     width = contentWidth_;
     height = contentHeight_;
 }
+
+void PipOption::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
+{
+    xComponentController_ = xComponentController;
+}
+
+std::shared_ptr<XComponentController> PipOption::GetXComponentController()
+{
+    return xComponentController_;
+}
 } // namespace Rosen
 } // namespace OHOS
