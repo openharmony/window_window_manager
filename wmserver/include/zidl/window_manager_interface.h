@@ -161,6 +161,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
 };
 }
 }

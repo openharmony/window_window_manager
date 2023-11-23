@@ -141,6 +141,7 @@ public:
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
+    WSError RaiseWindowToTop(int32_t persistentId) override;
 
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
