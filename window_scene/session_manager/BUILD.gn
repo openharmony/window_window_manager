@@ -59,6 +59,12 @@ config("session_manager_public_config") {
 }
 
 ohos_shared_library("scene_session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/distributed_client.cpp",
@@ -153,6 +159,12 @@ ohos_shared_library("scene_session_manager") {
 }
 
 ohos_shared_library("screen_session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager/src/zidl/screen_session_manager_client_proxy.cpp",
@@ -234,6 +246,12 @@ ohos_shared_library("screen_session_manager") {
 }
 
 ohos_shared_library("session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",

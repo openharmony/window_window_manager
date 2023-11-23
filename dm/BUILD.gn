@@ -35,6 +35,12 @@ config("libdm_public_config") {
 
 ## Build libdm_static.a
 ohos_static_library("libdm_static") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
     "src/display.cpp",
@@ -75,6 +81,12 @@ ohos_static_library("libdm_static") {
 
 ## Build libdm.so
 ohos_shared_library("libdm") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
     "src/display.cpp",

@@ -33,6 +33,12 @@ config("dm_napi_common_public_config") {
 }
 
 ohos_static_library("dm_napi_common") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [ "dm_napi_common.cpp" ]
 
   configs = [
