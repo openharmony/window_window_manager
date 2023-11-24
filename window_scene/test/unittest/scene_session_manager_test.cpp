@@ -2890,6 +2890,20 @@ HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, Function | Sm
 }
 
 /**
+ * @tc.name: NotifyWindowExtensionVisibilityChange
+ * @tc.desc: test NotifyWindowExtensionVisibilityChange
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyWindowExtensionVisibilityChange, Function | SmallTest | Level3)
+{
+    int32_t pid = 1;
+    int32_t uid = 32;
+    bool isVisible = false;
+    WSError result = ssm_->NotifyWindowExtensionVisibilityChange(pid, uid, isVisible);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: SceneSesionManager NotifySessionForeground
  * @tc.type: FUNC
