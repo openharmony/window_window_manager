@@ -25,12 +25,12 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    WLOGFD("Create SubSession");
+    WLOGFD("[WMSSub] Create SubSession");
 }
 
 SubSession::~SubSession()
 {
-    WLOGD("~SubSession, id: %{public}d", GetPersistentId());
+    WLOGD("[WMSSub] ~SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
@@ -38,10 +38,10 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSSub] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("Show session, id: %{public}d", session->GetPersistentId());
+        WLOGFD("[WMSSub] Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -59,10 +59,10 @@ WSError SubSession::Hide()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSSub] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("Hide session, id: %{public}d", session->GetPersistentId());
+        WLOGFD("[WMSSub] Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
