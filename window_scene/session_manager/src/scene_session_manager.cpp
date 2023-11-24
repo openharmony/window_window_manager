@@ -3027,7 +3027,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     }
     // app session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
-    if (focusedSession && focusedSession->IsAppSession()
+    if (byForeground && focusedSession && focusedSession->IsAppSession()
         && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
             WLOGFD("session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
             return WSError::WS_DO_NOTHING;
@@ -3036,7 +3036,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     bool isTypeBlocked = sceneSession->IsAppSession() ||
         sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
         sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN;
-    if (focusedSession && focusedSession->GetSessionInfo().isSystem_ &&
+    if (byForeground && focusedSession && focusedSession->GetSessionInfo().isSystem_ &&
         (focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_PANEL ||
         focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) && isTypeBlocked &&
         sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
