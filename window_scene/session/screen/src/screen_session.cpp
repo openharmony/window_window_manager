@@ -266,9 +266,9 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::ScreenOrientationChange(Orientation orientation)
+void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
-    Rotation rotationAfter = CalcRotation(orientation);
+    Rotation rotationAfter = CalcRotation(orientation, foldDisplayMode);
     float screenRotation = ConvertRotationToFloat(rotationAfter);
     ScreenOrientationChange(screenRotation);
 }
@@ -399,7 +399,7 @@ void ScreenSession::SetScreenType(ScreenType type)
     property_.SetScreenType(type);
 }
 
-Rotation ScreenSession::CalcRotation(Orientation orientation) const
+Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const
 {
     sptr<SupportedScreenModes> info = GetActiveScreenMode();
     if (info == nullptr) {
@@ -407,6 +407,9 @@ Rotation ScreenSession::CalcRotation(Orientation orientation) const
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
+        isVerticalScreen = info->width_ > info->height_;
+    }
     switch (orientation) {
         case Orientation::UNSPECIFIED: {
             return Rotation::ROTATION_0;
