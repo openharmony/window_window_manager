@@ -252,8 +252,6 @@ private:
     bool needDefaultAnimationFlag_ = true;
     PiPRectInfo pipRectInfo_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
-    std::recursive_mutex sizeChangeMutex_;
-    bool isDirty_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

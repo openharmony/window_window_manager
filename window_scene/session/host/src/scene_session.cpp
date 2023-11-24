@@ -401,7 +401,7 @@ WSError SceneSession::NotifyClientToUpdateRect()
             session->GetPersistentId(), session->winRect_.posX_,
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
         // clear after use
-        if (ret == WSError::WS_OK) {
+        if (ret == WSError::WS_OK || session->sessionInfo_.isSystem_) {
             session->reason_ = SizeChangeReason::UNDEFINED;
             session->isDirty_ = false;
         }

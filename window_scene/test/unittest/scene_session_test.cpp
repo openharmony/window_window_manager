@@ -2227,6 +2227,58 @@ HWTEST_F(SceneSessionTest, NotifySessionBackground, Function | SmallTest | Level
     scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
 }
+
+/**
+ * @tc.name: NotifyClientToUpdateRect01
+ * @tc.desc: NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateRect01";
+    info.bundleName_ = "NotifyClientToUpdateRect01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->isDirty_ = true;
+    scensession->sessionStage_ = mockSessionStage;
+    auto ret = scensession->NotifyClientToUpdateRect();
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateSizeChangeReason01
+ * @tc.desc: UpdateSizeChangeReason01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSizeChangeReason01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSizeChangeReason01";
+    info.bundleName_ = "UpdateSizeChangeReason01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->isDirty_ = true;
+    scensession->sessionStage_ = mockSessionStage;
+    scensession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
+    ASSERT_EQ(scensession->reason_, SizeChangeReason::ROTATION);
+}
 }
 }
 }
