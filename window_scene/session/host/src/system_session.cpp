@@ -25,18 +25,18 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "System
 SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    WLOGFD("Create SystemSession");
+    WLOGFD("[WMSSystem] Create SystemSession");
 }
 
 SystemSession::~SystemSession()
 {
-    WLOGD("~SystemSession, id: %{public}d", GetPersistentId());
+    WLOGD("[WMSSystem] ~SystemSession, id: %{public}d", GetPersistentId());
 }
 
 void SystemSession::UpdateCameraFloatWindowStatus(bool isShowing)
 {
     if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
-        WLOGFD("CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
+        WLOGFD("[WMSSystem] CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
         specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
     }
 }
@@ -49,7 +49,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("Show session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSSystem] Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -68,10 +68,10 @@ WSError SystemSession::Hide()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSSystem] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("Hide session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSSystem] Hide session, id: %{public}d", session->GetPersistentId());
 
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
@@ -96,9 +96,10 @@ WSError SystemSession::Disconnect()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSSystem] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        WLOGFI("[WMSSystem] Disconnect session, id: %{public}d", session->GetPersistentId());
         session->SceneSession::Disconnect();
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->NotifyCallingSessionBackground();

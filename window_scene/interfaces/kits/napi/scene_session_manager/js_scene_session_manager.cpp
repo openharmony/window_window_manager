@@ -132,27 +132,27 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFI("[NAPI]sceneSession is nullptr");
+        WLOGFI("[WMSSystem][NAPI]sceneSession is nullptr");
         return;
     }
     auto iter = jsCbMap_.find(CREATE_SYSTEM_SESSION_CB);
     if (iter == jsCbMap_.end()) {
-        WLOGFE("[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
+        WLOGFE("[WMSSystem][NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
         return;
     }
 
-    WLOGFD("[NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
+    WLOGFD("[WMSSystem][NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            WLOGFE("[NAPI]specific session is nullptr");
+            WLOGFE("[WMSSystem][NAPI]specific session is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = JsSceneSession::Create(env, specificSession);
         if (jsSceneSessionObj == nullptr) {
-            WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
+            WLOGFE("[WMSSystem][NAPI]jsSceneSessionObj is nullptr");
             return;
         }
         napi_value argv[] = {jsSceneSessionObj};
@@ -254,7 +254,7 @@ void JsSceneSessionManager::OnShowPiPMainWindow(int32_t persistentId)
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
-        WLOGFD("NotifyCreateSystemSessionFunc");
+        WLOGFD("[WMSSystem] NotifyCreateSystemSessionFunc");
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);

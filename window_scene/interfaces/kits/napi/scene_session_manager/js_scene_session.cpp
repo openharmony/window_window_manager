@@ -327,12 +327,12 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+        WLOGFE("[WMSDialog] sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->onBindDialogTarget_ = std::bind(&JsSceneSession::OnBindDialogTarget,
         this, std::placeholders::_1);
-    WLOGFD("ProcessBindDialogTargetRegister success");
+    WLOGFD("[WMSDialog] ProcessBindDialogTargetRegister success");
 }
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
@@ -1002,25 +1002,25 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
 
     auto iter = jsCbMap_.find(CREATE_SUB_SESSION_CB);
     if (iter == jsCbMap_.end()) {
-        WLOGFE("[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
+        WLOGFE("[WMSSub][NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
         return;
     }
 
-    WLOGFD("[NAPI]OnCreateSubSession, id: %{public}d", sceneSession->GetPersistentId());
+    WLOGFD("[WMSSub][NAPI]OnCreateSubSession, id: %{public}d", sceneSession->GetPersistentId());
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            WLOGFE("[NAPI]root session or target session or env is nullptr");
+            WLOGFE("[WMSSub][NAPI]root session or target session or env is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
         if (jsSceneSessionObj == nullptr || !jsCallBack) {
-            WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+            WLOGFE("[WMSSub][NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
+        WLOGFI("[WMSSub]CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -1029,13 +1029,12 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
 
 void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 {
-    WLOGFI("OnBindDialogTarget");
     if (sceneSession == nullptr) {
         WLOGFI("[NAPI]sceneSession is nullptr");
         return;
     }
 
-    WLOGFI("[NAPI]OnBindDialogTarget");
+    WLOGFI("[NAPI][WMSDialog] OnBindDialogTarget, id: %{public}d", sceneSession->GetPersistentId());
     auto iter = jsCbMap_.find(BIND_DIALOG_TARGET_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -1054,7 +1053,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
             WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("CreateJsSceneSessionObject success");
+        WLOGFI("[WMSDialog] CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
