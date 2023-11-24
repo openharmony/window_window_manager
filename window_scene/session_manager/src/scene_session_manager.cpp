@@ -5737,7 +5737,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto& iter: sceneSessionMap_) {
             auto sceneSession = iter.second;
-            if (sceneSession && !sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsDirtyWindow()) {
+            if (sceneSession && sceneSession->IsDirtyWindow()) {
                 sceneSession->NotifyClientToUpdateRect();
             }
         }
