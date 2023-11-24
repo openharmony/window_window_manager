@@ -641,7 +641,7 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     WLOGFI("ScreenSessionManager::WakeUpBegin remove suspend begin task");
     blockScreenPowerChange_ = false;
     taskScheduler_->RemoveTask("suspendBeginTask");
-    if (reason == PowerStateChangeReason::POWER_BUTTON) { // STATE_CHANGE_REASON_COLLABORATION
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
         return true;
     }
@@ -671,7 +671,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     };
     taskScheduler_->PostTask(suspendBeginTask, "suspendBeginTask", 1500);
     sessionDisplayPowerController_->SuspendBegin(reason);
-    if (reason == PowerStateChangeReason::POWER_BUTTON) { // STATE_CHANGE_REASON_COLLABORATION
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
         return true;
     }
@@ -733,7 +733,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
     }
 
     rsInterface_.SetScreenPowerStatus(screenId, status);
-    if (reason == PowerStateChangeReason::POWER_BUTTON) { // STATE_CHANGE_REASON_COLLABORATION
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
@@ -794,7 +794,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    if (isMultiScreenCollaboration_) {
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
@@ -2539,7 +2539,7 @@ bool ScreenSessionManager::IsFoldable()
     return foldScreenController_->IsFoldable();
 }
 
-bool ScreenSessionManager::GetMultiScreenCollaboration()
+bool ScreenSessionManager::IsMultiScreenCollaboration()
 {
     return isMultiScreenCollaboration_;
 }
