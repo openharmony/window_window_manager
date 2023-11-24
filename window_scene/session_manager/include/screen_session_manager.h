@@ -157,6 +157,7 @@ public:
     void OnScreenGroupChange(const std::string& trigger,
         const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent);
     void OnScreenshot(sptr<ScreenshotInfo> info);
+    bool GetMultiScreenCollaboration();
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
@@ -285,6 +286,7 @@ private:
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     uint32_t defaultDpi {0};
 
+    bool isMultiScreenCollaboration_ = false;
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
