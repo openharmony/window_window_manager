@@ -180,8 +180,7 @@ WSError SceneSession::Disconnect()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] Disconnect session, id: %{public}d", session->GetPersistentId());
-        auto state = session->GetSessionState();
-        if (state == SessionState::STATE_ACTIVE && WindowHelper::IsMainWindow(session->GetWindowType())) {
+        if (session->needSnapshot_) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
                 session->scenePersistence_->SaveSnapshot(session->snapshot_);
