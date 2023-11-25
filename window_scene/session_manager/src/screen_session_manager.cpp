@@ -502,6 +502,42 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio)
+{
+    WLOGI("SetResolution ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
+        screenId, width, height, virtualPixelRatio);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("SetResolution: invalid screenId");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("SetResolution: Get ScreenSession failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (width <= 0 || width > screenSession->GetScreenProperty().GetPhyWidth() ||
+        height <= 0 || height > screenSession->GetScreenProperty().GetPhyHeight() ||
+        virtualPixelRatio < (static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH) ||
+        virtualPixelRatio > (static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH)) {
+        WLOGFE("SetResolution invalid param!");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+
+    DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    if (ret != DMError::DM_OK) {
+        WLOGFE("Failed to setVirtualPixelRatio when settingResolution");
+    }
+    {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
+            screenId, width, height, virtualPixelRatio);
+        screenSession->UpdatePropertyByResolution(width, height);
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+        NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
     WLOGFI("GetScreenColorGamut::ScreenId: %{public}" PRIu64 "", screenId);
