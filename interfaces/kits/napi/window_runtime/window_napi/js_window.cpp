@@ -901,7 +901,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env,info);
+    return HideWindowFunction(env, info);
 }
 
 napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
@@ -4474,7 +4474,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 {
     if (WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env,info);
+        return HideWindowFunction(env, info);
     }
 
     size_t argc = 4;
