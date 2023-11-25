@@ -13,10 +13,16 @@
 
 import("//build/ohos/sa_profile/sa_profile.gni")
 
+declare_args() {
+  scene_board_enabled = false
+}
+
 ohos_sa_profile("wms_sa_profile") {
-  sources = [
-    "4606.json",
-    "4607.json",
-  ]
+  sources = [ "4606.json" ]
+  if (scene_board_enabled) {
+    sources += [ "scene_board/4607.json" ]
+  } else {
+    sources += [ "4607.json" ]
+  }
   part_name = "window_manager"
 }

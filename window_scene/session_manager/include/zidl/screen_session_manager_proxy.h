@@ -50,6 +50,7 @@ public:
     virtual bool WakeUpEnd() override;
     virtual bool SuspendBegin(PowerStateChangeReason reason) override;
     virtual bool SuspendEnd() override;
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     virtual bool SetDisplayState(DisplayState state) override;
@@ -60,6 +61,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
 
     virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override;
 
@@ -115,6 +118,16 @@ public:
 
     // unique screen
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+
+    void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
+    ScreenProperty GetScreenProperty(ScreenId screenId) override;
+    std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
+    void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) override;
+    uint32_t GetCurvedCompressionArea() override;
+    ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
+    void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
+    void SetScreenPrivacyState(bool hasPrivate) override;
+
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

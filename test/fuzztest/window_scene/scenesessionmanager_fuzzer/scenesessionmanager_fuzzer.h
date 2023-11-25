@@ -13,18 +13,9 @@
  * limitations under the License.
  */
 
-#include "zidl/mock_screen_manager_service_proxy.h"
-#include "window_manager_hilog.h"
+#ifndef TEST_FUZZTEST_SCENE_SESSION_MANAGER_FUZZER_H
+#define TEST_FUZZTEST_SCENE_SESSION_MANAGER_FUZZER_H
 
-namespace OHOS {
-namespace Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "MockScreenManagerServiceProxy"};
-}
+#define FUZZ_PROJECT_NAME "scenesessionmanager_fuzzer"
 
-void MockScreenManagerServiceProxy::GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info)
-{
-    WLOGFD("GetScreenDumpInfo begin");
-}
-} // namespace Rosen
-} // namespace OHOS
+#endif

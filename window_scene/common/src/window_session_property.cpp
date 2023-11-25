@@ -387,6 +387,16 @@ void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
+void WindowSessionProperty::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+{
+    isNeedKeepKeyboard_ = isNeedKeepKeyboard;
+}
+
+bool WindowSessionProperty::IsNeedKeepKeyboard() const
+{
+    return isNeedKeepKeyboard_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&

@@ -54,6 +54,9 @@ namespace OHOS::Media {
     class PixelMap;
 }
 
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
@@ -1229,7 +1232,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Recover() { return WMError::WM_OK; }
+    virtual WMError Recover() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -1398,6 +1401,45 @@ public:
      * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
+
+    /**
+     * @brief Transfer accessibility event data
+     *
+     * @param func Function to notify transfer component data.
+    */
+    virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+
+    /**
+     * @brief Notify prepare to close window
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
+
+    /**
+     * @brief update the pip window instance (w,h,r).
+     *
+     * @param width width of pip window.
+     * @param height width of pip window.
+     * @param reason reason of update.
+     */
+    virtual void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) {}
+
+    /**
+     * @brief Recovery pip main window.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError RecoveryPullPiPMainWindow() { return WMError::WM_OK; }
+
+    /**
+     * @brief Set to keep keyboard.
+     *
+     * @param isNeedKeepKeyboard true means the keyboard should be preserved, otherwise means the opposite.
+     * @return True means set isNeedKeepKeyboard flag success, others means failed.
+    */
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
 };
 }
 }

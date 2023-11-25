@@ -47,6 +47,7 @@ public:
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
     MOCK_METHOD2(NotifySessionForeground, void(uint32_t reason, bool withAnimation));
     MOCK_METHOD3(NotifySessionBackground, void(uint32_t reason, bool withAnimation, bool isFromInnerkits));
+    MOCK_METHOD2(UpdateTitleInTargetPos, WSError(bool isShow, int32_t height));
 };
 } // namespace Rosen
 } // namespace OHOS

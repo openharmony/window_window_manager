@@ -644,6 +644,35 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
     return reply.ReadBool();
 }
 
+bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
+        WLOGFE("Write ScreenId failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write ScreenPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
 {
     MessageParcel data;
@@ -1222,6 +1251,77 @@ DMError DisplayManagerProxy::SetScreenRotationLocked(bool isLocked)
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError DisplayManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    WLOGFI("DisplayManagerProxy::ResizeVirtualScreen: ENTER");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::ResizeVirtualScreen: remote is nullptr");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("DisplayManagerProxy::ResizeVirtualScreen: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("DisplayManagerProxy::ResizeVirtualScreen: WriteUnit64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(width)) {
+        WLOGFE("DisplayManagerProxy::ResizeVirtualScreen: WriteUnit32 width failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(height)) {
+        WLOGFE("DisplayManagerProxy::ResizeVirtualScreen: WriteUnit32 height failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RESIZE_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("DisplayManagerProxy::ResizeVirtualScreen fail: SendRequest failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+{
+    WLOGFI("DisplayManagerProxy::MakeUniqueScreen");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("make unique screen failed: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("MakeUniqueScreen writeInterfaceToken failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (!data.WriteUint32(screenIds.size())) {
+        WLOGFE("MakeUniqueScreen write screenIds size failed");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    bool res = data.WriteUInt64Vector(screenIds);
+    if (!res) {
+        WLOGFE("MakeUniqueScreen fail: write screens failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("MakeUniqueScreen fail: SendRequest failed");
+        return DMError::DM_ERROR_NULLPTR;
     }
     return static_cast<DMError>(reply.ReadInt32());
 }

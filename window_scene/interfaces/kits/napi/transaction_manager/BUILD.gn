@@ -21,6 +21,12 @@ config("transaction_manager_config") {
 }
 
 ohos_shared_library("transactionmanager_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "js_transaction_manager.cpp",
     "transaction_manager_module.cpp",
