@@ -139,6 +139,7 @@ private:
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
+    napi_value HideWindowFunction(napi_env env, napi_callback_info info);
     napi_value OnShow(napi_env env, napi_callback_info info);
     napi_value OnShowWindow(napi_env env, napi_callback_info info);
     napi_value OnShowWithAnimation(napi_env env, napi_callback_info info);
