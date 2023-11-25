@@ -170,6 +170,7 @@ public:
     bool GetShowRecent() const;
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
+    void SetNeedSnapshot(bool needSnapshot);
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
@@ -375,6 +376,7 @@ protected:
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
     SystemSessionConfig systemConfig_;
+    bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
     uint32_t zOrder_ = 0;

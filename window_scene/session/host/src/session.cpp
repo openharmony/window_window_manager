@@ -1876,6 +1876,11 @@ bool Session::GetBufferAvailable() const
     return bufferAvailable_;
 }
 
+void Session::SetNeedSnapshot(bool needSnapshot)
+{
+    needSnapshot_ = needSnapshot;
+}
+
 void Session::SetFloatingScale(float floatingScale)
 {
     floatingScale_ = floatingScale;
