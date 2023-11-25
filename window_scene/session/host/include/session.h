@@ -393,7 +393,6 @@ protected:
     float floatingScale_ = 1.0f;
     bool scbKeepKeyboardFlag_ = false;
     bool isDirty_ = false;
-    std::recursive_mutex sizeChangeMutex_;
 
 private:
     void HandleDialogForeground();
