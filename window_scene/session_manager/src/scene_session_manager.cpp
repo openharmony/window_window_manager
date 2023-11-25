@@ -878,8 +878,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 
     auto task = [this, sessionInfo, property]() {
         WLOGFI("[WMSCom] RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
-            "appIndex: %{public}d, type %{public}u", sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-            sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_);
+            "appIndex: %{public}d, type %{public}u isSystem:%{public}u, isPersistentRecover: %{public}u",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_,
+            static_cast<uint32_t>(sessionInfo.isSystem_), static_cast<uint32_t>(sessionInfo.isPersistentRecover_));
         sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
