@@ -40,11 +40,8 @@ class TimerManager final {
 public:
     DISALLOW_COPY_AND_MOVE(TimerManager);
     void Init();
-    void Stop();
     int32_t AddTimer(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimer(int32_t timerId);
-    int32_t CalcNextDelay();
-    void ProcessTimers();
 private:
     struct TimerItem {
         int32_t id { 0 };
@@ -55,6 +52,8 @@ private:
 private:
     void OnThread();
     void OnStop();
+    int32_t CalcNextDelay();
+    void ProcessTimers();
     int32_t TakeNextTimerId();
     int32_t AddTimerInternal(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimerInternal(int32_t timerId);
@@ -63,7 +62,7 @@ private:
     void ProcessTimersInternal();
 
 private:
-    std::recursive_mutex mutex_;
+    std::mutex mutex_;
     std::atomic<TimerMgrState> state_ { TimerMgrState::STATE_NOT_START };
     std::thread timerWorker_;
     std::list<std::unique_ptr<TimerItem>> timers_;
