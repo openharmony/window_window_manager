@@ -234,6 +234,11 @@ public:
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
 
     void NotifyUpdateRectAfterLayout();
+    void DealwithVisibilityChange(bool isVisible, uint64_t& surfaceId, WindowVisibilityState& visibleState,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void DealwithDrawingContentChange(uint64_t& surfaceId, WindowVisibilityState& visibleState,
+        WindowVisibilityInfo& windowVisibilityInfo);
+
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -460,6 +465,7 @@ private:
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
 
     void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
+    void UpdateWindowDrawingContentInfo(const sptr<SceneSession>& sceneSession, const WindowDrawingContentInfo& info);
 };
 } // namespace OHOS::Rosen
 
