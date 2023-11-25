@@ -1859,7 +1859,6 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
     sessionInfoLockedStateChangeFunc_ = func;
-    sessionInfoLockedStateChangeFunc_(sessionInfo_.lockedState);
 }
 
 void Session::NotifySessionInfoLockedStateChange(bool lockedState)
