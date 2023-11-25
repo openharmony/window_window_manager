@@ -45,7 +45,7 @@ using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
 using GetAINavigationBarArea = std::function<WSRect()>;
-using RecoveryCallback = std::function<void(int32_t persistentId)>;
+using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
@@ -139,7 +139,7 @@ public:
     WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
-    WSError RecoveryPullPiPMainWindow(int32_t persistentId) override;
+    WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -252,8 +252,6 @@ private:
     bool needDefaultAnimationFlag_ = true;
     PiPRectInfo pipRectInfo_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
-    std::recursive_mutex sizeChangeMutex_;
-    bool isDirty_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

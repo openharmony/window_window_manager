@@ -730,6 +730,14 @@ WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
     return ret;
 }
 
+WMError WindowManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyWindowExtensionVisibilityChange(pid, uid, visible);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("notify WindowExtension visibility change failed");
+    }
+    return ret;
+}
 
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
@@ -760,6 +768,15 @@ void WindowManager::OnRemoteDied()
     pImpl_->windowUpdateListenerAgent_ = nullptr;
     pImpl_->windowVisibilityListenerAgent_ = nullptr;
     pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
+}
+
+WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("raise window to top failed");
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -61,12 +61,18 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     mainWindowId_ = callWindow->GetWindowId();
-
+    mainWindow_ = callWindow;
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
         WLOGFE("Get WindowOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
+    mainWindowXComponentController_ = pipOption_->GetXComponentController();
+    if (mainWindowXComponentController_ == nullptr || mainWindow_ == nullptr) {
+        WLOGFE("mainWindowXComponentController or main window is nullptr");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    UpdateXComponentPositionAndSize();
     windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -106,9 +112,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow()
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     PictureInPictureManager::SetCurrentPipController(this);
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPictureInPictureStart();
-    }
     return WMError::WM_OK;
 }
 
@@ -173,6 +176,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
             WLOGFE("session is null");
             return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
         }
+        session->ResetExtController();
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
         if (ret != WmErrorCode::WM_OK) {
             PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
@@ -294,7 +298,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         WLOGFE("window_ is nullptr");
         return;
     }
-    window_->RecoveryPullPiPMainWindow();
+    window_->RecoveryPullPiPMainWindow(windowRect_);
     auto stopPipTask = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -309,6 +313,69 @@ void PictureInPictureController::RestorePictureInPictureWindow()
     }
     handler_->PostTask(stopPipTask, DELAY_ANIM);
     WLOGFI("restore pip main window finished");
+}
+
+void PictureInPictureController::UpdateXComponentPositionAndSize()
+{
+    float posX = 0;
+    float posY = 0;
+    float width = 0;
+    float height = 0;
+    mainWindowXComponentController_->GetGlobalPosition(posX, posY);
+    mainWindowXComponentController_->GetSize(width, height);
+    windowRect_.width_ = static_cast<uint32_t>(width);
+    windowRect_.height_ = static_cast<uint32_t>(height);
+    windowRect_.posX_ = static_cast<uint32_t>(posX);
+    windowRect_.posY_ = static_cast<uint32_t>(posY);
+
+    bool isFullScreen = mainWindow_->IsLayoutFullScreen();
+    if (!isFullScreen) {
+        // calculate status bar height as offset
+        WLOGFI("not full screen");
+        AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+        AvoidArea avoidArea;
+        mainWindow_->GetAvoidAreaByType(avoidAreaType, avoidArea);
+
+        uint32_t offset = avoidArea.topRect_.height_;
+        windowRect_.posY_ += offset;
+        WLOGFD("status bar height = %{public}d", offset);
+    }
+    WLOGFD("position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
+        windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
+}
+
+void PictureInPictureController::ResetExtController()
+{
+    if (mainWindowXComponentController_ != nullptr && pipXComponentController_ != nullptr) {
+        XComponentControllerErrorCode errorCode =
+                mainWindowXComponentController_->ResetExtController(pipXComponentController_);
+        if (errorCode != XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR) {
+            WLOGFE("swap xComponent failed, errorCode: %{public}u", errorCode);
+        }
+    }
+}
+
+WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
+{
+    pipXComponentController_ = xComponentController;
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    if (mainWindowXComponentController_ == nullptr || pipXComponentController_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    XComponentControllerErrorCode errorCode =
+        mainWindowXComponentController_->SetExtController(pipXComponentController_);
+    if (errorCode != XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR) {
+        WLOGFE("swap xComponent failed, errorCode: %{public}u", errorCode);
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    if (pipLifeCycleListener_ != nullptr) {
+        pipLifeCycleListener_->OnPictureInPictureStart();
+    }
+    return WMError::WM_OK;
 }
 
 void PictureInPictureController::SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener)

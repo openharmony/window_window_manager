@@ -373,6 +373,24 @@ public:
      */
     WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
 
+    /**
+     * @brief raise window to top by windowId
+     *
+     * @param persistentId this window to raise
+     * @return WM_OK if raise success
+     */
+    WMError RaiseWindowToTop(int32_t persistentId);
+
+    /**
+     * @brief notify window extension visibility change
+     *
+     * @param pid process id
+     * @param uid user id
+     * @param visible visibility
+     * @return WM_OK means notify success, others means notify failed.
+    */
+    WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
+
 private:
     WindowManager();
     ~WindowManager();

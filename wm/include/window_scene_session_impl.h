@@ -128,7 +128,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    WMError RecoveryPullPiPMainWindow() override;
+    WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
 
 protected:
     void DestroySubWindow();
