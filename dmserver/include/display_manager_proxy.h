@@ -81,6 +81,8 @@ public:
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
+        float virtualPixelRatio) override { return DMError::DM_OK; }
     DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override;
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,

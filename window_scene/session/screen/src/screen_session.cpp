@@ -184,6 +184,14 @@ void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
     property_.SetPhyBounds(phyBounds);
 }
 
+void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
+{
+    auto screenBounds = property_.GetBounds();
+    screenBounds.rect_.width_ = width;
+    screenBounds.rect_.height_ = height;
+    property_.SetBounds(screenBounds);
+}
+
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
 {
     return displayNode_;
