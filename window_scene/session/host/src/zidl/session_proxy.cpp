@@ -36,25 +36,25 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[WMSCom] WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            WLOGFE("Write property failed");
+            WLOGFE("[WMSCom] Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
+            WLOGFE("[WMSCom] Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        WLOGFE("[WMSCom] SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -67,13 +67,13 @@ WSError SessionProxy::Background()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[WMSCom] WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        WLOGFE("[WMSCom] SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();

@@ -75,7 +75,7 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
         [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] Connect session, id: %{public}d", session->GetPersistentId());
@@ -128,7 +128,7 @@ WSError SceneSession::Background()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] Background session, id: %{public}d", session->GetPersistentId());
@@ -176,7 +176,7 @@ WSError SceneSession::Disconnect()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] Disconnect session, id: %{public}d", session->GetPersistentId());
@@ -203,7 +203,7 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     PostTask([weakThis = wptr(this), isActive]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->IsSessionValid()) {
@@ -237,7 +237,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     PostTask([weakThis = wptr(this), event]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
@@ -268,7 +268,7 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
     return PostSyncTask([weakThis = wptr(this), mode]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFD("[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
@@ -284,7 +284,7 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
     return PostSyncTask([weakThis = wptr(this), &mode]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         mode = maximizeMode_;
@@ -298,11 +298,11 @@ WSError SceneSession::SetAspectRatio(float ratio)
     return PostSyncTask([weakThis = wptr(this), ratio]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            WLOGE("SetAspectRatio failed because property is null");
+            WLOGE("[WMSCom] SetAspectRatio failed because property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         WLOGFI("[WMSCom] ratio: %{public}f", ratio);
@@ -475,7 +475,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     PostTask([weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto newWinRect = session->winRect_;

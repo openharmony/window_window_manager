@@ -682,7 +682,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
-        WLOGFE("Foreground state invalid! state:%{public}u", state);
+        WLOGFE("[WMSCom] Foreground state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -706,7 +706,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 void Session::NotifyCallingSessionForeground()
 {
     if (notifyCallingSessionForegroundFunc_) {
-        WLOGFI("Notify calling window that input method shown");
+        WLOGFI("[WMSInput] Notify calling window that input method shown");
         notifyCallingSessionForegroundFunc_(persistentId_);
     }
 }
@@ -785,7 +785,7 @@ WSError Session::Background()
 void Session::NotifyCallingSessionBackground()
 {
     if (notifyCallingSessionBackgroundFunc_) {
-        WLOGFI("[WMSCom] Notify calling window that input method hide");
+        WLOGFI("[WMSInput] Notify calling window that input method hide");
         notifyCallingSessionBackgroundFunc_();
     }
 }

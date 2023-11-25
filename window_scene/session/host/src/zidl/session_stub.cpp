@@ -132,12 +132,12 @@ int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("Foreground!");
+    WLOGFD("[WMSCom] Foreground!");
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
-        WLOGFW("Property not exist!");
+        WLOGFW("[WMSCom] Property not exist!");
         property = new WindowSessionProperty();
     }
     const WSError& errCode = Foreground(property);
@@ -147,7 +147,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("Background!");
+    WLOGFD("[WMSCom] Background!");
     const WSError& errCode = Background();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
