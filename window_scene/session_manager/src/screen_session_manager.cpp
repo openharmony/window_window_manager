@@ -973,7 +973,7 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
     }
     // just for get orientation test
     screenSession->SetOrientation(orientation);
-    screenSession->ScreenOrientationChange(orientation);
+    screenSession->ScreenOrientationChange(orientation, GetFoldDisplayMode());
     return DMError::DM_OK;
 }
 
@@ -1010,7 +1010,7 @@ DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orient
     if (isFromWindow) {
         ScreenRotationProperty::ProcessOrientationSwitch(newOrientation);
     } else {
-        Rotation rotationAfter = screenSession->CalcRotation(newOrientation);
+        Rotation rotationAfter = screenSession->CalcRotation(newOrientation, GetFoldDisplayMode());
         SetRotation(screenId, rotationAfter, false);
     }
     screenSession->SetOrientation(newOrientation);
