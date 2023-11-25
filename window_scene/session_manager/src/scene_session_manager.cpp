@@ -865,7 +865,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
-    if (sessionInfo.persistentId_ != 0 &&
+    if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_ &&
         sessionInfo.bundleName_.find("hmsapp.samplemanagement") == std::string::npos) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
