@@ -446,5 +446,17 @@ WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->RequestFocusStatus(persistentId, isFocused));
 }
+
+WMError WindowAdapter::RaiseWindowToTop(int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->RaiseWindowToTop(persistentId));
+}
+
+WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
+}
 } // namespace Rosen
 } // namespace OHOS

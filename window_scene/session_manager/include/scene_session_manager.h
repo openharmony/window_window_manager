@@ -141,6 +141,7 @@ public:
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
+    WSError RaiseWindowToTop(int32_t persistentId) override;
 
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
@@ -211,7 +212,7 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
-    WSError RecoveryPullPiPMainWindow(const int32_t& persistentId);
+    WSError RecoveryPullPiPMainWindow(const int32_t& persistentId, const Rect& rect);
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     int GetSceneSessionPrivacyModeCount();
@@ -230,6 +231,7 @@ public:
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
+    WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
 
     void NotifyUpdateRectAfterLayout();
 public:

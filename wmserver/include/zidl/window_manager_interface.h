@@ -161,6 +161,11 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
+    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+    {
+        return WSError::WS_OK;
+    }
 };
 }
 }
