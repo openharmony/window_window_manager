@@ -43,6 +43,12 @@ config("window_native_kit_config") {
 }
 
 ohos_shared_library("window_native_kit") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
@@ -70,7 +76,9 @@ ohos_shared_library("window_native_kit") {
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "image_framework:image",
     "image_framework:image_native",
     "ipc:ipc_napi_common",
@@ -84,6 +92,12 @@ ohos_shared_library("window_native_kit") {
 }
 
 ohos_shared_library("window_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "window_manager_napi/js_window_manager.cpp",
     "window_manager_napi/window_manager_module.cpp",
@@ -121,6 +135,12 @@ ohos_shared_library("window_napi") {
 }
 
 ohos_shared_library("windowstage_kit") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [ "window_stage_napi/js_window_stage.cpp" ]
 
   configs = [

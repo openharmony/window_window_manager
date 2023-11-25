@@ -13,25 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_MOCK_SCREEN_MANAGER_INTERFACE_H
-#define OHOS_ROSEN_MOCK_SCREEN_MANAGER_INTERFACE_H
+#ifndef TEST_FUZZTEST_SCREEN_SESSION_MANAGER_FUZZER_H
+#define TEST_FUZZTEST_SCREEN_SESSION_MANAGER_FUZZER_H
 
-#include <iremote_broker.h>
-#include <refbase.h>
-#include <parcel.h>
+#define FUZZ_PROJECT_NAME "screensessionmanager_fuzzer"
 
-namespace OHOS {
-namespace Rosen {
-
-class IMockScreenManagerInterface : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockScreenManager");
-    enum class MockScreenManagerServiceMessage : uint32_t {
-        TRANS_ID_GET_SCREEN_DUMP_INFO,
-    };
-
-    virtual void GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
-};
-}
-}
-#endif // OHOS_ROSEN_MOCK_SESSION_MANAGER_INTERFACE_H
+#endif

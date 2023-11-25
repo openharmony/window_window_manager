@@ -33,17 +33,17 @@
 #include "event_handler.h"
 
 namespace OHOS::Rosen {
-class IScreenChangeListener : public RefBase {
+class IScreenChangeListener {
 public:
-    IScreenChangeListener() = default;
-    virtual ~IScreenChangeListener() = default;
-
-    virtual void OnConnect() = 0;
-    virtual void OnDisconnect() = 0;
-    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
-    virtual void OnSensorRotationChange(float sensorRotation) = 0;
-    virtual void OnScreenOrientationChange(float screenOrientation) = 0;
-    virtual void OnScreenRotationLockedChange(bool isLocked) = 0;
+    virtual void OnConnect(ScreenId screenId) = 0;
+    virtual void OnDisconnect(ScreenId screenId) = 0;
+    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        ScreenId screenId) = 0;
+    virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) = 0;
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
+    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
+    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -54,10 +54,12 @@ enum class ScreenState : int32_t {
 
 class ScreenSession : public RefBase {
 public:
-    explicit ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
-    ScreenSession();
+    ScreenSession() = default;
+    ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
+        const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
+    ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
-    ~ScreenSession() = default;
+    virtual ~ScreenSession() = default;
 
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
@@ -82,13 +84,14 @@ public:
 
     std::string GetName();
     ScreenId GetScreenId();
+    ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
     void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
@@ -105,9 +108,10 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void SetName(std::string name);
+    void Resize(uint32_t width, uint32_t height);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
@@ -125,11 +129,16 @@ public:
     void Connect();
     void Disconnect();
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
+    void PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
+    void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation);
+    void ScreenOrientationChange(float orientation);
+
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
+    Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };

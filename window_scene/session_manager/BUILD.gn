@@ -46,6 +46,8 @@ config("session_manager_public_config") {
     "${window_base_path}/wmserver/include",
     "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
 
+    "${window_base_path}/window_scene/screen_session_manager/include",
+
     # for window_manager_hilog
     "${window_base_path}/utils/include",
 
@@ -57,6 +59,12 @@ config("session_manager_public_config") {
 }
 
 ohos_shared_library("scene_session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/distributed_client.cpp",
@@ -75,11 +83,13 @@ ohos_shared_library("scene_session_manager") {
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
   ]
 
@@ -138,14 +148,26 @@ ohos_shared_library("scene_session_manager") {
     defines += [ "RES_SCHED_ENABLE" ]
   }
 
+  if (efficiency_manager_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
 
 ohos_shared_library("screen_session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "../screen_session_manager/src/zidl/screen_session_manager_client_proxy.cpp",
     "src/fold_screen_controller/dual_display_device_policy.cpp",
     "src/fold_screen_controller/fold_screen_controller.cpp",
     "src/fold_screen_controller/fold_screen_policy.cpp",
@@ -168,6 +190,7 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
   ]
@@ -184,6 +207,8 @@ ohos_shared_library("screen_session_manager") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = []
@@ -221,8 +246,13 @@ ohos_shared_library("screen_session_manager") {
 }
 
 ohos_shared_library("session_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
-    "../../wmserver/src/zidl/mock_screen_manager_service_proxy.cpp",
     "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",

@@ -24,7 +24,9 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession" };
 }
 
-ScreenSession::ScreenSession()
+ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
+    const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
+    : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)
 {}
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -83,7 +85,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
 
     screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
-        screenChangeListener->OnConnect();
+        screenChangeListener->OnConnect(screenId_);
     }
 }
 
@@ -155,6 +157,11 @@ ScreenId ScreenSession::GetScreenId()
     return screenId_;
 }
 
+ScreenId ScreenSession::GetRSScreenId()
+{
+    return rsId_;
+}
+
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;
@@ -191,7 +198,7 @@ void ScreenSession::Connect()
 {
     screenState_ = ScreenState::CONNECTION;
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnConnect();
+        listener->OnConnect(screenId_);
     }
 }
 
@@ -202,7 +209,7 @@ void ScreenSession::Disconnect()
         if (!listener) {
             continue;
         }
-        listener->OnDisconnect();
+        listener->OnDisconnect(screenId_);
     }
 }
 
@@ -212,7 +219,17 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
         if (!listener) {
             continue;
         }
-        listener->OnPropertyChange(newProperty, reason);
+        listener->OnPropertyChange(newProperty, reason, screenId_);
+    }
+}
+
+void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnPowerStatusChange(event, status, reason);
     }
 }
 
@@ -239,11 +256,13 @@ float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
 void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 {
     float rotation = ConvertRotationToFloat(sensorRotation);
+    SensorRotationChange(rotation);
+}
+
+void ScreenSession::SensorRotationChange(float sensorRotation)
+{
     for (auto& listener : screenChangeListenerList_) {
-        if (!listener) {
-            continue;
-        }
-        listener->OnSensorRotationChange(rotation);
+        listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
 }
 
@@ -251,15 +270,17 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation)
 {
     Rotation rotationAfter = CalcRotation(orientation);
     float screenRotation = ConvertRotationToFloat(rotationAfter);
+    ScreenOrientationChange(screenRotation);
+}
+
+void ScreenSession::ScreenOrientationChange(float orientation)
+{
     for (auto& listener : screenChangeListenerList_) {
-        if (!listener) {
-            continue;
-        }
-        listener->OnScreenOrientationChange(screenRotation);
+        listener->OnScreenOrientationChange(orientation, screenId_);
     }
 }
 
-void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation)
+Rotation ScreenSession::ConvertIntToRotation(int rotation)
 {
     Rotation targetRotation = Rotation::ROTATION_0;
     switch (rotation) {
@@ -276,19 +297,31 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation)
             targetRotation = Rotation::ROTATION_0;
             break;
     }
-    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation);
+    return targetRotation;
+}
+
+void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    Rotation displayScreenRotation = targetRotation;
+    if (foldDisplayMode == FoldDisplayMode::FULL) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        displayScreenRotation = ConvertIntToRotation((rotation + 90) % 360);
+    }
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+    displayNode_->SetScreenRotation(static_cast<uint32_t>(displayScreenRotation));
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     }
-    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f], rotation: %{public}u",
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
-        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(), targetRotation);
+        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
+        rotation, displayOrientation);
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
@@ -335,7 +368,7 @@ void ScreenSession::SetScreenRotationLocked(bool isLocked)
         if (!listener) {
             continue;
         }
-        listener->OnScreenRotationLockedChange(isLocked);
+        listener->OnScreenRotationLockedChange(isLocked, screenId_);
     }
 }
 
@@ -397,7 +430,7 @@ Rotation ScreenSession::CalcRotation(Orientation orientation) const
     }
 }
 
-DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation) const
+DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
     sptr<SupportedScreenModes> info = GetActiveScreenMode();
     if (info == nullptr) {
@@ -405,6 +438,9 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation) cons
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
+        isVerticalScreen = info->width_ > info->height_;
+    }
     switch (rotation) {
         case Rotation::ROTATION_0: {
             return isVerticalScreen ? DisplayOrientation::PORTRAIT : DisplayOrientation::LANDSCAPE;
@@ -797,5 +833,15 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
 {
     property_.SetOffsetY(offsetY);
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
+}
+
+void ScreenSession::Resize(uint32_t width, uint32_t height)
+{
+    sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
+    if (screenMode != nullptr) {
+        screenMode->width_ = width;
+        screenMode->height_ = height;
+        UpdatePropertyByActiveMode();
+    }
 }
 } // namespace OHOS::Rosen

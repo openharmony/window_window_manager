@@ -52,27 +52,6 @@ void WindowImplListenerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: BasicRegisterUnregister
- * @tc.desc: test the basic method of register/unregister
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplListenerTest, BasicRegisterUnregister, Function | SmallTest | Level2)
-{
-    std::vector<sptr<IWindowLifeCycle>> holder;
-    sptr<IWindowLifeCycle> listener = nullptr;
-    window_->RegisterListener(holder, listener);
-    ASSERT_EQ(holder.size(), 0);
-
-    listener = new IWindowLifeCycle();
-    window_->RegisterListener(holder, listener);
-    ASSERT_EQ(holder.size(), 1);
-    window_->RegisterListener(holder, listener);
-    ASSERT_EQ(holder.size(), 1);
-    window_->UnregisterListener(holder, listener);
-    ASSERT_EQ(holder.size(), 0);
-}
-
-/**
  * @tc.name: InterfacesRegisterUnregister
  * @tc.desc: test all interfaces listener
  * @tc.type: FUNC

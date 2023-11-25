@@ -38,13 +38,13 @@ private:
     int HandleForeground(MessageParcel& data, MessageParcel& reply);
     int HandleBackground(MessageParcel& data, MessageParcel& reply);
     int HandleDisconnect(MessageParcel& data, MessageParcel& reply);
+    int HandleShow(MessageParcel& data, MessageParcel& reply);
+    int HandleHide(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
-    int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
-    int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
@@ -68,8 +68,13 @@ private:
     int HandleNotifySyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAsyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply);
-
+    int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
+
+    // PictureInPicture
+    int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

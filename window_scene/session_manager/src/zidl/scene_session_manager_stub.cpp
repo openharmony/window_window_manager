@@ -194,7 +194,7 @@ int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessagePa
     } else {
         WLOGFW("Property not exist!");
     }
-    const WMError& ret = UpdateProperty(property, action);
+    const WMError& ret = UpdateSessionProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -531,7 +531,7 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
     WLOGFI("run HandleBindDialogTarget!");
     auto persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    const WSError& ret = BindDialogTarget(persistentId, remoteObject);
+    const WSError& ret = BindDialogSessionTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

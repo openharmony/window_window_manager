@@ -90,14 +90,6 @@ public:
         TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
     };
 
-    virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-        sptr<IRemoteObject> token = nullptr) = 0;
-    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
-    virtual WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
-    virtual WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) = 0;
-    virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
@@ -142,7 +134,6 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override { return WMError::WM_OK; }
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
-    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false) = 0;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override { return WMError::WM_OK; }
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
