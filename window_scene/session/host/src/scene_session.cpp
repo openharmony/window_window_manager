@@ -188,6 +188,9 @@ WSError SceneSession::Disconnect()
             }
             session->isActive_ = false;
         }
+        if (WindowHelper::IsPipWindow(session->GetWindowType())) {
+            session->SavePiPRectInfo();
+        }
         session->Session::Disconnect();
         session->snapshot_.reset();
         session->isTerminating = false;
@@ -1873,7 +1876,7 @@ void SceneSession::ClearPiPRectPivotInfo()
 
 void SceneSession::SavePiPRectInfo()
 {
-    auto pipRect = GetSessionRequestRect();
+    auto pipRect = GetSessionRect();
     ScenePersistentStorage::Insert("pip_window_pos_x", pipRect.posX_, ScenePersistentStorageType::PIP_INFO);
     ScenePersistentStorage::Insert("pip_window_pos_y", pipRect.posY_, ScenePersistentStorageType::PIP_INFO);
     ScenePersistentStorage::Insert("pip_window_level", static_cast<int32_t>(pipRectInfo_.level_),
@@ -1883,29 +1886,31 @@ void SceneSession::SavePiPRectInfo()
 void SceneSession::GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect)
 {
     PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect);
-    WLOGD("SceneSession::GetNewPiPRect rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+    WLOGFD("scale rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    auto requestRect = GetSessionRequestRect();
-    if (pipRectInfo_.xPivot_ == PiPScalePivot::UNDEFINED || pipRectInfo_.yPivot_ == PiPScalePivot::UNDEFINED) {
-        // If no anchor, create anchor
-        WLOGD("SceneSession::GetNewPiPRect can't find anchor, create it");
-        PiPUtil::UpdateRectPivot(rect.posX_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
-        PiPUtil::UpdateRectPivot(rect.posY_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
-    } else {
-        // If it has anchor, location by anchor
-        WLOGD("SceneSession::GetNewPiPRect find anchor, resize");
-        PiPUtil::GetRectByPivot(rect.posX_, requestRect.width_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
-        PiPUtil::GetRectByPivot(rect.posY_, requestRect.height_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+    auto sessionRect = GetSessionRect();
+    WLOGFD("session rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+        sessionRect.posX_, sessionRect.posY_, sessionRect.width_, sessionRect.height_);
+    if (sessionRect.width_ != 0 && sessionRect.height_ != 0) {
+        if (pipRectInfo_.xPivot_ == PiPScalePivot::UNDEFINED || pipRectInfo_.yPivot_ == PiPScalePivot::UNDEFINED) {
+            // If no anchor, create anchor
+            PiPUtil::UpdateRectPivot(sessionRect.posX_, sessionRect.width_, displayWidth, pipRectInfo_.xPivot_);
+            PiPUtil::UpdateRectPivot(sessionRect.posY_, sessionRect.height_, displayHeight, pipRectInfo_.yPivot_);
+        }
+        PiPUtil::GetRectByPivot(rect.posX_, sessionRect.width_, rect.width_, displayWidth, pipRectInfo_.xPivot_);
+        PiPUtil::GetRectByPivot(rect.posY_, sessionRect.height_, rect.height_, displayHeight, pipRectInfo_.yPivot_);
+        WLOGFD("pivot rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     PiPUtil::GetValidRect(displayWidth, displayHeight, rect);
-    WLOGD("SceneSession::GetNewPiPRect valid rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
+    WLOGFD("valid rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
 void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
 {
-    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP) {
-        WLOGE("SceneSessionManager::ProcessUpdatePiPRect not pip window");
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        WLOGFW("Session is not PiP type!");
         return;
     }
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1915,34 +1920,41 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
+    float displayVpr = display->GetVirtualPixelRatio();
+    if (displayVpr < 0.0f) {
+        displayVpr = 1.5f;
+    }
+    PiPUtil::SetDisplayVpr(displayVpr);
 
     // default pos of phone is the right top
     Rect rect = { 0, 0, pipRectInfo_.originWidth_, pipRectInfo_.originHeight_ };
     ScenePersistentStorage::Get("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
     ScenePersistentStorage::Get("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
     if (rect.posX_ == 0) {
-        rect.posX_ = displayWidth - PiPUtil::SAFE_PADDING_HORIZONTAL;
+        rect.posX_ = displayWidth;
     }
-    if (rect.posY_ == 0) {
-        rect.posY_ = PiPUtil::SAFE_PADDING_VERTICAL_TOP;
-    }
-    WLOGD("SceneSession::ProcessUpdatePiPRectpip window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+    WLOGFD("window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
 
     GetNewPiPRect(displayWidth, displayHeight, rect);
-    WLOGD("SceneSession::ProcessUpdatePiPRectpip window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+    WLOGFD("window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
     ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
 
     WSRect newRect = SessionHelper::TransferToWSRect(rect);
     SetSessionRect(newRect);
+    SetSessionRequestRect(newRect);
     Session::UpdateRect(newRect, reason);
     NotifySessionRectChange(newRect, reason);
 }
 
 WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
 {
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        WLOGFW("Session is not PiP type!");
+        return WSError::WS_DO_NOTHING;
+    }
     PostTask([weakThis = wptr(this), width, height, reason]() {
         auto session = weakThis.promote();
         if (!session) {

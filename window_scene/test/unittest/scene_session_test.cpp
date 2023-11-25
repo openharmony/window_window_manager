@@ -2279,6 +2279,37 @@ HWTEST_F(SceneSessionTest, UpdateSizeChangeReason01, Function | SmallTest | Leve
     scensession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
     ASSERT_EQ(scensession->reason_, SizeChangeReason::ROTATION);
 }
+
+/**
+ * @tc.name: UpdatePiPRect01
+ * @tc.desc: UpdatePiPRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdatePiPRect01";
+    info.bundleName_ = "UpdatePiPRect";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scenesession;
+    scenesession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scenesession, nullptr);
+    scenesession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    scenesession->SetSessionProperty(property);
+
+    uint32_t width = 800;
+    uint32_t height = 600;
+    PiPRectUpdateReason reason = PiPRectUpdateReason::REASON_PIP_START_WINDOW;
+    WSError result = scenesession->UpdatePiPRect(width, height, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
+    delete scenesession;
+}
 }
 }
 }
