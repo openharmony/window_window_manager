@@ -279,6 +279,7 @@ public:
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
         return std::vector<Rect>();

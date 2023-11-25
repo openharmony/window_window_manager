@@ -88,6 +88,7 @@
 #include "focus_change_info.h"
 
 #include "window_visibility_info.h"
+#include "window_drawing_content_info.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
@@ -4713,54 +4714,84 @@ sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& su
     return nullptr;
 }
 
+
 void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData)
 {
     WLOGFD("WindowVisibilityChangeCallback: entry");
     std::weak_ptr<RSOcclusionData> weak(occlusiontionData);
 
     taskScheduler_->PostVoidSyncTask([this, weak]() {
-    auto weakOcclusionData = weak.lock();
-    if (weakOcclusionData == nullptr) {
-        WLOGFE("weak occlusionData is nullptr");
-        return;
-    }
-
-    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo =
-        GetWindowVisibilityChangeInfo(weakOcclusionData);
-    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
-#ifdef MEMMGR_WINDOW_ENABLE
-    std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
-#endif
-    for (const auto& elem : visibilityChangeInfo) {
-        uint64_t surfaceId = elem.first;
-        WindowVisibilityState visibleState = elem.second;
-        bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
-        sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
-        if (session == nullptr) {
-            continue;
+        auto weakOcclusionData = weak.lock();
+        if (weakOcclusionData == nullptr) {
+            WLOGFE("weak occlusionData is nullptr");
+            return;
         }
-        session->SetVisible(isVisible);
-        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
-            session->GetCallingUid(), visibleState, session->GetWindowType()));
+
+        std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo =
+            GetWindowVisibilityChangeInfo(weakOcclusionData);
+        std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+        std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
+    #ifdef MEMMGR_WINDOW_ENABLE
+        std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
+    #endif
+        for (const auto& elem : visibilityChangeInfo) {
+            uint64_t surfaceId = elem.first;
+            WindowVisibilityState visibleState = elem.second;
+            sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+            if (session == nullptr) {
+                continue;
+            }
+            if (visibleState == WINDOW_DRAWING_CONTENT_CHANGE || visibleState == WINDOW_DRAWING_CONTENT_NO_CHANGE) {
+                WindowVisibilityInfo windowVisibilityInfo(session->GetWindowId(),
+                session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
+                DealwithDrawingContentChange(surfaceId, visibleState,  windowVisibilityInfo);
+            } else {
+                bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+                DealwithVisibilityChange(isVisible, surfaceId, visibleState, windowVisibilityInfos);
 #ifdef MEMMGR_WINDOW_ENABLE
-        memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
-            session->GetCallingUid(), isVisible));
+            memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(),
+                session->GetCallingPid(), session->GetCallingUid(), isVisible));
 #endif
-        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, visibleState:%{public}d",
-            session->GetWindowId(), visibleState);
-        CheckAndNotifyWaterMarkChangedResult();
-    }
+            }
+        }
         if (windowVisibilityInfos.size() != 0) {
             WLOGD("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
         }
-#ifdef MEMMGR_WINDOW_ENABLE
+        
+    #ifdef MEMMGR_WINDOW_ENABLE
         if (memMgrWindowInfos.size() != 0) {
             WLOGD("Notify memMgrWindowInfos changed start");
             Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
         }
-#endif
+    #endif
     });
+}
+
+void SceneSessionManager::DealwithVisibilityChange(bool isVisible, uint64_t& surfaceId,
+    WindowVisibilityState& visibleState, std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+{
+    sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+    session->SetVisible(isVisible);
+    windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
+        session->GetCallingUid(), visibleState, session->GetWindowType()));
+
+    WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, visibleState:%{public}d",
+        session->GetWindowId(), visibleState);
+    CheckAndNotifyWaterMarkChangedResult();
+}
+
+void SceneSessionManager::DealwithDrawingContentChange(uint64_t& surfaceId, WindowVisibilityState& visibleState,
+    WindowVisibilityInfo& windowVisibilityInfo)
+{
+    bool drawingContentState = visibleState == WINDOW_DRAWING_CONTENT_CHANGE;
+    sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+
+    WindowDrawingContentInfo windowDrawingContentInfo(session->GetWindowId(), session->GetCallingPid(),
+        session->GetCallingUid(), drawingContentState, session->GetWindowType());
+    WLOGFD("UpdateWindowDrawingContentInfo window:%{public}u, drawingContentState:%{public}d",
+        session->GetWindowId(), drawingContentState);
+    session->UpdateWindowDrawingContentInfo(windowDrawingContentInfo);
 }
 
 void SceneSessionManager::InitWithRenderServiceAdded()
@@ -5796,5 +5827,11 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdateWindowDrawingContentInfo(const sptr<SceneSession>& session,
+    const WindowDrawingContentInfo& info)
+{
+    session->UpdateWindowDrawingContentInfo(info);
 }
 } // namespace OHOS::Rosen

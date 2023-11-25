@@ -1843,6 +1843,29 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySessionBackground, Function | SmallTe
     bool isFromInnerkits = true;
     windowscenesession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
+
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo
+ * @tc.desc: UpdateWindowDrawingContentInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    WindowDrawingContentInfo info;
+    info.windowId_ = 0;
+    info.pid_ = 0;
+    info.uid_ = 0;
+    info.drawingContentState_ = true;
+    info.windowType_  = static_cast<WindowType>(3);
+
+    windowscenesession->UpdateWindowDrawingContentInfo(info);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

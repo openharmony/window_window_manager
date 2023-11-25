@@ -192,6 +192,21 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
     return hostSession_;
 }
 
+bool WindowSessionImpl::GetDrawingContentState() const
+{
+    if (property_) {
+        return property_->GetDrawingContentState();
+    }
+    return false;
+}
+
+void WindowSessionImpl::SetDrawingContentState(bool windowDrawingContentState)
+{
+    if (property_) {
+        property_->SetDrawingContentState(windowDrawingContentState);
+    }
+}
+
 ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
     if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB) {
@@ -1741,6 +1756,11 @@ void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t heigh
         return;
     }
     hostSession_->UpdatePiPRect(width, height, reason);
+}
+
+void WindowSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos)
+{
+    WLOGFD("UpdateWindowDrawingContentInfo");
 }
 } // namespace Rosen
 } // namespace OHOS

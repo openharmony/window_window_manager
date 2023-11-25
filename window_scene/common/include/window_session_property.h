@@ -143,6 +143,8 @@ public:
 
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
+    void SetDrawingContentState(bool drawingContentState);
+    bool GetDrawingContentState() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -191,6 +193,7 @@ private:
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
+    bool drawingContentState_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
