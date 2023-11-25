@@ -67,7 +67,8 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
             RegisterRsScreenConnectionChangeListener();
         };
         // post task after 50 ms.
-        controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
+        controllerHandler_->PostTask(task, "wms:RegisterRsScreenConnectionChangeListener",
+            50, AppExecFwk::EventQueue::Priority::HIGH);
     }
 }
 
@@ -237,12 +238,12 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
         auto task = [this, rsScreenId] {
             ProcessScreenConnected(rsScreenId);
         };
-        controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+        controllerHandler_->PostTask(task, "wms:OnRsScreenConnectionChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         auto task = [this, rsScreenId] {
             ProcessScreenDisconnected(rsScreenId);
         };
-        controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+        controllerHandler_->PostTask(task, "wms:OnRsScreenConnectionChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
     } else {
         WLOGE("unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
     }
@@ -968,7 +969,7 @@ DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_
             ProcessScreenModeChanged(screenId);
             return;
         };
-        controllerHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH);
+        controllerHandler_->PostTask(func, "wms:ProcessScreenModeChanged", 0, AppExecFwk::EventQueue::Priority::HIGH);
     }
     return DMError::DM_OK;
 }
@@ -1303,7 +1304,7 @@ void AbstractScreenController::NotifyScreenConnected(sptr<ScreenInfo> screenInfo
         WLOGFI("NotifyScreenConnected,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         DisplayManagerAgentController::GetInstance().OnScreenConnect(screenInfo);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    controllerHandler_->PostTask(task, "wms:OnScreenConnect", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AbstractScreenController::NotifyScreenDisconnected(ScreenId screenId) const
@@ -1312,7 +1313,7 @@ void AbstractScreenController::NotifyScreenDisconnected(ScreenId screenId) const
         WLOGFI("NotifyScreenDisconnected,  screenId:%{public}" PRIu64"", screenId);
         DisplayManagerAgentController::GetInstance().OnScreenDisconnect(screenId);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    controllerHandler_->PostTask(task, "wms:NotifyScreenDisconnected", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AbstractScreenController::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const
@@ -1325,7 +1326,7 @@ void AbstractScreenController::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, 
         WLOGFI("NotifyScreenChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         DisplayManagerAgentController::GetInstance().OnScreenChange(screenInfo, event);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    controllerHandler_->PostTask(task, "wms:OnScreenChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AbstractScreenController::NotifyScreenGroupChanged(
@@ -1340,7 +1341,7 @@ void AbstractScreenController::NotifyScreenGroupChanged(
         WLOGFI("screenId:%{public}" PRIu64", trigger:[%{public}s]", screenInfo->GetScreenId(), trigger.c_str());
         DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    controllerHandler_->PostTask(task, "wms:OnScreenGroupChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AbstractScreenController::NotifyScreenGroupChanged(
@@ -1354,7 +1355,7 @@ void AbstractScreenController::NotifyScreenGroupChanged(
         WLOGFI("trigger:[%{public}s]", trigger.c_str());
         DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    controllerHandler_->PostTask(task, "wms:NotifyScreenGroupChanged", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,

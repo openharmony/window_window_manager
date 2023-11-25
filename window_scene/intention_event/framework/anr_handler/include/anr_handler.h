@@ -38,7 +38,7 @@ public:
     void OnWindowDestroyed(int32_t persistentId);
 private:
     using Task = std::function<void()>;
-    bool PostTask(Task&& task, int64_t delayTime = 0);
+    bool PostTask(Task &&task, const std::string& name = "ANRHandlerTask", int64_t delayTime = 0);
     void MarkProcessed();
     void SendEvent(int32_t eventId, int64_t delayTime);
     void SetAnrHandleState(int32_t eventId, bool status);

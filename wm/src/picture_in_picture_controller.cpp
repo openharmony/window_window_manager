@@ -241,7 +241,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim, StopPipT
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
-        handler_->PostTask(task, "StopPictureInPicture", DEFAULT_TIME_DELAY);
+        handler_->PostTask(task, "wms:StopPictureInPicture", DEFAULT_TIME_DELAY);
     } else {
         return task();
     }
@@ -357,7 +357,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         WLOGFE("handler is nullptr");
         return;
     }
-    handler_->PostTask(stopPipTask, DELAY_ANIM);
+    handler_->PostTask(stopPipTask, "wms:RestorePictureInPictureWindow", DELAY_ANIM);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     WLOGFI("restore pip main window finished");
 }

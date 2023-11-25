@@ -96,7 +96,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
             WLOGFE("get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(jsCallback, "JsWindowListener::OnSizeChange", 0,
+        eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnSizeChange", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     currentWidth_ = rect.width_;
@@ -202,7 +202,7 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         WLOGFE("get main event handler failed!");
         return;
     }
-    eventHandler_->PostTask(task, "JsWindowListener::LifeCycleCallBack", 0,
+    eventHandler_->PostTask(task, "wms:JsWindowListener::LifeCycleCallBack", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 

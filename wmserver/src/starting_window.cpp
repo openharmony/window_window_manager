@@ -256,7 +256,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     // Register FirstFrame Callback to rs, replace startwin
     wptr<WindowNode> weak = node;
     auto firstFrameCompleteCallback = [weak]() {
-        WindowManagerService::GetInstance().PostAsyncTask([weak]() {
+        auto task = [weak]() {
             FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
                 "wms:async:ShowStartingWindow");
             auto weakNode = weak.promote();
@@ -275,7 +275,8 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
             }
             WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
             weakNode->firstFrameAvailable_ = true;
-        });
+        };
+        WindowManagerService::GetInstance().PostAsyncTask(task, "firstFrameCompleteCallback");
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
     RSTransaction::FlushImplicitTransaction();
