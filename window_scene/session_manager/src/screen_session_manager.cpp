@@ -641,12 +641,20 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     WLOGFI("ScreenSessionManager::WakeUpBegin remove suspend begin task");
     blockScreenPowerChange_ = false;
     taskScheduler_->RemoveTask("suspendBeginTask");
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+        isMultiScreenCollaboration_ = true;
+        return true;
+    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN, reason);
 }
 
 bool ScreenSessionManager::WakeUpEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:WakeUpEnd");
+    if (isMultiScreenCollaboration_) {
+        isMultiScreenCollaboration_ = false;
+        return true;
+    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END,
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
@@ -663,6 +671,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     };
     taskScheduler_->PostTask(suspendBeginTask, "suspendBeginTask", 1500);
     sessionDisplayPowerController_->SuspendBegin(reason);
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+        isMultiScreenCollaboration_ = true;
+        return true;
+    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
 }
 
@@ -671,6 +683,10 @@ bool ScreenSessionManager::SuspendEnd()
     WLOGFI("ScreenSessionManager::SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
+    if (isMultiScreenCollaboration_) {
+        isMultiScreenCollaboration_ = false;
+        return true;
+    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
@@ -717,7 +733,9 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
     }
 
     rsInterface_.SetScreenPowerStatus(screenId, status);
-
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+        return true;
+    }
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
@@ -775,6 +793,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         for (auto screenId : screenIds) {
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
+    }
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+        return true;
     }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
@@ -2516,6 +2537,11 @@ bool ScreenSessionManager::IsFoldable()
         return false;
     }
     return foldScreenController_->IsFoldable();
+}
+
+bool ScreenSessionManager::IsMultiScreenCollaboration()
+{
+    return isMultiScreenCollaboration_;
 }
 
 FoldStatus ScreenSessionManager::GetFoldStatus()
