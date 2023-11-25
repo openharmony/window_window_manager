@@ -17,6 +17,7 @@
 
 #include <event_handler.h>
 #include <refbase.h>
+#include "parameters.h"
 #include <power_mgr_client.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
@@ -30,10 +31,12 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureController"};
     constexpr int32_t DELAY_ANIM = 500;
+    const std::string PROP_DEFAULT_PAGE_NAME = "const.window.pip.debug.useDefaultPage";
+    const std::string DEFAULT_PAGE_PATH = "pages/pipwindow/PiPWindow";
 }
 
-PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId)
-    : weakRef_(this), pipOption_(pipOption), mainWindowId_(windowId)
+PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId, napi_env env)
+    : weakRef_(this), pipOption_(pipOption), mainWindowId_(windowId), env_(env)
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -94,6 +97,10 @@ WMError PictureInPictureController::ShowPictureInPictureWindow()
     }
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStart();
+    }
+    bool useDefaultPage = system::GetParameter(PROP_DEFAULT_PAGE_NAME, "") != "";
+    if (useDefaultPage && env_ != nullptr) {
+        window_->NapiSetUIContent(DEFAULT_PAGE_PATH, env_, nullptr, false, nullptr);
     }
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
@@ -183,7 +190,6 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        session->window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW);
         PictureInPictureManager::RemoveCurrentPipController();
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
