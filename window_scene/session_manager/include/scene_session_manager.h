@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
+#include <cstdint>
 #include <mutex>
 #include <shared_mutex>
 
@@ -82,6 +83,8 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     virtual void OnScreenshot(DisplayId displayId) override;
     virtual void OnImmersiveStateChange(bool& immersive) override;
+    virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -228,6 +231,8 @@ public:
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
     WSRect GetAINavigationBarArea();
     bool UpdateImmersiveState();
+    WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);

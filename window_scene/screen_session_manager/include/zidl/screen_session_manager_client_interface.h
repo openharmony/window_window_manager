@@ -37,6 +37,7 @@ public:
         TRANS_ID_ON_DISPLAY_STATE_CHANGED,
         TRANS_ID_ON_SCREEN_SHOT,
         TRANS_ID_ON_IMMERSIVE_STATE_CHANGED,
+        TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID,
     };
 
     virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
@@ -53,6 +54,8 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
     virtual void OnScreenshot(DisplayId displayId) = 0;
     virtual void OnImmersiveStateChanged(bool& immersive) = 0;
+    virtual void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds) = 0;
 };
 } // namespace OHOS::Rosen
 

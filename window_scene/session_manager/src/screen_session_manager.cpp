@@ -16,6 +16,7 @@
 #include "session_manager/include/screen_session_manager.h"
 
 #include <csignal>
+#include <cstdint>
 #include <ctime>
 #include <iomanip>
 #include <string_ex.h>
@@ -1178,6 +1179,11 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen ENTER");
+    if (clientProxy_ && option.missionIds_.size() > 0) {
+        std::vector<uint64_t> surfaceNodeIds;
+        clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
+        option.missionIds_ = surfaceNodeIds;
+    }
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
     WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen rsid: %{public}" PRIu64"", rsId);

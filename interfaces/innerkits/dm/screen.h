@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_DM_SCREEN_H
 #define FOUNDATION_DM_SCREEN_H
 
+#include <cstdint>
 #include <screen_manager/screen_types.h>
 #include <string>
 #include <surface.h>
@@ -49,6 +50,7 @@ struct VirtualScreenOption {
     sptr<Surface> surface_;
     int32_t flags_;
     bool isForShot_ {true};
+    std::vector<uint64_t> missionIds_ {};
 };
 
 struct ExpandOption {
