@@ -1694,11 +1694,17 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
 
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
-    auto task = [this, persistentId]() {
+    const auto& callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [this, persistentId, callingPid]() {
         WLOGFI("[WMSSystem][WMSSub] Destroy specific session start, id: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
+        }
+
+        if (callingPid != sceneSession->GetCallingPid()) {
+            WLOGFE("[WMSSystem][WMSSub] Permission denied, not destroy by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         auto ret = sceneSession->UpdateActiveStatus(false);
         WindowDestroyNotifyVisibility(sceneSession);
