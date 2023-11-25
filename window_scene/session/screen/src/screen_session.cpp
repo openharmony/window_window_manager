@@ -303,17 +303,12 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    Rotation displayScreenRotation = targetRotation;
-    if (foldDisplayMode == FoldDisplayMode::FULL) {
-        // fold phone need fix 90 degree by remainder 360 degree
-        displayScreenRotation = ConvertIntToRotation((rotation + 90) % 360);
-    }
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(displayScreenRotation));
+    displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
