@@ -17,6 +17,7 @@
 
 #include <cinttypes>
 #include <csignal>
+#include <cstdint>
 #include <iomanip>
 #include <map>
 #include <memory>
@@ -4288,6 +4289,42 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
         WLOGFI("[WMSDialog] Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
             persistentId, parentSession->GetPersistentId());
         return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+    std::vector<uint64_t>& surfaceNodeIds)
+{
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+}
+
+WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+    std::vector<uint64_t>& surfaceNodeIds)
+{
+    auto isSaCall = SessionPermission::IsSACalling();
+    if (!isSaCall) {
+        WLOGFE("The interface only support for sa call");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &missionIds, &surfaceNodeIds]() {
+        std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto missionId : missionIds) {
+            iter = sceneSessionMap_.find(static_cast<int32_t>(missionId));
+            if (iter == sceneSessionMap_.end()) {
+                continue;
+            }
+            auto sceneSession = iter->second;
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (sceneSession->GetSurfaceNode() == nullptr) {
+                continue;
+            }
+            surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+        }
+        return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task);
 }
