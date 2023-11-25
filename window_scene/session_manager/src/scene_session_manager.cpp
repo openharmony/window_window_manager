@@ -979,22 +979,22 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
 void SceneSessionManager::RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSInput] session is nullptr");
         return;
     }
     NotifyCallingSessionForegroundFunc onInputMethodUpdate = [this](int32_t persistentId) {
         this->OnInputMethodUpdate(persistentId);
     };
     sceneSession->SetNotifyCallingSessionUpdateRectFunc(onInputMethodUpdate);
-    WLOGFD("RegisterInputMethodUpdateFunc success");
+    WLOGFD("[WMSInput] RegisterInputMethodUpdateFunc success");
 }
 
 void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
 {
-    WLOGFD("Resize input method calling window");
+    WLOGFD("[WMSInput] Resize input method calling window");
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
-        WLOGFE("Input method is null");
+        WLOGFE("[WMSInput] Input method is null");
         return;
     }
     ResizeSoftInputCallingSessionIfNeed(scnSession, true);
@@ -1003,27 +1003,27 @@ void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSInput] session is nullptr");
         return;
     }
     NotifyCallingSessionForegroundFunc onInputMethodShown = [this](int32_t persistentId) {
         this->OnInputMethodShown(persistentId);
     };
     sceneSession->SetNotifyCallingSessionForegroundFunc(onInputMethodShown);
-    WLOGFD("RegisterInputMethodShownFunc success");
+    WLOGFD("[WMSInput] RegisterInputMethodShownFunc success");
 }
 
 void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 {
-    WLOGFD("Resize input method calling window");
+    WLOGFD("[WMSInput] Resize input method calling window");
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
-        WLOGFE("Input method is null");
+        WLOGFE("[WMSInput] Input method is null");
         return;
     }
     callingSession_ = GetSceneSession(focusedSessionId_);
     if (callingSession_ == nullptr) {
-        WLOGFE("calling session is nullptr");
+        WLOGFE("[WMSInput] calling session is nullptr");
         return;
     }
     callingSession_->SetTextFieldAvoidInfo(scnSession->textFieldPositionY_, scnSession->textFieldHeight_);
@@ -1033,14 +1033,14 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 void SceneSessionManager::RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSInput] session is nullptr");
         return;
     }
     NotifyCallingSessionBackgroundFunc onInputMethodHide = [this]() {
         this->RestoreCallingSessionSizeIfNeed();
     };
     sceneSession->SetNotifyCallingSessionBackgroundFunc(onInputMethodHide);
-    WLOGFD("RegisterInputMethodHideFunc success");
+    WLOGFD("[WMSInput] RegisterInputMethodHideFunc success");
 }
 
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
@@ -4384,14 +4384,14 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
     if (callingSession_ == nullptr) {
-        WLOGFE("calling session is nullptr");
+        WLOGFE("[WMSInput] calling session is nullptr");
         return;
     }
     SessionGravity gravity;
     uint32_t percent = 0;
     sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
     if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM && gravity != SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        WLOGFI("input method window gravity is not bottom, no need to raise calling window");
+        WLOGFI("[WMSInput] input method window gravity is not bottom, no need to raise calling window");
         return;
     }
 
@@ -4411,7 +4411,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
         callingSessionRect = callingSession_->GetSessionRect();
     }
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
-        WLOGFD("There is no overlap area");
+        WLOGFD("[WMSInput] There is no overlap area");
         return;
     }
 
@@ -4440,23 +4440,23 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
     const WSRect& lastSafeRect = callingSession_->GetLastSafeRect();
     if (lastSafeRect == safeRect) {
-        WLOGFI("NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
+        WLOGFI("[WMSInput] NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
         return;
     }
     callingSession_->SetLastSafeRect(safeRect);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_,
         sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
-    WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
+    WLOGFD("[WMSInput] OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
     callingSession_->NotifyOccupiedAreaChangeInfo(info);
 }
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
-    WLOGFD("RestoreCallingSessionSizeIfNeed");
+    WLOGFD("[WMSInput] RestoreCallingSessionSizeIfNeed");
     if (callingSession_ == nullptr) {
-        WLOGFE("Calling session is nullptr");
+        WLOGFE("[WMSInput] Calling session is nullptr");
         return;
     }
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
@@ -4503,7 +4503,7 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
 void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        WLOGFE("[WMSInput] sceneSession is nullptr");
         return;
     }
     SessionGravity gravity;
@@ -4516,7 +4516,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
 
     auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("screenSession is null");
+        WLOGFE("[WMSInput] screenSession is null");
         return;
     }
 
@@ -4532,7 +4532,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
     requestRect.posY_ = defaultDisplayInfo->GetHeight() -
         static_cast<int32_t>(requestRect.height_);
     sceneSession->GetSessionProperty()->SetRequestRect(requestRect);
-    WLOGFD("Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
+    WLOGFD("[WMSInput] Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
     sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }
