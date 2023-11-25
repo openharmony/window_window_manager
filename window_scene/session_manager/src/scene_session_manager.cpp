@@ -350,7 +350,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionContinueState");
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
@@ -744,7 +744,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         return rootSceneSession_;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetRootSceneSession");
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
@@ -860,7 +860,7 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
         WLOGFD("Window(%{public}d) to set the cursor style, pid:%{public}d", windowId, pid);
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
 sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& sessionInfo,
@@ -945,7 +945,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             persistentId, sceneSession->GetWindowType());
         return sceneSession;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
@@ -1136,7 +1136,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "PrepareTerminate:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
 
@@ -1169,8 +1169,9 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         }
         return RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
     };
-
-    taskScheduler_->PostAsyncTask(task);
+    std::string taskName = "RequestSceneSessionActivation:PID:" +
+        (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
+    taskScheduler_->PostAsyncTask(task, taskName);
     return future;
 }
 
@@ -1269,8 +1270,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         }
         return WSError::WS_OK;
     };
-
-    taskScheduler_->PostAsyncTask(task);
+    std::string taskName = "RequestSceneSessionBackground:PID:" +
+        (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
+    taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
 }
 
@@ -1297,7 +1299,7 @@ void SceneSessionManager::NotifyForegroundInteractiveStatus(const sptr<SceneSess
         }
     };
 
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyForegroundInteractiveStatus");
 }
 
 WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession)
@@ -1417,8 +1419,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         }
         return WSError::WS_OK;
     };
-
-    taskScheduler_->PostAsyncTask(task);
+    std::string taskName = "RequestSceneSessionDestruction:PID:" +
+        (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
+    taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
 }
 
@@ -1460,7 +1463,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
         DestroyAndDisconnectSpecificSessionInner(sceneSession);
         remoteObjectMap_.erase(iter);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "DestroySpecificSession");
 }
 
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -1506,7 +1509,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return errCode;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
@@ -1573,7 +1576,7 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
         }
         return WMError::WM_OK;
     };
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "RegisterCreateSubSessionListener");
 }
 
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
@@ -1658,7 +1661,7 @@ void SceneSessionManager::NotifyStatusBarEnabledChange(bool enable)
         }
         return WMError::WM_OK;
     };
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "NotifyStatusBarEnabledChange");
 }
 
 void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func)
@@ -1725,7 +1728,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
         }
     };
 
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifySessionTouchOutside:PID" + std::to_string(persistentId));
     return;
 }
 
@@ -1791,7 +1794,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         return DestroyAndDisconnectSpecificSessionInner(sceneSession);
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
 }
 
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
@@ -1817,7 +1820,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "ProcessBackEvent");
     return WSError::WS_OK;
 }
 
@@ -1890,7 +1893,7 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
         CleanUserMap();
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "SwitchUser");
     return WSError::WS_OK;
 }
 
@@ -2075,7 +2078,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
             mainWinId, topWinId, zOrder);
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
 }
 
 WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
@@ -2113,7 +2116,7 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
         return weakSession->HandleUpdateProperty(property, action, sceneSession);
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UpdateProperty");
 }
 
 WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
@@ -2250,7 +2253,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
             }
             break;
-        }  
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;
@@ -2392,7 +2395,8 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "HandleTurnScreenOn");
+
 #else
     WLOGFD("Can not found the sub system of PowerMgr");
 #endif
@@ -2437,7 +2441,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
                 requireLock, res);
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "HandleKeepScreenOn");
 #else
     WLOGFD("Can not found the sub system of PowerMgr");
 #endif
@@ -2540,7 +2544,7 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetGestureNavigaionEnabled");
 }
 
 WSError SceneSessionManager::SetFocusedSession(int32_t persistentId)
@@ -2619,7 +2623,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
         };
-        taskScheduler_->PostVoidSyncTask(task);
+        taskScheduler_->PostVoidSyncTask(task, "sessionException");
     };
     sceneSession->SetSessionExceptionListener(sessionExceptionFunc);
     WLOGFD("[WMSLife]RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
@@ -2655,7 +2659,7 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
                 listenerController_->NotifySessionSnapshotChanged(persistentId);
             }
         };
-        taskScheduler_->PostVoidSyncTask(task);
+        taskScheduler_->PostVoidSyncTask(task, "sessionSnapshot");
     };
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("RegisterSessionSnapshotFunc success, id: %{public}d", sceneSession->GetPersistentId());
@@ -3042,7 +3046,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
             RequestSessionUnfocus(persistentId);
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RequestFocusStatus" + std::to_string(persistentId));
     return WMError::WM_OK;
 }
 
@@ -3418,7 +3422,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "UpdateFocus" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
 
@@ -3811,7 +3815,7 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     auto task = [this, abilityInfoPtr]() {
         ProcessPreload(*abilityInfoPtr);
     };
-    return taskScheduler_->PostAsyncTask(task);
+    return taskScheduler_->PostAsyncTask(task, "NotifyCompleteFirstFrameDrawing" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
@@ -3859,7 +3863,7 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionLabel");
 }
 
 WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
@@ -3893,7 +3897,7 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionIcon");
 }
 
 WSError SceneSessionManager::IsValidSessionIds(
@@ -3931,7 +3935,7 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener
             return WSError::WS_DO_NOTHING;
         }
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "AddSessionListener");
 }
 
 WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListener>& listener)
@@ -3954,7 +3958,7 @@ WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListen
             return WSError::WS_DO_NOTHING;
         }
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "DelSessionListener");
 }
 
 WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_t numMax,
@@ -4006,7 +4010,7 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
         }
         return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, sessionInfos);
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetSessionInfos");
 }
 
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
@@ -4071,7 +4075,7 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             return WSError::WS_ERROR_INVALID_PARAM;
         }
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetSessionInfo");
 }
 
 int SceneSessionManager::GetRemoteSessionInfo(const std::string& deviceId,
@@ -4160,7 +4164,7 @@ WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
         return WSError::WS_OK;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "DumpSessionAll");
 }
 
 WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
@@ -4183,7 +4187,7 @@ WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector
         return WSError::WS_OK;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "DumpSessionWithId");
 }
 
 WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
@@ -4309,7 +4313,7 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
@@ -4341,7 +4345,7 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeLi
         sessionListener_ = sessionListener;
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "RegisterSessionListener");
 }
 
 void SceneSessionManager::UnregisterSessionListener()
@@ -4353,7 +4357,7 @@ void SceneSessionManager::UnregisterSessionListener()
     auto task = [this]() {
         sessionListener_ = nullptr;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "UnregisterSessionListener");
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
@@ -4389,8 +4393,9 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo);
         return WSError::WS_OK;
     };
-
-    taskScheduler_->PostAsyncTask(task);
+    std::string taskName = "RequestSceneSessionByCall:PID:" +
+        (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
+    taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
 }
 
@@ -4404,7 +4409,7 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
     };
 
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
 }
 
 sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)
@@ -4466,7 +4471,7 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
             persistentId, parentSession->GetPersistentId());
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "BindDialogTarget:PID:" + std::to_string(persistentId));
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
@@ -4505,7 +4510,7 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetSurfaceNodeIdsFromMissionIds");
 }
 
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -4526,7 +4531,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "RegisterWindowManagerAgent");
 }
 
 WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -4547,7 +4552,7 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UnregisterWindowManagerAgent");
 }
 
 void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
@@ -4572,7 +4577,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         StartWindowInfoReportLoop();
     };
     int64_t delayTime = 1000 * 60 * 60; // an hour.
-    bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
+    bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
         WLOGFE("Report post listener callback task failed. the task name is WindowInfoReport");
         return;
@@ -4713,7 +4718,7 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionGravity" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
@@ -4792,7 +4797,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
@@ -4815,7 +4820,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
             WindowChangedFunc_(scnSession->GetPersistentId(), type);
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
 }
 
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
@@ -4877,7 +4882,7 @@ std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId
         std::string filePath = scnSession->GetSessionSnapshotFilePath();
         return filePath;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotFilePath" + std::to_string(persistentId));
 }
 
 sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& surfaceId)
@@ -4903,7 +4908,7 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
     WLOGFD("WindowLayerInfoChangeCallback: entry");
     std::weak_ptr<RSOcclusionData> weak(occlusiontionData);
 
-    taskScheduler_->PostVoidSyncTask([this, weak]() {
+    auto task = [this, weak]() {
         auto weakOcclusionData = weak.lock();
         if (weakOcclusionData == nullptr) {
             WLOGFE("weak occlusionData is nullptr");
@@ -4927,7 +4932,8 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
         if (drawingContentChangeInfos.size() != 0) {
             DealwithDrawingContentChange(drawingContentChangeInfos);
         }
-    });
+    };
+    taskScheduler_->PostVoidSyncTask(task, "WindowLayerInfoChangeCallback");
 }
 
 void SceneSessionManager::GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusiontionData,
@@ -5123,7 +5129,7 @@ WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sce
             WLOGFE("Set system animated scene failed.");
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "SetSystemAnimatedScenes");
     return WMError::WM_OK;
 }
 
@@ -5232,7 +5238,7 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
         WLOGFE("fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "PendingSessionToForeground");
 }
 
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token)
@@ -5245,7 +5251,7 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
         WLOGFE("fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
 }
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
@@ -5263,7 +5269,7 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
         }
         return WSError::WS_ERROR_INVALID_PARAM;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetFocusSessionToken");
 }
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
@@ -5284,7 +5290,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
@@ -5388,11 +5394,9 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         } else {
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
-
         return;
     };
-
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
 }
 
@@ -5423,7 +5427,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             }
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyAINavigationBarShowStatus");
     return WSError::WS_OK;
 }
 
@@ -5449,7 +5453,7 @@ WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persiste
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UpdateSessionTouchOutsideListener" + std::to_string(persistentId));
 }
 
 WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
@@ -5470,7 +5474,7 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UpdateSessionWindowVisibilityListener");
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
@@ -5508,7 +5512,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "ProcessVirtualPixelRatioChange:DID:" + std::to_string(defaultDisplayId));
 }
 
 void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -5536,7 +5540,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
 }
 
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -5572,7 +5576,7 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
             sceneSession->NotifyScreenshot();
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "OnScreenshot:PID:" + std::to_string(displayId));
 }
 
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
@@ -5590,7 +5594,7 @@ WSError SceneSessionManager::ClearSession(int32_t persistentId)
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         return ClearSession(sceneSession);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "ClearSession:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
 
@@ -5628,7 +5632,7 @@ WSError SceneSessionManager::ClearAllSessions()
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "ClearAllSessions");
     return WSError::WS_OK;
 }
 
@@ -5664,7 +5668,7 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
         sceneSession->SetSessionInfoLockedState(true);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "LockSession:SID:" + std::to_string(sessionId));
 }
 
 WSError SceneSessionManager::UnlockSession(int32_t sessionId)
@@ -5687,7 +5691,7 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
         sceneSession->SetSessionInfoLockedState(false);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "UnlockSession" + std::to_string(sessionId));
 }
 
 WSError SceneSessionManager::MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId)
@@ -5825,7 +5829,7 @@ WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistent
         scnSession->UpdateSessionRect(rectPos, SizeChangeReason::RECOVER);
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RecoveryPullPiPMainWindow");
     return WSError::WS_OK;
 }
 
@@ -6051,7 +6055,7 @@ WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMax
         sceneSession->UpdateMaximizeMode(isMaximize);
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "UpdateMaximizeMode:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
 
@@ -6148,7 +6152,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
         }
     };
     // need sync task since animation transcation need
-    return taskScheduler_->PostAsyncTask(task);
+    return taskScheduler_->PostAsyncTask(task, "NotifyUpdateRectAfterLayout");
 }
 
 WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
@@ -6190,7 +6194,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
             return WSError::WS_ERROR_INVALID_SESSION;
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RaiseWindowToTop");
     return WSError::WS_OK;
 }
 

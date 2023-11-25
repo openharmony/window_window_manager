@@ -683,7 +683,6 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     return objValue;
 }
-} // namespace OHOS::Rosen
 
 
 struct AsyncInfo {
@@ -741,8 +740,10 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
     if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
     } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        handler_->PostTask(std::move(task), OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
+            OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
         NapiAsyncWork(env_, task);
     }
 }
+} // namespace OHOS::Rosen

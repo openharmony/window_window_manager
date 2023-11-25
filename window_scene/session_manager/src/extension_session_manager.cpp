@@ -80,7 +80,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         return extensionSession;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "RequestExtensionSession");
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
@@ -114,7 +114,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RequestExtensionSessionActivation");
     return WSError::WS_OK;
 }
 
@@ -149,7 +149,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RequestExtensionSessionBackground");
     return WSError::WS_OK;
 }
 
@@ -184,7 +184,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "RequestExtensionSessionDestruction");
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
