@@ -20,11 +20,12 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
+#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-
+using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
 }
@@ -36,7 +37,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value templateTypeValue = nullptr;
     napi_value widthValue = nullptr;
     napi_value heightValue = nullptr;
-
+    napi_value xComponentControllerValue = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId;
     uint32_t templateType;
@@ -48,7 +49,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
-
+    napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     if (!ConvertFromJsValue(env, navigationIdValue, navigationId)) {
         WLOGFE("Failed to convert navigationIdValue to stringType");
@@ -66,10 +67,13 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
         WLOGFE("Failed to convert heightValue to uint32_tType");
         return -1;
     }
+    std::shared_ptr<XComponentController> xComponentControllerResult =
+        XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);
     option.SetContentSize(width, height);
+    option.SetXComponentController(xComponentControllerResult);
     return 0;
 }
 
