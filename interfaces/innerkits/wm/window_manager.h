@@ -147,6 +147,7 @@ public:
     uint32_t layer_;
     WindowMode mode_;
     WindowType type_;
+    float scaleVal_;
 };
 
 /**

@@ -100,7 +100,7 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         WLOGFE("Invalid angle value, angle is %{public}f.", angle);
         return;
     }
-    WLOGFD("angle vlaue in PostureData is: %{public}f.", angle);
+    WLOGFD("angle value in PostureData is: %{public}f.", angle);
     HandleSensorData(angle, DEFAULT_HALL);
 }
 
