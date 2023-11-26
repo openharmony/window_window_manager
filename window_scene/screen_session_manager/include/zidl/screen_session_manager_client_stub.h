@@ -38,6 +38,7 @@ private:
     int HandleOnScreenOrientationChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenRotationLockedChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnDisplayStateChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenshot(MessageParcel& data, MessageParcel& reply);
     int HandleOnImmersiveStateChanged(MessageParcel& data, MessageParcel& reply);
 
