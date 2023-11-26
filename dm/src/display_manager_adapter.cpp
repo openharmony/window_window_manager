@@ -112,14 +112,14 @@ DMError ScreenManagerAdapter::SetScreenColorTransform(ScreenId screenId)
 DMError ScreenManagerAdapter::GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::GetPixelFormat");
     return displayManagerServiceProxy_->GetPixelFormat(screenId, pixelFormat);
 }
 
 DMError ScreenManagerAdapter::SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::SetPixelFormat");
     return displayManagerServiceProxy_->SetPixelFormat(screenId, pixelFormat);
 }
 
@@ -127,21 +127,21 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId,
     std::vector<ScreenHDRFormat>& hdrFormats)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::GetSupportedHDRFormats");
     return displayManagerServiceProxy_->GetSupportedHDRFormats(screenId, hdrFormats);
 }
 
 DMError ScreenManagerAdapter::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::GetScreenHDRFormat");
     return displayManagerServiceProxy_->GetScreenHDRFormat(screenId, hdrFormat);
 }
 
 DMError ScreenManagerAdapter::SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::SetScreenHDRFormat");
     return displayManagerServiceProxy_->SetScreenHDRFormat(screenId, modeIdx);
 }
 
@@ -149,7 +149,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId,
     std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::GetSupportedColorSpaces");
     return displayManagerServiceProxy_->GetSupportedColorSpaces(screenId, colorSpaces);
 }
 
@@ -157,7 +157,7 @@ DMError ScreenManagerAdapter::GetScreenColorSpace(ScreenId screenId,
     GraphicCM_ColorSpaceType& colorSpace)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::GetScreenColorSpace");
     return displayManagerServiceProxy_->GetScreenColorSpace(screenId, colorSpace);
 }
 
@@ -165,7 +165,7 @@ DMError ScreenManagerAdapter::SetScreenColorSpace(ScreenId screenId,
     GraphicCM_ColorSpaceType colorSpace)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
+    WLOGFI("ScreenManagerAdapter::SetScreenColorSpace");
     return displayManagerServiceProxy_->SetScreenColorSpace(screenId, colorSpace);
 }
 
@@ -177,6 +177,7 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId, std::vec
     for (auto value : hdrFormatsVec) {
         hdrFormats.push_back(static_cast<uint32_t>(value));
     }
+    WLOGFI("ScreenManagerAdapter::GetSupportedHDRFormats ret %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -188,6 +189,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId, std::ve
     for (auto value : colorSpacesVec) {
         colorSpaces.push_back(static_cast<uint32_t>(value));
     }
+    WLOGFI("ScreenManagerAdapter::GetSupportedColorSpaces ret %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
