@@ -242,6 +242,67 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetResolution(uint32_t width, uint32_t height, uint32_t dpi) const;
+
+    /**
+     * @brief Get the pixel format of the screen.
+     *
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError GetPixelFormat(GraphicPixelFormat& pixelFormat) const;
+
+    /**
+     * @brief Set the color gamut of the screen.
+     *
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetPixelFormat(GraphicPixelFormat pixelFormat);
+
+    /**
+     * @brief Get the supported HDR format of the screen.
+     *
+     * @param colorSpaces Supported HDR format of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
+    DMError GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats) const;
+
+    /**
+     * @brief Get the HDR format of the screen.
+     *
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError GetScreenHDRFormat(ScreenHDRFormat& hdrFormat) const;
+
+    /**
+     * @brief Set the HDR format of the screen.
+     *
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetScreenHDRFormat(int32_t modeIdx);
+
+    /**
+     * @brief Get the supported color space of the screen.
+     *
+     * @param colorSpaces Supported color space of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
+    DMError GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces) const;
+
+    /**
+     * @brief Get the color space of the screen.
+     *
+     * @param colorSpace Color space of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
+    DMError GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace) const;
+
+    /**
+     * @brief Set the color space of the screen.
+     *
+     * @param colorSpace Color space of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
+
 protected:
     // No more methods or variables can be defined here.
     explicit Screen(sptr<ScreenInfo> info);

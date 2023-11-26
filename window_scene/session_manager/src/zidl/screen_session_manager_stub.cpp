@@ -362,6 +362,90 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat;
+            DMError ret = GetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(pixelFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat = static_cast<GraphicPixelFormat>(data.ReadUint32());
+            DMError ret = SetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenHDRFormat> hdrFormats;
+            DMError ret = GetSupportedHDRFormats(screenId, hdrFormats);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<ScreenHDRFormat>(reply, hdrFormats,
+                [](Parcel& parcel, const ScreenHDRFormat& hdrFormat) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(hdrFormat));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenHDRFormat hdrFormat;
+            DMError ret = GetScreenHDRFormat(screenId, hdrFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(hdrFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t modeIdx = data.ReadInt32();
+            DMError ret = SetScreenHDRFormat(screenId, modeIdx);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+            DMError ret = GetSupportedColorSpaces(screenId, colorSpaces);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<GraphicCM_ColorSpaceType>(reply, colorSpaces,
+                [](Parcel& parcel, const GraphicCM_ColorSpaceType& color) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(color));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace;
+            DMError ret = GetScreenColorSpace(screenId, colorSpace);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(colorSpace));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace = static_cast<GraphicCM_ColorSpaceType>(data.ReadUint32());
+            DMError ret = SetScreenColorSpace(screenId, colorSpace);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());

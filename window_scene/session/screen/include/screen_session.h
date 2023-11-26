@@ -102,6 +102,15 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
+    DMError GetPixelFormat(GraphicPixelFormat& pixelFormat);
+    DMError SetPixelFormat(GraphicPixelFormat pixelFormat);
+    DMError GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats);
+    DMError GetScreenHDRFormat(ScreenHDRFormat& hdrFormat);
+    DMError SetScreenHDRFormat(int32_t modeIdx);
+    DMError GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces);
+    DMError GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace);
+    DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
+
     bool HasPrivateSessionForeground() const;
     void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
