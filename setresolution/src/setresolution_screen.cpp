@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     }
     std::cout << "width: " << cmdArgments.width << " height: " << cmdArgments.height <<
         " dpi: " << cmdArgments.dpi << std::endl;
-    
+
     std::vector<sptr<Rosen::Screen>> screens;
     Rosen::ScreenManager::GetInstance().GetAllScreens(screens);
     if (screens.size() == 0) {
@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     DMError ret = screens[0]->SetResolution(cmdArgments.width, cmdArgments.height, cmdArgments.dpi);
     if (ret != DMError::DM_OK) {
         std::cout<< "Error! SetResolution failed!" << std::endl;
+        return 0;
     }
     std::cout<< "SetResolution successful!" << std::endl;
     return 0;
