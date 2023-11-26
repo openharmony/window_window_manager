@@ -25,6 +25,34 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class ColorSpace : uint32_t {
+    UNKNOWN = 0,
+    ADOBE_RGB = 1,
+    BT2020_HLG = 2,
+    BT2020_PQ = 3,
+    BT601_EBU = 4,
+    BT601_SMPTE_C = 5,
+    BT709 = 6,
+    P3_HLG = 7,
+    P3_PQ = 8,
+    DISPLAY_P3 = 9,
+    SRGB = 10,
+    LINEAR_SRGB = 11,
+    LINEAR_P3 = 12,
+    LINEAR_BT2020 = 13,
+};
+
+enum class HDRFormat : uint32_t {
+    NONE = 0,
+    VIDEO_HLG = 1,
+    VIDEO_HDR10 = 2,
+    VIDEO_HDR_VIVID = 3,
+    IMAGE_HDR_VIVID_DUAL = 4,
+    IMAGE_HDR_VIVID_SINGLE = 5,
+    IMAGE_HDR_ISO_DUAL = 6,
+    IMAGE_HDR_ISO_SINGLE = 7,
+};
+
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display);
 napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo);
@@ -41,11 +69,15 @@ public:
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value GetCutoutInfo(napi_env env, napi_callback_info info);
     static napi_value HasImmersiveWindow(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedColorSpaces(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedHDRFormats(napi_env env, napi_callback_info info);
 
 private:
     sptr<Display> display_ = nullptr;
     napi_value OnGetCutoutInfo(napi_env env, napi_callback_info info);
     napi_value OnHasImmersiveWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetSupportedColorSpaces(napi_env env, napi_callback_info info);
+    napi_value OnGetSupportedHDRFormats(napi_env env, napi_callback_info info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

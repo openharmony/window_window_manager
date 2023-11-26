@@ -77,6 +77,14 @@ public:
         TRANS_ID_SCREEN_GET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
+        TRANS_ID_SCREEN_GET_PIXEL_FORMAT,
+        TRANS_ID_SCREEN_SET_PIXEL_FORMAT,
+        TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT,
+        TRANS_ID_SCREEN_GET_HDR_FORMAT,
+        TRANS_ID_SCREEN_SET_HDR_FORMAT,
+        TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE,
+        TRANS_ID_SCREEN_GET_COLOR_SPACE,
+        TRANS_ID_SCREEN_SET_COLOR_SPACE,
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
         TRANS_ID_HAS_PRIVATE_WINDOW,
@@ -132,6 +140,41 @@ public:
     virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap) = 0;
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
     virtual DMError SetScreenColorTransform(ScreenId screenId) = 0;
+
+    virtual DMError GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetSupportedHDRFormats(ScreenId screenId,
+        std::vector<ScreenHDRFormat>& hdrFormats)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetSupportedColorSpaces(ScreenId screenId,
+        std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
