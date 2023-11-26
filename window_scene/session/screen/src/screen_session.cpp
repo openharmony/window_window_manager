@@ -613,6 +613,130 @@ DMError ScreenSession::SetScreenColorTransform()
     return DMError::DM_OK;
 }
 
+DMError ScreenSession::GetPixelFormat(GraphicPixelFormat& pixelFormat)
+{
+    auto ret = RSInterfaces::GetInstance().GetPixelFormat(rsId_, pixelFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetPixelFormat ok! rsId %{public}" PRIu64 ", pixelFormat %{public}u",
+        rsId_, static_cast<uint32_t>(pixelFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetPixelFormat(GraphicPixelFormat pixelFormat)
+{
+    if (pixelFormat > GRAPHIC_PIXEL_FMT_VENDER_MASK) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetPixelFormat(rsId_, pixelFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetPixelFormat ok! rsId %{public}" PRIu64 ", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(pixelFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(rsId_, hdrFormats);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SCB: ScreenSession::GetSupportedHDRFormats fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+            rsId_, ret);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SCB: ScreenSession::GetSupportedHDRFormats ok! rsId %{public}" PRIu64 ", size %{public}u",
+        rsId_, static_cast<uint32_t>(hdrFormats.size()));
+
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenHDRFormat(rsId_, hdrFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenHDRFormat ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, static_cast<uint32_t>(hdrFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
+{
+    std::vector<ScreenHDRFormat> hdrFormats;
+    DMError res = GetSupportedHDRFormats(hdrFormats);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return res;
+    }
+    if (modeIdx < 0 || modeIdx >= static_cast<int32_t>(hdrFormats.size())) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64 " modeIdx %{public}d invalid.",
+            rsId_, modeIdx);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetScreenHDRFormat(rsId_, modeIdx);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}u",
+        rsId_, modeIdx);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(rsId_, colorSpaces);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SCB: ScreenSession::GetSupportedColorSpaces fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+            rsId_, ret);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SCB: ScreenSession::GetSupportedColorSpaces ok! rsId %{public}" PRIu64 ", size %{public}u",
+        rsId_, static_cast<uint32_t>(colorSpaces.size()));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenColorSpace(rsId_, colorSpace);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, static_cast<uint32_t>(colorSpace));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
+{
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    DMError res = GetSupportedColorSpaces(colorSpaces);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return res;
+    }
+    if (colorSpace < 0 || static_cast<int32_t>(colorSpace) >= static_cast<int32_t>(colorSpaces.size())) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64 " colorSpace %{public}d invalid.",
+            rsId_, colorSpace);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetScreenColorSpace(rsId_, colorSpace);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, colorSpace);
+    return DMError::DM_OK;
+}
+
 bool ScreenSession::HasPrivateSessionForeground() const
 {
     return hasPrivateWindowForeground_;

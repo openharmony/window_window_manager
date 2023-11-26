@@ -1228,6 +1228,114 @@ DMError ScreenSessionManager::GetScreenSupportedColorGamuts(ScreenId screenId,
     return screen->GetScreenSupportedColorGamuts(colorGamuts);
 }
 
+DMError ScreenSessionManager::GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat)
+{
+    WLOGFI("GetPixelFormat::ScreenId: %{public}" PRIu64, screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->GetPixelFormat(pixelFormat);
+}
+
+DMError ScreenSessionManager::SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
+{
+    WLOGFI("SetPixelFormat::ScreenId: %{public}" PRIu64 ", pixelFormat %{public}d", screenId, pixelFormat);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->SetPixelFormat(pixelFormat);
+}
+
+DMError ScreenSessionManager::GetSupportedHDRFormats(ScreenId screenId,
+    std::vector<ScreenHDRFormat>& hdrFormats)
+{
+    WLOGFI("SCB: ScreenSessionManager::GetSupportedHDRFormats %{public}" PRIu64, screenId);
+    sptr<ScreenSession> screen = GetScreenSession(screenId);
+    if (screen == nullptr) {
+        WLOGFE("SCB: ScreenSessionManager::GetSupportedHDRFormats nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->GetSupportedHDRFormats(hdrFormats);
+}
+
+DMError ScreenSessionManager::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat)
+{
+    WLOGFI("GetScreenHDRFormat::ScreenId: %{public}" PRIu64, screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->GetScreenHDRFormat(hdrFormat);
+}
+
+DMError ScreenSessionManager::SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
+{
+    WLOGFI("SetScreenHDRFormat::ScreenId: %{public}" PRIu64 ", modeIdx %{public}d", screenId, modeIdx);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->SetScreenHDRFormat(modeIdx);
+}
+
+DMError ScreenSessionManager::GetSupportedColorSpaces(ScreenId screenId,
+    std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+{
+    WLOGFI("SCB: ScreenSessionManager::GetSupportedColorSpaces %{public}" PRIu64, screenId);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("SCB: ScreenSessionManager::GetSupportedColorSpaces nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->GetSupportedColorSpaces(colorSpaces);
+}
+
+DMError ScreenSessionManager::GetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace)
+{
+    WLOGFI("GetScreenColorSpace::ScreenId: %{public}" PRIu64, screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->GetScreenColorSpace(colorSpace);
+}
+
+DMError ScreenSessionManager::SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace)
+{
+    WLOGFI("SetScreenColorSpace::ScreenId: %{public}" PRIu64 ", colorSpace %{public}d", screenId, colorSpace);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screenSession->SetScreenColorSpace(colorSpace);
+}
+
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
