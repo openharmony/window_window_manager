@@ -28,6 +28,8 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
     virtual void OnScreenshot(DisplayId displayId) = 0;
     virtual void OnImmersiveStateChange(bool& immersive) { return; }
+    virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds) { return; }
 };
 }
 }
