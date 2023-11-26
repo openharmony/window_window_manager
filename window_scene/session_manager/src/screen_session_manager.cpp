@@ -829,6 +829,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     } else {
         for (auto screenId : screenIds) {
             rsInterface_.SetScreenPowerStatus(screenId, status);
+            HandlerSensor(status);
         }
     }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
@@ -836,6 +837,22 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+}
+
+void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
+{
+    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    if (isPhone) {
+        if (status == ScreenPowerStatus::POWER_STATUS_ON) {
+            WLOGFI("subscribe rotation sensor when phone turn on");
+            ScreenSensorConnector::SubscribeRotationSensor();
+        } else if (status == ScreenPowerStatus::POWER_STATUS_OFF) {
+            WLOGFI("unsubscribe rotation sensor when phone turn off");
+            ScreenSensorConnector::UnsubscribeRotationSensor();
+        } else {
+            WLOGFI("SetScreenPower state not support");
+        }
+    }
 }
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
@@ -1108,7 +1125,9 @@ void ScreenSessionManager::SetSensorSubscriptionEnabled()
         ScreenRotationProperty::Init();
         return;
     }
+    ScreenRotationProperty::Init();
     ScreenSensorConnector::SubscribeRotationSensor();
+    WLOGFI("subscribe rotation sensor successful");
 }
 
 bool ScreenSessionManager::SetRotationFromWindow(Rotation targetRotation)
