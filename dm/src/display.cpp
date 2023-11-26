@@ -208,7 +208,7 @@ DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const
 
 DMError Display::GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(GetScreenId(), colorSpaces);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetScreenId(), colorSpaces);
 }
 
 } // namespace OHOS::Rosen
