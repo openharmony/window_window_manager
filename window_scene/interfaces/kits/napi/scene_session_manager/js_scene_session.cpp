@@ -530,11 +530,11 @@ void JsSceneSession::ProcessSessionFocusableChangeRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSComm]session is nullptr");
         return;
     }
     session->SetSessionFocusableChangeListener(func);
-    WLOGFI("ProcessSessionFocusableChangeRegister success");
+    WLOGFI("[WMSFocus]ProcessSessionFocusableChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionTouchableChangeRegister()
@@ -786,7 +786,7 @@ napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callb
 
 napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]SetFocusable");
+    WLOGI("[WMSFocus][NAPI]SetFocusable");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }
@@ -1025,7 +1025,7 @@ napi_value JsSceneSession::OnSetFocusable(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->SetFocusable(isFocusable);
-    WLOGFI("[NAPI]OnSetFocusable end");
+    WLOGFI("[WMSFocus][NAPI]OnSetFocusable end");
     return NapiGetUndefined(env);
 }
 
@@ -1266,7 +1266,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    WLOGFI("[WMSFocus][NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
