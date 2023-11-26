@@ -109,6 +109,88 @@ DMError ScreenManagerAdapter::SetScreenColorTransform(ScreenId screenId)
     return displayManagerServiceProxy_->SetScreenColorTransform(screenId);
 }
 
+DMError ScreenManagerAdapter::GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetPixelFormat(screenId, pixelFormat);
+}
+
+DMError ScreenManagerAdapter::SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetPixelFormat(screenId, pixelFormat);
+}
+
+DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId,
+    std::vector<ScreenHDRFormat>& hdrFormats)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetSupportedHDRFormats(screenId, hdrFormats);
+}
+
+DMError ScreenManagerAdapter::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetScreenHDRFormat(screenId, hdrFormat);
+}
+
+DMError ScreenManagerAdapter::SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetScreenHDRFormat(screenId, modeIdx);
+}
+
+DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId,
+    std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetSupportedColorSpaces(screenId, colorSpaces);
+}
+
+DMError ScreenManagerAdapter::GetScreenColorSpace(ScreenId screenId,
+    GraphicCM_ColorSpaceType& colorSpace)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetScreenColorSpace(screenId, colorSpace);
+}
+
+DMError ScreenManagerAdapter::SetScreenColorSpace(ScreenId screenId,
+    GraphicCM_ColorSpaceType colorSpace)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetScreenColorSpace(screenId, colorSpace);
+}
+
+DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId, std::vector<uint32_t>& hdrFormats)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    std::vector<ScreenHDRFormat> hdrFormatsVec;
+    DMError ret = GetSupportedHDRFormats(screenId, hdrFormatsVec);
+    for (auto value : hdrFormatsVec) {
+        hdrFormats.push_back(static_cast<uint32_t>(value));
+    }
+    return ret;
+}
+
+DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId, std::vector<uint32_t>& colorSpaces)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    std::vector<GraphicCM_ColorSpaceType> colorSpacesVec;
+    DMError ret = GetSupportedColorSpaces(screenId, colorSpacesVec);
+    for (auto value : colorSpacesVec) {
+        colorSpaces.push_back(static_cast<uint32_t>(value));
+    }
+    return ret;
+}
+
 ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IDisplayManagerAgent>& displayManagerAgent)
 {

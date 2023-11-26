@@ -156,6 +156,46 @@ DMError Screen::SetScreenColorTransform()
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(GetId());
 }
 
+DMError Screen::GetPixelFormat(GraphicPixelFormat& pixelFormat) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(GetId(), pixelFormat);
+}
+
+DMError Screen::SetPixelFormat(GraphicPixelFormat pixelFormat)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(GetId(), pixelFormat);
+}
+
+DMError Screen::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(GetId(), hdrFormats);
+}
+
+DMError Screen::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(GetId(), hdrFormat);
+}
+
+DMError Screen::SetScreenHDRFormat(int32_t modeIdx)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(GetId(), modeIdx);
+}
+
+DMError Screen::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetId(), colorSpaces);
+}
+
+DMError Screen::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(GetId(), colorSpace);
+}
+
+DMError Screen::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(GetId(), colorSpace);
+}
+
 ScreenId Screen::GetParentId() const
 {
     UpdateScreenInfo();
