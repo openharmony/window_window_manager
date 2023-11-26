@@ -227,7 +227,7 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 {
-    WLOGFI("[NAPI]OnShiftFocus");
+    WLOGFI("[WMSFocus][NAPI]OnShiftFocus");
     auto iter = jsCbMap_.find(SHIFT_FOCUS_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -311,23 +311,23 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 void JsSceneSessionManager::ProcessShiftFocus()
 {
     ProcessShiftFocusFunc func = [this](int32_t persistentId) {
-        WLOGFD("ProcessShiftFocus called");
+        WLOGFD("[WMSFocus]ProcessShiftFocus called");
         this->OnShiftFocus(persistentId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
-        WLOGFD("WMSFocus, scb uicontent focus");
+        WLOGFD("[WMSFocus]WMSFocus, scb uicontent focus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
-            WLOGFE("uiContent is nullptr");
+            WLOGFE("[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->Focus();
     };
     NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
-        WLOGFD("WMSFocus, scb uicontent unfocus");
+        WLOGFD("[WMSFocus]WMSFocus, scb uicontent unfocus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
-            WLOGFE("uiContent is nullptr");
+            WLOGFE("[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->UnFocus();
@@ -364,7 +364,7 @@ napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::UpdateFocus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateFocus");
+    WLOGD("[WMSFocus][NAPI]UpdateFocus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateFocus(env, info) : nullptr;
 }
@@ -524,7 +524,7 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
 
 napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]RequestFocusStatus");
+    WLOGI("[WMSFocus][NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }
