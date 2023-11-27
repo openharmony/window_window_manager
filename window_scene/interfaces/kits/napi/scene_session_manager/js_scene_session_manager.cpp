@@ -35,6 +35,9 @@
 #ifdef SOC_PERF_ENABLE
 #include "socperf_client.h"
 #endif
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#endif
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -112,6 +115,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
+    BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
     return NapiGetUndefined(env);
 }
 
@@ -539,6 +543,13 @@ napi_value JsSceneSessionManager::UpdateTitleInTargetPos(napi_env env, napi_call
     WLOGI("[NAPI]UpdateTitleInTargetPos");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateTitleInTargetPos(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::ReportData(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]ReportData");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnReportData(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1682,6 +1693,46 @@ napi_value JsSceneSessionManager::OnUpdateTitleInTargetPos(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateTitleInTargetPos(persistentId, isShow, height);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 3) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t resType;
+    if (!ConvertFromJsValue(env, argv[0], resType)) {
+        WLOGFE("[NAPI]Failed to convert parameter to resType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t value;
+    if (!ConvertFromJsValue(env, argv[1], value)) {
+        WLOGFE("[NAPI]Failed to convert parameter to value");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t payloadPid;
+    if (!ConvertFromJsValue(env, argv[2], payloadPid)) {
+        WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::unordered_map<std::string, std::string> mapPayload;
+    mapPayload.emplace("srcPid",std::to_string(payloadPid));
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    OHOS::ResourceSchedule::ResSchedClient::GetInStance().ReportData(resType, value, mapPayload);
+#endif
     return NapiGetUndefined(env);
 }
 
