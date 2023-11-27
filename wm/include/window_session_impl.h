@@ -166,6 +166,11 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void SetDrawingContentState(bool drawingContentState);
+    bool lastProcessContentState_ = false;
+    bool GetDrawingContentState() const override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
