@@ -390,12 +390,12 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnWindowStatusChange(WindowStatus status)
+void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 {
     WLOGFD("[NAPI]OnWindowStatusChange");
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
+        [self = weakRef_, windowstatus, eng = env_] (napi_env env,
             NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -409,9 +409,9 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus status)
                 return;
             }
             napi_set_named_property(env, propertyValue, "status",
-                CreateJsValue(eng, static_cast<uint32_t>(status)));
+                CreateJsValue(eng, static_cast<uint32_t>(windowstatus)));
             napi_value argv[] = {propertyValue};
-            thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
