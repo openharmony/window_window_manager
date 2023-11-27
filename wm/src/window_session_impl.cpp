@@ -1420,7 +1420,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        if (avoidAreaChangeListeners_[persistentId].empty()) {
+        if (touchOutsideListeners_[persistentId].empty()) {
             isUpdate = true;
         }
     }
