@@ -1765,7 +1765,7 @@ void WindowSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingConten
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
-    WLOGFD("NotifySessionBackground");
+    WLOGFD("NotifyWindowStatusChange");
     auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
