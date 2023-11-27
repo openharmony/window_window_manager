@@ -12,7 +12,10 @@
     "component": {
       "name": "window_manager",
       "subsystem": "window",
-      "syscap": ["SystemCapability.WindowManager.WindowManager.Core"],
+      "syscap": [
+        "SystemCapability.WindowManager.WindowManager.Core",
+        "SystemCapability.Window.SessionManager"
+      ],
       "features": [
         "window_manager_feature_coverage = false",
         "window_manager_dayu210_resource_config",
