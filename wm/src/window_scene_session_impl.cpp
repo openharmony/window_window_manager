@@ -521,7 +521,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
 
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        
+        UpdateSubWindowState(type);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
     }
@@ -529,7 +529,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowState()
+void WindowSceneSessionImpl::UpdateSubWindowState(WindowType &type)
 {
     if (WindowHelper::IsMainWindow(type)) {
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
