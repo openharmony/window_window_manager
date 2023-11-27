@@ -204,7 +204,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool autoRotate = data.ReadBool();
-            DMError result = SetVirtualMirrorScreenBufferRotation(screenId, autoRotate);
+            DMError result = SetVirtualMirrorScreenCanvasRotation(screenId, autoRotate);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
