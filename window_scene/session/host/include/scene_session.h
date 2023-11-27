@@ -195,6 +195,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info);
     WSError UpdateSizeChangeReason(SizeChangeReason reason);
     void ClearSpecificSessionCbMap();
 
