@@ -3501,7 +3501,7 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WMError::WM_ERROR_INVALID_PARAM;
             }
@@ -3555,7 +3555,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
