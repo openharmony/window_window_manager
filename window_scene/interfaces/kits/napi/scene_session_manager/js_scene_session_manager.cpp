@@ -1729,9 +1729,9 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     std::unordered_map<std::string, std::string> mapPayload;
-    mapPayload.emplace("srcPid",std::to_string(payloadPid));
+    mapPayload.emplace("srcPid", std::to_string(payloadPid));
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    OHOS::ResourceSchedule::ResSchedClient::GetInStance().ReportData(resType, value, mapPayload);
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, value, mapPayload);
 #endif
     return NapiGetUndefined(env);
 }
