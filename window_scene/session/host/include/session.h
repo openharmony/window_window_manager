@@ -68,6 +68,7 @@ using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
+using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
 
 class ILifecycleListener {
 public:
@@ -144,7 +145,7 @@ public:
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
-    void SetSessionInfoLockedState(bool state);
+    void SetSessionInfoLockedState(bool lockedState);
     void SetSessionInfoIsClearSession(bool isClearSession);
     void SetSessionInfoAffinity(std::string affinity);
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
@@ -241,6 +242,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
+    void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
+    void NotifySessionInfoLockedStateChange(bool lockedState);
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -375,6 +378,7 @@ protected:
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
+    NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
