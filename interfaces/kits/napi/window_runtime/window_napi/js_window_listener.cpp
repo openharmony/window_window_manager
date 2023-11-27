@@ -390,7 +390,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnWindowStatusChange(Windowstatus status)
+void JsWindowListener::OnWindowStatusChange(WindowStatus status)
 {
     WLOGFD("[NAPI]OnWindowStatusChange");
     // js callback should run in js thread

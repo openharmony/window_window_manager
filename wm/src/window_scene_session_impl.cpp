@@ -521,21 +521,26 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
 
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        if (WindowHelper::IsMainWindow(type)) {
-            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
-        }
-        if (WindowHelper::IsSubWindow(type)) {
-            if (state_ == WindowState::STATE_SHOWN) {
-                NotifyAfterBackground();
-            }
-        } else {
-            NotifyAfterBackground();
-        }
+        
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
     }
     NotifyWindowStatusChange(GetMode());
     return res;
+}
+
+void WindowSceneSessionImpl::UpdateSubWindowState()
+{
+    if (WindowHelper::IsMainWindow(type)) {
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+    }
+    if (WindowHelper::IsSubWindow(type)) {
+        if (state_ == WindowState::STATE_SHOWN) {
+            NotifyAfterBackground();
+        }
+    } else {
+        NotifyAfterBackground();
+    }
 }
 
 void WindowSceneSessionImpl::PreProcessCreate()
