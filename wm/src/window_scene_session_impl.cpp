@@ -529,7 +529,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowState(WindowType &type)
+void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     if (WindowHelper::IsMainWindow(type)) {
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);

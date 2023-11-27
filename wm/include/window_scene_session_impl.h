@@ -132,7 +132,7 @@ public:
     void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
     bool lastProcessContentState_ = false;
     void GetWindowDrawingContentChangeInfo(WindowDrawingContentInfo info);
-    void UpdateSubWindowState(WindowType& type);
+    void UpdateSubWindowState(const WindowType& type);
 
 protected:
     void DestroySubWindow();
