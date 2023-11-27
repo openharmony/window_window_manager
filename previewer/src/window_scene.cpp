@@ -19,6 +19,7 @@
 #include "window_impl.h"
 #include "window_manager_hilog.h"
 #include "window_model.h"
+#include "window_display.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -61,6 +62,19 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 
     Previewer::PreviewerWindow::GetInstance().SetWindowObject(mainWindow_.GetRefPtr());
     mainWindow_->RegisterLifeCycleListener(listener);
+
+    Previewer::PreviewerDisplay::GetInstance().RegisterStatusChangedCallback(
+        [this](FoldStatus status) {
+            WLOGFI("FoldStatus changed to %{public}d", status);
+            if (mainWindow_ == nullptr) {
+                WLOGFE("mainWindow_ is NULL");
+                return WMError::WM_ERROR_NULLPTR;
+            }
+            Previewer::PreviewerDisplay::GetInstance().SetFoldStatus(status);
+            return WMError::WM_OK;
+        }
+    );
+
     return WMError::WM_OK;
 }
 
