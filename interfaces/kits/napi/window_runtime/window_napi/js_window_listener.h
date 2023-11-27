@@ -44,6 +44,7 @@ const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
+const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -81,6 +82,7 @@ public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
+    void OnWindowStatusChange(WindowStatus status) override;
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
