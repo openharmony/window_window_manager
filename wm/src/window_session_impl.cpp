@@ -637,7 +637,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     uiContent_ = std::move(uiContent);
 
     if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
-        SetAppWindowLabel(subWindowTitle_);
+        SetAPPWindowLabel(subWindowTitle_);
     }
 
     uint32_t version = 0;
