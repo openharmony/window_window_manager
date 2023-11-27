@@ -125,7 +125,7 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
-    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
+    virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
