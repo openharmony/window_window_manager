@@ -368,6 +368,8 @@ private:
     WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
+    WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     std::shared_mutex sceneSessionMapMutex_;
