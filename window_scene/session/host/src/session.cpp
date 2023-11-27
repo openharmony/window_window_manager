@@ -133,10 +133,11 @@ void Session::SetSessionInfoContinueState(ContinueState state)
     sessionInfo_.continueState = state;
 }
 
-void Session::SetSessionInfoLockedState(bool state)
+void Session::SetSessionInfoLockedState(bool lockedState)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.lockedState = state;
+    sessionInfo_.lockedState = lockedState;
+    NotifySessionInfoLockedStateChange(lockedState);
 }
 
 void Session::SetSessionInfoIsClearSession(bool isClearSession)
@@ -1949,6 +1950,19 @@ WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::st
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+}
+
+void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
+{
+    sessionInfoLockedStateChangeFunc_ = func;
+}
+
+void Session::NotifySessionInfoLockedStateChange(bool lockedState)
+{
+    WLOGFD("Notify sessioninfo lockedstate change: %{public}u", lockedState);
+    if (sessionInfoLockedStateChangeFunc_) {
+        sessionInfoLockedStateChangeFunc_(lockedState);
+    }
 }
 
 WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)

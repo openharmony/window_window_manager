@@ -97,6 +97,7 @@ private:
     void ProcessForceHideChangeRegister();
     void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
 
     void PendingSessionActivation(SessionInfo& info);
@@ -131,6 +132,7 @@ private:
     void OnForceHideChange(bool hide);
     void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
 
     napi_env env_;
