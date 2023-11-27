@@ -1432,26 +1432,26 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate)
+DMError ScreenSessionManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("SetVirtualMirrorScreenBufferRotation denied!");
+        WLOGFE("SetVirtualMirrorScreenCanvasRotation denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    WLOGFI("SCB: ScreenSessionManager::SetVirtualMirrorScreenBufferRotation ENTER");
+    WLOGFI("SCB: ScreenSessionManager::SetVirtualMirrorScreenCanvasRotation ENTER");
 
     bool res = false;
     ScreenId rsScreenId;
     if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-        WLOGFE("SetVirtualMirrorScreenBufferRotation: No corresponding rsId");
+        WLOGFE("SetVirtualMirrorScreenCanvasRotation: No corresponding rsId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    res = rsInterface_.SetVirtualMirrorScreenBufferRotation(rsScreenId, autoRotate);
+    res = rsInterface_.SetVirtualMirrorScreenCanvasRotation(rsScreenId, autoRotate);
     if (!res) {
-        WLOGE("SetVirtualMirrorScreenBufferRotation failed in RenderService");
+        WLOGE("SetVirtualMirrorScreenCanvasRotation failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("SetVirtualMirrorScreenBufferRotation success");
+    WLOGI("SetVirtualMirrorScreenCanvasRotation success");
     return DMError::DM_OK;
 }
 
