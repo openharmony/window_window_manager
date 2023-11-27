@@ -87,7 +87,7 @@ public:
          *
          * @param infos DisplayChangeInfo.
          */
-        virtual void OnDisplayUpdate(const sptr<DisplayChangeInfo>& info) {}
+        virtual void OnDisplayUpdate([[maybe_unused]]const sptr<DisplayChangeInfo>& info) {}
     };
 
     class IDisplayModeListener : public virtual RefBase {
