@@ -932,12 +932,12 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sp
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation)
+DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualMirrorScreenBufferRotation: ENTER");
+    WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: SetVirtualMirrorScreenBufferRotation: remote is nullptr");
+        WLOGFW("SCB: SetVirtualMirrorScreenCanvasRotation: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -945,17 +945,17 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenBufferRotation(ScreenId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: SetVirtualMirrorScreenBufferRotation: WriteInterfaceToken failed");
+        WLOGFE("SCB: SetVirtualMirrorScreenCanvasRotation: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    bool res = data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteBool(bufferRotation);
+    bool res = data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteBool(canvasRotation);
     if (!res) {
-        WLOGFW("SCB:SetVirtualMirrorScreenBufferRotation: Write screenId/bufferRotation failed");
+        WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: Write screenId/bufferRotation failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB:SetVirtualMirrorScreenBufferRotation: SendRequest failed");
+        WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
