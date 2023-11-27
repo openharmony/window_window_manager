@@ -36,7 +36,7 @@ public:
      * @param winId Window id.
      * @param pid Process id.
      * @param uid User id.
-     * @param visibility True means window is visible, false means the opposite.
+     * @param drawing content True means window is drawing, false means the opposite.
      * @param winType Type of window.
      */
     WindowDrawingContentInfo(uint32_t winId, int32_t pid, int32_t uid, bool drawingContentState,
