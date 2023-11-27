@@ -1597,6 +1597,10 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The interface permission failed.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     PostTask([weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1681,6 +1685,10 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The interface permission failed.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     PostTask([weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
