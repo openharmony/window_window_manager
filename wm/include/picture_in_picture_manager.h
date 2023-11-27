@@ -38,21 +38,27 @@ public:
     static void SetCurrentPipController(sptr<PictureInPictureController> pipController);
     static void RemoveCurrentPipController();
     static void RemoveCurrentPipControllerSafety();
+    static void AttachActivePipController(sptr<PictureInPictureController> pipController);
+    static void DetachActivePipController(sptr<PictureInPictureController> pipController);
 
     static bool IsAttachedPipWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
+    static bool IsActiveController(wptr<PictureInPictureController> pipController);
 
     static void DoRestore();
     static void DoClose(bool needAnim);
     static void DoStartMove();
     static void DoScale();
-    static void DoActionEvent();
+    static void DoActionEvent(std::string actionName);
+    static void AutoStartPipWindow();
+    static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
 private:
     static sptr<PictureInPictureController> curPipController_;
     static sptr<PictureInPictureController> activePipController_;
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
     static std::mutex pipWindowStateMutex_;
     static PipWindowState pipWindowState_;
+    static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
 };
 } // namespace Rosen
 } // namespace OHOS

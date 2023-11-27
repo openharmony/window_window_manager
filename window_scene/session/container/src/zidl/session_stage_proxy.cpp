@@ -22,6 +22,7 @@
 #include <message_parcel.h>
 
 #include "window_manager_hilog.h"
+#include "ws_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -238,6 +239,40 @@ WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& 
     return static_cast<WSError>(ret);
 }
 
+WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                               AAFwk::WantParams& reWantParams)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    if (!data.WriteParcelable(&wantParams)) {
+        WLOGFE("wantParams write failed.");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    int sendCode = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return static_cast<WSErrorCode>(sendCode);
+    }
+
+    std::shared_ptr<AAFwk::WantParams> readWantParams(reply.ReadParcelable<AAFwk::WantParams>());
+    if (readWantParams == nullptr) {
+        WLOGFE("readWantParams is nullptr");
+        return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    }
+
+    reWantParams = *readWantParams;
+    return WSErrorCode::WS_OK;
+}
+
 void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
     MessageParcel data;
@@ -410,4 +445,141 @@ WSError SessionStageProxy::UpdateMaximizeMode(MaximizeMode mode)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+void SessionStageProxy::NotifyConfigurationUpdated()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void  SessionStageProxy::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(reason)) {
+        WLOGFE("Write reason failed");
+        return;
+    }
+    if (!data.WriteBool(withAnimation)) {
+        WLOGFE("Write withAnimation failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FOREGROUND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("Send NotifySessionForeground Request failed");
+    }
+}
+
+void SessionStageProxy::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(reason)) {
+        WLOGFE("Write reason failed");
+        return;
+    }
+    if (!data.WriteBool(withAnimation)) {
+        WLOGFE("Write withAnimation failed");
+        return;
+    }
+    if (!data.WriteBool(isFromInnerkits)) {
+        WLOGFE("Write isFromInnerkits failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_BACKGROUND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("Send NotifySessionBackground Request failed");
+        return;
+    }
+}
+
+WSError SessionStageProxy::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isShow)) {
+        WLOGFE("Write isShow failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(height)) {
+        WLOGFE("Write height failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TITLE_POSITION_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+void SessionStageProxy::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(info.windowId_)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteInt32(info.pid_)) {
+        WLOGFE("Write pid failed");
+        return;
+    }
+    if (!data.WriteInt32(info.uid_)) {
+        WLOGFE("Write uid failed");
+        return;
+    }
+    if (!data.WriteBool(info.drawingContentState_)) {
+        WLOGFE("Write drawingContentState failed");
+        return ;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(info.windowType_))) {
+        WLOGFE("Write windowType failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest UpdateWindowDrawingContentInfo failed");
+    }
+}
+
 } // namespace OHOS::Rosen

@@ -30,6 +30,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -231,6 +232,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         return nullptr;
     }
     WLOGFD("Create stub successfully!");
+    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getpid(), getuid(), true);
     auto context = GetContext();
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
@@ -250,6 +252,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
         WLOGI("Destroy window.");
     }
     WLOGI("called.");
+    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getpid(), getuid(), false);
     auto context = GetContext();
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
@@ -327,7 +330,7 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
-napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const* argv, size_t argc) const
+napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const * argv, size_t argc) const
 {
     WLOGI("called (%{public}s), begin", name);
 

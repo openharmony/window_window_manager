@@ -14,12 +14,13 @@
  */
 
 #include "session_manager.h"
+
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "mock_session_manager_service_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
-#include "mock_session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -50,15 +51,6 @@ void SessionManager::ClearSessionManagerProxy()
         sessionManagerServiceProxy_ = nullptr;
     }
     sceneSessionManagerProxy_ = nullptr;
-    screenSessionManagerProxy_ = nullptr;
-}
-
-sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    InitSessionManagerServiceProxy();
-    InitScreenSessionManagerProxy();
-    return screenSessionManagerProxy_;
 }
 
 sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
@@ -98,26 +90,6 @@ void SessionManager::InitSessionManagerServiceProxy()
     sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
-    }
-}
-
-void SessionManager::InitScreenSessionManagerProxy()
-{
-    if (screenSessionManagerProxy_) {
-        return;
-    }
-    if (!sessionManagerServiceProxy_) {
-        WLOGFW("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
-        return;
-    }
-    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenSessionManagerService();
-    if (!remoteObject) {
-        WLOGFW("Get screen session manager proxy failed, screen session manager service is null");
-        return;
-    }
-    screenSessionManagerProxy_ = iface_cast<IScreenSessionManager>(remoteObject);
-    if (!screenSessionManagerProxy_) {
-        WLOGFW("Get screen session manager proxy failed, nullptr");
     }
 }
 
@@ -176,68 +148,5 @@ void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     WLOGI("ssm OnRemoteDied");
     SingletonContainer::Get<SessionManager>().Clear();
     SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
-}
-
-void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
-{
-    WLOGFD("CreateAndConnectSpecificSession");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return;
-    }
-    sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, persistentId, session, token);
-}
-
-void SessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
-{
-    WLOGFD("DestroyAndDisconnectSpecificSession");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return;
-    }
-    sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(persistentId);
-}
-
-WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
-{
-    WLOGFD("UpdateProperty");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_DO_NOTHING;
-    }
-    return sceneSessionManagerProxy_->UpdateProperty(property, action);
-}
-
-WMError SessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
-{
-    WLOGFD("SetWindowGravity");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_DO_NOTHING;
-    }
-    return static_cast<WMError>(sceneSessionManagerProxy_->SetSessionGravity(persistentId, gravity, percent));
-}
-
-WMError SessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
-{
-    WLOGFD("BindDialogTarget");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_DO_NOTHING;
-    }
-    return static_cast<WMError>(sceneSessionManagerProxy_->BindDialogTarget(persistentId, targetToken));
 }
 } // namespace OHOS::Rosen

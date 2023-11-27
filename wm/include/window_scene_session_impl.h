@@ -79,6 +79,7 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
+    static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -106,6 +107,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -122,6 +124,14 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+    void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
+    void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError NotifyPrepareClosePiPWindow() override;
+    WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
+    bool lastProcessContentState_ = false;
+    void GetWindowDrawingContentChangeInfo(WindowDrawingContentInfo info);
 
 protected:
     void DestroySubWindow();

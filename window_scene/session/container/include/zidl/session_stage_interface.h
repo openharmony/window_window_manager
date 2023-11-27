@@ -17,16 +17,21 @@
 #define OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
 
 #include <iremote_broker.h>
+#include <list>
+#include <map>
 
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
+#include "window_drawing_content_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 } // namespace MMI
-
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 namespace OHOS::Rosen {
 class RSTransaction;
 
@@ -43,11 +48,36 @@ public:
         return -1;
     }
     virtual void NotifyFocusStateEvent(bool focusState) {}
+    virtual void NotifyConfigurationUpdated() {}
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
     {
         return WSError::WS_OK;
     }
-
+    virtual WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& infos)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& info)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
@@ -66,6 +96,19 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
+    virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
+    virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
+    virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
+    virtual WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+                                                        AAFwk::WantParams& reWantParams)
+    {
+        return WSErrorCode::WS_OK;
+    }
+    virtual void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) = 0;
+    virtual bool GetDrawingContentState() const
+    {
+        return false;
+    };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

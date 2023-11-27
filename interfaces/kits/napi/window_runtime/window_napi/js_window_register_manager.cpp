@@ -284,12 +284,13 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     }
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
-    NativeReference* callbackRef = reinterpret_cast<NativeReference*>(result);
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef);
     if (windowManagerListener == nullptr) {
         WLOGFE("[NAPI]New JsWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    windowManagerListener->SetMainEventHandler();
     WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());

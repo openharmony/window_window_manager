@@ -134,6 +134,31 @@ public:
      * @return Cutout info of the display.
      */
     sptr<CutoutInfo> GetCutoutInfo() const;
+
+    /**
+     * @brief Judge if current display has immersive window.
+     * @param immersive The flag to represent if current display has immersive window.
+     *
+     * @return DM error codes.
+     */
+    DMError HasImmersiveWindow(bool& immersive);
+
+    /**
+     * @brief Get the supported HDR format of the screen.
+     *
+     * @param colorSpaces Supported HDR format of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
+    DMError GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const;
+
+    /**
+     * @brief Get the supported color space of the screen.
+     *
+     * @param colorSpaces Supported color space of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
+    DMError GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const;
+
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);

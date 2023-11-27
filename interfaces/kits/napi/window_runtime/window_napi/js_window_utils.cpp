@@ -111,6 +111,8 @@ napi_value AvoidAreaTypeInit(napi_env env)
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM_GESTURE)));
     napi_set_named_property(env, objValue, "TYPE_KEYBOARD",
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
+    napi_set_named_property(env, objValue, "TYPE_NAVIGATION_INDICATOR",
+        CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)));
     return objValue;
 }
 

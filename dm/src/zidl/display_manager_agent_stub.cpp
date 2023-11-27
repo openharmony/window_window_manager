@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "display_info.h"
+#include "display_change_info.h"
 #include "dm_common.h"
 #include "marshalling_helper.h"
 #include "screen_info.h"
@@ -132,6 +133,16 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
                 return -1;
             }
             NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
+            break;
+        }
+        case TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED: {
+            sptr<DisplayChangeInfo> info;
+            info = DisplayChangeInfo::Unmarshalling(data);
+            if (!info) {
+                WLOGFE("Read DisplayChangeInfo failed");
+                return -1;
+            }
+            NotifyDisplayChangeInfoChanged(info);
             break;
         }
         case TRANS_ID_ON_DISPLAY_MODE_CHANGED: {

@@ -381,11 +381,16 @@ bool WindowController::GetNavigationBarHeight(DisplayId displayId, uint32_t& nav
 
     bool hasFullScreenKeyGuardWindow = false;
     WindowNodeOperationFunc func = [&navigationBarHeight, &hasFullScreenKeyGuardWindow](sptr<WindowNode> windowNode) {
+        if (!windowNode) {
+            WLOGFE("The window node is nullptr.");
+            return false;
+        }
         if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
             windowNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 hasFullScreenKeyGuardWindow = true;
         }
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR &&
+            windowNode->GetVisibilityState() < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             navigationBarHeight = windowNode->GetWindowRect().height_;
             if (hasFullScreenKeyGuardWindow) {
                 WLOGFW("The navigation bar is overlaid by the keyguard window and is invisible");
@@ -485,7 +490,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const Rect& safeRect = WindowHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
-        occupiedArea, safeRect.height_);
+        safeRect, safeRect.height_);
 
     if (WindowNodeContainer::GetAnimateTransactionEnabled()) {
         auto syncTransactionController = RSSyncTransactionController::GetInstance();

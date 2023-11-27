@@ -177,7 +177,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     }
     Rect rect = node->GetWindowRect();
     std::string isShown_ = node->startingWindowShown_ ? "true" : "false";
-    std::string isVisible = node->isVisible_ ? "true" : "false";
+    std::string visibilityState = std::to_string(node->GetVisibilityState());
     std::string Focusable = node->GetWindowProperty()->GetFocusable() ? "true" : "false";
     std::string DecoStatus = node->GetWindowProperty()->GetDecoStatus() ? "true" : "false";
     bool PrivacyMode = node->GetWindowProperty()->GetSystemPrivacyMode() ||
@@ -195,7 +195,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "Orientation: " << static_cast<uint32_t>(node->GetRequestedOrientation()) << std::endl;
     oss << "IsStartingWindow: " << isShown_ << std::endl;
     oss << "FirstFrameCallbackCalled: " << node->firstFrameAvailable_ << std::endl;
-    oss << "IsVisible: " << isVisible << std::endl;
+    oss << "VisibilityState: " << visibilityState << std::endl;
     oss << "Focusable: "  << Focusable << std::endl;
     oss << "DecoStatus: "  << DecoStatus << std::endl;
     oss << "IsPrivacyMode: "  << isPrivacyMode << std::endl;

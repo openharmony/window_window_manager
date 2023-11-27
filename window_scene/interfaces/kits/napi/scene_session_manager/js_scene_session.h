@@ -26,6 +26,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_session.h"
 #include "js_scene_utils.h"
+#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
@@ -37,7 +38,7 @@ public:
     static napi_value Create(napi_env env, const sptr<SceneSession>& session);
     static void Finalizer(napi_env env, void* data, void* hint);
 
-    void ClearCbMap(bool needRemove);
+    void ClearCbMap(bool needRemove, int32_t persistentId);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
@@ -49,6 +50,8 @@ private:
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
+    static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -58,6 +61,8 @@ private:
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
@@ -65,7 +70,7 @@ private:
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessSessionEventRegister();
-    void ProcessCreateSpecificSessionRegister();
+    void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
@@ -92,12 +97,14 @@ private:
     void ProcessForceHideChangeRegister();
     void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessSessionInfoLockedStateChangeRegister();
+    void ProcessPrepareClosePiPSessionRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t eventId);
-    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
@@ -125,6 +132,8 @@ private:
     void OnForceHideChange(bool hide);
     void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnSessionInfoLockedStateChange(bool lockedState);
+    void OnPrepareClosePiPSession();
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
@@ -132,6 +141,8 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     using Func = void(JsSceneSession::*)();
     std::map<std::string, Func> listenerFunc_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
+    static std::map<int32_t, napi_ref> jsSceneSessionMap_;
 };
 } // namespace OHOS::Rosen
 

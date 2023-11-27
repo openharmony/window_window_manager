@@ -22,6 +22,7 @@
 #include "zidl/window_interface.h"
 #include "window_manager_hilog.h"
 #include "window_node_state_machine.h"
+#include "window_visibility_info.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <running_lock.h>
@@ -95,6 +96,7 @@ public:
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void SetAspectRatio(float ratio);
     void SetWindowGravity(WindowGravity gravity, uint32_t percent);
+    void SetVisibilityState(WindowVisibilityState state);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -133,6 +135,7 @@ public:
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
     float GetAspectRatio() const;
     void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
+    WindowVisibilityState GetVisibilityState() const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;
@@ -152,7 +155,7 @@ public:
     uint32_t zOrder_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
-    bool isVisible_ { false };
+    WindowVisibilityState visibilityState_ { WINDOW_VISIBILITY_STATE_MAX };
     bool isAppCrash_ { false };
     bool isPlayAnimationShow_ { false }; // delete when enable state machine
     bool isPlayAnimationHide_ { false }; // delete when enable state machine

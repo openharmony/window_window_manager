@@ -34,14 +34,15 @@ namespace {
 
 bool Permission::IsSystemServiceCalling(bool needPrintLog)
 {
-    Security::AccessToken::NativeTokenInfo tokenInfo;
-    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), tokenInfo);
-    if (tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_CORE ||
-        tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC) {
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        WLOGFD("system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("Is not system service calling, native apl: %{public}d", tokenInfo.apl);
+        WLOGFE("not system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
     }
     return false;
 }

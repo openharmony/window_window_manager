@@ -19,12 +19,11 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":ws_dual_display_device_policy_test",
+    ":ws_distributed_client_test",
     ":ws_event_stage_test",
     ":ws_extension_session_manager_test",
     ":ws_extension_session_test",
     ":ws_fold_screen_controller_test",
-    ":ws_fold_screen_sensor_manager_test",
     ":ws_fold_screen_state_machine_test",
     ":ws_move_drag_controller_test",
     ":ws_root_scene_session_test",
@@ -45,11 +44,13 @@ group("unittest") {
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
+    ":ws_session_permission_test",
     ":ws_session_proxy_test",
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_test",
     ":ws_session_stub_test",
     ":ws_session_test",
+    ":ws_task_scheduler_test",
     ":ws_timer_manager_test",
     ":ws_window_event_channel_proxy_test",
     ":ws_window_event_channel_stub_test",
@@ -59,10 +60,23 @@ group("unittest") {
   ]
 }
 
-ohos_unittest("ws_dual_display_device_policy_test") {
+ohos_unittest("ws_task_scheduler_test") {
   module_out_path = module_out_path
 
-  sources = [ "dual_display_device_policy_test.cpp" ]
+  sources = [ "task_scheduler_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_permission_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_permission_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -82,22 +96,6 @@ ohos_unittest("ws_session_listener_controller_test") {
   external_deps = [
     "c_utils:utils",
     "image_framework:image_native",
-  ]
-}
-
-ohos_unittest("ws_fold_screen_sensor_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "fold_screen_sensor_manager_test.cpp" ]
-
-  include_dirs = [ "${window_base_path}/window_scene/session_manager/include/fold_screen_controller" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "sensor:sensor_interface_native",
   ]
 }
 
@@ -220,6 +218,7 @@ ohos_unittest("ws_session_test") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -289,6 +288,7 @@ ohos_unittest("ws_screen_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -592,6 +592,19 @@ ohos_unittest("ws_session_stub_test") {
   ]
 }
 
+ohos_unittest("ws_distributed_client_test") {
+  module_out_path = module_out_path
+
+  sources = [ "distributed_client_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -602,6 +615,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/common/include",
@@ -635,6 +649,8 @@ config("ws_unittest_common_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -653,6 +669,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",

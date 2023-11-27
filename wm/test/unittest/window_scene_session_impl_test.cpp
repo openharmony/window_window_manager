@@ -1656,6 +1656,216 @@ HWTEST_F(WindowSceneSessionImplTest, DumpSessionElementInfo3, Function | SmallTe
     delete option;
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
 }
+
+/**
+ * @tc.name: DisableAppWindowDecor02
+ * @tc.desc: DisableAppWindowDecor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("PreProcessCreate");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->DisableAppWindowDecor();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: RaiseAboveTarget01
+ * @tc.desc: RaiseAboveTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RaiseAboveTarget01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("Connect01");
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT,windowscenesession->RaiseAboveTarget(0));
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
+}
+
+/**
+ * @tc.name: FindParentSessionByParentId02
+ * @tc.desc: FindParentSessionByParentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowTag(WindowTag::MAIN_WINDOW);
+    option->SetWindowName("FindParentSessionByParentId02");
+    sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, parentscenesession);
+
+    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(0));
+    GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
+}
+
+/**
+ * @tc.name: GetConfigurationFromAbilityInfo02
+ * @tc.desc: GetConfigurationFromAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetConfigurationFromAbilityInfo02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->GetConfigurationFromAbilityInfo();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: NotifyWindowSessionProperty01
+ * @tc.desc: NotifyWindowSessionProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyWindowSessionProperty01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->NotifyWindowSessionProperty();
+    ASSERT_EQ(ret, 0);
+}
+
+HWTEST_F(WindowSceneSessionImplTest, IsTransparent01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->IsTransparent();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SetTransparent02
+ * @tc.desc: SetTransparent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetTransparent02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    bool isTransparent = false;
+    windowscenesession->SetTransparent(isTransparent);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Snapshot01
+ * @tc.desc: Snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Snapshot01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->Snapshot();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: BindDialogTarget01
+ * @tc.desc: BindDialogTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, BindDialogTarget01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    sptr<IRemoteObject> targetToken;
+    WMError ret = windowscenesession->BindDialogTarget(targetToken);
+    ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: NotifySessionForeground
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, NotifySessionForeground, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    windowscenesession->NotifySessionForeground(reason, withAnimation);
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: NotifySessionBackground
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, NotifySessionBackground, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    windowscenesession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
+
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo
+ * @tc.desc: UpdateWindowDrawingContentInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    WindowDrawingContentInfo info;
+    info.windowId_ = 0;
+    info.pid_ = 0;
+    info.uid_ = 0;
+    info.drawingContentState_ = true;
+    info.windowType_  = static_cast<WindowType>(3);
+
+    windowscenesession->UpdateWindowDrawingContentInfo(info);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

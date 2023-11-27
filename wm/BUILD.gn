@@ -36,11 +36,18 @@ config("libwm_public_config") {
 
 ## Build libwm_static.a
 ohos_static_library("libwm_static") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   include_dirs = [
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -89,11 +96,14 @@ ohos_static_library("libwm_static") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -157,11 +167,18 @@ ohos_static_library("libwm_static") {
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   include_dirs = [
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -210,11 +227,14 @@ ohos_shared_library("libwm") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -231,10 +251,6 @@ ohos_shared_library("libwm") {
   ]
 
   defines = []
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
 
   if (defined(global_parts_info)) {
     if (defined(

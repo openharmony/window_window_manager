@@ -24,7 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "FoldScreenController"};
 } // namespace
 
-FoldScreenController::FoldScreenController()
+FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMutex): displayInfoMutex_(displayInfoMutex)
 {
     foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::DOUBLE_DISPLAY_DEVICE);
     if (foldScreenPolicy_ == nullptr) {
@@ -44,7 +44,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
     sptr<FoldScreenPolicy> tempPolicy = nullptr;
     switch (productType) {
         case DisplayDeviceType::DOUBLE_DISPLAY_DEVICE: {
-            tempPolicy = new DualDisplayDevicePolicy();
+            tempPolicy = new DualDisplayDevicePolicy(displayInfoMutex_);
             break;
         }
         default: {
@@ -63,6 +63,15 @@ void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
         return;
     }
     foldScreenPolicy_->ChangeScreenDisplayMode(displayMode);
+}
+
+void FoldScreenController::LockDisplayStatus(bool locked)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("LockDisplayStatus: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->LockDisplayStatus(locked);
 }
 
 FoldDisplayMode FoldScreenController::GetDisplayMode()
@@ -90,7 +99,11 @@ FoldStatus FoldScreenController::GetFoldStatus()
 
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 {
-    return nullptr;
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("GetFoldStatus: foldScreenPolicy_ is null");
+        return nullptr;
+    }
+    return foldScreenPolicy_->GetCurrentFoldCreaseRegion();
 }
 
 ScreenId FoldScreenController::GetCurrentScreenId()

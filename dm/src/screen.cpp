@@ -156,6 +156,46 @@ DMError Screen::SetScreenColorTransform()
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(GetId());
 }
 
+DMError Screen::GetPixelFormat(GraphicPixelFormat& pixelFormat) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(GetId(), pixelFormat);
+}
+
+DMError Screen::SetPixelFormat(GraphicPixelFormat pixelFormat)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(GetId(), pixelFormat);
+}
+
+DMError Screen::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(GetId(), hdrFormats);
+}
+
+DMError Screen::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(GetId(), hdrFormat);
+}
+
+DMError Screen::SetScreenHDRFormat(int32_t modeIdx)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(GetId(), modeIdx);
+}
+
+DMError Screen::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetId(), colorSpaces);
+}
+
+DMError Screen::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(GetId(), colorSpace);
+}
+
+DMError Screen::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(GetId(), colorSpace);
+}
+
 ScreenId Screen::GetParentId() const
 {
     UpdateScreenInfo();
@@ -207,6 +247,17 @@ DMError Screen::SetDensityDpi(uint32_t dpi) const
     // Calculate display density, Density = Dpi / 160.
     float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
+}
+
+DMError Screen::SetResolution(uint32_t width, uint32_t height, uint32_t dpi) const
+{
+    if (width <= 0 || height <= 0 || dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
+        WLOGFE("Invalid param, w:%{public}u h:%{public}u dpi:%{public}u", width, height, dpi);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    // Calculate display density, Density = Dpi / 160.
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(GetId(), width, height, density);
 }
 
 sptr<ScreenInfo> Screen::GetScreenInfo() const

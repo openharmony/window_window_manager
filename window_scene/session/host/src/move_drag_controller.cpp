@@ -18,13 +18,12 @@
 #include <hitrace_meter.h>
 #include <pointer_event.h>
 #include "input_manager.h"
+#include <ui/rs_surface_node.h>
 
+#include "display_manager.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
-#include "session_manager/include/screen_session_manager.h"
-#include <ui/rs_surface_node.h>
-#include "window.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -123,7 +122,11 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
 
     int32_t action = pointerEvent->GetPointerAction();
     if (!GetStartMoveFlag()) {
-        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            WLOGFD("Move event hasPointDown");
+            hasPointDown_ = true;
+        } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             WLOGFD("Reset hasPointDown_ when point up or cancel");
@@ -291,7 +294,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     InitMoveDragProperty();
     hasPointDown_ = true;
     moveDragProperty_.originalRect_ = originalRect;
-    auto display = ScreenSessionManager::GetInstance().GetDisplayInfoById(pointerEvent->GetTargetDisplayId());
+    auto display = DisplayManager::GetInstance().GetDisplayById(pointerEvent->GetTargetDisplayId());
     if (display) {
         vpr_ = display->GetVirtualPixelRatio();
     } else {
@@ -374,9 +377,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     FixTranslateByLimits(tranX, tranY);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         targetRect.posX_ += tranX;
-        targetRect.width_ -= static_cast<uint32_t>(tranX);
+        targetRect.width_ -= tranX;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        targetRect.width_ += static_cast<uint32_t>(tranX);
+        targetRect.width_ += tranX;
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
         targetRect.posY_ += tranY;
@@ -459,18 +462,18 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
-        minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_ - limits_.maxWidth_);
-        maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_ - limits_.minWidth_);
+        minTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.maxWidth_);
+        maxTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.minWidth_);
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        minTranX_ = static_cast<int32_t>(limits_.minWidth_ - moveDragProperty_.originalRect_.width_);
-        maxTranX_ = static_cast<int32_t>(limits_.maxWidth_ - moveDragProperty_.originalRect_.width_);
+        minTranX_ = static_cast<int32_t>(limits_.minWidth_) - moveDragProperty_.originalRect_.width_;
+        maxTranX_ = static_cast<int32_t>(limits_.maxWidth_) - moveDragProperty_.originalRect_.width_;
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
-        minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_ - limits_.maxHeight_);
-        maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_ - limits_.minHeight_);
+        minTranY_ = moveDragProperty_.originalRect_.height_ - static_cast<int32_t>(limits_.maxHeight_);
+        maxTranY_ = moveDragProperty_.originalRect_.height_ - static_cast<int32_t>(limits_.minHeight_);
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        minTranY_ = static_cast<int32_t>(limits_.minHeight_ - moveDragProperty_.originalRect_.height_);
-        maxTranY_ = static_cast<int32_t>(limits_.maxHeight_ - moveDragProperty_.originalRect_.height_);
+        minTranY_ = static_cast<int32_t>(limits_.minHeight_) - moveDragProperty_.originalRect_.height_;
+        maxTranY_ = static_cast<int32_t>(limits_.maxHeight_) - moveDragProperty_.originalRect_.height_;
     }
 }
 
@@ -580,7 +583,7 @@ void MoveDragController::ProcessSessionRectChange(const SizeChangeReason& reason
 float MoveDragController::GetVirtualPixelRatio() const
 {
     float vpr = 1.5;
-    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    auto displayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (displayInfo != nullptr) {
         vpr = displayInfo->GetVirtualPixelRatio();
     }

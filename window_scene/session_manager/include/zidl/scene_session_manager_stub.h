@@ -37,6 +37,7 @@ private:
 
     int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
@@ -77,6 +78,8 @@ private:
     int HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply);
     int HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply);
+    int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

@@ -20,12 +20,14 @@
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
 #include <gmock/gmock.h>
-
+#include "accessibility_element_info.h"
 namespace OHOS {
 namespace Ace {
 class UIContentMocker : public UIContent {
 public:
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage));
+    MOCK_METHOD3(Initialize,
+        void(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage));
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
@@ -48,6 +50,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD3(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize));
+    MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
     MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
     MOCK_METHOD2(DumpInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
@@ -69,6 +72,21 @@ public:
     MOCK_METHOD3(CreateModalUIExtension, int32_t(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config));
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
+    MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
+    MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
+
+    MOCK_METHOD4(
+        SearchElementInfoByAccessibilityId, void(int32_t elementId,
+        int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+    MOCK_METHOD4(
+        SearchElementInfosByText, void(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+    MOCK_METHOD4(
+        FindFocusedElementInfo, void(int32_t elementId,
+        int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo &output));
+    MOCK_METHOD4(
+        FocusMoveSearch, void(int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo &output));
 };
 } // namespace Ace
 } // namespace OHOS

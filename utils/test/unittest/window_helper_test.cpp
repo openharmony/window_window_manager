@@ -66,6 +66,9 @@ HWTEST_F(WindowHelperTest, WindowTypeWindowMode, Function | SmallTest | Level1)
 
     ASSERT_EQ(true, WindowHelper::IsFullScreenWindow(WindowMode::WINDOW_MODE_FULLSCREEN));
     ASSERT_EQ(false, WindowHelper::IsFullScreenWindow(WindowMode::WINDOW_MODE_FLOATING));
+
+    ASSERT_EQ(true, WindowHelper::IsDialogWindow(WindowType::WINDOW_TYPE_DIALOG));
+    ASSERT_EQ(false, WindowHelper::IsDialogWindow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
 }
 
 /**

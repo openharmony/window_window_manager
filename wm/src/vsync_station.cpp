@@ -17,6 +17,7 @@
 
 #include "window_frame_trace.h"
 #include "transaction/rs_interfaces.h"
+#include "ui/rs_frame_rate_linker.h"
 #include "window_manager_hilog.h"
 
 using namespace FRAME_TRACE;
@@ -66,6 +67,27 @@ int64_t VsyncStation::GetVSyncPeriod()
     return period;
 }
 
+void VsyncStation::FlushFrameRate(uint32_t rate)
+{
+    if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
+        WLOGI("VsyncStation::FlushFrameRate %{public}d", rate);
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
+        frameRateLinker_->UpdateFrameRateRange(range);
+    }
+}
+
+void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
+{
+    if (frameRateLinker_) {
+        if (!enabled) {
+            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
+            WLOGI("VsyncStation::SetFrameRateLinkerEnable false");
+            frameRateLinker_->UpdateFrameRateRangeImme(range);
+        }
+        frameRateLinker_->SetEnable(enabled);
+    }
+}
+
 void VsyncStation::Init()
 {
     if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
@@ -81,8 +103,10 @@ void VsyncStation::Init()
             }
         }
         auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+        frameRateLinker_ = OHOS::Rosen::RSFrameRateLinker::Create();
         while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), vsyncHandler_);
+            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), frameRateLinker_->GetId(),
+                vsyncHandler_);
         }
         receiver_->Init();
         hasInitVsyncReceiver_ = true;
@@ -107,7 +131,9 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
     }
     for (const auto& callback: vsyncCallbacks) {
-        callback->onCallback(timestamp);
+        if (callback) {
+            callback->onCallback(timestamp);
+        }
     }
 }
 
