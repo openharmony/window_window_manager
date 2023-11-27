@@ -43,6 +43,7 @@ public:
     static napi_value LoadContentByName(napi_env env, napi_callback_info info);
     static napi_value GetWindowMode(napi_env env, napi_callback_info info);
     static napi_value CreateSubWindow(napi_env env, napi_callback_info info);
+    static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value GetSubWindow(napi_env env, napi_callback_info info);
     static napi_value SetShowOnLockScreen(napi_env env, napi_callback_info info);
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
@@ -56,9 +57,12 @@ private:
     napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value OnGetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnCreateSubWindow(napi_env env, napi_callback_info info);
+    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnGetSubWindow(napi_env env, napi_callback_info info);
     napi_value OnSetShowOnLockScreen(napi_env env, napi_callback_info info);
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
+
+    bool ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option);
 
     std::weak_ptr<Rosen::WindowScene> windowScene_;
 };

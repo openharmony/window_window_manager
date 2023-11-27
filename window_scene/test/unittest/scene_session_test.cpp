@@ -500,6 +500,44 @@ HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsDecorEnable01
+ * @tc.desc: IsDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsDecorEnable01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetDecorEnable(true);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SceneSession->property_ = property;
+    ASSERT_EQ(true, scensession->IsDecorEnable());
+
+    sptr<SceneSession> scensession_;
+    scensession_ = new (std::nothrow) SceneSession(info_, nullptr);
+    EXPECT_NE(scensession_, nullptr);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetDecorEnable(false);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(false, scensession_->IsDecorEnable());
+}
+
+/**
  * @tc.name: UpdateNativeVisibility
  * @tc.desc: UpdateNativeVisibility
  * @tc.type: FUNC
@@ -1866,6 +1904,40 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    delete scensession;
+}
+
+/**
+ * @tc.name: TransferPointerEvent
+ * @tc.desc: TransferPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TransferPointerEvent02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsSubWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetPersistentId(11);
+    scensession->property_ = property;
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
     delete scensession;
 }
 

@@ -38,6 +38,7 @@
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include <running_lock.h>
+#include "parameters.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -805,10 +806,11 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
+    auto windowType = Session::GetWindowType();
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
         iter = Session::windowAreas_.cbegin();
         for (;iter != Session::windowAreas_.cend(); ++iter) {
             WSRectF rect = iter->second;
@@ -823,7 +825,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
         if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
             WSRectF rectF = Session::UpdateHotRect(rect);
             isInRegion = rectF.IsInRegion(displayX, displayY);
         } else {
@@ -922,8 +924,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent);
     }
+    auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        WindowHelper::IsMainWindow(property->GetWindowType()) &&
+        (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (CheckDialogOnForeground()) {
             WLOGFI("There is at least one active dialog window in the main winodw.");
@@ -1022,7 +1025,10 @@ bool SceneSession::IsDecorEnable() const
         /* FloatingWindow skip for Phone */
         return false;
     }
-    return WindowHelper::IsMainWindow(property->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
+    auto windowType = property->GetWindowType();
+    return (WindowHelper::IsMainWindow(windowType) ||
+            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
+        systemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
 }
 
@@ -1196,6 +1202,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
     } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
         WLOGFD("PipWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("subwindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
