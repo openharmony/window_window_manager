@@ -1108,7 +1108,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         return false;
     }
     bool enable = (WindowHelper::IsMainWindow(GetType())
-            || (WindowHelper::IsSubWindow(GetType() && property_->IsDecorEnable()))) &&
+            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
