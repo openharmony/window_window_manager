@@ -238,6 +238,27 @@ const std::string WindowOption::GetBundleName() const
 {
     return bundleName_;
 }
+
+void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
+{
+    subWindowTitle_ = subWindowTitle;
+}
+
+const std::string WindowOption::GetSubWindowTitle()
+{
+    return subWindowTitle_;
+}
+
+void WindowOption::SetSubWindowDecorEnable(bool subWindowDecorEnable)
+{
+    subWindowDecorEnable_ = subWindowDecorEnable;
+}
+
+bool WindowOption::GetSubWindowDecorEnable()
+{
+    return subWindowDecorEnable_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

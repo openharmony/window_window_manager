@@ -46,6 +46,7 @@
 #include "singleton_container.h"
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
+#include "parameters.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -117,6 +118,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
+
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
+        WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
+            option->GetSubWindowTitle().c_str(), option->GetSubWindowDecorEnable());
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+        property_->SetDragEnabled(option->GetSubWindowDecorEnable());
+        subWindowTitle_ = option->GetSubWindowTitle();
+    }
+
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -569,6 +580,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC && WindowHelper::IsSubWindow(GetType())) {
+        WLOGFD("hide other buttons except close");
+        uiContent_->HideWindowTitleButton(true, true, true);
+        return;
+    }
     auto modeSupportInfo = property_->GetModeSupportInfo();
     bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     // not support fullscreen in split and floating mode, or not support float in fullscreen mode
@@ -618,6 +635,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+
+    if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
+        SetAppWindowLabel(subWindowTitle_);
+    }
 
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
