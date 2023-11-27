@@ -528,7 +528,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, AppExecFwk::Ability* ability)
+    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
 }
@@ -1463,6 +1463,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
         || property_->GetRequestedOrientation() == Orientation::REVERSE_HORIZONTAL) {
         RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     }
+    needNotifyFocusLater_ = false;
     return ret;
 }
 
@@ -2897,6 +2898,7 @@ int64_t WindowImpl::GetVSyncPeriod()
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
+    isFocused_ = focused;
     if (focused) {
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -2905,11 +2907,14 @@ void WindowImpl::UpdateFocusStatus(bool focused)
             "PID", getpid(),
             "UID", getuid(),
             "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_);
+        if (state_ <= WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+            needNotifyFocusLater_ = true;
+            return;
+        }
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
     }
-    isFocused_ = focused;
 }
 
 bool WindowImpl::IsFocused() const
@@ -3066,6 +3071,9 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
             NotifyAfterForeground();
             subWindowState_ = WindowState::STATE_SHOWN;
         }
+    }
+    if (needNotifyFocusLater_ && isFocused_) {
+        UpdateFocusStatus(true);
     }
     return WmErrorCode::WM_OK;
 }
@@ -3684,6 +3692,13 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
 void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     needDefaultAnimation_= needDefaultAnimation;
+}
+
+WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

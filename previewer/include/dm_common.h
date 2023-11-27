@@ -44,7 +44,30 @@ namespace {
  * @brief Power state change reason.
  */
 enum class PowerStateChangeReason : uint32_t {
-    POWER_BUTTON,
+    POWER_BUTTON = 0,
+    STATE_CHANGE_REASON_INIT = 0,
+    STATE_CHANGE_REASON_TIMEOUT = 1,
+    STATE_CHANGE_REASON_RUNNING_LOCK = 2,
+    STATE_CHANGE_REASON_BATTERY = 3,
+    STATE_CHANGE_REASON_THERMAL = 4,
+    STATE_CHANGE_REASON_WORK = 5,
+    STATE_CHANGE_REASON_SYSTEM = 6,
+    STATE_CHANGE_REASON_APPLICATION = 10,
+    STATE_CHANGE_REASON_SETTINGS = 11,
+    STATE_CHANGE_REASON_HARD_KEY = 12,
+    STATE_CHANGE_REASON_TOUCH = 13,
+    STATE_CHANGE_REASON_CABLE = 14,
+    STATE_CHANGE_REASON_SENSOR = 15,
+    STATE_CHANGE_REASON_LID = 16,
+    STATE_CHANGE_REASON_CAMERA = 17,
+    STATE_CHANGE_REASON_ACCESS = 18,
+    STATE_CHANGE_REASON_RESET = 19,
+    STATE_CHANGE_REASON_POWER_KEY = 20,
+    STATE_CHANGE_REASON_KEYBOARD = 21,
+    STATE_CHANGE_REASON_MOUSE = 22,
+    STATE_CHANGE_REASON_DOUBLE_CLICK = 23,
+    STATE_CHANGE_REASON_REMOTE = 100,
+    STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
 
 /**
@@ -250,6 +273,27 @@ enum class ScreenSourceMode: uint32_t {
     SCREEN_MIRROR = 1,
     SCREEN_EXTEND = 2,
     SCREEN_ALONE = 3,
+};
+
+/**
+ * @brief Enumerates the fold status.
+ */
+enum class FoldStatus: uint32_t {
+    UNKNOWN = 0,
+    EXPAND = 1,
+    FOLDED = 2,
+    HALF_FOLD = 3,
+};
+
+/**
+ * @brief Enumerates the fold display mode.
+ */
+enum class FoldDisplayMode: uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,
+    MAIN = 2,
+    SUB = 3,
+    COORDINATION = 4,
 };
 }
 }

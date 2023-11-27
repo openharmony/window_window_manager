@@ -54,6 +54,15 @@ public:
     DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) override;
     DMError SetScreenColorTransform(ScreenId screenId) override;
 
+    DMError GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat) override;
+    DMError SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat) override;
+    DMError GetSupportedHDRFormats(ScreenId screenId, std::vector<ScreenHDRFormat>& hdrFormats) override;
+    DMError GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat) override;
+    DMError SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx) override;
+    DMError GetSupportedColorSpaces(ScreenId screenId, std::vector<GraphicCM_ColorSpaceType>& colorSpaces) override;
+    DMError GetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace) override;
+    DMError SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace) override;
+
     DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
     DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -62,6 +71,7 @@ public:
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SuspendEnd() override;
+    bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
@@ -80,11 +90,14 @@ public:
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
+        float virtualPixelRatio) override { return DMError::DM_OK; }
     DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override;
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override;
-
+    DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };

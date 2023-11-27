@@ -112,6 +112,8 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_CONNECT)));
     napi_set_named_property(env, objValue, "SCREEN_DISCONNECT", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_DISCONNECT)));
+    napi_set_named_property(env, objValue, "FOLD_SCREEN_FOLDING", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING)));
     return objValue;
 }
 

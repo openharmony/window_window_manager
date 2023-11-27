@@ -31,23 +31,39 @@ config("session_public_config") {
 
     # for mouse style
     "${multimodalinput_path}/input/util/common/include",
+
+    #for element
+    "${accessibility_path}/interfaces/innerkits/common/include",
+    "${window_base_path}/window_scene/session/container/include/parcel/",
   ]
 }
 
 ohos_shared_library("scene_session") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
+    "container/src/parcel/accessibility_element_info_parcel.cpp",
+    "container/src/parcel/accessibility_event_info_parcel.cpp",
     "container/src/window_event_channel.cpp",
     "container/src/zidl/session_stage_proxy.cpp",
     "container/src/zidl/session_stage_stub.cpp",
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
     "host/src/extension_session.cpp",
+    "host/src/main_session.cpp",
     "host/src/move_drag_controller.cpp",
     "host/src/root_scene_session.cpp",
+    "host/src/scb_system_session.cpp",
     "host/src/scene_persistence.cpp",
     "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
     "host/src/session.cpp",
+    "host/src/sub_session.cpp",
+    "host/src/system_session.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -55,19 +71,21 @@ ohos_shared_library("scene_session") {
   public_configs = [ ":session_public_config" ]
 
   deps = [
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   public_deps =
       [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_start_setting",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
@@ -93,6 +111,12 @@ ohos_shared_library("scene_session") {
 }
 
 ohos_shared_library("screen_session") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "screen/src/screen_property.cpp",
     "screen/src/screen_session.cpp",

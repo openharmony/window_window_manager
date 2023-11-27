@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
-#include <iomanip>
-#include <js_runtime_utils.h>
 #include "js_scene_utils.h"
-#include "interfaces/include/ws_common.h"
-#include "session_manager/include/screen_session_manager.h"
+
+#include <iomanip>
+
+#include <event_handler.h>
+#include <js_runtime_utils.h>
+
+#include "display_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -180,6 +183,32 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
     return true;
 }
 
+bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, JsScreenId) != napi_undefined) {
+        int32_t screenId = 0;
+        if (!ConvertFromJsValue(env, JsScreenId, screenId)) {
+            WLOGFE("[NAPI]Failed to convert parameter to screenId");
+            return false;
+        }
+        sessionInfo.screenId_ = static_cast<uint64_t>(screenId);
+    }
+    return true;
+}
+
+bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRecover, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsPersistentRecover) != napi_undefined) {
+        bool isPersistentRecover = false;
+        if (!ConvertFromJsValue(env, jsIsPersistentRecover, isPersistentRecover)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isPersistentRecover");
+            return false;
+        }
+        sessionInfo.isPersistentRecover_ = isPersistentRecover;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -198,6 +227,10 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
     napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
+    napi_value jsIsPersistentRecover = nullptr;
+    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
 
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
@@ -221,6 +254,12 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
         return false;
     }
     if (!IsJsSessionTypeUndefind(env, jsSessionType, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsScreenIdUndefind(env, jsScreenId, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsPersistentRecoverUndefined(env, jsIsPersistentRecover, sessionInfo)) {
         return false;
     }
     return true;
@@ -276,12 +315,12 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
-    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!displayInfo) {
-        WLOGFE("[NAPI]Default display info is null");
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        WLOGFE("[NAPI]Default display is null");
         return false;
     }
-    auto vpr = displayInfo->GetVirtualPixelRatio();
+    auto vpr = display->GetVirtualPixelRatio();
     MMI::PointerEvent::PointerItem pointerItem;
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
@@ -394,6 +433,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callState_)));
     napi_set_named_property(env, objValue, "windowMode",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.windowMode)));
+    napi_set_named_property(env, objValue, "screenId",
+        CreateJsValue(env, static_cast<int32_t>(sessionInfo.screenId_)));
     return objValue;
 }
 
@@ -593,6 +634,69 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_TOAST", JsSessionType::TYPE_SYSTEM_TOAST);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_FLOAT", JsSessionType::TYPE_SYSTEM_FLOAT);
     SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
+    SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     return objValue;
 }
 } // namespace OHOS::Rosen
+
+
+struct AsyncInfo {
+    napi_env env;
+    napi_async_work work;
+    std::function<void()> func;
+};
+
+void NapiAsyncWork(napi_env env, std::function<void()> task)
+{
+    napi_value resource = nullptr;
+    AsyncInfo* info = new AsyncInfo();
+    info->env = env;
+    info->func = task;
+    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
+    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
+    },
+    [](napi_env env, napi_status status, void* data) {
+        AsyncInfo* info = (AsyncInfo*)data;
+        info->func();
+        napi_delete_async_work(env, info->work);
+    }, (void*)info, &info->work);
+    napi_queue_async_work(env, info->work);
+    delete info;
+}
+
+MainThreadScheduler::MainThreadScheduler(napi_env env)
+    : env_(env)
+{
+    GetMainEventHandler();
+}
+
+inline void MainThreadScheduler::GetMainEventHandler()
+{
+    if (handler_ != nullptr) {
+        return;
+    }
+    auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (runner == nullptr) {
+        return;
+    }
+    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+}
+
+void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
+{
+    GetMainEventHandler();
+    auto task = [env = env_, localTask, traceInfo] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        localTask();
+        napi_close_handle_scope(env, scope);
+    };
+    if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
+    } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->PostTask(std::move(task), OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        NapiAsyncWork(env_, task);
+    }
+}

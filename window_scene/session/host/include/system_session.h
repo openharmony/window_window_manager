@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_MOCK_SCREEN_MANAGER_INTERFACE_H
-#define OHOS_ROSEN_MOCK_SCREEN_MANAGER_INTERFACE_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H
+#define OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H
 
-#include <iremote_broker.h>
-#include <refbase.h>
-#include <parcel.h>
+#include "session/host/include/scene_session.h"
 
-namespace OHOS {
-namespace Rosen {
-
-class IMockScreenManagerInterface : public IRemoteBroker {
+namespace OHOS::Rosen {
+class SystemSession : public SceneSession {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockScreenManager");
-    enum class MockScreenManagerServiceMessage : uint32_t {
-        TRANS_ID_GET_SCREEN_DUMP_INFO,
-    };
+    SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
+    ~SystemSession();
 
-    virtual void GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
+    WSError Show(sptr<WindowSessionProperty> property) override;
+    WSError Hide() override;
+    WSError Disconnect() override;
+
+private:
+    void UpdateCameraFloatWindowStatus(bool isShowing);
 };
-}
-}
-#endif // OHOS_ROSEN_MOCK_SESSION_MANAGER_INTERFACE_H
+} // namespace OHOS::Rosen
+#endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

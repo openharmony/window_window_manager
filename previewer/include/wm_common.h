@@ -72,6 +72,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SYSTEM_TOAST,
     WINDOW_TYPE_SYSTEM_FLOAT,
     WINDOW_TYPE_PIP,
+    WINDOW_TYPE_THEME_EDITOR,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -454,6 +455,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
     TYPE_KEYBOARD,         // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
 };
 
 /**

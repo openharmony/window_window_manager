@@ -46,6 +46,7 @@ public:
         TRANS_ID_WAKE_UP_END,
         TRANS_ID_SUSPEND_BEGIN,
         TRANS_ID_SUSPEND_END,
+        TRANS_ID_SET_SPECIFIED_SCREEN_POWER,
         TRANS_ID_SET_SCREEN_POWER_FOR_ALL,
         TRANS_ID_GET_SCREEN_POWER,
         TRANS_ID_SET_DISPLAY_STATE,
@@ -57,12 +58,14 @@ public:
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
         TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE,
+        TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
         TRANS_ID_GET_ALL_SCREEN_INFOS,
         TRANS_ID_SET_ORIENTATION,
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO,
+        TRANS_ID_SET_RESOLUTION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
@@ -74,10 +77,19 @@ public:
         TRANS_ID_SCREEN_GET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
+        TRANS_ID_SCREEN_GET_PIXEL_FORMAT,
+        TRANS_ID_SCREEN_SET_PIXEL_FORMAT,
+        TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT,
+        TRANS_ID_SCREEN_GET_HDR_FORMAT,
+        TRANS_ID_SCREEN_SET_HDR_FORMAT,
+        TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE,
+        TRANS_ID_SCREEN_GET_COLOR_SPACE,
+        TRANS_ID_SCREEN_SET_COLOR_SPACE,
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
         TRANS_ID_HAS_PRIVATE_WINDOW,
         TRANS_ID_GET_CUTOUT_INFO,
+        TRANS_ID_HAS_IMMERSIVE_WINDOW,
         TRANS_ID_ADD_SURFACE_NODE,
         TRANS_ID_REMOVE_SURFACE_NODE,
         TRANS_ID_SCREEN_STOP_MIRROR,
@@ -92,6 +104,16 @@ public:
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
+        TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
+        TRANS_ID_SET_CLIENT = 2500,
+        TRANS_ID_GET_SCREEN_PROPERTY,
+        TRANS_ID_GET_DISPLAY_NODE,
+        TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY,
+        TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA,
+        TRANS_ID_GET_PHY_SCREEN_PROPERTY,
+        TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO,
+        TRANS_ID_SET_SCREEN_PRIVACY_STATE,
+        TRANS_ID_RESIZE_VIRTUAL_SCREEN,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -103,6 +125,7 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
@@ -118,6 +141,41 @@ public:
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
     virtual DMError SetScreenColorTransform(ScreenId screenId) = 0;
 
+    virtual DMError GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetSupportedHDRFormats(ScreenId screenId,
+        std::vector<ScreenHDRFormat>& hdrFormats)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetSupportedColorSpaces(ScreenId screenId,
+        std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError GetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -126,6 +184,7 @@ public:
     virtual bool WakeUpEnd() = 0;
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
+    virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
@@ -147,6 +206,8 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) = 0;
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
@@ -160,7 +221,11 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
+    virtual void LockFoldDisplayStatus(bool locked) {}
+
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+
+    virtual DMError HasImmersiveWindow(bool& immersive) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }

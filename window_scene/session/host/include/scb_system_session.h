@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
-#define OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H
+#define OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H
 
-#include <iremote_stub.h>
-#include "mock_screen_manager_service_interface.h"
+#include "session/host/include/scene_session.h"
 
-namespace OHOS {
-namespace Rosen {
-class MockScreenManagerServiceStub : public IRemoteStub<IMockScreenManagerInterface> {
+namespace OHOS::Rosen {
+class SCBSystemSession : public SceneSession {
 public:
-    MockScreenManagerServiceStub() = default;
-    ~MockScreenManagerServiceStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
+    ~SCBSystemSession();
 };
-}
-}
-#endif // OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
+} // namespace OHOS::Rosen
+#endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H

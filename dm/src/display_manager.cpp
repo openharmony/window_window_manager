@@ -68,6 +68,8 @@ public:
     DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
     DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+    DMError RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
+    DMError UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
     DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
@@ -84,6 +86,7 @@ private:
     void NotifyDisplayChange(sptr<DisplayInfo> displayInfo);
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void Clear();
 
@@ -96,6 +99,7 @@ private:
     std::set<sptr<IScreenshotListener>> screenshotListeners_;
     std::set<sptr<IPrivateWindowListener>> privateWindowListeners_;
     std::set<sptr<IFoldStatusListener>> foldStatusListeners_;
+    std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners_;
     std::set<sptr<IDisplayModeListener>> displayModeListeners_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
@@ -108,6 +112,8 @@ private:
     sptr<DisplayManagerPrivateWindowAgent> privateWindowListenerAgent_;
     class DisplayManagerFoldStatusAgent;
     sptr<DisplayManagerFoldStatusAgent> foldStatusListenerAgent_;
+    class DisplayManagerDisplayUpdateAgent;
+    sptr<DisplayManagerDisplayUpdateAgent> displayUpdateListenerAgent_;
     class DisplayManagerDisplayModeAgent;
     sptr<DisplayManagerDisplayModeAgent> displayModeListenerAgent_;
 };
@@ -245,6 +251,21 @@ public:
     virtual void NotifyFoldStatusChanged(FoldStatus foldStatus) override
     {
         pImpl_->NotifyFoldStatusChanged(foldStatus);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerDisplayUpdateAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerDisplayUpdateAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerDisplayUpdateAgent() = default;
+
+    virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override
+    {
+        pImpl_->NotifyDisplayChangeInfoChanged(info);
     }
 private:
     sptr<Impl> pImpl_;
@@ -923,6 +944,75 @@ DMError DisplayManager::Impl::UnregisterFoldStatusListener(sptr<IFoldStatusListe
     return ret;
 }
 
+void DisplayManager::Impl::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+{
+    std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayUpdateListeners = displayUpdateListeners_;
+    }
+    for (auto& listener : displayUpdateListeners) {
+        listener->OnDisplayUpdate(info);
+    }
+}
+
+DMError DisplayManager::RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IDisplayUpdateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterDisplayUpdateListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (displayUpdateListenerAgent_ == nullptr) {
+        displayUpdateListenerAgent_ = new DisplayManagerDisplayUpdateAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            displayUpdateListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterDisplayUpdateListener failed !");
+        displayUpdateListenerAgent_ = nullptr;
+    } else {
+        WLOGI("IDisplayUpdateListener register success");
+        displayUpdateListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterDisplayUpdateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterDisplayUpdateListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(displayUpdateListeners_.begin(), displayUpdateListeners_.end(), listener);
+    if (iter == displayUpdateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    displayUpdateListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (displayUpdateListeners_.empty() && displayUpdateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            displayUpdateListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
+        displayUpdateListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
 void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     std::set<sptr<IDisplayModeListener>> displayModeListeners;
@@ -1023,8 +1113,11 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     WLOGFD("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    DisplayStateCallback displayStateCallback = displayStateCallback_;
+    DisplayStateCallback displayStateCallback = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayStateCallback = displayStateCallback_;
+    }
     if (displayStateCallback) {
         displayStateCallback(state);
         ClearDisplayStateCallback();

@@ -78,6 +78,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "stretchable",                                  WindowSceneConfig::ValueType::UNDIFINED },
     { "remoteAnimation",                              WindowSceneConfig::ValueType::UNDIFINED },
     { "configMainFloatingWindowAbove",                WindowSceneConfig::ValueType::UNDIFINED },
+    { "backgroundswitch",                             WindowSceneConfig::ValueType::INTS },
 };
 
 std::vector<std::string> WindowSceneConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)

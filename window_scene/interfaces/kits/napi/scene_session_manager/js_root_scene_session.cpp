@@ -187,7 +187,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     return result;
 }
 
-bool JsRootSceneSession::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
+bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
@@ -260,7 +260,12 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
     if (info.persistentId_ == 0) {
-        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
+        if (result == BrokerStates::BROKER_NOT_START) {
+            WLOGE("[NAPI] The BrokerStates is not opened");
+            return nullptr;
+        }
+
         if (info.reuse) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(

@@ -13,18 +13,29 @@
  * limitations under the License.
  */
 
-#include "zidl/mock_screen_manager_service_proxy.h"
-#include "window_manager_hilog.h"
+#ifndef SETRESOLUTION_UTILS_H
+#define SETRESOLUTION_UTILS_H
+
+#include <string>
 
 namespace OHOS {
-namespace Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "MockScreenManagerServiceProxy"};
+struct CmdArgments {
+    uint32_t width = -1;
+    uint32_t height = -1;
+    uint32_t dpi = -1;
+    bool isWidthSet = false;
+    bool isHeightSet = false;
+    bool isDpiSet = false;
+};
+
+class SetResolutionUtils {
+public:
+    SetResolutionUtils() = default;
+    ~SetResolutionUtils() = default;
+
+    static void PrintUsage(const std::string &cmdLine);
+    static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
+};
 }
 
-void MockScreenManagerServiceProxy::GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info)
-{
-    WLOGFD("GetScreenDumpInfo begin");
-}
-} // namespace Rosen
-} // namespace OHOS
+#endif // SETRESOLUTION_UTILS_H

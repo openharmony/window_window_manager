@@ -91,6 +91,7 @@ public:
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetNeedKeepKeyboard(bool isNeedKeepKeyboard);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -128,6 +129,7 @@ public:
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    bool IsNeedKeepKeyboard() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -135,6 +137,14 @@ public:
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
+
+    void SetTextFieldPositionY(double textFieldPositionY);
+    void SetTextFieldHeight(double textFieldHeight);
+
+    double GetTextFieldPositionY() const;
+    double GetTextFieldHeight() const;
+    void SetDrawingContentState(bool drawingContentState);
+    bool GetDrawingContentState() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -179,6 +189,11 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
+    bool isNeedKeepKeyboard_ = false;
+
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
+    bool drawingContentState_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
@@ -192,6 +207,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniHeightOfMainWindow_ = 0;
     uint32_t miniWidthOfSubWindow_ = 0;
     uint32_t miniHeightOfSubWindow_ = 0;
+    bool backgroundswitch = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -211,6 +227,10 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
+        if (!parcel.WriteBool(backgroundswitch)) {
+            return false;
+        }
+        
         return true;
     }
 
@@ -231,6 +251,7 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->backgroundswitch = parcel.ReadBool();
         return config;
     }
 };

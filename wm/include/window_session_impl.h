@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include <optional>
-
+#include <shared_mutex>
 #include <ability_context.h>
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
@@ -53,10 +53,11 @@ public:
         const sptr<Rosen::ISession>& iSession);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
@@ -87,12 +88,15 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
+    void FlushFrameRate(uint32_t rate) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
+    bool IsFocused() const override;
+    WMError RequestFocus() const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -152,10 +156,20 @@ public:
     virtual void SetColorSpace(ColorSpace colorSpace) override;
     virtual ColorSpace GetColorSpace() override;
     WSError NotifyTouchOutside() override;
-
+    WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState requestState_ { WindowState::STATE_INITIAL };
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
+    void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
+    void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+
+    void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void SetDrawingContentState(bool drawingContentState);
+    bool lastProcessContentState_ = false;
+    bool GetDrawingContentState() const override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
 
 protected:
     WMError Connect();
@@ -186,10 +200,13 @@ protected:
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    // protect windowSessionMap_
+    static std::shared_mutex windowSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
+    bool isFocused_ { false };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 

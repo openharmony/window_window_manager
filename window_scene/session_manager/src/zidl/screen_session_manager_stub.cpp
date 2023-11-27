@@ -15,7 +15,10 @@
 
 #include "zidl/screen_session_manager_stub.h"
 
+#include "common/rs_rect.h"
 #include <ipc_skeleton.h>
+#include "transaction/rs_marshalling_helper.h"
+
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -74,6 +77,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE: {
             DisplayState state = static_cast<DisplayState>(data.ReadUint32());
             reply.WriteBool(SetDisplayState(state));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint32());
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SetSpecifiedScreenPower(screenId, state, reason));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
@@ -155,6 +165,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             float density = data.ReadFloat();
             int32_t flags = data.ReadInt32();
             bool isForShot = data.ReadBool();
+            std::vector<uint64_t> missionIds;
+            data.ReadUInt64Vector(&missionIds);
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -170,7 +182,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .density_ = density,
                 .surface_ = surface,
                 .flags_ = flags,
-                .isForShot_ = isForShot
+                .isForShot_ = isForShot,
+                .missionIds_ = missionIds
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
@@ -185,6 +198,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 bp = iface_cast<IBufferProducer>(surfaceObject);
             }
             DMError result = SetVirtualScreenSurface(screenId, bp);
+            reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            bool autoRotate = data.ReadBool();
+            DMError result = SetVirtualMirrorScreenCanvasRotation(screenId, autoRotate);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
@@ -291,6 +311,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_RESOLUTION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            float virtualPixelRatio = data.ReadFloat();
+            DMError ret = SetResolution(screenId, width, height, virtualPixelRatio);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenColorGamut colorGamut;
@@ -333,6 +362,90 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat;
+            DMError ret = GetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(pixelFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat = static_cast<GraphicPixelFormat>(data.ReadUint32());
+            DMError ret = SetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenHDRFormat> hdrFormats;
+            DMError ret = GetSupportedHDRFormats(screenId, hdrFormats);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<ScreenHDRFormat>(reply, hdrFormats,
+                [](Parcel& parcel, const ScreenHDRFormat& hdrFormat) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(hdrFormat));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenHDRFormat hdrFormat;
+            DMError ret = GetScreenHDRFormat(screenId, hdrFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(hdrFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t modeIdx = data.ReadInt32();
+            DMError ret = SetScreenHDRFormat(screenId, modeIdx);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+            DMError ret = GetSupportedColorSpaces(screenId, colorSpaces);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<GraphicCM_ColorSpaceType>(reply, colorSpaces,
+                [](Parcel& parcel, const GraphicCM_ColorSpaceType& color) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(color));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace;
+            DMError ret = GetScreenColorSpace(screenId, colorSpace);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(colorSpace));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace = static_cast<GraphicCM_ColorSpaceType>(data.ReadUint32());
+            DMError ret = SetScreenColorSpace(screenId, colorSpace);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());
@@ -367,6 +480,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(hasPrivateWindow);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            bool immersive = false;
+            DMError ret = HasImmersiveWindow(immersive);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(immersive);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN: {
             std::string dumpInfo;
             DumpAllScreensInfo(dumpInfo);
@@ -384,6 +504,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
             SetFoldDisplayMode(displayMode);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS: {
+            bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
+            LockFoldDisplayStatus(lockDisplayStatus);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
@@ -415,6 +540,76 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             DMError ret = MakeUniqueScreen(uniqueScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_CLIENT: {
+            auto remoteObject = data.ReadRemoteObject();
+            auto clientProxy = iface_cast<IScreenSessionManagerClient>(remoteObject);
+            if (!clientProxy) {
+                WLOGFE("clientProxy is null");
+                break;
+            }
+            SetClient(clientProxy);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            if (!RSMarshallingHelper::Marshalling(reply, GetScreenProperty(screenId))) {
+                WLOGFE("Write screenProperty failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_NODE: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto displayNode = GetDisplayNode(screenId);
+            if (!displayNode || !displayNode->Marshalling(reply)) {
+                WLOGFE("Write displayNode failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            RRect bounds;
+            if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
+                WLOGFE("Read bounds failed");
+                break;
+            }
+            auto rotation = data.ReadFloat();
+            UpdateScreenRotationProperty(screenId, bounds, rotation);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {
+            auto area = GetCurvedCompressionArea();
+            reply.WriteUint32(area);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_PHY_SCREEN_PROPERTY: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            if (!RSMarshallingHelper::Marshalling(reply, GetPhyScreenProperty(screenId))) {
+                WLOGFE("Write screenProperty failed");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO: {
+            sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
+            if (!info) {
+                WLOGFE("Read DisplayChangeInfo failed");
+                return -1;
+            }
+            NotifyDisplayChangeInfoChanged(info);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE: {
+            auto hasPrivate = data.ReadBool();
+            SetScreenPrivacyState(hasPrivate);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_RESIZE_VIRTUAL_SCREEN: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMError ret = ResizeVirtualScreen(screenId, width, height);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

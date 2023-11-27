@@ -175,6 +175,7 @@ public:
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual int64_t GetVSyncPeriod() = 0;
+    virtual void FlushFrameRate(uint32_t rate) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
@@ -201,7 +202,8 @@ public:
     virtual void NotifyTouchDialogTarget() = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
+        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr) = 0;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability = nullptr)
     {
@@ -251,6 +253,7 @@ public:
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
+    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
 };
 }
 }

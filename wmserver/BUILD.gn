@@ -79,15 +79,21 @@ config("libmockwms_config") {
     "${screenlock_mgr_path}/frameworks/native/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
+
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
 ohos_shared_library("sms") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
-    "src/mock_screen_manager_service.cpp",
     "src/mock_session_manager_service.cpp",
-    "src/zidl/mock_screen_manager_service_stub.cpp",
     "src/zidl/mock_session_manager_service_stub.cpp",
   ]
 
@@ -123,6 +129,12 @@ ohos_shared_library("sms") {
 }
 
 ohos_shared_library("libwms") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   defines = []
   if (use_musl) {
     if (use_jemalloc && use_jemalloc_dfx_intf) {

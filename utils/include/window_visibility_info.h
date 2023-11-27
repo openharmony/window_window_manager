@@ -20,6 +20,20 @@
 
 namespace OHOS::Rosen {
 /**
+ * @enum WindowVisibilityState
+ *
+ * @brief Visibility state of a window
+ */
+enum WindowVisibilityState {
+    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
+    WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
+    WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
+    WINDOW_DRAWING_CONTENT_CHANGE,
+    WINDOW_DRAWING_CONTENT_NO_CHANGE,
+    WINDOW_VISIBILITY_STATE_MAX,
+};
+
+/**
  * @class WindowVisibilityInfo
  *
  * @brief Visibility info of window.
@@ -39,8 +53,9 @@ public:
      * @param visibility True means window is visible, false means the opposite.
      * @param winType Type of window.
      */
-    WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, bool visibility, WindowType winType)
-        : windowId_(winId), pid_(pid), uid_(uid), isVisible_(visibility), windowType_(winType) {};
+    WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
+        WindowType winType) : windowId_(winId), pid_(pid), uid_(uid), visibilityState_(visibilityState),
+        windowType_(winType) {};
     /**
      * @brief Deconstruct of WindowVisibilityInfo.
      */
@@ -64,7 +79,7 @@ public:
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
-    bool isVisible_ { false };
+    WindowVisibilityState visibilityState_ = WINDOW_VISIBILITY_STATE_MAX;
     WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
 };
 } // namespace OHOS::Rosen

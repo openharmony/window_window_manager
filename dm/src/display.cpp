@@ -51,7 +51,8 @@ Display::~Display()
 
 DisplayId Display::GetId() const
 {
-    if (pImpl_->GetDisplayInfo() == nullptr) {
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return DisplayId(0);
     }
     return pImpl_->GetDisplayInfo()->GetDisplayId();
@@ -59,54 +60,90 @@ DisplayId Display::GetId() const
 
 std::string Display::GetName() const
 {
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return std::string();
+    }
     return pImpl_->GetDisplayInfo()->GetName();
 }
 
 int32_t Display::GetWidth() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetWidth();
 }
 
 int32_t Display::GetHeight() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetHeight();
 }
 
 int32_t Display::GetPhysicalWidth() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetPhysicalWidth();
 }
 
 int32_t Display::GetPhysicalHeight() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetPhysicalHeight();
 }
 
 uint32_t Display::GetRefreshRate() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetRefreshRate();
 }
 
 ScreenId Display::GetScreenId() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return SCREEN_ID_INVALID;
+    }
     return pImpl_->GetDisplayInfo()->GetScreenId();
 }
 
 Rotation Display::GetRotation() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return Rotation::ROTATION_0;
+    }
     return pImpl_->GetDisplayInfo()->GetRotation();
 }
 
 Orientation Display::GetOrientation() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return Orientation::UNSPECIFIED;
+    }
     return pImpl_->GetDisplayInfo()->GetOrientation();
 }
 
@@ -114,6 +151,10 @@ void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is invalid");
+        return;
+    }
+    if (pImpl_ == nullptr) {
+        WLOGFE("pImpl_ is nullptr");
         return;
     }
     pImpl_->SetDisplayInfo(displayInfo);
@@ -128,6 +169,10 @@ void Display::UpdateDisplayInfo() const
 float Display::GetVirtualPixelRatio() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
     return pImpl_->GetDisplayInfo()->GetVirtualPixelRatio();
 }
 
@@ -139,6 +184,10 @@ int Display::GetDpi() const
 sptr<DisplayInfo> Display::GetDisplayInfo() const
 {
     UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return nullptr;
+    }
     return pImpl_->GetDisplayInfo();
 }
 
@@ -146,4 +195,20 @@ sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
 }
+
+DMError Display::HasImmersiveWindow(bool& immersive)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+}
+
+DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(GetScreenId(), hdrFormats);
+}
+
+DMError Display::GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetScreenId(), colorSpaces);
+}
+
 } // namespace OHOS::Rosen

@@ -75,6 +75,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SYSTEM_TOAST,
     WINDOW_TYPE_SYSTEM_FLOAT,
     WINDOW_TYPE_PIP,
+    WINDOW_TYPE_THEME_EDITOR,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -472,6 +473,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
     TYPE_KEYBOARD,         // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
 };
 
 /**
@@ -612,6 +614,47 @@ enum class PipState : int32_t {
     STOPPED = 4,
     ABOUT_TO_RESTORE = 5,
     ERROR = 6,
+};
+
+/**
+ * @brief Enumerates pip window rect update reason.
+ */
+enum class PiPRectUpdateReason : int32_t {
+    REASON_PIP_START_WINDOW,
+    REASON_PIP_MOVE,
+    REASON_PIP_VIDEO_RATIO_CHANGE,
+    REASON_PIP_SCALE_CHANGE,
+    REASON_PIP_DESTROY_WINDOW,
+};
+
+/**
+ * @brief Enumerates picture in picture scale level.
+ */
+enum class PiPScaleLevel : int32_t {
+    PIP_SCALE_LEVEL_SMALLEST = 0,
+    PIP_SCALE_LEVEL_BIGGEST = 1,
+    COUNT = 2,
+};
+
+/**
+ * @brief Enumerates picture in picture scale pivot.
+ */
+enum class PiPScalePivot : int32_t {
+    UNDEFINED = 0,
+    START,
+    MIDDLE,
+    END,
+};
+
+/**
+ * @brief Structure of picture in picture rect info.
+ */
+struct PiPRectInfo {
+    PiPScalePivot xPivot_;
+    PiPScalePivot yPivot_;
+    uint32_t originWidth_;
+    uint32_t originHeight_;
+    PiPScaleLevel level_;
 };
 
 using OnCallback = std::function<void(int64_t)>;

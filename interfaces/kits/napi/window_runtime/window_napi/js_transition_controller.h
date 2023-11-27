@@ -42,7 +42,7 @@ public:
     void AnimationForHidden() override;
     void SetJsController(std::shared_ptr<NativeReference> jsVal);
 private:
-    void CallJsMethod(const std::string& methodName, napi_value const* argv, size_t argc);
+    void CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc);
     napi_env env_;
     std::weak_ptr<NativeReference> jsTransControllerObj_;
     std::weak_ptr<NativeReference> jsWin_;

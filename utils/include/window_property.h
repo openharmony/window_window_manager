@@ -147,6 +147,12 @@ public:
     bool Write(Parcel& parcel, PropertyChangeAction action);
     void Read(Parcel& parcel, PropertyChangeAction action);
     bool isSystemCalling_ { false };
+
+    void SetTextFieldPositionY(double textFieldPositionY);
+    void SetTextFieldHeight(double textFieldHeight);
+
+    double GetTextFieldPositionY() const;
+    double GetTextFieldHeight() const;
 private:
     bool MapMarshalling(Parcel& parcel) const;
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
@@ -220,6 +226,9 @@ private:
     WindowSizeLimits sizeLimits_;
     WindowSizeLimits updatedSizeLimits_;
     MaximizeMode maximizeMode_ { MaximizeMode::MODE_RECOVER };
+
+    double textFieldPositionY_ = 0.0;
+    double textFieldHeight_ = 0.0;
 };
 }
 }

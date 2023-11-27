@@ -21,9 +21,11 @@
 #include "interfaces/include/ws_common.h"
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+#include "interfaces/kits/napi/scene_session_manager/js_scene_utils.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
 #include "ability_info.h"
+#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
@@ -47,7 +49,7 @@ public:
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
-    static napi_value SwitchUser(napi_env engin, napi_callback_info info);
+    static napi_value SwitchUser(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
@@ -60,7 +62,10 @@ public:
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
+    static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
+    static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -94,17 +99,22 @@ private:
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
+    napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
-    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnShiftFocus(int32_t persistentId);
-    void ProcessCreateSpecificSessionRegister();
+    void OnShowPiPMainWindow(int32_t persistentId);
+    void ProcessCreateSystemSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
+    void ProcessShowPiPMainWindow();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
@@ -116,6 +126,7 @@ private:
     std::map<std::string, Func> listenerFunc_;
 
     sptr<RootScene> rootScene_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 

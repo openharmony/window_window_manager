@@ -20,7 +20,7 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 
-void SensorPostureDataCallback(SensorEvent *event)
+static void SensorPostureDataCallback(SensorEvent *event)
 {
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(event);
 }
@@ -90,13 +90,17 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         WLOGFI("SensorEvent dataLen less than posture data size.");
         return;
     }
+    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
+        WLOGFI("SensorEvent display status is locked.");
+        return;
+    }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     float angle = (*postureData).angle;
     if (std::isless(angle, ANGLE_MIN_VAL) || std::isgreater(angle, ANGLE_MAX_VAL)) {
         WLOGFE("Invalid angle value, angle is %{public}f.", angle);
         return;
     }
-    WLOGFD("angle vlaue in PostureData is: %{public}f.", angle);
+    WLOGFD("angle value in PostureData is: %{public}f.", angle);
     HandleSensorData(angle, DEFAULT_HALL);
 }
 

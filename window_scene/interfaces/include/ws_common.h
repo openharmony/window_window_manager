@@ -54,6 +54,7 @@ enum class WSError : int32_t {
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
+    WS_ERROR_NO_UI_CONTENT_ERROR,
     WS_ERROR_INVALID_SHOW_WHEN_LOCKED,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
@@ -80,6 +81,8 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
     WS_ERROR_TIMEOUT = 901,
+    WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
+    WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
     WS_ERROR_STATE_ABNORMALLY = 1300002,
     WS_ERROR_SYSTEM_ABNORMALLY = 1300003,
@@ -157,6 +160,9 @@ struct SessionInfo {
     bool isSystem_ = false;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
+    sptr<IRemoteObject> rootToken_ = nullptr;
+    uint64_t screenId_ = 0;
+    bool isPersistentRecover_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
@@ -222,6 +228,12 @@ enum class SessionEvent : uint32_t {
     EVENT_EXCEPTION,
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
+};
+
+enum class BrokerStates: uint32_t {
+    BROKER_UNKOWN = 1,
+    BROKER_STARTED = 0,
+    BROKER_NOT_START = -1,
 };
 
 inline bool GreatOrEqual(double left, double right)

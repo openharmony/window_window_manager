@@ -58,6 +58,7 @@ public:
     const ScreenId testVirtualScreenId_ = 2;
     const uint32_t testVirtualScreenWidth_ = 1920;
     const uint32_t testVirtualScreenHeight_ = 1080;
+    const uint32_t testVirtualScreenRefreshRate_ = 60;
     static sptr<Display> defaultDisplay_;
     static uint32_t defaultWidth_;
     static uint32_t defaultHeight_;
@@ -468,14 +469,14 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: ResizeVirtualScreen
- * @tc.desc: resize virtual screen
+ * @tc.name: SetVirtualScreenRefreshRate
+ * @tc.desc: Set virtual screen refrensh rate.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate, Function | SmallTest | Level1)
 {
-    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().ResizeVirtualScreen(testVirtualScreenId_,
-        testVirtualScreenWidth_, testVirtualScreenHeight_));
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().SetVirtualScreenRefreshRate(testVirtualScreenId_,
+        testVirtualScreenRefreshRate_));
 }
 }
 } // namespace Rosen

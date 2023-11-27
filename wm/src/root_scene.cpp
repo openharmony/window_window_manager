@@ -37,29 +37,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 
-class InputEventListener : public MMI::IInputEventConsumer {
-public:
-    explicit InputEventListener(RootScene* rootScene) : rootScene_(rootScene) {}
-    virtual ~InputEventListener() = default;
-
-    void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override
-    {
-        rootScene_->ConsumePointerEvent(pointerEvent);
-    }
-
-    void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override
-    {
-        rootScene_->ConsumeKeyEvent(keyEvent);
-    }
-
-    void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override
-    {
-    }
-
-private:
-    RootScene* rootScene_;
-};
-
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
     explicit BundleStatusCallback(RootScene* rootScene) : rootScene_(rootScene) {}
@@ -97,6 +74,7 @@ RootScene::RootScene()
 
 RootScene::~RootScene()
 {
+    uiContent_ = nullptr;
 }
 
 void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
@@ -114,7 +92,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
 
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
-
+    uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     RegisterInputEventListener();
     DelayedSingleton<ANRManager>::GetInstance()->Init();
     DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
@@ -143,7 +121,6 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
         return;
@@ -173,7 +150,6 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 
 void RootScene::RegisterInputEventListener()
 {
-    auto listener = std::make_shared<InputEventListener>(this);
     auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     if (mainEventRunner) {
         WLOGFD("MainEventRunner is available");
@@ -212,6 +188,15 @@ void RootScene::OnBundleUpdated(const std::string& bundleName)
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
+}
+
+void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    frameLayoutFinishCb_ = callback;
+    if (uiContent_) {
+        uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+    }
+    WLOGFI("[WMSWinLayout] SetFrameLayoutFinishCallback end");
 }
 } // namespace Rosen
 } // namespace OHOS

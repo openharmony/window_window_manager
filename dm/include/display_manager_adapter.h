@@ -39,7 +39,6 @@ public:
     virtual void Clear();
 protected:
     bool InitDMSProxy();
-    bool InitSMSProxy();
     std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
@@ -62,6 +61,7 @@ public:
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
     virtual DMError DisableDisplaySnapshot(bool disableOrNot);
+    virtual DMError HasImmersiveWindow(bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
@@ -97,6 +97,8 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
+    virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation);
@@ -111,6 +113,8 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio);
+    virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
     virtual DMError SetScreenRotationLocked(bool isLocked);
     virtual DMError IsScreenRotationLocked(bool& isLocked);
 
@@ -121,6 +125,17 @@ public:
     virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
     virtual DMError SetScreenColorTransform(ScreenId screenId);
+
+    virtual DMError GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat);
+    virtual DMError SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat);
+    virtual DMError GetSupportedHDRFormats(ScreenId screenId, std::vector<ScreenHDRFormat>& hdrFormats);
+    virtual DMError GetScreenHDRFormat(ScreenId screenId, ScreenHDRFormat& hdrFormat);
+    virtual DMError SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx);
+    virtual DMError GetSupportedColorSpaces(ScreenId screenId, std::vector<GraphicCM_ColorSpaceType>& colorSpaces);
+    virtual DMError GetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace);
+    virtual DMError SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace);
+    virtual DMError GetSupportedHDRFormats(ScreenId screenId, std::vector<uint32_t>& hdrFormats);
+    virtual DMError GetSupportedColorSpaces(ScreenId screenId, std::vector<uint32_t>& colorSpaces);
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);

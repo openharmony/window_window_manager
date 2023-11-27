@@ -25,9 +25,6 @@
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "suspend_manager_client.h"
-#endif // EFFICIENCY_MANAGER_ENABLE
 
 namespace OHOS {
 namespace Rosen {
@@ -58,6 +55,7 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
+    void NotifyWindowDrawingContentInfoChanged(const WindowDrawingContentInfo& info);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -76,6 +74,8 @@ public:
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
+    std::vector<sptr<IDrawingContentChangedListener>>windowDrawingContentListeners_;
+    sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -664,10 +664,6 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
     }
     WLOGFD("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
-#ifdef EFFICIENCY_MANAGER_ENABLE
-        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(focusChangeInfo->uid_,
-            "", "THAW_BY_FOCUS_CHANGED");
-#endif // EFFICIENCY_MANAGER_ENABLE
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
         pImpl_->NotifyUnfocused(focusChangeInfo);
@@ -737,6 +733,14 @@ WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
     return ret;
 }
 
+WMError WindowManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyWindowExtensionVisibilityChange(pid, uid, visible);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("notify WindowExtension visibility change failed");
+    }
+    return ret;
+}
 
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
@@ -767,6 +771,89 @@ void WindowManager::OnRemoteDied()
     pImpl_->windowUpdateListenerAgent_ = nullptr;
     pImpl_->windowVisibilityListenerAgent_ = nullptr;
     pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
+}
+
+WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("raise window to top failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowDrawingContentListenerAgent_ == nullptr) {
+        pImpl_->windowDrawingContentListenerAgent_ = new WindowManagerAgent();
+        ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            pImpl_->windowDrawingContentListenerAgent_);
+    }
+    if (ret != WMError::WM_OK) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->windowDrawingContentListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowDrawingContentListeners_.begin(),
+            pImpl_->windowDrawingContentListeners_.end(), listener);
+        if (iter != pImpl_->windowDrawingContentListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowDrawingContentListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowDrawingContentListeners_.erase(std::remove_if(pImpl_->windowDrawingContentListeners_.begin(),
+        pImpl_->windowDrawingContentListeners_.end(),
+        [listener](sptr<IDrawingContentChangedListener> registeredListener) { return registeredListener == listener; }),
+        pImpl_->windowDrawingContentListeners_.end());
+
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowDrawingContentListeners_.empty() && pImpl_->windowDrawingContentListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            pImpl_->windowDrawingContentListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowDrawingContentListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
+    const WindowDrawingContentInfo& windowDrawingContentInfos)
+{
+    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowDrawingContentChangeListeners = windowDrawingContentListeners_;
+    }
+    for (auto& listener : windowDrawingContentChangeListeners) {
+        WLOGFD("Notify windowDrawingContentInfo to caller");
+        listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
+    }
+}
+
+void WindowManager::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) const
+{
+    WLOGFD("NotifyWindowDrawingContentInfoChanged:pid%{public}d, windowId:%{public}u, drawingContentState:%{public}d",
+        info.pid_, info.windowId_, info.drawingContentState_);
+    pImpl_->NotifyWindowDrawingContentInfoChanged(info);
 }
 } // namespace Rosen
 } // namespace OHOS

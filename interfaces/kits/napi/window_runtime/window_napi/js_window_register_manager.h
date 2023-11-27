@@ -57,7 +57,7 @@ private:
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
         sptr<Window> window, bool isRegister);
     using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
-    std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
     std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
 };
