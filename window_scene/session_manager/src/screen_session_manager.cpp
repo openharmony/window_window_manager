@@ -516,13 +516,17 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         WLOGFE("SetResolution: Get ScreenSession failed");
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (width <= 0 || width > screenSession->GetActiveScreenMode()->width_ ||
-        height <= 0 || height > screenSession->GetActiveScreenMode()->height_ ||
+    sptr<SupportedScreenModes> screenSessionModes = screenSession->GetActiveScreenMode();
+    if (screenSessionModes == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (width <= 0 || width > screenSessionModes->width_ ||
+        height <= 0 || height > screenSessionModes->height_ ||
         virtualPixelRatio < (static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH) ||
         virtualPixelRatio > (static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH)) {
         WLOGFE("SetResolution invalid param! w:%{public}u h:%{public}u min:%{public}f max:%{public}f",
-            screenSession->GetActiveScreenMode()->width_,
-            screenSession->GetActiveScreenMode()->height_,
+            screenSessionModes->width_,
+            screenSessionModes->height_,
             static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH,
             static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH);
         return DMError::DM_ERROR_INVALID_PARAM;
