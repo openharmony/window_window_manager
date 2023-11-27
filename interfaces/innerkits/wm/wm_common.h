@@ -204,6 +204,20 @@ enum class WmErrorCode : int32_t {
 };
 
 /**
+ * @brief Enumerates status of window.
+ */
+enum class WindowStatus : uint32_t {
+    WINDOW_STATUS_UNDEFINED = 0,
+    WINDOW_STATUS_FULLSCREEN = 1,
+    WINDOW_STATUS_MAXMIZE,
+    WINDOW_STATUS_MINIMIZE,
+    WINDOW_STATUS_FLOATING,
+    WINDOW_STATUS_SPLIT_PRIMARY = 100,
+    WINDOW_STATUS_SPLIT_SECONDARY
+};
+
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {

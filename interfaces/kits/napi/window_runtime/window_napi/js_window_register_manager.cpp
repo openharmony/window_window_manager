@@ -42,6 +42,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            },
         { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister     },
         { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister  },
+        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowChangeRegister          },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
