@@ -230,6 +230,7 @@ private:
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+    void HandlerSensor(ScreenPowerStatus status);
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
