@@ -351,14 +351,14 @@ public:
 
     /**
      * @brief Get subwindow title
-     * 
+     *
      * @return Return the subwindow title
     */
     const std::string GetSubWindowTitle() const;
 
     /**
      * @brief Get subwindow decor enable
-     * 
+     *
      * @return Return ture means the subwindow decor enabled, otherwise not.
     */
     bool GetSubWindowDecorEnable() const;

@@ -600,13 +600,8 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    napi_value nativeObj = argv[1];
-    if (nativeObj == nullptr) {
-        WLOGFW("createsubwindow without options");
-        return OnCreateSubWindowWithOptions(env, info);
-    }
     WindowOption option;
-    if (!ParseSubWindowOptions(env, nativeObj, option)) {
+    if (!ParseSubWindowOptions(env, argv[1], option)) {
         WLOGFE("[NAPI]get invalid options param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
@@ -642,6 +637,11 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
 
 bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
 {
+    if (jsObect == nullptr) {
+        WLOGFW("jsObject is null");
+        return true;
+    }
+
     std::string title;
     if (ParseJsValue(jsObject, env, "title", title)) {
         option.SetSubWindowTitle(title);
