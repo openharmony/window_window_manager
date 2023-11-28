@@ -12,10 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/sa_profile/sa_profile.gni")
-
-declare_args() {
-  scene_board_enabled = false
-}
+import("../windowmanager_aafwk.gni")
 
 ohos_sa_profile("wms_sa_profile") {
   sources = [ "4606.json" ]
