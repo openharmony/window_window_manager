@@ -49,17 +49,6 @@ namespace {
 
 /**
  * @tc.name: PipWindowState
- * @tc.desc: SetPipWindowState/GetPipWindowState
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, PipWindowState, Function | SmallTest | Level2)
-{
-    PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STARTED);
-    ASSERT_EQ(PipWindowState::STATE_STARTED, PictureInPictureManager::GetPipWindowState());
-}
-
-/**
- * @tc.name: PipWindowState
  * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo
  * @tc.type: FUNC
  */
@@ -75,27 +64,27 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 
 /**
  * @tc.name: PictureInPictureController
- * @tc.desc: SetCurrentPipController/IsCurrentPipController/HasActiveController/RemoveCurrentPipController/
- * RemoveCurrentPipControllerSafety
+ * @tc.desc: SetActiveController/IsActiveController/HasActiveController/RemoveActiveController/
+ * RemoveActiveControllerSafe
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipController = new PictureInPictureController(option, 100, nullptr);
-    PictureInPictureManager::SetCurrentPipController(pipController);
+    PictureInPictureManager::SetActiveController(pipController);
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
-    ASSERT_TRUE(PictureInPictureManager::IsCurrentPipController(pipController));
-    PictureInPictureManager::RemoveCurrentPipController();
+    ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
+    PictureInPictureManager::RemoveActiveController();
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    ASSERT_FALSE(PictureInPictureManager::IsCurrentPipController(pipController));
+    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
 
-    PictureInPictureManager::SetCurrentPipController(pipController);
+    PictureInPictureManager::SetActiveController(pipController);
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
-    ASSERT_TRUE(PictureInPictureManager::IsCurrentPipController(pipController));
-    PictureInPictureManager::RemoveCurrentPipControllerSafety();
+    ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
+    PictureInPictureManager::RemoveActiveControllerSafe();
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    ASSERT_FALSE(PictureInPictureManager::IsCurrentPipController(pipController));
+    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
 }
 }
 }
