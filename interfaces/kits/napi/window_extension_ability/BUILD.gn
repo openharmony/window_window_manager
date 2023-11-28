@@ -39,7 +39,7 @@ ohos_shared_library("windowextensionability_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [ "window_extension_ability_module.cpp" ]
 

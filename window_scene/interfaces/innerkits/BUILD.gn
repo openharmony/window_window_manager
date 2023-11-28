@@ -24,7 +24,7 @@ ohos_shared_library("libwsutils") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [ "src/scene_board_judgement.cpp" ]
 

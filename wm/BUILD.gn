@@ -40,7 +40,7 @@ ohos_static_library("libwm_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   include_dirs = [
     "../utils/include",
@@ -170,7 +170,7 @@ ohos_shared_library("libwm") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   include_dirs = [
     "../utils/include",

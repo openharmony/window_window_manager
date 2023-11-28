@@ -33,7 +33,7 @@ ohos_shared_library("libwindow_extension_client") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   install_enable = true
   sources = [

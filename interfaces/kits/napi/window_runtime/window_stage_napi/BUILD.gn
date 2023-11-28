@@ -39,7 +39,7 @@ ohos_shared_library("windowstage") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [ "window_stage_module.cpp" ]
 

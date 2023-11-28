@@ -47,7 +47,7 @@ ohos_shared_library("window_native_kit") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "window_napi/js_transition_controller.cpp",
@@ -96,7 +96,7 @@ ohos_shared_library("window_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "window_manager_napi/js_window_manager.cpp",
@@ -139,7 +139,7 @@ ohos_shared_library("windowstage_kit") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [ "window_stage_napi/js_window_stage.cpp" ]
 
