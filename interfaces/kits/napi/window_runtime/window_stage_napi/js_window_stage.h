@@ -21,6 +21,7 @@
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "window_scene.h"
+#include "window_option.h"
 namespace OHOS {
 namespace Rosen {
 #ifdef _WIN32
