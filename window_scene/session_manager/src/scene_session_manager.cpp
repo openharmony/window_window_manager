@@ -1416,7 +1416,12 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
             return;
         }
         WLOGFD("Remote died, id: %{public}d", iter->second);
-        DestroyAndDisconnectSpecificSession(iter->second);
+        auto sceneSession = GetSceneSession(iter->second);
+        if (sceneSession == nullptr) {
+            WLOGFW("Remote died, session is nullptr, id: %{public}d", iter->second);
+            return;
+        }
+        DestroyAndDisconnectSpecificSessionInner(sceneSession);
         remoteObjectMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task);
@@ -1694,6 +1699,45 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession)
+{
+    if (sceneSession == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    const auto& persistentId = sceneSession->GetPersistentId();
+    auto ret = sceneSession->UpdateActiveStatus(false);
+    WindowDestroyNotifyVisibility(sceneSession);
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        if (parentSession == nullptr) {
+            WLOGFE("[WMSSystem][WMSDialog] Dialog not bind parent");
+        } else {
+            parentSession->RemoveDialogToParentSession(sceneSession);
+        }
+        sceneSession->NotifyDestroy();
+    }
+    ret = sceneSession->Disconnect();
+    sceneSession->ClearSpecificSessionCbMap();
+    if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
+        auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        if (parentSession != nullptr) {
+            WLOGFD("[WMSSub] Find parentSession, id: %{public}d", persistentId);
+            parentSession->RemoveSubSession(persistentId);
+        } else {
+            WLOGFW("[WMSSub] ParentSession is nullptr, id: %{public}d", persistentId);
+        }
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMap_.erase(persistentId);
+        systemTopSceneSessionMap_.erase(persistentId);
+        nonSystemFloatSceneSessionMap_.erase(persistentId);
+        UnregisterCreateSubSessionListener(persistentId);
+    }
+    WLOGFI("[WMSSystem][WMSSub] Destroy specific session end, id: %{public}d", persistentId);
+    return ret;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     const auto& callingPid = IPCSkeleton::GetCallingPid();
@@ -1708,37 +1752,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
             WLOGFE("[WMSSystem][WMSSub] Permission denied, not destroy by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        auto ret = sceneSession->UpdateActiveStatus(false);
-        WindowDestroyNotifyVisibility(sceneSession);
-        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            if (parentSession == nullptr) {
-                WLOGFE("[WMSSystem][WMSDialog] Dialog not bind parent");
-            } else {
-                parentSession->RemoveDialogToParentSession(sceneSession);
-            }
-            sceneSession->NotifyDestroy();
-        }
-        ret = sceneSession->Disconnect();
-        sceneSession->ClearSpecificSessionCbMap();
-        if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
-            auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            if (parentSession != nullptr) {
-                WLOGFD("[WMSSub] Find parentSession, id: %{public}d", persistentId);
-                parentSession->RemoveSubSession(sceneSession->GetPersistentId());
-            } else {
-                WLOGFW("[WMSSub] ParentSession is nullptr, id: %{public}d", persistentId);
-            }
-        }
-        {
-            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            sceneSessionMap_.erase(persistentId);
-            systemTopSceneSessionMap_.erase(persistentId);
-            nonSystemFloatSceneSessionMap_.erase(persistentId);
-            UnregisterCreateSubSessionListener(persistentId);
-        }
-        WLOGFI("[WMSSystem][WMSSub] Destroy specific session end, id: %{public}d", persistentId);
-        return ret;
+        return DestroyAndDisconnectSpecificSessionInner(sceneSession);
     };
 
     return taskScheduler_->PostSyncTask(task);
@@ -4825,7 +4839,7 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
             WLOGD("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
         }
-        
+
     #ifdef MEMMGR_WINDOW_ENABLE
         if (memMgrWindowInfos.size() != 0) {
             WLOGD("Notify memMgrWindowInfos changed start");
