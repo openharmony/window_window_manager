@@ -571,7 +571,7 @@ void Session::UpdatePointerArea(const WSRect& rect)
     }
     if (!((GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
             (WindowHelper::IsSubWindow(GetWindowType()) && property_->IsDecorEnable())) &&
-         GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
+        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
         return;
     }
     if (preRect_ == rect) {
