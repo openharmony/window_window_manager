@@ -190,7 +190,13 @@ void WindowSceneSessionImpl::UpdateWindowState()
     requestState_ = WindowState::STATE_CREATED;
     if (WindowHelper::IsMainWindow(GetType())) {
         maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-        SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+        if (property_->GetIsNeedUpdateWindowMode()) {
+            WLOGFI("UpdateWindowMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
+            UpdateWindowModeImmediately(property_->GetWindowMode());
+            property_->SetIsNeedUpdateWindowMode(false);
+        } else {
+            SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+        }
         NotifyWindowNeedAvoid(
             (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
         GetConfigurationFromAbilityInfo();
@@ -1001,6 +1007,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
+            WindowHelper::IsMainWindow(GetType()) &&
           system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1086,11 +1093,12 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
+            WindowHelper::IsMainWindow(GetType()) &&
           system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     };
-    
+
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
