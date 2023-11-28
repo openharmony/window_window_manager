@@ -97,7 +97,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         !IsShowWhenLocked()) {
         WLOGFW("[WMSCom] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
-        return WSError::WS_ERROR_INVALID_SHOW_WHEN_LOCKED;
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
     PostTask([weakThis = wptr(this), property]() {
