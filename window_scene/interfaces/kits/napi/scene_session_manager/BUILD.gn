@@ -29,7 +29,7 @@ ohos_shared_library("scenesessionmanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "js_root_scene_session.cpp",

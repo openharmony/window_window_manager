@@ -35,7 +35,7 @@ ohos_static_library("libwmutil_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "src/accessibility_window_info.cpp",
@@ -106,7 +106,7 @@ ohos_shared_library("libwmutil_base") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "src/accessibility_window_info.cpp",

@@ -19,7 +19,7 @@ ohos_shared_library("screenshot") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [ "native_screenshot_module.cpp" ]
 

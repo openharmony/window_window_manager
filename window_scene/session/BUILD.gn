@@ -43,7 +43,7 @@ ohos_shared_library("scene_session") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "container/src/parcel/accessibility_element_info_parcel.cpp",
@@ -115,7 +115,7 @@ ohos_shared_library("screen_session") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "screen/src/screen_property.cpp",

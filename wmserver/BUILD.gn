@@ -89,7 +89,7 @@ ohos_shared_library("sms") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
@@ -133,7 +133,7 @@ ohos_shared_library("libwms") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   defines = []
   if (use_musl) {

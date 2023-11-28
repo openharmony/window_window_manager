@@ -32,7 +32,7 @@ ohos_shared_library("window_scene_common") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "src/session_permission.cpp",

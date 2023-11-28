@@ -28,7 +28,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "napi/js_session_manager_service.cpp",
