@@ -258,7 +258,7 @@ PipWindowState PictureInPictureController::GetControllerState() {
 void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t height)
 {
     WLOGI("UpdateContentSize is called, state: %{public}u", curState_);
-    if (curState_ == PipWindowState::STATE_STOPPING || curState_ == PipWindowState::STATE_STOPPED) {
+    if (curState_ != PipWindowState::STATE_STARTED) {
         return;
     }
     if (window_ == nullptr) {
