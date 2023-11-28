@@ -122,10 +122,10 @@ WMError PictureInPictureController::StartPictureInPicture()
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PipWindowState::STATE_STARTING || curState_ == PipWindowState::STATE_STARTED) {
         WLOGFW("pip window is starting");
-        return WMError::WN_ERROR_PIP_REPEAT_OPERATION;
+        return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     curState_ = PipWindowState::STATE_STARTING;
-    if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRed_)) {
+    if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
@@ -193,7 +193,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
         session->ResetExtController();
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
         if (ret != WmErrorCode::WM_OK) {
-            curState_ = PipWindowState::STATE_UNDEFINED;
+            session->curState_ = PipWindowState::STATE_UNDEFINED;
             WLOGFE("Window destroy failed");
             int32_t err = static_cast<int32_t>(ret);
             if (session->pipLifeCycleListener_ != nullptr) {
@@ -207,7 +207,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
         PictureInPictureManager::RemoveActiveController();
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
-        curState_ = PipWindowState::STATE_STOPPED;
+        session->curState_ = PipWindowState::STATE_STOPPED;
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
@@ -258,11 +258,11 @@ PipWindowState PictureInPictureController::GetControllerState() {
 void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t height)
 {
     WLOGI("UpdateContentSize is called, state: %{public}u", curState_);
-    if (window_ == nullptr) {
-        WLOGFE("PiPWindow is not exist");
+    if (curState_ == PipWindowState::STATE_STOPPING || curState_ == PipWindowState::STATE_STOPPED) {
         return;
     }
-    if (curState_ == PipWindowState::STAET_STOPPING || curState_ == PipWindowState::STATE_STOPPED) {
+    if (window_ == nullptr) {
+        WLOGFE("PiPWindow is not exist");
         return;
     }
     window_->UpdatePiPRect(width, height, PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE);

@@ -40,8 +40,8 @@ public:
     static void RemoveActiveController();
     static void RemoveActiveControllerSafe();
     static void AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
-    static void DetachAutoStartController(std::string pageName);
-    static bool IsAttachedToSameWindow(int32_t windowId);
+    static void DetachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
+    static bool IsAttachedToSameWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
 
     static void DoRestore();
