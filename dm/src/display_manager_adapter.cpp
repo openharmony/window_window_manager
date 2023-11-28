@@ -20,8 +20,10 @@
 #include <system_ability_definition.h>
 
 #include "display_manager.h"
+#include "scene_board_judgement.h"
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
+#include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -357,7 +359,11 @@ bool BaseAdapter::InitDMSProxy()
             return false;
         }
 
-        displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            displayManagerServiceProxy_ = iface_cast<IScreenSessionManager>(remoteObject);
+        } else {
+            displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
+        }
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
             WLOGFE("Failed to get system display manager services");
             return false;
