@@ -523,13 +523,13 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(true);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    SceneSession->property_ = property;
+    scensession->property_ = property;
     ASSERT_EQ(true, scensession->IsDecorEnable());
 
     sptr<SceneSession> scensession_;
-    scensession_ = new (std::nothrow) SceneSession(info_, nullptr);
+    scensession_ = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession_, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(false);
