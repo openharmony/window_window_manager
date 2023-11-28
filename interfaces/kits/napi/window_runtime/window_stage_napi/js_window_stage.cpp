@@ -637,7 +637,7 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
 
 bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
 {
-    if (jsObect == nullptr) {
+    if (jsObject == nullptr) {
         WLOGFW("jsObject is null");
         return true;
     }
