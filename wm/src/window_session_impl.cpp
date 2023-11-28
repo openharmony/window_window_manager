@@ -1647,6 +1647,22 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
+sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
+{
+    if (windowSessionMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (auto iter = windowSessionMap_.begin(); iter != windowSessionMap_.end(); iter++) {
+        if (winId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", winId);
+            return iter->second.second;
+        }
+    }
+    WLOGFE("Cannot find Window, id: %{public}d", winId);
+    return nullptr;
+}
+
 std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
 {
     auto iter = subWindowSessionMap_.find(parentId);
@@ -1783,7 +1799,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     if (state_ == WindowState::STATE_HIDDEN) {
         WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
-    
+
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener != nullptr) {
