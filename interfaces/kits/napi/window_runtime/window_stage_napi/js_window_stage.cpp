@@ -513,7 +513,7 @@ napi_value JsWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set show on lock screen permission denied!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));

@@ -296,7 +296,7 @@ DMError ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 DMError ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("unregister display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }

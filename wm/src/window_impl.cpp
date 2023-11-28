@@ -364,8 +364,7 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
-    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling() &&
-        !Permission::IsStartByHdcd()) {
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling()) {
         WLOGFE("set window type permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -423,7 +422,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 WMError WindowImpl::SetAlpha(float alpha)
 {
     WLOGI("Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set alpha permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1802,7 +1801,7 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 
 WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1836,7 +1835,7 @@ WmErrorCode WindowImpl::RaiseToAppTop()
 
 WMError WindowImpl::DisableAppWindowDecor()
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2127,7 +2126,7 @@ WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAre
 
 WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("register touch outside listener permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2138,7 +2137,7 @@ WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListene
 
 WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("register touch outside listener permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2149,7 +2148,7 @@ WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListe
 
 WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("register animation transition controller permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3554,7 +3553,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 
 WMError WindowImpl::SetShadowRadius(float radius)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set shadow radius permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3569,7 +3568,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
 
 WMError WindowImpl::SetShadowColor(std::string color)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set shadow color permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3585,7 +3584,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
 
 WMError WindowImpl::SetShadowOffsetX(float offsetX)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set shadow offset x permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3597,7 +3596,7 @@ WMError WindowImpl::SetShadowOffsetX(float offsetX)
 
 WMError WindowImpl::SetShadowOffsetY(float offsetY)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set shadow offset y permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3609,7 +3608,7 @@ WMError WindowImpl::SetShadowOffsetY(float offsetY)
 
 WMError WindowImpl::SetBlur(float radius)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set blur permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3626,7 +3625,7 @@ WMError WindowImpl::SetBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlur(float radius)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set backdrop blur permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -3643,7 +3642,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set backdrop blur style permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
