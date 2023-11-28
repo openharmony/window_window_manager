@@ -244,7 +244,7 @@ void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
     subWindowTitle_ = subWindowTitle;
 }
 
-const std::string WindowOption::GetSubWindowTitle()
+const std::string WindowOption::GetSubWindowTitle() const
 {
     return subWindowTitle_;
 }
@@ -254,7 +254,7 @@ void WindowOption::SetSubWindowDecorEnable(bool subWindowDecorEnable)
     subWindowDecorEnable_ = subWindowDecorEnable;
 }
 
-bool WindowOption::GetSubWindowDecorEnable()
+bool WindowOption::GetSubWindowDecorEnable() const
 {
     return subWindowDecorEnable_;
 }
