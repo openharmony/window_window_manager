@@ -17,6 +17,7 @@
 #define OHOS_JS_PIP_WINDOW_MANAGER_H
 
 #include "js_runtime_utils.h"
+#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -31,6 +32,7 @@ public:
 private:
     static napi_value OnIsPipEnabled(napi_env env, napi_callback_info info);
     static napi_value OnCreatePipController(napi_env env, napi_callback_info info);
+    static std::mutex mutex_;
 };
 }
 }

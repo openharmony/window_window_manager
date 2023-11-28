@@ -20,6 +20,7 @@
 
 #include <event_handler.h>
 #include <refbase.h>
+#include <mutex>
 #include "picture_in_picture_option.h"
 #include "window.h"
 #include "wm_common.h"
@@ -35,7 +36,7 @@ public:
     PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture();
-    WMError StopPictureInPicture(bool needAnim);
+    WMError StopPictureInPicture(bool destroyWindow, bool needAnim);
     sptr<Window> GetPipWindow();
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
@@ -51,6 +52,7 @@ public:
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
+    PipWindowState GetControllerState();
 
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
     public:
@@ -73,10 +75,12 @@ private:
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
+    PipWindowState curState_ = PipWindowState::STATE_UNDEFINED;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<XComponentController> pipXComponentController_;
     std::shared_ptr<XComponentController> mainWindowXComponentController_;
     napi_env env_;
+    std::mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

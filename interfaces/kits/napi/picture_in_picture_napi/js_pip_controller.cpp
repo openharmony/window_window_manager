@@ -19,6 +19,7 @@
 #include "js_pip_utils.h"
 #include "js_runtime_utils.h"
 #include "picture_in_picture_controller.h"
+#include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "picture_in_picture_interface.h"
@@ -32,6 +33,8 @@ namespace {
     const std::string STATE_CHANGE_CB = "stateChange";
     const std::string CONTROL_PANEL_ACTION_EVENT_CB = "controlPanelActionEvent";
 }
+
+std::mutex JsPipController::pipMutex_;
 
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
@@ -88,6 +91,11 @@ napi_value JsPipController::StartPictureInPicture(napi_env env, napi_callback_in
 napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_info info)
 {
     WLOGI("OnStartPictureInPicture is called");
+    std::lock_guard<std::mutex> lock(pipMutex_);
+    if (PictureInPictureManager::ShouldAbortPipStart()) {
+        WLOGFI("OnStartPictureInPicture abort");
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -126,6 +134,7 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     WLOGI("OnStopPictureInPicture is called");
+    std::lock_guard<std::mutex> lock(pipMutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -141,7 +150,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
                     "JsPipController::OnStopPictureInPicture failed."));
                 return;
             }
-            WMError errCode = weak->StopPictureInPicture(true);
+            WMError errCode = weak->StopPictureInPicture(true, true);
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStopPictureInPicture failed."));
