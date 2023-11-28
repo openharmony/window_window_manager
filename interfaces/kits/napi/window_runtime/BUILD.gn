@@ -152,8 +152,8 @@ ohos_shared_library("windowstage_kit") {
   deps = [
     ":window_native_kit",
     "../../../../utils:libwmutil",
-    "../../../../wm:libwm",
     "../../../../window_scene/interfaces/innerkits:libwsutils",
+    "../../../../wm:libwm",
   ]
 
   external_deps = [
