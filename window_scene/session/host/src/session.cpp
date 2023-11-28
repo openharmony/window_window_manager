@@ -1698,7 +1698,6 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 
 void Session::SetSessionRect(const WSRect& rect)
 {
-    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
     if (winRect_ == rect) {
         WLOGFW("id: %{public}d skip same rect", persistentId_);
         return;

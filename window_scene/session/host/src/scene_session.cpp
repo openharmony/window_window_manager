@@ -354,18 +354,26 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
-    if (winRect_ == rect) {
-        WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", GetPersistentId());
+    PostTask([weakThis = wptr(this), rect, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->winRect_ == rect) {
+            WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
+            return WSError::WS_OK;
+        }
+        session->winRect_ = rect;
+        session->isDirty_ = true;
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
+            session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return WSError::WS_OK;
-    }
-    winRect_ = rect;
-    isDirty_ = true;
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-    WLOGFD("[WMSWinLayout] Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    });
+
     return WSError::WS_OK;
 }
 
@@ -377,7 +385,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
         WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, session->winRect_.posX_,
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
@@ -1012,11 +1019,17 @@ void SceneSession::ClearEnterWindow()
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
-    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
-    if (sessionRectChangeFunc_) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
-        sessionRectChangeFunc_(rect, reason);
-    }
+    PostTask([weakThis = wptr(this), rect, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionRectChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
+            session->sessionRectChangeFunc_(rect, reason);
+        }
+    });
 }
 
 bool SceneSession::IsDecorEnable() const
@@ -2015,7 +2028,6 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
             // system scene no need to update reason
             return WSError::WS_DO_NOTHING;
         }
-        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
         session->reason_ = reason;
         if (reason != SizeChangeReason::UNDEFINED) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -2031,7 +2043,6 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 
 bool SceneSession::IsDirtyWindow()
 {
-    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
     return isDirty_;
 }
 
