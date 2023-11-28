@@ -27,37 +27,37 @@ class PictureInPictureManager {
 public:
     PictureInPictureManager();
     ~PictureInPictureManager();
+    static bool ShouldAbortPipStart();
     static void PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController);
     static void RemovePipControllerInfo(int32_t windowId);
-
-    static void SetPipWindowState(PipWindowState pipWindowState);
-    static PipWindowState GetPipWindowState();
-
-    static bool IsCurrentPipControllerExist();
-    static bool IsCurrentPipController(wptr<PictureInPictureController> pipController);
-    static void SetCurrentPipController(sptr<PictureInPictureController> pipController);
-    static void RemoveCurrentPipController();
-    static void RemoveCurrentPipControllerSafety();
     static void AttachActivePipController(sptr<PictureInPictureController> pipController);
     static void DetachActivePipController(sptr<PictureInPictureController> pipController);
+    static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
 
-    static bool IsAttachedPipWindow(uint32_t windowId);
-    static sptr<Window> GetCurrentWindow();
+    static bool HasActiveController();
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
+    static void SetActiveController(sptr<PictureInPictureController> pipController);
+    static void RemoveActiveController();
+    static void RemoveActiveControllerSafe();
+    static void AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
+    static void DetachAutoStartController(std::string pageName);
+    static bool IsAttachedToSameWindow(int32_t windowId);
+    static sptr<Window> GetCurrentWindow();
 
     static void DoRestore();
-    static void DoClose(bool needAnim);
+    static void DoClose(bool destroyWindow, bool needAnim);
     static void DoStartMove();
     static void DoScale();
     static void DoActionEvent(std::string actionName);
     static void AutoStartPipWindow();
-    static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
 private:
-    static sptr<PictureInPictureController> curPipController_;
-    static sptr<PictureInPictureController> activePipController_;
-    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
-    static std::mutex pipWindowStateMutex_;
-    static PipWindowState pipWindowState_;
+    // controller in use
+    static sptr<PictureInPictureController> activeController_;
+    static sptr<PictureInPictureController> autoStartController_; //todo delete
+    // controllers enable auto start
+    static std::map<std::string, sptr<PictureInPictureController>> autoStartControllerMap_;
+
+    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_; // todo delete
     static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
 };
 } // namespace Rosen

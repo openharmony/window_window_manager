@@ -75,7 +75,7 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 
 /**
  * @tc.name: PictureInPictureController
- * @tc.desc: SetCurrentPipController/IsCurrentPipController/IsCurrentPipControllerExist/RemoveCurrentPipController/
+ * @tc.desc: SetCurrentPipController/IsCurrentPipController/HasActiveController/RemoveCurrentPipController/
  * RemoveCurrentPipControllerSafety
  * @tc.type: FUNC
  */
@@ -84,17 +84,17 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | Sma
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipController = new PictureInPictureController(option, 100, nullptr);
     PictureInPictureManager::SetCurrentPipController(pipController);
-    ASSERT_TRUE(PictureInPictureManager::IsCurrentPipControllerExist());
+    ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     ASSERT_TRUE(PictureInPictureManager::IsCurrentPipController(pipController));
     PictureInPictureManager::RemoveCurrentPipController();
-    ASSERT_FALSE(PictureInPictureManager::IsCurrentPipControllerExist());
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_FALSE(PictureInPictureManager::IsCurrentPipController(pipController));
 
     PictureInPictureManager::SetCurrentPipController(pipController);
-    ASSERT_TRUE(PictureInPictureManager::IsCurrentPipControllerExist());
+    ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     ASSERT_TRUE(PictureInPictureManager::IsCurrentPipController(pipController));
     PictureInPictureManager::RemoveCurrentPipControllerSafety();
-    ASSERT_FALSE(PictureInPictureManager::IsCurrentPipControllerExist());
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_FALSE(PictureInPictureManager::IsCurrentPipController(pipController));
 }
 }

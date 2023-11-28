@@ -119,7 +119,7 @@ napi_value JsPipManager::OnRestore(napi_env env, napi_callback_info info)
 napi_value JsPipManager::OnClose(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]JsPipManager::OnClose");
-    PictureInPictureManager::DoClose(true);
+    PictureInPictureManager::DoClose(true, true);
     return NapiGetUndefined(env);
 }
 

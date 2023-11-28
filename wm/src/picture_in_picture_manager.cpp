@@ -28,11 +28,10 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureManager"};
 }
 
-sptr<PictureInPictureController> PictureInPictureManager::curPipController_ = nullptr;
-sptr<PictureInPictureController> PictureInPictureManager::activePipController_ = nullptr;
-std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
-std::mutex PictureInPictureManager::pipWindowStateMutex_;
-PipWindowState PictureInPictureManager::pipWindowState_ = PipWindowState::STATE_UNDEFINED;
+sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
+sptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr; // todo delete
+std::map<std::string, sptr<PictureInPictureCoontroller>> PictureInPictureManager::autoStartControllerMap_ = {};
+std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {}; // todo delete
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 
 PictureInPictureManager::PictureInPictureManager()
@@ -43,193 +42,181 @@ PictureInPictureManager::~PictureInPictureManager()
 {
 }
 
+bool PictureInPictureManager::ShouldAbortPipStart()
+{
+    return activeController_ != nullptr && activeController_->GetControllerState() == PipWindowState::STATE_STARTING;
+}
+
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
 {
-    WLOGD("PutPipControllerInfo is called, windowId %{public}u", windowId);
+    WLOGD("PutPipControllerInfo called, windowId %{public}u", windowId);
     windowToControllerMap_.insert(std::make_pair(windowId, pipController));
 }
 
 void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 {
-    WLOGD("RemovePipControllerInfo is called, windowId %{public}u", windowId);
+    WLOGD("RemovePipControllerInfo called, windowId %{public}u", windowId);
     windowToControllerMap_.erase(windowId);
-}
-
-void PictureInPictureManager::SetPipWindowState(PipWindowState pipWindowState)
-{
-    WLOGD("SetPipWindowState is called, state %{public}u", pipWindowState);
-    std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
-    pipWindowState_ = pipWindowState;
-}
-
-PipWindowState PictureInPictureManager::GetPipWindowState()
-{
-    WLOGD("GetPipWindowState is called");
-    std::lock_guard<std::mutex> lock(PictureInPictureManager::pipWindowStateMutex_);
-    return pipWindowState_;
-}
-
-bool PictureInPictureManager::IsCurrentPipControllerExist()
-{
-    WLOGD("IsCurrentPipControllerExist is called");
-    return curPipController_ != nullptr;
-}
-
-bool PictureInPictureManager::IsCurrentPipController(wptr<PictureInPictureController> pipController)
-{
-    WLOGD("IsCurrentPipController is called");
-    if (!IsCurrentPipControllerExist()) {
-        return false;
-    }
-    return pipController.GetRefPtr() == curPipController_.GetRefPtr();
-}
-
-void PictureInPictureManager::SetCurrentPipController(sptr<PictureInPictureController> pipController)
-{
-    WLOGD("SetCurrentPipController is called");
-    curPipController_ = pipController;
-}
-
-void PictureInPictureManager::RemoveCurrentPipController()
-{
-    WLOGD("RemoveCurrentPipController is called");
-    curPipController_ = nullptr;
-}
-
-void PictureInPictureManager::RemoveCurrentPipControllerSafety()
-{
-    WLOGD("RemoveCurrentPipControllerSafety is called");
-    if (!IsCurrentPipControllerExist()) {
-        return;
-    }
-    curPipController_->SetPipWindow(nullptr);
-    RemoveCurrentPipController();
-}
-
-void PictureInPictureManager::AttachActivePipController(sptr<PictureInPictureController> pipController)
-{
-    WLOGD("Attach active pipController");
-    if (pipController == nullptr) {
-        return;
-    }
-    if (activePipController_ != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
-        sptr<WindowSessionImpl> previousMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-            activePipController_ -> GetMainWindowId());
-        if (previousMainWindow != nullptr) {
-            previousMainWindow -> UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
-        }
-    }
-    activePipController_ = pipController;
-    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        activePipController_ -> GetMainWindowId());
-    if (mainWindow != nullptr) {
-        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl();
-        mainWindow -> RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
-    }
-}
-
-void PictureInPictureManager::DetachActivePipController(sptr<PictureInPictureController> pipController)
-{
-    WLOGD("Detach active pipController");
-    if (pipController != nullptr &&
-        pipController.GetRefPtr() != activePipController_.GetRefPtr()) {
-        WLOGFE("not same pip controller or no active pip controller");
-        return;
-    }
-    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        activePipController_ -> GetMainWindowId());
-    if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
-        mainWindow -> UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
-    }
-    activePipController_ = nullptr;
-}
-
-bool PictureInPictureManager::IsAttachedPipWindow(uint32_t windowId)
-{
-    WLOGD("IsAttachedPipWindow is called");
-    if (!IsCurrentPipControllerExist()) {
-        return false;
-    }
-    return curPipController_->GetMainWindowId() == windowId;
-}
-
-sptr<Window> PictureInPictureManager::GetCurrentWindow()
-{
-    WLOGD("GetCurrentWindow is called");
-    if (!IsCurrentPipControllerExist()) {
-        return nullptr;
-    }
-    return curPipController_->GetPipWindow();
-}
-
-bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
-{
-    return pipController.GetRefPtr() == activePipController_.GetRefPtr();
-}
-
-void PictureInPictureManager::DoRestore()
-{
-    WLOGD("DoRestore is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
-        return;
-    }
-    PictureInPictureManager::curPipController_->RestorePictureInPictureWindow();
-}
-
-void PictureInPictureManager::DoClose(bool needAnim)
-{
-    WLOGD("DoClose is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
-        return;
-    }
-    curPipController_->StopPictureInPicture(needAnim);
-}
-
-void PictureInPictureManager::DoStartMove()
-{
-    WLOGD("DoStartMove is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
-        return;
-    }
-    PictureInPictureManager::curPipController_->StartMove();
-}
-
-void PictureInPictureManager::DoScale()
-{
-    WLOGD("DoScale is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
-        return;
-    }
-    PictureInPictureManager::curPipController_->DoScale();
-}
-
-void PictureInPictureManager::DoActionEvent(std::string actionName)
-{
-    WLOGD("DoActionEvent is called");
-    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
-        return;
-    }
-    PictureInPictureManager::curPipController_->DoActionEvent(actionName);
-}
-
-void PictureInPictureManager::AutoStartPipWindow()
-{
-    WLOGD("AutoStartPipWindow is called");
-    if (activePipController_ == nullptr) {
-        WLOGFE("activePipController_ is null");
-        return;
-    }
-    activePipController_ -> StartPictureInPicture();
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
 {
-    WLOGD("GetPipControllerInfo is called");
+    WLOGD("GetPipControllerInfo called");
     if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
         WLOGE("GetPipControllerInfo error, %{public}d not registered!", windowId);
         return nullptr;
     }
     return windowToControllerMap_[windowId];
+}
+
+bool PictureInPictureManager::HasActiveController()
+{
+    WLOGD("HasActiveController called");
+    return activeController_ != nullptr;
+}
+
+bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
+{
+    WLOGD("IsActiveController called");
+    if (!HasActiveController()) {
+        return false;
+    }
+    return pipController.GetRefPtr() == activeController_.GetRefPtr();
+}
+
+void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
+{
+    WLOGD("SetActiveController called");
+    activeController_ = pipController;
+}
+
+void PictureInPictureManager::RemoveActiveController()
+{
+    WLOGD("RemoveActiveController called");
+    activeController_ = nullptr;
+}
+
+void PictureInPictureManager::RemoveActiveControllerSafe()
+{
+    WLOGD("RemoveActiveControllerSafe called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->SetPipWindow(nullptr);
+    RemoveActiveController();
+}
+
+void PictureInPictureManager::AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController)
+{
+    WLOGD("AttachAutoStartController called");
+    if (pipController == nullptr) {
+        return;
+    }
+    if (autoStartController_ != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
+        sptr<WindowSessionImpl> previousMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+            autoStartController_->GetMainWindowId());
+        if (previousMainWindow != nullptr) {
+            previousMainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
+        }
+    }
+    autoStartController_ = pipController;
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        autoStartController_->GetMainWindowId());
+    if (mainWindow != nullptr) {
+        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl();
+        mainWindow -> RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
+    }
+    autoStartControllerMap_.insert(std::make_pair(pageName, pipController));
+}
+
+void PictureInPictureManager::DetachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController)
+{
+    WLOGD("Detach active pipController");
+    if (pipController != nullptr &&
+        pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
+        WLOGFE("not same pip controller or no active pip controller");
+        return;
+    }
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        autoStartController_->GetMainWindowId());
+    if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
+        mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
+    }
+    autoStartControllerMap_.erase(pageName);
+    autoStartController_ = nullptr;
+}
+
+bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
+{
+    WLOGD("IsAttachedToSameWindow called");
+    if (!HasActiveController()) {
+        return false;
+    }
+    return activeController_->GetMainWindowId() == windowId;
+}
+
+sptr<Window> PictureInPictureManager::GetCurrentWindow()
+{
+    WLOGD("GetCurrentWindow is called");
+    if (!HasActiveController()) {
+        return nullptr;
+    }
+    return activeController_->GetPipWindow();
+}
+
+void PictureInPictureManager::DoRestore()
+{
+    WLOGD("DoRestore is called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->RestorePictureInPictureWindow();
+}
+
+void PictureInPictureManager::DoClose(bool destroyWindow, bool needAnim)
+{
+    WLOGD("DoClose is called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->StopPictureInPicture(destroyWindow, needAnim);
+}
+
+void PictureInPictureManager::DoStartMove()
+{
+    WLOGD("DoStartMove is called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->StartMove();
+}
+
+void PictureInPictureManager::DoScale()
+{
+    WLOGD("DoScale is called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->DoScale();
+}
+
+void PictureInPictureManager::DoActionEvent(std::string actionName)
+{
+    WLOGD("DoActionEvent is called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->DoActionEvent(actionName);
+}
+
+void PictureInPictureManager::AutoStartPipWindow()
+{
+    WLOGD("AutoStartPipWindow is called");
+    if (autoStartController_ == nullptr) {
+        WLOGFE("autoStartController_ is null");
+        return;
+    }
+    autoStartController_->StartPictureInPicture();
 }
 }
 }
