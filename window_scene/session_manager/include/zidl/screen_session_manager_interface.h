@@ -29,6 +29,8 @@ class RRectT;
 
 class IScreenSessionManager : public IDisplayManager {
 public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IScreenSessionManager");
+
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
