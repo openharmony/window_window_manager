@@ -151,8 +151,7 @@ void ScreenSessionManager::OnStart()
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()) {
         WLOGFE("register display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -172,8 +171,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()) {
         WLOGFE("unregister display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -441,7 +439,7 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     WLOGI("SetScreenActiveMode: ScreenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("set screen active permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -492,7 +490,7 @@ void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, Scre
 
 DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("set virtual pixel permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -981,7 +979,7 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
 
 DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB: ScreenSessionManager is screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -997,7 +995,7 @@ DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
 
 DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB: ScreenSessionManager set screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1059,7 +1057,7 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
 
 DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB: ScreenSessionManager set orientation permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1236,7 +1234,7 @@ bool ScreenSessionManager::NotifyDisplayStateChanged(DisplayId id, DisplayState 
 }
 DMError ScreenSessionManager::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB: ScreenSessionManager::GetAllScreenInfos get all screen infos permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1588,7 +1586,7 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
                                          ScreenId& screenGroupId)
 {
     WLOGFI("SCB:ScreenSessionManager::MakeMirror enter!");
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB:ScreenSessionManager::MakeMirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1720,7 +1718,7 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
                                          ScreenId& screenGroupId)
 {
     WLOGFI("SCB:ScreenSessionManager::MakeExpand enter!");
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB:ScreenSessionManager::MakeExpand permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2488,7 +2486,7 @@ void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
 
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SCB: ScreenSessionManager HasPrivateWindow permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2625,7 +2623,7 @@ std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const
 
 void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
 {
-    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsShellCall())) {
         WLOGFE("DumpAllScreensInfo permission denied!");
         return;
     }
@@ -2668,7 +2666,7 @@ void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
 
 void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo)
 {
-    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsShellCall())) {
         WLOGFE("DumpSpecialScreenInfo permission denied!");
         return;
     }

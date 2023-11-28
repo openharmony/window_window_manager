@@ -33,7 +33,7 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsStartByHdcd()
+bool Permission::IsShellCall()
 {
     return true;
 }
