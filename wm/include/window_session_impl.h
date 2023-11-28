@@ -189,6 +189,7 @@ protected:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyWindowStatusChange(WindowMode mode);
+    static sptr<Window> FindWindowById(uint32_t winId);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
