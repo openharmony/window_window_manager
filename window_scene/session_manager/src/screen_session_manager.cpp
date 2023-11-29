@@ -56,6 +56,8 @@ const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const ScreenId SCREEN_ID_FULL = 0;
+const ScreenId SCREEN_ID_MAIN = 5;
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
@@ -75,30 +77,48 @@ ScreenSessionManager::ScreenSessionManager()
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
     if (foldScreenFlag) {
         foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_);
-        ScreenId screenIdFull = 0;
-        ScreenId screenIdMain = 5;
-        int64_t timeStamp = 50;
-        rsInterface_.SetScreenCorrection(screenIdFull, ScreenRotation::ROTATION_270);
+        foldScreenController_->LockDisplayStatus(true);
+        rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
         SetFoldScreenPowerInit([&]() {
+            int64_t timeStamp = 50;
             #ifdef TP_FEATURE_ENABLE
             int32_t tpType = 12;
             std::string fullTpChange = "0";
             std::string mainTpChange = "1";
             #endif
-            WLOGFI("ScreenSessionManager Fold Screen Power Init 1.");
-            #ifdef TP_FEATURE_ENABLE
-            rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
-            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
-            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
-            std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
+            if (rsInterface_.GetActiveScreenId() == SCREEN_ID_FULL) {
+                WLOGFI("ScreenSessionManager Fold Screen Power Full animation Init 1.");
+                #ifdef TP_FEATURE_ENABLE
+                rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
+                #endif
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+                std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
+                WLOGFI("ScreenSessionManager Fold Screen Power Full animation Init 2.");
+                #ifdef TP_FEATURE_ENABLE
+                rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
+                #endif
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
+            } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
+                WLOGFI("ScreenSessionManager Fold Screen Power Main animation Init 3.");
+                #ifdef TP_FEATURE_ENABLE
+                rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
+                #endif
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
+                std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
 
-            WLOGFI("ScreenSessionManager Fold Screen Power Init 2.");
-            #ifdef TP_FEATURE_ENABLE
-            rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
-            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
-            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
+                WLOGFI("ScreenSessionManager Fold Screen Power Main animation Init 4.");
+                #ifdef TP_FEATURE_ENABLE
+                rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
+                #endif
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+            } else {
+                WLOGFI("ScreenSessionManager Fold Screen Power Init, invalid active screen id");
+            }
+            foldScreenController_->LockDisplayStatus(false);
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
