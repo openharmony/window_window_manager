@@ -224,6 +224,13 @@ public:
     void SetSubWindowDecorEnable(bool subWindowDecorEnable);
 
     /**
+     * @brief Set only sceneboard supported.
+     *
+     * @param onlySupportSceneBoard only sceneboard supported.
+     */
+    void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -363,6 +370,13 @@ public:
     */
     bool GetSubWindowDecorEnable() const;
 
+    /**
+     * @brief Get only sceneboard supported
+     *
+     * @return Return ture means only sceneboard supported, otherwise not.
+    */
+    bool GetOnlySupportSceneBoard() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -389,6 +403,7 @@ private:
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
+    bool onlySupportSceneBoard_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

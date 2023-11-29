@@ -21,7 +21,6 @@
 #include "js_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
-#include "../../../../../window_scene/interfaces/innerkits/include/scene_board_judgement.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -585,12 +584,6 @@ napi_value JsWindowStage::OnDisableWindowDecor(napi_env env, napi_callback_info 
 
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        WLOGFE("Capability not supported on this device");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-        return NapiGetUndefined(env);
-    }
-
     std::string windowName;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -618,6 +611,7 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
             sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption(option);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            windowOption->SetOnlySupportSceneBoard(true);
             auto window = weakScene->CreateWindow(windowName, windowOption);
             if (window == nullptr) {
                 WLOGFE("[NAPI]Get window failed");

@@ -259,6 +259,16 @@ bool WindowOption::GetSubWindowDecorEnable() const
     return subWindowDecorEnable_;
 }
 
+void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
+{
+    onlySupportSceneBoard_ = onlySupportSceneBoard;
+}
+
+bool WindowOption::GetOnlySupportSceneBoard() const
+{
+    return onlySupportSceneBoard_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 
