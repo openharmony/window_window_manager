@@ -309,8 +309,19 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
     return targetRotation;
 }
 
+void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(Rect, float)> updateToInputManagerCallback)
+{
+    updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    bool needUpdateToInputManager = false;
+    if (foldDisplayMode == FoldDisplayMode::FULL &&
+        property_.GetBounds() == bounds &&
+        property_.GetRotation() != static_cast<float>(rotation)) {
+        needUpdateToInputManager = true;
+    }
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -321,6 +332,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
+    }
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        int foldRotation = (rotation + 90) % 360;
+        updateToInputManagerCallback_(bounds, static_cast<float>(foldRotation));
     }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
