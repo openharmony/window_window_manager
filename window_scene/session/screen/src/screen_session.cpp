@@ -18,6 +18,7 @@
 #include "window_manager_hilog.h"
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -974,5 +975,24 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
     }
+}
+
+bool ScreenSession::UpdateAvailableArea(DMRect area)
+{
+    if (property_.GetAvailableArea() == area) {
+        return false;
+    }
+    property_.SetAvailableArea(area);
+    return true;
+}
+
+void ScreenSession::SetAvailableArea(DMRect area)
+{
+    property_.SetAvailableArea(area);
+}
+
+DMRect ScreenSession::GetAvailableArea()
+{
+    return property_.GetAvailableArea();
 }
 } // namespace OHOS::Rosen
