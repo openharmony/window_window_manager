@@ -154,6 +154,15 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
             break;
         }
+        case TRANS_ID_ON_AVAILABLE_AREA_CHANGED: {
+            DMRect rect;
+            rect.posX_ = data.ReadInt32();
+            rect.posY_ = data.ReadInt32();
+            rect.width_ = data.ReadUint32();
+            rect.height_ = data.ReadUint32();
+            NotifyAvailableAreaChanged(rect);
+            break;
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

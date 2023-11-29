@@ -237,4 +237,13 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
     }
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
 }
+
+void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateAvailableArea(screenId, area);
+}
 } // namespace OHOS::Rosen
