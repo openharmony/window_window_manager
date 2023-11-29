@@ -72,7 +72,7 @@ public:
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
-    void SetNeedKeepKeyboard(bool isNeedKeepKeyboard);
+    void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingWindow(uint32_t windowId);
 
@@ -113,7 +113,7 @@ public:
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
-    bool IsNeedKeepKeyboard() const;
+    bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingWindow() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -172,7 +172,7 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
-    bool isNeedKeepKeyboard_ = false;
+    bool keepKeyboardFlag_ = false;
     uint32_t callingWindowId_ = INVALID_WINDOW_ID;
 
     double textFieldPositionY_ = 0.0;

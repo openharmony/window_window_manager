@@ -1115,9 +1115,9 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
 }
 
-static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool isNeedKeepKeyboard)
+static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
 {
-    if (!isNeedKeyboard && !isNeedKeepKeyboard) {
+    if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
         WLOGFI("[WMSInput] Notify InputMethod framework close keyboard");
         if (MiscServices::InputMethodController::GetInstance()) {
@@ -1143,13 +1143,14 @@ void WindowSessionImpl::NotifyAfterFocused()
             if (uiContent_ != nullptr) {
                 // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
                 bool isNeedKeyboard = uiContent_->NeedSoftKeyboard();
-                /* isNeedKeyboard is set by the system window and the app subwindow,
-                 * which indicates whether the window is set to keep the keyboard.
-                 */
-                bool isNeedKeepKeyboard = (property_ != nullptr) ? property_->IsNeedKeepKeyboard() : false;
-                WLOGFD("[WMSInput] isNeedKeyboard: %{public}d, isNeedKeepKeyboard: %{public}d",
-                    isNeedKeyboard, isNeedKeepKeyboard);
-                RequestInputMethodCloseKeyboard(isNeedKeyboard, isNeedKeepKeyboard);
+                // whether keep the keyboard created by other windows, support system window and app subwindow.
+                bool keepKeyboardFlag = false;
+                if (property_ != nullptr) {
+                    keepKeyboardFlag = property_->GetKeepKeyboardFlag();
+                }
+                WLOGFD("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+                    isNeedKeyboard, keepKeyboardFlag);
+                RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
             }
         };
         uiContent_->SetOnWindowFocused(task);

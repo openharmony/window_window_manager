@@ -659,11 +659,11 @@ napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]SetNeedKeepKeyboard");
+    WLOGI("[NAPI]KeepKeyboardOnFocus");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetNeedKeepKeyboard(env, info) : nullptr;
+    return (me != nullptr) ? me->KeepKeyboardOnFocus(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
@@ -3305,7 +3305,7 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -3314,28 +3314,33 @@ napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool isNeedKeepKeyboard = false;
+    bool keepKeyboardFlag = false;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to get parameter isNeedKeepKeyboard");
+        WLOGFE("Failed to get parameter keepKeyboardFlag");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     } else {
-        napi_get_value_bool(env, nativeVal, &isNeedKeepKeyboard);
+        napi_get_value_bool(env, nativeVal, &keepKeyboardFlag);
     }
 
     if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        WLOGFE("KeepKeyboardOnFocus is not allowed since window is not system window or app subwindow");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
 
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetNeedKeepKeyboard(isNeedKeepKeyboard));
+    WmErrorCode ret = windowToken_->KeepKeyboardOnFocus(keepKeyboardFlag);
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetNeedKeepKeyboard failed");
+        WLOGFE("Window KeepKeyboardOnFocus failed");
         return NapiThrowError(env, ret);
     }
 
-    WLOGI("Window [%{public}u, %{public}s] SetNeedKeepKeyboard end, isNeedKeepKeyboard = %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isNeedKeepKeyboard);
+    WLOGI("Window [%{public}u, %{public}s] KeepKeyboardOnFocus end, keepKeyboardFlag = %{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), keepKeyboardFlag);
 
     return NapiGetUndefined(env);
 }
@@ -4819,7 +4824,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
-    BindNativeFunction(env, object, "setNeedKeepKeyboard", moduleName, JsWindow::SetNeedKeepKeyboard);
+    BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
 }
