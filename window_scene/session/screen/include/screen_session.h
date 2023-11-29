@@ -156,6 +156,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::function<void(Rect, float) updateToInputManagerCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {
