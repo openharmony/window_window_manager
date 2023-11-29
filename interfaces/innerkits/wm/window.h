@@ -1461,12 +1461,12 @@ public:
     virtual WMError RecoveryPullPiPMainWindow(const Rect& rect) { return WMError::WM_OK; }
 
     /**
-     * @brief Set to keep keyboard.
+     * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
-     * @param isNeedKeepKeyboard true means the keyboard should be preserved, otherwise means the opposite.
-     * @return True means set isNeedKeepKeyboard flag success, others means failed.
+     * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
+     * @return WM_OK means set keep keyboard flag success, others means failed.
     */
-    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
+    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) { return WmErrorCode::WM_OK; }
 
     /**
      * @brief Get the window limits of current window.

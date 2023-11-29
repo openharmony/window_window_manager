@@ -874,5 +874,10 @@ WMError WindowImpl::UnregisterWindowVisibilityChangeListener(const WindowVisibil
 {
     return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
+
+WmErrorCode WindowImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
+{
+    return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace Rosen
 } // namespace OHOS
