@@ -200,6 +200,11 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     }
     if (property) {
         property->SetPersistentId(reply.ReadInt32());
+        bool needUpdate = reply.ReadBool();
+        property->SetIsNeedUpdateWindowMode(needUpdate);
+        if (needUpdate) {
+            property->SetWindowMode(static_cast<WindowMode>(reply.ReadUint32()));
+        }
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

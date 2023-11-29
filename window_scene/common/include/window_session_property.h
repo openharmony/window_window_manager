@@ -92,7 +92,9 @@ public:
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetNeedKeepKeyboard(bool isNeedKeepKeyboard);
+    void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
 
+    bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
     Rect GetWindowRect() const;
@@ -194,6 +196,7 @@ private:
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
     bool drawingContentState_ = false;
+    bool isNeedUpdateWindowMode_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
@@ -230,7 +233,6 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(backgroundswitch)) {
             return false;
         }
-        
         return true;
     }
 
