@@ -29,6 +29,8 @@ class RRectT;
 
 class IScreenSessionManager : public IDisplayManager {
 public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IScreenSessionManager");
+
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
@@ -41,7 +43,7 @@ public:
     {
         return DMError::DM_OK;
     }
-    virtual DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool autoRotate) override
+    virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override
     {
         return DMError::DM_OK;
     }
@@ -95,6 +97,8 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override {}
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override { return DMError::DM_OK; }
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override { return DMError::DM_OK; }
+    virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
+        float virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width,
         uint32_t height) override { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,

@@ -192,6 +192,21 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
     return hostSession_;
 }
 
+bool WindowSessionImpl::GetDrawingContentState() const
+{
+    if (property_) {
+        return property_->GetDrawingContentState();
+    }
+    return false;
+}
+
+void WindowSessionImpl::SetDrawingContentState(bool windowDrawingContentState)
+{
+    if (property_) {
+        property_->SetDrawingContentState(windowDrawingContentState);
+    }
+}
+
 ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
     if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB) {
@@ -491,7 +506,7 @@ WMError WindowSessionImpl::RequestFocus() const
         WLOGFD("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SessionManager::GetInstance().RequestFocusStatus(GetPersistentId(), true);
+    return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
@@ -1405,7 +1420,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        if (avoidAreaChangeListeners_[persistentId].empty()) {
+        if (touchOutsideListeners_[persistentId].empty()) {
             isUpdate = true;
         }
     }
@@ -1564,7 +1579,7 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SessionManager::GetInstance().UpdateProperty(property_, action);
+    return SingletonContainer::Get<WindowAdapter>().UpdateSessionProperty(property_, action);
 }
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
@@ -1661,7 +1676,7 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
-    return SessionManager::GetInstance().SetSessionGravity(GetPersistentId(),
+    return SingletonContainer::Get<WindowAdapter>().SetSessionGravity(GetPersistentId(),
         static_cast<SessionGravity>(gravity), percent);
 }
 
@@ -1741,6 +1756,40 @@ void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t heigh
         return;
     }
     hostSession_->UpdatePiPRect(width, height, reason);
+}
+
+void WindowSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos)
+{
+    WLOGFD("UpdateWindowDrawingContentInfo");
+}
+
+void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+{
+    WLOGFD("NotifyWindowStatusChange");
+    auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
+        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+            WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+        }
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_PRIMARY;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SECONDARY;
+    }
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+    }
+    if (state_ == WindowState::STATE_HIDDEN) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
+    }
+    
+    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
+    for (auto& listener : windowChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowStatusChange(WindowStatus);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

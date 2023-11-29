@@ -803,6 +803,88 @@ napi_value InitFoldDisplayMode(napi_env env)
     return objValue;
 }
 
+napi_value InitColorSpace(napi_env env)
+{
+    WLOGI("InitColorSpace called");
+
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "UNKNOWN",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::UNKNOWN)));
+    napi_set_named_property(env, objValue, "ADOBE_RGB",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::ADOBE_RGB)));
+    napi_set_named_property(env, objValue, "BT2020_HLG",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT2020_HLG)));
+    napi_set_named_property(env, objValue, "BT2020_PQ",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT2020_PQ)));
+    napi_set_named_property(env, objValue, "BT601_EBU",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT601_EBU)));
+    napi_set_named_property(env, objValue, "BT601_SMPTE_C",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT601_SMPTE_C)));
+    napi_set_named_property(env, objValue, "BT709",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT709)));
+    napi_set_named_property(env, objValue, "P3_HLG",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::P3_HLG)));
+    napi_set_named_property(env, objValue, "P3_PQ",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::P3_PQ)));
+    napi_set_named_property(env, objValue, "DISPLAY_P3",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::DISPLAY_P3)));
+    napi_set_named_property(env, objValue, "SRGB",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::SRGB)));
+    napi_set_named_property(env, objValue, "LINEAR_SRGB",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_SRGB)));
+    napi_set_named_property(env, objValue, "LINEAR_P3",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_P3)));
+    napi_set_named_property(env, objValue, "LINEAR_BT2020",
+        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_BT2020)));
+    return objValue;
+}
+
+napi_value InitHDRFormat(napi_env env)
+{
+    WLOGI("InitHDRFormat called");
+
+    if (env == nullptr) {
+        WLOGFE("env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "NONE",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::NONE)));
+    napi_set_named_property(env, objValue, "VIDEO_HLG",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::VIDEO_HLG)));
+    napi_set_named_property(env, objValue, "VIDEO_HDR10",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::VIDEO_HDR10)));
+    napi_set_named_property(env, objValue, "VIDEO_HDR_VIVID",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::VIDEO_HDR_VIVID)));
+    napi_set_named_property(env, objValue, "IMAGE_HDR_VIVID_DUAL",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_VIVID_DUAL)));
+    napi_set_named_property(env, objValue, "IMAGE_HDR_VIVID_SINGLE",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_VIVID_SINGLE)));
+    napi_set_named_property(env, objValue, "IMAGE_HDR_ISO_DUAL",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_ISO_DUAL)));
+    napi_set_named_property(env, objValue, "IMAGE_HDR_ISO_SINGLE",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_ISO_SINGLE)));
+    return objValue;
+}
+
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGI("JsDisplayManagerInit is called");
@@ -821,6 +903,8 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "DMError", InitDisplayError(env));
     napi_set_named_property(env, exportObj, "FoldStatus", InitFoldStatus(env));
     napi_set_named_property(env, exportObj, "FoldDisplayMode", InitFoldDisplayMode(env));
+    napi_set_named_property(env, exportObj, "ColorSpace", InitColorSpace(env));
+    napi_set_named_property(env, exportObj, "HDRFormat", InitHDRFormat(env));
 
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);

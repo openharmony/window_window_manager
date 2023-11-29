@@ -584,7 +584,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, Function | SmallTest | Level
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     Orientation orientation = Orientation::UNSPECIFIED;
     int res = 0;
-    session->ScreenOrientationChange(orientation);
+    session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 end";
 }

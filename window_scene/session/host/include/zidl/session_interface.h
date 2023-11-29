@@ -39,17 +39,14 @@ public:
     virtual WSError Foreground(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
+    virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
+    virtual WSError Hide() = 0;
 
     // scene session
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
-    virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-        sptr<IRemoteObject> token = nullptr) { return WSError::WS_OK; }
-    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
@@ -86,7 +83,7 @@ public:
     virtual void NotifyPiPWindowPrepareClose() {}
     virtual WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
         { return WSError::WS_OK; }
-    virtual WSError RecoveryPullPiPMainWindow(int32_t persistentId) { return WSError::WS_OK; }
+    virtual WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

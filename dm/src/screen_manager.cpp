@@ -558,9 +558,9 @@ DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t r
     return DMError::DM_OK;
 }
 
-DMError ScreenManager::SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool rotation)
+DMError ScreenManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotation)
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenBufferRotation(screenId, rotation);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(screenId, rotation);
 }
 
 bool ScreenManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)

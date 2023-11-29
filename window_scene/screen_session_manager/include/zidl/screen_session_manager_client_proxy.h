@@ -31,6 +31,8 @@ public:
         ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
+    void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
@@ -38,6 +40,8 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChanged(bool& immersive) override;
+    void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

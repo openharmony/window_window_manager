@@ -51,6 +51,7 @@ private:
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -61,6 +62,7 @@ private:
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
@@ -68,7 +70,7 @@ private:
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessSessionEventRegister();
-    void ProcessCreateSpecificSessionRegister();
+    void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
@@ -95,13 +97,14 @@ private:
     void ProcessForceHideChangeRegister();
     void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t eventId);
-    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
@@ -129,6 +132,7 @@ private:
     void OnForceHideChange(bool hide);
     void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
 
     napi_env env_;

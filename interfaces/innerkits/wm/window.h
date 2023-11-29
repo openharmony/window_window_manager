@@ -142,6 +142,12 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+    /**
+     * @brief Notify caller when window status changed.
+     *
+     * @param status Mode of the current window.
+     */
+    virtual void OnWindowStatusChange(WindowStatus status) {}
 };
 
 /**
@@ -1232,7 +1238,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Recover() { return WMError::WM_OK; }
+    virtual WMError Recover() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -1429,9 +1435,10 @@ public:
     /**
      * @brief Recovery pip main window.
      *
+     * @param Rect of window.
      * @return Errorcode of window.
      */
-    virtual WMError RecoveryPullPiPMainWindow() { return WMError::WM_OK; }
+    virtual WMError RecoveryPullPiPMainWindow(const Rect& rect) { return WMError::WM_OK; }
 
     /**
      * @brief Set to keep keyboard.

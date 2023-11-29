@@ -38,13 +38,13 @@ private:
     int HandleForeground(MessageParcel& data, MessageParcel& reply);
     int HandleBackground(MessageParcel& data, MessageParcel& reply);
     int HandleDisconnect(MessageParcel& data, MessageParcel& reply);
+    int HandleShow(MessageParcel& data, MessageParcel& reply);
+    int HandleHide(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
-    int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
-    int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);

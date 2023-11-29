@@ -50,6 +50,7 @@ public:
     static napi_value DestroyWindow(napi_env env, napi_callback_info info);
     static napi_value Hide(napi_env env, napi_callback_info info);
     static napi_value HideWithAnimation(napi_env env, napi_callback_info info);
+    static napi_value Recover(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
@@ -138,6 +139,7 @@ private:
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
+    napi_value HideWindowFunction(napi_env env, napi_callback_info info);
     napi_value OnShow(napi_env env, napi_callback_info info);
     napi_value OnShowWindow(napi_env env, napi_callback_info info);
     napi_value OnShowWithAnimation(napi_env env, napi_callback_info info);
@@ -145,6 +147,7 @@ private:
     napi_value OnDestroyWindow(napi_env env, napi_callback_info info);
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
+    napi_value OnRecover(napi_env env, napi_callback_info info);
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);

@@ -26,6 +26,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
+int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
 
 } // namespace
@@ -84,11 +85,18 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
             WLOGFE("Enter session is null, do not reissuing enter leave events");
             return;
         }
+        if (g_lastLeaveWindowId == enterSession->GetPersistentId()) {
+            WLOGFI("g_lastLeaveWindowId:%{public}d equal enterSession id",
+                g_lastLeaveWindowId);
+            return;
+        }
+
         WLOGFD("Reissue enter leave, enter persistentId:%{public}d",
             enterSession->GetPersistentId());
         auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
         leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
         enterSession->TransferPointerEvent(leavePointerEvent);
+        g_lastLeaveWindowId = enterSession->GetPersistentId();
 
         auto enterPointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
         enterPointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
@@ -113,6 +121,7 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
         WLOGFE("UpdateLastMouseEvent pointerEvent is null");
         return;
     }
+    g_lastLeaveWindowId = -1;
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
