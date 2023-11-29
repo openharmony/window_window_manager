@@ -386,6 +386,17 @@ bool Session::GetVisible() const
     return isRSVisible_;
 }
 
+WSError Session::SetDrawingContentState(bool isRSDrawing)
+{
+    isRSDrawing_ = isRSDrawing;
+    return WSError::WS_OK;
+}
+
+bool Session::GetDrawingContentState() const
+{
+    return isRSDrawing_;
+}
+
 int32_t Session::GetWindowId() const
 {
     return GetPersistentId();

@@ -898,7 +898,7 @@ HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
 
-    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_MAX);
+    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_LAYER_STATE_MAX);
     windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
     ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
 }
