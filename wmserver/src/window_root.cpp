@@ -372,9 +372,10 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> WindowRoot::GetWindowVis
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     VisibleData& rsVisibleData = occlusionData->GetVisibleData();
     std::vector<std::pair<uint64_t, WindowVisibilityState> > currVisibleData;
-    currVisibleData.reserve(rsVisibleData.size());
     for (auto iter = rsVisibleData.begin(); iter != rsVisibleData.end(); iter++) {
-        currVisibleData.emplace_back(iter->first, static_cast<WindowVisibilityState>(iter->second));
+        if (static_cast<WindowLayerState>(iter->second) < WINDOW_LAYER_DRAWING) {
+            currVisibleData.emplace_back(iter->first, static_cast<WindowVisibilityState>(iter->second));
+        }
     }
     std::sort(currVisibleData.begin(), currVisibleData.end(), Comp);
     uint32_t i, j;

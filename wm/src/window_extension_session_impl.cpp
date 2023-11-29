@@ -325,8 +325,5 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
-void WindowExtensionSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos)
-{
-}
 } // namespace Rosen
 } // namespace OHOS
