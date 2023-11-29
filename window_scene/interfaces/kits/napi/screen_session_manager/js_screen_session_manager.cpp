@@ -165,7 +165,7 @@ bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
     return true;
 }
 
-
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("Register RegisterShutdownCallback.");
@@ -173,6 +173,7 @@ napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_c
     return (me != nullptr) ? me->OnRegisterShutdownCallback(env, info) : nullptr;
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("Register UnRegisterShutdownCallback.");
@@ -180,6 +181,7 @@ napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi
     return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::GetPhyScreenProperty(napi_env env, napi_callback_info info)
 {
     WLOGD("Register GetPhyScreenProperty.");
@@ -234,6 +236,7 @@ napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, co
     return NapiGetUndefined(env);
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("Register callback.");
@@ -241,6 +244,7 @@ napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_
     return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::UpdateScreenRotationProperty(napi_env env, napi_callback_info info)
 {
     WLOGD("Update screen rotation property.");
@@ -330,6 +334,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     return NapiGetUndefined(env);
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::NotifyScreenLockEvent(napi_env env, napi_callback_info info)
 {
     WLOGD("Notify screen lock event.");
@@ -360,6 +365,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
     return NapiGetUndefined(env);
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value JsScreenSessionManager::GetCurvedCompressionArea(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]GetCurvedCompressionArea");
