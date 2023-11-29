@@ -24,7 +24,7 @@ ohos_executable("snapshot_display") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   install_enable = true
   sources = [ "src/snapshot_display.cpp" ]
@@ -53,7 +53,7 @@ ohos_shared_library("libsnapshot_util") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [ "src/snapshot_utils.cpp" ]
 

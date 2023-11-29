@@ -378,7 +378,7 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 {
-    WLOGI("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+    WLOGD("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) == g_JsDisplayMap.end()) {
         WLOGI("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
@@ -475,11 +475,11 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
 {
-    WLOGI("CreateJsDisplay is called");
+    WLOGD("CreateJsDisplay is called");
     napi_value objValue = nullptr;
     std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
     if (jsDisplayObj != nullptr && jsDisplayObj->GetNapiValue() != nullptr) {
-        WLOGI("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
+        WLOGD("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
         objValue = jsDisplayObj->GetNapiValue();
     }
     if (objValue == nullptr) {

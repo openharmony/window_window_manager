@@ -35,7 +35,7 @@ ohos_shared_library("libwindow_extension") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "../extension_connection/src/zidl/window_extension_client_proxy.cpp",
@@ -96,7 +96,7 @@ ohos_shared_library("window_extension_module") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [ "src/window_extension_module_loader.cpp" ]
 
