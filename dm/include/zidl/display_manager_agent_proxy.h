@@ -18,6 +18,7 @@
 
 #include <iremote_proxy.h>
 #include "display_manager_agent_interface.h"
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -41,6 +42,7 @@ public:
     virtual void NotifyFoldStatusChanged(FoldStatus) override;
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) override;
+    virtual void NotifyAvailableAreaChanged(DMRect) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };
