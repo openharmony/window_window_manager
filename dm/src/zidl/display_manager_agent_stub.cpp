@@ -31,7 +31,7 @@ namespace {
 int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    WLOGFI("code:%{public}u", code);
+    WLOGFD("code:%{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;
