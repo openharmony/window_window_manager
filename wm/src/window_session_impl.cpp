@@ -119,6 +119,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
+    property_->SetCallingWindow(option->GetCallingWindow());
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
@@ -1081,11 +1082,42 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
 }
 
+static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool isNeedKeepKeyboard)
+{
+    if (!isNeedKeyboard && !isNeedKeepKeyboard) {
+#ifdef IMF_ENABLE
+        WLOGFI("[WMSInput] Notify InputMethod framework close keyboard");
+        if (MiscServices::InputMethodController::GetInstance()) {
+            int32_t ret = MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+            if (ret != 0) { // 0 - NO_ERROR
+                WLOGFE("[WMSInput] InputMethod framework close keyboard failed, ret: %{public}d", ret);
+            }
+        }
+#endif
+    }
+}
+
 void WindowSessionImpl::NotifyAfterFocused()
 {
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
     CALL_UI_CONTENT(Focus);
+    if (uiContent_ != nullptr) {
+        auto task = [this]() {
+            if (uiContent_ != nullptr) {
+                // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
+                bool isNeedKeyboard = uiContent_->NeedSoftKeyboard();
+                /* isNeedKeyboard is set by the system window and the app subwindow,
+                 * which indicates whether the window is set to keep the keyboard.
+                 */
+                bool isNeedKeepKeyboard = (property_ != nullptr) ? property_->IsNeedKeepKeyboard() : false;
+                WLOGFD("[WMSInput] isNeedKeyboard: %{public}d, isNeedKeepKeyboard: %{public}d",
+                    isNeedKeyboard, isNeedKeepKeyboard);
+                RequestInputMethodCloseKeyboard(isNeedKeyboard, isNeedKeepKeyboard);
+            }
+        };
+        uiContent_->SetOnWindowFocused(task);
+    }
 }
 
 void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)

@@ -397,6 +397,16 @@ bool WindowSessionProperty::IsNeedKeepKeyboard() const
     return isNeedKeepKeyboard_;
 }
 
+void WindowSessionProperty::SetCallingWindow(uint32_t windowId)
+{
+    callingWindowId_ = windowId;
+}
+
+uint32_t WindowSessionProperty::GetCallingWindow() const
+{
+    return callingWindowId_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -517,7 +527,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
-        parcel.WriteBool(isNeedUpdateWindowMode_);
+        parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -564,6 +574,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
+    property->SetCallingWindow(parcel.ReadUint32());
     return property;
 }
 

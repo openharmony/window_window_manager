@@ -2021,6 +2021,28 @@ WMError WindowSceneSessionImpl::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("[WMSInput] Set calling window id failed, window session is InValid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (property_ == nullptr) {
+        WLOGFE("[WMSInput] Set calling window id failed, property_ is nullptr!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uint32_t lastCallingWindowId = property_->GetCallingWindow();
+    if (callingWindowId == lastCallingWindowId) {
+        WLOGFD("[WMSInput] Calling window id does not need to be updated!");
+        return WMError::WM_OK;
+    }
+    WLOGFI("[WMSInput] Set calling window id: %{public}d", callingWindowId);
+    property_->SetCallingWindow(callingWindowId);
+
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+}
+
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("DumpSessionElementInfo");
