@@ -77,11 +77,11 @@ ScreenSessionManager::ScreenSessionManager()
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
     if (foldScreenFlag) {
         foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_);
-        int64_t timeStamp = 50;
         foldScreenController_->LockDisplayStatus(true);
         rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
         SetFoldScreenPowerInit([&]() {
             #ifdef TP_FEATURE_ENABLE
+            int64_t timeStamp = 50;
             int32_t tpType = 12;
             std::string fullTpChange = "0";
             std::string mainTpChange = "1";
