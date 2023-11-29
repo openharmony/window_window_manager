@@ -400,13 +400,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
             rsTransaction = transactionController->GetRSTransaction();
         }
         WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
-        if (WindowHelper::IsPipWindow(session->GetWindowType()) && session->reason_ == SizeChangeReason::DRAG_END) {
-            session->ClearPiPRectPivotInfo();
-            ScenePersistentStorage::Insert("pip_window_pos_x", session->winRect_.posX_,
-                ScenePersistentStorageType::PIP_INFO);
-            ScenePersistentStorage::Insert("pip_window_pos_y", session->winRect_.posY_,
-                ScenePersistentStorageType::PIP_INFO);
-        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
@@ -1168,9 +1161,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
-    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
-        NotifySessionRectChange(rect, reason);
-    }
+    OnPiPMoveCallback(rect, reason);
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1872,6 +1863,21 @@ WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double te
     textFieldPositionY_ = textFieldPositionY;
     textFieldHeight_ = textFieldHeight;
     return WSError::WS_OK;
+}
+
+void SceneSession::OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason)
+{
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        return;
+    }
+    if (reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
+    if (reason == SizeChangeReason::DRAG_END) {
+        ClearPiPRectPivotInfo();
+        ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+        ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    }
 }
 
 bool SceneSession::InitPiPRectInfo()
