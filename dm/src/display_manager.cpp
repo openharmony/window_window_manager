@@ -1299,6 +1299,7 @@ void DisplayManager::Impl::OnRemoteDied()
     powerEventListenerAgent_ = nullptr;
     screenshotListenerAgent_ = nullptr;
     privateWindowListenerAgent_ = nullptr;
+    foldStatusListenerAgent_ = nullptr;
 }
 
 void DisplayManager::OnRemoteDied()
