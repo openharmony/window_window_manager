@@ -274,6 +274,8 @@ DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, n
         ret = SingletonContainer::Get<DisplayManager>().RegisterFoldStatusListener(displayListener);
     } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayModeListener(displayListener);
+    } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
     } else {
         WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -351,6 +353,10 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 WLOGFD("unregister privateWindowListener, ret: %{public}u", ret);
+            } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+                sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+                WLOGFD("unregister IAvailableAreaListener, ret: %{public}u", ret);
             } else {
                 ret = DMError::DM_ERROR_INVALID_PARAM;
                 WLOGFE("unregister displaylistener with type failed, %{public}s not matched", type.c_str());

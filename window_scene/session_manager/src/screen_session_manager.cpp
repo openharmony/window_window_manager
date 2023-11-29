@@ -29,6 +29,7 @@
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
 
+#include "dm_common.h"
 #include "scene_board_judgement.h"
 #include "session_permission.h"
 #include "screen_scene_config.h"
@@ -661,6 +662,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetPhyHeight(screenCapability.GetPhyHeight());
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
+    property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
         property.SetDefaultDensity(densityDpi_);
@@ -3045,4 +3047,42 @@ int ScreenSessionManager::LockFoldDisplayStatus(const std::string& lockParam)
     LockFoldDisplayStatus(lockDisplayStatus);
     return 0;
 }
+
+void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
+{
+    WLOGI("NotifyAvailableAreaChanged call");
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyAvailableAreaChanged(area);
+    }
+}
+
+DMError ScreenSessionManager::GetAvailableArea(DisplayId displayId, DMRect& area)
+{
+    auto displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFE("can not get displayInfo.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto screenSession = GetScreenSession(displayInfo->GetScreenId());
+    area = screenSession->GetAvailableArea();
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get default screen now");
+        return;
+    }
+    if (!screenSession->UpdateAvailableArea(area)) {
+        return;
+    }
+    NotifyAvailableAreaChanged(area);
+}
+
 } // namespace OHOS::Rosen

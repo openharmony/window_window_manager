@@ -72,6 +72,8 @@ public:
     DMError UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
     DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     void OnRemoteDied();
 private:
@@ -88,6 +90,7 @@ private:
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
+    void NotifyAvailableAreaChanged(DMRect rect);
     void Clear();
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
@@ -101,6 +104,7 @@ private:
     std::set<sptr<IFoldStatusListener>> foldStatusListeners_;
     std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners_;
     std::set<sptr<IDisplayModeListener>> displayModeListeners_;
+    std::set<sptr<IAvailableAreaListener>> availableAreaListeners_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
     class DisplayManagerAgent;
@@ -116,6 +120,8 @@ private:
     sptr<DisplayManagerDisplayUpdateAgent> displayUpdateListenerAgent_;
     class DisplayManagerDisplayModeAgent;
     sptr<DisplayManagerDisplayModeAgent> displayModeListenerAgent_;
+    class DisplayManagerAvailableAreaAgent;
+    sptr<DisplayManagerAvailableAreaAgent> availableAreaListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -271,6 +277,7 @@ private:
     sptr<Impl> pImpl_;
 };
 
+
 class DisplayManager::Impl::DisplayManagerDisplayModeAgent : public DisplayManagerAgentDefault {
 public:
     explicit DisplayManagerDisplayModeAgent(sptr<Impl> impl) : pImpl_(impl)
@@ -281,6 +288,21 @@ public:
     virtual void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override
     {
         pImpl_->NotifyDisplayModeChanged(displayMode);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerAvailableAreaAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerAvailableAreaAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerAvailableAreaAgent() = default;
+
+    virtual void NotifyAvailableAreaChanged(DMRect area) override
+    {
+        pImpl_->NotifyAvailableAreaChanged(area);
     }
 private:
     sptr<Impl> pImpl_;
@@ -1025,6 +1047,18 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     }
 }
 
+void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
+{
+    std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        availableAreaListeners = availableAreaListeners_;
+    }
+    for (auto& listener : availableAreaListeners) {
+        listener->OnAvailableAreaChanged(rect);
+    }
+}
+
 DMError DisplayManager::RegisterDisplayModeListener(sptr<IDisplayModeListener> listener)
 {
     if (listener == nullptr) {
@@ -1078,6 +1112,63 @@ DMError DisplayManager::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeLis
             displayModeListenerAgent_,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
         displayModeListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+DMError DisplayManager::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterAvailableAreaListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterAvailableAreaListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListenerAgent_ == nullptr) {
+        availableAreaListenerAgent_ = new DisplayManagerAvailableAreaAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterAvailableAreaListener failed !");
+        availableAreaListenerAgent_ = nullptr;
+    } else {
+        WLOGI("IAvailableAreaListener register success");
+        availableAreaListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterAvailableAreaListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(availableAreaListeners_.begin(), availableAreaListeners_.end(), listener);
+    if (iter == availableAreaListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    availableAreaListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListeners_.empty() && availableAreaListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+        availableAreaListenerAgent_ = nullptr;
     }
     return ret;
 }

@@ -179,6 +179,13 @@ napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
 
+napi_value JsDisplay::GetAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGI("GetAvailableArea is called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnGetAvailableArea(env, info) : nullptr;
+}
+
 napi_value JsDisplay::HasImmersiveWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("HasImmersiveWindow is called");
@@ -217,6 +224,35 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsDisplay::OnGetCutoutInfo",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnGetAvailableArea is called");
+    NapiAsyncTask::CompleteCallback complete =
+        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
+            DMRect area;
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetAvailableArea(area));
+            if (ret == DmErrorCode::DM_OK) {
+                task.Resolve(env, CreateJsRectObject(env, area));
+                WLOGI("JsDisplay::OnGetAvailableArea success");
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                    "JsDisplay::OnGetAvailableArea failed."));
+            }
+        };
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = nullptr;
+    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
+        GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
+        lastParam = argv[ARGC_ONE - 1];
+    }
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplay::OnGetAvailableArea",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -504,6 +540,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "hasImmersiveWindow", "JsDisplay", JsDisplay::HasImmersiveWindow);
         BindNativeFunction(env, objValue, "getSupportedColorSpaces", "JsDisplay", JsDisplay::GetSupportedColorSpaces);
         BindNativeFunction(env, objValue, "getSupportedHDRFormats", "JsDisplay", JsDisplay::GetSupportedHDRFormats);
+        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);
