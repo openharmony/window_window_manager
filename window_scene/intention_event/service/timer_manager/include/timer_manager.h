@@ -62,7 +62,7 @@ private:
     void ProcessTimersInternal();
 
 private:
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     std::atomic<TimerMgrState> state_ { TimerMgrState::STATE_NOT_START };
     std::thread timerWorker_;
     std::list<std::unique_ptr<TimerItem>> timers_;

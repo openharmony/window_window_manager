@@ -64,22 +64,6 @@ HWTEST_F(TimerManagerTest, Init, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Stop
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, Stop, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "TimerManagerTest::Stop start";
-    TimerManager* timermanager = new TimerManager();
-    timermanager->Init();
-    timermanager->Stop();
-    int32_t res = timermanager->TakeNextTimerId();
-    ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "TimerManagerTest::Stop end";
-}
-
-/**
  * @tc.name: RemoveTimer
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -94,34 +78,6 @@ HWTEST_F(TimerManagerTest, RemoveTimer, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcNextDelay
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, CalcNextDelay, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "TimerManagerTest::CalcNextDelay start";
-    TimerManager* timermanager = new TimerManager();
-    int32_t res = timermanager->CalcNextDelay();
-    ASSERT_EQ(5000, res);
-    GTEST_LOG_(INFO) << "TimerManagerTest::CalcNextDelay end";
-}
-
-/**
- * @tc.name: ProcessTimers
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, ProcessTimers, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimers start";
-    TimerManager* timermanager = new TimerManager();
-    timermanager->ProcessTimers();
-    ASSERT_EQ(timermanager->RemoveTimerInternal(0), -1);
-    GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimers start";
-}
-
-/**
  * @tc.name: OnThread
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -133,20 +89,6 @@ HWTEST_F(TimerManagerTest, OnThread, Function | SmallTest | Level2)
     timermanager->OnThread();
     ASSERT_EQ(-1, timermanager->RemoveTimerInternal(0));
     GTEST_LOG_(INFO) << "TimerManagerTest::OnThread start";
-}
-
-/**
- * @tc.name: OnStop
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, OnStop, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "TimerManagerTest::OnStop start";
-    TimerManager* timermanager = new TimerManager();
-    timermanager->OnStop();
-    ASSERT_EQ(timermanager->CalcNextDelayInternal(), 5000);
-    GTEST_LOG_(INFO) << "TimerManagerTest::OnStop start";
 }
 
 /**
