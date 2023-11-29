@@ -116,6 +116,14 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     screenSession->PropertyChange(property, reason);
 }
 
+void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    for (auto screenSession:screenSessionMap_) {
+        (screenSession.second)->PowerStatusChange(event, status, reason);
+    }
+}
+
 void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
 {
     auto screenSession = GetScreenSession(screenId);
@@ -156,6 +164,14 @@ void ScreenSessionManagerClient::OnDisplayStateChanged(DisplayId defaultDisplayI
 {
     if (displayChangeListener_) {
         displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    }
+}
+
+void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+    std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
     }
 }
 

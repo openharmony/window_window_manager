@@ -23,6 +23,12 @@ namespace {
     constexpr int32_t NUMBER_THREE = 3;
     constexpr int32_t NUMBER_FOUR = 4;
     constexpr int32_t NUMBER_SEVEN = 7;
+    float g_vpr = 1.0f;
+}
+
+void PiPUtil::SetDisplayVpr(const float displayVpr)
+{
+    g_vpr = displayVpr;
 }
 
 void PiPUtil::UpdateRectPivot(const int32_t start, const uint32_t len, const uint32_t totalLen, PiPScalePivot& pivot)
@@ -60,7 +66,7 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
     if (winWidth == 0 || winHeight == 0) {
         return;
     }
-
+    int32_t safePaddingHorizontal = static_cast<int32_t>(SAFE_PADDING_HORIZONTAL_VP * g_vpr);
     switch (scaleLevel) {
         default:
         case PiPScaleLevel::PIP_SCALE_LEVEL_SMALLEST: {
@@ -78,9 +84,9 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
             int32_t widthTmp = 0;
             if (winWidth < winHeight) {
                 widthTmp = (NUMBER_THREE * static_cast<int32_t>(width) -
-                    NUMBER_SEVEN * SAFE_PADDING_HORIZONTAL) / NUMBER_FOUR;
+                    NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
             } else {
-                widthTmp = static_cast<int32_t>(width) - NUMBER_TWO * SAFE_PADDING_HORIZONTAL;
+                widthTmp = static_cast<int32_t>(width) - NUMBER_TWO * safePaddingHorizontal;
             }
             rect.width_ = static_cast<uint32_t>(widthTmp);
             rect.height_ = rect.width_ * winHeight / winWidth;
@@ -91,18 +97,19 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
 
 bool PiPUtil::GetValidRect(const uint32_t width, const uint32_t height, Rect& rect)
 {
+    int32_t safePaddingHorizontal = static_cast<int32_t>(SAFE_PADDING_HORIZONTAL_VP * g_vpr);
     bool hasChanged = false;
-    if (rect.posX_ < SAFE_PADDING_HORIZONTAL) {
-        rect.posX_ = SAFE_PADDING_HORIZONTAL;
+    if (rect.posX_ < safePaddingHorizontal) {
+        rect.posX_ = safePaddingHorizontal;
         hasChanged = true;
-    } else if ((rect.posX_ + rect.width_) > (width - SAFE_PADDING_HORIZONTAL)) {
-        rect.posX_ = width - SAFE_PADDING_HORIZONTAL - rect.width_;
+    } else if ((rect.posX_ + rect.width_) > (width - safePaddingHorizontal)) {
+        rect.posX_ = width - safePaddingHorizontal - rect.width_;
         hasChanged = true;
     }
     if (rect.posY_ < SAFE_PADDING_VERTICAL_TOP) {
         rect.posY_ = SAFE_PADDING_VERTICAL_TOP;
         hasChanged = true;
-    } else if ((rect.posY_ + rect.height_) > (width - SAFE_PADDING_VERTICAL_BOTTOM)) {
+    } else if ((rect.posY_ + rect.height_) > (height - SAFE_PADDING_VERTICAL_BOTTOM)) {
         rect.posY_ = height - SAFE_PADDING_VERTICAL_BOTTOM - rect.height_;
         hasChanged = true;
     }

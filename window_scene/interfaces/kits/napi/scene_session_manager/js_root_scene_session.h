@@ -19,6 +19,7 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include "session/host/include/root_scene_session.h"
+#include "js_scene_utils.h"
 
 namespace OHOS::Rosen {
 class JsRootSceneSession : public RefBase {
@@ -37,11 +38,13 @@ private:
     napi_value OnLoadContent(napi_env env, napi_callback_info info);
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void PendingSessionActivation(SessionInfo& info);
+    void PendingSessionActivationInner(SessionInfo& info);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
 
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     sptr<RootSceneSession> rootSceneSession_;
+    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 

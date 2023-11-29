@@ -42,6 +42,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            },
         { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister     },
         { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister  },
+        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowChangeRegister          },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -284,7 +285,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     }
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
-    NativeReference* callbackRef = reinterpret_cast<NativeReference*>(result);
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef);
     if (windowManagerListener == nullptr) {
         WLOGFE("[NAPI]New JsWindowListener failed");

@@ -38,7 +38,6 @@ sptr<RotationMotionEventCallback> MotionSubscriber::motionEventCallback_ = nullp
 void ScreenSensorConnector::SubscribeRotationSensor()
 {
     WLOGFI("dms: subscribe rotation-related sensor");
-    ScreenRotationProperty::Init();
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
     if (MotionSubscriber::isMotionSensorSubscribed_) {

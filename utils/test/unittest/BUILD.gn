@@ -23,6 +23,7 @@ group("unittest") {
     ":utils_cutout_info_test",
     ":utils_display_info_test",
     ":utils_perform_reporter_test",
+    ":utils_pip_util_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
@@ -232,6 +233,19 @@ ohos_unittest("utils_window_transition_info_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
+  ]
+}
+
+ohos_unittest("utils_pip_util_test") {
+  module_out_path = module_out_path
+
+  sources = [ "pip_util_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

@@ -203,7 +203,7 @@ public:
      * @param bufferRotation auto rotate
      * @return DM_OK means set success, others means set failed.
      */
-    DMError SetVirtualMirrorScreenBufferRotation(ScreenId screenId, bool bufferRotation);
+    DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
 
     /**
      * @brief Set the screen power state on the specified screen.

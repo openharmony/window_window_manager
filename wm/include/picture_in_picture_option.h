@@ -17,9 +17,11 @@
 #define OHOS_PIP_OPTION_H
 #include <refbase.h>
 #include <string>
+#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
+using namespace Ace;
 class PipOption : virtual public RefBase {
 public:
     explicit PipOption();
@@ -28,16 +30,19 @@ public:
     void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
     void SetContentSize(uint32_t width, uint32_t height);
+    void SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     void* GetContext() const;
     std::string GetNavigationId() const;
     uint32_t GetPipTemplate();
     void GetContentSize(uint32_t& width, uint32_t& height);
+    std::shared_ptr<XComponentController> GetXComponentController();
 private:
     void* contextPtr_;
     uint32_t templateType_  = 0;
     std::string navigationId_ = "";
     uint32_t contentWidth_ = 0;
     uint32_t contentHeight_ = 0;
+    std::shared_ptr<XComponentController> xComponentController_;
 };
 }
 }

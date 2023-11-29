@@ -29,6 +29,7 @@ sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
 
 declare_args() {
+  scene_board_enabled = false
   efficiency_manager_enable = true
   window_manager_feature_subscribe_motion = false
   window_manager_feature_tp_enable = false
@@ -39,5 +40,6 @@ declare_args() {
   }
 }
 
+print("scene_board_enabled = ${scene_board_enabled}")
 print(
     "window_manager_feature_subscribe_motion = ${window_manager_feature_subscribe_motion}")

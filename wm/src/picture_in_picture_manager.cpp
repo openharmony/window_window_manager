@@ -197,6 +197,10 @@ void PictureInPictureManager::DoStartMove()
 void PictureInPictureManager::DoScale()
 {
     WLOGD("DoScale is called");
+    if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
+        return;
+    }
+    PictureInPictureManager::curPipController_->DoScale();
 }
 
 void PictureInPictureManager::DoActionEvent(std::string actionName)
@@ -216,6 +220,16 @@ void PictureInPictureManager::AutoStartPipWindow()
         return;
     }
     activePipController_ -> StartPictureInPicture();
+}
+
+sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
+{
+    WLOGD("GetPipControllerInfo is called");
+    if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
+        WLOGE("GetPipControllerInfo error, %{public}d not registered!", windowId);
+        return nullptr;
+    }
+    return windowToControllerMap_[windowId];
 }
 }
 }

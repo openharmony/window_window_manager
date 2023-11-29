@@ -44,6 +44,7 @@ const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
+const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -57,7 +58,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener {
 public:
-    JsWindowListener(napi_env env, NativeReference* callback)
+    JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
@@ -81,13 +82,14 @@ public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
+    void OnWindowStatusChange(WindowStatus status) override;
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     napi_env env_ = nullptr;
-    NativeReference* jsCallBack_ = nullptr;
+    std::shared_ptr<NativeReference> jsCallBack_;
     wptr<JsWindowListener> weakRef_  = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)

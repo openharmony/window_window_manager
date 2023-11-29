@@ -37,6 +37,8 @@ public:
     MOCK_METHOD1(Foreground, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Background, WSError(void));
     MOCK_METHOD0(Disconnect, WSError(void));
+    MOCK_METHOD1(Show, WSError(sptr<WindowSessionProperty> property));
+    MOCK_METHOD0(Hide, WSError(void));
 
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
 
@@ -47,8 +49,6 @@ public:
     MOCK_METHOD2(HandleUpdateActivateStatus, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleSessionEvent, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleUpdateSessionRect, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleCreateAndConnectSpecificSession, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleDestroyAndDisconnectSpecificSession, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleRaiseToAppTop, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleBackPressed, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleMarkProcessed, int(MessageParcel &data, MessageParcel &reply));

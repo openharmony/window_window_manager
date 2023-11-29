@@ -166,6 +166,11 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void SetDrawingContentState(bool drawingContentState);
+    bool lastProcessContentState_ = false;
+    bool GetDrawingContentState() const override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -183,6 +188,7 @@ protected:
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifyWindowStatusChange(WindowMode mode);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;

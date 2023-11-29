@@ -77,7 +77,7 @@ public:
          *
          * @param foldStatus Screen foldStatus.
          */
-        virtual void OnFoldStatusChanged(FoldStatus foldStatus) {}
+        virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
     };
 
     class IDisplayUpdateListener : public virtual RefBase {
@@ -87,7 +87,7 @@ public:
          *
          * @param infos DisplayChangeInfo.
          */
-        virtual void OnDisplayUpdate(const sptr<DisplayChangeInfo>& info) {}
+        virtual void OnDisplayUpdate([[maybe_unused]]const sptr<DisplayChangeInfo>& info) {}
     };
 
     class IDisplayModeListener : public virtual RefBase {
@@ -97,7 +97,7 @@ public:
          *
          * @param displayMode DisplayMode.
          */
-        virtual void OnDisplayModeChanged(FoldDisplayMode displayMode) {}
+        virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
     };
 
     /**

@@ -455,7 +455,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
     TYPE_KEYBOARD,         // area for soft input keyboard
-    TYPE_AI_NAVIGATION_BAR, // area for AI navigation bar
+    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
 };
 
 /**
