@@ -26,7 +26,7 @@ ohos_shared_library("session_manager_service") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "src/session_manager_service.cpp",

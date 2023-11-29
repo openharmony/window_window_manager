@@ -25,7 +25,7 @@ ohos_shared_library("transactionmanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "js_transaction_manager.cpp",

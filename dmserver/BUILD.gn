@@ -31,7 +31,7 @@ ohos_shared_library("libdms") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "../dm/src/zidl/display_manager_agent_proxy.cpp",

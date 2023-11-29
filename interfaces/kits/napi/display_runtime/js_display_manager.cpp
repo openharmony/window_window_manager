@@ -165,7 +165,7 @@ napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
 
 napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetDefaultDisplaySync called");
+    WLOGD("GetDefaultDisplaySync called");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:GetDefaultDisplay");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
@@ -511,7 +511,7 @@ napi_value OnIsFoldable(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
-    WLOGI("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
+    WLOGD("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
     napi_value result;
     napi_get_boolean(env, foldable, &result);
     return result;

@@ -41,7 +41,7 @@ ohos_static_library("libdm_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
@@ -87,7 +87,7 @@ ohos_shared_library("libdm") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",

@@ -36,7 +36,7 @@ ohos_shared_library("intention_event_anr_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "../dfx/src/dfx_hisysevent.cpp",

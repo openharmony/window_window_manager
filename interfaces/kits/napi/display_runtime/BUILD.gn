@@ -32,7 +32,7 @@ ohos_shared_library("display_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "js_display.cpp",

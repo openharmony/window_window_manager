@@ -27,7 +27,7 @@ ohos_shared_library("pipwindow_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
   }
   sources = [
     "js_pip_controller.cpp",
