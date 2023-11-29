@@ -215,6 +215,12 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
+        bool needUpdate = property->GetIsNeedUpdateWindowMode();
+        reply.WriteBool(needUpdate);
+        if (needUpdate) {
+            reply.WriteUint32(static_cast<uint32_t>(property->GetWindowMode()));
+        }
+        property->SetIsNeedUpdateWindowMode(false);
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

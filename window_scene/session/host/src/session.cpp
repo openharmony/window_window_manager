@@ -655,6 +655,10 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
+    if (property_ && property_->GetIsNeedUpdateWindowMode()) {
+        property->SetIsNeedUpdateWindowMode(true);
+        property->SetWindowMode(property_->GetWindowMode());
+    }
     SetSessionProperty(property);
     if (property) {
         property->SetPersistentId(GetPersistentId());
@@ -1673,14 +1677,32 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
         static_cast<int32_t>(mode));
-    if (!IsSessionValid()) {
+    if (sessionInfo_.isSystem_) {
+        WLOGFD("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
+            GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    property_->SetWindowMode(mode);
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->UpdateWindowMode(mode);
+
+    if (state_ == SessionState::STATE_END) {
+        WLOGFI("session is already destroyed or property is nullptr! id: %{public}d state: %{public}u",
+            GetPersistentId(), state_);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    } else if (state_ == SessionState::STATE_DISCONNECT) {
+        property_->SetWindowMode(mode);
+        property_->SetIsNeedUpdateWindowMode(true);
+    } else {
+        property_->SetWindowMode(mode);
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        }
+        return sessionStage_->UpdateWindowMode(mode);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
