@@ -38,6 +38,9 @@ group("unittest") {
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
+    ":ws_screen_session_manager_client_proxy_test",
+    ":ws_screen_session_manager_client_stub_test",
+    ":ws_screen_session_manager_client_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_test",
@@ -265,6 +268,30 @@ ohos_unittest("ws_screen_scene_config_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+}
+
+ohos_unittest("ws_screen_session_manager_client_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_client_proxy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_screen_session_manager_client_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_client_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_screen_session_manager_client_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_client_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
 }
 
 ohos_unittest("ws_screen_session_manager_stub_test") {
