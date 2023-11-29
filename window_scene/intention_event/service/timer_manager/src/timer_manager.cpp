@@ -34,7 +34,8 @@ const std::string TIMER_MANAGER_THREAD_NAME { "ANR_TIMER_MANAGER_THREAD" };
 } // namespace
 
 TimerManager::TimerManager() {}
-TimerManager::~TimerManager() {
+TimerManager::~TimerManager()
+{
     OnStop();
 }
 
