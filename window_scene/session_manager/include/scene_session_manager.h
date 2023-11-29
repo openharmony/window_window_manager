@@ -76,6 +76,7 @@ using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessShowPiPMainWindowFunc = std::function<void(int32_t persistentId)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
+using ProcessCallingWindowIdChangeFunc = std::function<void(uint32_t callingWindowId)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -122,6 +123,7 @@ public:
     void SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetShowPiPMainWindowListener(const ProcessShowPiPMainWindowFunc& func);
+    void SetCallingWindowIdChangeListenser(const ProcessCallingWindowIdChangeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -397,6 +399,7 @@ private:
     NotifySCBAfterUpdateFocusFunc notifySCBAfterFocusedFunc_;
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
     ProcessShowPiPMainWindowFunc showPiPMainWindowFunc_;
+    ProcessCallingWindowIdChangeFunc callingWindowIdChangeFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;

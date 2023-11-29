@@ -1026,10 +1026,20 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
         WLOGFE("[WMSInput] Input method is null");
         return;
     }
-    callingSession_ = GetSceneSession(focusedSessionId_);
+
+    uint32_t callingWindowId_ = INVALID_WINDOW_ID;
+    if (scnSession->GetSessionProperty() != nullptr) {
+        callingWindowId_ = scnSession->GetSessionProperty()->GetCallingWindow();
+    }
+    WLOGFD("[WMSInput] Calling window id: %{public}d", callingWindowId_);
+    callingSession_ = GetSceneSession(callingWindowId_);
     if (callingSession_ == nullptr) {
-        WLOGFE("[WMSInput] calling session is nullptr");
-        return;
+        WLOGFI("[WMSInput] The calling session obtained through callingWindowId_ is nullptr");
+        callingSession_ = GetSceneSession(focusedSessionId_);
+        if (callingSession_ == nullptr) {
+            WLOGFE("[WMSInput] The calling session obtained through focusedSessionId_ is nullptr");
+            return;
+        }
     }
     callingSession_->SetTextFieldAvoidInfo(scnSession->textFieldPositionY_, scnSession->textFieldHeight_);
     ResizeSoftInputCallingSessionIfNeed(scnSession);
@@ -2201,6 +2211,15 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetCallingWindow(property->GetCallingWindow());
+            }
+            if (callingWindowIdChangeFunc_ != nullptr) {
+                callingWindowIdChangeFunc_(property->GetCallingWindow());
+            }
+            break;
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
@@ -3160,6 +3179,12 @@ void SceneSessionManager::SetShowPiPMainWindowListener(const ProcessShowPiPMainW
 {
     WLOGFD("SetShowPiPMainWindowListener");
     showPiPMainWindowFunc_ = func;
+}
+
+void SceneSessionManager::SetCallingWindowIdChangeListenser(const ProcessCallingWindowIdChangeFunc& func)
+{
+    WLOGFD("SetCallingWindowIdChangeListenser");
+    callingWindowIdChangeFunc_ = func;
 }
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
