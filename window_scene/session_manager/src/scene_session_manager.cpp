@@ -2012,6 +2012,38 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     return abilityInfo;
 }
 
+WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    const auto& callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [this, mainWinId, &topWinId, callingPid]() {
+        const auto& mainSession = GetSceneSession(mainWinId);
+        if (mainSession == nullptr) {
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+
+        if (callingPid != mainSession->GetCallingPid()) {
+            WLOGFE("Permission denied, not destroy by the same process");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+        const auto& subVec = mainSession->GetSubSession();
+        uint32_t zOrder = mainSession->GetZOrder();
+        topWinId = mainWinId;
+        for (const auto& subSession : subVec) {
+            if (subSession != nullptr && (subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                subSession->GetSessionState() == SessionState::STATE_ACTIVE) && subSession->GetZOrder() > zOrder) {
+                topWinId = subSession->GetPersistentId();
+                zOrder = subSession->GetZOrder();
+                WLOGFD("[GetTopWin] Current zorder is larger than mainWin, mainId: %{public}d, topWinId: %{public}d, "
+                    "zOrder: %{public}d", mainWinId, topWinId, zOrder);
+            }
+        }
+        WLOGFD("[GetTopWin] Get top window, mainId: %{public}d, topWinId: %{public}d, zOrder: %{public}d",
+            mainWinId, topWinId, zOrder);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
 WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
