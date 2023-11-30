@@ -835,7 +835,7 @@ WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionI
 
 WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
-    WLOGFI("run SceneSessionManagerProxy::GetFocusSessionToken");
+    WLOGFD("run SceneSessionManagerProxy::GetFocusSessionToken");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1250,5 +1250,32 @@ WSError SceneSessionManagerProxy::NotifyWindowExtensionVisibilityChange(int32_t 
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    WLOGFD("[GetTopWin] mainId: %{public}d", mainWinId);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(mainWinId)) {
+        WLOGFE("Write mainWinId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    topWinId = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

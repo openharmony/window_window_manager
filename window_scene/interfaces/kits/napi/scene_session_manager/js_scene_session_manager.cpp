@@ -484,7 +484,7 @@ napi_value JsSceneSessionManager::AddWindowDragHotArea(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::GetRootSceneUIContext(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]GetRootSceneUIContext");
+    WLOGD("[NAPI]GetRootSceneUIContext");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetRootSceneUIContext(env, info) : nullptr;
 }

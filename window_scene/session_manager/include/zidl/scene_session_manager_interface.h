@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
         TRANS_ID_RAISE_WINDOW_TO_TOP,
         TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE,
+        TRANS_ID_GET_TOP_WINDOW_ID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;

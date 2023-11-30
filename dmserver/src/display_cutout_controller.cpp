@@ -16,6 +16,7 @@
 #include "display_cutout_controller.h"
 #include <screen_manager/screen_types.h>
 #include "display_manager_service_inner.h"
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {

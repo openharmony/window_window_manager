@@ -159,6 +159,13 @@ public:
      */
     DMError GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const;
 
+    /**
+     * @brief get available area of the display.(the screen area without dock and statusbar)
+     * @param area available area of the screen.
+     * @return DMError
+     */
+    DMError GetAvailableArea(DMRect& area) const;
+
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);

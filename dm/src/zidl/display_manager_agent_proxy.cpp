@@ -15,6 +15,7 @@
 
 #include "zidl/display_manager_agent_proxy.h"
 #include <ipc_types.h>
+#include "dm_common.h"
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
@@ -321,6 +322,25 @@ void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayM
         return;
     }
     if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_MODE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_)
+        ||!data.WriteUint32(area.height_)) {
+        WLOGFE("Write rect failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_AVAILABLE_AREA_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
