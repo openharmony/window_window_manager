@@ -1909,7 +1909,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetWindowLimits01, Function | SmallTest | L
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    WindowSizeLimits windowSizeLimits;
+    WindowRangeLimits windowSizeLimits;
     ASSERT_EQ(WMError::WM_OK, window->GetWindowLimits(windowSizeLimits));
     ASSERT_EQ(windowSizeLimits.maxWidth_, 1000);
     ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
@@ -1938,7 +1938,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    WindowSizeLimits windowSizeLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
+    WindowRangeLimits windowSizeLimits = {1000, 1000, 1000, 1000};
     ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowSizeLimits));
     
     WindowLimits windowLimits = window->property_->GetWindowLimits();

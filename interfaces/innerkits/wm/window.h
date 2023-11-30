@@ -23,7 +23,6 @@
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
-#include "wm_common_inner.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -1451,11 +1450,11 @@ public:
 
     /**
      * @brief Get the window limits of current window.
-     *  
+     *
      * @param windowSizeLimits.
      * @return WMError.
     */
-    virtual WMError GetWindowLimits(WindowSizeLimits& windowSizeLimits) { return WMError::WM_OK; }
+    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; }
 
     /**
      * @brief Set the window limits of current window.
@@ -1463,7 +1462,7 @@ public:
      * @param windowSizeLimits.
      * @return WMError.
     */
-    virtual WMError SetWindowLimits(WindowSizeLimits& windowSizeLimits) { return WMError::WM_OK; }
+    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; }
 };
 }
 }

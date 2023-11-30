@@ -668,7 +668,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     return objValue;
 }
 
-napi_value GetWindowSizeLimitsAndConvertToJsValue(napi_env env, const WindowSizeLimits& windowSizeLimits)
+napi_value GetWindowSizeLimitsAndConvertToJsValue(napi_env env, const WindowRangeLimits& windowSizeLimits)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);

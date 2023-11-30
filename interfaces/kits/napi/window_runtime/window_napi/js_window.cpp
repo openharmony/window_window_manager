@@ -4606,7 +4606,8 @@ napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
     return objValue;
 }
 
-bool JsWindow::ParseWindowSizeLimits(napi_env env, napi_value jsObject, WindowSizeLimits& windowSizeLimits) {
+bool JsWindow::ParseWindowSizeLimits(napi_env env, napi_value jsObject, WindowRangeLimits& windowSizeLimits)
+{
     int32_t data = 0;
     if (ParseJsValue(jsObject, env, "maxWidth", data)) {
         windowSizeLimits.maxWidth_ = data;
@@ -4646,29 +4647,22 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     }
     napi_value nativeObj = argv[0];
     if (nativeObj == nullptr) {
-        WLOGFE("Failed to convert object to WindowSizeLimits");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowSizeLimits windowSizeLimits;
+    WindowRangeLimits windowSizeLimits;
     if (!ParseWindowSizeLimits(env, nativeObj, windowSizeLimits)) {
         WLOGFE("Failed to convert object to WindowSizeLimits");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (windowSizeLimits.maxWidth_ < 0 || windowSizeLimits.maxHeight_ < 0 || windowSizeLimits.minWidth_ < 0 || windowSizeLimits.minHeight_ < 0) {
+    if (windowSizeLimits.maxWidth_ < 0 || windowSizeLimits.maxHeight_ < 0 ||
+        windowSizeLimits.minWidth_ < 0 || windowSizeLimits.minHeight_ < 0) {
         WLOGFE("Width or height should be greater than or equal to 0");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, windowSizeLimits](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WindowSizeLimits sizeLimits(windowSizeLimits);
-            if (sizeLimits.maxWidth_ < 0 || sizeLimits.maxHeight_ < 0 || sizeLimits.minWidth_ < 0 || sizeLimits.minHeight_ < 0) {
-                WLOGFE("Width or height should be greater than or equal to 0");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-                return;
-            }
-
+            WindowRangeLimits sizeLimits(windowSizeLimits);
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
@@ -4685,10 +4679,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window set window limits failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] set window limits end, ret = %{public}d",
-             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
-
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowLimits",
@@ -4712,13 +4703,14 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
         WLOGFE("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WindowSizeLimits windowSizeLimits;
+    WindowRangeLimits windowSizeLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowLimits(windowSizeLimits));
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
     auto objValue = GetWindowSizeLimitsAndConvertToJsValue(env, windowSizeLimits);
-    WLOGI("Windwo [%{public}u, %{public}s] get window limits end", window->GetWindowId(), window->GetWindowName().c_str());
+    WLOGI("Windwo [%{public}u, %{public}s] get window limits end",
+        window->GetWindowId(), window->GetWindowName().c_str());
     if (objValue != nullptr) {
         return objValue;
     } else {
