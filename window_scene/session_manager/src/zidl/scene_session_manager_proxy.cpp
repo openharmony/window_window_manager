@@ -835,7 +835,7 @@ WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionI
 
 WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
-    WLOGFI("run SceneSessionManagerProxy::GetFocusSessionToken");
+    WLOGFD("run SceneSessionManagerProxy::GetFocusSessionToken");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

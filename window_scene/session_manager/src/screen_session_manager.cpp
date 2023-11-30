@@ -2736,7 +2736,7 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 bool ScreenSessionManager::IsFoldable()
 {
     if (foldScreenController_ == nullptr) {
-        WLOGFW("foldScreenController_ is null");
+        WLOGFD("foldScreenController_ is null");
         return false;
     }
     return foldScreenController_->IsFoldable();
