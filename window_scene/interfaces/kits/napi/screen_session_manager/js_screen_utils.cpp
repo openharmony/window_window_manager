@@ -17,6 +17,7 @@
 
 #include <js_runtime_utils.h>
 
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -165,6 +166,50 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
             return false;
         }
         bound.radius_[0].x_ = static_cast<float>(radius);
+    }
+    return true;
+}
+
+
+bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
+{
+    napi_value jsPosX = nullptr, jsPosY = nullptr, jsWidth = nullptr, jsHeight = nullptr;
+    napi_get_named_property(env, jsObject, "posX", &jsPosX);
+    napi_get_named_property(env, jsObject, "posY", &jsPosY);
+    napi_get_named_property(env, jsObject, "width", &jsWidth);
+    napi_get_named_property(env, jsObject, "height", &jsHeight);
+
+    if (GetType(env, jsPosX) != napi_undefined) {
+        int32_t posX;
+        if (!ConvertFromJsValue(env, jsPosX, posX)) {
+            WLOGFE("[NAPI]Failed to convert parameter to posX");
+            return false;
+        }
+        rect.posX_ = posX;
+    }
+    if (GetType(env, jsPosY) != napi_undefined) {
+        int32_t top;
+        if (!ConvertFromJsValue(env, jsPosY, top)) {
+            WLOGFE("[NAPI]Failed to convert parameter to posY");
+            return false;
+        }
+        rect.posY_ = top;
+    }
+    if (GetType(env, jsWidth) != napi_undefined) {
+        int32_t width;
+        if (!ConvertFromJsValue(env, jsWidth, width)) {
+            WLOGFE("[NAPI]Failed to convert parameter to width");
+            return false;
+        }
+        rect.width_ = width;
+    }
+    if (GetType(env, jsHeight) != napi_undefined) {
+        int32_t height;
+        if (!ConvertFromJsValue(env, jsHeight, height)) {
+            WLOGFE("[NAPI]Failed to convert parameter to height");
+            return false;
+        }
+        rect.height_ = height;
     }
     return true;
 }

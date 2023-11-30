@@ -21,6 +21,7 @@
 #include "class_var_definition.h"
 #include "display_info.h"
 #include "display_manager_adapter.h"
+#include "dm_common.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
 
@@ -209,6 +210,11 @@ DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const
 DMError Display::GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetScreenId(), colorSpaces);
+}
+
+DMError Display::GetAvailableArea(DMRect& area) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(GetId(), area);
 }
 
 } // namespace OHOS::Rosen

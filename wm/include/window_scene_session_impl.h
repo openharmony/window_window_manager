@@ -129,6 +129,10 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
     WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
+    bool lastProcessContentState_ = false;
+    void GetWindowDrawingContentChangeInfo(WindowDrawingContentInfo info);
+    void UpdateSubWindowState(const WindowType& type);
 
 protected:
     void DestroySubWindow();

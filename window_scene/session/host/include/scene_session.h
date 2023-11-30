@@ -195,6 +195,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info);
     WSError UpdateSizeChangeReason(SizeChangeReason reason);
     void ClearSpecificSessionCbMap();
 
@@ -234,6 +235,7 @@ private:
     void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
+    void OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason);
     bool InitPiPRectInfo();
     void ClearPiPRectPivotInfo();
     void SavePiPRectInfo();

@@ -20,8 +20,11 @@
 #include <system_ability_definition.h>
 
 #include "display_manager.h"
+#include "dm_common.h"
+#include "scene_board_judgement.h"
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
+#include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -357,7 +360,11 @@ bool BaseAdapter::InitDMSProxy()
             return false;
         }
 
-        displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            displayManagerServiceProxy_ = iface_cast<IScreenSessionManager>(remoteObject);
+        } else {
+            displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
+        }
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
             WLOGFE("Failed to get system display manager services");
             return false;
@@ -626,5 +633,16 @@ DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& scre
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->MakeUniqueScreen(screenIds);
+}
+
+DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& area)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
 }
 } // namespace OHOS::Rosen

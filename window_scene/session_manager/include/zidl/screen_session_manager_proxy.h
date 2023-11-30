@@ -133,10 +133,12 @@ public:
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) override;
+    void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
+    virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

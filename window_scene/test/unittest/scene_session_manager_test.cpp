@@ -68,15 +68,21 @@ public:
     void TearDown() override;
 
     static bool gestureNavigationEnabled_;
+    static bool statusBarEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
+    static ProcessStatusBarEnabledChangeFunc statusBarEnabledCallbackFunc_;
     static sptr<SceneSessionManager> ssm_;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest::ssm_ = nullptr;
 
 bool SceneSessionManagerTest::gestureNavigationEnabled_ = true;
+bool SceneSessionManagerTest::statusBarEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_ = [](bool enable) {
     gestureNavigationEnabled_ = enable;
+};
+ProcessStatusBarEnabledChangeFunc SceneSessionManagerTest::statusBarEnabledCallbackFunc_ = [](bool enable) {
+    statusBarEnabled_ = enable;
 };
 
 void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
@@ -150,6 +156,35 @@ HWTEST_F(SceneSessionManagerTest, SetGestureNavigaionEnabled, Function | SmallTe
     ASSERT_EQ(gestureNavigationEnabled_, false);
 
     SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(nullptr);
+    WMError result03 = SceneSessionManager::GetInstance().SetGestureNavigaionEnabled(true);
+    ASSERT_EQ(result03, WMError::WM_DO_NOTHING);
+}
+
+/**
+ * @tc.name: SetStatusBarEnabled
+ * @tc.desc: SceneSessionManager set status bar enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetStatusBarEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_NE(statusBarEnabledCallbackFunc_, nullptr);
+    SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(nullptr);
+
+    WMError result00 = SceneSessionManager::GetInstance().SetGestureNavigaionEnabled(true);
+    ASSERT_EQ(result00, WMError::WM_DO_NOTHING);
+
+    SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(statusBarEnabledCallbackFunc_);
+    WMError result01 = SceneSessionManager::GetInstance().SetGestureNavigaionEnabled(true);
+    ASSERT_EQ(result01, WMError::WM_OK);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(statusBarEnabled_, true);
+
+    WMError result02 = SceneSessionManager::GetInstance().SetGestureNavigaionEnabled(false);
+    ASSERT_EQ(result02, WMError::WM_OK);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(statusBarEnabled_, false);
+
+    SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(nullptr);
     WMError result03 = SceneSessionManager::GetInstance().SetGestureNavigaionEnabled(true);
     ASSERT_EQ(result03, WMError::WM_DO_NOTHING);
 }

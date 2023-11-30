@@ -397,6 +397,26 @@ bool WindowSessionProperty::IsNeedKeepKeyboard() const
     return isNeedKeepKeyboard_;
 }
 
+bool WindowSessionProperty::GetDrawingContentState() const
+{
+    return drawingContentState_;
+}
+
+void WindowSessionProperty::SetDrawingContentState(bool drawingContentState)
+{
+    drawingContentState_ = drawingContentState;
+}
+
+void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
+{
+    isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
+}
+
+bool WindowSessionProperty::GetIsNeedUpdateWindowMode() const
+{
+    return isNeedUpdateWindowMode_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -506,7 +526,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
-        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
+        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
+        parcel.WriteBool(isNeedUpdateWindowMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -552,6 +573,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSystemCalling(parcel.ReadBool());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
+    property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     return property;
 }
 
@@ -592,6 +614,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isSystemCalling_ = property->isSystemCalling_;
     textFieldPositionY_ = property->textFieldPositionY_;
     textFieldHeight_ = property->textFieldHeight_;
+    isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

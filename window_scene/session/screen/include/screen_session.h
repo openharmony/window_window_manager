@@ -145,6 +145,9 @@ public:
     void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
+    DMRect GetAvailableArea();
+    void SetAvailableArea(DMRect area);
+    bool UpdateAvailableArea(DMRect area);
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);

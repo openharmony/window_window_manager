@@ -81,6 +81,7 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
+    WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
 
 private:
     template<typename T>

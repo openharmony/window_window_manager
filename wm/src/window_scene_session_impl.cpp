@@ -190,7 +190,13 @@ void WindowSceneSessionImpl::UpdateWindowState()
     requestState_ = WindowState::STATE_CREATED;
     if (WindowHelper::IsMainWindow(GetType())) {
         maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-        SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+        if (property_->GetIsNeedUpdateWindowMode()) {
+            WLOGFI("UpdateWindowMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
+            UpdateWindowModeImmediately(property_->GetWindowMode());
+            property_->SetIsNeedUpdateWindowMode(false);
+        } else {
+            SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+        }
         NotifyWindowNeedAvoid(
             (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
         GetConfigurationFromAbilityInfo();
@@ -468,6 +474,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     } else {
         NotifyForegroundFailed(ret);
     }
+    NotifyWindowStatusChange(GetMode());
     return ret;
 }
 
@@ -520,20 +527,26 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
 
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        if (WindowHelper::IsMainWindow(type)) {
-            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
-        }
-        if (WindowHelper::IsSubWindow(type)) {
-            if (state_ == WindowState::STATE_SHOWN) {
-                NotifyAfterBackground();
-            }
-        } else {
-            NotifyAfterBackground();
-        }
+        UpdateSubWindowState(type);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
     }
+    NotifyWindowStatusChange(GetMode());
     return res;
+}
+
+void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
+{
+    if (WindowHelper::IsMainWindow(type)) {
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+    }
+    if (WindowHelper::IsSubWindow(type)) {
+        if (state_ == WindowState::STATE_SHOWN) {
+            NotifyAfterBackground();
+        }
+    } else {
+        NotifyAfterBackground();
+    }
 }
 
 void WindowSceneSessionImpl::PreProcessCreate()
@@ -996,8 +1009,17 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    WindowMode mode = GetMode();
+    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
+            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
+            WindowHelper::IsMainWindow(GetType()) &&
+          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    }
+
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
@@ -1073,8 +1095,17 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    WindowMode mode = GetMode();
+    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
+           mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
+            WindowHelper::IsMainWindow(GetType()) &&
+          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    };
+
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
@@ -1486,7 +1517,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 {
     std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
+        WLOGFE("[GetTopWin] Please create mainWindow First!");
         return nullptr;
     }
     uint32_t mainWinId = INVALID_WINDOW_ID;
@@ -1494,17 +1525,34 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
             mainWinId = win->GetWindowId();
-            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
-            return win;
+            WLOGI("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+            break;
         }
     }
-    WLOGFE("Cannot find topWindow!");
-    return nullptr;
+    WLOGFI("[GetTopWin] mainId: %{public}u!", mainWinId);
+    if (mainWinId == INVALID_WINDOW_ID) {
+        WLOGFE("[GetTopWin] Cannot find topWindow!");
+        return nullptr;
+    }
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return nullptr;
+    }
+    return FindWindowById(topWinId);
 }
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return GetMainWindowWithId(mainWinId);
+    WLOGFI("[GetTopWin] mainId: %{public}u!", mainWinId);
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return nullptr;
+    }
+    return FindWindowById(topWinId);
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)
@@ -2100,6 +2148,64 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     hostSession_->NotifyPiPWindowPrepareClose();
     WLOGFD("NotifyPrepareClosePiPWindow end");
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::GetWindowDrawingContentChangeInfo(WindowDrawingContentInfo info)
+{
+    WindowDrawingContentInfo windowDrawingInfo(info);
+    uint32_t windowId = info.windowId_;
+    bool currentDrawingContentState = info.drawingContentState_;
+    bool currentProcessContentState = lastProcessContentState_;
+    if (currentDrawingContentState) {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        if (windowSessionMap_.empty()) {
+            WLOGFE("Please create mainWindow First!");
+            return;
+        }
+        for (auto& item : windowSessionMap_) {
+            if (item.second.second->GetWindowId() == windowId) {
+                item.second.second->SetDrawingContentState(currentDrawingContentState);
+                break;
+            }
+        }
+        currentProcessContentState = true;
+    } else {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        if (windowSessionMap_.empty()) {
+            WLOGFE("Please create mainWindow First!");
+            return;
+        }
+        for (auto& item : windowSessionMap_) {
+            WLOGFD("Show all WindowDrawingContentInfo:pid%{public}d, windowId%{public}d,"
+                "currentDrawingContentState%{public}d", windowDrawingInfo.pid_, windowDrawingInfo.windowId_,
+                currentDrawingContentState);
+            if (item.second.second->GetWindowId() == windowId) {
+                item.second.second->SetDrawingContentState(currentDrawingContentState);
+                continue;
+            }
+            if (item.second.second->GetDrawingContentState()) {
+                currentProcessContentState = true;
+                break;
+            }
+            currentProcessContentState = false;
+        }
+    }
+    WLOGFD("compare processContentState:pid%{public}d, currentProcessContentState%{public}d,"
+        "lastProcessContentState%{public}d", windowDrawingInfo.pid_, currentProcessContentState,
+        lastProcessContentState_);
+    if (lastProcessContentState_ != currentProcessContentState) {
+        windowDrawingInfo.drawingContentState_ = currentProcessContentState;
+        SingletonContainer::Get<WindowManager>().UpdateWindowDrawingContentInfo(windowDrawingInfo);
+        lastProcessContentState_ = currentProcessContentState;
+    }
+    return;
+}
+
+void WindowSceneSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info)
+{
+    WLOGFD("UpdateWindowDrawingContentInfo:pid%{public}d, windowId:%{public}u, drawingContentState:%{public}d",
+        info.pid_, info.windowId_, info.drawingContentState_);
+    GetWindowDrawingContentChangeInfo(info);
 }
 } // namespace Rosen
 } // namespace OHOS
