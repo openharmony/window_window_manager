@@ -2270,8 +2270,9 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     if (!WindowHelper::IsMainWindow(windowType)
         && !WindowHelper::IsSubWindow(windowType)
         && windowType != WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFE("windowType not support");
-        return WMError::WM_ERROR_INVALID_TYPE;
+        WLOGFE("windowType not support. WinId:%{public}u, WindowType:%{public}u",
+            GetWindowId(), static_cast<uint32_t>(windowType));
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
