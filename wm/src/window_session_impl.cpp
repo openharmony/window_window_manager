@@ -46,6 +46,7 @@
 #include "singleton_container.h"
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
+#include "parameters.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -90,6 +91,7 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 
 #define CALL_UI_CONTENT(uiContentCb)                          \
     do {                                                      \
+        std::lock_guard<std::recursive_mutex> lock(mutex_);   \
         if (uiContent_ != nullptr) {                          \
             uiContent_->uiContentCb();                        \
         }                                                     \
@@ -117,6 +119,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
+
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
+        WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
+            option->GetSubWindowTitle().c_str(), option->GetSubWindowDecorEnable());
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+        property_->SetDragEnabled(option->GetSubWindowDecorEnable());
+        subWindowTitle_ = option->GetSubWindowTitle();
+    }
+
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -584,6 +596,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC && WindowHelper::IsSubWindow(GetType())) {
+        WLOGFD("hide other buttons except close");
+        uiContent_->HideWindowTitleButton(true, true, true);
+        return;
+    }
     auto modeSupportInfo = property_->GetModeSupportInfo();
     bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     // not support fullscreen in split and floating mode, or not support float in fullscreen mode
@@ -632,7 +650,14 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         uiContent->Initialize(this, contentInfo, storage);
     }
     // make uiContent available after Initialize/Restore
-    uiContent_ = std::move(uiContent);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        uiContent_ = std::move(uiContent);
+    }
+
+    if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
+        SetAPPWindowLabel(subWindowTitle_);
+    }
 
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
@@ -1647,6 +1672,22 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
+sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
+{
+    if (windowSessionMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (auto iter = windowSessionMap_.begin(); iter != windowSessionMap_.end(); iter++) {
+        if (winId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", winId);
+            return iter->second.second;
+        }
+    }
+    WLOGFE("Cannot find Window, id: %{public}d", winId);
+    return nullptr;
+}
+
 std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
 {
     auto iter = subWindowSessionMap_.find(parentId);
@@ -1783,7 +1824,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     if (state_ == WindowState::STATE_HIDDEN) {
         WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
-    
+
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener != nullptr) {

@@ -31,6 +31,7 @@
 #include "util.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "parameters.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -569,8 +570,9 @@ void Session::UpdatePointerArea(const WSRect& rect)
     if (IsSystemSession()) {
         return;
     }
-    if (!(GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-         GetWindowMode()== WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!((GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            (WindowHelper::IsSubWindow(GetWindowType()) && property_->IsDecorEnable())) &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
         return;
     }
     if (preRect_ == rect) {
@@ -1169,7 +1171,9 @@ bool Session::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>
     bool isSystemWindow = GetSessionInfo().isSystem_;
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    if (!isSystemWindow && WindowHelper::IsMainWindow(windowType) &&
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (!isSystemWindow &&
+        (WindowHelper::IsMainWindow(windowType) || (WindowHelper::IsSubWindow(windowType) && isPC)) &&
         sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {

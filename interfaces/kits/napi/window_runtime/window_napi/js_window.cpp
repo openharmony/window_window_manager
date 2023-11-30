@@ -199,7 +199,7 @@ napi_value JsWindow::GetProperties(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetProperties");
+    WLOGD("GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
 }
@@ -304,7 +304,7 @@ napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_in
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAvoidArea");
+    WLOGD("GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
