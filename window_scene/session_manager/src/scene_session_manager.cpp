@@ -4452,7 +4452,7 @@ void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void SceneSessionManager::StartWindowInfoReportLoop()
 {
-    WLOGFI("Report loop");
+    WLOGFD("Report loop");
     if (eventHandler_ == nullptr) {
         WLOGFE("Report event null");
         return ;
@@ -4722,7 +4722,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
         || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
-        WLOGFW("filter gesture window.");
+        WLOGFD("filter gesture window.");
         return false;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
@@ -5592,7 +5592,7 @@ WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistent
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)
 {
     if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE) {
-        WLOGFE("type is invalid");
+        WLOGFD("type is invalid");
         return false;
     }
     return true;
