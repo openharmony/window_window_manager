@@ -192,6 +192,21 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
     return hostSession_;
 }
 
+bool WindowSessionImpl::GetDrawingContentState() const
+{
+    if (property_) {
+        return property_->GetDrawingContentState();
+    }
+    return false;
+}
+
+void WindowSessionImpl::SetDrawingContentState(bool windowDrawingContentState)
+{
+    if (property_) {
+        property_->SetDrawingContentState(windowDrawingContentState);
+    }
+}
+
 ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
     if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB) {
@@ -1405,7 +1420,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        if (avoidAreaChangeListeners_[persistentId].empty()) {
+        if (touchOutsideListeners_[persistentId].empty()) {
             isUpdate = true;
         }
     }
@@ -1632,6 +1647,22 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
+sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
+{
+    if (windowSessionMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (auto iter = windowSessionMap_.begin(); iter != windowSessionMap_.end(); iter++) {
+        if (winId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", winId);
+            return iter->second.second;
+        }
+    }
+    WLOGFE("Cannot find Window, id: %{public}d", winId);
+    return nullptr;
+}
+
 std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
 {
     auto iter = subWindowSessionMap_.find(parentId);
@@ -1741,6 +1772,40 @@ void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t heigh
         return;
     }
     hostSession_->UpdatePiPRect(width, height, reason);
+}
+
+void WindowSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos)
+{
+    WLOGFD("UpdateWindowDrawingContentInfo");
+}
+
+void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+{
+    WLOGFD("NotifyWindowStatusChange");
+    auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
+        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+            WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+        }
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_PRIMARY;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SECONDARY;
+    }
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+    }
+    if (state_ == WindowState::STATE_HIDDEN) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
+    }
+
+    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
+    for (auto& listener : windowChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowStatusChange(WindowStatus);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

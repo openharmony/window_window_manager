@@ -188,6 +188,7 @@ public:
     WSError UnlockSession(int32_t sessionId) override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
+    WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -239,6 +240,11 @@ public:
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
 
     void NotifyUpdateRectAfterLayout();
+    void DealwithVisibilityChange(bool isVisible, uint64_t& surfaceId, WindowVisibilityState& visibleState,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void DealwithDrawingContentChange(uint64_t& surfaceId, WindowVisibilityState& visibleState,
+        WindowVisibilityInfo& windowVisibilityInfo);
+
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -363,6 +369,8 @@ private:
     WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
+    WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     std::shared_mutex sceneSessionMapMutex_;
@@ -465,6 +473,7 @@ private:
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
 
     void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
+    void UpdateWindowDrawingContentInfo(const sptr<SceneSession>& sceneSession, const WindowDrawingContentInfo& info);
 };
 } // namespace OHOS::Rosen
 

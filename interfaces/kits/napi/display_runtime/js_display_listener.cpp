@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "js_display_listener.h"
+#include "dm_common.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "js_display.h"
@@ -242,6 +243,32 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
+}
+
+void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnAvailableAreaChanged is called");
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnAvailableAreaChanged not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_AVAILABLE_AREA_CHANGED) == jsCallBack_.end()) {
+        WLOGE("OnAvailableAreaChanged not this event, return");
+        return;
+    }
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, area] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsRectObject(env_, area)};
+            CallJsMethod(EVENT_AVAILABLE_AREA_CHANGED, argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnAvailableAreaChanged", env_, std::make_unique<NapiAsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen

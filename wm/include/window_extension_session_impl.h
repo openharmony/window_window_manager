@@ -65,6 +65,7 @@ public:
     void NotifyConfigurationUpdated() override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

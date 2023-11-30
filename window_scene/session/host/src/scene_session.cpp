@@ -97,7 +97,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         !IsShowWhenLocked()) {
         WLOGFW("[WMSCom] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
-        return WSError::WS_ERROR_INVALID_SHOW_WHEN_LOCKED;
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
     PostTask([weakThis = wptr(this), property]() {
@@ -354,18 +354,26 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
-    if (winRect_ == rect) {
-        WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", GetPersistentId());
+    PostTask([weakThis = wptr(this), rect, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->winRect_ == rect) {
+            WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
+            return WSError::WS_OK;
+        }
+        session->winRect_ = rect;
+        session->isDirty_ = true;
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
+            session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return WSError::WS_OK;
-    }
-    winRect_ = rect;
-    isDirty_ = true;
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-    WLOGFD("[WMSWinLayout] Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    });
+
     return WSError::WS_OK;
 }
 
@@ -377,7 +385,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
         WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, session->winRect_.posX_,
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
@@ -393,13 +400,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
             rsTransaction = transactionController->GetRSTransaction();
         }
         WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
-        if (WindowHelper::IsPipWindow(session->GetWindowType()) && session->reason_ == SizeChangeReason::DRAG_END) {
-            session->ClearPiPRectPivotInfo();
-            ScenePersistentStorage::Insert("pip_window_pos_x", session->winRect_.posX_,
-                ScenePersistentStorageType::PIP_INFO);
-            ScenePersistentStorage::Insert("pip_window_pos_y", session->winRect_.posY_,
-                ScenePersistentStorageType::PIP_INFO);
-        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
@@ -1012,11 +1012,17 @@ void SceneSession::ClearEnterWindow()
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
-    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
-    if (sessionRectChangeFunc_) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
-        sessionRectChangeFunc_(rect, reason);
-    }
+    PostTask([weakThis = wptr(this), rect, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionRectChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
+            session->sessionRectChangeFunc_(rect, reason);
+        }
+    });
 }
 
 bool SceneSession::IsDecorEnable() const
@@ -1155,9 +1161,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
-    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
-        NotifySessionRectChange(rect, reason);
-    }
+    OnPiPMoveCallback(rect, reason);
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1597,6 +1601,10 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The interface permission failed.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     PostTask([weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1681,6 +1689,10 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The interface permission failed.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     PostTask([weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1853,6 +1865,21 @@ WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double te
     return WSError::WS_OK;
 }
 
+void SceneSession::OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason)
+{
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        return;
+    }
+    if (reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
+    if (reason == SizeChangeReason::DRAG_END) {
+        ClearPiPRectPivotInfo();
+        ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+        ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    }
+}
+
 bool SceneSession::InitPiPRectInfo()
 {
     auto requestRect = GetSessionRequestRect();
@@ -2007,7 +2034,6 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
             // system scene no need to update reason
             return WSError::WS_DO_NOTHING;
         }
-        std::lock_guard<std::recursive_mutex> lock(session->sizeChangeMutex_);
         session->reason_ = reason;
         if (reason != SizeChangeReason::UNDEFINED) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -2023,7 +2049,14 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 
 bool SceneSession::IsDirtyWindow()
 {
-    std::lock_guard<std::recursive_mutex> lock(sizeChangeMutex_);
     return isDirty_;
+}
+
+void SceneSession::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    return sessionStage_->UpdateWindowDrawingContentInfo(info);
 }
 } // namespace OHOS::Rosen

@@ -77,7 +77,7 @@ public:
          *
          * @param foldStatus Screen foldStatus.
          */
-        virtual void OnFoldStatusChanged(FoldStatus foldStatus) {}
+        virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
     };
 
     class IDisplayUpdateListener : public virtual RefBase {
@@ -87,7 +87,7 @@ public:
          *
          * @param infos DisplayChangeInfo.
          */
-        virtual void OnDisplayUpdate(const sptr<DisplayChangeInfo>& info) {}
+        virtual void OnDisplayUpdate([[maybe_unused]]const sptr<DisplayChangeInfo>& info) {}
     };
 
     class IDisplayModeListener : public virtual RefBase {
@@ -97,7 +97,17 @@ public:
          *
          * @param displayMode DisplayMode.
          */
-        virtual void OnDisplayModeChanged(FoldDisplayMode displayMode) {}
+        virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
+    };
+
+    class IAvailableAreaListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when available area changed.
+         *
+         * @param DMRect area.
+         */
+        virtual void OnAvailableAreaChanged(DMRect area) {}
     };
 
     /**
@@ -387,6 +397,22 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
+     * @brief Register a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+
+    /**
+     * @brief UnRegister a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
 
     /**
      * @brief Add a surface node to the target display.

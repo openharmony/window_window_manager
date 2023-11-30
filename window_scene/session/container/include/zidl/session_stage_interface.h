@@ -22,6 +22,7 @@
 
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
+#include "window_drawing_content_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -103,6 +104,11 @@ public:
     {
         return WSErrorCode::WS_OK;
     }
+    virtual void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) = 0;
+    virtual bool GetDrawingContentState() const
+    {
+        return false;
+    };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

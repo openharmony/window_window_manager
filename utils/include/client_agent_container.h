@@ -111,7 +111,7 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& age
         return false;
     }
     agents.erase(iter);
-    WLOGFI("agent unregistered");
+    WLOGFD("agent unregistered");
     return true;
 }
 

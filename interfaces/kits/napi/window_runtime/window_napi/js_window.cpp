@@ -199,7 +199,7 @@ napi_value JsWindow::GetProperties(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetProperties");
+    WLOGD("GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
 }
@@ -304,7 +304,7 @@ napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_in
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAvoidArea");
+    WLOGD("GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
@@ -908,7 +908,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env,info);
+    return HideWindowFunction(env, info);
 }
 
 napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
@@ -3501,7 +3501,7 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WMError::WM_ERROR_INVALID_PARAM;
             }
@@ -3555,7 +3555,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
@@ -4513,7 +4513,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 {
     if (WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env,info);
+        return HideWindowFunction(env, info);
     }
 
     size_t argc = 4;
