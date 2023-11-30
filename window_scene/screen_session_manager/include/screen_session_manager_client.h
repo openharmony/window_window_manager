@@ -23,6 +23,7 @@
 
 #include "display_change_listener.h"
 #include "display_change_info.h"
+#include "dm_common.h"
 #include "session/screen/include/screen_session.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
@@ -55,7 +56,7 @@ public:
     void OnImmersiveStateChanged(bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
-
+    void UpdateAvailableArea(ScreenId screenId, DMRect area);
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

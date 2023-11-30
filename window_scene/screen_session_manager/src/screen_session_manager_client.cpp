@@ -76,7 +76,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
         }
-        screenConnectionListener_->OnScreenConnected(screenSession);
+        if (screenConnectionListener_) {
+            screenConnectionListener_->OnScreenConnected(screenSession);
+        }
         screenSession->Connect();
         return;
     }
@@ -86,7 +88,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             WLOGFE("screenSession is null");
             return;
         }
-        screenConnectionListener_->OnScreenDisconnected(screenSession);
+        if (screenConnectionListener_) {
+            screenConnectionListener_->OnScreenDisconnected(screenSession);
+        }
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.erase(screenId);
@@ -232,5 +236,14 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
         return;
     }
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
+}
+
+void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 } // namespace OHOS::Rosen

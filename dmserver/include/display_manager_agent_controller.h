@@ -48,6 +48,7 @@ public:
     void NotifyFoldStatusChanged(FoldStatus);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode);
+    void NotifyAvailableRectChanged(DMRect);
 
 private:
     DisplayManagerAgentController() {}

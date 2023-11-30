@@ -186,6 +186,7 @@ protected:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyWindowStatusChange(WindowMode mode);
+    static sptr<Window> FindWindowById(uint32_t winId);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -260,6 +261,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    std::string subWindowTitle_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS

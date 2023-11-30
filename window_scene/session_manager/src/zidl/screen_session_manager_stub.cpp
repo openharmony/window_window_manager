@@ -16,6 +16,7 @@
 #include "zidl/screen_session_manager_stub.h"
 
 #include "common/rs_rect.h"
+#include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
 
@@ -611,6 +612,27 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint32_t height = data.ReadUint32();
             DMError ret = ResizeVirtualScreen(screenId, width, height);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect area = {posX, posY, width, height};
+            UpdateAvailableArea(screenId, area);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            DMRect area;
+            DMError ret = GetAvailableArea(displayId, area);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteInt32(area.posX_);
+            reply.WriteInt32(area.posY_);
+            reply.WriteUint32(area.width_);
+            reply.WriteUint32(area.height_);
             break;
         }
         default:

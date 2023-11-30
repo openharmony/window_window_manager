@@ -44,6 +44,7 @@ class PixelMap;
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
+class RSSyncTransactionController;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
@@ -122,7 +123,7 @@ public:
         Accessibility::AccessibilityElementInfo& info);
     virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info);
-    virtual WSError NotifyClientToUpdateRect() { return WSError::WS_OK; };
+    virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; };
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
