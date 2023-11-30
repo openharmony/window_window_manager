@@ -293,7 +293,7 @@ napi_value WindowLayoutModeInit(napi_env env)
 
 napi_value BlurStyleInit(napi_env env)
 {
-    WLOGI("BlurStyleInit");
+    WLOGD("BlurStyleInit");
     if (env == nullptr) {
         WLOGFE("Engine is nullptr");
         return nullptr;
@@ -421,7 +421,7 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 
 napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window)
 {
-    WLOGI("CreateJsWindowPropertiesObject");
+    WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {

@@ -193,7 +193,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessagePar
 
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleUpdateProperty!");
+    WLOGFD("run HandleUpdateProperty!");
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
@@ -417,7 +417,7 @@ int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleGetFocusSessionToken!");
+    WLOGFD("run HandleGetFocusSessionToken!");
     sptr<IRemoteObject> token = nullptr;
     const WSError& errCode = GetFocusSessionToken(token);
     reply.WriteRemoteObject(token);
