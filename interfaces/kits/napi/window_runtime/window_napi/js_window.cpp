@@ -4687,7 +4687,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info) 
+napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
