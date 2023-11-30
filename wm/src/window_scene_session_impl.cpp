@@ -202,6 +202,10 @@ void WindowSceneSessionImpl::UpdateWindowState()
         GetConfigurationFromAbilityInfo();
     } else {
         UpdateWindowSizeLimits();
+        if (WindowHelper::IsSubWindow(GetType()) && property_->GetDragEnabled()) {
+            WLOGFD("sync window limits to server side in order to make size limits work while resizing");
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+        }
     }
 }
 
@@ -1135,7 +1139,8 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         /* FloatingWindow skip for Phone*/
         return false;
     }
-    bool enable = WindowHelper::IsMainWindow(GetType()) &&
+    bool enable = (WindowHelper::IsMainWindow(GetType())
+            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
@@ -1232,7 +1237,9 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    if ((WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsPipWindow(GetType())) && hostSession_) {
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if ((WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsPipWindow(GetType())
+            || (isPC && WindowHelper::IsSubWindow(GetType()))) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -1273,6 +1280,9 @@ WMError WindowSceneSessionImpl::Close()
             hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
+    } else if (WindowHelper::IsSubWindow(GetType())) {
+        WLOGFI("WindowSceneSessionImpl::Close subwindow");
+        return Destroy(true);
     }
 
     return WMError::WM_OK;
@@ -1517,7 +1527,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 {
     std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
+        WLOGFE("[GetTopWin] Please create mainWindow First!");
         return nullptr;
     }
     uint32_t mainWinId = INVALID_WINDOW_ID;
@@ -1525,17 +1535,34 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
             mainWinId = win->GetWindowId();
-            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
-            return win;
+            WLOGI("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+            break;
         }
     }
-    WLOGFE("Cannot find topWindow!");
-    return nullptr;
+    WLOGFI("[GetTopWin] mainId: %{public}u!", mainWinId);
+    if (mainWinId == INVALID_WINDOW_ID) {
+        WLOGFE("[GetTopWin] Cannot find topWindow!");
+        return nullptr;
+    }
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return nullptr;
+    }
+    return FindWindowById(topWinId);
 }
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return GetMainWindowWithId(mainWinId);
+    WLOGFI("[GetTopWin] mainId: %{public}u!", mainWinId);
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return nullptr;
+    }
+    return FindWindowById(topWinId);
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)

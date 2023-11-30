@@ -38,6 +38,7 @@
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include <running_lock.h>
+#include "parameters.h"
 #include "singleton_container.h"
 #include "pip_report.h"
 
@@ -402,13 +403,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
             rsTransaction = transactionController->GetRSTransaction();
         }
         WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
-        if (WindowHelper::IsPipWindow(session->GetWindowType()) && session->reason_ == SizeChangeReason::DRAG_END) {
-            session->ClearPiPRectPivotInfo();
-            ScenePersistentStorage::Insert("pip_window_pos_x", session->winRect_.posX_,
-                ScenePersistentStorageType::PIP_INFO);
-            ScenePersistentStorage::Insert("pip_window_pos_y", session->winRect_.posY_,
-                ScenePersistentStorageType::PIP_INFO);
-        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
@@ -824,10 +818,11 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
+    auto windowType = Session::GetWindowType();
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
         iter = Session::windowAreas_.cbegin();
         for (;iter != Session::windowAreas_.cend(); ++iter) {
             WSRectF rect = iter->second;
@@ -842,7 +837,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
         if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
             WSRectF rectF = Session::UpdateHotRect(rect);
             isInRegion = rectF.IsInRegion(displayX, displayY);
         } else {
@@ -941,8 +936,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent);
     }
+    auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        WindowHelper::IsMainWindow(property->GetWindowType()) &&
+        (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (CheckDialogOnForeground()) {
             WLOGFI("[WMSDialog] There is dialog window foreground");
@@ -1046,7 +1042,10 @@ bool SceneSession::IsDecorEnable() const
         /* FloatingWindow skip for Phone */
         return false;
     }
-    return WindowHelper::IsMainWindow(property->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
+    auto windowType = property->GetWindowType();
+    return (WindowHelper::IsMainWindow(windowType) ||
+            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
+        systemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
 }
 
@@ -1170,9 +1169,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
-    if (WindowHelper::IsPipWindow(GetWindowType()) && reason == SizeChangeReason::MOVE) {
-        NotifySessionRectChange(rect, reason);
-    }
+    OnPiPMoveCallback(rect, reason);
     if (reason != SizeChangeReason::MOVE) {
         UpdateRect(rect, reason);
     }
@@ -1220,6 +1217,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
     } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
         WLOGFD("PipWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("subwindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
@@ -1874,6 +1875,21 @@ WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double te
     textFieldPositionY_ = textFieldPositionY;
     textFieldHeight_ = textFieldHeight;
     return WSError::WS_OK;
+}
+
+void SceneSession::OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason)
+{
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        return;
+    }
+    if (reason == SizeChangeReason::MOVE) {
+        NotifySessionRectChange(rect, reason);
+    }
+    if (reason == SizeChangeReason::DRAG_END) {
+        ClearPiPRectPivotInfo();
+        ScenePersistentStorage::Insert("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+        ScenePersistentStorage::Insert("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    }
 }
 
 bool SceneSession::InitPiPRectInfo()

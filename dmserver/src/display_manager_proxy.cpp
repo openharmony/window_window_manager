@@ -19,7 +19,6 @@
 #include <ipc_types.h>
 #include <parcel.h>
 #include <ui/rs_surface_node.h>
-
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 

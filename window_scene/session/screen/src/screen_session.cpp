@@ -18,6 +18,7 @@
 #include "window_manager_hilog.h"
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -309,8 +310,19 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
     return targetRotation;
 }
 
+void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
+{
+    updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    bool needUpdateToInputManager = false;
+    if (foldDisplayMode == FoldDisplayMode::FULL &&
+        property_.GetBounds() == bounds &&
+        property_.GetRotation() != static_cast<float>(rotation)) {
+        needUpdateToInputManager = true;
+    }
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -321,6 +333,12 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
+    }
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        int foldRotation = (rotation + 90) % 360;
+        updateToInputManagerCallback_(static_cast<float>(foldRotation));
+        WLOGFI("UpdatePropertyAfterRotation updateToInputManagerCallback_:%{public}d", foldRotation);
     }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
@@ -974,5 +992,24 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
     }
+}
+
+bool ScreenSession::UpdateAvailableArea(DMRect area)
+{
+    if (property_.GetAvailableArea() == area) {
+        return false;
+    }
+    property_.SetAvailableArea(area);
+    return true;
+}
+
+void ScreenSession::SetAvailableArea(DMRect area)
+{
+    property_.SetAvailableArea(area);
+}
+
+DMRect ScreenSession::GetAvailableArea()
+{
+    return property_.GetAvailableArea();
 }
 } // namespace OHOS::Rosen
