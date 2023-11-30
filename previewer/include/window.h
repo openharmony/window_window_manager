@@ -239,8 +239,6 @@ public:
     virtual WMError ResetAspectRatio() = 0;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
-    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) = 0;
-    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) = 0;
 
     virtual void SetViewportConfig(const Ace::ViewportConfig& config) = 0;
     virtual void UpdateViewportConfig() = 0;
@@ -256,6 +254,8 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
+    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; };
+    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; };
 };
 }
 }
