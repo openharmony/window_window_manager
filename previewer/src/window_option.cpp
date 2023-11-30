@@ -229,7 +229,7 @@ void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
     subWindowTitle_ = subWindowTitle;
 }
 
-const std::string WindowOption::GetSubWindowTitle() const
+std::string WindowOption::GetSubWindowTitle() const
 {
     return subWindowTitle_;
 }
