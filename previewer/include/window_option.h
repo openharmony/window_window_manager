@@ -361,7 +361,7 @@ public:
      *
      * @return Return the subwindow title
     */
-    const std::string GetSubWindowTitle() const;
+    std::string GetSubWindowTitle() const;
 
     /**
      * @brief Get subwindow decor enable
