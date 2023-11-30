@@ -20,7 +20,6 @@
 #include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <pointer_event.h>
-#include "transaction/rs_sync_transaction_controller.h"
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 
@@ -76,10 +75,10 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
         [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] Connect session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Connect session, id: %{public}d", session->GetPersistentId());
         auto ret = session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
@@ -378,15 +377,16 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifyClientToUpdateRect()
+WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
 {
-    PostTask([weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGD("[WMSWinLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:[%{public}d, "
+            "%{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, session->winRect_.posX_,
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
         bool isMoveOrDrag = session->moveDragController_ &&
@@ -394,11 +394,6 @@ WSError SceneSession::NotifyClientToUpdateRect()
         if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
             WLOGFD("[WMSWinLayout] skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
-        }
-        auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-        std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-        if (transactionController) {
-            rsTransaction = transactionController->GetRSTransaction();
         }
         WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {

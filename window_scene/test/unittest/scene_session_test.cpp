@@ -2322,7 +2322,7 @@ HWTEST_F(SceneSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Le
     ASSERT_NE(mockSessionStage, nullptr);
     scensession->isDirty_ = true;
     scensession->sessionStage_ = mockSessionStage;
-    auto ret = scensession->NotifyClientToUpdateRect();
+    auto ret = scensession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
