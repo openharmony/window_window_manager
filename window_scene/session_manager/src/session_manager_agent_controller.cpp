@@ -89,5 +89,15 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
+
+void SessionManagerAgentController::UpdateWindowDrawingContentInfo(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
+{
+    WLOGFD("Size:%{public}zu", windowDrawingContentInfos.size());
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE)) {
+        agent->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -19,6 +19,17 @@
 #include "wm_common.h"
 
 namespace OHOS::Rosen {
+ /**
+ * @enum WindowDrawingContentState
+ *
+ * @brief DrawingContent state of a window
+ */
+enum WindowDrawingContentState {
+    WINDOW_DRAWING_CONTENT_CHANGE = 0,
+    WINDOW_DRAWING_CONTENT_NO_CHANGE,
+    WINDOW_DRAWING_CONTENT_UNKNOWN_TYPE,
+};
+
 /**
  * @class WindowDrawingContentInfo
  *
