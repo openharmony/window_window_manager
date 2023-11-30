@@ -139,7 +139,7 @@ private:
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
-    static bool ParseWindowSizeLimits(napi_env env, napi_value jsObject, WindowRangeLimits& windowSizeLimits);
+    static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value HideWindowFunction(napi_env env, napi_callback_info info);

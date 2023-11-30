@@ -4606,31 +4606,31 @@ napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
     return objValue;
 }
 
-bool JsWindow::ParseWindowSizeLimits(napi_env env, napi_value jsObject, WindowRangeLimits& windowSizeLimits)
+bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
-    int32_t data = 0;
+    uint32_t data = 0;
     if (ParseJsValue(jsObject, env, "maxWidth", data)) {
-        windowSizeLimits.maxWidth_ = data;
+        windowLimits.maxWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to WindwoSizeLimits");
+        WLOGFE("Failed to convert object to windowLimits");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minWidth", data)) {
-        windowSizeLimits.minWidth_ = data;
+        windowLimits.minWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to WindwoSizeLimits");
+        WLOGFE("Failed to convert object to windowLimits");
         return false;
     }
     if (ParseJsValue(jsObject, env, "maxHeight", data)) {
-        windowSizeLimits.maxHeight_ = data;
+        windowLimits.maxHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to WindwoSizeLimits");
+        WLOGFE("Failed to convert object to windowLimits");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minHeight", data)) {
-        windowSizeLimits.minHeight_ = data;
+        windowLimits.minHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to WindwoSizeLimits");
+        WLOGFE("Failed to convert object to windowLimits");
         return false;
     }
     return true;
@@ -4649,20 +4649,20 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     if (nativeObj == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowRangeLimits windowSizeLimits;
-    if (!ParseWindowSizeLimits(env, nativeObj, windowSizeLimits)) {
-        WLOGFE("Failed to convert object to WindowSizeLimits");
+    WindowLimits windowLimits;
+    if (!ParseWindowLimits(env, nativeObj, windowLimits)) {
+        WLOGFE("Failed to convert object to windowLimits");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (windowSizeLimits.maxWidth_ < 0 || windowSizeLimits.maxHeight_ < 0 ||
-        windowSizeLimits.minWidth_ < 0 || windowSizeLimits.minHeight_ < 0) {
+    if (windowLimits.maxWidth_ < 0 || windowLimits.maxHeight_ < 0 ||
+        windowLimits.minWidth_ < 0 || windowLimits.minHeight_ < 0) {
         WLOGFE("Width or height should be greater than or equal to 0");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, windowSizeLimits](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WindowRangeLimits sizeLimits(windowSizeLimits);
+        [weakToken, windowLimits](napi_env env, NapiAsyncTask& task, int32_t status) {
+            WindowLimits sizeLimits(windowLimits);
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
@@ -4670,9 +4670,10 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowLimits(sizeLimits));
             if (ret == WmErrorCode::WM_OK) {
-                auto objValue = GetWindowSizeLimitsAndConvertToJsValue(env, sizeLimits);
+                auto objValue = GetWindowLimitsAndConvertToJsValue(env, sizeLimits);
                 if (objValue == nullptr) {
-                    task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window set window limits failed"));
+                    task.Reject(env, CreateJsError(env, 
+                        static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "Window set window limits failed"));
                 } else {
                     task.Resolve(env, objValue);
                 }
@@ -4703,18 +4704,18 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
         WLOGFE("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WindowRangeLimits windowSizeLimits;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowLimits(windowSizeLimits));
+    WindowLimits windowLimits;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowLimits(windowLimits));
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    auto objValue = GetWindowSizeLimitsAndConvertToJsValue(env, windowSizeLimits);
+    auto objValue = GetWindowLimitsAndConvertToJsValue(env, windowLimits);
     WLOGI("Windwo [%{public}u, %{public}s] get window limits end",
         window->GetWindowId(), window->GetWindowName().c_str());
     if (objValue != nullptr) {
         return objValue;
     } else {
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
 

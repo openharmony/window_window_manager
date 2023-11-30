@@ -668,7 +668,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     return objValue;
 }
 
-napi_value GetWindowSizeLimitsAndConvertToJsValue(napi_env env, const WindowRangeLimits& windowSizeLimits)
+napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -677,10 +677,10 @@ napi_value GetWindowSizeLimitsAndConvertToJsValue(napi_env env, const WindowRang
         return nullptr;
     }
 
-    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env, windowSizeLimits.maxWidth_));
-    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowSizeLimits.maxHeight_));
-    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowSizeLimits.minWidth_));
-    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowSizeLimits.minHeight_));
+    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env, windowLimits.maxWidth_));
+    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
+    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
+    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
     return objValue;
 }
 
