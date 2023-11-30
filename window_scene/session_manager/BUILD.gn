@@ -190,12 +190,14 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
