@@ -97,6 +97,7 @@ ohos_unittest("ws_session_listener_controller_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "image_framework:image_native",
   ]
