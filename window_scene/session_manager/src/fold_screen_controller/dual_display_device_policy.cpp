@@ -28,7 +28,7 @@ namespace {
     const ScreenId SCREEN_ID_MAIN = 5;
 
     #ifdef TP_FEATURE_ENABLE
-    const int32_t_TP_TYPE = 12;
+    const int32_t TP_TYPE = 12;
     const std::string FULL_TP = "0";
     const std::string MAIN_TP = "1";
     #endif
@@ -181,6 +181,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
     screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
+    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConverToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // on main screen
     RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
     WLOGFI("changeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
@@ -199,6 +201,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
     screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConverToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // on full screen
     RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
     WLOGFI("changeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
