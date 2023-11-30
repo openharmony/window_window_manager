@@ -2135,6 +2135,36 @@ HWTEST_F(WindowTest, HideNonSystemFloatingWindows, Function | SmallTest | Level2
     ASSERT_EQ(WMError::WM_OK, window->HideNonSystemFloatingWindows(false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetWindowLimits
+ * @tc.desc: window GetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetWindowLimits, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    WindowSizeLimits windowSizeLimits;
+    auto ret = window->GetWindowLimits(windowSizeLimits);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetWindowLimits
+ * @tc.desc: window SetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    WindowSizeLimits windowSizeLimits;
+    auto ret = window->SetWindowLimits(windowSizeLimits);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

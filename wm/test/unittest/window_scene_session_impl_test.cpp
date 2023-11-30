@@ -1885,6 +1885,68 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyPrepareClosePiPWindow01, Function | S
     windowscenesession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowscenesession->NotifyPrepareClosePiPWindow());
 }
+
+/**
+ * @tc.name: GetWindowLimits01
+ * @tc.desc: GetWindowLimits
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetWindowLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetWindowLimits01");
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetWindowLimits(windowLimits);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_HIDDEN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    WindowSizeLimits windowSizeLimits;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowLimits(windowSizeLimits));
+    ASSERT_EQ(windowSizeLimits.maxWidth_, 1000);
+    ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
+    ASSERT_EQ(windowSizeLimits.minWidth_, 1000);
+    ASSERT_EQ(windowSizeLimits.minHeight_, 1000);
+}
+
+/**
+ * @tc.name: SetWindowLimits01
+ * @tc.desc: SetWindowLimits
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetWindowLimits01");
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(888);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    WindowSizeLimits windowSizeLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowSizeLimits));
+    
+    WindowLimits windowLimits = window->property_->GetWindowLimits();
+    ASSERT_EQ(windowLimits.maxWidth_, 1000);
+    ASSERT_EQ(windowLimits.maxHeight_, 1000);
+    ASSERT_EQ(windowLimits.minWidth_, 1000);
+    ASSERT_EQ(windowLimits.minHeight_, 1000);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
