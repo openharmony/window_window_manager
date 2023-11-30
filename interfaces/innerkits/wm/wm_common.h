@@ -682,6 +682,24 @@ struct VsyncCallback {
     OnCallback onCallback;
 };
 
+struct WindowRangeLimits {
+    uint32_t maxWidth_;
+    uint32_t maxHeight_;
+    uint32_t minWidth_;
+    uint32_t minHeight_;
+    WindowRangeLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX),
+        minWidth_(0),  minHeight_(0) {}
+    WindowRangeLimits(uint32_t maxWidth, uint32_t maxHeight,
+        uint32_t minWidth, uint32_t minHeight)
+        : maxWidth_(maxWidth), maxHeight_(maxHeight),
+        minWidth_(minWidth), minHeight_(minHeight) {}
+
+    bool IsEmpty() const
+    {
+        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+};
+
 /*
  * Config of keyboard animation
  */

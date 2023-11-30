@@ -2145,7 +2145,7 @@ HWTEST_F(WindowTest, GetWindowLimits, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    WindowSizeLimits windowSizeLimits;
+    WindowRangeLimits windowSizeLimits;
     auto ret = window->GetWindowLimits(windowSizeLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2160,7 +2160,7 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    WindowSizeLimits windowSizeLimits;
+    WindowRangeLimits windowSizeLimits;
     auto ret = window->SetWindowLimits(windowSizeLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());

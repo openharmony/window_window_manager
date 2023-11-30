@@ -2208,7 +2208,7 @@ void WindowSceneSessionImpl::UpdateWindowDrawingContentInfo(const WindowDrawingC
     GetWindowDrawingContentChangeInfo(info);
 }
 
-WMError WindowSceneSessionImpl::GetWindowLimits(WindowSizeLimits& windowLimits)
+WMError WindowSceneSessionImpl::GetWindowLimits(WindowRangeLimits& windowLimits)
 {
     WLOGI("GetWindowLimits, WinId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
@@ -2254,30 +2254,26 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
 }
 
-WMError WindowSceneSessionImpl::SetWindowLimits(WindowSizeLimits& windowSizeLimits)
+WMError WindowSceneSessionImpl::SetWindowLimits(WindowRangeLimits& windowSizeLimits)
 {
     WLOGFI("SetWindowLimits %{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     WindowType windowType = GetType();
     if (!WindowHelper::IsMainWindow(windowType)
         && !WindowHelper::IsSubWindow(windowType)
         && windowType != WindowType::WINDOW_TYPE_DIALOG) {
-        return WMError::WM_OK;       
+        return WMError::WM_OK;
     }
-
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-
     float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
     const auto& customizedLimits = property_->GetWindowLimits();
     uint32_t minWidth = windowSizeLimits.minWidth_ ? windowSizeLimits.minWidth_ : customizedLimits.minWidth_;
@@ -2290,7 +2286,9 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowSizeLimits& windowSizeLimi
     maxWidth = static_cast<uint32_t>(ceil(maxWidth / vpr));
     maxHeight = static_cast<uint32_t>(ceil(maxHeight / vpr));
 
-    property_->SetWindowLimits({maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_});
+    property_->SetWindowLimits({
+        maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_
+    });
     UpdateWindowSizeLimits();
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {

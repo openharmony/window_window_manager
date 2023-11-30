@@ -239,8 +239,8 @@ public:
     virtual WMError ResetAspectRatio() = 0;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
-    virtual WMError SetWindowLimits(WindowSizeLimits& windowSizeLimits) = 0;
-    virtual WMError GetWindowLimits(WindowSizeLimits& windowSizeLimits) = 0;
+    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) = 0;
+    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) = 0;
 
     virtual void SetViewportConfig(const Ace::ViewportConfig& config) = 0;
     virtual void UpdateViewportConfig() = 0;
