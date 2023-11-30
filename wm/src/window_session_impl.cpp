@@ -90,6 +90,7 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 
 #define CALL_UI_CONTENT(uiContentCb)                          \
     do {                                                      \
+        std::lock_guard<std::recursive_mutex> lock(mutex_);   \
         if (uiContent_ != nullptr) {                          \
             uiContent_->uiContentCb();                        \
         }                                                     \
@@ -632,7 +633,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         uiContent->Initialize(this, contentInfo, storage);
     }
     // make uiContent available after Initialize/Restore
-    uiContent_ = std::move(uiContent);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        uiContent_ = std::move(uiContent);
+    }
 
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
