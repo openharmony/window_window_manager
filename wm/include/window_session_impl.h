@@ -264,6 +264,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    std::string subWindowTitle_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS
