@@ -39,6 +39,7 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
+#include "anr_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -102,6 +103,9 @@ ScreenSessionManager::ScreenSessionManager()
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
+
+    AppExecFwk::AppMgrClient appMgrClient_;
+    appMgrClient_.RegisterAppDebugListener(appAnrListener_);
 }
 
 void ScreenSessionManager::Init()
@@ -3016,5 +3020,24 @@ int ScreenSessionManager::LockFoldDisplayStatus(const std::string& lockParam)
     }
     LockFoldDisplayStatus(lockDisplayStatus);
     return 0;
+}
+void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+{
+    WLOGFI("AppAnrListener OnAppDebugStarted");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
+        return;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
+}
+
+void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+{
+    WLOGFI("AppAnrListener OnAppDebugStoped");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
+        return;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 } // namespace OHOS::Rosen
