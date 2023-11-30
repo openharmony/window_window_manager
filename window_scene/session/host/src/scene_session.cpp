@@ -2053,12 +2053,4 @@ bool SceneSession::IsDirtyWindow()
 {
     return isDirty_;
 }
-
-void SceneSession::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info)
-{
-    if (!sessionStage_) {
-        return;
-    }
-    return sessionStage_->UpdateWindowDrawingContentInfo(info);
-}
 } // namespace OHOS::Rosen

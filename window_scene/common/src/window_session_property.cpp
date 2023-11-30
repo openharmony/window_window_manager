@@ -397,16 +397,6 @@ bool WindowSessionProperty::IsNeedKeepKeyboard() const
     return isNeedKeepKeyboard_;
 }
 
-bool WindowSessionProperty::GetDrawingContentState() const
-{
-    return drawingContentState_;
-}
-
-void WindowSessionProperty::SetDrawingContentState(bool drawingContentState)
-{
-    drawingContentState_ = drawingContentState;
-}
-
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
