@@ -1912,9 +1912,6 @@ void SceneSession::ClearPiPRectPivotInfo()
 
 void SceneSession::SavePiPRectInfo()
 {
-    auto pipRect = GetSessionRect();
-    ScenePersistentStorage::Insert("pip_window_pos_x", pipRect.posX_, ScenePersistentStorageType::PIP_INFO);
-    ScenePersistentStorage::Insert("pip_window_pos_y", pipRect.posY_, ScenePersistentStorageType::PIP_INFO);
     ScenePersistentStorage::Insert("pip_window_level", static_cast<int32_t>(pipRectInfo_.level_),
         ScenePersistentStorageType::PIP_INFO);
 }
