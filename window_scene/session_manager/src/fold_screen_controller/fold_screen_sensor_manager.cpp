@@ -39,7 +39,6 @@ namespace {
     constexpr float HALF_FOLDED_MAX_THRESHOLD = 140.0F;
     constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD = 90.0F;
     constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD_TEMP = 70.0F;
-    // constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
     constexpr float HALF_FOLDED_BUFFER = 10.0F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
