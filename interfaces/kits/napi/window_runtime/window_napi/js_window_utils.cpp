@@ -668,6 +668,22 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     return objValue;
 }
 
+napi_value GetWindowSizeLimitsAndConvertToJsValue(napi_env env, const WindowSizeLimits& windowSizeLimits)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert windowLimits t o jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env, windowSizeLimits.maxWidth_));
+    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowSizeLimits.maxHeight_));
+    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowSizeLimits.minWidth_));
+    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowSizeLimits.minHeight_));
+    return objValue;
+}
+
 bool CheckCallingPermission(std::string permission)
 {
     WLOGD("Permission: %{public}s", permission.c_str());

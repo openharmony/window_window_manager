@@ -106,6 +106,8 @@ public:
     static napi_value Minimize(napi_env env, napi_callback_info info);
     static napi_value RaiseAboveTarget(napi_env env, napi_callback_info info);
     static napi_value SetNeedKeepKeyboard(napi_env env, napi_callback_info info);
+    static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
+    static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -137,6 +139,7 @@ private:
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
+    static bool ParseWindowSizeLimits(napi_env env, napi_value jsObject, WindowSizeLimits& windowSizeLimits);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value HideWindowFunction(napi_env env, napi_callback_info info);
@@ -180,6 +183,8 @@ private:
     napi_value OnMinimize(napi_env env, napi_callback_info info);
     napi_value OnRaiseAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);

@@ -76,6 +76,8 @@ public:
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    WMError GetWindowLimits(WindowSizeLimits& windowSizeLimits) override;
+    WMError SetWindowLimits(WindowSizeLimits& windowSizeLimits) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -159,6 +161,7 @@ private:
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
+    void UpdateNewSize();
 
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
