@@ -233,10 +233,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
-        WLOGFI("Create system or sub window");
+        WLOGFI("[WMSLife]Create system or sub window");
         if (WindowHelper::IsSystemWindow(GetType())) {
             if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
-                WLOGFI("System sub window is not support");
+                WLOGFI("[WMSLife]System sub window is not support");
                 return WMError::WM_ERROR_INVALID_TYPE;
             }
             // Not valid system window type for session should return WMError::WM_OK;
@@ -251,7 +251,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret == WMError::WM_OK) {
         UpdateWindowState();
     }
-    WLOGFD("[WMSCom] Window Create [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
+    WLOGFD("[WMSLife] Window Create [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
     return ret;
 }
@@ -1884,11 +1884,11 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
     const sptr<IAnimationTransitionController>& listener)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("register animation transition controller permission denied!");
+        WLOGFE("[WMSSystem]register animation transition controller permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr");
+        WLOGFE("[WMSSystem]listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     animationTransitionController_ = listener;
@@ -1906,27 +1906,27 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
                 // CustomAnimation is enabled when animationTransitionController_ exists
                 animationTransitionController->AnimationForShown();
             }
-            WLOGFI("AnimationForShown excute sucess  %{public}d!", property->GetPersistentId());
+            WLOGFI("[WMSSystem]AnimationForShown excute sucess  %{public}d!", property->GetPersistentId());
         });
     }
-    WLOGI("RegisterAnimationTransitionController %{public}d!", property_->GetPersistentId());
+    WLOGI("[WMSSystem]RegisterAnimationTransitionController %{public}d!", property_->GetPersistentId());
     return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 {
-    WLOGFI("id: %{public}d , isAdd:%{public}u", property_->GetPersistentId(), isAdd);
+    WLOGFI("[WMSSystem]id: %{public}d , isAdd:%{public}u", property_->GetPersistentId(), isAdd);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
-        WLOGFE("only system window can set");
+        WLOGFE("[WMSSystem]only system window can set");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // set no custom after customAnimation
     WMError ret = UpdateAnimationFlagProperty(false);
     if (ret != WMError::WM_OK) {
-        WLOGFE("UpdateAnimationFlagProperty failed!");
+        WLOGFE("[WMSSystem]UpdateAnimationFlagProperty failed!");
         return ret;
     }
     ret = static_cast<WMError>(hostSession_->UpdateWindowSceneAfterCustomAnimation(isAdd));
@@ -1936,7 +1936,7 @@ WMError WindowSceneSessionImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd
 void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGE("AdjustWindowAnimationFlag failed since session invalid!");
+        WLOGE("[WMSCom]AdjustWindowAnimationFlag failed since session invalid!");
         return;
     }
     // when show/hide with animation
