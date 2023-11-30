@@ -38,7 +38,7 @@ namespace {
     constexpr uint16_t HALL_THRESHOLD = 1;
     constexpr float HALF_FOLDED_MAX_THRESHOLD = 140.0F;
     constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD = 90.0F;
-    constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
+    constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD_TEMP = 70.0F;
     constexpr float HALF_FOLDED_BUFFER = 10.0F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
@@ -135,10 +135,10 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
         return FoldStatus::EXPAND;
     }
     if (hall == HALL_THRESHOLD) {
-        if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD)) {
+        if (std::islessequal(angle, CLOSE_HALF_FOLDED_MIN_THRESHOLD_TEMP)) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
-            std::isgreater(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD + HALF_FOLDED_BUFFER)) {
+            std::isgreater(angle, CLOSE_HALF_FOLDED_MIN_THRESHOLD_TEMP + HALF_FOLDED_BUFFER)) {
             state = FoldStatus::HALF_FOLD;
         } else {
             state = mState_;
