@@ -1451,18 +1451,18 @@ public:
     /**
      * @brief Get the window limits of current window.
      *
-     * @param windowSizeLimits.
+     * @param windowLimits.
      * @return WMError.
     */
-    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set the window limits of current window.
      *
-     * @param windowSizeLimits.
+     * @param windowLimits.
      * @return WMError.
     */
-    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; }
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

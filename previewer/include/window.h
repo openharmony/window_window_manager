@@ -254,8 +254,8 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
-    virtual WMError SetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; };
-    virtual WMError GetWindowLimits(WindowRangeLimits& windowSizeLimits) { return WMError::WM_OK; };
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
 };
 }
 }
