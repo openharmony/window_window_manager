@@ -634,6 +634,7 @@ private:
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    static std::map<uint32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
 
     sptr<MoveDragProperty> moveDragProperty_;
     SystemConfig windowSystemConfig_;
