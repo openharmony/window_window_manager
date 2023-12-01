@@ -1447,6 +1447,22 @@ public:
      * @return True means set isNeedKeepKeyboard flag success, others means failed.
     */
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the window limits of current window.
+     *
+     * @param windowLimits.
+     * @return WMError.
+    */
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the window limits of current window.
+     *
+     * @param windowLimits.
+     * @return WMError.
+    */
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
