@@ -458,5 +458,12 @@ WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
 }
+
+WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    WSError ret = windowManagerServiceProxy_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    return static_cast<WMError>(ret);
+}
 } // namespace Rosen
 } // namespace OHOS

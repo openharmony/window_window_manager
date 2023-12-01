@@ -362,6 +362,17 @@ public:
     virtual void OnDialogDeathRecipient() const {}
 };
 
+/**
+ * @class IWindowVisibilityChangedListener
+ *
+ * @brief Listener to observe one window visibility changed.
+*/
+class IWindowVisibilityChangedListener : virtual public RefBase {
+public:
+    virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
+};
+using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1463,6 +1474,28 @@ public:
      * @return WMError.
     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
