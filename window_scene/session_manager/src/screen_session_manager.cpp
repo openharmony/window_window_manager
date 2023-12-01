@@ -649,8 +649,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
 
     ScreenId rsId = rsInterface_.GetDefaultScreenId();
-    screenIdManager_.rs2SmsScreenIdMap_[rsId] = screenId;
-    screenIdManager_.sms2RsScreenIdMap_[screenId] = rsId;
+    screenIdManager_.UpdateScreenId(rsId, screenId);
 
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
     auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
@@ -1655,14 +1654,9 @@ DMError ScreenSessionManager::StopScreens(const std::vector<ScreenId>& screenIds
             WLOGFW("SCB: StopMirror screen:%{public}" PRIu64" is nullptr", screenId);
             continue;
         }
-        auto iter = smsScreenGroupMap_.find(screen->groupSmsId_);
-        if (iter == smsScreenGroupMap_.end()) {
+        sptr<ScreenSessionGroup> screenGroup = GetAbstractScreenGroup(screen->groupSmsId_);
+        if (!screenGroup) {
             WLOGFW("SCB: StopMirror groupDmsId:%{public}" PRIu64"is not in smsScreenGroupMap_", screen->groupSmsId_);
-            continue;
-        }
-        sptr<ScreenSessionGroup> screenGroup = iter->second;
-        if (screenGroup == nullptr) {
-            WLOGFW("SCB: StopMirror screenGroup:%{public}" PRIu64" is nullptr", screen->groupSmsId_);
             continue;
         }
         if (screenGroup->combination_ != stopCombination) {
@@ -1824,6 +1818,7 @@ DMError ScreenSessionManager::StopExpand(const std::vector<ScreenId>& expandScre
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
 {
+    std::shared_lock lock(mutex_);
     auto iter = sms2RsScreenIdMap_.find(smsScreenId);
     if (iter == sms2RsScreenIdMap_.end()) {
         return false;
@@ -1848,6 +1843,7 @@ ScreenId ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rs
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScreenId, ScreenId& smsScreenId) const
 {
+    std::shared_lock lock(mutex_);
     auto iter = rs2SmsScreenIdMap_.find(rsScreenId);
     if (iter == rs2SmsScreenIdMap_.end()) {
         return false;
@@ -1858,6 +1854,7 @@ bool ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScre
 
 ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId rsScreenId)
 {
+    std::unique_lock lock(mutex_);
     ScreenId smsScreenId = smsScreenCount_++;
     WLOGFI("SCB: ScreenSessionManager::CreateAndGetNewScreenId screenId: %{public}" PRIu64"", smsScreenId);
     if (sms2RsScreenIdMap_.find(smsScreenId) != sms2RsScreenIdMap_.end()) {
@@ -1874,8 +1871,16 @@ ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId
     return smsScreenId;
 }
 
+void ScreenSessionManager::ScreenIdManager::UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId)
+{
+    std::unique_lock lock(mutex_);
+    rs2SmsScreenIdMap_[rsScreenId] = smsScreenId;
+    sms2RsScreenIdMap_[smsScreenId] = rsScreenId;
+}
+
 bool ScreenSessionManager::ScreenIdManager::DeleteScreenId(ScreenId smsScreenId)
 {
+    std::unique_lock lock(mutex_);
     auto iter = sms2RsScreenIdMap_.find(smsScreenId);
     if (iter == sms2RsScreenIdMap_.end()) {
         return false;
@@ -1888,6 +1893,7 @@ bool ScreenSessionManager::ScreenIdManager::DeleteScreenId(ScreenId smsScreenId)
 
 bool ScreenSessionManager::ScreenIdManager::HasRsScreenId(ScreenId smsScreenId) const
 {
+    std::shared_lock lock(mutex_);
     return rs2SmsScreenIdMap_.find(smsScreenId) != rs2SmsScreenIdMap_.end();
 }
 
@@ -1977,6 +1983,7 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
 
 sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen)
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     sptr<ScreenSessionGroup> res;
     if (smsScreenGroupMap_.empty()) {
         WLOGI("connect the first screen");
@@ -2017,13 +2024,13 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
         screenIdManager_.DeleteScreenId(smsGroupScreenId);
         return nullptr;
     }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = smsScreenGroupMap_.find(smsGroupScreenId);
     if (iter != smsScreenGroupMap_.end()) {
         WLOGE("group screen existed. id=%{public}" PRIu64"", smsGroupScreenId);
         smsScreenGroupMap_.erase(iter);
     }
     smsScreenGroupMap_.insert(std::make_pair(smsGroupScreenId, screenGroup));
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     screenSessionMap_.insert(std::make_pair(smsGroupScreenId, screenGroup));
     screenGroup->mirrorScreenId_ = newScreen->screenId_;
     WLOGI("connect new group screen, screenId: %{public}" PRIu64", screenGroupId: %{public}" PRIu64", "
@@ -2062,12 +2069,11 @@ sptr<ScreenSessionGroup> ScreenSessionManager::RemoveFromGroupLocked(sptr<Screen
 {
     WLOGI("RemoveFromGroupLocked.");
     auto groupSmsId = screen->groupSmsId_;
-    auto iter = smsScreenGroupMap_.find(groupSmsId);
-    if (iter == smsScreenGroupMap_.end()) {
+    sptr<ScreenSessionGroup> screenGroup = GetAbstractScreenGroup(groupSmsId);
+    if (!screenGroup) {
         WLOGE("RemoveFromGroupLocked. groupSmsId:%{public}" PRIu64"is not in smsScreenGroupMap_.", groupSmsId);
         return nullptr;
     }
-    sptr<ScreenSessionGroup> screenGroup = iter->second;
     if (!RemoveChildFromGroup(screen, screenGroup)) {
         return nullptr;
     }
@@ -2084,10 +2090,10 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
     }
     if (screenGroup->GetChildCount() == 0) {
         // Group removed, need to do something.
-        smsScreenGroupMap_.erase(screenGroup->screenId_);
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        WLOGE("SCB: RemoveFromGroupLocked. screenSessionMap_ remove screen:%{public}" PRIu64"", screenGroup->screenId_);
+        smsScreenGroupMap_.erase(screenGroup->screenId_);
         screenSessionMap_.erase(screenGroup->screenId_);
+        WLOGE("SCB: RemoveFromGroupLocked. screenSessionMap_ remove screen:%{public}" PRIu64"", screenGroup->screenId_);
     }
     return true;
 }
@@ -2123,6 +2129,7 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
 
 sptr<ScreenSessionGroup> ScreenSessionManager::GetAbstractScreenGroup(ScreenId smsScreenId)
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = smsScreenGroupMap_.find(smsScreenId);
     if (iter == smsScreenGroupMap_.end()) {
         WLOGE("did not find screen:%{public}" PRIu64"", smsScreenId);
