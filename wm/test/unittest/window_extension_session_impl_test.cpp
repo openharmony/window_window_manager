@@ -16,13 +16,16 @@
 #include <gtest/gtest.h>
 
 #include <transaction/rs_transaction.h>
+#include "accessibility_event_info.h"
 #include "window_manager_hilog.h"
 #include "native_engine.h"
 #include "window_extension_session_impl.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
-
+using namespace OHOS::Accessibility;
+using namespace std;
 namespace OHOS {
 namespace Rosen {
 class WindowExtensionSessionImplTest : public testing::Test {
@@ -180,6 +183,205 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent, Function | Smal
     windowExtensionSessionImpl.NotifyFocusActiveEvent(false);
 
     ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.SetPrivacyMode(false));
+}
+
+/**
+ * @tc.name: NotifySearchElementInfoByAccessibilityId01
+ * @tc.desc: NotifySearchElementInfoByAccessibilityId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfoByAccessibilityId01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    int32_t elementId = 0;
+    int32_t mode = 0;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+
+    ASSERT_EQ(WSError::WS_OK,
+        windowExtensionSessionImpl.NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos));
+}
+
+/**
+ * @tc.name: NotifySearchElementInfoByAccessibilityId02
+ * @tc.desc: NotifySearchElementInfoByAccessibilityId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfoByAccessibilityId02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    int32_t elementId = 0;
+    int32_t mode = 0;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        windowExtensionSessionImpl.NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos));
+}
+
+/**
+ * @tc.name: NotifySearchElementInfosByText01
+ * @tc.desc: NotifySearchElementInfosByText Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfosByText01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    int32_t elementId = 0;
+    string text;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+
+    ASSERT_EQ(WSError::WS_OK,
+        windowExtensionSessionImpl.NotifySearchElementInfosByText(elementId, text, baseParent, infos));
+}
+
+/**
+ * @tc.name: NotifySearchElementInfosByText02
+ * @tc.desc: NotifySearchElementInfosByText Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfosByText02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    int32_t elementId = 0;
+    string text;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        windowExtensionSessionImpl.NotifySearchElementInfosByText(elementId, text, baseParent, infos));
+}
+
+/**
+ * @tc.name: NotifyFindFocusedElementInfo01
+ * @tc.desc: NotifyFindFocusedElementInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFindFocusedElementInfo01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    int32_t elementId = 0;
+    int32_t focusType = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+
+    ASSERT_EQ(WSError::WS_OK,
+        windowExtensionSessionImpl.NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info));
+}
+
+/**
+ * @tc.name: NotifyFindFocusedElementInfo02
+ * @tc.desc: NotifyFindFocusedElementInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFindFocusedElementInfo02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    int32_t elementId = 0;
+    int32_t focusType = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        windowExtensionSessionImpl.NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info));
+}
+
+/**
+ * @tc.name: NotifyFocusMoveSearch01
+ * @tc.desc: NotifyFocusMoveSearch Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusMoveSearch01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    int32_t elementId = 0;
+    int32_t direction = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+
+    ASSERT_EQ(WSError::WS_OK,
+        windowExtensionSessionImpl.NotifyFocusMoveSearch(elementId, direction, baseParent, info));
+}
+
+/**
+ * @tc.name: NotifyFocusMoveSearch02
+ * @tc.desc: NotifyFocusMoveSearch Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusMoveSearch02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    int32_t elementId = 0;
+    int32_t direction = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        windowExtensionSessionImpl.NotifyFocusMoveSearch(elementId, direction, baseParent, info));
+}
+
+/**
+ * @tc.name: NotifyExecuteAction01
+ * @tc.desc: NotifyExecuteAction Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExecuteAction01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    int32_t elementId = 0;
+    std::map<std::string, std::string> actionAguments;
+    int32_t action = 0;
+    int32_t baseParent = 0;
+    ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR,
+        windowExtensionSessionImpl.NotifyExecuteAction(elementId, actionAguments, action, baseParent));
+}
+
+/**
+ * @tc.name: NotifyExecuteAction02
+ * @tc.desc: NotifyExecuteAction Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExecuteAction02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    int32_t elementId = 0;
+    std::map<std::string, std::string> actionAguments;
+    int32_t action = 0;
+    int32_t baseParent = 0;
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        windowExtensionSessionImpl.NotifyExecuteAction(elementId, actionAguments, action, baseParent));
+}
+
+/**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: TransferAccessibilityEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    AccessibilityEventInfo info;
+    vector<int32_t> uiExtensionIdLevelVec;
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        windowExtensionSessionImpl.TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
 }
 }
 } // namespace Rosen

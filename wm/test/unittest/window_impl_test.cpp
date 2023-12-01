@@ -3762,7 +3762,6 @@ HWTEST_F(WindowImplTest, NotifyForegroundInteractiveStatus, Function | SmallTest
     window->NotifyForegroundInteractiveStatus(interactive);
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
