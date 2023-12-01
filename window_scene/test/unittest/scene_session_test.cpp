@@ -557,6 +557,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     EXPECT_NE(scensession, nullptr);
     scensession->UpdateNativeVisibility(false);
     ASSERT_EQ(false, scensession->IsVisible());
+    scensession->NotifyWindowVisibility();
 }
 
 /**

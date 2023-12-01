@@ -210,6 +210,8 @@ public:
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) override;
+    virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
+    virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;

@@ -96,6 +96,10 @@ class IDialogTargetTouchListener : virtual public RefBase {
 };
 class IDialogDeathRecipientListener : virtual public RefBase {
 };
+class IWindowVisibilityChangedListener : virtual public RefBase {
+};
+using WindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class WINDOW_EXPORT Window : public RefBase {
 public:
@@ -256,6 +260,8 @@ public:
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
 };
 }
 }

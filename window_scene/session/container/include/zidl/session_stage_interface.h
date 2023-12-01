@@ -93,6 +93,7 @@ public:
     virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
+    virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
