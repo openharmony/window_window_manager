@@ -1514,6 +1514,15 @@ void SceneSession::NotifyTouchOutside()
     }
 }
 
+void SceneSession::NotifyWindowVisibility()
+{
+    if (sessionStage_) {
+        sessionStage_->NotifyWindowVisibility(GetVisible());
+    } else {
+        WLOGFE("Notify window(id:%{public}d) visibility failed, for this session stage is nullptr", GetPersistentId());
+    }
+}
+
 bool SceneSession::CheckOutTouchOutsideRegister()
 {
     if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {

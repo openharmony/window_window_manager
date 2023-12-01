@@ -122,6 +122,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE),
         &SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
+        &SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -676,6 +678,15 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
     uint32_t topWinId;
     const WMError& ret = GetTopWindowId(mainWinId, topWinId);
     reply.WriteUint32(topWinId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistendId = data.ReadInt32();
+    bool haveListener = data.ReadBool();
+    WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

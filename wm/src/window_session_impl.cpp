@@ -66,6 +66,7 @@ std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::occupiedAreaChangeListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
+std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
@@ -1462,6 +1463,74 @@ WSError WindowSessionImpl::NotifyTouchOutside()
     for (auto& listener : touchOutsideListeners) {
         if (listener != nullptr) {
             listener->OnTouchOutside();
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+{
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start to register window visibility change listener, persistentId=%{public}d.", persistentId);
+    WMError ret = WMError::WM_OK;
+    bool isFirstRegister = false;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        ret = RegisterListener(windowVisibilityChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        isFirstRegister = windowVisibilityChangeListeners_[persistentId].size() == 1;
+    }
+
+    if (isFirstRegister) {
+        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, true);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+{
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start to unregister window visibility change listener, persistentId=%{public}d.", persistentId);
+    WMError ret = WMError::WM_OK;
+    bool isFirstUnregister = false;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        ret = UnregisterListener(windowVisibilityChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        isFirstUnregister = windowVisibilityChangeListeners_[persistentId].empty();
+    }
+    
+    if (isFirstUnregister) {
+        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, false);
+    }
+    return ret;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    std::vector<IWindowVisibilityListenerSptr> windowVisibilityChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto& listener : windowVisibilityChangeListeners_[GetPersistentId()]) {
+            windowVisibilityChangeListeners.push_back(listener);
+        }
+    }
+    return windowVisibilityChangeListeners;
+}
+
+WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
+{
+    WLOGFD("Notify window visibility Change, window: name=%{public}s, id=%{public}u, isVisible:%{public}d",
+        GetWindowName().c_str(), GetPersistentId(), isVisible);
+    auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
+    for (auto& listener : windowVisibilityListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowVisibilityChangedCallback(isVisible);
         }
     }
     return WSError::WS_OK;

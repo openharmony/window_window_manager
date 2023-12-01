@@ -104,6 +104,13 @@ public:
     }
 };
 
+class WindowVisibilityChangeListener : public IWindowVisibilityChangedListener {
+public:
+    void OnWindowVisibilityChangedCallback(const bool isVisisble) override
+    {
+    }
+};
+
 class AnimationTransitionController : public IAnimationTransitionController {
 public:
     void AnimationForShown() override
@@ -712,6 +719,9 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     sptr<IDisplayMoveListener> displayMoveListener = new DisplayMoveListener();
     window->RegisterDisplayMoveListener(displayMoveListener);
     window->UnregisterDisplayMoveListener(displayMoveListener);
+    sptr<IWindowVisibilityChangedListener> visibilityChangeListener = new WindowVisibilityChangeListener();
+    window->RegisterWindowVisibilityChangeListener(visibilityChangeListener);
+    window->UnregisterWindowVisibilityChangeListener(visibilityChangeListener);
     AAFwk::Want want;
     window->OnNewWant(want);
 }

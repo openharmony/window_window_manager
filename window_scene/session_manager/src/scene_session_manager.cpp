@@ -4899,14 +4899,18 @@ for (const auto& elem : visibilityChangeInfo) {
         continue;
     }
     session->SetVisible(isVisible);
-    windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
-        session->GetCallingUid(), visibleState, session->GetWindowType()));
+    int32_t windowId = session->GetWindowId();
+    if (windowVisibilityListenerSessionSet_.find(windowId) != windowVisibilityListenerSessionSet_.end()) {
+        session->NotifyWindowVisibility();
+    }
+    windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(windowId, session->GetCallingPid(),
+         session->GetCallingUid(), visibleState, session->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
     memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
         session->GetCallingUid(), isVisible));
 #endif
-    WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, visibleState:%{public}d",
-        session->GetWindowId(), visibleState);
+    WLOGFD("Notify window visibility Change, window: name=%{public}s, id=%{public}u, visibleState:%{public}d",
+        session->GetWindowName().c_str(), windowId, visibleState);
     CheckAndNotifyWaterMarkChangedResult();
 }
     if (windowVisibilityInfos.size() != 0) {
@@ -5312,6 +5316,27 @@ WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persiste
             touchOutsideListenerSessionSet_.insert(persistentId);
         } else {
             touchOutsideListenerSessionSet_.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+{
+    auto task = [this, persistentId, haveListener]() -> WSError {
+        WLOGFI("UpdateSessionWindowVisibilityListener persistentId: %{public}d haveListener:%{public}d",
+            persistentId, haveListener);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFD("sceneSession is nullptr.");
+            return WSError::WS_DO_NOTHING;
+        }
+        if (haveListener) {
+            windowVisibilityListenerSessionSet_.insert(persistentId);
+            sceneSession->NotifyWindowVisibility();
+        } else {
+            windowVisibilityListenerSessionSet_.erase(persistentId);
         }
         return WSError::WS_OK;
     };

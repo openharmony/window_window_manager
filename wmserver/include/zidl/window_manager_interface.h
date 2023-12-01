@@ -166,6 +166,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistendId, bool haveListener)
+    {
+        return WSError::WS_OK;
+    }
 };
 }
 }

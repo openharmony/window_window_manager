@@ -864,5 +864,15 @@ WMError WindowImpl::HideNonSystemFloatingWindows(bool shouldHide)
 {
     return WMError::WM_OK;
 }
+
+WMError WindowImpl::RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+WMError WindowImpl::UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace Rosen
 } // namespace OHOS
