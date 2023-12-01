@@ -2131,6 +2131,7 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
             property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
     }
+    NotifyWindowStatusChange(mode);
     return WMError::WM_OK;
 }
 

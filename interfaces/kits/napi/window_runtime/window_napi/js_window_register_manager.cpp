@@ -42,7 +42,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister                 },
         { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister          },
         { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
-        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowChangeRegister               },
+        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
         { WINDOW_VISIBILITY_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
     };
     // white register list for window stage
@@ -371,6 +371,23 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         jsCbMap_.erase(type);
     }
     return WmErrorCode::WM_OK;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStatusChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

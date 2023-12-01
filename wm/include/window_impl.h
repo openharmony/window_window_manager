@@ -297,6 +297,8 @@ public:
     void PendingClose();
 
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
+    virtual WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
+    virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
 private:
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
@@ -419,6 +421,18 @@ private:
     {
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         return dialogDeathRecipientListener_[GetWindowId()];
+    }
+    template<typename T>
+    inline EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners()
+    {
+        std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+            for (auto& listener : windowStatusChangeListeners_[GetWindowId()]) {
+                windowStatusChangeListeners.push_back(listener);
+            }
+        }
+        return windowStatusChangeListeners;
     }
     inline void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
