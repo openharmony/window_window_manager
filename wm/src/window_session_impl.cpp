@@ -1053,8 +1053,8 @@ void WindowSessionImpl::ClearUselessListeners(std::map<int32_t, T>& listeners, i
 }
 
 template<typename T>
-EnableIfSame<T, IWindowStatusChangeListener,
-    std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowStatusChangeListener,std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::
+    GetListeners()
 {
     std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
     {
