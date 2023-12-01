@@ -2159,5 +2159,116 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     WLOGFD("NotifyPrepareClosePiPWindow end");
     return WMError::WM_OK;
 }
+
+WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_ == nullptr) {
+        WLOGFE("GetWindowLimits property_ is null, WinId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    const auto& customizedLimits = property_->GetWindowLimits();
+    windowLimits.minWidth_ = customizedLimits.minWidth_;
+    windowLimits.minHeight_ = customizedLimits.minHeight_;
+    windowLimits.maxWidth_ = customizedLimits.maxWidth_;
+    windowLimits.maxHeight_ = customizedLimits.maxHeight_;
+    WLOGFI("GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::UpdateNewSize()
+{
+    bool needResize = false;
+    const Rect& windowRect = GetRect();
+    uint32_t width = windowRect.width_;
+    uint32_t height = windowRect.height_;
+    const auto& newLimits = property_->GetWindowLimits();
+    if (width < newLimits.minWidth_) {
+        width = newLimits.minWidth_;
+        needResize = true;
+    }
+    if (height < newLimits.minHeight_) {
+        height = newLimits.minHeight_;
+        needResize = true;
+    }
+    if (width > newLimits.maxWidth_) {
+        width = newLimits.maxWidth_;
+        needResize = true;
+    }
+    if (height > newLimits.maxHeight_) {
+        height = newLimits.maxHeight_;
+        needResize = true;
+    }
+    if (needResize) {
+        Resize(width, height);
+    }
+}
+
+WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
+{
+    WLOGFI("SetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)
+        && !WindowHelper::IsSubWindow(windowType)
+        && windowType != WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFE("windowType not support. WinId:%{public}u, WindowType:%{public}u",
+            GetWindowId(), static_cast<uint32_t>(windowType));
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        WLOGFE("SetWindowLimits failed, because of wrong vpr: %{public}f", vpr);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& customizedLimits = property_->GetWindowLimits();
+    uint32_t minWidth = windowLimits.minWidth_ ? windowLimits.minWidth_ : customizedLimits.minWidth_;
+    uint32_t minHeight = windowLimits.minHeight_ ? windowLimits.minHeight_ : customizedLimits.minHeight_;
+    uint32_t maxWidth = windowLimits.maxWidth_ ? windowLimits.maxWidth_ : customizedLimits.maxWidth_;
+    uint32_t maxHeight = windowLimits.maxHeight_ ? windowLimits.maxHeight_ : customizedLimits.maxHeight_;
+    // px to vp
+    minWidth = static_cast<uint32_t>(ceil(minWidth / vpr));
+    minHeight = static_cast<uint32_t>(ceil(minHeight / vpr));
+    maxWidth = static_cast<uint32_t>(ceil(maxWidth / vpr));
+    maxHeight = static_cast<uint32_t>(ceil(maxHeight / vpr));
+
+    property_->SetWindowLimits({
+        maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_
+    });
+    UpdateWindowSizeLimits();
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
+        return ret;
+    }
+    UpdateNewSize();
+
+    const auto& newLimits = property_->GetWindowLimits();
+    windowLimits.minWidth_ = newLimits.minWidth_;
+    windowLimits.minHeight_ = newLimits.minHeight_;
+    windowLimits.maxWidth_ = newLimits.maxWidth_;
+    windowLimits.maxHeight_ = newLimits.maxHeight_;
+    WLOGFI("SetWindowLimits success! WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
