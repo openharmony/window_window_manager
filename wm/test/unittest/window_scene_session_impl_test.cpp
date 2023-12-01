@@ -465,6 +465,26 @@ HWTEST_F(WindowSceneSessionImplTest, Close01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->Close());
+}
+
+/**
+ * @tc.name: Close02
+ * @tc.desc: Close
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("Connect02");
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    windowscenesession->property_->SetPersistentId(1);
+    windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Close());
 }
 
@@ -1842,29 +1862,6 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySessionBackground, Function | SmallTe
     bool withAnimation = true;
     bool isFromInnerkits = true;
     windowscenesession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-}
-
-/**
- * @tc.name: UpdateWindowDrawingContentInfo
- * @tc.desc: UpdateWindowDrawingContentInfo
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetConfigurationFromAbilityInfo");
-    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowscenesession);
-
-    WindowDrawingContentInfo info;
-    info.windowId_ = 0;
-    info.pid_ = 0;
-    info.uid_ = 0;
-    info.drawingContentState_ = true;
-    info.windowType_  = static_cast<WindowType>(3);
-
-    windowscenesession->UpdateWindowDrawingContentInfo(info);
 }
 
 /**

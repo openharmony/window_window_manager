@@ -137,14 +137,7 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 
 sptr<FoldCreaseRegion> DualDisplayDevicePolicy::GetCurrentFoldCreaseRegion()
 {
-    ScreenId screenIdMain = 5;
-
     WLOGI("GetCurrentFoldCreaseRegion");
-    if (screenId_ == screenIdMain) {
-        WLOGI("CurrentFoldCreaseRegion is invalid");
-        return nullptr;
-    }
-
     return currentFoldCreaseRegion_;
 }
 

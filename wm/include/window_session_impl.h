@@ -167,9 +167,6 @@ public:
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
     void SetDrawingContentState(bool drawingContentState);
-    bool lastProcessContentState_ = false;
-    bool GetDrawingContentState() const override;
-    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
 
 protected:
     WMError Connect();
@@ -264,6 +261,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    std::string subWindowTitle_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS
