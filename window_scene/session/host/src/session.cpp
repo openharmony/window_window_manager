@@ -1763,6 +1763,7 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         mode = MaximizeMode::MODE_FULL_FILL;
     }
+    property_->SetMaximizeMode(mode);
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
