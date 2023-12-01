@@ -58,7 +58,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
-                         public IWindowVisibilityChangedListener {
+                         public IWindowVisibilityChangedListener,
+                         public IWindowStatusChangeListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}

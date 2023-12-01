@@ -3700,5 +3700,19 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     property_->SetTextFieldHeight(textFieldHeight);
     return WMError::WM_OK;
 }
+
+WMError WindowImpl::RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+{
+    WLOGFD("Start register");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(windowStatusChangeListeners_[GetWindowId()], listener);
+}
+
+WMError WindowImpl::UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+{
+    WLOGFD("Start unregister");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(windowStatusChangeListeners_[GetWindowId()], listener);
+}
 } // namespace Rosen
 } // namespace OHOS

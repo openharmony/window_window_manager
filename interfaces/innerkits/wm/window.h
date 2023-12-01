@@ -142,6 +142,15 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+};
+
+/**
+ * @class IWindowStatusChangeListener
+ *
+ * @brief IWindowStatusChangeListener is used to observe the window status when window status changed.
+ */
+class IWindowStatusChangeListener : virtual public RefBase {
+public:
     /**
      * @brief Notify caller when window status changed.
      *
@@ -1493,6 +1502,27 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_OK;
+    }
+    
+    /**
+     * @brief Register window status change listener.
+     *
+     * @param listener IWindowStatusChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+    /**
+     * @brief Unregister window status change listener.
+     *
+     * @param listener IWindowStatusChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
     {
         return WMError::WM_OK;
     }
