@@ -38,6 +38,8 @@
 #include "wm_math.h"
 #include <running_lock.h>
 #include "parameters.h"
+#include "singleton_container.h"
+#include "pip_report.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1975,6 +1977,8 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
     SetSessionRequestRect(newRect);
     Session::UpdateRect(newRect, reason);
     NotifySessionRectChange(newRect, reason);
+    SingletonContainer::Get<PiPReporter>()
+        .ReportPiPResize(static_cast<int32_t>(pipRectInfo_.level_), newRect.width_, newRect.height_);
 }
 
 WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
@@ -2008,6 +2012,7 @@ WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpda
                 session->pipRectInfo_.originWidth_ = width;
                 session->pipRectInfo_.originHeight_ = height;
                 session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
+                SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
                 break;
             case PiPRectUpdateReason::REASON_PIP_MOVE:
                 session->ClearPiPRectPivotInfo();
