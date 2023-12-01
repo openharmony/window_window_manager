@@ -1403,7 +1403,14 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
-            auto objValue = CreateJsWindowPropertiesObject(env, weakWindow);
+            Rect drawableRect = g_emptyRect;
+            auto uicontent = weakWindow->GetUIContent();
+            if (uicontent == nullptr) {
+                WLOGFW("uicontent is nullptr");
+            } else {
+                uicontent->GetAppPaintSize(drawableRect);
+            }
+            auto objValue = CreateJsWindowPropertiesObject(env, weakWindow, drawableRect);
             if (objValue != nullptr) {
                 task.Resolve(env, objValue);
             } else {
@@ -1429,7 +1436,14 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFE("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, window);
+    Rect drawableRect = g_emptyRect;
+    auto uicontent = window->GetUIContent();
+    if (uicontent == nullptr) {
+        WLOGFW("uicontent is nullptr");
+    } else {
+        uicontent->GetAppPaintSize(drawableRect);
+    }
+    auto objValue = CreateJsWindowPropertiesObject(env, window, drawableRect);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
         window->GetWindowId(), window->GetWindowName().c_str());
     if (objValue != nullptr) {
