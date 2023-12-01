@@ -183,6 +183,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void NotifyTouchOutside();
+    void NotifyWindowVisibility();
     bool CheckOutTouchOutsideRegister();
     void UpdateNativeVisibility(bool visible);
     void UpdateRotationAvoidArea();

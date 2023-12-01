@@ -2165,6 +2165,32 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: RegisterWindowVisibilityChangeListener
+ * @tc.desc: Register window visibility change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowVisibilityChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->RegisterWindowVisibilityChangeListener(nullptr));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterWindowVisibilityChangeListener
+ * @tc.desc: Unregister window visibility change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowVisibilityChangeListener(nullptr));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
