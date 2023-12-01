@@ -419,7 +419,7 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     return objValue;
 }
 
-napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window)
+napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect)
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
@@ -429,12 +429,19 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window)
         return nullptr;
     }
 
-    Rect rect = window->GetRect();
-    napi_value rectObj = GetRectAndConvertToJsValue(env, rect);
-    if (rectObj == nullptr) {
-        WLOGFE("GetRect failed!");
+    Rect windowRect = window->GetRect();
+    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
+    if (windowRectObj == nullptr) {
+        WLOGFE("GetWindowRect failed!");
     }
-    napi_set_named_property(env, objValue, "windowRect", rectObj);
+    napi_set_named_property(env, objValue, "windowRect", windowRectObj);
+
+    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
+    if (drawableRectObj == nullptr) {
+        WLOGFE("GetDrawableRect failed!");
+    }
+    napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
+    
     WindowType type = window->GetType();
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
