@@ -383,9 +383,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
         targetRect.posY_ += tranY;
-        targetRect.height_ -= static_cast<uint32_t>(tranY);
+        targetRect.height_ -= tranY;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        targetRect.height_ += static_cast<uint32_t>(tranY);
+        targetRect.height_ += tranY;
     }
     // check current ratio limits
     if (targetRect.height_ == 0) {

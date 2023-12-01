@@ -159,7 +159,7 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
         WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    int32_t count = infos.size();
+    int32_t count = static_cast<int32_t>(infos.size());
     if (!reply.WriteInt32(count)) {
         WLOGFE("Failed to write count!");
         return ERR_INVALID_DATA;
@@ -197,7 +197,7 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
         WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    int32_t count = infos.size();
+    int32_t count = static_cast<int32_t>(infos.size());
     if (!reply.WriteInt32(count)) {
         WLOGFE("Failed to write count!");
         return ERR_INVALID_DATA;

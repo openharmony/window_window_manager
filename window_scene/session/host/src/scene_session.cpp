@@ -429,10 +429,10 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
         }
 
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            static_cast<uint32_t>(defaultDisplayInfo->GetWidth()) : rect.width_;
+            defaultDisplayInfo->GetWidth() : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
         newWinRect.height_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0) ?
-            static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u : rect.height_;
+            static_cast<int32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u : rect.height_;
         newRequestRect.height_ = newWinRect.height_;
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : newRequestRect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
