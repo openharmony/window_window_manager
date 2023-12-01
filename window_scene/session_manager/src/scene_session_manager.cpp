@@ -106,8 +106,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 #ifdef RES_SCHED_ENABLE
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 #endif
-const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
-const std::string WINDOW_INFO_REPORT_THREAD = "WindowInfoReportThread";
+const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
+const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 std::recursive_mutex g_instanceMutex;
 constexpr uint32_t MAX_BRIGHTNESS = 255;
