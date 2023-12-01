@@ -4672,8 +4672,8 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             if (ret == WmErrorCode::WM_OK) {
                 auto objValue = GetWindowLimitsAndConvertToJsValue(env, sizeLimits);
                 if (objValue == nullptr) {
-                    task.Reject(env, CreateJsError(env, 
-                        static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "Window set window limits failed"));
+                    task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                        "Window set window limits failed"));
                 } else {
                     task.Resolve(env, objValue);
                 }

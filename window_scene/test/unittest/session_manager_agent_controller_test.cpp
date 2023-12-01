@@ -146,6 +146,23 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, Function
         windowManagerAgent, type));
 }
 
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo
+ * @tc.desc: UpdateWindowDrawingContentInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level3)
+{
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
+    SessionManagerAgentController::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+
+     
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

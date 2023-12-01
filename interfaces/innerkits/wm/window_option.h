@@ -210,6 +210,27 @@ public:
     void SetMainHandlerAvailable(bool isMainHandlerAvailable);
 
     /**
+     * @brief Set subwindow title.
+     *
+     * @param subWindowTitle the subwindow title.
+     */
+    void SetSubWindowTitle(const std::string& subWindowTitle);
+
+    /**
+     * @brief Set subwindow decor enable.
+     *
+     * @param subWindowDecorEnable the subwindow decor enable.
+     */
+    void SetSubWindowDecorEnable(bool subWindowDecorEnable);
+
+    /**
+     * @brief Set only sceneboard supported.
+     *
+     * @param onlySupportSceneBoard only sceneboard supported.
+     */
+    void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -335,6 +356,27 @@ public:
      */
     bool GetMainHandlerAvailable() const;
 
+    /**
+     * @brief Get subwindow title
+     *
+     * @return Return the subwindow title
+    */
+    std::string GetSubWindowTitle() const;
+
+    /**
+     * @brief Get subwindow decor enable
+     *
+     * @return Return ture means the subwindow decor enabled, otherwise not.
+    */
+    bool GetSubWindowDecorEnable() const;
+
+    /**
+     * @brief Get only sceneboard supported
+     *
+     * @return Return ture means only sceneboard supported, otherwise not.
+    */
+    bool GetOnlySupportSceneBoard() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -359,6 +401,9 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
+    std::string subWindowTitle_ = { "" };
+    bool subWindowDecorEnable_ = false;
+    bool onlySupportSceneBoard_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

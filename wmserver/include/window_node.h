@@ -155,7 +155,7 @@ public:
     uint32_t zOrder_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
-    WindowVisibilityState visibilityState_ { WINDOW_VISIBILITY_STATE_MAX };
+    WindowVisibilityState visibilityState_ { WINDOW_LAYER_STATE_MAX };
     bool isAppCrash_ { false };
     bool isPlayAnimationShow_ { false }; // delete when enable state machine
     bool isPlayAnimationHide_ { false }; // delete when enable state machine
