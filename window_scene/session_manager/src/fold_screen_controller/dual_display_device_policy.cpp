@@ -200,8 +200,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenSession->SetDisplayNodeScreenId(SCREEN_ID_MAIN);
         screenId_ = SCREEN_ID_MAIN;
     }
-
 }
+
 void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession)
 {
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_FULL);
