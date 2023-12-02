@@ -232,7 +232,8 @@ private:
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
-    void SetSurfaceBounds(const WSRect& rect);
+    WSError RaiseAppMainWindowToTop() override;
+    void SetSurfaceBounds(const WSRect &rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     void OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason);
