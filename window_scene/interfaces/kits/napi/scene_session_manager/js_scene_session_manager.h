@@ -66,7 +66,7 @@ public:
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
-
+    static napi_value ReportData(napi_env env, napi_callback_info info);
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
@@ -102,19 +102,22 @@ private:
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
+    napi_value OnReportData(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
-    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnShiftFocus(int32_t persistentId);
     void OnShowPiPMainWindow(int32_t persistentId);
-    void ProcessCreateSpecificSessionRegister();
+    void OnCallingWindowIdChange(const uint32_t callingWindowId);
+    void ProcessCreateSystemSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessShowPiPMainWindow();
+    void ProcessCallingWindowIdChangeRegister();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

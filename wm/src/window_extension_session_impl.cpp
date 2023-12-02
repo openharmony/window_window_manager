@@ -312,7 +312,7 @@ WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibili
 {
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
-        return WMError::WM_ERROR_REPEAT_OPERATION;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
 }
@@ -324,5 +324,6 @@ void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool w
 void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
 }
+
 } // namespace Rosen
 } // namespace OHOS

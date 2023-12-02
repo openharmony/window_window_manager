@@ -76,7 +76,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
         }
-        screenConnectionListener_->OnScreenConnected(screenSession);
+        if (screenConnectionListener_) {
+            screenConnectionListener_->OnScreenConnected(screenSession);
+        }
         screenSession->Connect();
         return;
     }
@@ -86,7 +88,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             WLOGFE("screenSession is null");
             return;
         }
-        screenConnectionListener_->OnScreenDisconnected(screenSession);
+        if (screenConnectionListener_) {
+            screenConnectionListener_->OnScreenDisconnected(screenSession);
+        }
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.erase(screenId);
@@ -114,6 +118,14 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         return;
     }
     screenSession->PropertyChange(property, reason);
+}
+
+void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    for (auto screenSession:screenSessionMap_) {
+        (screenSession.second)->PowerStatusChange(event, status, reason);
+    }
 }
 
 void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
@@ -156,6 +168,14 @@ void ScreenSessionManagerClient::OnDisplayStateChanged(DisplayId defaultDisplayI
 {
     if (displayChangeListener_) {
         displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    }
+}
+
+void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+    std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
     }
 }
 
@@ -216,5 +236,14 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
         return;
     }
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
+}
+
+void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 } // namespace OHOS::Rosen

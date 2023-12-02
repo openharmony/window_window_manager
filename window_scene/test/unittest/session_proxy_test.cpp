@@ -15,10 +15,11 @@
 #include "session_proxy.h"
 #include "iremote_object_mocker.h"
 #include <gtest/gtest.h>
-
+#include "accessibility_event_info.h"
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS {
 namespace Rosen {
 class SessionProxyTest : public testing::Test {
@@ -26,7 +27,6 @@ class SessionProxyTest : public testing::Test {
     SessionProxyTest() {}
     ~SessionProxyTest() {}
 };
-
 namespace {
 /**
  * @tc.name: Foreground
@@ -448,18 +448,21 @@ HWTEST_F(SessionProxyTest, UpdateWindowAnimationFlag, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: DestroyAndDisconnectSpecificSession
+ * @tc.name: TransferAccessibilityEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: DestroyAndDisconnectSpecificSession start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    int32_t persistentId = 0;
-    sProxy->DestroyAndDisconnectSpecificSession(persistentId);
-    GTEST_LOG_(INFO) << "SessionProxyTest: DestroyAndDisconnectSpecificSession end";
+    Accessibility::AccessibilityEventInfo info;
+    std::vector<int32_t> uiExtensionIdLevelVec;
+    WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevelVec);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent end";
 }
 } // namespace
 } // namespace Rosen

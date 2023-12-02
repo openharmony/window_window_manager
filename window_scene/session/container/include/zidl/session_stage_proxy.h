@@ -47,6 +47,7 @@ public:
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
+    WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyConfigurationUpdated() override;

@@ -25,6 +25,12 @@ config("scene_session_manager_napi_config") {
 }
 
 ohos_shared_library("scenesessionmanager_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "js_root_scene_session.cpp",
     "js_scene_session.cpp",
@@ -73,6 +79,11 @@ ohos_shared_library("scenesessionmanager_napi") {
       defined(global_parts_info.powermgr_power_manager)) {
     external_deps += [ "power_manager:powermgr_client" ]
     defines += [ "POWER_MANAGER_ENABLE" ]
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
 
   relative_install_dir = "module"

@@ -32,6 +32,12 @@ config("intention_event_public_config") {
 }
 
 ohos_shared_library("intention_event_anr_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "../dfx/src/dfx_hisysevent.cpp",
     "../framework/anr_handler/src/anr_handler.cpp",

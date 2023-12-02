@@ -30,6 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScen
 constexpr int32_t NUMBER_2 = 2;
 constexpr int32_t NUMBER_3 = 3;
 constexpr int32_t US_PER_NS = 1000;
+constexpr int32_t INVALID_VAL = -9999;
 
 int32_t GetMMITouchType(int32_t aceType)
 {
@@ -196,6 +197,19 @@ bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sess
     return true;
 }
 
+bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRecover, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsPersistentRecover) != napi_undefined) {
+        bool isPersistentRecover = false;
+        if (!ConvertFromJsValue(env, jsIsPersistentRecover, isPersistentRecover)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isPersistentRecover");
+            return false;
+        }
+        sessionInfo.isPersistentRecover_ = isPersistentRecover;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -216,6 +230,8 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
     napi_value jsScreenId = nullptr;
     napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
+    napi_value jsIsPersistentRecover = nullptr;
+    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
 
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
@@ -241,7 +257,10 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     if (!IsJsSessionTypeUndefind(env, jsSessionType, sessionInfo)) {
         return false;
     }
-    if (!IsJsScreenIdUndefind(env, jsSessionType, sessionInfo)) {
+    if (!IsJsScreenIdUndefind(env, jsScreenId, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsPersistentRecoverUndefined(env, jsIsPersistentRecover, sessionInfo)) {
         return false;
     }
     return true;
@@ -417,7 +436,35 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.windowMode)));
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.screenId_)));
+
+    if (sessionInfo.want != nullptr) {
+        napi_set_named_property(env, objValue, "windowTop",
+            GetWindowRectIntValue(env,
+            sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_TOP, INVALID_VAL)));
+        napi_set_named_property(env, objValue, "windowLeft",
+            GetWindowRectIntValue(env,
+            sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_LEFT, INVALID_VAL)));
+        napi_set_named_property(env, objValue, "windowWidth",
+            GetWindowRectIntValue(env,
+            sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_WIDTH, INVALID_VAL)));
+        napi_set_named_property(env, objValue, "windowHeight",
+            GetWindowRectIntValue(env,
+            sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_HEIGHT, INVALID_VAL)));
+
+        napi_set_named_property(env, objValue, "withAnimation",
+            CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
+    }
+
     return objValue;
+}
+
+napi_value GetWindowRectIntValue(napi_env env, int val)
+{
+    if (val != INVALID_VAL) {
+        return  CreateJsValue(env, val);
+    } else {
+        return NapiGetUndefined(env);
+    }
 }
 
 napi_value CreateJsSessionState(napi_env env)

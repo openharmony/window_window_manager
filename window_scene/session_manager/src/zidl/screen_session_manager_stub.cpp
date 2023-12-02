@@ -16,6 +16,7 @@
 #include "zidl/screen_session_manager_stub.h"
 
 #include "common/rs_rect.h"
+#include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
 
@@ -165,6 +166,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             float density = data.ReadFloat();
             int32_t flags = data.ReadInt32();
             bool isForShot = data.ReadBool();
+            std::vector<uint64_t> missionIds;
+            data.ReadUInt64Vector(&missionIds);
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -180,7 +183,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .density_ = density,
                 .surface_ = surface,
                 .flags_ = flags,
-                .isForShot_ = isForShot
+                .isForShot_ = isForShot,
+                .missionIds_ = missionIds
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
@@ -201,7 +205,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool autoRotate = data.ReadBool();
-            DMError result = SetVirtualMirrorScreenBufferRotation(screenId, autoRotate);
+            DMError result = SetVirtualMirrorScreenCanvasRotation(screenId, autoRotate);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
@@ -308,6 +312,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_RESOLUTION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            float virtualPixelRatio = data.ReadFloat();
+            DMError ret = SetResolution(screenId, width, height, virtualPixelRatio);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenColorGamut colorGamut;
@@ -347,6 +360,90 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError ret = SetScreenColorTransform(screenId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat;
+            DMError ret = GetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(pixelFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicPixelFormat pixelFormat = static_cast<GraphicPixelFormat>(data.ReadUint32());
+            DMError ret = SetPixelFormat(screenId, pixelFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenHDRFormat> hdrFormats;
+            DMError ret = GetSupportedHDRFormats(screenId, hdrFormats);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<ScreenHDRFormat>(reply, hdrFormats,
+                [](Parcel& parcel, const ScreenHDRFormat& hdrFormat) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(hdrFormat));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenHDRFormat hdrFormat;
+            DMError ret = GetScreenHDRFormat(screenId, hdrFormat);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(hdrFormat));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t modeIdx = data.ReadInt32();
+            DMError ret = SetScreenHDRFormat(screenId, modeIdx);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+            DMError ret = GetSupportedColorSpaces(screenId, colorSpaces);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            MarshallingHelper::MarshallingVectorObj<GraphicCM_ColorSpaceType>(reply, colorSpaces,
+                [](Parcel& parcel, const GraphicCM_ColorSpaceType& color) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(color));
+                }
+            );
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace;
+            DMError ret = GetScreenColorSpace(screenId, colorSpace);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(colorSpace));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            GraphicCM_ColorSpaceType colorSpace = static_cast<GraphicCM_ColorSpaceType>(data.ReadUint32());
+            DMError ret = SetScreenColorSpace(screenId, colorSpace);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
@@ -515,6 +612,27 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint32_t height = data.ReadUint32();
             DMError ret = ResizeVirtualScreen(screenId, width, height);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect area = {posX, posY, width, height};
+            UpdateAvailableArea(screenId, area);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            DMRect area;
+            DMError ret = GetAvailableArea(displayId, area);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteInt32(area.posX_);
+            reply.WriteInt32(area.posY_);
+            reply.WriteUint32(area.width_);
+            reply.WriteUint32(area.height_);
             break;
         }
         default:

@@ -103,7 +103,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
                     "JsPipController::OnStartPictureInPicture failed."));
                 return;
             }
-            WMError errCode = weak->StartPictureInPicture();
+            WMError errCode = weak->StartPictureInPicture(StartPipType::USER_START);
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStartPictureInPicture failed."));
@@ -141,7 +141,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
                     "JsPipController::OnStopPictureInPicture failed."));
                 return;
             }
-            WMError errCode = weak->StopPictureInPicture(true);
+            WMError errCode = weak->StopPictureInPicture(true, StopPipType::USER_STOP);
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStopPictureInPicture failed."));

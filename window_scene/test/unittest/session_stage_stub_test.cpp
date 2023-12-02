@@ -329,6 +329,20 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTe
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
 }
 
+/**
+ * @tc.name: HandleNotifyWindowVisibilityChange
+ * @tc.desc: test function : HandleNotifyWindowVisibilityChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
+}
+
 }
 }
 }

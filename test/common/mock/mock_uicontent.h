@@ -26,6 +26,8 @@ namespace Ace {
 class UIContentMocker : public UIContent {
 public:
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage));
+    MOCK_METHOD3(Initialize,
+        void(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage));
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
@@ -85,6 +87,7 @@ public:
     MOCK_METHOD4(
         FocusMoveSearch, void(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo &output));
+    MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
 };
 } // namespace Ace
 } // namespace OHOS

@@ -116,10 +116,6 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
-        sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED),
@@ -216,9 +212,6 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
 
     bool needMoveToBackground = source.GetObject<bool>();
     proxy->RequestSessionBack(needMoveToBackground);
-
-    int32_t persistentId = source.GetObject<int32_t>();
-    proxy->DestroyAndDisconnectSpecificSession(persistentId);
 }
 
 void ProxyInterfaceFuzzTestPart2(const uint8_t* data, size_t size)

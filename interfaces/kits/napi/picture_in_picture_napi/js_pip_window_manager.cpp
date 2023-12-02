@@ -20,11 +20,12 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
+#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-
+using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
 }
@@ -36,40 +37,31 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value templateTypeValue = nullptr;
     napi_value widthValue = nullptr;
     napi_value heightValue = nullptr;
-
+    napi_value xComponentControllerValue = nullptr;
     void* contextPtr = nullptr;
-    std::string navigationId;
-    uint32_t templateType;
-    uint32_t width;
-    uint32_t height;
+    std::string navigationId = "";
+    uint32_t templateType = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
-
+    napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_unwrap(env, contextPtrValue, &contextPtr);
-    if (!ConvertFromJsValue(env, navigationIdValue, navigationId)) {
-        WLOGFE("Failed to convert navigationIdValue to stringType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, templateTypeValue, templateType)) {
-        WLOGFE("Failed to convert templateTypeValue to uint32_tType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, widthValue, width)) {
-        WLOGFE("Failed to convert widthValue to uint32_tType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, heightValue, height)) {
-        WLOGFE("Failed to convert heightValue to uint32_tType");
-        return -1;
-    }
+    ConvertFromJsValue(env, navigationIdValue, navigationId);
+    ConvertFromJsValue(env, templateTypeValue, templateType);
+    ConvertFromJsValue(env, widthValue, width);
+    ConvertFromJsValue(env, heightValue, height);
+    std::shared_ptr<XComponentController> xComponentControllerResult =
+        XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);
     option.SetContentSize(width, height);
+    option.SetXComponentController(xComponentControllerResult);
     return 0;
 }
 
@@ -141,7 +133,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
             }
             sptr<Window> mainWindow = Window::GetTopWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
-                new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId());
+                new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId(), env);
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));
         };
     napi_value result = nullptr;

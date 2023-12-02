@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "session/host/include/scene_session.h"
+#include "session/host/include/sub_session.h"
+#include "session/host/include/system_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
@@ -195,10 +197,6 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
     ASSERT_EQ(result, WSError::WS_OK);
     result = scensession->UpdateWindowSceneAfterCustomAnimation(true);
     ASSERT_EQ(result, WSError::WS_OK);
-    sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =
-        new (std::nothrow) SceneSession::SetWindowScenePatternFunc();
-    scensession->setWindowScenePatternFunc_ = setWindowScenePatternFunc;
-    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_OK);
 }
 
 /**
@@ -300,34 +298,6 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     ASSERT_EQ(WSError::WS_OK, scensession->UpdateWindowAnimationFlag(false));
-}
-
-/**
- * @tc.name: GetHotAreaRect01
- * @tc.desc: GetHotAreaRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetHotAreaRect01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "GetHotAreaRect01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    Rect windowRect = { 1, 1, 1, 1 };
-    std::vector<Rect> rects;
-    uint32_t hotAreasNum = 10;
-    uint32_t hotAreaWidth = windowRect.width_ / hotAreasNum;
-    uint32_t hotAreaHeight = windowRect.height_ / hotAreasNum;
-    for (uint32_t i = 0; i < hotAreasNum; ++i) {
-        rects.emplace_back(Rect{ hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight });
-    }
-    ASSERT_NE(windowRect, scensession->GetHotAreaRect(2));
 }
 
 /**
@@ -530,6 +500,44 @@ HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsDecorEnable01
+ * @tc.desc: IsDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsDecorEnable01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetDecorEnable(true);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    scensession->property_ = property;
+    ASSERT_EQ(true, scensession->IsDecorEnable());
+
+    sptr<SceneSession> scensession_;
+    scensession_ = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession_, nullptr);
+    property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetDecorEnable(false);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(false, scensession_->IsDecorEnable());
+}
+
+/**
  * @tc.name: UpdateNativeVisibility
  * @tc.desc: UpdateNativeVisibility
  * @tc.type: FUNC
@@ -549,6 +557,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     EXPECT_NE(scensession, nullptr);
     scensession->UpdateNativeVisibility(false);
     ASSERT_EQ(false, scensession->IsVisible());
+    scensession->NotifyWindowVisibility();
 }
 
 /**
@@ -1023,22 +1032,22 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
+    sptr<SystemSession> sysSession;
+    sysSession = new (std::nothrow) SystemSession(info, specificCallback_);
+    EXPECT_NE(sysSession, nullptr);
     int ret = 1;
     specificCallback_->onCameraFloatSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
 
-    scensession->UpdateCameraFloatWindowStatus(false);
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    scensession->UpdateCameraFloatWindowStatus(false);
+    sysSession->UpdateCameraFloatWindowStatus(false);
+    sysSession = new (std::nothrow) SystemSession(info, specificCallback_);
+    sysSession->UpdateCameraFloatWindowStatus(false);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    scensession->property_ = property;
-    scensession->UpdateCameraFloatWindowStatus(false);
+    sysSession->property_ = property;
+    sysSession->UpdateCameraFloatWindowStatus(false);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    scensession->property_ = property;
-    scensession->UpdateCameraFloatWindowStatus(false);
+    sysSession->property_ = property;
+    sysSession->UpdateCameraFloatWindowStatus(false);
     ASSERT_EQ(ret, 1);
 }
 
@@ -1640,15 +1649,15 @@ HWTEST_F(SceneSessionTest, RaiseAboveTarget, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: BindDialogTarget
+ * @tc.name: BindDialogSessionTarget
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, BindDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, BindDialogSessionTarget, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "BindDialogTarget";
-    info.bundleName_ = "BindDialogTarget";
+    info.abilityName_ = "BindDialogSessionTarget";
+    info.bundleName_ = "BindDialogSessionTarget";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
@@ -1664,41 +1673,12 @@ HWTEST_F(SceneSessionTest, BindDialogTarget, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
 
     sptr<SceneSession> sceneSession = nullptr;
-    WSError result = scensession->BindDialogTarget(sceneSession);
+    WSError result = scensession->BindDialogSessionTarget(sceneSession);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<SceneSession> sceneSession1 = scensession;
-    result = scensession->BindDialogTarget(sceneSession1);
+    result = scensession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
-    delete scensession;
-}
-
-/**
- * @tc.name: DestroyAndDisconnectSpecificSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "DestroyAndDisconnectSpecificSession";
-    info.bundleName_ = "DestroyAndDisconnectSpecificSession";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
-    scensession->SetSessionProperty(property);
-
-    WSError result = scensession->DestroyAndDisconnectSpecificSession(0);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
     delete scensession;
 }
 
@@ -1925,6 +1905,40 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    delete scensession;
+}
+
+/**
+ * @tc.name: TransferPointerEvent
+ * @tc.desc: TransferPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TransferPointerEvent02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsSubWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetPersistentId(11);
+    scensession->property_ = property;
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
     delete scensession;
 }
 
@@ -2285,6 +2299,89 @@ HWTEST_F(SceneSessionTest, NotifySessionBackground, Function | SmallTest | Level
     scensession->sessionStage_ = mockSessionStage;
     scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect01
+ * @tc.desc: NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateRect01";
+    info.bundleName_ = "NotifyClientToUpdateRect01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->isDirty_ = true;
+    scensession->sessionStage_ = mockSessionStage;
+    auto ret = scensession->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateSizeChangeReason01
+ * @tc.desc: UpdateSizeChangeReason01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSizeChangeReason01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSizeChangeReason01";
+    info.bundleName_ = "UpdateSizeChangeReason01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->isDirty_ = true;
+    scensession->sessionStage_ = mockSessionStage;
+    scensession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
+    ASSERT_EQ(scensession->reason_, SizeChangeReason::ROTATION);
+}
+
+/**
+ * @tc.name: UpdatePiPRect01
+ * @tc.desc: UpdatePiPRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdatePiPRect01";
+    info.bundleName_ = "UpdatePiPRect";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scenesession;
+    scenesession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scenesession, nullptr);
+    scenesession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    scenesession->SetSessionProperty(property);
+
+    uint32_t width = 800;
+    uint32_t height = 600;
+    PiPRectUpdateReason reason = PiPRectUpdateReason::REASON_PIP_START_WINDOW;
+    WSError result = scenesession->UpdatePiPRect(width, height, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
+    delete scenesession;
 }
 }
 }

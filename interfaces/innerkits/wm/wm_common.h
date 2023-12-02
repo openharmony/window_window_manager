@@ -18,6 +18,7 @@
 
 #include <parcel.h>
 #include <map>
+#include <float.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -159,6 +160,7 @@ enum class WMError : int32_t {
     WM_ERROR_OPER_FULLSCREEN_FAILED,
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
+    WM_ERROR_INVALID_CALLING,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -204,6 +206,20 @@ enum class WmErrorCode : int32_t {
 };
 
 /**
+ * @brief Enumerates status of window.
+ */
+enum class WindowStatus : uint32_t {
+    WINDOW_STATUS_UNDEFINED = 0,
+    WINDOW_STATUS_FULLSCREEN = 1,
+    WINDOW_STATUS_MAXMIZE,
+    WINDOW_STATUS_MINIMIZE,
+    WINDOW_STATUS_FLOATING,
+    WINDOW_STATUS_SPLIT_PRIMARY = 100,
+    WINDOW_STATUS_SPLIT_SECONDARY
+};
+
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -233,6 +249,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_PIP_CREATE_FAILED,              WmErrorCode::WM_ERROR_PIP_CREATE_FAILED      },
     {WMError::WM_ERROR_PIP_INTERNAL_ERROR,             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR     },
     {WMError::WM_ERROR_PIP_REPEAT_OPERATION,           WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION   },
+    {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING        },
 };
 
 /**
@@ -473,7 +490,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
     TYPE_KEYBOARD,         // area for soft input keyboard
-    TYPE_AI_NAVIGATION_BAR, // area for AI navigation bar
+    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
 };
 
 /**
@@ -602,6 +619,7 @@ enum class PipTemplateType : int32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
+    VIDEO_LIVE = 3,
 };
 
 /**
@@ -666,6 +684,25 @@ using OnCallback = std::function<void(int64_t)>;
  */
 struct VsyncCallback {
     OnCallback onCallback;
+};
+
+struct WindowLimits {
+    uint32_t maxWidth_;
+    uint32_t maxHeight_;
+    uint32_t minWidth_;
+    uint32_t minHeight_;
+    float maxRatio_;
+    float minRatio_;
+    WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
+        minRatio_(0.0f) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth), minHeight_(minHeight),
+        maxRatio_(maxRatio), minRatio_(minRatio) {}
+
+    bool IsEmpty() const
+    {
+        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
 };
 
 /*

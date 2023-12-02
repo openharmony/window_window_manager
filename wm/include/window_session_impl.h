@@ -122,6 +122,8 @@ public:
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
+    WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
@@ -156,6 +158,7 @@ public:
     virtual void SetColorSpace(ColorSpace colorSpace) override;
     virtual ColorSpace GetColorSpace() override;
     WSError NotifyTouchOutside() override;
+    WSError NotifyWindowVisibility(bool isVisible) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         const std::vector<int32_t>& uiExtensionIdLevelVec) override;
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -166,6 +169,8 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void SetDrawingContentState(bool drawingContentState);
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -183,6 +188,8 @@ protected:
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifyWindowStatusChange(WindowMode mode);
+    static sptr<Window> FindWindowById(uint32_t winId);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -227,6 +234,8 @@ private:
     EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
@@ -250,6 +259,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
+    static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
@@ -257,6 +267,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    std::string subWindowTitle_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS

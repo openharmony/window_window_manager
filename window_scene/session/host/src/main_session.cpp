@@ -15,6 +15,10 @@
 
 #include "session/host/include/main_session.h"
 
+#include <ui/rs_surface_node.h>
+
+#include "session_helper.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -25,6 +29,28 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSe
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    SetMoveDragCallback();
+    std::string key = GetRatioPreferenceKey();
+    if (!key.empty()) {
+        if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
+            ScenePersistentStorage::Get(key, aspectRatio_, ScenePersistentStorageType::ASPECT_RATIO);
+            WLOGD("SceneSession init aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
+            if (moveDragController_) {
+                moveDragController_->SetAspectRatio(aspectRatio_);
+            }
+        }
+    }
+
+    auto name = sessionInfo_.bundleName_;
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
+        RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
+        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    }
     WLOGFD("Create MainSession");
 }
 
