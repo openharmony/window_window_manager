@@ -3762,6 +3762,198 @@ HWTEST_F(WindowImplTest, NotifyForegroundInteractiveStatus, Function | SmallTest
     window->NotifyForegroundInteractiveStatus(interactive);
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
 }
+
+/*
+ * @tc.name: GetTopWindowWithContext
+ * @tc.desc: GetTopWindowWithContexttest01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetTopWindowWithContext01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetTopWindowWithContext01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    option->SetBundleName("OK");
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    std::shared_ptr<AbilityRuntime::Context> context;
+    ASSERT_EQ(nullptr, sptr<Window>(window)->GetTopWindowWithContext(context));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/*
+ * @tc.name: GetSubWindow
+ * @tc.desc: GetSubWindowtest02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetSubWindowtext02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetSubWindowtest02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    option->SetBundleName("OK");
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    ASSERT_NE(window, nullptr);
+    auto subWindowVec = sptr<Window>(window)->GetSubWindow(window->GetWindowId());
+    if (subWindowVec.size() == 1) {
+        ASSERT_EQ(1, subWindowVec.size());
+    }
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/*
+ * @tc.name: SetFloatingMaximize
+ * @tc.desc: SetFloatingMaximize test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetFloatingMaximize, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetFloatingMaximize");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowFlags(0));
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->UpdateModeSupportInfo(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFloatingMaximize(true));
+}
+
+/**
+ * @tc.name: SetAspectRatio
+ * @tc.desc: SetAspectRatio Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAspectRatio, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetAspectRatio");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(1.1));
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(1.1));
+}
+
+/**
+ * @tc.name: SetAspectRatio02
+ * @tc.desc: SetAspectRatio Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAspectRatio02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetAspectRatio02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.0));
+}
+
+/*
+ * @tc.name: MapDialogWindowToAppIfNeeded
+ * @tc.desc: MapDialogWindowToAppIfNeededtest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, MapDialogWindowToAppIfNeededtest, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("MapDialogWindowToAppIfNeededtest");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    option->SetBundleName("OK");
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->MapDialogWindowToAppIfNeeded();
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/*
+ * @tc.name: GetConfigurationFromAbilityInfo
+ * @tc.desc: GetConfigurationFromAbilityInfotest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetConfigurationFromAbilityInfotest, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetConfigurationFromAbilityInfotest");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_NE(option, nullptr);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    ASSERT_NE(window, nullptr);
+    window->MapDialogWindowToAppIfNeeded();
+    window->GetConfigurationFromAbilityInfo();
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetSnapshotSkip
+ * @tc.desc: SetSnapshotSkip test
+ * @tc.type: FUNC
+ * @tc.require: issueI5MYNX
+ */
+HWTEST_F(WindowImplTest, SetSnapshotSkip, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetSnapshotSkip");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillRepeatedly(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(true));
+}
+
+/**
+ * @tc.name: MaximizeFloating
+ * @tc.desc: MaximizeFloating test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, MaximizeFloating, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("MaximizeFloating");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    window->MaximizeFloating();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+    window->MaximizeFloating();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
+    EXPECT_CALL(m->Mock(), RemoveWindow(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Hide();
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
