@@ -4424,6 +4424,9 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            if (sceneSession->GetLeashWinSurfaceNode()) {
+                surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
+            }
         }
         return WMError::WM_OK;
     };
