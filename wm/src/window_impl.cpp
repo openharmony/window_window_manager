@@ -70,7 +70,6 @@ std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avo
 std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
-std::map<uint32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowImpl::windowStatusChangeListeners_;
 int constructorCnt = 0;
 int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -3700,20 +3699,6 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     property_->SetTextFieldPositionY(textFieldPositionY);
     property_->SetTextFieldHeight(textFieldHeight);
     return WMError::WM_OK;
-}
-
-WMError WindowImpl::RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
-{
-    WLOGFD("Start register");
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    return RegisterListener(windowStatusChangeListeners_[GetWindowId()], listener);
-}
-
-WMError WindowImpl::UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
-{
-    WLOGFD("Start unregister");
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    return UnregisterListener(windowStatusChangeListeners_[GetWindowId()], listener);
 }
 } // namespace Rosen
 } // namespace OHOS
