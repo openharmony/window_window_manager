@@ -1514,7 +1514,7 @@ public:
      */
     virtual WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     /**
      * @brief Unregister window status change listener.
@@ -1524,7 +1524,7 @@ public:
      */
     virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WWM_ERROR_DEVICE_NOT_SUPPORTM_OK;
     }
 };
 }
