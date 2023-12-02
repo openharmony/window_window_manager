@@ -170,6 +170,8 @@ public:
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
     void SetDrawingContentState(bool drawingContentState);
+    WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
+    WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
 
 protected:
     WMError Connect();
@@ -238,6 +240,8 @@ private:
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
+    template<typename T>
+    EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
@@ -260,6 +264,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

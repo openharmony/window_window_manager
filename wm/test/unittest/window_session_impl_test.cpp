@@ -857,6 +857,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     res = window->UnregisterDialogTargetTouchListener(listener4);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    sptr<IWindowStatusChangeListener> listener5 = nullptr;
+    res = window->RegisterWindowStatusChangeListener(listener5);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowStatusChangeListener(listener5);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
 
