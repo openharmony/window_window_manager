@@ -1140,7 +1140,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfoLockedState01, Function | SmallTest | 
 {
     ASSERT_NE(session_, nullptr);
     session_->SetSessionInfoLockedState(false);
-    ASSERT_EQ(false, session_.sessionInfo_.lockedState);
+    ASSERT_EQ(false, session_->sessionInfo_.lockedState);
 }
 
 /**
@@ -1152,7 +1152,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfoLockedState02, Function | SmallTest | 
 {
     ASSERT_NE(session_, nullptr);
     session_->SetSessionInfoLockedState(true);
-    ASSERT_EQ(true, session_.sessionInfo_.lockedState);
+    ASSERT_EQ(true, session_->sessionInfo_.lockedState);
 }
 
 /**
@@ -1887,7 +1887,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfoLockedStateChangeListener, Function | 
     session_->SetSessionInfoLockedStateChangeListener(func);
 
     session_->SetSessionInfoLockedState(true);
-    ASSERT_EQ(true, session_.sessionInfo_.lockedState);
+    ASSERT_EQ(true, session_->sessionInfo_.lockedState);
 }
 
 /**
