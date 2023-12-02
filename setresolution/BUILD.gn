@@ -1,0 +1,63 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+## Build setresolution {{{
+config("setresolution_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
+}
+
+ohos_executable("setresolution_screen") {
+  install_enable = true
+  sources = [ "src/setresolution_screen.cpp" ]
+
+  configs = [
+    ":setresolution_config",
+    "../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    ":libsetresolution_util",
+    "../dm:libdm",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:surface",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_shared_library("libsetresolution_util") {
+  sources = [ "src/setresolution_utils.cpp" ]
+
+  configs = [
+    ":setresolution_config",
+    "../resources/config/build:coverage_flags",
+  ]
+
+  deps = [ "../dm:libdm" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hitrace:hitrace_meter",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+## Build setresolution }}}

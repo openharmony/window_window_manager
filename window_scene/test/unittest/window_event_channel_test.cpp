@@ -24,6 +24,8 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Accessibility;
+using namespace std;
 
 namespace OHOS::Rosen {
 class WindowEventChannelTest : public testing::Test {
@@ -32,6 +34,13 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    WSError TransferSearchElementInfo(bool isChannelNull);
+    WSError TransferSearchElementInfosByText(bool isChannelNull);
+    WSError TransferFindFocusedElementInfo(bool isChannelNull);
+    WSError TransferFocusMoveSearch(bool isChannelNull);
+    WSError TransferExecuteAction(bool isChannelNull);
+
     sptr<ISessionStage> sessionStage = new SessionStageMocker();
     sptr<WindowEventChannel> windowEventChannel_ = new WindowEventChannelMocker(sessionStage);
 };
@@ -50,6 +59,67 @@ void WindowEventChannelTest::SetUp()
 
 void WindowEventChannelTest::TearDown()
 {
+}
+
+WSError WindowEventChannelTest::TransferSearchElementInfo(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t mode = 0;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+}
+
+WSError WindowEventChannelTest::TransferSearchElementInfosByText(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    string text;
+    int32_t baseParent = 0;
+    list<AccessibilityElementInfo> infos;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+}
+
+
+WSError WindowEventChannelTest::TransferFindFocusedElementInfo(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t focusType = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+}
+
+WSError WindowEventChannelTest::TransferFocusMoveSearch(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t direction = 0;
+    int32_t baseParent = 0;
+    AccessibilityElementInfo info;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
+}
+
+WSError WindowEventChannelTest::TransferExecuteAction(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    map<string, string> actionArguments;
+    int32_t action = 0;
+    int32_t baseParent = 0;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
 }
 
 namespace {
@@ -175,6 +245,124 @@ HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Leve
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = windowEventChannel_->TransferFocusState(focusState);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfo01
+ * @tc.desc: normal function TransferSearchElementInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
+{
+    auto res = TransferSearchElementInfo(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfo02
+ * @tc.desc: normal function TransferSearchElementInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
+{
+    auto res = TransferSearchElementInfo(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText01
+ * @tc.desc: normal function TransferSearchElementInfosByText01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferSearchElementInfosByText(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText02
+ * @tc.desc: normal function TransferSearchElementInfosByText02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferSearchElementInfosByText(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo01
+ * @tc.desc: normal function TransferFindFocusedElementInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferFindFocusedElementInfo(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo02
+ * @tc.desc: normal function TransferFindFocusedElementInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferFindFocusedElementInfo(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch01
+ * @tc.desc: normal function TransferFocusMoveSearch01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferFocusMoveSearch(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch02
+ * @tc.desc: normal function TransferFocusMoveSearch02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferFocusMoveSearch(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferExecuteAction01
+ * @tc.desc: normal function TransferExecuteAction01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferExecuteAction01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferExecuteAction(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferExecuteAction02
+ * @tc.desc: normal function TransferExecuteAction02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferExecuteAction02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    auto res = TransferExecuteAction(false);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 }
 }

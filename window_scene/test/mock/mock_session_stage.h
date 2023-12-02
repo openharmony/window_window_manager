@@ -48,6 +48,8 @@ public:
     MOCK_METHOD2(NotifySessionForeground, void(uint32_t reason, bool withAnimation));
     MOCK_METHOD3(NotifySessionBackground, void(uint32_t reason, bool withAnimation, bool isFromInnerkits));
     MOCK_METHOD2(UpdateTitleInTargetPos, WSError(bool isShow, int32_t height));
+    MOCK_METHOD1(UpdateWindowDrawingContentInfo, void(const WindowDrawingContentInfo& info));
+    MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
 };
 } // namespace Rosen
 } // namespace OHOS

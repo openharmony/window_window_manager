@@ -24,33 +24,6 @@
 #include "noncopyable.h"
 
 namespace OHOS::Rosen {
-struct DMRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
-
-    bool operator==(const DMRect& a) const
-    {
-        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
-    }
-
-    bool operator!=(const DMRect& a) const
-    {
-        return !this->operator==(a);
-    }
-
-    bool IsUninitializedRect() const
-    {
-        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
-    }
-
-    bool IsInsideOf(const DMRect& a) const
-    {
-        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
-            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
-    }
-};
 
 struct WaterfallDisplayAreaRects {
     DMRect left;

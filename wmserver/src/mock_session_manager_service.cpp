@@ -266,7 +266,7 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, userId);
     if (!result) {
         WLOGFE("Failed to query bundleInfo, userId:%{public}d", userId);
-        return false;
+        return true;
     }
     auto hapModulesList = bundleInfo.hapModuleInfos;
     if (hapModulesList.empty()) {

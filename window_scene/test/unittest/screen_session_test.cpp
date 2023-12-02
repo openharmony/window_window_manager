@@ -584,7 +584,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, Function | SmallTest | Level
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     Orientation orientation = Orientation::UNSPECIFIED;
     int res = 0;
-    session->ScreenOrientationChange(orientation);
+    session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 end";
 }
@@ -663,6 +663,36 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level
     session->SetDisplayBoundary(rect, offsetY);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test012 end";
+}
+
+/**
+ * @tc.name: GetName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
+    std::string name { "UNKNOW" };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ASSERT_EQ(name, session->GetName());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";
+}
+
+/**
+ * @tc.name: SetName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetName, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetName start";
+    std::string name { "UNKNOW" };
+    int ret = 0;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetName(name);
+    ASSERT_EQ(ret, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetName end";
 }
 } // namespace
 } // namespace Rosen

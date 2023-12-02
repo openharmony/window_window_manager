@@ -18,6 +18,8 @@
 
 #include <zidl/display_manager_agent_stub.h>
 
+#include "dm_common.h"
+
 namespace OHOS {
 namespace Rosen {
 class DisplayManagerAgentDefault : public DisplayManagerAgentStub {
@@ -40,6 +42,7 @@ public:
     void NotifyFoldStatusChanged(FoldStatus foldStatus) override {};
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override {};
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
+    void NotifyAvailableAreaChanged(DMRect area) override {};
 };
 }
 }

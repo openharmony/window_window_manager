@@ -31,6 +31,12 @@ config("libwmutil_public_config") {
 
 ## build libwmutil_static.a
 ohos_static_library("libwmutil_static") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/accessibility_window_info.cpp",
     "src/agent_death_recipient.cpp",
@@ -41,6 +47,7 @@ ohos_static_library("libwmutil_static") {
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
+    "src/pip_report.cpp",
     "src/pip_util.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
@@ -51,6 +58,7 @@ ohos_static_library("libwmutil_static") {
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
+    "src/window_drawing_content_info.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
     "src/window_visibility_info.cpp",
@@ -96,6 +104,12 @@ ohos_static_library("libwmutil_static") {
 
 ## Build libwmutil_base.so
 ohos_shared_library("libwmutil_base") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/accessibility_window_info.cpp",
     "src/agent_death_recipient.cpp",
@@ -106,6 +120,7 @@ ohos_shared_library("libwmutil_base") {
     "src/screenshot_info.cpp",
     "src/singleton_container.cpp",
     "src/string_util.cpp",
+    "src/window_drawing_content_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_math.cpp",
     "src/wm_occlusion_region.cpp",
@@ -131,6 +146,7 @@ ohos_shared_library("libwmutil") {
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
+    "src/pip_report.cpp",
     "src/pip_util.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",

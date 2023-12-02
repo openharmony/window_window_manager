@@ -568,7 +568,9 @@ void MoveDragController::ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float 
 void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property,
     const SystemSessionConfig& sysConfig)
 {
-    isDecorEnable_ = WindowHelper::IsMainWindow(property->GetWindowType()) &&
+    auto windowType = property->GetWindowType();
+    isDecorEnable_ = (WindowHelper::IsMainWindow(windowType) ||
+            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
         sysConfig.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
 }

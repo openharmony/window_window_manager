@@ -111,8 +111,8 @@ napi_value AvoidAreaTypeInit(napi_env env)
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM_GESTURE)));
     napi_set_named_property(env, objValue, "TYPE_KEYBOARD",
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
-    napi_set_named_property(env, objValue, "TYPE_AI_BAR",
-        CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_AI_NAVIGATION_BAR)));
+    napi_set_named_property(env, objValue, "TYPE_NAVIGATION_INDICATOR",
+        CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)));
     return objValue;
 }
 
@@ -293,7 +293,7 @@ napi_value WindowLayoutModeInit(napi_env env)
 
 napi_value BlurStyleInit(napi_env env)
 {
-    WLOGI("BlurStyleInit");
+    WLOGD("BlurStyleInit");
     if (env == nullptr) {
         WLOGFE("Engine is nullptr");
         return nullptr;
@@ -419,9 +419,9 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     return objValue;
 }
 
-napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window)
+napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect)
 {
-    WLOGI("CreateJsWindowPropertiesObject");
+    WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -429,12 +429,19 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window)
         return nullptr;
     }
 
-    Rect rect = window->GetRect();
-    napi_value rectObj = GetRectAndConvertToJsValue(env, rect);
-    if (rectObj == nullptr) {
-        WLOGFE("GetRect failed!");
+    Rect windowRect = window->GetRect();
+    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
+    if (windowRectObj == nullptr) {
+        WLOGFE("GetWindowRect failed!");
     }
-    napi_set_named_property(env, objValue, "windowRect", rectObj);
+    napi_set_named_property(env, objValue, "windowRect", windowRectObj);
+
+    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
+    if (drawableRectObj == nullptr) {
+        WLOGFE("GetDrawableRect failed!");
+    }
+    napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
+    
     WindowType type = window->GetType();
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
@@ -665,6 +672,22 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
     napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
     napi_set_named_property(env, objValue, "bottomRect", GetRectAndConvertToJsValue(env, avoidArea.bottomRect_));
+    return objValue;
+}
+
+napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert windowLimits t o jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env, windowLimits.maxWidth_));
+    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
+    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
+    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
     return objValue;
 }
 

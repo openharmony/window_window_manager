@@ -17,6 +17,7 @@
 
 #include <event_handler.h>
 #include <refbase.h>
+#include "parameters.h"
 #include <power_mgr_client.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
@@ -24,16 +25,21 @@
 #include "window_option.h"
 #include "window.h"
 #include "wm_common.h"
+#include "singleton_container.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureController"};
     constexpr int32_t DELAY_ANIM = 500;
+    constexpr int32_t SUCCESS = 1;
+    constexpr int32_t FAILED = 0;
+    const std::string PROP_DEFAULT_PAGE_NAME = "const.window.pip.debug.useDefaultPage";
+    const std::string DEFAULT_PAGE_PATH = "pages/pipwindow/PiPWindow";
 }
 
-PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId)
-    : weakRef_(this), pipOption_(pipOption), mainWindowId_(windowId)
+PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId, napi_env env)
+    : weakRef_(this), pipOption_(pipOption), mainWindowId_(windowId), env_(env)
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -52,18 +58,26 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
+    const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
+    SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
     sptr<Window> callWindow = Window::GetTopWindowWithContext(context->lock());
     if (callWindow == nullptr) {
         WLOGFE("Get call Window failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     mainWindowId_ = callWindow->GetWindowId();
-
+    mainWindow_ = callWindow;
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
         WLOGFE("Get WindowOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
+    mainWindowXComponentController_ = pipOption_->GetXComponentController();
+    if (mainWindowXComponentController_ == nullptr || mainWindow_ == nullptr) {
+        WLOGFE("mainWindowXComponentController or main window is nullptr");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    UpdateXComponentPositionAndSize();
     windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -79,15 +93,22 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::ShowPictureInPictureWindow()
+WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType startType)
 {
     WLOGI("ShowPictureInPictureWindow is called");
     if (window_ == nullptr) {
         WLOGFD("window_ is nullptr");
+        SingletonContainer::Get<PiPReporter>()
+            .ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
+                                  FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStart();
+    }
+    bool useDefaultPage = system::GetParameter(PROP_DEFAULT_PAGE_NAME, "") != "";
+    if (useDefaultPage && env_ != nullptr) {
+        window_->NapiSetUIContent(DEFAULT_PAGE_PATH, env_, nullptr, false, nullptr);
     }
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
@@ -96,34 +117,43 @@ WMError PictureInPictureController::ShowPictureInPictureWindow()
         if (pipLifeCycleListener_ != nullptr) {
             pipLifeCycleListener_->OnPictureInPictureOperationError(err);
         }
+        SingletonContainer::Get<PiPReporter>()
+            .ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
+                                  FAILED, "window_ show failed");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     PictureInPictureManager::SetCurrentPipController(this);
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPictureInPictureStart();
-    }
+    SingletonContainer::Get<PiPReporter>()
+            .ReportPiPStartWindow(static_cast<int32_t>(startType),
+                                  pipOption_->GetPipTemplate(), SUCCESS, "show pip success");
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::StartPictureInPicture()
+WMError PictureInPictureController::StartPictureInPicture(StartPipType startType)
 {
     WLOGI("StartPictureInPicture is called");
     sptr<PictureInPictureController> thisController = this;
     if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STARTING) {
         WLOGFE("Pip window is starting");
+        SingletonContainer::Get<PiPReporter>().
+            ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
+                                 FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     if (PictureInPictureManager::IsCurrentPipControllerExist()) {
         // pip window exists
         if (PictureInPictureManager::IsCurrentPipController(weakRef_)) {
             WLOGFE("Repeat start request");
+            SingletonContainer::Get<PiPReporter>()
+                .ReportPiPStartWindow(static_cast<int32_t>(startType),
+                                      pipOption_->GetPipTemplate(), FAILED, "Repeat start request");
             return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
         }
         if (PictureInPictureManager::IsAttachedPipWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
             PictureInPictureManager::RemoveCurrentPipController();
             PictureInPictureManager::SetCurrentPipController(thisController);
-            return ShowPictureInPictureWindow();
+            return ShowPictureInPictureWindow(startType);
         }
         PictureInPictureManager::DoClose(false);
     }
@@ -132,19 +162,28 @@ WMError PictureInPictureController::StartPictureInPicture()
     if (errCode != WMError::WM_OK) {
         PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
         WLOGFE("Create pip window failed");
+        SingletonContainer::Get<PiPReporter>()
+            .ReportPiPStartWindow(static_cast<int32_t>(startType),
+                                  pipOption_->GetPipTemplate(), FAILED, "Create pip window failed");
         return errCode;
     }
-    errCode = ShowPictureInPictureWindow();
+    errCode = ShowPictureInPictureWindow(startType);
     if (errCode != WMError::WM_OK) {
         PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
         WLOGFE("Show pip window failed");
+        SingletonContainer::Get<PiPReporter>()
+                .ReportPiPStartWindow(static_cast<int32_t>(startType),
+                                      pipOption_->GetPipTemplate(), FAILED, "Show pip window failed");
         return errCode;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STARTED);
+    SingletonContainer::Get<PiPReporter>()
+            .ReportPiPStartWindow(static_cast<int32_t>(startType),
+                                  pipOption_->GetPipTemplate(), SUCCESS, "start pip success");
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
+WMError PictureInPictureController::StopPictureInPicture(bool needAnim, StopPipType stopPipType)
 {
     WLOGI("StopPictureInPicture is called, needAnim: %{public}u", needAnim);
     if (pipLifeCycleListener_ != nullptr) {
@@ -152,20 +191,30 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
     }
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
+        SingletonContainer::Get<PiPReporter>()
+                .ReportPiPStopWindow(static_cast<int32_t>(stopPipType),
+                                     pipOption_->GetPipTemplate(), FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     if (PictureInPictureManager::GetPipWindowState() == PipWindowState::STATE_STOPPING) {
         WLOGFE("Repeat stop request");
+        SingletonContainer::Get<PiPReporter>()
+                .ReportPiPStopWindow(static_cast<int32_t>(stopPipType),
+                                     pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPING);
     window_->NotifyPrepareClosePiPWindow();
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this), currentStopType = stopPipType, currentPipOption = pipOption_]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
+            SingletonContainer::Get<PiPReporter>()
+                    .ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
+                                         currentPipOption->GetPipTemplate(), FAILED, "session is null");
             return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
         }
+        session->ResetExtController();
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
         if (ret != WmErrorCode::WM_OK) {
             PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_UNDEFINED);
@@ -174,16 +223,21 @@ WMError PictureInPictureController::StopPictureInPicture(bool needAnim)
             if (session->pipLifeCycleListener_ != nullptr) {
                 session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
             }
+            SingletonContainer::Get<PiPReporter>()
+                    .ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
+                                         currentPipOption->GetPipTemplate(), FAILED, "Window destroy failed");
             return WMError::WM_ERROR_PIP_DESTROY_FAILED;
         }
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        session->window_->UpdatePiPRect(0, 0, PiPRectUpdateReason::REASON_PIP_DESTROY_WINDOW);
         PictureInPictureManager::RemoveCurrentPipController();
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
         PictureInPictureManager::SetPipWindowState(PipWindowState::STATE_STOPPED);
+        SingletonContainer::Get<PiPReporter>()
+                .ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
+                                     currentPipOption->GetPipTemplate(), SUCCESS, "pip window stop success");
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
@@ -244,6 +298,7 @@ void PictureInPictureController::StartMove()
         WLOGFE("PiPWindow is not exist");
         return;
     }
+    SingletonContainer::Get<PiPReporter>().ReportPiPMove();
     window_->StartMove();
 }
 
@@ -279,6 +334,7 @@ void PictureInPictureController::DoActionEvent(std::string& actionName)
         WLOGFE("pipActionObserver is not registered");
         return;
     }
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(pipOption_->GetPipTemplate(), actionName);
     pipActionObserver_->OnActionEvent(actionName);
 }
 
@@ -288,21 +344,85 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         WLOGFE("window_ is nullptr");
         return;
     }
-    window_->RecoveryPullPiPMainWindow();
+    window_->RecoveryPullPiPMainWindow(windowRect_);
     auto stopPipTask = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return;
         }
-        session->StopPictureInPicture(false);
+        session->StopPictureInPicture(false, StopPipType::NULL_STOP);
     };
     if (handler_ == nullptr) {
         WLOGFE("handler is nullptr");
         return;
     }
     handler_->PostTask(stopPipTask, DELAY_ANIM);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     WLOGFI("restore pip main window finished");
+}
+
+void PictureInPictureController::UpdateXComponentPositionAndSize()
+{
+    float posX = 0;
+    float posY = 0;
+    float width = 0;
+    float height = 0;
+    mainWindowXComponentController_->GetGlobalPosition(posX, posY);
+    mainWindowXComponentController_->GetSize(width, height);
+    windowRect_.width_ = static_cast<uint32_t>(width);
+    windowRect_.height_ = static_cast<uint32_t>(height);
+    windowRect_.posX_ = static_cast<uint32_t>(posX);
+    windowRect_.posY_ = static_cast<uint32_t>(posY);
+
+    bool isFullScreen = mainWindow_->IsLayoutFullScreen();
+    if (!isFullScreen) {
+        // calculate status bar height as offset
+        WLOGFI("not full screen");
+        AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+        AvoidArea avoidArea;
+        mainWindow_->GetAvoidAreaByType(avoidAreaType, avoidArea);
+
+        uint32_t offset = avoidArea.topRect_.height_;
+        windowRect_.posY_ += offset;
+        WLOGFD("status bar height = %{public}d", offset);
+    }
+    WLOGFD("position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
+        windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
+}
+
+void PictureInPictureController::ResetExtController()
+{
+    if (mainWindowXComponentController_ != nullptr && pipXComponentController_ != nullptr) {
+        XComponentControllerErrorCode errorCode =
+                mainWindowXComponentController_->ResetExtController(pipXComponentController_);
+        if (errorCode != XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR) {
+            WLOGFE("swap xComponent failed, errorCode: %{public}u", errorCode);
+        }
+    }
+}
+
+WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
+{
+    pipXComponentController_ = xComponentController;
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    if (mainWindowXComponentController_ == nullptr || pipXComponentController_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    XComponentControllerErrorCode errorCode =
+        mainWindowXComponentController_->SetExtController(pipXComponentController_);
+    if (errorCode != XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR) {
+        WLOGFE("swap xComponent failed, errorCode: %{public}u", errorCode);
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    if (pipLifeCycleListener_ != nullptr) {
+        pipLifeCycleListener_->OnPictureInPictureStart();
+    }
+    return WMError::WM_OK;
 }
 
 void PictureInPictureController::SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener)

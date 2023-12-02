@@ -23,6 +23,7 @@
 
 #include "display_change_listener.h"
 #include "display_change_info.h"
+#include "dm_common.h"
 #include "session/screen/include/screen_session.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
@@ -53,7 +54,9 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChanged(bool& immersive) override;
-
+    void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds) override;
+    void UpdateAvailableArea(ScreenId screenId, DMRect area);
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
@@ -64,6 +67,8 @@ private:
         ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
+    void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;

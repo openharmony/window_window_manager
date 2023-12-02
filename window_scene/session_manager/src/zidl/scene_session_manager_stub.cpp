@@ -115,6 +115,15 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleUnregisterCollaborator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER),
         &SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+        &SceneSessionManagerStub::HandleRaiseWindowToTop),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
+        &SceneSessionManagerStub::HandleGetTopWindowId),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE),
+        &SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
+        &SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -186,7 +195,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessagePar
 
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleUpdateProperty!");
+    WLOGFD("run HandleUpdateProperty!");
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
@@ -194,7 +203,7 @@ int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessagePa
     } else {
         WLOGFW("Property not exist!");
     }
-    const WMError& ret = UpdateProperty(property, action);
+    const WMError& ret = UpdateSessionProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -410,7 +419,7 @@ int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleGetFocusSessionToken!");
+    WLOGFD("run HandleGetFocusSessionToken!");
     sptr<IRemoteObject> token = nullptr;
     const WSError& errCode = GetFocusSessionToken(token);
     reply.WriteRemoteObject(token);
@@ -531,7 +540,7 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
     WLOGFI("run HandleBindDialogTarget!");
     auto persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    const WSError& ret = BindDialogTarget(persistentId, remoteObject);
+    const WSError& ret = BindDialogSessionTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -642,6 +651,43 @@ int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParc
     bool haveAvoidAreaListener = data.ReadBool();
     WSError errCode = UpdateSessionTouchOutsideListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    WSError errCode = RaiseWindowToTop(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply)
+{
+    auto pid = data.ReadInt32();
+    auto uid = data.ReadInt32();
+    bool visible = data.ReadBool();
+    const WSError& ret = NotifyWindowExtensionVisibilityChange(pid, uid, visible);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t mainWinId = data.ReadUint32();
+    uint32_t topWinId;
+    const WMError& ret = GetTopWindowId(mainWinId, topWinId);
+    reply.WriteUint32(topWinId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistendId = data.ReadInt32();
+    bool haveListener = data.ReadBool();
+    WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

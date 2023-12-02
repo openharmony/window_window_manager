@@ -19,10 +19,12 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 
+#include "dm_common.h"
 #include "session/screen/include/screen_property.h"
 
 namespace OHOS::Rosen {
 bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound);
+bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect);
 napi_value NapiGetUndefined(napi_env env);
 bool NapiIsCallable(napi_env env, napi_value value);
 class JsScreenUtils {

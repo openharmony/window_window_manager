@@ -59,7 +59,7 @@ HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, Function | SmallTest | L
 {
     bool needPrintLog = true;
     bool result = SessionPermission::IsSystemServiceCalling(needPrintLog);
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(true, result);
 }
 
 /**

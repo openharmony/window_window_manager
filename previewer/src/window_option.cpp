@@ -223,6 +223,36 @@ void WindowOption::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
 }
+
+void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
+{
+    subWindowTitle_ = subWindowTitle;
+}
+
+std::string WindowOption::GetSubWindowTitle() const
+{
+    return subWindowTitle_;
+}
+
+void WindowOption::SetSubWindowDecorEnable(bool subWindowDecorEnable)
+{
+    subWindowDecorEnable_ = subWindowDecorEnable;
+}
+
+bool WindowOption::GetSubWindowDecorEnable() const
+{
+    return subWindowDecorEnable_;
+}
+
+void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
+{
+    onlySupportSceneBoard_ = onlySupportSceneBoard;
+}
+
+bool WindowOption::GetOnlySupportSceneBoard() const
+{
+    return onlySupportSceneBoard_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

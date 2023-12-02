@@ -28,7 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
-const std::string EXTENSION_SESSION_MANAGER_THREAD = "ExtensionSessionManager";
+const std::string EXTENSION_SESSION_MANAGER_THREAD = "OS_ExtensionSessionManager";
 std::recursive_mutex g_instanceMutex;
 } // namespace
 

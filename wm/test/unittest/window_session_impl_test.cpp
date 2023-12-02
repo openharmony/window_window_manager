@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "accessibility_event_info.h"
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
@@ -895,6 +896,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterTouchOutsideListener(listener7);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    IWindowVisibilityListenerSptr listener8 = nullptr;
+    res = window->RegisterWindowVisibilityChangeListener(listener8);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowVisibilityChangeListener(listener8);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
@@ -1267,7 +1274,7 @@ HWTEST_F(WindowSessionImplTest, SetAPPWindowIcon, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Notify02
- * @tc.desc: NotifyAvoidAreaChange NotifyPointerEvent NotifyTouchOutside
+ * @tc.desc: NotifyAvoidAreaChange NotifyPointerEvent NotifyTouchOutside NotifyWindowVisibility
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest, Notify02, Function | SmallTest | Level2)
@@ -1294,6 +1301,9 @@ HWTEST_F(WindowSessionImplTest, Notify02, Function | SmallTest | Level2)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     window->NotifyPointerEvent(pointerEvent);
     WSError res = window->NotifyTouchOutside();
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    res = window->NotifyWindowVisibility(true);
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: Notify02 end";
@@ -1480,6 +1490,25 @@ HWTEST_F(WindowSessionImplTest, GetFocusable, Function | SmallTest | Level2)
     bool ret = window->GetFocusable();
     ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetFocusabletest01 end";
+}
+
+
+/**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: TransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    Accessibility::AccessibilityEventInfo info;
+    vector<int32_t> uiExtensionIdLevelVec;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent end";
 }
 }
 } // namespace Rosen

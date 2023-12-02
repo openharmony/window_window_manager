@@ -38,7 +38,31 @@ namespace {
  * @brief Power state change reason.
  */
 enum class PowerStateChangeReason : uint32_t {
-    POWER_BUTTON,
+    POWER_BUTTON = 0,
+    STATE_CHANGE_REASON_INIT = 0,
+    STATE_CHANGE_REASON_TIMEOUT = 1,
+    STATE_CHANGE_REASON_RUNNING_LOCK = 2,
+    STATE_CHANGE_REASON_BATTERY = 3,
+    STATE_CHANGE_REASON_THERMAL = 4,
+    STATE_CHANGE_REASON_WORK = 5,
+    STATE_CHANGE_REASON_SYSTEM = 6,
+    STATE_CHANGE_REASON_APPLICATION = 10,
+    STATE_CHANGE_REASON_SETTINGS = 11,
+    STATE_CHANGE_REASON_HARD_KEY = 12,
+    STATE_CHANGE_REASON_TOUCH = 13,
+    STATE_CHANGE_REASON_CABLE = 14,
+    STATE_CHANGE_REASON_SENSOR = 15,
+    STATE_CHANGE_REASON_LID = 16,
+    STATE_CHANGE_REASON_CAMERA = 17,
+    STATE_CHANGE_REASON_ACCESS = 18,
+    STATE_CHANGE_REASON_RESET = 19,
+    STATE_CHANGE_REASON_POWER_KEY = 20,
+    STATE_CHANGE_REASON_KEYBOARD = 21,
+    STATE_CHANGE_REASON_MOUSE = 22,
+    STATE_CHANGE_REASON_DOUBLE_CLICK = 23,
+    STATE_CHANGE_REASON_COLLABORATION = 24,
+    STATE_CHANGE_REASON_REMOTE = 100,
+    STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
 
 /**
@@ -287,6 +311,42 @@ enum class FoldDisplayMode: uint32_t {
     MAIN = 2,
     SUB = 3,
     COORDINATION = 4,
+};
+
+
+/**
+ * @brief displayRect
+ */
+struct DMRect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+
+    bool operator==(const DMRect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool operator!=(const DMRect& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
+    bool IsInsideOf(const DMRect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+    static DMRect NONE()
+    {
+        return {0, 0, 0, 0};
+    }
 };
 }
 }

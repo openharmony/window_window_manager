@@ -18,6 +18,7 @@
 #include "window_manager_hilog.h"
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -67,6 +68,7 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 
@@ -184,6 +186,14 @@ void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
     property_.SetPhyBounds(phyBounds);
 }
 
+void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
+{
+    auto screenBounds = property_.GetBounds();
+    screenBounds.rect_.width_ = width;
+    screenBounds.rect_.height_ = height;
+    property_.SetBounds(screenBounds);
+}
+
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
 {
     return displayNode_;
@@ -223,6 +233,16 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
     }
 }
 
+void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnPowerStatusChange(event, status, reason);
+    }
+}
+
 float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
 {
     float rotation = 0.f;
@@ -256,9 +276,9 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::ScreenOrientationChange(Orientation orientation)
+void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
-    Rotation rotationAfter = CalcRotation(orientation);
+    Rotation rotationAfter = CalcRotation(orientation, foldDisplayMode);
     float screenRotation = ConvertRotationToFloat(rotationAfter);
     ScreenOrientationChange(screenRotation);
 }
@@ -290,23 +310,35 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
     return targetRotation;
 }
 
+void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
+{
+    updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
-    Rotation targetRotation = ConvertIntToRotation(rotation);
-    Rotation displayScreenRotation = targetRotation;
-    if (foldDisplayMode == FoldDisplayMode::FULL) {
-        // fold phone need fix 90 degree by remainder 360 degree
-        displayScreenRotation = ConvertIntToRotation((rotation + 90) % 360);
+    bool needUpdateToInputManager = false;
+    if (foldDisplayMode == FoldDisplayMode::FULL &&
+        property_.GetBounds() == bounds &&
+        property_.GetRotation() != static_cast<float>(rotation)) {
+        needUpdateToInputManager = true;
     }
+    Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(displayScreenRotation));
+    displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
+    }
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        int foldRotation = (rotation + 90) % 360;
+        updateToInputManagerCallback_(static_cast<float>(foldRotation));
+        WLOGFI("UpdatePropertyAfterRotation updateToInputManagerCallback_:%{public}d", foldRotation);
     }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
@@ -389,7 +421,7 @@ void ScreenSession::SetScreenType(ScreenType type)
     property_.SetScreenType(type);
 }
 
-Rotation ScreenSession::CalcRotation(Orientation orientation) const
+Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const
 {
     sptr<SupportedScreenModes> info = GetActiveScreenMode();
     if (info == nullptr) {
@@ -397,6 +429,9 @@ Rotation ScreenSession::CalcRotation(Orientation orientation) const
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
+        isVerticalScreen = info->width_ > info->height_;
+    }
     switch (orientation) {
         case Orientation::UNSPECIFIED: {
             return Rotation::ROTATION_0;
@@ -594,6 +629,130 @@ DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
 DMError ScreenSession::SetScreenColorTransform()
 {
     WLOGI("SetScreenColorTransform ok! rsId %{public}" PRIu64"", rsId_);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetPixelFormat(GraphicPixelFormat& pixelFormat)
+{
+    auto ret = RSInterfaces::GetInstance().GetPixelFormat(rsId_, pixelFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetPixelFormat ok! rsId %{public}" PRIu64 ", pixelFormat %{public}u",
+        rsId_, static_cast<uint32_t>(pixelFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetPixelFormat(GraphicPixelFormat pixelFormat)
+{
+    if (pixelFormat > GRAPHIC_PIXEL_FMT_VENDER_MASK) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetPixelFormat(rsId_, pixelFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetPixelFormat ok! rsId %{public}" PRIu64 ", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(pixelFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(rsId_, hdrFormats);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SCB: ScreenSession::GetSupportedHDRFormats fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+            rsId_, ret);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SCB: ScreenSession::GetSupportedHDRFormats ok! rsId %{public}" PRIu64 ", size %{public}u",
+        rsId_, static_cast<uint32_t>(hdrFormats.size()));
+
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenHDRFormat(rsId_, hdrFormat);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenHDRFormat ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, static_cast<uint32_t>(hdrFormat));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
+{
+    std::vector<ScreenHDRFormat> hdrFormats;
+    DMError res = GetSupportedHDRFormats(hdrFormats);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return res;
+    }
+    if (modeIdx < 0 || modeIdx >= static_cast<int32_t>(hdrFormats.size())) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64 " modeIdx %{public}d invalid.",
+            rsId_, modeIdx);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetScreenHDRFormat(rsId_, modeIdx);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}u",
+        rsId_, modeIdx);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(rsId_, colorSpaces);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SCB: ScreenSession::GetSupportedColorSpaces fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+            rsId_, ret);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SCB: ScreenSession::GetSupportedColorSpaces ok! rsId %{public}" PRIu64 ", size %{public}u",
+        rsId_, static_cast<uint32_t>(colorSpaces.size()));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenColorSpace(rsId_, colorSpace);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, static_cast<uint32_t>(colorSpace));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
+{
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    DMError res = GetSupportedColorSpaces(colorSpaces);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return res;
+    }
+    if (colorSpace < 0 || static_cast<int32_t>(colorSpace) >= static_cast<int32_t>(colorSpaces.size())) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64 " colorSpace %{public}d invalid.",
+            rsId_, colorSpace);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetScreenColorSpace(rsId_, colorSpace);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
+        rsId_, colorSpace);
     return DMError::DM_OK;
 }
 
@@ -833,5 +992,24 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
     }
+}
+
+bool ScreenSession::UpdateAvailableArea(DMRect area)
+{
+    if (property_.GetAvailableArea() == area) {
+        return false;
+    }
+    property_.SetAvailableArea(area);
+    return true;
+}
+
+void ScreenSession::SetAvailableArea(DMRect area)
+{
+    property_.SetAvailableArea(area);
+}
+
+DMRect ScreenSession::GetAvailableArea()
+{
+    return property_.GetAvailableArea();
 }
 } // namespace OHOS::Rosen

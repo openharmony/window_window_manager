@@ -36,6 +36,12 @@ config("libwm_public_config") {
 
 ## Build libwm_static.a
 ohos_static_library("libwm_static") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   include_dirs = [
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
@@ -97,6 +103,7 @@ ohos_static_library("libwm_static") {
     "ability_runtime:app_manager",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -160,6 +167,12 @@ ohos_static_library("libwm_static") {
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   include_dirs = [
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
@@ -221,6 +234,7 @@ ohos_shared_library("libwm") {
     "ability_runtime:app_manager",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",

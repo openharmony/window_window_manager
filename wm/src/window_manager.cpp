@@ -52,6 +52,8 @@ public:
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
+        windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
@@ -67,6 +69,8 @@ public:
     sptr<WindowManagerAgent> windowUpdateListenerAgent_;
     std::vector<sptr<IVisibilityChangedListener>> windowVisibilityListeners_;
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
+    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
+    sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
@@ -162,6 +166,20 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
     for (auto& listener : visibilityChangeListeners) {
         WLOGD("Notify WindowVisibilityInfo to caller");
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
+{
+    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowDrawingContentChangeListeners = windowDrawingContentListeners_;
+    }
+    for (auto& listener : windowDrawingContentChangeListeners) {
+        WLOGFD("Notify windowDrawingContentInfo to caller");
+        listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
     }
 }
 
@@ -685,6 +703,12 @@ void WindowManager::UpdateWindowVisibilityInfo(
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
 
+void WindowManager::UpdateWindowDrawingContentInfo(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const
+{
+    pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
+}
+
 WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(infos);
@@ -730,6 +754,14 @@ WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
     return ret;
 }
 
+WMError WindowManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyWindowExtensionVisibilityChange(pid, uid, visible);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("notify WindowExtension visibility change failed");
+    }
+    return ret;
+}
 
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
@@ -761,5 +793,68 @@ void WindowManager::OnRemoteDied()
     pImpl_->windowVisibilityListenerAgent_ = nullptr;
     pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
 }
+
+WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("raise window to top failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowDrawingContentListenerAgent_ == nullptr) {
+        pImpl_->windowDrawingContentListenerAgent_ = new WindowManagerAgent();
+        ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
+            pImpl_->windowDrawingContentListenerAgent_);
+    }
+    if (ret != WMError::WM_OK) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->windowDrawingContentListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowDrawingContentListeners_.begin(),
+            pImpl_->windowDrawingContentListeners_.end(), listener);
+        if (iter != pImpl_->windowDrawingContentListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowDrawingContentListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowDrawingContentListeners_.erase(std::remove_if(pImpl_->windowDrawingContentListeners_.begin(),
+        pImpl_->windowDrawingContentListeners_.end(),
+        [listener](sptr<IDrawingContentChangedListener> registeredListener) { return registeredListener == listener; }),
+        pImpl_->windowDrawingContentListeners_.end());
+
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowDrawingContentListeners_.empty() && pImpl_->windowDrawingContentListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
+            pImpl_->windowDrawingContentListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowDrawingContentListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS

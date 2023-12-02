@@ -22,7 +22,7 @@
 #include <ipc_types.h>
 #include "want.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
-
+#include "accessibility_event_info_parcel.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -32,12 +32,16 @@ namespace {
 const std::string UNDEFINED = "undefined";
 }
 
+namespace OHOS::Accessibility {
+class AccessibilityEventInfo;
+}
 class SessionStubTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     sptr<SessionStub> session_ = nullptr;
 };
@@ -119,10 +123,6 @@ HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleCreateAndConnectSpecificSession(data, reply);
-    ASSERT_EQ(5, res);
-    res = session_->HandleDestroyAndDisconnectSpecificSession(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleRaiseToAppTop(data, reply);
     ASSERT_EQ(0, res);
 }
@@ -173,6 +173,27 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityEvent
+ * @tc.desc: sessionStub HandleTransferAccessibilityEvent
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    Accessibility::AccessibilityEventInfo info;
+    AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+
+    std::vector<int32_t> uiExtensionIdLevelVec;
+    data.WriteInt32Vector(uiExtensionIdLevelVec);
+    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
 }
 }
 } // namespace Rosen

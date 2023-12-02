@@ -24,11 +24,25 @@ namespace OHOS::Rosen {
  *
  * @brief Visibility state of a window
  */
-enum WindowVisibilityState {
+enum WindowVisibilityState : uint32_t {
     WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
     WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
     WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WINDOW_VISIBILITY_STATE_MAX
+    WINDOW_LAYER_STATE_MAX
+};
+
+/**
+ * @enum WindowLayerState
+ *
+ * @brief Layer state of a window
+ */
+enum WindowLayerState {
+    WINDOW_ALL_VISIBLE = 0,
+    WINDOW_SEMI_VISIBLE,
+    WINDOW_IN_VISIBLE,
+    WINDOW_LAYER_DRAWING,
+    WINDOW_LAYER_NO_DRAWING,
+    WINDOW_LAYER_UNKNOWN_STATE,
 };
 
 /**
@@ -77,7 +91,7 @@ public:
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
-    WindowVisibilityState visibilityState_ = WINDOW_VISIBILITY_STATE_MAX;
+    WindowVisibilityState visibilityState_ = WINDOW_LAYER_STATE_MAX;
     WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
 };
 } // namespace OHOS::Rosen

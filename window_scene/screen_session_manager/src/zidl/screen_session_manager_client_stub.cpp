@@ -27,6 +27,8 @@ const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSession
         &ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnPropertyChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED),
+        &ScreenSessionManagerClientStub::HandleOnPowerStatusChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnSensorRotationChanged },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED),
@@ -39,6 +41,8 @@ const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSession
         &ScreenSessionManagerClientStub::HandleOnScreenshot },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED),
         &ScreenSessionManagerClientStub::HandleOnImmersiveStateChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID),
+        &ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChanged },
 };
 
 int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -83,6 +87,16 @@ int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data,
     return ERR_NONE;
 }
 
+int ScreenSessionManagerClientStub::HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnPowerStatusChanged");
+    auto event = static_cast<DisplayPowerEvent>(data.ReadUint32());
+    auto status = static_cast<EventStatus>(data.ReadUint32());
+    auto reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    OnPowerStatusChanged(event, status, reason);
+    return ERR_NONE;
+}
+
 int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleOnSensorRotationChanged");
@@ -124,6 +138,17 @@ int ScreenSessionManagerClientStub::HandleOnDisplayStateChanged(MessageParcel& d
     }
     auto type = static_cast<DisplayStateChangeType>(data.ReadUint32());
     OnDisplayStateChanged(defaultDisplayId, displayInfo, displayInfoMap, type);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(MessageParcel& data,
+    MessageParcel& reply)
+{
+    std::vector<uint64_t> missionIds;
+    data.ReadUInt64Vector(&missionIds);
+    std::vector<uint64_t> surfaceNodeIds;
+    data.ReadUInt64Vector(&surfaceNodeIds);
+    OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
     return ERR_NONE;
 }
 
