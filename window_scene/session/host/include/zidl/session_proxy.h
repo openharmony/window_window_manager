@@ -54,6 +54,7 @@ public:
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+    WSError RaiseAppMainWindowToTop() override;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
