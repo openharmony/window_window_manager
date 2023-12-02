@@ -297,8 +297,6 @@ public:
     void PendingClose();
 
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
-    virtual WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
-    virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
 private:
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
@@ -421,18 +419,6 @@ private:
     {
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         return dialogDeathRecipientListener_[GetWindowId()];
-    }
-    template<typename T>
-    inline EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners()
-    {
-        std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : windowStatusChangeListeners_[GetWindowId()]) {
-                windowStatusChangeListeners.push_back(listener);
-            }
-        }
-        return windowStatusChangeListeners;
     }
     inline void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
@@ -634,7 +620,6 @@ private:
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
-    static std::map<uint32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
 
     sptr<MoveDragProperty> moveDragProperty_;
     SystemConfig windowSystemConfig_;
