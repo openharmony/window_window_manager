@@ -149,6 +149,10 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
     std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
     OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
+        WLOGFE("Write surfaceNodeIds failed");
+        return ERR_TRANSACTION_FAILED;
+    }
     return ERR_NONE;
 }
 
