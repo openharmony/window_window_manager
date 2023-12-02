@@ -1939,8 +1939,8 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
         WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
 
-    auto windowChangeListeners = GetListeners<IWindowStatusChangeListener>();
-    for (auto& listener : windowChangeListeners) {
+    auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
+    for (auto& listener : windowStatusChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowStatusChange(WindowStatus);
         }
