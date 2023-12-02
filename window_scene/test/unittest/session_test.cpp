@@ -1132,6 +1132,30 @@ HWTEST_F(WindowSessionTest, SetTouchable02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSessionInfoLockedState01
+ * @tc.desc: IsSessionValid() return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoLockedState01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSessionInfoLockedState(false)
+    ASSERT_EQ(false, sessionInfo_.lockedState);
+}
+
+/**
+ * @tc.name: SetSessionInfoLockedState02
+ * @tc.desc: IsSessionValid() return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoLockedState02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSessionInfoLockedState(true)
+    ASSERT_EQ(true, sessionInfo_.lockedState);
+}
+
+/**
  * @tc.name: GetCallingPid
  * @tc.desc: GetCallingPid Test
  * @tc.type: FUNC
@@ -1846,6 +1870,24 @@ HWTEST_F(WindowSessionTest, SetSessionTouchableChangeListener, Function | SmallT
 
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+/**
+ * @tc.name: SetSessionInfoLockedStateChangeListener
+ * @tc.desc: SetSessionInfoLockedStateChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoLockedStateChangeListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    NotifySessionTouchableChangeFunc func = [](const bool lockedState)
+    {
+    };
+    session_->SetSessionInfoLockedStateChangeListener(func);
+
+    session_->SetSessionInfoLockedState(true)
+    ASSERT_EQ(true, sessionInfo_.lockedState);
 }
 
 /**
