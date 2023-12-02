@@ -20,6 +20,7 @@
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
 #include "key_event.h"
+#include "accessibility_event_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2190,6 +2191,20 @@ HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, Function | SmallT
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowVisibilityChangeListener(nullptr));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    Accessibility::AccessibilityEventInfo info;
+    vector<int32_t> uiExtensionIdLevelVec;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
 }
 }
 } // namespace Rosen

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "accessibility_event_info.h"
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
@@ -1491,6 +1492,24 @@ HWTEST_F(WindowSessionImplTest, GetFocusable, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetFocusabletest01 end";
 }
 
+
+/**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: TransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    Accessibility::AccessibilityEventInfo info;
+    vector<int32_t> uiExtensionIdLevelVec;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

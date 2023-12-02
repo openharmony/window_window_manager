@@ -679,6 +679,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/utils/include",
 
     "${accessibility_path}/interfaces/innerkits/common/include/",
+    "${window_base_path}/window_scene/session/container/include/parcel/",
   ]
 }
 
@@ -717,6 +718,7 @@ ohos_static_library("ws_unittest_common") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",
