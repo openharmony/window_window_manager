@@ -124,13 +124,17 @@ ScreenSessionManager::ScreenSessionManager()
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
-    
+
     appAnrListener_ = new (std::nothrow) AppAnrListener();
-    if(appAnrListener_ == nullptr) {
-        WLOGEI("AppAnrListener is nullptr");
+
+    auto ret = static_cast<int32_t>(DelayedSingleton<AppExecFwk::AppMgrClient>::
+        GetInstance()->RegisterAppDebugListener(appAnrListener_));
+
+    if (ret != ERR_OK) {
+        WLOGFI("Register app debug listener failed.");
+    } else {
+        WLOGFI("Register app debug listener success.");
     }
-    
-    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->RegisterAppDebugListener(appAnrListener_);
 }
 
 void ScreenSessionManager::Init()
@@ -3112,6 +3116,4 @@ void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo
     }
     DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
-
-void AppAnrListener::ASObject() {return nullptr;}
 } // namespace OHOS::Rosen
