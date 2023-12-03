@@ -30,18 +30,9 @@
 #include "screen.h"
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
-#include "app_debug_listener_interface.h"
-#include "app_mgr_client.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
-
-class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
-public:
-    void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
-
-    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
-};
 
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
 DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
@@ -303,7 +294,6 @@ private:
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
     sptr<FoldScreenController> foldScreenController_;
-    sptr<AppAnrListener> appAnrListener_;
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
