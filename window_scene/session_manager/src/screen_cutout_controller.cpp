@@ -322,5 +322,4 @@ uint32_t ScreenCutoutController::GetOffsetY()
 {
     return offsetY_;
 }
-
 } // namespace OHOS::Rosen
