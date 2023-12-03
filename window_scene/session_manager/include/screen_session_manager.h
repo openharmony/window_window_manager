@@ -39,9 +39,8 @@ class RSInterfaces;
 class AppAnrListener : public AppExecFwk::IAppDebugListener {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
-    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
 
-    sptr<IRemoteObject> ASObject() override;
+    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
 };
 
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
