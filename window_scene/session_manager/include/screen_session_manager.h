@@ -36,7 +36,7 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
-class AppAnrListener : public AppExecFwk::IAppDebugListener {
+class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
 
