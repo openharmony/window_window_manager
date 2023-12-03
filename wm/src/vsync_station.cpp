@@ -131,7 +131,7 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
     }
     for (const auto& callback: vsyncCallbacks) {
-        if (callback) {
+        if (callback && callback->onCallback) {
             callback->onCallback(timestamp);
         }
     }

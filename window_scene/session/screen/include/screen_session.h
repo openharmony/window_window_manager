@@ -78,6 +78,7 @@ public:
     void SetRotation(Rotation rotation);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
+    void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenType(ScreenType type);
@@ -159,6 +160,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::function<void(float)> updateToInputManagerCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {

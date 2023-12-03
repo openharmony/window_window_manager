@@ -277,6 +277,17 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
+
+/**
+ * @tc.name: NotifyWindowVisibility
+ * @tc.desc: test function : NotifyWindowVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifyWindowVisibility(true);
+}
 }
 }
 }

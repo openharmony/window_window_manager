@@ -29,25 +29,6 @@
 namespace OHOS {
 namespace Rosen {
 
-struct WindowLimits {
-    uint32_t maxWidth_;
-    uint32_t maxHeight_;
-    uint32_t minWidth_;
-    uint32_t minHeight_;
-    float maxRatio_;
-    float minRatio_;
-    WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
-        minRatio_(0.0f) {}
-    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
-        float minRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth), minHeight_(minHeight),
-        maxRatio_(maxRatio), minRatio_(minRatio) {}
-
-    bool IsEmpty() const
-    {
-        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
-    }
-};
-
 class WindowSessionProperty : public Parcelable {
 public:
     WindowSessionProperty() = default;
@@ -93,6 +74,7 @@ public:
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetNeedKeepKeyboard(bool isNeedKeepKeyboard);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
+    void SetCallingWindow(uint32_t windowId);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -132,6 +114,7 @@ public:
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     bool IsNeedKeepKeyboard() const;
+    uint32_t GetCallingWindow() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -145,8 +128,6 @@ public:
 
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
-    void SetDrawingContentState(bool drawingContentState);
-    bool GetDrawingContentState() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -192,10 +173,10 @@ private:
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
     bool isNeedKeepKeyboard_ = false;
+    uint32_t callingWindowId_ = INVALID_WINDOW_ID;
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
-    bool drawingContentState_ = false;
     bool isNeedUpdateWindowMode_ = false;
 };
 

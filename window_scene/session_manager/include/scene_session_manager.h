@@ -78,6 +78,7 @@ using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessShowPiPMainWindowFunc = std::function<void(int32_t persistentId)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
+using ProcessCallingWindowIdChangeFunc = std::function<void(uint32_t callingWindowId)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -131,6 +132,7 @@ public:
     void SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetShowPiPMainWindowListener(const ProcessShowPiPMainWindowFunc& func);
+    void SetCallingWindowIdChangeListenser(const ProcessCallingWindowIdChangeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -247,13 +249,10 @@ public:
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
-
+    void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos);
+    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
-    void DealwithVisibilityChange(bool isVisible, uint64_t& surfaceId, WindowVisibilityState& visibleState,
-        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
-    void DealwithDrawingContentChange(uint64_t& surfaceId, WindowVisibilityState& visibleState,
-        WindowVisibilityInfo& windowVisibilityInfo);
-
+    WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -349,8 +348,13 @@ private:
     bool FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
         const sptr<SceneSession>& sceneSession);
     std::vector<std::pair<uint64_t, WindowVisibilityState>> GetWindowVisibilityChangeInfo(
-        std::shared_ptr<RSOcclusionData> occlusionData);
-    void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
+        std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
+        std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
+    void GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusionData,
+        std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
+        std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
+    void WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
     sptr<SceneSession> SelectSesssionFromMap(const uint64_t& surfaceId);
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession);
@@ -391,6 +395,7 @@ private:
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
+    std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
@@ -404,6 +409,7 @@ private:
     NotifySCBAfterUpdateFocusFunc notifySCBAfterFocusedFunc_;
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
     ProcessShowPiPMainWindowFunc showPiPMainWindowFunc_;
+    ProcessCallingWindowIdChangeFunc callingWindowIdChangeFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
@@ -481,9 +487,9 @@ private:
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
-
+    bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
+    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
-    void UpdateWindowDrawingContentInfo(const sptr<SceneSession>& sceneSession, const WindowDrawingContentInfo& info);
 };
 } // namespace OHOS::Rosen
 

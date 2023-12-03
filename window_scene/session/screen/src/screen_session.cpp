@@ -310,18 +310,38 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
     return targetRotation;
 }
 
+void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
+{
+    updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    bool needUpdateToInputManager = false;
+    if (foldDisplayMode == FoldDisplayMode::FULL &&
+        property_.GetBounds() == bounds &&
+        property_.GetRotation() != static_cast<float>(rotation)) {
+        needUpdateToInputManager = true;
+    }
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
+        transactionProxy->Begin();
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+        transactionProxy->Commit();
+    } else {
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+    }
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        int foldRotation = (rotation + 90) % 360;
+        updateToInputManagerCallback_(static_cast<float>(foldRotation));
+        WLOGFI("UpdatePropertyAfterRotation updateToInputManagerCallback_:%{public}d", foldRotation);
     }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),

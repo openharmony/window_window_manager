@@ -44,7 +44,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
-const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
+const std::string SCREEN_SESSION_MANAGER_THREAD = "OS_ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const int SLEEP_US = 48 * 1000; // 48ms
@@ -289,7 +289,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         WLOGFE("screenSession is nullptr");
         return;
     }
-    //if SetDisplayMode failed, try again
+    // If SetDisplayMode failed, try again
     if (foldScreenController_ != nullptr && foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
         auto foldStatus = GetFoldStatus();
         switch (foldStatus) {

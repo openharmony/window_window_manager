@@ -109,6 +109,13 @@ napi_value JsWindowStage::CreateSubWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnCreateSubWindow(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]CreateSubWindowWithOptions");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
+}
+
 napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]GetSubWindow");
@@ -575,6 +582,79 @@ napi_value JsWindowStage::OnDisableWindowDecor(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    std::string windowName;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (!ConvertFromJsValue(env, argv[0], windowName)) {
+        WLOGFE("[NAPI]Failed to convert parameter to windowName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    WindowOption option;
+    if (!ParseSubWindowOptions(env, argv[1], option)) {
+        WLOGFE("[NAPI]get invalid options param");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr) {
+                WLOGFE("[NAPI]Window scene is null");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption(option);
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            windowOption->SetOnlySupportSceneBoard(true);
+            auto window = weakScene->CreateWindow(windowName, windowOption);
+            if (window == nullptr) {
+                WLOGFE("[NAPI]Get window failed");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "Get window failed"));
+                return;
+            }
+            task.Resolve(env, CreateJsWindowObject(env, window));
+            WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
+        };
+    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowStage::OnCreateSubWindowWithOptions",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
+{
+    if (jsObject == nullptr) {
+        WLOGFW("jsObject is null");
+        return true;
+    }
+
+    std::string title;
+    if (ParseJsValue(jsObject, env, "title", title)) {
+        option.SetSubWindowTitle(title);
+    } else {
+        WLOGFE("Failed to convert parameter to title");
+        return false;
+    }
+
+    bool decorEnable;
+    if (ParseJsValue(jsObject, env, "decorEnable", decorEnable)) {
+        option.SetSubWindowDecorEnable(decorEnable);
+    } else {
+        WLOGFE("Failed to convert parameter to decorEnable");
+        return false;
+    }
+
+    return true;
+}
+
 napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene)
 {
     WLOGFD("[NAPI]CreateJsWindowStage");
@@ -599,6 +679,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "getWindowMode", moduleName, JsWindowStage::GetWindowMode);
     BindNativeFunction(env,
         objValue, "createSubWindow", moduleName, JsWindowStage::CreateSubWindow);
+    BindNativeFunction(env,
+        objValue, "createSubWindowWithOptions", moduleName, JsWindowStage::CreateSubWindowWithOptions);
     BindNativeFunction(env,
         objValue, "getSubWindow", moduleName, JsWindowStage::GetSubWindow);
     BindNativeFunction(env, objValue, "on", moduleName, JsWindowStage::On);

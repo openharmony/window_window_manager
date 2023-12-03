@@ -2972,6 +2972,19 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionBackground, Function | SmallTest 
     bool isFromInnerkits = true;
     scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
+
+/**
+ * @tc.name: UpdateSessionWindowVisibilityListener
+ * @tc.desc: SceneSesionManager update window visibility listener
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateSessionWindowVisibilityListener, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    bool haveListener = true;
+    WSError result = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -31,6 +31,7 @@
 #include "util.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "parameters.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -386,6 +387,17 @@ bool Session::GetVisible() const
     return isRSVisible_;
 }
 
+WSError Session::SetDrawingContentState(bool isRSDrawing)
+{
+    isRSDrawing_ = isRSDrawing;
+    return WSError::WS_OK;
+}
+
+bool Session::GetDrawingContentState() const
+{
+    return isRSDrawing_;
+}
+
 int32_t Session::GetWindowId() const
 {
     return GetPersistentId();
@@ -569,8 +581,9 @@ void Session::UpdatePointerArea(const WSRect& rect)
     if (IsSystemSession()) {
         return;
     }
-    if (!(GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-         GetWindowMode()== WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!((GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            (WindowHelper::IsSubWindow(GetWindowType()) && property_->IsDecorEnable())) &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
         return;
     }
     if (preRect_ == rect) {
@@ -640,14 +653,15 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
-    WLOGFI("[WMSCom] Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
+    WLOGFI("[WMSLife] Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating);
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
-        WLOGFE("state is not disconnect!");
+        WLOGFE("[WMSLife]state is not disconnect state:%{public}u id:%{public}u!",
+            GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("session stage or eventChannel is nullptr");
+        WLOGFE("[WMSLife]session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
@@ -671,7 +685,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
         UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     } else {
-        NotifyClientToUpdateRect();
+        NotifyClientToUpdateRect(nullptr);
     }
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
@@ -1169,7 +1183,9 @@ bool Session::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>
     bool isSystemWindow = GetSessionInfo().isSystem_;
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    if (!isSystemWindow && WindowHelper::IsMainWindow(windowType) &&
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (!isSystemWindow &&
+        (WindowHelper::IsMainWindow(windowType) || (WindowHelper::IsSubWindow(windowType) && isPC)) &&
         sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
@@ -1855,6 +1871,7 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         mode = MaximizeMode::MODE_FULL_FILL;
     }
+    property_->SetMaximizeMode(mode);
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 

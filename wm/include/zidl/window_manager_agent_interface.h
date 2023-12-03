@@ -27,6 +27,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
     WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
     WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
@@ -41,6 +42,7 @@ public:
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
         TRANS_ID_UPDATE_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY,
+        TRANS_ID_UPDATE_WINDOW_DRAWING_STATE,
         TRANS_ID_UPDATE_CAMERA_FLOAT,
         TRANS_ID_UPDATE_WATER_MARK_FLAG,
         TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
@@ -51,6 +53,8 @@ public:
     virtual void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) = 0;
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
+    virtual void UpdateWindowDrawingContentInfo(
+        const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWaterMarkFlagChangedResult(bool isShowing) = 0;
     virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;

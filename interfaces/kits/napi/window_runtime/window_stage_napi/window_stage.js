@@ -46,6 +46,10 @@ class WindowStage {
     return this.__window_stage__.createSubWindow(windowName, asyncCallback);
   }
 
+  createSubWindowWithOptions(windowName, options, asyncCallback) {
+    return this.__window_stage__.createSubWindowWithOptions(windowName, options, asyncCallback);
+  }
+
   getSubWindow(asyncCallback) {
     return this.__window_stage__.getSubWindow(asyncCallback);
   }

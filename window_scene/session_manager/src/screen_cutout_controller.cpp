@@ -57,7 +57,13 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     }
 
     Rotation currentRotation = displayInfo->GetRotation();
-    std::vector<DMRect> displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect();
+    std::vector<DMRect> displayBoundaryRects;
+    if (ScreenSessionManager::GetInstance().IsFoldable() &&
+        (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
+        displayBoundaryRects = {{ 507, 18, 66, 66}}; // x:507, y:18, w:66, h:66
+    } else {
+        displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect();
+    }
     CheckBoundaryRects(displayBoundaryRects, displayInfo);
     if (currentRotation == Rotation::ROTATION_0) {
         boundaryRects = displayBoundaryRects;
@@ -316,4 +322,5 @@ uint32_t ScreenCutoutController::GetOffsetY()
 {
     return offsetY_;
 }
+
 } // namespace OHOS::Rosen

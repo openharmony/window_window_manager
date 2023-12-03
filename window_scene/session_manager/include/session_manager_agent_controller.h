@@ -21,6 +21,7 @@
 #include "wm_single_instance.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_visibility_info.h"
+#include "window_drawing_content_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -38,6 +39,7 @@ public:
         WindowUpdateType type);
     void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void UpdateWindowDrawingContentInfo(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos);
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;
