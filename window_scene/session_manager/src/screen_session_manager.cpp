@@ -40,7 +40,6 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
-#include "anr_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -124,15 +123,6 @@ ScreenSessionManager::ScreenSessionManager()
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
-
-    appAnrListener_ = new (std::nothrow) AppAnrListener();
-    auto ret = static_cast<int32_t>(DelayedSingleton<AppExecFwk::AppMgrClient>::
-        GetInstance()->RegisterAppDebugListener(appAnrListener_));
-    if (ret != ERR_OK) {
-        WLOGFI("Register app debug listener failed.");
-    } else {
-        WLOGFI("Register app debug listener success.");
-    }
 }
 
 void ScreenSessionManager::Init()
@@ -3093,25 +3083,5 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         return;
     }
     NotifyAvailableAreaChanged(area);
-}
-
-void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
-{
-    WLOGFI("AppAnrListener OnAppDebugStarted");
-    if (debugInfos.empty()) {
-        WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
-        return;
-    }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
-}
-
-void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
-{
-    WLOGFI("AppAnrListener OnAppDebugStoped");
-    if (debugInfos.empty()) {
-        WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
-        return;
-    }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 } // namespace OHOS::Rosen

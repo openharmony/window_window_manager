@@ -37,6 +37,8 @@
 #include "display_info.h"
 #include "display_change_info.h"
 #include "display_change_listener.h"
+#include "app_debug_listener_interface.h"
+#include "app_mgr_client.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -76,6 +78,13 @@ using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessShowPiPMainWindowFunc = std::function<void(int32_t persistentId)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
+
+class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
+public:
+    void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
+
+    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
+};
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -413,6 +422,7 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    sptr<AppAnrListener> appAnrListener_;
 
     bool isAINavigationBarVisible_ = false;
     WSRect currAINavigationBarArea_;
