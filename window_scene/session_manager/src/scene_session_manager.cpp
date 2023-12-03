@@ -220,7 +220,6 @@ void SceneSessionManager::Init()
 
     appAnrListener_ = new (std::nothrow) AppAnrListener();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
     } else {

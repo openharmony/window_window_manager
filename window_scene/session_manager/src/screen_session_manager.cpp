@@ -3084,4 +3084,5 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
     }
     NotifyAvailableAreaChanged(area);
 }
+
 } // namespace OHOS::Rosen
