@@ -289,7 +289,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         WLOGFE("screenSession is nullptr");
         return;
     }
-    //if SetDisplayMode failed, try again
+    // If SetDisplayMode failed, try again
     if (foldScreenController_ != nullptr && foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
         auto foldStatus = GetFoldStatus();
         switch (foldStatus) {
