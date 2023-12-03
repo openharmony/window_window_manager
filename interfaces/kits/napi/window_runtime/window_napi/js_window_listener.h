@@ -45,6 +45,7 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
+const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -56,7 +57,9 @@ class JsWindowListener : public IWindowChangeListener,
                          public IDialogTargetTouchListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
-                         public IGestureNavigationEnabledChangedListener {
+                         public IGestureNavigationEnabledChangedListener,
+                         public IWindowVisibilityChangedListener,
+                         public IWindowStatusChangeListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -83,6 +86,7 @@ public:
     void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowStatusChange(WindowStatus status) override;
+    void OnWindowVisibilityChangedCallback(const bool isVisible) override;
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;

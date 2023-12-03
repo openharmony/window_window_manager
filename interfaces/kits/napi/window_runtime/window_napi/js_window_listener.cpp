@@ -63,7 +63,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_) {
+    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
         WLOGFD("[NAPI]no need to change size");
         return;
     }
@@ -419,6 +419,26 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowStatusChange",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
+{
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("This listener or eng is nullptr");
+                return;
+            }
+            napi_value argv[] = { CreateJsValue(eng, isVisible) };
+            thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS

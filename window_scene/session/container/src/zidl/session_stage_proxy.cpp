@@ -376,6 +376,29 @@ WSError SessionStageProxy::NotifyTouchOutside()
     return WSError::WS_OK;
 }
 
+WSError SessionStageProxy::NotifyWindowVisibility(bool isVisible)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isVisible)) {
+        WLOGFE("Write window visible failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t messageCode = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE);
+    if (Remote()->SendRequest(messageCode, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionStageProxy::UpdateWindowMode(WindowMode mode)
 {
     MessageParcel data;
@@ -546,40 +569,4 @@ WSError SessionStageProxy::UpdateTitleInTargetPos(bool isShow, int32_t height)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
-
-void SessionStageProxy::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint32(info.windowId_)) {
-        WLOGFE("Write windowId failed");
-        return;
-    }
-    if (!data.WriteInt32(info.pid_)) {
-        WLOGFE("Write pid failed");
-        return;
-    }
-    if (!data.WriteInt32(info.uid_)) {
-        WLOGFE("Write uid failed");
-        return;
-    }
-    if (!data.WriteBool(info.drawingContentState_)) {
-        WLOGFE("Write drawingContentState failed");
-        return ;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(info.windowType_))) {
-        WLOGFE("Write windowType failed");
-        return;
-    }
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest UpdateWindowDrawingContentInfo failed");
-    }
-}
-
 } // namespace OHOS::Rosen

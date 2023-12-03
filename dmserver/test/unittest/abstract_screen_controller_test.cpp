@@ -952,6 +952,28 @@ HWTEST_F(AbstractScreenControllerTest, ProcessDefaultScreenReconnected02, Functi
     absController_->defaultRsScreenId_ = 1;
     absController_->ProcessDefaultScreenReconnected(rsScreenId);
 }
+
+/**
+ * @tc.name: ConvertToRsScreenId
+ * @tc.desc: ConvertToRsScreenId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ConvertToRsScreenId, Function | SmallTest | Level3)
+{
+    ScreenId dmsScreenId = 6;
+    ASSERT_TRUE(absController_->screenIdManager_.ConvertToRsScreenId(dmsScreenId));
+}
+
+/**
+ * @tc.name: ConvertToDmsScreenId
+ * @tc.desc: ConvertToDmsScreenId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ConvertToDmsScreenId, Function | SmallTest | Level3)
+{
+    ScreenId rsScreenId = 7;
+    ASSERT_TRUE(absController_->screenIdManager_.ConvertToDmsScreenId(rsScreenId));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

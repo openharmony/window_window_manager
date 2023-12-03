@@ -330,21 +330,17 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTe
 }
 
 /**
- * @tc.name: HandleWindowDrawingContentInfoChange
- * @tc.desc: test function : HandleWindowDrawingContentInfoChange
+ * @tc.name: HandleNotifyWindowVisibilityChange
+ * @tc.desc: test function : HandleNotifyWindowVisibilityChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleWindowDrawingContentInfoChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteUint32(1);
-    data.WriteInt32(1);
-    data.WriteInt32(1);
     data.WriteBool(true);
-    data.WriteUint32(1);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleWindowDrawingContentInfoChange(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
 }
 
 }

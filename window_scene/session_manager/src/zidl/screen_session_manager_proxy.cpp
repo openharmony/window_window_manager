@@ -954,7 +954,7 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId
         WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: Write screenId/bufferRotation failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION),
         data, reply, option) != ERR_NONE) {
         WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

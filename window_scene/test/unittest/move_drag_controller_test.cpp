@@ -239,6 +239,32 @@ HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: EventDownInit01
+ * @tc.desc: test function : EventDownInit
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, EventDownInit01, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetDecorEnable(true);
+
+    SystemSessionConfig sysConfig;
+    moveDragController->InitMoveDragProperty();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    auto res = moveDragController->EventDownInit(pointerEvent, originalRect, property, sysConfig);
+    ASSERT_EQ(true, res);
+}
+
+/**
  * @tc.name: GetAreaType
  * @tc.desc: test function : GetAreaType
  * @tc.type: FUNC

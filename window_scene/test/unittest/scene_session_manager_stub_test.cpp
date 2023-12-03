@@ -369,6 +369,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionGravity, Function | SmallT
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleUpdateSessionWindowVisibilityListener
+ * @tc.desc: test HandleUpdateSessionWindowVisibilityListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionWindowVisibilityListener, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(0);
+    data.WriteBool(true);
+
+    int res = stub_->HandleUpdateSessionWindowVisibilityListener(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
 }
 }
 }

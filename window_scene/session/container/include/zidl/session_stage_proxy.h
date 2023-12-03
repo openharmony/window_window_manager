@@ -47,6 +47,7 @@ public:
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
+    WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyConfigurationUpdated() override;
@@ -54,7 +55,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
-    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& infos) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
