@@ -126,10 +126,8 @@ ScreenSessionManager::ScreenSessionManager()
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 
     appAnrListener_ = new (std::nothrow) AppAnrListener();
-
     auto ret = static_cast<int32_t>(DelayedSingleton<AppExecFwk::AppMgrClient>::
         GetInstance()->RegisterAppDebugListener(appAnrListener_));
-
     if (ret != ERR_OK) {
         WLOGFI("Register app debug listener failed.");
     } else {
