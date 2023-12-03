@@ -316,6 +316,7 @@ ohos_unittest("ws_screen_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
