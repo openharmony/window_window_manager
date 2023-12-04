@@ -1355,6 +1355,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
+        RequestSessionUnfocus(persistentId);
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         DestroySubSession(scnSession); // destroy sub session by destruction
@@ -3068,12 +3069,13 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
         WLOGFE("id is invalid");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (persistentId != focusedSessionId_) {
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    if (persistentId != focusedSessionId_ &&
+        !(focusedSession && focusedSession->GetParentPersistentId() == persistentId)) {
         WLOGFD("unfocused id cannot request unfocus!");
         return WSError::WS_DO_NOTHING;
     }
     // if pop menu created by desktop request unfocus, back to desktop
-    auto focusedSession = GetSceneSession(focusedSessionId_);
     auto lastSession = GetSceneSession(lastFocusedSessionId_);
     if (focusedSession && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
         lastSession && lastSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP &&
@@ -3105,7 +3107,8 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
 {
     int32_t persistentId = sceneSession->GetPersistentId();
     // dialog get focus
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+        SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK) {
             return WSError::WS_DO_NOTHING;
     }
@@ -3586,8 +3589,18 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
 
 WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
 {
-    // focus must on dialog when APP_MAIN_WINDOW go foreground
-    std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
+    // focus must on dialog when APP_MAIN_WINDOW or sub winodw request focus
+    sptr<SceneSession> mainSession = nullptr;
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        mainSession = sceneSession;
+    } else if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
+        mainSession = GetSceneSession(sceneSession->GetParentPersistentId());
+    }
+    if (mainSession == nullptr) {
+        WLOGFD("[WMSFocus]main window is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+    std::vector<sptr<Session>> dialogVec = mainSession->GetDialogVector();
     if (std::find_if(dialogVec.begin(), dialogVec.end(),
         [this](sptr<Session>& iter) { return iter && iter->GetPersistentId() == focusedSessionId_; })
         != dialogVec.end()) {
@@ -3612,11 +3625,6 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
     if (sceneSession == nullptr) {
         WLOGFD("session is nullptr");
         return;
-    }
-    // sub session request unfocus
-    auto focusedSession = GetSceneSession(focusedSessionId_);
-    if (focusedSession && focusedSession->GetParentPersistentId() == sceneSession->GetPersistentId()) {
-        RequestSessionUnfocus(focusedSessionId_);
     }
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
