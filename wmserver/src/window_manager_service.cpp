@@ -879,7 +879,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    int pid = IPCSkeleton::GetCallingPid();
+    int pid = IPCSkeleton::GetCallingRealPid();
     int uid = IPCSkeleton::GetCallingUid();
     property->isSystemCalling_ = Permission::IsSystemCalling();
     WMError ret = PostSyncTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
