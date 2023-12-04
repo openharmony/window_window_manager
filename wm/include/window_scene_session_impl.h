@@ -133,6 +133,7 @@ public:
     WMError NotifyPrepareClosePiPWindow() override;
     WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
     void UpdateSubWindowState(const WindowType& type);
+    WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
 protected:
     void DestroySubWindow();
@@ -148,6 +149,7 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);

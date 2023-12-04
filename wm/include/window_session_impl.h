@@ -172,6 +172,7 @@ public:
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
+    WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
 protected:
     WMError Connect();
