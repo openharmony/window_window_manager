@@ -253,6 +253,7 @@ ohos_unittest("ws_screen_cutout_controller_test") {
 
   deps = [ ":ws_unittest_common" ]
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -303,6 +304,7 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -377,6 +379,7 @@ ohos_unittest("ws_scene_session_manager_proxy_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -390,6 +393,7 @@ ohos_unittest("ws_session_manager_agent_controller_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -416,6 +420,7 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -513,6 +518,7 @@ ohos_unittest("ws_session_display_power_controller_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -526,6 +532,7 @@ ohos_unittest("ws_scene_session_converter_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -593,6 +600,7 @@ ohos_unittest("ws_window_event_channel_stub_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -606,6 +614,7 @@ ohos_unittest("ws_fold_screen_state_machine_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]
