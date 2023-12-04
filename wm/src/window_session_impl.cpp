@@ -1025,6 +1025,7 @@ WMError WindowSessionImpl::RegisterListener(std::vector<sptr<T>>& holder, const 
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         WLOGFE("Listener already registered");
         return WMError::WM_OK;
@@ -1040,6 +1041,7 @@ WMError WindowSessionImpl::UnregisterListener(std::vector<sptr<T>>& holder, cons
         WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](sptr<T> registeredListener) {
             return registeredListener == listener;
@@ -1130,8 +1132,11 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool isNeedKeep
 
 void WindowSessionImpl::NotifyAfterFocused()
 {
-    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+    {
+        std::lock_guard<std::mutex> lock(listenerMutex_);
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+    }
     CALL_UI_CONTENT(Focus);
     if (uiContent_ != nullptr) {
         auto task = [this]() {
@@ -1153,9 +1158,12 @@ void WindowSessionImpl::NotifyAfterFocused()
 
 void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 {
-    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    // use needNotifyUinContent to separate ui content callbacks
-    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+    {
+        std::lock_guard<std::mutex> lock(listenerMutex_);
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        // use needNotifyUinContent to separate ui content callbacks
+        CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+    }
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(UnFocus);
     }

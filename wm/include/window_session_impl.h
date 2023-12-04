@@ -255,6 +255,7 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
 
     static std::recursive_mutex globalMutex_;
+    std::mutex listenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
