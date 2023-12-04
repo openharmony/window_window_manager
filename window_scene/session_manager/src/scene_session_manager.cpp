@@ -110,10 +110,6 @@ const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 std::recursive_mutex g_instanceMutex;
-constexpr uint32_t INDEX_ZERO = 0;
-constexpr uint32_t INDEX_FIRST = 1;
-constexpr uint32_t INDEX_SECOND = 2;
-constexpr uint32_t INDEX_THIRD = 3;
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t DEFAULT_USERID = -1;
@@ -509,10 +505,10 @@ void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigI
         const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
         config.curveType_ = curveType;
         if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
-            config.ctrlX1_ = curveParams[INDEX_ZERO];
-            config.ctrlY1_ = curveParams[INDEX_FIRST];
-            config.ctrlX2_ = curveParams[INDEX_SECOND];
-            config.ctrlY2_ = curveParams[INDEX_THIRD];
+            config.ctrlX1_ = curveParams[0]; // 0: ctrl x1 index
+            config.ctrlY1_ = curveParams[1]; // 1: ctrl y1 index
+            config.ctrlX2_ = curveParams[2]; // 2: ctrl x2 index
+            config.ctrlY2_ = curveParams[3]; // 3: ctrl y2 index
         }
     }
 
@@ -553,10 +549,10 @@ void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigI
         const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
         appWindowSceneConfig_.windowAnimation_.curveType_ = curveType;
         if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
-            appWindowSceneConfig_.windowAnimation_.ctrlX1_ = curveParams[INDEX_ZERO];
-            appWindowSceneConfig_.windowAnimation_.ctrlY1_ = curveParams[INDEX_FIRST];
-            appWindowSceneConfig_.windowAnimation_.ctrlX2_ = curveParams[INDEX_SECOND];
-            appWindowSceneConfig_.windowAnimation_.ctrlY2_ = curveParams[INDEX_THIRD];
+            appWindowSceneConfig_.windowAnimation_.ctrlX1_ = curveParams[0]; // 0: ctrl x1 index
+            appWindowSceneConfig_.windowAnimation_.ctrlY1_ = curveParams[1]; // 1: ctrl y1 index
+            appWindowSceneConfig_.windowAnimation_.ctrlX2_ = curveParams[2]; // 2: ctrl x2 index
+            appWindowSceneConfig_.windowAnimation_.ctrlY2_ = curveParams[3]; // 3: ctrl y2 index
         }
     }
     item = windowAnimationConfig["timing"]["duration"];
