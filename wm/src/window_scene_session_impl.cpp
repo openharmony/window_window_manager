@@ -1065,6 +1065,29 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property)
+{
+    WLOGFD("NotifySpecificWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if ((state_ == WindowState::STATE_CREATED &&
+         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
+        state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
+    } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS);
+    } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
@@ -1083,6 +1106,31 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifyWindowSessionProperty();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
+    }
+    return ret;
+}
+
+WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
+           "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+           GetWindowId(), static_cast<uint32_t>(type),
+           property.enable_, property.backgroundColor_, property.contentColor_);
+    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    } else if (GetSystemBarPropertyByType(type) == property) {
+        return WMError::WM_OK;
+    }
+
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    isSystembarPropertiesSet_ = true;
+    property_->SetSystemBarProperty(type, property);
+    WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
         WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));

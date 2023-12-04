@@ -21,6 +21,7 @@
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -565,6 +566,45 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     }
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
+    return true;
+}
+
+bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+                        napi_env env, napi_callback_info info, sptr<Window>& window)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 3 ) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return false;
+    }
+    std::string name;
+    if (!ConvertFromJsValue(env, argv[0], name)) {
+        WLOGFE("Failed to convert parameter to SystemBarName");
+        return false;
+    }
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[1], enable)) {
+        WLOGFE("Failed to convert parameter to bool");
+        return NapiGetUndefined(env);
+    }
+    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    statusProperty.enable_ = false;
+    navProperty.enable_ = false;
+    navIndicatorProperty.enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
+    if (name.compare("status") == 0) {
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
+    } else if (name.compare("navigation") == 0) {
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
+    } else if (name.compare("navigationIndicator") == 0) {
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
+    }
     return true;
 }
 

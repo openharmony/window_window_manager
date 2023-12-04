@@ -706,6 +706,14 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
+WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x ",
+          property_->GetWindowId(), static_cast<uint32_t>(type), property.enable_,
+          property.backgroundColor_, property.contentColor_);
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::UpdateSystemBarProperty(bool status)
 {
     if (!IsWindowValid()) {

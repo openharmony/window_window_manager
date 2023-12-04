@@ -2186,6 +2186,36 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS: {
+            auto systemBarProperties = property->GetSystemBarProperty();
+            for (auto iter : systemBarProperties) {
+                if (iter.first == WindowType::WINDOW_TYPE_STATUS_BAR) {
+                    sceneSession->SetSystemBarProperty(iter.first, iter.second);
+                }
+            }
+            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS: {
+            auto systemBarProperties = property->GetSystemBarProperty();
+            for (auto iter : systemBarProperties) {
+                if (iter.first == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+                    sceneSession->SetSystemBarProperty(iter.first, iter.second);
+                }
+            }
+            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS: {
+            auto systemBarProperties = property->GetSystemBarProperty();
+            for (auto iter : systemBarProperties) {
+                if (iter.first == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
+                    sceneSession->SetSystemBarProperty(iter.first, iter.second);
+                }
+            }
+            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            break;
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             SetWindowFlags(sceneSession, property->GetWindowFlags());
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
