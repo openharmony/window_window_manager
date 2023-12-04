@@ -37,7 +37,7 @@ WSError ExtensionSession::Connect(
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     // Get pid and uid before posting task.
-    pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
+    pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
     uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
     return PostSyncTask(
         [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {

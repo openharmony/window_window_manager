@@ -181,8 +181,8 @@ void SceneSessionManager::Init()
 
 #ifdef RES_SCHED_ENABLE
     std::unordered_map<std::string, std::string> payload {
-        { "pid", std::to_string(getpid()) },
-        { "tid", std::to_string(gettid()) },
+        { "pid", std::to_string(getprocpid()) },
+        { "tid", std::to_string(getproctid()) },
         { "uid", std::to_string(getuid()) },
         { "bundleName", SCENE_BOARD_BUNDLE_NAME },
     };
@@ -890,7 +890,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler());
         if (sessionInfo.isSystem_) {
-            sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
+            sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
             auto rootContext = rootSceneContextWeak_.lock();
             sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
@@ -1455,7 +1455,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     // Get pid and uid before posting task.
-    auto pid = IPCSkeleton::GetCallingPid();
+    auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         if (property == nullptr) {
@@ -1755,7 +1755,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(sptr<Scene
 
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
-    const auto& callingPid = IPCSkeleton::GetCallingPid();
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, callingPid]() {
         WLOGFI("[WMSSystem][WMSSub] Destroy specific session start, id: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
@@ -2027,7 +2027,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
-    const auto& callingPid = IPCSkeleton::GetCallingPid();
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, mainWinId, &topWinId, callingPid]() {
         const auto& mainSession = GetSceneSession(mainWinId);
         if (mainSession == nullptr) {

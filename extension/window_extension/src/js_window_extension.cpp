@@ -232,7 +232,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         return nullptr;
     }
     WLOGFD("Create stub successfully!");
-    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getpid(), getuid(), true);
+    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), true);
     auto context = GetContext();
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
@@ -252,7 +252,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
         WLOGI("Destroy window.");
     }
     WLOGI("called.");
-    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getpid(), getuid(), false);
+    WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), false);
     auto context = GetContext();
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
