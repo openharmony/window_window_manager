@@ -2483,7 +2483,10 @@ void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
 
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
 {
-    // delete permission
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager HasPrivateWindow permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     std::vector<ScreenId> screenIds = GetAllScreenIds();
     auto iter = std::find(screenIds.begin(), screenIds.end(), id);
     if (iter == screenIds.end()) {
@@ -2617,6 +2620,10 @@ std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const
 
 void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
 {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+        WLOGFE("DumpAllScreensInfo permission denied!");
+        return;
+    }
     std::ostringstream oss;
     oss << "--------------------------------------Free Screen"
         << "--------------------------------------"
@@ -2656,6 +2663,10 @@ void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
 
 void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo)
 {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+        WLOGFE("DumpSpecialScreenInfo permission denied!");
+        return;
+    }
     std::ostringstream oss;
     sptr<ScreenSession> session = GetScreenSession(id);
     if (!session) {
