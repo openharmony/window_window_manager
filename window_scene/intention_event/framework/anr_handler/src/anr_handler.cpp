@@ -91,7 +91,6 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
 {
     PostTask([this, persistentId]() {
         anrHandlerState_.sendStatus.erase(persistentId);
-        anrHandlerState_.eventsIterMap.erase(persistentId);
         for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
             if (iter->second.persistentId == persistentId) {
                 iter = sessionStageMap_.erase(iter);
@@ -127,11 +126,13 @@ void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
-        auto iter = anrHandlerState_.eventsToReceipt.insert(anrHandlerState_.eventsToReceipt.end(), eventId);
-        anrHandlerState_.eventsIterMap[persistentId] = iter;
+        anrHandlerState_.eventsToReceipt.push_back(eventId);
     } else {
+        if(anrHandlerState_.eventsToReceipt.empty()){
+            WLOGFE("EventsToReceipt is empty");
+            return;
+        }
         anrHandlerState_.eventsToReceipt.pop_front();
-        anrHandlerState_.eventsIterMap[persistentId] = anrHandlerState_.eventsToReceipt.end();
         ClearExpiredEvents(eventId);
     }
 }
@@ -211,14 +212,12 @@ bool ANRHandler::IsOnEventHandler(int32_t persistentId)
 void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
     auto currentPersistentId = GetPersistentIdOfEvent(eventId);
-    auto pendingEventIter = anrHandlerState_.eventsIterMap[currentPersistentId];
-    if (pendingEventIter == anrHandlerState_.eventsToReceipt.end()) {
-        WLOGFE("No pending event on eventsToReceipt");
-        return;
-    }
-    if (eventId > *pendingEventIter) {
-        WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", *pendingEventIter, eventId);
-        *pendingEventIter = eventId;
+    for (auto &event : anrHandlerState_.eventsToReceipt) {
+        if ((GetPersistentIdOfEvent(event) == currentPersistentId) && (eventId > event)) {
+            WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
+            event = eventId;
+            break;
+        }
     }
 }
 
