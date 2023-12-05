@@ -1074,7 +1074,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
             WLOGFE("[WMSSub][NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
             return;
         }
-            jsCallBack = iter->second;
+        jsCallBack = iter->second;
     }
 
     WLOGFD("[WMSSub][NAPI]OnCreateSubSession, id: %{public}d", sceneSession->GetPersistentId());
