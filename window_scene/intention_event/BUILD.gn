@@ -38,6 +38,7 @@ ohos_shared_library("libintention_event") {
   ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",

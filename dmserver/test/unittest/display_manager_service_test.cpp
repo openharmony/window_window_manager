@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "display_manager_adapter.h"
 #include "display_manager_config.h"
 #include "display_manager_service.h"
 #include "display_manager_agent_default.h"
@@ -484,6 +485,17 @@ HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Functio
     dms_->SetGravitySensorSubscriptionEnabled();
     DMError result = dms_->DestroyVirtualScreen(10086);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: OnStop
+ * @tc.desc: DMS on stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, OnStop, Function | SmallTest | Level3)
+{
+    dms_->OnStop();
+    ASSERT_TRUE(true);
 }
 }
 } // namespace Rosen

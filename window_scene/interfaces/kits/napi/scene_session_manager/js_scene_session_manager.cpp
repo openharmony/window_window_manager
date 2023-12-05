@@ -54,6 +54,7 @@ const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string SHOW_PIP_MAIN_WINDOW_CB = "showPiPMainWindow";
+const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 } // namespace
 
 napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
@@ -129,6 +130,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { SHOW_PIP_MAIN_WINDOW_CB,      &JsSceneSessionManager::ProcessShowPiPMainWindow },
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
+        { CALLING_WINDOW_ID_CHANGE_CB,  &JsSceneSessionManager::ProcessCallingWindowIdChangeRegister},
     };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
@@ -255,6 +257,21 @@ void JsSceneSessionManager::OnShowPiPMainWindow(int32_t persistentId)
     taskScheduler_->PostMainThreadTask(task, "OnShowPiPMainWindow, persistentId:" + std::to_string(persistentId));
 }
 
+void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
+{
+    WLOGFD("[WMSInput][NAPI]OnCallingWindowIdChange");
+    auto iter = jsCbMap_.find(CALLING_WINDOW_ID_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto task = [this, windowId, jsCallBack, env = env_]() {
+        napi_value argv[] = { CreateJsValue(env, windowId) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnCallingWindowIdChange, windowId:" + std::to_string(windowId));
+}
+
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -329,6 +346,15 @@ void JsSceneSessionManager::ProcessShowPiPMainWindow()
     SceneSessionManager::GetInstance().SetShowPiPMainWindowListener(func);
 }
 
+void JsSceneSessionManager::ProcessCallingWindowIdChangeRegister()
+{
+    ProcessCallingWindowIdChangeFunc func = [this](const uint32_t callingWindowId) {
+        WLOGFD("ProcessCallingWindowIdChangeRegister called, callingWindowId: %{public}d", callingWindowId);
+        this->OnCallingWindowIdChange(callingWindowId);
+    };
+    SceneSessionManager::GetInstance().SetCallingWindowIdChangeListenser(func);
+}
+
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]RegisterCallback");
@@ -372,7 +398,7 @@ napi_value JsSceneSessionManager::GetRootSceneSession(napi_env env, napi_callbac
 
 napi_value JsSceneSessionManager::RequestSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]RequestSceneSession");
+    WLOGD("[NAPI]RequestSceneSession");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestSceneSession(env, info) : nullptr;
 }
@@ -484,7 +510,7 @@ napi_value JsSceneSessionManager::AddWindowDragHotArea(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::GetRootSceneUIContext(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]GetRootSceneUIContext");
+    WLOGD("[NAPI]GetRootSceneUIContext");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetRootSceneUIContext(env, info) : nullptr;
 }
@@ -498,7 +524,7 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
 
 napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]RequestFocusStatus");
+    WLOGD("[NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }
@@ -865,7 +891,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OnRequestSceneSession");
+    WLOGD("[NAPI]OnRequestSceneSession");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};

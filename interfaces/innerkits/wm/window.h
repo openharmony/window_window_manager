@@ -142,6 +142,15 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+};
+
+/**
+ * @class IWindowStatusChangeListener
+ *
+ * @brief IWindowStatusChangeListener is used to observe the window status when window status changed.
+ */
+class IWindowStatusChangeListener : virtual public RefBase {
+public:
     /**
      * @brief Notify caller when window status changed.
      *
@@ -361,6 +370,17 @@ public:
      */
     virtual void OnDialogDeathRecipient() const {}
 };
+
+/**
+ * @class IWindowVisibilityChangedListener
+ *
+ * @brief Listener to observe one window visibility changed.
+*/
+class IWindowVisibilityChangedListener : virtual public RefBase {
+public:
+    virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
+};
+using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
@@ -1447,6 +1467,65 @@ public:
      * @return True means set isNeedKeepKeyboard flag success, others means failed.
     */
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the window limits of current window.
+     *
+     * @param windowLimits.
+     * @return WMError.
+    */
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the window limits of current window.
+     *
+     * @param windowLimits.
+     * @return WMError.
+    */
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_OK;
+    }
+    
+    /**
+     * @brief Register window status change listener.
+     *
+     * @param listener IWindowStatusChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
+     * @brief Unregister window status change listener.
+     *
+     * @param listener IWindowStatusChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

@@ -383,9 +383,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
         targetRect.posY_ += tranY;
-        targetRect.height_ -= static_cast<uint32_t>(tranY);
+        targetRect.height_ -= tranY;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        targetRect.height_ += static_cast<uint32_t>(tranY);
+        targetRect.height_ += tranY;
     }
     // check current ratio limits
     if (targetRect.height_ == 0) {
@@ -568,7 +568,9 @@ void MoveDragController::ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float 
 void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property,
     const SystemSessionConfig& sysConfig)
 {
-    isDecorEnable_ = WindowHelper::IsMainWindow(property->GetWindowType()) &&
+    auto windowType = property->GetWindowType();
+    isDecorEnable_ = (WindowHelper::IsMainWindow(windowType) ||
+            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
         sysConfig.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
 }

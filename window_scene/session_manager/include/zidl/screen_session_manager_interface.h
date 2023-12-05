@@ -19,6 +19,7 @@
 #include <ui/rs_display_node.h>
 
 #include "display_manager_interface.h"
+#include "dm_common.h"
 #include "session/screen/include/screen_property.h"
 #include "zidl/screen_session_manager_client_interface.h"
 
@@ -126,6 +127,7 @@ public:
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
+    virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}

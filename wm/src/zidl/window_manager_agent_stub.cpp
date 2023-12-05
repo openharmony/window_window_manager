@@ -85,6 +85,15 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateWindowVisibilityInfo(infos);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE: {
+            std::vector<sptr<WindowDrawingContentInfo>> infos;
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowDrawingContentInfo>(data, infos)) {
+                WLOGFE("fail to read WindowDrawingContentInfo.");
+                break;
+            }
+            UpdateWindowDrawingContentInfo(infos);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT: {
             uint32_t accessTokenId = data.ReadUint32();
             bool isShowing = data.ReadBool();

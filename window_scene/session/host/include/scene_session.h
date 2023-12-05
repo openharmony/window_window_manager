@@ -122,7 +122,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
-    WSError NotifyClientToUpdateRect() override;
+    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -183,6 +183,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void NotifyTouchOutside();
+    void NotifyWindowVisibility();
     bool CheckOutTouchOutsideRegister();
     void UpdateNativeVisibility(bool visible);
     void UpdateRotationAvoidArea();
@@ -195,7 +196,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info);
     WSError UpdateSizeChangeReason(SizeChangeReason reason);
     void ClearSpecificSessionCbMap();
 
@@ -232,9 +232,11 @@ private:
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
-    void SetSurfaceBounds(const WSRect& rect);
+    WSError RaiseAppMainWindowToTop() override;
+    void SetSurfaceBounds(const WSRect &rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
+    void OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason);
     bool InitPiPRectInfo();
     void ClearPiPRectPivotInfo();
     void SavePiPRectInfo();

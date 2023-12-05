@@ -87,6 +87,7 @@ public:
     MOCK_METHOD4(
         FocusMoveSearch, void(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo &output));
+    MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
 };
 } // namespace Ace
 } // namespace OHOS
