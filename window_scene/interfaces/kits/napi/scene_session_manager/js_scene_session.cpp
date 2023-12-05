@@ -898,7 +898,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     {
-        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_)
+        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
     (this->*listenerFunc_[cbType])();
