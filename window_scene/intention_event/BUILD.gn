@@ -39,7 +39,6 @@ ohos_shared_library("libintention_event") {
 
   external_deps = [
     "ability_runtime:app_manager",
-    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -52,6 +51,12 @@ ohos_shared_library("libintention_event") {
   ]
 
   defines = []
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.barrierfree_accessibility)) {
+    external_deps += [ "accessibility:accessibility_common" ]
+  }
+
   if (!defined(global_parts_info) ||
       defined(global_parts_info.inputmethod_imf)) {
     imf_enable = true
