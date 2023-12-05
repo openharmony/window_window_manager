@@ -62,7 +62,7 @@ std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
 
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
-    WLOGI("[NAPI]Create");
+    WLOGD("[NAPI]Create");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr || session == nullptr) {
@@ -786,7 +786,7 @@ napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callb
 
 napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]SetFocusable");
+    WLOGD("[NAPI]SetFocusable");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }

@@ -1338,7 +1338,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
+        if (!IsSystemSession()) {
+            WLOGFE("windowEventChannel_ is null");
+        }
         return WSError::WS_ERROR_NULLPTR;
     }
 
