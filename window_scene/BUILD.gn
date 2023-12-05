@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../windowmanager_aafwk.gni")
 
 group("window_scene") {
   public_deps = [
@@ -21,8 +22,10 @@ group("window_scene") {
     "session_manager:scene_session_manager",
     "session_manager:screen_session_manager",
     "session_manager:session_manager",
-    "session_manager_service:session_manager_service",
   ]
+  if (scene_board_enabled) {
+    public_deps += [ "session_manager_service:session_manager_service" ]
+  }
 }
 
 group("test") {
