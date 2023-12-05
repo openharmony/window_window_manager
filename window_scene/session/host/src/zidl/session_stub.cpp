@@ -75,6 +75,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleUpdateWindowSceneAfterCustomAnimation),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         &SessionStub::HandleRaiseAboveTarget),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
+        &SessionStub::HandleRaiseAppMainWindowToTop),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         &SessionStub::HandlePendingSessionActivation),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE),
@@ -326,6 +328,14 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
     WLOGFD("RaiseAboveTarget!");
     auto subWindowId = data.ReadInt32();
     const WSError& errCode = RaiseAboveTarget(subWindowId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("RaiseAppMainWindowToTop!");
+    const WSError& errCode = RaiseAppMainWindowToTop();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

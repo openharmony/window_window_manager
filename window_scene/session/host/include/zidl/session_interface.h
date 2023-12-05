@@ -58,6 +58,7 @@ public:
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
+    virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
