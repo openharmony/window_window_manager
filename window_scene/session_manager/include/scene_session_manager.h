@@ -261,6 +261,7 @@ protected:
 
 private:
     void Init();
+    void RegisterAppListener();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
