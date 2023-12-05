@@ -138,6 +138,7 @@ private:
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
+    std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     using Func = void(JsSceneSession::*)();
     std::map<std::string, Func> listenerFunc_;
