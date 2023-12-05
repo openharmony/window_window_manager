@@ -21,6 +21,8 @@
 
 #include <refbase.h>
 
+#include "common/include/task_scheduler.h"
+
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
@@ -35,7 +37,7 @@ public:
     static bool CreateUpdatedIconDir(const std::string& directory);
 
     bool IsSnapshotExisted() const;
-    std::string GetSnapshotFilePath() const;
+    std::string GetSnapshotFilePath();
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
@@ -49,6 +51,8 @@ private:
 
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
+
+    static std::shared_ptr<TaskScheduler> snapshotScheduler_;
 };
 } // namespace OHOS::Rosen
 

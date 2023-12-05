@@ -76,6 +76,8 @@ public:
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    WMError GetWindowLimits(WindowLimits& windowLimits) override;
+    WMError SetWindowLimits(WindowLimits& windowLimits) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -108,6 +110,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) override;
+    virtual WMError SetCallingWindow(uint32_t callingWindowId) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -129,9 +132,6 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
     WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
-    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) override;
-    bool lastProcessContentState_ = false;
-    void GetWindowDrawingContentChangeInfo(WindowDrawingContentInfo info);
     void UpdateSubWindowState(const WindowType& type);
 
 protected:
@@ -159,6 +159,7 @@ private:
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
+    void UpdateNewSize();
 
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;

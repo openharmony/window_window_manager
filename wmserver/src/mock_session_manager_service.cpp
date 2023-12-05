@@ -72,7 +72,7 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
         return;
     }
     WLOGFI("SessionManagerService died, restart foundation now!");
-    uint32_t pid = getpid();
+    int32_t pid = getpid();
     MockSessionManagerService::WriteStringToFile(pid, "0");
     if (needKillService_) {
         _exit(0);
@@ -287,7 +287,7 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
     return false;
 }
 
-void MockSessionManagerService::WriteStringToFile(uint32_t pid, const char* str)
+void MockSessionManagerService::WriteStringToFile(int32_t pid, const char* str)
 {
     char file[PATH_LEN] = {0};
     if (snprintf_s(file, PATH_LEN, PATH_LEN - 1, "/proc/%d/unexpected_die_catch", pid) == -1) {

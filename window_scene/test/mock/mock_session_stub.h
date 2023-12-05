@@ -61,6 +61,7 @@ public:
     MOCK_METHOD2(HandleSetWindowAnimationFlag, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleUpdateWindowSceneAfterCustomAnimation, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleRaiseAboveTarget, int(MessageParcel &data, MessageParcel &reply));
+    MOCK_METHOD2(HandleRaiseAppMainWindowToTop, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandlePendingSessionActivation, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleTerminateSession, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleSessionException, int(MessageParcel &data, MessageParcel &reply));

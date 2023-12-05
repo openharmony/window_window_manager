@@ -78,6 +78,7 @@ public:
     void SetRotation(Rotation rotation);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
+    void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenType(ScreenType type);
@@ -145,6 +146,9 @@ public:
     void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
+    DMRect GetAvailableArea();
+    void SetAvailableArea(DMRect area);
+    bool UpdateAvailableArea(DMRect area);
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
@@ -156,6 +160,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::function<void(float)> updateToInputManagerCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {

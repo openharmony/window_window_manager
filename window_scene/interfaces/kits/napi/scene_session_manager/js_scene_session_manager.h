@@ -110,12 +110,14 @@ private:
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnShiftFocus(int32_t persistentId);
     void OnShowPiPMainWindow(int32_t persistentId);
+    void OnCallingWindowIdChange(const uint32_t callingWindowId);
     void ProcessCreateSystemSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessShowPiPMainWindow();
+    void ProcessCallingWindowIdChangeRegister();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

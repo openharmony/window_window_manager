@@ -182,7 +182,13 @@ void PictureInPictureManager::DoClose(bool needAnim)
     if (!PictureInPictureManager::IsCurrentPipControllerExist()) {
         return;
     }
-    curPipController_->StopPictureInPicture(needAnim);
+    StopPipType currentStopType = StopPipType::NULL_STOP;
+    if (needAnim) {
+        currentStopType = StopPipType::USER_STOP;
+    } else {
+        currentStopType = StopPipType::OTHER_PACKAGE_STOP;
+    }
+    curPipController_->StopPictureInPicture(needAnim, currentStopType);
 }
 
 void PictureInPictureManager::DoStartMove()
@@ -219,7 +225,7 @@ void PictureInPictureManager::AutoStartPipWindow()
         WLOGFE("activePipController_ is null");
         return;
     }
-    activePipController_ -> StartPictureInPicture();
+    activePipController_ -> StartPictureInPicture(StartPipType::AUTO_START);
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)

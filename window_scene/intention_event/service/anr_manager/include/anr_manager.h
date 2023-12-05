@@ -38,6 +38,7 @@ public:
     void AddTimer(int32_t eventId, int32_t persistentId);
     void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int32_t persistentId);
+    void SwitchAnr(bool status);
     void OnSessionLost(int32_t persistentId);
     void OnBackground(int32_t persistentId);
     void SetApplicationInfo(int32_t persistentId, int32_t pid, const std::string& uid);
@@ -49,7 +50,6 @@ private:
         int32_t pid { -1 };
         std::string bundleName { "unknow" };
     };
-    void SwitchAnr(bool status);
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
     void ExecuteAnrObserver(int32_t pid);

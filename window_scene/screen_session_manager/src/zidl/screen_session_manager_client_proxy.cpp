@@ -260,6 +260,7 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
         WLOGFE("SendRequest failed");
         return;
     }
+    reply.ReadUInt64Vector(&surfaceNodeIds);
 }
 
 void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)

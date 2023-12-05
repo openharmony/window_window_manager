@@ -58,7 +58,7 @@ public:
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
         TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE,
-        TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION,
+        TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
@@ -109,11 +109,13 @@ public:
         TRANS_ID_GET_SCREEN_PROPERTY,
         TRANS_ID_GET_DISPLAY_NODE,
         TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY,
+        TRANS_ID_UPDATE_AVAILABLE_AREA,
         TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA,
         TRANS_ID_GET_PHY_SCREEN_PROPERTY,
         TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO,
         TRANS_ID_SET_SCREEN_PRIVACY_STATE,
         TRANS_ID_RESIZE_VIRTUAL_SCREEN,
+        TRANS_ID_GET_AVAILABLE_AREA,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -212,7 +214,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
-
+    virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool IsFoldable() { return false; }
 
     virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; }

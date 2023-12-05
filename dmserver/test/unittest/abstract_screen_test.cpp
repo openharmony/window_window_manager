@@ -461,6 +461,20 @@ HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
     EXPECT_EQ(result[0].posX_, 159);
     EXPECT_EQ(result[0].posY_, 357);
 }
+
+/**
+ * @tc.name: ~AbstractScreenGroup
+ * @tc.desc: Abstract screen group
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, AbstractScreenGroup, Function | SmallTest | Level3)
+{
+    int res = 0;
+    sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
+    absScreenGroup_ = new AbstractScreenGroup(absScreenController,
+        0, 0, name_, ScreenCombination::SCREEN_ALONE);
+    EXPECT_EQ(res, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
