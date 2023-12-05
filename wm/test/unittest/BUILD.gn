@@ -34,7 +34,6 @@ group("unittest") {
     ":wm_window_manager_stub_proxy_test",
     ":wm_window_manager_test",
     ":wm_window_option_test",
-    ":wm_window_proxy_test",
     ":wm_window_scene_effect_test",
     ":wm_window_scene_session_impl_test",
     ":wm_window_scene_test",
@@ -42,6 +41,9 @@ group("unittest") {
     ":wm_window_stub_test",
     ":wm_window_test",
   ]
+  if (!scene_board_enabled) {
+    deps += [ ":wm_window_proxy_test" ]
+  }
 }
 
 ohos_unittest("wm_window_manager_test") {

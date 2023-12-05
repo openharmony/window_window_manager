@@ -235,15 +235,6 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/session_manager_service:session_manager_service",
-            "header": {
-              "header_files": [
-              ],
-              "header_base": "//foundation/window/window_manager/window_scene"
-            }
-          },
-          {
-            "type": "so",
             "name": "//foundation/window/window_manager/wmserver:sms",
             "header": {
               "header_files": [
