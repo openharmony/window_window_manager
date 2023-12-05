@@ -51,7 +51,6 @@ ohos_shared_library("intention_event_anr_manager") {
 
   external_deps = [
     "ability_base:want",
-    "accessibility:accessibility_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hicollie:libhicollie",
@@ -61,6 +60,10 @@ ohos_shared_library("intention_event_anr_manager") {
     "ipc:ipc_single",
   ]
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.barrierfree_accessibility)) {
+    external_deps += [ "accessibility:accessibility_common" ]
+  }
   part_name = "window_manager"
   subsystem_name = "window"
 }

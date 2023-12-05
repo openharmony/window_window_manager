@@ -101,7 +101,6 @@ ohos_static_library("libwm_static") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -120,6 +119,12 @@ ohos_static_library("libwm_static") {
   ]
 
   defines = []
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.barrierfree_accessibility)) {
+    external_deps += [ "accessibility:accessibility_common" ]
+  }
+
   if (efficiency_manager_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
@@ -232,7 +237,6 @@ ohos_shared_library("libwm") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -251,6 +255,11 @@ ohos_shared_library("libwm") {
   ]
 
   defines = []
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.barrierfree_accessibility)) {
+    external_deps += [ "accessibility:accessibility_common" ]
+  }
 
   if (defined(global_parts_info)) {
     if (defined(
