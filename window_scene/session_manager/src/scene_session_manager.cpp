@@ -3014,7 +3014,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
 */
 WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId)
 {
-    WLOGFI("RequestSessionFocusImmediately, id: %{public}d", persistentId);
+    WLOGFI("[WMSFocus]RequestSessionFocusImmediately, id: %{public}d", persistentId);
     // base block
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
     if (basicCheckRet != WSError::WS_OK) {
@@ -3022,11 +3022,11 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSComm]session is nullptr");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sceneSession->GetFocusable()) {
-        WLOGFD("session is not focusable!");
+        WLOGFD("[WMSFocus]session is not focusable!");
         return WSError::WS_DO_NOTHING;
     }
     // specific block
@@ -3045,18 +3045,18 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
 
 WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground)
 {
-    WLOGFI("RequestSessionFocus, id: %{public}d, by foreground: %{public}d", persistentId, byForeground);
+    WLOGFI("[WMSFocus]RequestSessionFocus, id: %{public}d, by foreground: %{public}d", persistentId, byForeground);
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
     if (basicCheckRet != WSError::WS_OK) {
         return basicCheckRet;
     }
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSComm]session is nullptr");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sceneSession->GetFocusable() || !IsSessionVisible(sceneSession)) {
-        WLOGFD("session is not focusable or not visible!");
+        WLOGFD("[WMSFocus]session is not focusable or not visible!");
         return WSError::WS_DO_NOTHING;
     }
     // subwindow/dialog state block
@@ -3064,7 +3064,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
         sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
         GetSceneSession(sceneSession->GetParentPersistentId()) &&
         !IsSessionVisible(GetSceneSession(sceneSession->GetParentPersistentId()))) {
-            WLOGFD("parent session id: %{public}d is not visible!", sceneSession->GetParentPersistentId());
+            WLOGFD("[WMSFocus]parent session id: %{public}d is not visible!", sceneSession->GetParentPersistentId());
             return WSError::WS_DO_NOTHING;
     }
     // specific block
@@ -3081,7 +3081,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
 
 WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
 {
-    WLOGFI("RequestSessionUnfocus, id: %{public}d", persistentId);
+    WLOGFI("[WMSFocus]RequestSessionUnfocus, id: %{public}d", persistentId);
     if (persistentId == INVALID_SESSION_ID) {
         WLOGFE("id is invalid");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -3089,7 +3089,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (persistentId != focusedSessionId_ &&
         !(focusedSession && focusedSession->GetParentPersistentId() == persistentId)) {
-        WLOGFD("unfocused id cannot request unfocus!");
+        WLOGFD("[WMSFocus]unfocused id cannot request unfocus!");
         return WSError::WS_DO_NOTHING;
     }
     // if pop menu created by desktop request unfocus, back to desktop
@@ -3097,6 +3097,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
     if (focusedSession && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
         lastSession && lastSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP &&
         RequestSessionFocus(lastFocusedSessionId_) == WSError::WS_OK) {
+            WLOGFD("[WMSFocus]focus is back to desktop");
             return WSError::WS_OK;
     }
     auto nextSession = GetNextFocusableSession(persistentId);
@@ -3110,11 +3111,11 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
 {
     // basic focus rule
     if (persistentId == INVALID_SESSION_ID) {
-        WLOGFE("id is invalid!");
+        WLOGFE("[WMSFocus]id is invalid!");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (persistentId == focusedSessionId_) {
-        WLOGFD("request id has been focused!");
+        WLOGFD("[WMSFocus]request id has been focused!");
         return WSError::WS_DO_NOTHING;
     }
     return WSError::WS_OK;
@@ -3127,13 +3128,14 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
         SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK) {
+            WLOGFD("[WMSFocus]dialog is focused");
             return WSError::WS_DO_NOTHING;
     }
     // app session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (byForeground && focusedSession && focusedSession->IsAppSession()
         && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            WLOGFD("session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
+            WLOGFD("[WMSFocus]session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
             return WSError::WS_DO_NOTHING;
     }
     // drop down panel will block lower zOrder request focus
@@ -3144,7 +3146,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
         (focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_PANEL ||
         focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) && isTypeBlocked &&
         sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            WLOGFD("session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
+            WLOGFD("[WMSFocus]session %{public}d is lower than focused session %{public}d", persistentId, focusedSessionId_);
             return WSError::WS_DO_NOTHING;
     }
     return WSError::WS_OK;
@@ -3152,7 +3154,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
 
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persistentId)
 {
-    WLOGFD("GetNextFocusableSession, id: %{public}d", persistentId);
+    WLOGFD("[WMSFocus]GetNextFocusableSession, id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
     sptr<SceneSession> ret = nullptr;
     auto func = [this, persistentId, &previousFocusedSessionFound, &ret](sptr<SceneSession> session) {
@@ -3181,17 +3183,19 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
 
 void SceneSessionManager::SetShiftFocusListener(const ProcessShiftFocusFunc& func)
 {
-    WLOGFD("SetShiftFocusListener");
+    WLOGFD("[WMSFocus]SetShiftFocusListener");
     shiftFocusFunc_ = func;
 }
 
 void SceneSessionManager::SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func)
 {
+    WLOGFD("[WMSFocus]SetSCBFocusedListener");
     notifySCBAfterFocusedFunc_ = func;
 }
 
 void SceneSessionManager::SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func)
 {
+    WLOGFD("[WMSFocus]SetSCBUnfocusedListener");
     notifySCBAfterUnfocusedFunc_ = func;
 }
 
@@ -3217,7 +3221,7 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
     int32_t nextId = INVALID_SESSION_ID;
     if (nextSession == nullptr) {
         std::string sessionLog(GetAllSessionFocusInfo());
-        WLOGFW("ShiftFocus to nullptr! id: %{public}d, info: %{public}s", focusedSessionId_, sessionLog.c_str());
+        WLOGFW("[WMSFocus]ShiftFocus to nullptr! id: %{public}d, info: %{public}s", focusedSessionId_, sessionLog.c_str());
     } else {
         nextId = nextSession->GetPersistentId();
     }
@@ -3233,14 +3237,14 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
             notifySCBAfterUnfocusedFunc_();
         }
     }
-    WLOGFI("ShiftFocus, focusedId: %{public}d, nextId: %{public}d", focusedId, nextId);
+    WLOGFI("[WMSFocus]ShiftFocus, focusedId: %{public}d, nextId: %{public}d", focusedId, nextId);
     return WSError::WS_OK;
 }
 
 void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFE("[WMSComm]session is nullptr");
         if (isFocused) {
             SetFocusedSession(INVALID_SESSION_ID);
         }
@@ -3253,8 +3257,8 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
     } else {
         sName = sceneSession->GetWindowName();
     }
-    WLOGFI("WMSFocus UpdateFocusStatus, name: %{public}s, id: %{public}d, isFocused: %{public}u",
-        sName.c_str(), sceneSession->GetPersistentId(), static_cast<uint32_t>(isFocused));
+    WLOGFI("[WMSFocus]UpdateFocusStatus, name: %{public}s, id: %{public}d, isFocused: %{public}d",
+        sName.c_str(), sceneSession->GetPersistentId(), isFocused);
     // set focused
     if (isFocused) {
         SetFocusedSession(sceneSession->GetPersistentId());
@@ -3268,6 +3272,8 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
 void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
 {
     int32_t persistentId = sceneSession->GetPersistentId();
+    WLOGFI("[WMSFocus]NotifyFocusStatus, id: %{public}d, isFocused: %{public}d",
+        sceneSession->GetPersistentId(), isFocused);
     if (isFocused) {
         if (sceneSession && IsSessionVisible(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
@@ -3300,10 +3306,10 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     // notify listenerController
     if (listenerController_ != nullptr && !sceneSession->GetSessionInfo().isSystem_) {
         if (isFocused) {
-            WLOGFD("NotifySessionFocused, id: %{public}d", sceneSession->GetPersistentId());
+            WLOGFD("[WMSFocus]NotifySessionFocused, id: %{public}d", sceneSession->GetPersistentId());
             listenerController_->NotifySessionFocused(sceneSession->GetPersistentId());
         } else {
-            WLOGFD("NotifySessionUnfocused, id: %{public}d", sceneSession->GetPersistentId());
+            WLOGFD("[WMSFocus]NotifySessionUnfocused, id: %{public}d", sceneSession->GetPersistentId());
             listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
         }
     }
