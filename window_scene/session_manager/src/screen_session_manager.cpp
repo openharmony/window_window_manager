@@ -1818,7 +1818,7 @@ DMError ScreenSessionManager::StopExpand(const std::vector<ScreenId>& expandScre
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
 {
-    std::shared_lock lock(mutex_);
+    std::shared_lock lock(screenIdMapMutex_);
     auto iter = sms2RsScreenIdMap_.find(smsScreenId);
     if (iter == sms2RsScreenIdMap_.end()) {
         return false;
@@ -1843,7 +1843,7 @@ ScreenId ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rs
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScreenId, ScreenId& smsScreenId) const
 {
-    std::shared_lock lock(mutex_);
+    std::shared_lock lock(screenIdMapMutex_);
     auto iter = rs2SmsScreenIdMap_.find(rsScreenId);
     if (iter == rs2SmsScreenIdMap_.end()) {
         return false;
@@ -1854,7 +1854,7 @@ bool ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScre
 
 ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId rsScreenId)
 {
-    std::unique_lock lock(mutex_);
+    std::unique_lock lock(screenIdMapMutex_);
     ScreenId smsScreenId = smsScreenCount_++;
     WLOGFI("SCB: ScreenSessionManager::CreateAndGetNewScreenId screenId: %{public}" PRIu64"", smsScreenId);
     if (sms2RsScreenIdMap_.find(smsScreenId) != sms2RsScreenIdMap_.end()) {
@@ -1873,14 +1873,14 @@ ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId
 
 void ScreenSessionManager::ScreenIdManager::UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId)
 {
-    std::unique_lock lock(mutex_);
+    std::unique_lock lock(screenIdMapMutex_);
     rs2SmsScreenIdMap_[rsScreenId] = smsScreenId;
     sms2RsScreenIdMap_[smsScreenId] = rsScreenId;
 }
 
 bool ScreenSessionManager::ScreenIdManager::DeleteScreenId(ScreenId smsScreenId)
 {
-    std::unique_lock lock(mutex_);
+    std::unique_lock lock(screenIdMapMutex_);
     auto iter = sms2RsScreenIdMap_.find(smsScreenId);
     if (iter == sms2RsScreenIdMap_.end()) {
         return false;
@@ -1893,7 +1893,7 @@ bool ScreenSessionManager::ScreenIdManager::DeleteScreenId(ScreenId smsScreenId)
 
 bool ScreenSessionManager::ScreenIdManager::HasRsScreenId(ScreenId smsScreenId) const
 {
-    std::shared_lock lock(mutex_);
+    std::shared_lock lock(screenIdMapMutex_);
     return rs2SmsScreenIdMap_.find(smsScreenId) != rs2SmsScreenIdMap_.end();
 }
 

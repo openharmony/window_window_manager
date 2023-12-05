@@ -268,7 +268,7 @@ private:
         std::atomic<ScreenId> smsScreenCount_ {2};
         std::map<ScreenId, ScreenId> rs2SmsScreenIdMap_;
         std::map<ScreenId, ScreenId> sms2RsScreenIdMap_;
-        mutable std::shared_mutex mutex_;
+        mutable std::shared_mutex screenIdMapMutex_;
     };
 
     RSInterfaces& rsInterface_;
