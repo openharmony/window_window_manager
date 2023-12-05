@@ -771,7 +771,7 @@ WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSessio
     sptr<WindowSessionProperty> property)
 {
     if (property == nullptr) {
-        WLOGFD"[WMSDialog] Property is null, no need to update parent info");
+        WLOGFD("[WMSDialog] Property is null, no need to update parent info");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (sceneSession == nullptr) {
