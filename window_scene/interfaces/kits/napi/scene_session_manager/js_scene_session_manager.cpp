@@ -398,7 +398,7 @@ napi_value JsSceneSessionManager::GetRootSceneSession(napi_env env, napi_callbac
 
 napi_value JsSceneSessionManager::RequestSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]RequestSceneSession");
+    WLOGD("[NAPI]RequestSceneSession");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestSceneSession(env, info) : nullptr;
 }
@@ -524,7 +524,7 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
 
 napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]RequestFocusStatus");
+    WLOGD("[NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }
@@ -891,7 +891,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OnRequestSceneSession");
+    WLOGD("[NAPI]OnRequestSceneSession");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
