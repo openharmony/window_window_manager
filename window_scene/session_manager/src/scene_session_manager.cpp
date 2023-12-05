@@ -88,6 +88,7 @@
 #include "perform_reporter.h"
 #include "pip_util.h"
 #include "focus_change_info.h"
+#include "anr_manager.h"
 
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
@@ -213,9 +214,25 @@ void SceneSessionManager::Init()
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
-
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
+    RegisterAppListener();
+}
+
+void SceneSessionManager::RegisterAppListener()
+{
+    appAnrListener_ = new (std::nothrow) AppAnrListener();
+    auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient_ == nullptr) {
+        WLOGFE("appMgrClient_ is nullptr.");
+    } else {
+        auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
+        if (flag != ERR_OK) {
+            WLOGFE("Register app debug listener failed.");
+        } else {
+            WLOGFI("Register app debug listener success.");
+        }
+    }
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -6098,5 +6115,25 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+{
+    WLOGFI("AppAnrListener OnAppDebugStarted");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
+        return;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
+}
+
+void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+{
+    WLOGFI("AppAnrListener OnAppDebugStoped");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
+        return;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 } // namespace OHOS::Rosen
