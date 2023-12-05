@@ -214,21 +214,24 @@ void SceneSessionManager::Init()
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
-
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
+    RegisterAppListener();
+}
 
+void SceneSessionManager::RegisterAppListener()
+{
     appAnrListener_ = new (std::nothrow) AppAnrListener();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
     } else {
         auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
-        if (ret != ERR_OK) {
+        if (flag != ERR_OK) {
             WLOGFE("Register app debug listener failed.");
         } else {
             WLOGFI("Register app debug listener success.");
-    }
+        }
     }
 }
 
