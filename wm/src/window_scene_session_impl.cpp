@@ -447,6 +447,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("[WMSCom] window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
+        if (WindowHelper::IsMainWindow(type) && hostSession_ != nullptr) {
+            hostSession_->RaiseAppMainWindowToTop();
+        }
         NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }

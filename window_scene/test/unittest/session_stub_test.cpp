@@ -147,6 +147,8 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->HandleRaiseAboveTarget(data, reply);
     ASSERT_EQ(0, res);
+    res = session_->HandleRaiseAppMainWindowToTop(data, reply);
+    ASSERT_EQ(5, res);
     res = session_->HandleBackPressed(data, reply);
     ASSERT_EQ(5, res);
     res = session_->HandleMarkProcessed(data, reply);

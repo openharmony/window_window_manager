@@ -594,6 +594,21 @@ void SceneSession::NotifyPropertyWhenConnect()
     OnShowWhenLocked(IsShowWhenLocked());
 }
 
+WSError SceneSession::RaiseAppMainWindowToTop()
+{
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->NotifyRequestFocusStatusNotifyManager(true);
+        session->NotifyClick();
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::OnNeedAvoid(bool status)
 {
     PostTask([weakThis = wptr(this), status]() {
