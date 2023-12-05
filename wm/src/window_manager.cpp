@@ -81,7 +81,7 @@ public:
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    WLOGFD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -96,7 +96,7 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
 
 void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    WLOGFD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -677,7 +677,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         WLOGFE("focusChangeInfo is nullptr.");
         return;
     }
-    WLOGFD("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    WLOGFD("[WMSFocus]window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {

@@ -1664,9 +1664,9 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
 
 WSError Session::UpdateFocus(bool isFocused)
 {
-    WLOGFD("Session update focus id: %{public}d", GetPersistentId());
+    WLOGFD("[WMSFocus]Update focus id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (isFocused_ == isFocused) {
-        WLOGFD("Session focus do not change: [%{public}d]", isFocused);
+        WLOGFD("[WMSFocus]Session focus do not change");
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
@@ -1683,6 +1683,7 @@ WSError Session::UpdateFocus(bool isFocused)
 
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
+    WLOGFD("[WMSFocus]Notify focus, id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
