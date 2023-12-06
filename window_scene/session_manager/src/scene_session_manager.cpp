@@ -5091,14 +5091,25 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
     }
     if (sceneSession->GetVisible()) {
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+#ifdef MEMMGR_WINDOW_ENABLE
+        std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
+#endif
         sceneSession->SetVisible(false);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
             WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
+#ifdef MEMMGR_WINDOW_ENABLE
+        memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
+            session->GetCallingUid(), false));
+#endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
         CheckAndNotifyWaterMarkChangedResult();
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+#ifdef MEMMGR_WINDOW_ENABLE
+        WLOGD("Notify memMgrWindowInfos changed start");
+        Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
+#endif
     }
 }
 
