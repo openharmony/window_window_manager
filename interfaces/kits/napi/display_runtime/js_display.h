@@ -22,6 +22,7 @@
 
 #include "cutout_info.h"
 #include "display.h"
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -71,6 +72,7 @@ public:
     static napi_value HasImmersiveWindow(napi_env env, napi_callback_info info);
     static napi_value GetSupportedColorSpaces(napi_env env, napi_callback_info info);
     static napi_value GetSupportedHDRFormats(napi_env env, napi_callback_info info);
+    static napi_value GetAvailableArea(napi_env env, napi_callback_info info);
 
 private:
     sptr<Display> display_ = nullptr;
@@ -78,6 +80,7 @@ private:
     napi_value OnHasImmersiveWindow(napi_env env, napi_callback_info info);
     napi_value OnGetSupportedColorSpaces(napi_env env, napi_callback_info info);
     napi_value OnGetSupportedHDRFormats(napi_env env, napi_callback_info info);
+    napi_value OnGetAvailableArea(napi_env env, napi_callback_info info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

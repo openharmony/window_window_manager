@@ -92,6 +92,15 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
 
+    DMRect GetAvailableArea()
+    {
+        return availableArea_;
+    }
+
+    void SetAvailableArea(DMRect area)
+    {
+        availableArea_ = area;
+    }
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -124,6 +133,7 @@ private:
     void UpdateXDpi();
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
+    DMRect availableArea_;
 };
 } // namespace OHOS::Rosen
 

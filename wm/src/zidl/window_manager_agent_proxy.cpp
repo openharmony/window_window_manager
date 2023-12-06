@@ -139,6 +139,33 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     }
 }
 
+void WindowManagerAgentProxy::UpdateWindowDrawingContentInfo(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(windowDrawingContentInfos.size()))) {
+        WLOGFE("write windowDrawingContentInfos size failed");
+        return;
+    }
+    for (auto& info : windowDrawingContentInfos) {
+        if (!data.WriteParcelable(info)) {
+            WLOGFE("Write windowDrawingContentInfos failed");
+            return;
+        }
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE), data, reply,
+        option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     MessageParcel data;

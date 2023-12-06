@@ -32,16 +32,18 @@ JsWindowRegisterManager::JsWindowRegisterManager()
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        { WINDOW_SIZE_CHANGE_CB,       &JsWindowRegisterManager::ProcessWindowChangeRegister          },
-        { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister },
-        { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
-        { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
-        { WINDOW_EVENT_CB,             &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
-        { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
-        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          },
-        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            },
-        { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister     },
-        { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister  },
+        { WINDOW_SIZE_CHANGE_CB,       &JsWindowRegisterManager::ProcessWindowChangeRegister               },
+        { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister      },
+        { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister            },
+        { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
+        { WINDOW_EVENT_CB,             &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
+        { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister         },
+        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister               },
+        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister                 },
+        { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister          },
+        { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
+        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
+        { WINDOW_VISIBILITY_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -204,6 +206,23 @@ WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowLi
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    WLOGD("called");
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowVisibilityChangedListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowVisibilityChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowVisibilityChangeListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
@@ -352,6 +371,23 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         jsCbMap_.erase(type);
     }
     return WmErrorCode::WM_OK;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStatusChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

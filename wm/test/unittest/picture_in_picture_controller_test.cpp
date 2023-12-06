@@ -69,12 +69,12 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow());
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->window_ = mw;
     EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow());
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow());
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
 }
 
 /**
@@ -89,13 +89,13 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100, nullptr);
     ASSERT_EQ(PipWindowState::STATE_UNDEFINED, pipControl::GetControllerState());
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, false));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, false, StopPipType::NULL_STOP));
     pipControl->window_ = mw;
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, false));
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, false, StopPipType::NULL_STOP));
     ASSERT_EQ(PipWindowState::STATE_UNDEFINED, pipControl::GetControllerState());
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(false));
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, false, StopPipType::NULL_STOP));
     ASSERT_EQ(PipWindowState::STATE_STOPPED, pipControl::GetControllerState());
 }
 }

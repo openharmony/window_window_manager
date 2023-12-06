@@ -41,6 +41,12 @@ void WindowManagerAgent::UpdateWindowVisibilityInfo(const std::vector<sptr<Windo
     SingletonContainer::Get<WindowManager>().UpdateWindowVisibilityInfo(visibilityInfos);
 }
 
+void WindowManagerAgent::UpdateWindowDrawingContentInfo(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
+{
+    SingletonContainer::Get<WindowManager>().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+}
+
 void WindowManagerAgent::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     SingletonContainer::Get<WindowManager>().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);

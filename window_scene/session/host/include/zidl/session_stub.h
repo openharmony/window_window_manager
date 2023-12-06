@@ -57,7 +57,8 @@ private:
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
-    int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
+    int HandleRaiseAppMainWindowToTop(MessageParcel &data, MessageParcel &reply);
+    int HandlePendingSessionActivation(MessageParcel &data, MessageParcel &reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
 

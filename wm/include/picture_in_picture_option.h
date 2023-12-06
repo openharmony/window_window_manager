@@ -37,7 +37,7 @@ public:
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
 private:
-    void* contextPtr_;
+    void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
     std::string navigationId_ = "";
     uint32_t contentWidth_ = 0;

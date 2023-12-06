@@ -21,22 +21,39 @@
 #include <event_handler.h>
 #include <refbase.h>
 #include <mutex>
+#include <ability_context.h>
 #include "picture_in_picture_option.h"
 #include "window.h"
 #include "wm_common.h"
 #include "picture_in_picture_interface.h"
 #include "xcomponent_controller.h"
+#include "pip_report.h"
 
 namespace OHOS {
 namespace Rosen {
+
+enum class StartPipType : uint32_t {
+    NULL_START = 0,
+    USER_START = 1,
+    AUTO_START = 2,
+    ONE_STEP_START = 3,
+};
+
+enum class StopPipType : uint32_t {
+    NULL_STOP = 0,
+    USER_STOP = 1,
+    OTHER_PACKAGE_STOP = 2,
+    PACKAGE_STOP = 3,
+};
+
 using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
     PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
-    WMError StartPictureInPicture();
-    WMError StopPictureInPicture(bool destroyWindow, bool needAnim);
+    WMError StartPictureInPicture(StartPipType startType);
+    WMError StopPictureInPicture(bool destroyWindow, bool needAnim, StopPipType stopPipType);
     sptr<Window> GetPipWindow();
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
@@ -63,7 +80,7 @@ public:
     };
 private:
     WMError CreatePictureInPictureWindow();
-    WMError ShowPictureInPictureWindow();
+    WMError ShowPictureInPictureWindow(StartPipType startType);
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
     wptr<PictureInPictureController> weakRef_ = nullptr;
