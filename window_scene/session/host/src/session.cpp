@@ -1299,6 +1299,14 @@ void Session::HandlePointDownDialog(int32_t pointAction)
     }
 }
 
+void Session::NotifyPointerEventToRs(int32_t pointAction)
+{
+    if ((pointAction == MMI::PointerEvent::POINTER_ACTION_UP) |
+        (pointAction == MMI::PointerEvent::POINTER_ACTION_DOWN)) {
+        RSInterfaces::GetInstance().NotifyTouchEvent(pointAction);
+    }
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
@@ -1310,6 +1318,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     auto pointerAction = pointerEvent->GetPointerAction();
+    NotifyPointerEventToRs(pointerAction);
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             HandlePointDownDialog(pointerAction);

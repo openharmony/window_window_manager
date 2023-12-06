@@ -400,6 +400,7 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     void HandlePointDownDialog(int32_t pointAction);
+    void NotifyPointerEventToRs(int32_t pointAction);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
