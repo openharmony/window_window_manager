@@ -1045,6 +1045,7 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
 
 DMError AbstractScreenController::StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (ScreenId screenId : screenIds) {
         WLOGFI("ScreenId: %{public}" PRIu64"", screenId);
         auto screen = GetAbstractScreen(screenId);
