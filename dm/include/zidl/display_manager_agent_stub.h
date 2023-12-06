@@ -31,6 +31,22 @@ public:
 
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
+private:
+    void NotifyDisplaypowerevent();
+    void NotifyDisplaystateChanged();
+    void ScreenConnect();
+    void ScreenDisconnect();
+    void ScreenChanged();
+    void ScreenGroupChanged();
+    void DisplayConnect();
+    void DisplayDisconnect();
+    void DisplayChanged();
+    void ScreenShot();
+    void PrivateWindow();
+    void FoldStatusChanged();
+    void DisplayChangeInfoChanged();
+    void DisplayModechanged();
+    void AvailableAreaChanged();
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
