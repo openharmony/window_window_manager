@@ -61,13 +61,6 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
     const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
     SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
-    sptr<Window> callWindow = Window::GetTopWindowWithContext(context->lock());
-    if (callWindow == nullptr) {
-        WLOGFE("Get call Window failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
-    mainWindowId_ = callWindow->GetWindowId();
-    mainWindow_ = callWindow;
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
         WLOGFE("Get WindowOption failed");
@@ -124,9 +117,8 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     PictureInPictureManager::SetActiveController(this);
-    SingletonContainer::Get<PiPReporter>()
-        .ReportPiPStartWindow(static_cast<int32_t>(startType),
-             pipOption_->GetPipTemplate(), SUCCESS, "show pip success");
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+        pipOption_->GetPipTemplate(), SUCCESS, "show pip success");
     return WMError::WM_OK;
 }
 
@@ -174,13 +166,16 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         // otherwise, stop the previous one
         PictureInPictureManager::DoClose(true, false);
     }
+    return StartPictureInPictureInner(startType);
+}
+
+WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType) {
     WMError errCode = CreatePictureInPictureWindow();
     if (errCode != WMError::WM_OK) {
         curState_ = PipWindowState::STATE_UNDEFINED;
         WLOGFE("Create pip window failed");
-        SingletonContainer::Get<PiPReporter>()
-            .ReportPiPStartWindow(static_cast<int32_t>(startType),
-                pipOption_->GetPipTemplate(), FAILED, "Create pip window failed");
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+            pipOption_->GetPipTemplate(), FAILED, "Create pip window failed");
         return errCode;
     }
     errCode = ShowPictureInPictureWindow(startType);
@@ -227,8 +222,12 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
+    return StopPictureInPictureInner(needAnim, stopPipType);
+}
+
+WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, StopPipType stopType) {
     window_->NotifyPrepareClosePiPWindow();
-    auto task = [weakThis = wptr(this), currentStopType = stopPipType, currentPipOption = pipOption_]() {
+    auto task = [weakThis = wptr(this), currentStopType = stopType, currentPipOption = pipOption_]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -246,7 +245,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
                 session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
             }
             SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-                currentPipOption->GetPipTemplate(), FAILED, "Window destroy failed");
+                currentPipOption->GetPipTemplate(), FAILED,"Window destroy failed");
             return WMError::WM_ERROR_PIP_DESTROY_FAILED;
         }
         if (session->pipLifeCycleListener_ != nullptr) {
@@ -257,7 +256,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
         session->window_ = nullptr;
         session->curState_ = PipWindowState::STATE_STOPPED;
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-            currentPipOption->GetPipTemplate(), SUCCESS, "pip window stop success");
+            currentPipOption->GetPipTemplate(), SUCCESS,"pip window stop success");
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
