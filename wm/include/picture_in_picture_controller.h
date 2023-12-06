@@ -81,6 +81,8 @@ public:
 private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow(StartPipType startType);
+    WMError StartPictureInPictureInner(StartPipType startType);
+    WMError StopPictureInPictureInner(bool needAnim, StopPipType stopType);
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
     wptr<PictureInPictureController> weakRef_ = nullptr;
