@@ -16,6 +16,7 @@
 #include "zidl/screen_session_manager_proxy.h"
 
 #include "common/rs_rect.h"
+#include "dm_common.h"
 #include "transaction/rs_marshalling_helper.h"
 
 #include "marshalling_helper.h"
@@ -953,7 +954,7 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId
         WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: Write screenId/bufferRotation failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BUFFER_ROTATION),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION),
         data, reply, option) != ERR_NONE) {
         WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -2067,5 +2068,53 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect area)
+{
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_) ||
+        !data.WriteInt32(area.height_)) {
+        WLOGFE("Write area failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_AVAILABLE_AREA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)
+{
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    int32_t posX = reply.ReadInt32();
+    int32_t posY = reply.ReadInt32();
+    uint32_t width = reply.ReadUint32();
+    uint32_t height = reply.ReadUint32();
+    area = {posX, posY, width, height};
+    return ret;
 }
 } // namespace OHOS::Rosen

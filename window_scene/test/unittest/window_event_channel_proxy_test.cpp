@@ -25,10 +25,12 @@
 #include <pointer_event.h>
 #include "window_manager_hilog.h"
 
-
 using namespace testing;
 using namespace testing::ext;
-
+using namespace std;
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 namespace OHOS {
 namespace Rosen {
 class WindowEventChannelProxyTest : public testing::Test {
@@ -135,6 +137,86 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest |
     ASSERT_EQ(WSError::WS_OK, res);
     focusState = true;
     res = windowEventChannelProxy_->TransferFocusState(focusState);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfo
+ * @tc.desc: test function : TransferSearchElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferSearchElementInfo, Function | SmallTest | Level1)
+{
+    int32_t elementId = 0;
+    int32_t mode = 0;
+    int32_t baseParent = 0;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+
+    WSError res = windowEventChannelProxy_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText
+ * @tc.desc: test function : TransferSearchElementInfosByText
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferSearchElementInfosByText, Function | SmallTest | Level1)
+{
+    int32_t elementId = 0;
+    string text;
+    int32_t baseParent = 0;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+
+    WSError res = windowEventChannelProxy_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo
+ * @tc.desc: test function : TransferFindFocusedElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferFindFocusedElementInfo, Function | SmallTest | Level1)
+{
+    int32_t elementId = 0;
+    int32_t focusType = 0;
+    int32_t baseParent = 0;
+    Accessibility::AccessibilityElementInfo info;
+
+    WSError res = windowEventChannelProxy_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch
+ * @tc.desc: test function : TransferFocusMoveSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferFocusMoveSearch, Function | SmallTest | Level1)
+{
+    int32_t elementId = 0;
+    int32_t direction = 0;
+    int32_t baseParent = 0;
+    Accessibility::AccessibilityElementInfo info;
+
+    WSError res = windowEventChannelProxy_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: TransferExecuteAction
+ * @tc.desc: test function : TransferExecuteAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferExecuteAction, Function | SmallTest | Level1)
+{
+    int32_t elementId = 0;
+    map<string, string> actionArguments;
+    int32_t action = 0;
+    int32_t baseParent = 0;
+
+    WSError res = windowEventChannelProxy_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

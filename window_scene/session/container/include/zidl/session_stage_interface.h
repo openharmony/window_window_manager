@@ -93,6 +93,7 @@ public:
     virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
+    virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
@@ -104,11 +105,6 @@ public:
     {
         return WSErrorCode::WS_OK;
     }
-    virtual void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) = 0;
-    virtual bool GetDrawingContentState() const
-    {
-        return false;
-    };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

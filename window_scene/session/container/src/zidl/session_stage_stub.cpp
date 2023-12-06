@@ -71,8 +71,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifySessionBackground),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TITLE_POSITION_CHANGE),
         &SessionStageStub::HandleUpdateTitleInTargetPos),
-    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS),
-        &SessionStageStub::HandleWindowDrawingContentInfoChange),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE),
+        &SessionStageStub::HandleNotifyWindowVisibilityChange),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -260,6 +260,15 @@ int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyWindowVisibilityChange!");
+    bool isVisible = data.ReadBool();
+    WSError errCode = NotifyWindowVisibility(isVisible);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("NotifyForegroundInteractiveStatus!");
@@ -310,19 +319,6 @@ int SessionStageStub::HandleUpdateTitleInTargetPos(MessageParcel& data, MessageP
     int32_t height = data.ReadInt32();
     WSError errCode = UpdateTitleInTargetPos(isShow, height);
     reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleWindowDrawingContentInfoChange(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleWindowDrawingContentInfoChange!");
-    WindowDrawingContentInfo info;
-    info.windowId_ = data.ReadUint32();
-    info.pid_ = data.ReadInt32();
-    info.uid_ = data.ReadInt32();
-    info.drawingContentState_ = data.ReadBool();
-    info.windowType_ = static_cast<WindowType>(data.ReadUint32());
-    UpdateWindowDrawingContentInfo(info);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

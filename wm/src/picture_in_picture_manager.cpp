@@ -179,7 +179,13 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool needAnim)
     if (!HasActiveController()) {
         return;
     }
-    activeController_->StopPictureInPicture(destroyWindow, needAnim);
+    StopPipType currentStopType = StopPipType::NULL_STOP;
+    if (needAnim) {
+        currentStopType = StopPipType::USER_STOP;
+    } else {
+        currentStopType = StopPipType::OTHER_PACKAGE_STOP;
+    }
+    activeController_->StopPictureInPicture(destroyWindow, needAnim, currentStopType);
 }
 
 void PictureInPictureManager::DoStartMove()
@@ -216,7 +222,8 @@ void PictureInPictureManager::AutoStartPipWindow()
         WLOGFE("autoStartController_ is null");
         return;
     }
-    autoStartController_->StartPictureInPicture();
+    autoStartController_ -> StartPictureInPicture(StartPipType::AUTO_START);
+}
 }
 }
 }

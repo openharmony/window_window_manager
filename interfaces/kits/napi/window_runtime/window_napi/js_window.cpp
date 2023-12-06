@@ -199,7 +199,7 @@ napi_value JsWindow::GetProperties(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetProperties");
+    WLOGD("GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
 }
@@ -304,7 +304,7 @@ napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_in
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAvoidArea");
+    WLOGD("GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
@@ -666,6 +666,20 @@ napi_value JsWindow::SetNeedKeepKeyboard(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetNeedKeepKeyboard(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetWindowLimits");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowLimits");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowLimits(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -908,7 +922,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env,info);
+    return HideWindowFunction(env, info);
 }
 
 napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
@@ -1389,7 +1403,14 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
-            auto objValue = CreateJsWindowPropertiesObject(env, weakWindow);
+            Rect drawableRect = g_emptyRect;
+            auto uicontent = weakWindow->GetUIContent();
+            if (uicontent == nullptr) {
+                WLOGFW("uicontent is nullptr");
+            } else {
+                uicontent->GetAppPaintSize(drawableRect);
+            }
+            auto objValue = CreateJsWindowPropertiesObject(env, weakWindow, drawableRect);
             if (objValue != nullptr) {
                 task.Resolve(env, objValue);
             } else {
@@ -1415,7 +1436,14 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFE("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, window);
+    Rect drawableRect = g_emptyRect;
+    auto uicontent = window->GetUIContent();
+    if (uicontent == nullptr) {
+        WLOGFW("uicontent is nullptr");
+    } else {
+        uicontent->GetAppPaintSize(drawableRect);
+    }
+    auto objValue = CreateJsWindowPropertiesObject(env, window, drawableRect);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
         window->GetWindowId(), window->GetWindowName().c_str());
     if (objValue != nullptr) {
@@ -3501,7 +3529,7 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WMError::WM_ERROR_INVALID_PARAM;
             }
@@ -3555,7 +3583,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
             uint32_t resultValue = 0;
             napi_get_value_uint32(env, nativeType, &resultValue);
             colorSpace = static_cast<ColorSpace>(resultValue);
-            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
                 WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
@@ -4513,7 +4541,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 {
     if (WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env,info);
+        return HideWindowFunction(env, info);
     }
 
     size_t argc = 4;
@@ -4590,6 +4618,119 @@ napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
     return objValue;
+}
+
+bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
+{
+    uint32_t data = 0;
+    if (ParseJsValue(jsObject, env, "maxWidth", data)) {
+        windowLimits.maxWidth_ = data;
+    } else {
+        WLOGFE("Failed to convert object to windowLimits");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "minWidth", data)) {
+        windowLimits.minWidth_ = data;
+    } else {
+        WLOGFE("Failed to convert object to windowLimits");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "maxHeight", data)) {
+        windowLimits.maxHeight_ = data;
+    } else {
+        WLOGFE("Failed to convert object to windowLimits");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "minHeight", data)) {
+        windowLimits.minHeight_ = data;
+    } else {
+        WLOGFE("Failed to convert object to windowLimits");
+        return false;
+    }
+    return true;
+}
+
+napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value nativeObj = argv[0];
+    if (nativeObj == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WindowLimits windowLimits;
+    if (!ParseWindowLimits(env, nativeObj, windowLimits)) {
+        WLOGFE("Failed to convert object to windowLimits");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowLimits.maxWidth_ < 0 || windowLimits.maxHeight_ < 0 ||
+        windowLimits.minWidth_ < 0 || windowLimits.minHeight_ < 0) {
+        WLOGFE("Width or height should be greater than or equal to 0");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, windowLimits](napi_env env, NapiAsyncTask& task, int32_t status) {
+            WindowLimits sizeLimits(windowLimits);
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowLimits(sizeLimits));
+            if (ret == WmErrorCode::WM_OK) {
+                auto objValue = GetWindowLimitsAndConvertToJsValue(env, sizeLimits);
+                if (objValue == nullptr) {
+                    task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                        "Window set window limits failed"));
+                } else {
+                    task.Resolve(env, objValue);
+                }
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window set window limits failed"));
+            }
+        };
+    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowLimits",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr or get invalid param");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WindowLimits windowLimits;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowLimits(windowLimits));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    auto objValue = GetWindowLimitsAndConvertToJsValue(env, windowLimits);
+    WLOGI("Windwo [%{public}u, %{public}s] get window limits end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+    if (objValue != nullptr) {
+        return objValue;
+    } else {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
 }
 
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
@@ -4679,6 +4820,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
     BindNativeFunction(env, object, "setNeedKeepKeyboard", moduleName, JsWindow::SetNeedKeepKeyboard);
+    BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
+    BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
 }
 }  // namespace Rosen
 }  // namespace OHOS

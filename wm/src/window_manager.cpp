@@ -52,10 +52,11 @@ public:
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
+        windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
-    void NotifyWindowDrawingContentInfoChanged(const WindowDrawingContentInfo& info);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -68,19 +69,19 @@ public:
     sptr<WindowManagerAgent> windowUpdateListenerAgent_;
     std::vector<sptr<IVisibilityChangedListener>> windowVisibilityListeners_;
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
+    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
+    sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
-    std::vector<sptr<IDrawingContentChangedListener>>windowDrawingContentListeners_;
-    sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    WLOGFD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -95,7 +96,7 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
 
 void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    WLOGFD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -165,6 +166,20 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
     for (auto& listener : visibilityChangeListeners) {
         WLOGD("Notify WindowVisibilityInfo to caller");
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
+{
+    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowDrawingContentChangeListeners = windowDrawingContentListeners_;
+    }
+    for (auto& listener : windowDrawingContentChangeListeners) {
+        WLOGFD("Notify windowDrawingContentInfo to caller");
+        listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
     }
 }
 
@@ -662,7 +677,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         WLOGFE("focusChangeInfo is nullptr.");
         return;
     }
-    WLOGFD("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    WLOGFD("[WMSFocus]window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
@@ -686,6 +701,12 @@ void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+}
+
+void WindowManager::UpdateWindowDrawingContentInfo(
+    const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const
+{
+    pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
 }
 
 WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
@@ -793,7 +814,7 @@ WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawing
     if (pImpl_->windowDrawingContentListenerAgent_ == nullptr) {
         pImpl_->windowDrawingContentListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
             pImpl_->windowDrawingContentListenerAgent_);
     }
     if (ret != WMError::WM_OK) {
@@ -826,7 +847,7 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowDrawingContentListeners_.empty() && pImpl_->windowDrawingContentListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
             pImpl_->windowDrawingContentListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowDrawingContentListenerAgent_ = nullptr;
@@ -835,25 +856,5 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
     return ret;
 }
 
-void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
-    const WindowDrawingContentInfo& windowDrawingContentInfos)
-{
-    std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        windowDrawingContentChangeListeners = windowDrawingContentListeners_;
-    }
-    for (auto& listener : windowDrawingContentChangeListeners) {
-        WLOGFD("Notify windowDrawingContentInfo to caller");
-        listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
-    }
-}
-
-void WindowManager::UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) const
-{
-    WLOGFD("NotifyWindowDrawingContentInfoChanged:pid%{public}d, windowId:%{public}u, drawingContentState:%{public}d",
-        info.pid_, info.windowId_, info.drawingContentState_);
-    pImpl_->NotifyWindowDrawingContentInfoChanged(info);
-}
 } // namespace Rosen
 } // namespace OHOS

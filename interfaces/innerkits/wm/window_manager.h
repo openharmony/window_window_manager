@@ -110,18 +110,18 @@ public:
 /**
  * @class IDrawingContentChangedListener
  *
- * @brief Listener to observe visibility changed.
+ * @brief Listener to observe drawing content changed.
  */
 class IDrawingContentChangedListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when window visibility changed.
+     * @brief Notify caller when window DrawingContent changed.
      *
-     * @param DrawingContentInfo Window visibility info.
+     * @param windowDrawingInfo Window DrawingContent info.
      */
-    virtual void OnWindowDrawingContentChanged(const WindowDrawingContentInfo& DrawingContentInfo) = 0;
+    virtual void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
+        windowDrawingInfo) = 0;
 };
-
 
 /**
  * @class AccessibilityWindowInfo
@@ -282,6 +282,22 @@ public:
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     /**
+ * @brief Register drawingcontent changed listener.
+ *
+ * @param listener IDrawingContentChangedListener.
+ * @return WM_OK means register success, others means register failed.
+ */
+    WMError RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
+
+    /**
+     * @brief Unregister drawingcontent changed listener.
+     *
+     * @param listener IDrawingContentChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
+
+    /**
      * @brief Register camera float window changed listener.
      *
      * @param listener ICameraFloatWindowChangedListener.
@@ -410,22 +426,6 @@ public:
     WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
 
     /**
-     * @brief Register drawingcontent changed listener.
-     *
-     * @param listener IDrawingContentChangedListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    WMError RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
-
-    /**
-     * @brief Unregister drawingcontent changed listener.
-     *
-     * @param listener IDrawingContentChangedListener.
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    WMError UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
-
-    /**
      * @brief NotifyWindowDrawingContentInfoChanged.
      *
      * @param info DrawingContent window info
@@ -457,6 +457,8 @@ private:
         WindowUpdateType type) const;
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
+    void UpdateWindowDrawingContentInfo(
+        const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;

@@ -18,6 +18,7 @@
 
 #include <parcel.h>
 #include <map>
+#include <float.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -575,6 +576,25 @@ using OnCallback = std::function<void(int64_t)>;
  */
 struct VsyncCallback {
     OnCallback onCallback;
+};
+
+struct WindowLimits {
+    uint32_t maxWidth_;
+    uint32_t maxHeight_;
+    uint32_t minWidth_;
+    uint32_t minHeight_;
+    float maxRatio_;
+    float minRatio_;
+    WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
+        minRatio_(0.0f) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth), minHeight_(minHeight),
+        maxRatio_(maxRatio), minRatio_(minRatio) {}
+
+    bool IsEmpty() const
+    {
+        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
 };
 
 /*

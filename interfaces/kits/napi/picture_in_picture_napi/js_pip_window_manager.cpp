@@ -41,10 +41,10 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value heightValue = nullptr;
     napi_value xComponentControllerValue = nullptr;
     void* contextPtr = nullptr;
-    std::string navigationId;
-    uint32_t templateType;
-    uint32_t width;
-    uint32_t height;
+    std::string navigationId = "";
+    uint32_t templateType = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
@@ -53,22 +53,10 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_unwrap(env, contextPtrValue, &contextPtr);
-    if (!ConvertFromJsValue(env, navigationIdValue, navigationId)) {
-        WLOGFE("Failed to convert navigationIdValue to stringType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, templateTypeValue, templateType)) {
-        WLOGFE("Failed to convert templateTypeValue to uint32_tType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, widthValue, width)) {
-        WLOGFE("Failed to convert widthValue to uint32_tType");
-        return -1;
-    }
-    if (!ConvertFromJsValue(env, heightValue, height)) {
-        WLOGFE("Failed to convert heightValue to uint32_tType");
-        return -1;
-    }
+    ConvertFromJsValue(env, navigationIdValue, navigationId);
+    ConvertFromJsValue(env, templateTypeValue, templateType);
+    ConvertFromJsValue(env, widthValue, width);
+    ConvertFromJsValue(env, heightValue, height);
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
     option.SetContext(contextPtr);

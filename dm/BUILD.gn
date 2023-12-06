@@ -19,6 +19,8 @@ config("libdm_private_config") {
     "include",
     "../dmserver/include",
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/interfaces/innerkits/include",
@@ -43,6 +45,7 @@ ohos_static_library("libdm_static") {
   }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
+    "../window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
     "src/display_manager_adapter.cpp",
@@ -62,7 +65,6 @@ ohos_static_library("libdm_static") {
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session_manager:session_manager",
   ]
 
   external_deps = [
@@ -89,6 +91,7 @@ ohos_shared_library("libdm") {
   }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
+    "../window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
     "src/display_manager_adapter.cpp",
@@ -105,7 +108,10 @@ ohos_shared_library("libdm") {
 
   public_configs = [ ":libdm_public_config" ]
 
-  deps = [ "../utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",

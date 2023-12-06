@@ -92,6 +92,10 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return CreateWindowWithSession(option, context, errCode);
     }
+    if (option->GetOnlySupportSceneBoard()) {
+        errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     sptr<WindowImpl> windowImpl = new(std::nothrow) WindowImpl(option);
     if (windowImpl == nullptr) {
         WLOGFE("malloc windowImpl failed");

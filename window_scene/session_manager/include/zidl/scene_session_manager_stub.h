@@ -80,6 +80,8 @@ private:
     int HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

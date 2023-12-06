@@ -50,7 +50,7 @@ private:
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
-    static void WriteStringToFile(uint32_t pid, const char* str);
+    static void WriteStringToFile(int32_t pid, const char* str);
 
     class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
