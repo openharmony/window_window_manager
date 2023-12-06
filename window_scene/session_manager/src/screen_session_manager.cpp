@@ -78,7 +78,6 @@ ScreenSessionManager::ScreenSessionManager()
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
     if (foldScreenFlag) {
         foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_);
-        foldScreenController_->LockDisplayStatus(true);
         rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
         SetFoldScreenPowerInit([&]() {
             int64_t timeStamp = 50;
@@ -119,7 +118,6 @@ ScreenSessionManager::ScreenSessionManager()
             } else {
                 WLOGFI("ScreenSessionManager Fold Screen Power Init, invalid active screen id");
             }
-            foldScreenController_->LockDisplayStatus(false);
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
