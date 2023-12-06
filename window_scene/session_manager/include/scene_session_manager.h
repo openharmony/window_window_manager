@@ -253,6 +253,7 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
+    WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
