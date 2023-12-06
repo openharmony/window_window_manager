@@ -156,7 +156,6 @@ void DualDisplayDevicePolicy::ReportFoldDisplayModeChange(FoldDisplayMode displa
 {
     int32_t mode = static_cast<int32_t>(displayMode);
     WLOGI("ReportFoldDisplayModeChange displayMode: %{public}d", mode);
-
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "DISPLAY_MODE",
