@@ -38,129 +38,63 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     }
     switch (code) {
         case TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT: {
-            DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
-            EventStatus status = static_cast<EventStatus>(data.ReadUint32());
-            NotifyDisplayPowerEvent(event, status);
+            NotifyDisplaypowerevent();
             break;
         }
         case TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED: {
-            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
-            DisplayId id = static_cast<DisplayId>(data.ReadUint64());
-            NotifyDisplayStateChanged(id, state);
+            NotifyDisplaystateChanged();
             break;
         }
         case TRANS_ID_ON_SCREEN_CONNECT: {
-            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
-            OnScreenConnect(screenInfo);
+            ScreenConnect();
             break;
         }
         case TRANS_ID_ON_SCREEN_DISCONNECT: {
-            ScreenId screenId;
-            if (!data.ReadUint64(screenId)) {
-                WLOGFE("Read ScreenId failed");
-                return -1;
-            }
-            OnScreenDisconnect(screenId);
+            ScreenDisconnect();
             break;
         }
         case TRANS_ID_ON_SCREEN_CHANGED: {
-            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                WLOGFE("Read ScreenChangeEvent failed");
-                return -1;
-            }
-            OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
+            ScreenChanged();
             break;
         }
         case TRANS_ID_ON_SCREENGROUP_CHANGED: {
-            std::string trigger;
-            if (!data.ReadString(trigger)) {
-                WLOGFE("Read trigger failed");
-                return -1;
-            }
-            std::vector<sptr<ScreenInfo>> screenInfos;
-            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
-                WLOGFE("Read ScreenInfo failed");
-                return -1;
-            }
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                WLOGFE("Read ScreenChangeEvent failed");
-                return -1;
-            }
-            OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
+            ScreenGroupChanged();
             break;
         }
         case TRANS_ID_ON_DISPLAY_CONNECT: {
-            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
-            OnDisplayCreate(displayInfo);
+            DisplayConnect();
             break;
         }
         case TRANS_ID_ON_DISPLAY_DISCONNECT: {
-            DisplayId displayId;
-            if (!data.ReadUint64(displayId)) {
-                WLOGFE("Read DisplayId failed");
-                return -1;
-            }
-            OnDisplayDestroy(displayId);
+            DisplayDisconnect();
             break;
         }
         case TRANS_ID_ON_DISPLAY_CHANGED: {
-            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                WLOGFE("Read DisplayChangeEvent failed");
-                return -1;
-            }
-            OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
+            DisplayChanged();
             break;
         }
         case TRANS_ID_ON_SCREEN_SHOT: {
-            sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
-            OnScreenshot(snapshotInfo);
+            ScreenShot();
             break;
         }
         case TRANS_ID_ON_PRIVATE_WINDOW: {
-            bool hasPrivate = data.ReadBool();
-            NotifyPrivateWindowStateChanged(hasPrivate);
+            PrivateWindow();
             break;
         }
         case TRANS_ID_ON_FOLD_STATUS_CHANGED: {
-            uint32_t foldStatus;
-            if (!data.ReadUint32(foldStatus)) {
-                WLOGFE("Read FoldStatus failed");
-                return -1;
-            }
-            NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
+            FoldStatusChanged();
             break;
         }
         case TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED: {
-            sptr<DisplayChangeInfo> info;
-            info = DisplayChangeInfo::Unmarshalling(data);
-            if (!info) {
-                WLOGFE("Read DisplayChangeInfo failed");
-                return -1;
-            }
-            NotifyDisplayChangeInfoChanged(info);
+            DisplayChangeInfoChanged();
             break;
         }
         case TRANS_ID_ON_DISPLAY_MODE_CHANGED: {
-            uint32_t displayMode;
-            if (!data.ReadUint32(displayMode)) {
-                WLOGFE("Read FoldDisplayMode failed");
-                return -1;
-            }
-            NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
+            DisplayModechanged();
             break;
         }
         case TRANS_ID_ON_AVAILABLE_AREA_CHANGED: {
-            DMRect rect;
-            rect.posX_ = data.ReadInt32();
-            rect.posY_ = data.ReadInt32();
-            rect.width_ = data.ReadUint32();
-            rect.height_ = data.ReadUint32();
-            NotifyAvailableAreaChanged(rect);
+            AvailableAreaChanged();
             break;
         }
         default: {
@@ -170,4 +104,146 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     }
     return 0;
 }
+
+void DisplayManagerAgentStub::NotifyDisplaypowerevent()
+{
+    DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
+    EventStatus status = static_cast<EventStatus>(data.ReadUint32());
+    NotifyDisplayPowerEvent(event, status);
+}
+
+void DisplayManagerAgentStub::NotifyDisplaystateChanged()
+{
+    DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+    DisplayId id = static_cast<DisplayId>(data.ReadUint64());
+    NotifyDisplayStateChanged(id, state);
+}
+
+void DisplayManagerAgentStub::ScreenConnect()
+{
+    sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+    OnScreenConnect(screenInfo);
+}
+
+void DisplayManagerAgentStub::ScreenDisconnect()
+{
+    ScreenId screenId;
+    if (!data.ReadUint64(screenId)) {
+        WLOGFE("Read ScreenId failed");
+        return -1;
+    }
+    OnScreenDisconnect(screenId);
+}
+
+void DisplayManagerAgentStub::ScreenChanged()
+{
+    sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        WLOGFE("Read ScreenChangeEvent failed");
+        return -1;
+    }
+    OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
+}
+
+void DisplayManagerAgentStub::ScreenGroupChanged()
+{
+    std::string trigger;
+    if (!data.ReadString(trigger)) {
+        WLOGFE("Read trigger failed");
+        return -1;
+    }
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+        WLOGFE("Read ScreenInfo failed");
+        return -1;
+    }
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        WLOGFE("Read ScreenChangeEvent failed");
+        return -1;
+    }
+    OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
+}
+
+void DisplayManagerAgentStub::DisplayConnect()
+{
+    sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+    OnDisplayCreate(displayInfo);
+}
+
+void DisplayManagerAgentStub::DisplayDisconnect()
+{
+    DisplayId displayId;
+    if (!data.ReadUint64(displayId)) {
+        WLOGFE("Read DisplayId failed");
+        return -1;
+    }
+    OnDisplayDestroy(displayId);
+}
+
+void DisplayManagerAgentStub::DisplayChanged()
+{
+    sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        WLOGFE("Read DisplayChangeEvent failed");
+        return -1;
+    }
+    OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
+}
+
+void DisplayManagerAgentStub::ScreenShot()
+{
+    sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
+    OnScreenshot(snapshotInfo);
+}
+
+void DisplayManagerAgentStub::PrivateWindow()
+{
+    bool hasPrivate = data.ReadBool();
+    NotifyPrivateWindowStateChanged(hasPrivate);
+}
+
+void DisplayManagerAgentStub::FoldStatusChanged()
+{
+    uint32_t foldStatus;
+    if (!data.ReadUint32(foldStatus)) {
+        WLOGFE("Read FoldStatus failed");
+        return -1;
+    }
+    NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
+}
+
+void DisplayManagerAgentStub::DisplayChangeInfoChanged()
+{
+    sptr<DisplayChangeInfo> info;
+    info = DisplayChangeInfo::Unmarshalling(data);
+    if (!info) {
+        WLOGFE("Read DisplayChangeInfo failed");
+        return -1;
+    }
+    NotifyDisplayChangeInfoChanged(info);
+}
+
+void DisplayManagerAgentStub::DisplayModechanged()
+{
+    uint32_t displayMode;
+    if (!data.ReadUint32(displayMode)) {
+        WLOGFE("Read FoldDisplayMode failed");
+        return -1;
+    }
+    NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
+}
+
+void DisplayManagerAgentStub::AvailableAreaChanged()
+{
+    DMRect rect;
+    rect.posX_ = data.ReadInt32();
+    rect.posY_ = data.ReadInt32();
+    rect.width_ = data.ReadUint32();
+    rect.height_ = data.ReadUint32();
+    NotifyAvailableAreaChanged(rect);
+}
+
 } // namespace OHOS::Rosen
