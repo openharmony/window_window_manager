@@ -12,12 +12,15 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 group("window_scene_napi_packages") {
   public_deps = [
     "scene_session_manager:scenesessionmanager_napi",
     "screen_session_manager:screensessionmanager_napi",
-    "session_manager_service:sessionmanagerservice_napi",
     "transaction_manager:transactionmanager_napi",
   ]
+  if (scene_board_enabled) {
+    public_deps += [ "session_manager_service:sessionmanagerservice_napi" ]
+  }
 }
