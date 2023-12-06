@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 
+#include <shared_mutex>
 #include <system_ability.h>
 
 #include "common/include/task_scheduler.h"
@@ -255,6 +256,7 @@ private:
         ~ScreenIdManager() = default;
         WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
         ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        void UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId);
         bool DeleteScreenId(ScreenId smsScreenId);
         bool HasRsScreenId(ScreenId smsScreenId) const;
         bool ConvertToRsScreenId(ScreenId, ScreenId&) const;
@@ -262,9 +264,11 @@ private:
         bool ConvertToSmsScreenId(ScreenId, ScreenId&) const;
         ScreenId ConvertToSmsScreenId(ScreenId) const;
 
+    private:
         std::atomic<ScreenId> smsScreenCount_ {2};
         std::map<ScreenId, ScreenId> rs2SmsScreenIdMap_;
         std::map<ScreenId, ScreenId> sms2RsScreenIdMap_;
+        mutable std::shared_mutex screenIdMapMutex_;
     };
 
     RSInterfaces& rsInterface_;
