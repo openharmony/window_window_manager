@@ -226,4 +226,3 @@ void PictureInPictureManager::AutoStartPipWindow()
 }
 }
 }
-}

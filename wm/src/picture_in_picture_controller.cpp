@@ -148,7 +148,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
     sptr<Window> callWindow = Window::GetTopWindowWithContext(context->lock());
     if (callWindow == nullptr) {
-        WLOGFE(Get call window failed);
+        WLOGFE("Get call window failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     mainWindowId_ = callWindow->GetWindowId();
@@ -159,11 +159,11 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
             PictureInPictureManager::DoClose(false, false);
-            mainWindowXComponentController = pipOption_->GetXComponentController();
+            mainWindowXComponentController_ = pipOption_->GetXComponentController();
             UpdateXComponentPositionAndSize();
-            UpdateContentSize(windowRect_.width, windowRect_.height);
+            UpdateContentSize(windowRect_.width_, windowRect_.height_);
             PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), this);
-            WMError err = ShowPictureInPictureWindow();
+            WMError err = ShowPictureInPictureWindow(startType);
             if (err != WMError::WM_OK) {
                 curState_ = PipWindowState::STATE_UNDEFINED;
             } else {
