@@ -167,7 +167,7 @@ struct SessionInfo {
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    int32_t resultCode;
+    int32_t resultCode = -1;
     int32_t requestCode;
     int32_t errorCode;
     std::string errorReason;
