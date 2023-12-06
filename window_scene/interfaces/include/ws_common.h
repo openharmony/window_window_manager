@@ -386,5 +386,25 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
 };
+
+/**
+ * @brief System animaged scene type.
+ */
+enum class SystemAnimatedSceneType : uint32_t {
+    SCENE_ENTER_MISSION_CENTER,
+    SCENE_DISPLAY_MISSION_CENTER,
+    SCENE_EXIT_MISSION_CENTER,
+    SCENE_TFU_WINDOW_DISPLAY, // The three-finger-up window display
+    SCENE_TFU_WINDOW_DISAPPEAR, // The three-finger-up window disappears
+    SCENE_ENTER_FULL_SCREEN_WINDOW,
+    SCENE_EXIT_FULL_SCREEN_WINDOW,
+    SCENE_ENTER_MAX_WINDOW,
+    SCENE_EXIT_MAX_WINDOW,
+    SCENE_ENTER_SPLIT_SCREEN,
+    SCENE_EXIT_SPLIT_SCREEN,
+    SCENE_ENTER_APP_CENTER,
+    SCENE_EXIT_APP_CENTER,
+    SCENE_UNKNOWN,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
