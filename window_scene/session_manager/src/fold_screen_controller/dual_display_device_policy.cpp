@@ -73,6 +73,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             return;
         }
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+        ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
                 ChangeScreenDisplayModeToMain(screenSession);
@@ -149,6 +150,22 @@ void DualDisplayDevicePolicy::LockDisplayStatus(bool locked)
 {
     WLOGI("DualDisplayDevicePolicy LockDisplayStatus locked: %{public}d", locked);
     lockDisplayStatus_ = locked;
+}
+
+void DualDisplayDevicePolicy::ReportFoldDisplayModeChange(FoldDisplayMode displayMode)
+{
+    int32_t mode = static_cast<int32_t>(displayMode);
+    WLOGI("ReportFoldDisplayModeChange displayMode: %{public}d", mode);
+
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "DISPLAY_MODE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "FOLD_DISPLAY_MODE", mode);
+
+    if (ret != 0) {
+        WLOGE("ReportFoldDisplayModeChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
 }
 
 void DualDisplayDevicePolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
