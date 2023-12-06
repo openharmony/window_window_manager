@@ -253,8 +253,7 @@ HWTEST_F(WindowInnerManagerTest, UpdateInnerWindow, Function | SmallTest | Level
 HWTEST_F(WindowInnerManagerTest, TerminateAbility, Function | SmallTest | Level2)
 {
     wim_->isRecentHolderEnable_ = true;
-    sptr<WindowNode> node = new WindowNode();
-    wptr<WindowNode> node1 = node;
+    wptr<WindowNode> node1 = nullptr;
     wim_->TerminateAbility(node1);
     ASSERT_EQ(wim_->isRecentHolderEnable_, true);
 }
@@ -267,8 +266,7 @@ HWTEST_F(WindowInnerManagerTest, TerminateAbility, Function | SmallTest | Level2
 HWTEST_F(WindowInnerManagerTest, CloseAbility, Function | SmallTest | Level2)
 {
     wim_->isRecentHolderEnable_ = true;
-    sptr<WindowNode> node = new WindowNode();
-    wptr<WindowNode> node1 = node;
+    wptr<WindowNode> node1 = nullptr;
     wim_->CloseAbility(node1);
     ASSERT_EQ(wim_->isRecentHolderEnable_, true);
 }
@@ -281,8 +279,7 @@ HWTEST_F(WindowInnerManagerTest, CloseAbility, Function | SmallTest | Level2)
 HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, Function | SmallTest | Level2)
 {
     wim_->isRecentHolderEnable_ = true;
-    sptr<WindowNode> node = new WindowNode();
-    wptr<WindowNode> node1 = node;
+    wptr<WindowNode> node1 = nullptr;
     wim_->CompleteFirstFrameDrawing(node1);
     ASSERT_EQ(wim_->isRecentHolderEnable_, true);
 }
@@ -295,9 +292,8 @@ HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, Function | SmallTest
 HWTEST_F(WindowInnerManagerTest, UpdateMissionSnapShot, Function | SmallTest | Level2)
 {
     wim_->isRecentHolderEnable_ = true;
-    sptr<WindowNode> node = new WindowNode();
-    wptr<WindowNode> node1 = node;
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    wptr<WindowNode> node1 = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     wim_->UpdateMissionSnapShot(node1, pixelMap);
     ASSERT_EQ(wim_->isRecentHolderEnable_, true);
 }
