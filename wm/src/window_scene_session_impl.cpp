@@ -2129,7 +2129,7 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         // set client window mode if success.
         property_->SetWindowMode(mode);
         UpdateTitleButtonVisibility();
-        UpdateDecorEnable(true);
+        UpdateDecorEnable(true, mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }

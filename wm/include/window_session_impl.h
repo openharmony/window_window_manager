@@ -181,7 +181,7 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void ClearListenersById(int32_t persistentId);
     WMError WindowSessionCreateCheck();
-    void UpdateDecorEnable(bool needNotify = false);
+    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
