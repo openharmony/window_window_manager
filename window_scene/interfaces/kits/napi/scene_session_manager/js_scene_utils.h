@@ -159,6 +159,8 @@ const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSI
 };
 
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
+bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
+bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value GetWindowRectIntValue(napi_env env, int val);
