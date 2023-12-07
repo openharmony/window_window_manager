@@ -331,6 +331,10 @@ void SceneSessionManager::ConfigWindowSceneXml()
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFI("run SetSessionContinueState");
     auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
