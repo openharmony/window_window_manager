@@ -387,14 +387,14 @@ void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
-void WindowSessionProperty::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+void WindowSessionProperty::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
-    isNeedKeepKeyboard_ = isNeedKeepKeyboard;
+    keepKeyboardFlag_ = keepKeyboardFlag;
 }
 
-bool WindowSessionProperty::IsNeedKeepKeyboard() const
+bool WindowSessionProperty::GetKeepKeyboardFlag() const
 {
-    return isNeedKeepKeyboard_;
+    return keepKeyboardFlag_;
 }
 
 void WindowSessionProperty::SetCallingWindow(uint32_t windowId)

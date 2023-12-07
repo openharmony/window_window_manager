@@ -2014,14 +2014,14 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
-WMError WindowSceneSessionImpl::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     if (property_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    property_->SetNeedKeepKeyboard(isNeedKeepKeyboard);
+    property_->KeepKeyboardOnFocus(keepKeyboardFlag);
 
-    return WMError::WM_OK;
+    return WmErrorCode::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
