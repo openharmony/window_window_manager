@@ -32,8 +32,8 @@ public:
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
 private:
-    int32_t ProcNotifyDisplaypowerevent(MessageParcel& data);
-    int32_t ProcNotifyDisplaystateChanged(MessageParcel& data);
+    int32_t ProcNotifyDisplayPowerEvent(MessageParcel& data);
+    int32_t ProcNotifyDisplayStateChanged(MessageParcel& data);
     int32_t ProcScreenConnect(MessageParcel& data);
     int32_t ProcScreenDisconnect(MessageParcel& data);
     int32_t ProcScreenChanged(MessageParcel& data);
