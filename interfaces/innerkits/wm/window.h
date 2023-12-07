@@ -1534,7 +1534,10 @@ public:
      * @param property system bar prop,include content color, background color
      * @return WMError
      */
-    virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) { return WMError::WM_OK; }
+    virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
