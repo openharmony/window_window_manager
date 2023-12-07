@@ -570,12 +570,12 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
 }
 
 bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-                        napi_env env, napi_callback_info info, sptr<Window>& window)
+                          napi_env env, napi_callback_info info, sptr<Window>& window)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3 ) {
+    if (argc < 2) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return false;
     }

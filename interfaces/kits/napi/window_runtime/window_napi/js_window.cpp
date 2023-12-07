@@ -2100,19 +2100,22 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         WmErrorCode ret = WmErrorCode::WM_OK;
         if (name.compare("status") == 0) {
             ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
-                    WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+                WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
             if (ret != WmErrorCode::WM_OK) {
-                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret), "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret),
+                    "JsWindow::OnSetSpecificSystemBarEnabled failed"));
             }
         } else if (name.compare("navigation") == 0) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
-                    WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
             if (ret != WmErrorCode::WM_OK) {
-                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret), "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret),
+                    "JsWindow::OnSetSpecificSystemBarEnabled failed"));
             }
         } else if (name.compare("navigationIndicator") == 0) {
             ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
-                    WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
+                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
         }
         if (ret == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
@@ -2121,15 +2124,9 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
                 static_cast<int32_t>(ret), "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
-    napi_value lastParam = nullptr;
-    if (argc >= 2 && argv[1] != nullptr && GetType(env, argv[1]) == napi_function) {
-        lastParam = argv[1];
-    } else if (argc >= 3 && argv[2] != nullptr && GetType(env, argv[2]) == napi_function) { // 2 arg count
-        lastParam = argv[2];
-    }
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetSpecificSystemBarEnabled",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
