@@ -34,7 +34,6 @@
 #include "permission.h"
 #include "request_info.h"
 #include "ui_content.h"
-#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace Rosen {

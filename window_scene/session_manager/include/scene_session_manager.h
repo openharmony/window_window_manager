@@ -329,6 +329,8 @@ private:
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
+    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession);
     WMError HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
     void UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,

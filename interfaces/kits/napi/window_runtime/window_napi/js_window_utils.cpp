@@ -21,7 +21,6 @@
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
-#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -590,20 +589,17 @@ bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
         WLOGFE("Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    statusProperty.enable_ = false;
-    navProperty.enable_ = false;
-    navIndicatorProperty.enable_ = false;
-    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
     if (name.compare("status") == 0) {
+        auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
     } else if (name.compare("navigation") == 0) {
+        auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
     } else if (name.compare("navigationIndicator") == 0) {
+        auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
     }
     return true;
