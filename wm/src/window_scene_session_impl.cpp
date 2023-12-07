@@ -1084,7 +1084,6 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
 }
 
