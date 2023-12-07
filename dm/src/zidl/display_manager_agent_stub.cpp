@@ -41,7 +41,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             return ProcNotifyDisplayPowerEvent(data);
         }
         case TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED: {
-            return ProcNotifyDisplaystateChanged(data);
+            return ProcNotifyDisplayStateChanged(data);
         }
         case TRANS_ID_ON_SCREEN_CONNECT: {
             return ProcScreenConnect(data);
@@ -90,7 +90,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     return 0;
 }
 
-int32_t DisplayManagerAgentStub::ProcNotifyDisplaypowerevent(MessageParcel& data)
+int32_t DisplayManagerAgentStub::ProcNotifyDisplayPowerEvent(MessageParcel& data)
 {
     DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
     EventStatus status = static_cast<EventStatus>(data.ReadUint32());
@@ -98,7 +98,7 @@ int32_t DisplayManagerAgentStub::ProcNotifyDisplaypowerevent(MessageParcel& data
     return 0;
 }
 
-int32_t DisplayManagerAgentStub::ProcNotifyDisplaystateChanged(MessageParcel& data)
+int32_t DisplayManagerAgentStub::ProcNotifyDisplayStateChanged(MessageParcel& data)
 {
     DisplayState state = static_cast<DisplayState>(data.ReadUint32());
     DisplayId id = static_cast<DisplayId>(data.ReadUint64());
