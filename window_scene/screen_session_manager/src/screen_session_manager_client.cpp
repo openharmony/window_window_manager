@@ -207,7 +207,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
 }
 
 uint32_t ScreenSessionManagerClient::GetCurvedCompressionArea()
