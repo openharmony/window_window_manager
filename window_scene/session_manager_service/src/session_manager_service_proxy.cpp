@@ -43,4 +43,26 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManager()
 
     return reply.ReadRemoteObject();
 }
+
+sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManagerLite()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+
+    auto ret = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER_LITE),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        WLOGFE("SendRequest failed, errorCode %{public}d", ret);
+        return nullptr;
+    }
+
+    return reply.ReadRemoteObject();
+}
 } // namespace OHOS::Rosen
