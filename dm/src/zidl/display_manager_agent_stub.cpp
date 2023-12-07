@@ -38,49 +38,49 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     }
     switch (code) {
         case TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT: {
-            return NotifyDisplaypowerevent();
+            return ProcNotifyDisplayPowerEvent(data);
         }
         case TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED: {
-            return NotifyDisplaystateChanged();
+            return ProcNotifyDisplaystateChanged(data);
         }
         case TRANS_ID_ON_SCREEN_CONNECT: {
-            return ScreenConnect();
+            return ProcScreenConnect(data);
         }
         case TRANS_ID_ON_SCREEN_DISCONNECT: {
-            return ScreenDisconnect();
+            return ProcScreenDisconnect(data);
         }
         case TRANS_ID_ON_SCREEN_CHANGED: {
-            return ScreenChanged();
+            return ProcScreenChanged(data);
         }
         case TRANS_ID_ON_SCREENGROUP_CHANGED: {
-            return ScreenGroupChanged();
+            return ProcScreenGroupChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_CONNECT: {
-            return DisplayConnect();
+            return ProcDisplayConnect(data);
         }
         case TRANS_ID_ON_DISPLAY_DISCONNECT: {
-            return DisplayDisconnect();
+            return ProcDisplayDisconnect(data);
         }
         case TRANS_ID_ON_DISPLAY_CHANGED: {
-            return DisplayChanged();
+            return ProcDisplayChanged(data);
         }
         case TRANS_ID_ON_SCREEN_SHOT: {
-            return ScreenShot();
+            return ProcScreenShot(data);
         }
         case TRANS_ID_ON_PRIVATE_WINDOW: {
-            return PrivateWindow();
+            return ProcPrivateWindow(data);
         }
         case TRANS_ID_ON_FOLD_STATUS_CHANGED: {
-            return FoldStatusChanged();
+            return ProcFoldStatusChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED: {
-            return DisplayChangeInfoChanged();
+            return ProcDisplayChangeInfoChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_MODE_CHANGED: {
-            return DisplayModechanged();
+            return ProcDisplayModechanged(data);
         }
         case TRANS_ID_ON_AVAILABLE_AREA_CHANGED: {
-            return AvailableAreaChanged();
+            return ProcAvailableAreaChanged(data);
         }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
@@ -90,30 +90,30 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     return 0;
 }
 
-int32_t DisplayManagerAgentStub::NotifyDisplaypowerevent()
+int32_t DisplayManagerAgentStub::ProcNotifyDisplaypowerevent(MessageParcel& data)
 {
     DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
     EventStatus status = static_cast<EventStatus>(data.ReadUint32());
     NotifyDisplayPowerEvent(event, status);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::NotifyDisplaystateChanged()
+int32_t DisplayManagerAgentStub::ProcNotifyDisplaystateChanged(MessageParcel& data)
 {
     DisplayState state = static_cast<DisplayState>(data.ReadUint32());
     DisplayId id = static_cast<DisplayId>(data.ReadUint64());
     NotifyDisplayStateChanged(id, state);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::ScreenConnect()
+int32_t DisplayManagerAgentStub::ProcScreenConnect(MessageParcel& data)
 {
     sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
     OnScreenConnect(screenInfo);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::ScreenDisconnect()
+int32_t DisplayManagerAgentStub::ProcScreenDisconnect(MessageParcel& data)
 {
     ScreenId screenId;
     if (!data.ReadUint64(screenId)) {
@@ -121,10 +121,10 @@ int32_t DisplayManagerAgentStub::ScreenDisconnect()
         return -1;
     }
     OnScreenDisconnect(screenId);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::ScreenChanged()
+int32_t DisplayManagerAgentStub::ProcScreenChanged(MessageParcel& data)
 {
     sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
     uint32_t event;
@@ -133,10 +133,10 @@ int32_t DisplayManagerAgentStub::ScreenChanged()
         return -1;
     }
     OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::ScreenGroupChanged()
+int32_t DisplayManagerAgentStub::ProcScreenGroupChanged(MessageParcel& data)
 {
     std::string trigger;
     if (!data.ReadString(trigger)) {
@@ -154,17 +154,17 @@ int32_t DisplayManagerAgentStub::ScreenGroupChanged()
         return -1;
     }
     OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::DisplayConnect()
+int32_t DisplayManagerAgentStub::ProcDisplayConnect(MessageParcel& data)
 {
     sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
     OnDisplayCreate(displayInfo);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::DisplayDisconnect()
+int32_t DisplayManagerAgentStub::ProcDisplayDisconnect(MessageParcel& data)
 {
     DisplayId displayId;
     if (!data.ReadUint64(displayId)) {
@@ -172,10 +172,10 @@ int32_t DisplayManagerAgentStub::DisplayDisconnect()
         return -1;
     }
     OnDisplayDestroy(displayId);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::DisplayChanged()
+int32_t DisplayManagerAgentStub::ProcDisplayChanged(MessageParcel& data)
 {
     sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
     uint32_t event;
@@ -184,24 +184,24 @@ int32_t DisplayManagerAgentStub::DisplayChanged()
         return -1;
     }
     OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::ScreenShot()
+int32_t DisplayManagerAgentStub::ProcScreenShot(MessageParcel& data)
 {
     sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
     OnScreenshot(snapshotInfo);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::PrivateWindow()
+int32_t DisplayManagerAgentStub::ProcPrivateWindow(MessageParcel& data)
 {
     bool hasPrivate = data.ReadBool();
     NotifyPrivateWindowStateChanged(hasPrivate);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::FoldStatusChanged()
+int32_t DisplayManagerAgentStub::ProcFoldStatusChanged(MessageParcel& data)
 {
     uint32_t foldStatus;
     if (!data.ReadUint32(foldStatus)) {
@@ -209,10 +209,10 @@ int32_t DisplayManagerAgentStub::FoldStatusChanged()
         return -1;
     }
     NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::DisplayChangeInfoChanged()
+int32_t DisplayManagerAgentStub::ProcDisplayChangeInfoChanged(MessageParcel& data)
 {
     sptr<DisplayChangeInfo> info;
     info = DisplayChangeInfo::Unmarshalling(data);
@@ -221,10 +221,10 @@ int32_t DisplayManagerAgentStub::DisplayChangeInfoChanged()
         return -1;
     }
     NotifyDisplayChangeInfoChanged(info);
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::DisplayModechanged()
+int32_t DisplayManagerAgentStub::ProcDisplayModechanged(MessageParcel& data)
 {
     uint32_t displayMode;
     if (!data.ReadUint32(displayMode)) {
@@ -232,10 +232,10 @@ int32_t DisplayManagerAgentStub::DisplayModechanged()
         return -1;
     }
     NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
-	return 0;
+    return 0;
 }
 
-int32_t DisplayManagerAgentStub::AvailableAreaChanged()
+int32_t DisplayManagerAgentStub::ProcAvailableAreaChanged(MessageParcel& data)
 {
     DMRect rect;
     rect.posX_ = data.ReadInt32();
@@ -243,6 +243,6 @@ int32_t DisplayManagerAgentStub::AvailableAreaChanged()
     rect.width_ = data.ReadUint32();
     rect.height_ = data.ReadUint32();
     NotifyAvailableAreaChanged(rect);
-	return 0;
+    return 0;
 }
 } // namespace OHOS::Rosen

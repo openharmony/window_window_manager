@@ -32,21 +32,21 @@ public:
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
 private:
-    int32_t NotifyDisplaypowerevent();
-    int32_t NotifyDisplaystateChanged();
-    int32_t ScreenConnect();
-    int32_t ScreenDisconnect();
-    int32_t ScreenChanged();
-    int32_t ScreenGroupChanged();
-    int32_t DisplayConnect();
-    int32_t DisplayDisconnect();
-    int32_t DisplayChanged();
-    int32_t ScreenShot();
-    int32_t PrivateWindow();
-    int32_t FoldStatusChanged();
-    int32_t DisplayChangeInfoChanged();
-    int32_t DisplayModechanged();
-    int32_t AvailableAreaChanged();
+    int32_t ProcNotifyDisplaypowerevent(MessageParcel& data);
+    int32_t ProcNotifyDisplaystateChanged(MessageParcel& data);
+    int32_t ProcScreenConnect(MessageParcel& data);
+    int32_t ProcScreenDisconnect(MessageParcel& data);
+    int32_t ProcScreenChanged(MessageParcel& data);
+    int32_t ProcScreenGroupChanged(MessageParcel& data);
+    int32_t ProcDisplayConnect(MessageParcel& data);
+    int32_t ProcDisplayDisconnect(MessageParcel& data);
+    int32_t ProcDisplayChanged(MessageParcel& data);
+    int32_t ProcScreenShot(MessageParcel& data);
+    int32_t ProcPrivateWindow(MessageParcel& data);
+    int32_t ProcFoldStatusChanged(MessageParcel& data);
+    int32_t ProcDisplayChangeInfoChanged(MessageParcel& data);
+    int32_t ProcDisplayModechanged(MessageParcel& data);
+    int32_t ProcAvailableAreaChanged(MessageParcel& data);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
