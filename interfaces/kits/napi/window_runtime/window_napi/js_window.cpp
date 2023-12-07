@@ -2110,8 +2110,8 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, CreateJsError(env,static_cast<int32_t>(err),
-            "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err),
+                "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
     napi_value result = nullptr;
