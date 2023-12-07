@@ -2191,7 +2191,8 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             for (auto iter : systemBarProperties) {
                 if (iter.first == WindowType::WINDOW_TYPE_STATUS_BAR) {
                     sceneSession->SetSystemBarProperty(iter.first, iter.second);
-                    WLOGFE("SetSystemBarProperty status: %{public}d, enable: %{public}d", static_cast<int32_t>(iter.first), iter.second.enable_);
+                    WLOGFE("SetSystemBarProperty status: %{public}d, enable: %{public}d",
+                        static_cast<int32_t>(iter.first), iter.second.enable_);
                 }
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
@@ -2202,7 +2203,8 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             for (auto iter : systemBarProperties) {
                 if (iter.first == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
                     sceneSession->SetSystemBarProperty(iter.first, iter.second);
-                    WLOGFE("SetSystemBarProperty navigation: %{public}d, enable: %{public}d", static_cast<int32_t>(iter.first), iter.second.enable_);
+                    WLOGFE("SetSystemBarProperty navigation: %{public}d, enable: %{public}d",
+                        static_cast<int32_t>(iter.first), iter.second.enable_);
                 }
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
@@ -2213,7 +2215,8 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             for (auto iter : systemBarProperties) {
                 if (iter.first == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
                     sceneSession->SetSystemBarProperty(iter.first, iter.second);
-                    WLOGFE("SetSystemBarProperty navigationIndicator: %{public}d, enable: %{public}d", static_cast<int32_t>(iter.first), iter.second.enable_);
+                    WLOGFE("SetSystemBarProperty navigationIndicator: %{public}d, enable: %{public}d",
+                        static_cast<int32_t>(iter.first), iter.second.enable_);
                 }
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);

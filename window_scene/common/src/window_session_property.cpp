@@ -300,7 +300,8 @@ void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
 
 void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type ==WindowType::WINDOW_TYPE_NAVIGATION_BAR
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR
+        || type ==WindowType::WINDOW_TYPE_NAVIGATION_BAR
         || type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
         sysBarPropMap_[type] = property;
     }
