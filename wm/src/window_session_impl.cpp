@@ -672,14 +672,17 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::UpdateDecorEnable(bool needNotify)
+void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
 {
-    if (needNotify) {
+    if (mode == WindowMode::WINDOW_MODE_UNDEFINED){
+		mode = GetMode();
+	}
+	if (needNotify) {
         if (uiContent_ != nullptr) {
-            uiContent_->UpdateWindowMode(GetMode(), IsDecorEnable());
+            uiContent_->UpdateWindowMode(mode, IsDecorEnable());
             WLOGFD("Notify uiContent window mode change end");
         }
-        NotifyModeChange(GetMode(), IsDecorEnable());
+        NotifyModeChange(mode, IsDecorEnable());
     }
 }
 
