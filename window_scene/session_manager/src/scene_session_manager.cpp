@@ -5037,7 +5037,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& p
 
 bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState)
 {
-    bool isChange = false;
+    bool isChange = true;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto& item : sceneSessionMap_) {
         auto sceneSession = item.second;
@@ -5048,8 +5048,6 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid,
             windowId != sceneSession->GetSurfaceNode()->GetId()) {
                 if (sceneSession->GetDrawingContentState()) {
                     return false;
-                } else {
-                    isChange = true;
                 }
             }
         }
