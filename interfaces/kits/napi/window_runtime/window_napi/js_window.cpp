@@ -2072,10 +2072,9 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
 
 napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    errCode = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -2084,44 +2083,35 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         WLOGFE("Failed to convert parameter to SystemBarName");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (errCode == WmErrorCode::WM_OK && (argc < 1 || // 1: params num
+    if (err == WmErrorCode::WM_OK && (argc < 1 || // 1: params num
         !GetSpecificBarStatus(systemBarProperties, env, info, windowToken_))) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, name, errCode]
+    NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, name, err]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
-        errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
-        if (errCode != WmErrorCode::WM_OK) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
+        if (err != WmErrorCode::WM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err)));
             return;
         }
-        WmErrorCode ret = WmErrorCode::WM_OK;
         if (name.compare("status") == 0) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
                 WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
-            if (ret != WmErrorCode::WM_OK) {
-                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret),
-                "JsWindow::OnSetSpecificSystemBarEnabled failed"));
-            }
         } else if (name.compare("navigation") == 0) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
-            if (ret != WmErrorCode::WM_OK) {
-                task.Reject(env, CreateJsError(env,static_cast<int32_t>(ret),
-                "JsWindow::OnSetSpecificSystemBarEnabled failed"));
-            }
         } else if (name.compare("navigationIndicator") == 0) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
                 WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
         }
-        if (ret == WmErrorCode::WM_OK) {
+        if (err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(ret), "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+            task.Reject(env, CreateJsError(env,static_cast<int32_t>(err),
+            "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
     napi_value result = nullptr;
