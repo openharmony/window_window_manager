@@ -439,7 +439,8 @@ void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSess
 bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
-    if (size > 3) { // 1 max systembar number
+    uint32_t maxSystemBarNumber = 3;
+    if (size > maxSystemBarNumber) { // max systembar number
         return false;
     }
 
@@ -461,7 +462,8 @@ bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property)
 {
     uint32_t size = parcel.ReadUint32();
-    if (size > 3) { // 1 max systembar number
+    uint32_t maxSystemBarNumber = 3;
+    if (size > maxSystemBarNumber) { // max systembar number
         return;
     }
 
