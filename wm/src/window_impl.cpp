@@ -706,6 +706,11 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
+WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::UpdateSystemBarProperty(bool status)
 {
     if (!IsWindowValid()) {

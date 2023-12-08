@@ -183,6 +183,8 @@ struct SystemBarPropertyFlag {
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         napi_env env, napi_callback_info info, sptr<Window>& window);
+    bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        napi_env env, napi_callback_info info, sptr<Window>& window);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);

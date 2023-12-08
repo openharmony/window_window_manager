@@ -568,6 +568,43 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     return true;
 }
 
+bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+                          napi_env env, napi_callback_info info, sptr<Window>& window)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    uint32_t paramNumber = 2;
+    if (argc < paramNumber) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return false;
+    }
+    std::string name;
+    if (!ConvertFromJsValue(env, argv[0], name)) {
+        WLOGFE("Failed to convert parameter to SystemBarName");
+        return false;
+    }
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[1], enable)) {
+        WLOGFE("Failed to convert parameter to bool");
+        return NapiGetUndefined(env);
+    }
+    if (name.compare("status") == 0) {
+        auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
+    } else if (name.compare("navigation") == 0) {
+        auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
+    } else if (name.compare("navigationIndicator") == 0) {
+        auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
+    }
+    return true;
+}
+
 static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
     const char* name, uint32_t defaultColor, bool& flag)
 {
