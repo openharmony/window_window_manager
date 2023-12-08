@@ -266,6 +266,8 @@ napi_value WindowEventTypeInit(napi_env env)
         static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
     napi_set_named_property(env, objValue, "WINDOW_HIDDEN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    napi_set_named_property(env, objValue, "WINDOW_DESTROYED", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::DESTROYED)));
     return objValue;
 }
 

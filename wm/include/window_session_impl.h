@@ -180,6 +180,7 @@ protected:
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
+    void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);

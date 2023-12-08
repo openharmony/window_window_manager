@@ -684,9 +684,6 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     NotifyBeforeDestroy(GetWindowName());
-    if (needClearListener) {
-        ClearListenersById(GetPersistentId());
-    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -700,6 +697,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 	}
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     hostSession_ = nullptr;
+    NotifyAfterDestroy();
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
     return res;
 }
 
