@@ -346,7 +346,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         if (session->FixRectByAspectRatio(session->winRect_)) {
-            session->NotifySessionRectChange(session->winRect_);
+            session->NotifySessionRectChange(session->winRect_, SizeChangeReason::RESIZE);
             session->UpdateRect(session->winRect_, SizeChangeReason::RESIZE);
         }
         return WSError::WS_OK;
@@ -1181,6 +1181,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     SetSurfaceBounds(rect);
     OnPiPMoveCallback(rect, reason);
     if (reason != SizeChangeReason::MOVE) {
+        UpdateSizeChangeReason(reason);
         UpdateRect(rect, reason);
     }
     if (reason == SizeChangeReason::DRAG_END) {
