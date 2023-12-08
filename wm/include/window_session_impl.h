@@ -212,6 +212,7 @@ protected:
     bool isIgnoreSafeArea_ = false;
     bool isFocused_ { false };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    bool shouldReNotifyFocus_ = false;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 
 private:
@@ -243,6 +244,7 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     void NotifyAfterFocused();
+    void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
