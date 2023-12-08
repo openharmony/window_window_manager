@@ -2144,6 +2144,20 @@ WMError SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSession
     return WMError::WM_OK;
 }
 
+void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession)
+{
+    auto systemBarProperties = property->GetSystemBarProperty();
+    for (auto iter : systemBarProperties) {
+        if (iter.first == type) {
+            sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            WLOGFD("SetSystemBarProperty: %{public}d, enable: %{public}d",
+                   static_cast<int32_t>(iter.first), iter.second.enable_);
+        }
+    }
+    NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+}
+
 WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
@@ -2205,6 +2219,18 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->SetSystemBarProperty(iter.first, iter.second);
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS: {
+            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property, sceneSession);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS: {
+            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property, sceneSession);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS: {
+            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property, sceneSession);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {

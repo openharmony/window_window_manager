@@ -288,6 +288,13 @@ napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info i
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetSystemBarEnable");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
     WLOGI("SetSystemBarProperties");
@@ -2059,6 +2066,56 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowSystemBarEnable",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
+{
+    std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string name;
+    if (!ConvertFromJsValue(env, argv[0], name)) {
+        WLOGFE("Failed to convert parameter to SystemBarName");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (err == WmErrorCode::WM_OK && (argc < 1 || // 1: params num
+        !GetSpecificBarStatus(systemBarProperties, env, info, windowToken_))) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, name, err]
+            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        auto weakWindow = weakToken.promote();
+        err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
+        if (err != WmErrorCode::WM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err)));
+            return;
+        }
+        if (name.compare("status") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+                WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+        } else if (name.compare("navigation") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+        } else if (name.compare("navigationIndicator") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
+        }
+        if (err == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err),
+                "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetSpecificSystemBarEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -4827,6 +4884,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
+    BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS
