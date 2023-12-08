@@ -127,6 +127,13 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 
 WSError SceneSession::Background()
 {
+    auto type = GetWindowType();
+    if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
+        if (!SessionPermission::IsSystemCalling()) {
+            WLOGFE("[WMSLife]Background permission denied id: %{public}d type:%{public}u", GetPersistentId(), type);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    }
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1467,6 +1474,10 @@ void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 
 WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("[WMSSystem]failed to update with id:%{public}u!", GetPersistentId());
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     PostTask([weakThis = wptr(this), isAdd]() {
         auto session = weakThis.promote();
         if (!session) {
