@@ -210,7 +210,7 @@ bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRec
     return true;
 }
 
-bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
     napi_get_named_property(env, jsObject, "bundleName", &jsBundleName);
@@ -222,17 +222,6 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
-    napi_value jsPersistentId = nullptr;
-    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
-    napi_value jsCallState = nullptr;
-    napi_get_named_property(env, jsObject, "callState", &jsCallState);
-    napi_value jsSessionType = nullptr;
-    napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
-    napi_value jsScreenId = nullptr;
-    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
-    napi_value jsIsPersistentRecover = nullptr;
-    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
-
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -248,6 +237,22 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
+    return true;
+}
+
+bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+{
+    napi_value jsPersistentId = nullptr;
+    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_value jsCallState = nullptr;
+    napi_get_named_property(env, jsObject, "callState", &jsCallState);
+    napi_value jsSessionType = nullptr;
+    napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
+    napi_value jsIsPersistentRecover = nullptr;
+    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
+
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
     }
@@ -261,6 +266,17 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
         return false;
     }
     if (!IsJsIsPersistentRecoverUndefined(env, jsIsPersistentRecover, sessionInfo)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+{
+    if (!ConvertSessionInfoName(env, jsObject, sessionInfo)) {
+        return false;
+    }
+    if (!ConvertSessionInfoState(env, jsObject, sessionInfo)) {
         return false;
     }
     return true;
