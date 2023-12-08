@@ -226,7 +226,7 @@ public:
     void NotifyClick();
     void NotifyRequestFocusStatusNotifyManager(bool isFocused);
     void NotifyUIRequestFocus();
-    void NotifyUILostFocus();
+    virtual void NotifyUILostFocus();
     bool GetStateFromManager(const ManagerState key);
     void PresentFoucusIfNeed(int32_t pointerAcrion);
     WSError UpdateFocus(bool isFocused);
