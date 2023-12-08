@@ -313,6 +313,7 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     window->SetResizeByDragEnabled(boolVal);
     window->SetRaiseByClickEnabled(boolVal);
     window->HideNonSystemFloatingWindows(boolVal);
+    window->SetSingleFrameComposerEnabled(boolVal);
 
     WindowType windowType;
     WindowMode windowMode;
