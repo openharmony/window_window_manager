@@ -91,6 +91,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
+    BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -824,6 +825,12 @@ napi_value JsSceneSession::SetSCBKeepKeyboard(napi_env env, napi_callback_info i
     WLOGI("[NAPI]SetSCBKeepKeyboard");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSCBKeepKeyboard(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info) {
+    WLOGI("[NAPI]SetOffset");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1936,6 +1943,45 @@ napi_value JsSceneSession::OnSetSCBKeepKeyboard(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     session->SetSCBKeepKeyboard(scbKeepKeyboardFlag);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 2) {
+        WLOGFE("[NAPI]Argc count is invalid: %{public}u", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t offsetX = 0;
+    if (!ConvertFromJsValue(env, argv[0], offsetX)) {
+        WLOGFE("[NAPI]Failed to convert parameter to int32_t");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t offsetY = 0;
+    if (!ConvertFromJsValue(env, argv[1], offsetY)) {
+        WLOGFE("[NAPI]Failed to convert parameter to int32_t");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetOffset(offsetX, offsetY);
     return NapiGetUndefined(env);
 }
 

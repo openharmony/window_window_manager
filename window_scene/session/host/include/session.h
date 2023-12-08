@@ -170,6 +170,9 @@ public:
 
     void SetShowRecent(bool showRecent);
     bool GetShowRecent() const;
+    void SetOffset(int32_t x, int32_t y);
+    int32_t GetOffsetX() const;
+    int32_t GetOffsetY() const;
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -357,6 +360,8 @@ protected:
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
     WSRect winRect_;
+    int32_t offsetX_ = 0;
+    int32_t offsetY_ = 0;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
