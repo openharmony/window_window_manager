@@ -363,9 +363,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         hostSession_->Disconnect();
     }
     NotifyBeforeDestroy(GetWindowName());
-    if (needClearListener) {
-        ClearListenersById(GetPersistentId());
-    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -377,6 +374,10 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         windowSessionMap_.erase(property_->GetWindowName());
     }
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
+    NotifyAfterDestroy();
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
     return WMError::WM_OK;
 }
 
@@ -1205,6 +1206,12 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
     }
+}
+
+void WindowSessionImpl::NotifyAfterDestroy()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterDestroyed, lifecycleListeners);
 }
 
 void WindowSessionImpl::NotifyAfterActive()

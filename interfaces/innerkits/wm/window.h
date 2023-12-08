@@ -117,6 +117,10 @@ public:
      * @brief Notify caller that window is paused.
      */
     virtual void AfterPaused() {}
+    /**
+     * @brief Notify caller that window is destroyed.
+     */
+    virtual void AfterDestroyed() {}
 };
 
 /**

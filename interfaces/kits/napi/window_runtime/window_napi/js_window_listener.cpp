@@ -246,6 +246,11 @@ void JsWindowListener::AfterPaused()
     LifeCycleCallBack(LifeCycleEventType::PAUSED);
 }
 
+void JsWindowListener::AfterDestroyed()
+{
+    LifeCycleCallBack(LifeCycleEventType::DESTROYED);
+}
+
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
