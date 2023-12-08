@@ -480,6 +480,7 @@ void WindowSessionImpl::UpdateDensity()
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
     WLOGFD("[WMSFocus]Report update focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
+    isFocused_ = isFocused;
     if (isFocused) {
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -492,7 +493,6 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
-    isFocused_ = isFocused;
     return WSError::WS_OK;
 }
 
@@ -669,6 +669,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         UpdateTitleButtonVisibility();
     }
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
+    if (shouldReNotifyFocus_) {
+        // uiContent may be nullptr when notify focus status, need to notify again when uiContent is not empty.
+        NotifyUIContentFocusStatus();
+        shouldReNotifyFocus_ = false;
+    }
     WLOGFD("[WMSLife]notify uiContent window size change end");
     return WMError::WM_OK;
 }
@@ -1146,6 +1151,36 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
     }
 }
 
+void WindowSessionImpl::NotifyUIContentFocusStatus()
+{
+    if (!isFocused_) {
+        CALL_UI_CONTENT(UnFocus);
+        return;
+    }
+    CALL_UI_CONTENT(Focus);
+    auto task = [weak = wptr(this)]() {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        if (window->uiContent_ != nullptr) {
+            std::lock_guard<std::recursive_mutex> lock(window->mutex_);
+            // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
+            bool isNeedKeyboard = window->uiContent_->NeedSoftKeyboard();
+            // whether keep the keyboard created by other windows, support system window and app subwindow.
+            bool keepKeyboardFlag = (window->property_ != nullptr) ? window->property_->GetKeepKeyboardFlag() : false;
+            WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+                isNeedKeyboard, keepKeyboardFlag);
+            RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
+        }
+    };
+    if (uiContent_ != nullptr) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        uiContent_->SetOnWindowFocused(task);
+        WLOGFI("[WMSInput] set need soft keyboard callback success!");
+    }
+}
+
 void WindowSessionImpl::NotifyAfterFocused()
 {
     {
@@ -1153,23 +1188,10 @@ void WindowSessionImpl::NotifyAfterFocused()
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
     }
-    CALL_UI_CONTENT(Focus);
     if (uiContent_ != nullptr) {
-        auto task = [this]() {
-            if (uiContent_ != nullptr) {
-                // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
-                bool isNeedKeyboard = uiContent_->NeedSoftKeyboard();
-                // whether keep the keyboard created by other windows, support system window and app subwindow.
-                bool keepKeyboardFlag = false;
-                if (property_ != nullptr) {
-                    keepKeyboardFlag = property_->GetKeepKeyboardFlag();
-                }
-                WLOGFD("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-                    isNeedKeyboard, keepKeyboardFlag);
-                RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
-            }
-        };
-        uiContent_->SetOnWindowFocused(task);
+        NotifyUIContentFocusStatus();
+    } else {
+        shouldReNotifyFocus_ = true;
     }
 }
 
@@ -1182,6 +1204,9 @@ void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
         CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
     }
     if (needNotifyUiContent) {
+        if (uiContent_ == nullptr) {
+            shouldReNotifyFocus_ = true;
+        }
         CALL_UI_CONTENT(UnFocus);
     }
 }
