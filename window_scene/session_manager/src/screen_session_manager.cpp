@@ -2866,6 +2866,16 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     }
 }
 
+void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
+{
+    WLOGFI("screenId: %{public}" PRIu64 " displayNodeScreenId: %{public}" PRIu64, screenId, displayNodeScreenId);
+    if (!clientProxy_) {
+        WLOGFD("clientProxy_ is null");
+        return;
+    }
+    clientProxy_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
+}
+
 void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
     ScreenId screenId)
 {
