@@ -2015,4 +2015,13 @@ WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
     }
     return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
+
+bool Session::NeedSystemPermission(WindowType type)
+{
+    return !(WindowHelper::IsAppWindow(type) || type == WindowType::WINDOW_TYPE_UI_EXTENSION ||
+        type == WindowType::WINDOW_TYPE_SCENE_BOARD || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
+        type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
+        type == WindowType::WINDOW_TYPE_PIP);
+}
 } // namespace OHOS::Rosen

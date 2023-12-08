@@ -2224,7 +2224,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
             }
             break;
-        }
+        }  
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;
@@ -2243,6 +2243,10 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
+            if (property != nullptr && !property->GetSystemCalling()) {
+                WLOGFE("update decor enable permission denied!");
+                break;
+            }
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
             }
@@ -2899,6 +2903,10 @@ void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& i
 
 WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& params, std::string& dumpInfo)
 {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+        WLOGFE("GetSessionDumpInfo permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
         return GetAllSessionDumpInfo(dumpInfo);
     }
@@ -3691,6 +3699,12 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
         return WSError::WS_ERROR_NULLPTR;
     }
     uint32_t oldFlags = property->GetWindowFlags();
+    if (((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
+        (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) &&
+        !property->GetSystemCalling()) {
+            WLOGFE("Set window flags permission denied");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     property->SetWindowFlags(flags);
     CheckAndNotifyWaterMarkChangedResult();
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
