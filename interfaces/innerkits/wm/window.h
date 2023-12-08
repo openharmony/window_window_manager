@@ -1542,6 +1542,14 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set the single frame composer enabled flag of a window.
+     *
+     * @param enable true means the single frame composer is enabled, otherwise means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetSingleFrameComposerEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

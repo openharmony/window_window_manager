@@ -214,6 +214,7 @@ public:
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
+    virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;

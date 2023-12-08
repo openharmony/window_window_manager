@@ -263,6 +263,7 @@ public:
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
 };
 }
 }
