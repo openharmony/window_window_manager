@@ -50,7 +50,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
     "c_utils:utils",
     "graphic_2d:surface",  # use for SurfaceUtils
     "hilog:libhilog",
-    "ipc:ipc_napi_common",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 
