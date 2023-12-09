@@ -5109,6 +5109,24 @@ void SceneSessionManager::InitWithRenderServiceAdded()
     }
 }
 
+WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType)
+{
+    if (sceneType > SystemAnimatedSceneType::SCENE_UNKNOWN) {
+        WLOGFE("The input scene type is valid, scene type is %{public}d", sceneType);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    auto task = [this, sceneType]() {
+        WLOGFD("Set system animated scene %{public}d.", sceneType);
+        bool ret = rsInterface_.SetSystemAnimatedScenes(static_cast<SystemAnimatedScenes>(sceneType));
+        if (!ret) {
+            WLOGFE("Set system animated scene failed.");
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WMError::WM_OK;
+}
+
 WSError SceneSessionManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
 {
     if (!SessionPermission::IsSystemCalling()) {

@@ -117,6 +117,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
     BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
+    BindNativeFunction(env, exportObj, "setSystemAnimatedScenes", moduleName,
+        JsSceneSessionManager::SetSystemAnimatedScenes);
     return NapiGetUndefined(env);
 }
 
@@ -471,6 +473,13 @@ napi_value JsSceneSessionManager::InitWithRenderServiceAdded(napi_env env, napi_
     WLOGI("[NAPI]InitWithRenderServiceAdded");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnInitWithRenderServiceAdded(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetSystemAnimatedScenes(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetSystemAnimatedScenes");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetSystemAnimatedScenes(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetAllAbilityInfos(napi_env env, napi_callback_info info)
@@ -1325,6 +1334,38 @@ napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, nap
 {
     WLOGI("[NAPI]OnInitWithRenderServiceAdded");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing."));
+        return NapiGetUndefined(env);
+    }
+    uint32_t sceneCode;
+    if (!ConvertFromJsValue(env, argv[0], sceneCode)) {
+        WLOGFE("[NAPI]Faile to convert parameter to sceneCode.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+
+    SystemAnimatedSceneType sceneType = static_cast<SystemAnimatedSceneType>(sceneCode);
+    WMError ret = SceneSessionManager::GetInstance().SetSystemAnimatedScenes(sceneType);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        WLOGFE("[NAPI]Set system animated scene failed, return %{public}d", wmErrorCode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
+            "Set system animated scene failed."));
+        return NapiGetUndefined(env);
+    }
+    WLOGFE("[NAPI]Set system animated scene succeed, return WmErrorCode::WM_OK");
     return NapiGetUndefined(env);
 }
 
