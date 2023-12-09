@@ -614,12 +614,8 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
-    WSRect wsRect = {winRect_.posX_ + GetOffsetX(),
-                    winRect_.posY_ + GetOffsetY(),
-                    winRect_.width_,
-                    winRect_.height_};
     if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateRect(wsRect, reason, rsTransaction);
+        sessionStage_->UpdateRect(rect, reason, rsTransaction);
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
@@ -1947,18 +1943,18 @@ bool Session::GetSCBKeepKeyboardFlag() const
     return scbKeepKeyboardFlag_;
 }
 
-void Session::SetOffset(int32_t x, int32_t y)
+void Session::SetOffset(float x, float y)
 {
     offsetX_ = x;
     offsetY_ = y;
 }
 
-int32_t Session::GetOffsetX() const
+float Session::GetOffsetX() const
 {
     return offsetX_;
 }
 
-int32_t Session::GetOffsetY() const
+float Session::GetOffsetY() const
 {
     return offsetY_;
 }

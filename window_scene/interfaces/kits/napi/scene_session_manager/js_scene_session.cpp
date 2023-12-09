@@ -1952,23 +1952,23 @@ napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 2) {
-        WLOGFE("[NAPI]Argc count is invalid: %{public}u", argc);
+        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    int32_t offsetX = 0;
+    double offsetX = 0.0f;
     if (!ConvertFromJsValue(env, argv[0], offsetX)) {
-        WLOGFE("[NAPI]Failed to convert parameter to int32_t");
+        WLOGFE("[NAPI]Failed to convert parameter to double");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    int32_t offsetY = 0;
+    double offsetY = 0.0f;
     if (!ConvertFromJsValue(env, argv[1], offsetY)) {
-        WLOGFE("[NAPI]Failed to convert parameter to int32_t");
+        WLOGFE("[NAPI]Failed to convert parameter to double");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -1981,7 +1981,7 @@ napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    session->SetOffset(offsetX, offsetY);
+    session->SetOffset(static_cast<float>(offsetX), static_cast<float>(offsetY));
     return NapiGetUndefined(env);
 }
 
