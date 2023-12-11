@@ -70,15 +70,15 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsShellCall()
+bool Permission::IsStartByHdcd()
 {
-    auto callerToken = IPCSkeleton::GetCallingTokenID();
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFI("caller tokenType is shell, verify success");
+    OHOS::Security::AccessToken::NativeTokenInfo info;
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
+        return false;
+    }
+    if (info.processName.compare("hdcd") == 0) {
         return true;
     }
-    WLOGFI("Not shell called.");
     return false;
 }
 

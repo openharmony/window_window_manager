@@ -1343,7 +1343,7 @@ WMError WindowSceneSessionImpl::Close()
 
 WMError WindowSceneSessionImpl::DisableAppWindowDecor()
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1655,7 +1655,7 @@ WMError WindowSceneSessionImpl::CheckParmAndPermission()
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("Check failed, permission denied");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1825,7 +1825,7 @@ void WindowSceneSessionImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 
 WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1936,7 +1936,7 @@ void WindowSceneSessionImpl::TransformSurfaceNode(const Transform& trans)
 WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
     const sptr<IAnimationTransitionController>& listener)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("[WMSSystem]register animation transition controller permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2021,7 +2021,7 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
 WMError WindowSceneSessionImpl::SetAlpha(float alpha)
 {
     WLOGI("Window %{public}d alpha %{public}f", property_->GetPersistentId(), alpha);
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("set alpha permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
