@@ -430,6 +430,10 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SCB: ScreenSessionManager::GetScreenInfoById permission denied!");
+        return nullptr;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         WLOGE("SCB: ScreenSessionManager::GetScreenInfoById cannot find screenInfo: %{public}" PRIu64"", screenId);
@@ -1266,6 +1270,10 @@ DMError ScreenSessionManager::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
     WLOGFI("SCB: ScreenSessionManager::GetScreenSupportedColorGamuts ENTER");
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SCB: ScreenSessionManager::GetScreenSupportedColorGamuts permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     sptr<ScreenSession> screen = GetScreenSession(screenId);
     if (screen == nullptr) {
         WLOGFE("SCB: ScreenSessionManager::GetScreenSupportedColorGamuts nullptr");
@@ -2204,7 +2212,11 @@ void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
 
 void ScreenSessionManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
-    WLOGFE("SCB: ScreenSessionManager::RemoveVirtualScreenFromGroup enter!");
+    WLOGFI("SCB: ScreenSessionManager::RemoveVirtualScreenFromGroup enter!");
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SCB: ScreenSessionManager::RemoveVirtualScreenFromGroup permission denied!");
+        return;
+    }
     if (screens.empty()) {
         return;
     }
@@ -2371,6 +2383,10 @@ std::vector<ScreenId> ScreenSessionManager::GetAllValidScreenIds(const std::vect
 
 sptr<ScreenGroupInfo> ScreenSessionManager::GetScreenGroupInfoById(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SCB: ScreenSessionManager::GetScreenGroupInfoById permission denied!");
+        return nullptr;
+    }
     auto screenSessionGroup = GetAbstractScreenGroup(screenId);
     if (screenSessionGroup == nullptr) {
         WLOGE("SCB: GetScreenGroupInfoById cannot find screenGroupInfo: %{public}" PRIu64"", screenId);
