@@ -227,6 +227,7 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
 void Session::NotifyActivation()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnActivation();
@@ -237,6 +238,7 @@ void Session::NotifyActivation()
 void Session::NotifyConnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnConnect();
@@ -247,6 +249,7 @@ void Session::NotifyConnect()
 void Session::NotifyForeground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnForeground();
@@ -257,6 +260,7 @@ void Session::NotifyForeground()
 void Session::NotifyBackground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnBackground();
@@ -267,6 +271,7 @@ void Session::NotifyBackground()
 void Session::NotifyDisconnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnDisconnect();
@@ -277,6 +282,7 @@ void Session::NotifyDisconnect()
 void Session::NotifyExtensionDied()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnExtensionDied();
@@ -288,6 +294,7 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
     const std::vector<int32_t>& uiExtensionIdLevelVec)
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevelVec);
