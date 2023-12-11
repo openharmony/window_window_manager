@@ -125,7 +125,7 @@ void PictureInPictureManager::AttachAutoStartController(std::string pageName,
         autoStartController_->GetMainWindowId());
     if (mainWindow != nullptr) {
         mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl();
-        mainWindow -> RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
+        mainWindow->RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
     autoStartControllerMap_.insert(std::make_pair(pageName, pipController));
 }
@@ -224,7 +224,7 @@ void PictureInPictureManager::AutoStartPipWindow()
         WLOGFE("autoStartController_ is null");
         return;
     }
-    autoStartController_ -> StartPictureInPicture(StartPipType::AUTO_START);
+    autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
 }
 }
 }
