@@ -75,6 +75,8 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | Sma
     PictureInPictureManager::SetActiveController(pipController);
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
+    ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
+    ASSERT_FALSE(PictureInPictureManager::IsAttachedToSameWindow(1));
     PictureInPictureManager::RemoveActiveController();
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
