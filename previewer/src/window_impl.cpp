@@ -884,5 +884,10 @@ WmErrorCode WindowImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
+
+WMError WindowImpl::SetSingleFrameComposerEnabled(bool enable)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace Rosen
 } // namespace OHOS

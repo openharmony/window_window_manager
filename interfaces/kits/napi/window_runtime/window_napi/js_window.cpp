@@ -506,6 +506,13 @@ napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetSingleFrameComposerEnabled");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSingleFrameComposerEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::RaiseToAppTop(napi_env env, napi_callback_info info)
 {
     WLOGI("RaiseToAppTop");
@@ -3299,6 +3306,58 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
     return result;
 }
 
+napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set single frame composer enabled denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) { // 1: the param num
+        WLOGFE("Invalid parameter, argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Invalid parameter, failed to convert parameter to enabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    } else {
+        napi_get_value_bool(env, nativeVal, &enabled);
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, enabled](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            WmErrorCode wmErrorCode;
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr");
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "window is nullptr."));
+                return;
+            }
+            WMError ret = weakWindow->SetSingleFrameComposerEnabled(enabled);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
+                            "Set single frame composer enabled failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] Set single frame composer enabled end, enabled flag = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), enabled);
+        };
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::SetSingleFrameComposerEnabled",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode &errCode, int32_t &subWindowId)
 {
     if (nativeVal == nullptr) {
@@ -4886,6 +4945,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
     BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
+    BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
+        JsWindow::SetSingleFrameComposerEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS
