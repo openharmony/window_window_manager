@@ -110,9 +110,8 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
         if (pipLifeCycleListener_ != nullptr) {
             pipLifeCycleListener_->OnPictureInPictureOperationError(err);
         }
-        SingletonContainer::Get<PiPReporter>()
-            .ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
-                 FAILED, "window_ show failed");
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+            pipOption_->GetPipTemplate(), FAILED, "window_ show failed");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     PictureInPictureManager::SetActiveController(this);
@@ -127,9 +126,8 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PipWindowState::STATE_STARTING || curState_ == PipWindowState::STATE_STARTED) {
         WLOGFW("pip window is starting");
-        SingletonContainer::Get<PiPReporter>().
-            ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
-                FAILED, "Pip window is starting");
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+            pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
@@ -309,7 +307,7 @@ PipWindowState PictureInPictureController::GetControllerState()
 void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t height)
 {
     WLOGI("UpdateContentSize is called, state: %{public}u width:%{public}u height:%{public}u",
-         curState_, width, height);
+        curState_, width, height);
     if (curState_ != PipWindowState::STATE_STARTED) {
         return;
     }
