@@ -101,6 +101,10 @@
 #include "suspend_manager_client.h"
 #endif // EFFICIENCY_MANAGER_ENABLE
 
+#ifdef SECURITY_COMPONENT_MANAGER_ENABLE
+#include "sec_comp_enhance_kit.h"
+#endif
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
@@ -3437,6 +3441,31 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     return sceneSession->UpdateWindowMode(mode);
 }
 
+#ifdef SECURITY_COMPONENT_MANAGER_ENABLE
+static void FillSecCompEnhanceData(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    struct PointerEventData {
+        double x;
+        double y;
+        uint64_t time;
+    } pointerEventData = {
+        .x = pointerItem.GetDisplayX(),
+        .y = pointerItem.GetDisplayY(),
+        .time = pointerEvent->GetActionTime()
+    };
+
+    const uint32_t MAX_HMAC_SIZE = 64;
+    uint8_t outBuf[MAX_HMAC_SIZE] = { 0 };
+    uint8_t *enhanceData = reinterpret_cast<uint8_t *>(&outBuf[0]);
+    uint32_t enhanceDataLen = MAX_HMAC_SIZE;
+    if (Security::SecurityComponent::SecCompEnhanceKit::GetPointerEventEnhanceData(&pointerEventData,
+        sizeof(pointerEventData), enhanceData, enhanceDataLen) == 0) {
+        pointerEvent->SetEnhanceData(std::vector<uint8_t>(outBuf, outBuf + enhanceDataLen));
+    }
+}
+#endif // SECURITY_COMPONENT_MANAGER_ENABLE
+
 WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
 {
     if (!pointerEvent) {
@@ -3475,6 +3504,9 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
     }
     WLOGFI("Send touch event to session with id: %{public}d, zIndex: %{public}u, "
         "windowX: %{public}d, windowY: %{public}d", targetSession->GetPersistentId(), targetZIndex, windowX, windowY);
+#ifdef SECURITY_COMPONENT_MANAGER_ENABLE
+    FillSecCompEnhanceData(pointerEvent, pointerItem);
+#endif
     targetSession->TransferPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
