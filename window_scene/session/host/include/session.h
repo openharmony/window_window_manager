@@ -170,6 +170,9 @@ public:
 
     void SetShowRecent(bool showRecent);
     bool GetShowRecent() const;
+    void SetOffset(float x, float y);
+    float GetOffsetX() const;
+    float GetOffsetY() const;
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -357,6 +360,8 @@ protected:
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
     WSRect winRect_;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;

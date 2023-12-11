@@ -127,6 +127,7 @@ constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int ORIEN_MAX_WIDTH = 12;
+constexpr int OFFSET_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
@@ -2250,7 +2251,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
             }
             break;
-        }  
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;
@@ -2766,6 +2767,8 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posY_
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.width_
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
+        << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetX()
+        << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetY()
         << "]"
         << std::endl;
 }
@@ -2810,7 +2813,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     std::ostringstream oss;
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------" << std::endl;
-    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    offsetX offsetY ]"
         << std::endl;
 
     std::vector<sptr<SceneSession>> allSession;
