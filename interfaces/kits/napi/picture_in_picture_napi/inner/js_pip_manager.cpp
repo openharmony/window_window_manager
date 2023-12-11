@@ -150,18 +150,18 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     napi_value xComponentController = argv[0];
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(xComponentController);
-    int32_t windowId = 0;
-    if (!ConvertFromJsValue(env, argv[1], windowId)) {
-        WLOGFE("[NAPI]Failed to convert params to int32_t");
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (!pipWindow) {
+        WLOGFE("[NAPI]Failed to find pip window");
         return NapiGetUndefined(env);
     }
-    sptr<PictureInPictureController> pictureInPictureController =
-        PictureInPictureManager::GetPipControllerInfo(windowId);
-    if (pictureInPictureController == nullptr) {
+    int32_t windowId = pipWindow->GetWindowId();
+    sptr<PictureInPictureController> pipController =PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
         WLOGFE("[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    WMError errCode = pictureInPictureController->SetXComponentController(xComponentControllerResult);
+    WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
         WLOGFE("[NAPI]Failed to set xComponentController");
     }

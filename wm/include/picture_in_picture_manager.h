@@ -53,11 +53,11 @@ public:
 private:
     // controller in use
     static sptr<PictureInPictureController> activeController_;
-    static sptr<PictureInPictureController> autoStartController_; //todo delete
+    static sptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
     static std::map<std::string, sptr<PictureInPictureController>> autoStartControllerMap_;
 
-    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_; // todo delete
+    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
     static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
 };
 } // namespace Rosen
