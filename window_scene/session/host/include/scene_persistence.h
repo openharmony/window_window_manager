@@ -43,7 +43,7 @@ public:
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
-    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap() const;
+    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float& oriScale, const float& newScale) const;
 
 private:
     static std::string snapshotDirectory_;

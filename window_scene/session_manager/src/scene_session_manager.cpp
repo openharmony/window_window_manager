@@ -6213,7 +6213,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
 
     if (!pixelMap && sceneSession->GetScenePersistence()) {
         WLOGFE("get local snapshot pixelmap start");
-        pixelMap = sceneSession->GetScenePersistence()->GetLocalSnapshotPixelMap();
+        pixelMap = sceneSession->GetScenePersistence()->GetLocalSnapshotPixelMap(snapshotScale_, scaleParam);
     }
 
     return pixelMap;
