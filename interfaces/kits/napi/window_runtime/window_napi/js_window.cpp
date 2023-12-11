@@ -1333,7 +1333,7 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set window mode permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
@@ -2942,7 +2942,7 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set wake up screen permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
@@ -4297,7 +4297,7 @@ napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info 
 
 napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set corner radius permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }

@@ -30,6 +30,7 @@ public:
     static bool VerifySessionPermission();
     static bool JudgeCallerIsAllowedToUseSystemAPI();
     static bool IsShellCall();
+    static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
     static bool IsSACalling();
     static bool VerifyCallingPermission(const std::string &permissionName);
