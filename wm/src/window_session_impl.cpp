@@ -2015,7 +2015,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
             WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SCREEN;
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
