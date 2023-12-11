@@ -178,6 +178,7 @@ public:
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
+    void NotifyUILostFocus() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError OnShowWhenLocked(bool showWhenLocked);
