@@ -106,7 +106,8 @@ void PictureInPictureManager::RemoveActiveControllerSafe()
     RemoveActiveController();
 }
 
-void PictureInPictureManager::AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController)
+void PictureInPictureManager::AttachAutoStartController(std::string pageName,
+    sptr<PictureInPictureController> pipController)
 {
     WLOGD("AttachAutoStartController called");
     if (pipController == nullptr) {
@@ -129,7 +130,8 @@ void PictureInPictureManager::AttachAutoStartController(std::string pageName, sp
     autoStartControllerMap_.insert(std::make_pair(pageName, pipController));
 }
 
-void PictureInPictureManager::DetachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController)
+void PictureInPictureManager::DetachAutoStartController(std::string pageName,
+    sptr<PictureInPictureController> pipController)
 {
     WLOGD("Detach active pipController");
     if (pipController != nullptr &&
