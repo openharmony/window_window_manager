@@ -92,9 +92,8 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     WLOGI("ShowPictureInPictureWindow is called");
     if (window_ == nullptr) {
         WLOGFD("window_ is nullptr");
-        SingletonContainer::Get<PiPReporter>()
-            .ReportPiPStartWindow(static_cast<int32_t>(startType), pipOption_->GetPipTemplate(),
-                 FAILED, "window_ is nullptr");
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+            pipOption_->GetPipTemplate(), FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     if (pipLifeCycleListener_ != nullptr) {
@@ -169,7 +168,8 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     return StartPictureInPictureInner(startType);
 }
 
-WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType) {
+WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType)
+{
     WMError errCode = CreatePictureInPictureWindow();
     if (errCode != WMError::WM_OK) {
         curState_ = PipWindowState::STATE_UNDEFINED;
@@ -225,7 +225,8 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
     return StopPictureInPictureInner(needAnim, stopPipType);
 }
 
-WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, StopPipType stopType) {
+WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, StopPipType stopType)
+{
     window_->NotifyPrepareClosePiPWindow();
     auto task = [weakThis = wptr(this), currentStopType = stopType, currentPipOption = pipOption_]() {
         auto session = weakThis.promote();
@@ -245,7 +246,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
                 session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
             }
             SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-                currentPipOption->GetPipTemplate(), FAILED,"Window destroy failed");
+                currentPipOption->GetPipTemplate(), FAILED, "Window destroy failed");
             return WMError::WM_ERROR_PIP_DESTROY_FAILED;
         }
         if (session->pipLifeCycleListener_ != nullptr) {
@@ -256,7 +257,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
         session->window_ = nullptr;
         session->curState_ = PipWindowState::STATE_STOPPED;
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-            currentPipOption->GetPipTemplate(), SUCCESS,"pip window stop success");
+            currentPipOption->GetPipTemplate(), SUCCESS, "pip window stop success");
         return WMError::WM_OK;
     };
     if (handler_ && needAnim) {
@@ -300,7 +301,8 @@ void PictureInPictureController::IsAutoStartEnabled(bool& enable) const
     enable = isAutoStartEnabled_;
 }
 
-PipWindowState PictureInPictureController::GetControllerState() {
+PipWindowState PictureInPictureController::GetControllerState()
+{
     return curState_;
 }
 
