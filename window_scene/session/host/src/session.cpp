@@ -1950,6 +1950,22 @@ bool Session::GetSCBKeepKeyboardFlag() const
     return scbKeepKeyboardFlag_;
 }
 
+void Session::SetOffset(float x, float y)
+{
+    offsetX_ = x;
+    offsetY_ = y;
+}
+
+float Session::GetOffsetX() const
+{
+    return offsetX_;
+}
+
+float Session::GetOffsetY() const
+{
+    return offsetY_;
+}
+
 WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
