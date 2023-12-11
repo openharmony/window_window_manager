@@ -2083,11 +2083,6 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
         WLOGFE("[WMSInput] Set calling window id failed, property_ is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uint32_t lastCallingWindowId = property_->GetCallingWindow();
-    if (callingWindowId == lastCallingWindowId) {
-        WLOGFD("[WMSInput] Calling window id does not need to be updated!");
-        return WMError::WM_OK;
-    }
     WLOGFI("[WMSInput] Set calling window id: %{public}d", callingWindowId);
     property_->SetCallingWindow(callingWindowId);
 

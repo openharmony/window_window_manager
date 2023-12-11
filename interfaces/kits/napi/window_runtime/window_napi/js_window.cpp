@@ -678,7 +678,7 @@ napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]KeepKeyboardOnFocus");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->KeepKeyboardOnFocus(env, info) : nullptr;
+    return (me != nullptr) ? me->OnKeepKeyboardOnFocus(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
