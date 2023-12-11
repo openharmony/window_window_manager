@@ -2251,7 +2251,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
             }
             break;
-        }  
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;

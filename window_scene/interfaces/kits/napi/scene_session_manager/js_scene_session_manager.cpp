@@ -1856,7 +1856,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             }
         };
     napi_value result = nullptr;
-    napi_value lastParam = argv(1);
+    napi_value lastParam = argv[1];
     NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
 }
