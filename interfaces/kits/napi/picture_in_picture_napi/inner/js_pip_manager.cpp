@@ -156,7 +156,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     int32_t windowId = pipWindow->GetWindowId();
-    sptr<PictureInPictureController> pipController =PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         WLOGFE("[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
