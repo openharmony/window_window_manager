@@ -1556,7 +1556,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         WLOGFD("check create permission success, normal app create float window with request permission.");
         return true;
     }
-    if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
+    if (SessionPermission::IsSystemCalling()) {
         WLOGFD("check create permission success, create with system calling.");
         return true;
     }
@@ -2100,7 +2100,7 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
         }
     }
 
-    bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
     property->SetSystemCalling(isSystemCalling);
     wptr<SceneSessionManager> weak = this;
     auto task = [weak, property, action]() -> WMError {
@@ -2312,7 +2312,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
 void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
         return;
     }
@@ -2530,7 +2530,7 @@ float SceneSessionManager::GetDisplayBrightness() const
 
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("SetGestureNavigationEnabled permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2940,7 +2940,7 @@ void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& i
 
 WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& params, std::string& dumpInfo)
 {
-    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsShellCall())) {
         WLOGFE("GetSessionDumpInfo permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }

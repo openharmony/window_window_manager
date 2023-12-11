@@ -544,7 +544,7 @@ WSError SceneSession::RaiseToAppTop()
 
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("RaiseAboveTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
