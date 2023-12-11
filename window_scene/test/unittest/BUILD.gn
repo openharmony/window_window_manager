@@ -438,8 +438,12 @@ ohos_unittest("ws_screen_rotation_property_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "sensor:sensor_interface_native",
   ]
+  defines = []
+  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "SENSOR_ENABLE" ]
+  }
 }
 
 ohos_unittest("ws_move_drag_controller_test") {
@@ -693,8 +697,12 @@ ohos_static_library("ws_unittest_common") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "sensor:sensor_interface_native",
   ]
+  defines = []
+  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "SENSOR_ENABLE" ]
+  }
 
   part_name = "window_manager"
   subsystem_name = "window"
