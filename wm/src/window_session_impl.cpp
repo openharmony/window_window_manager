@@ -19,6 +19,8 @@
 #include <optional>
 
 #include <common/rs_common_def.h>
+#include <filesystem>
+#include <fstream>
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -605,17 +607,24 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
+    return SetUIContentInner(contentInfo, env, storage,
+        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, false, true, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+}
+
+WMError WindowSessionImpl::SetUIContentByAbc(
+    const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability)
+    WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
     WLOGFD("[WMSLife]NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
@@ -631,12 +640,21 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         WLOGFE("[WMSLife]fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (isdistributed) {
-        uiContent->Restore(this, contentInfo, storage);
-    } else if (isLoadedByName) {
-        uiContent->InitializeByName(this, contentInfo, storage);
-    } else {
-        uiContent->Initialize(this, contentInfo, storage);
+    switch (type) {
+        default:
+        case WindowSetUIContentType::DEFAULT:
+            uiContent->Initialize(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::DISTRIBUTE:
+            uiContent->Restore(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::BY_NAME:
+            uiContent->InitializeByName(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::BY_ABC:
+            auto abcContent = GetAbcContent(contentInfo);
+            uiContent->Initialize(this, abcContent, storage);
+            break;
     }
     // make uiContent available after Initialize/Restore
     {
@@ -676,6 +694,35 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     WLOGFD("[WMSLife]notify uiContent window size change end");
     return WMError::WM_OK;
+}
+
+std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std::string& abcPath)
+{
+    std::filesystem::path abcFile { abcPath };
+    if (abcFile.empty() || !abcFile.is_absolute() || !std::filesystem::exists(abcFile)) {
+        WLOGFE("abc file path is not valid");
+        return nullptr;
+    }
+    int begin, end;
+    std::fstream file(abcFile, std::ios::in | std::ios::binary);
+    if (!file) {
+        WLOGFE("abc file is not valid");
+        return nullptr;
+    }
+    begin = file.tellg();
+    file.seekg(0, std::ios::end);
+    end = file.tellg();
+    size_t len = end - begin;
+    WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
+
+    if (len <= 0) {
+        WLOGFE("abc file size is 0");
+        return nullptr;
+    }
+    std::vector<uint8_t> abcBytes(len);
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char *>(abcBytes.data()), len);
+    return std::make_shared<std::vector<uint8_t>>(abcBytes);
 }
 
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
