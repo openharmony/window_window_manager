@@ -136,7 +136,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot(const float& scaleParam = 0.0f) const;
     SessionState GetSessionState() const;
     void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);

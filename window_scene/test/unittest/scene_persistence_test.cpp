@@ -149,6 +149,30 @@ HWTEST_F(ScenePersistenceTest, IsSnapshotExisted, Function | SmallTest | Level1)
     ASSERT_EQ(result, false);
 }
 
+/**
+ * @tc.name: GetLocalSnapshotPixelMap
+ * @tc.desc: test function : get local snapshot pixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetPixelMap";
+    info.bundleName_ = "GetPixelMap1";
+    Session session(info);
+    auto abilityInfo = session.GetSessionInfo();
+    auto persistendId = abilityInfo.persistentId_;
+    ScenePersistence::CreateSnapshotDir("storage");
+    ScenePersistence scenePersistence(abilityInfo.bundleName_, persistendId);
+    auto result = scenePersistence.GetLocalSnapshotPixelMap();
+    EXPECT_EQ(result, nullptr);
+
+    auto pixelMap = session.GetSnapshot();
+    scenePersistence.SaveSnapshot(pixelMap);
+    result = scenePersistence.GetLocalSnapshotPixelMap();
+    remove(scenePersistence.GetSnapshotFilePath().c_str());
+    EXPECT_EQ(result, nullptr);
+}
 }
 }
 }

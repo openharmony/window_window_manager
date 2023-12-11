@@ -1483,13 +1483,14 @@ WSError Session::UpdateConfiguration()
     return WSError::WS_OK;
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot() const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(const float& scaleParam) const
 {
     if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
+    auto scaleValue = scaleParam == 0.0f ? snapshotScale_ : scaleParam;
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scaleValue, scaleValue);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;

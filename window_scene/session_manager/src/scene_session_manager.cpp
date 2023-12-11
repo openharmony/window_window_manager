@@ -63,6 +63,7 @@
 #include "color_parser.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
+#include "image_source.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/main_session.h"
@@ -6192,6 +6193,30 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t& persistentId,
+    const float& scaleParam)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (!sceneSession) {
+        WLOGFE("get scene session is nullptr");
+        return nullptr;
+    }
+
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    if (sceneSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+        sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+        pixelMap = sceneSession->Snapshot(scaleParam);
+    }
+
+    if (!pixelMap && sceneSession->GetScenePersistence()) {
+        WLOGFE("get local snapshot pixelmap start");
+        pixelMap = sceneSession->GetScenePersistence()->GetLocalSnapshotPixelMap();
+    }
+
+    return pixelMap;
 }
 
 void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)

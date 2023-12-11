@@ -159,4 +159,25 @@ bool ScenePersistence::IsSnapshotExisted() const
     }
     return S_ISREG(buf.st_mode);
 }
+
+std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap() const
+{
+    if (!IsSnapshotExisted()) {
+        WLOGE("local snapshot pic is not existed");
+        return nullptr;
+    }
+
+    uint32_t errorCode = 0;
+    Media::SourceOptions sourceOpts;
+    sourceOpts.formatHint = "image/png";
+    auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
+    if (!imageSource) {
+        WLOGE("create image source fail, errCode : %{public}d", errorCode);
+        return nullptr;
+    }
+
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
+    return imageSource->CreatePixelMap(decodeOpts, errorCode);
+}
 } // namespace OHOS::Rosen
