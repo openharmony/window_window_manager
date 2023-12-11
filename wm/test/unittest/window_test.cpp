@@ -2206,6 +2206,19 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
     vector<int32_t> uiExtensionIdLevelVec;
     ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
 }
+
+/**
+ * @tc.name: SetSingleFrameComposerEnabled
+ * @tc.desc: set single frame composer enable flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->SetSingleFrameComposerEnabled(false));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

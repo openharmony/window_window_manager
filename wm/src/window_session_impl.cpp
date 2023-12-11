@@ -809,6 +809,24 @@ WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 }
 
+WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
+{
+    WLOGFD("Set the enable flag of single frame composer.");
+    if (IsWindowSessionInvalid()) {
+        WLOGE("The window state is invalid ");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (surfaceNode_ == nullptr) {
+        WLOGE("The surface node is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    surfaceNode_->MarkNodeSingleFrameComposer(enable);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
 bool WindowSessionImpl::IsFloatingWindowAppType() const
 {
     return property_ != nullptr && property_->IsFloatingWindowAppType();

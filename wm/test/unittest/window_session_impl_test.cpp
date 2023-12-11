@@ -1516,6 +1516,29 @@ HWTEST_F(WindowSessionImplTest, TransferAccessibilityEvent, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
     GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent end";
 }
+
+/**
+ * @tc.name: SetSingleFrameComposerEnabled01
+ * @tc.desc: SetSingleFrameComposerEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetSingleFrameComposerEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetSingleFrameComposerEnabled01");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->SetSingleFrameComposerEnabled(false);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->SetSingleFrameComposerEnabled(false);
+    ASSERT_EQ(retCode, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
