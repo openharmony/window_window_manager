@@ -160,7 +160,8 @@ bool ScenePersistence::IsSnapshotExisted() const
     return S_ISREG(buf.st_mode);
 }
 
-std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap() const
+std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float& oriScale,
+    const float& newScale) const
 {
     if (!IsSnapshotExisted()) {
         WLOGE("local snapshot pic is not existed");
@@ -176,8 +177,20 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap() co
         return nullptr;
     }
 
+    Media::ImageInfo info;
+    int32_t decoderWidth = 0;
+    int32_t decoderHeight = 0;
+    errorCode = imageSource->GetImageInfo(info);
+    if (errorCode == Media::SUCCESS) {
+        decoderWidth = info.size.width;
+        decoderHeight = info.size.height;
+    }
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
+    if (oriScale != 0 && decoderWidth > 0 && decoderHeight > 0) {
+        decodeOpts.desiredSize.width = static_cast<int>(decoderWidth * newScale / oriScale);
+        decodeOpts.desiredSize.height = static_cast<int>(decoderHeight * newScale / oriScale);
+    }
     return imageSource->CreatePixelMap(decodeOpts, errorCode);
 }
 } // namespace OHOS::Rosen
