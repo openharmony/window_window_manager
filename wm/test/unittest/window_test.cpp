@@ -1342,6 +1342,22 @@ HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetUIContentByAbc
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetUIContentByAbc, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    napi_env env = nullptr;
+    napi_value storage = nullptr;
+    auto ret = window->SetUIContentByAbc("/system/etc/window/resources/test.abc", env, storage);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetContentInfo
  * @tc.desc: get
  * @tc.type: FUNC

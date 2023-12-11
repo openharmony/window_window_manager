@@ -332,6 +332,16 @@ enum class WindowGravity : uint32_t {
 };
 
 /**
+ * @brief Enumerates window setuicontent type.
+ */
+enum class WindowSetUIContentType: uint32_t {
+    DEFAULT,
+    DISTRIBUTE,
+    BY_NAME,
+    BY_ABC,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.
@@ -616,7 +626,7 @@ enum class PipWindowState : uint32_t {
 /**
  * @brief Enumerates picture in picture template type.
  */
-enum class PipTemplateType : int32_t {
+enum class PipTemplateType : uint32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
