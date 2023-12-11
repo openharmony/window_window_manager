@@ -2014,10 +2014,8 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
         }
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_PRIMARY;
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SECONDARY;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
