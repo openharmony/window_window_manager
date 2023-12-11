@@ -1405,6 +1405,10 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (scnSessionInfo->isClearSession) {
             scnSessionInfo->resultCode = -1;
         }
+        if (scnSessionInfo->resultCode == -1) {
+            OHOS::AAFwk::Want want;
+            scnSessionInfo->want = want;
+        }
         NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
