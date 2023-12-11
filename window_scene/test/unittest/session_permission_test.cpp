@@ -119,6 +119,17 @@ HWTEST_F(SessionPermissionTest, IsShellCall, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: IsStartByHdcd
+ * @tc.desc: test function : IsStartByHdcd
+ * @tc.type: FUNC
+*/
+HWTEST_F(SessionPermissionTest, IsStartByHdcd, Function | SmallTest | Level1)
+{
+    bool result = SessionPermission::IsStartByHdcd();
+    ASSERT_EQ(true, result);
+}
+
+/**
  * @tc.name: IsStartedByInputMethod
  * @tc.desc: test function : IsStartedByInputMethod
  * @tc.type: FUNC
@@ -137,9 +148,22 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | L
 HWTEST_F(SessionPermissionTest, session_permission_test001, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 start";
+    bool result = SessionPermission::IsStartByHdcd();
+    ASSERT_EQ(result, true);
+    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 end";
+}
+
+/**
+ * @tc.name: session_permission_test002
+ * @tc.desc: test function : session_permission_test002
+ * @tc.type: FUNC
+*/
+HWTEST_F(SessionPermissionTest, session_permission_test002, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 start";
     bool result = SessionPermission::IsStartedByInputMethod();
     ASSERT_EQ(result, false);
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 end";
+    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 end";
 }
 } // namespacecd
 } // namespace Rosen
