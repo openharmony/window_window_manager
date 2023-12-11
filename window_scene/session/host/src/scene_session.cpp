@@ -2094,4 +2094,12 @@ bool SceneSession::IsDirtyWindow()
 {
     return isDirty_;
 }
+
+void SceneSession::NotifyUILostFocus()
+{
+    if (moveDragController_) {
+        moveDragController_->OnLostFocus();
+    }
+    Session::NotifyUILostFocus();
+}
 } // namespace OHOS::Rosen

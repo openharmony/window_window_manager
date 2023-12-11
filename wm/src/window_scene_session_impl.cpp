@@ -1200,7 +1200,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
 
 WMError WindowSceneSessionImpl::Minimize()
 {
-    WLOGFD("WindowSceneSessionImpl::Minimize called");
+    WLOGFI("WindowSceneSessionImpl::Minimize id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1216,7 +1216,7 @@ WMError WindowSceneSessionImpl::Minimize()
 
 WMError WindowSceneSessionImpl::Maximize()
 {
-    WLOGFD("WindowSceneSessionImpl::Maximize called");
+    WLOGFI("WindowSceneSessionImpl::Maximize id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1229,7 +1229,7 @@ WMError WindowSceneSessionImpl::Maximize()
 
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
-    WLOGFD("WindowSceneSessionImpl::MaximizeFloating called");
+    WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1258,7 +1258,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 
 WMError WindowSceneSessionImpl::Recover()
 {
-    WLOGFD("WindowSceneSessionImpl::Recover called");
+    WLOGFI("WindowSceneSessionImpl::Recover id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1283,7 +1283,7 @@ WMError WindowSceneSessionImpl::Recover()
 
 void WindowSceneSessionImpl::StartMove()
 {
-    WLOGFD("WindowSceneSessionImpl::StartMove called");
+    WLOGFI("WindowSceneSessionImpl::StartMove id：%{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return;
@@ -1298,7 +1298,7 @@ void WindowSceneSessionImpl::StartMove()
 
 WMError WindowSceneSessionImpl::Close()
 {
-    WLOGFD("WindowSceneSessionImpl::Close called");
+    WLOGFI("WindowSceneSessionImpl::Close id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1421,7 +1421,7 @@ void WindowSceneSessionImpl::PerformBack()
 
 WMError WindowSceneSessionImpl::SetGlobalMaximizeMode(MaximizeMode mode)
 {
-    WLOGFD("WindowSceneSessionImpl::SetGlobalMaximizeMode %{public}u", static_cast<uint32_t>(mode));
+    WLOGFI("WindowSceneSessionImpl::SetGlobalMaximizeMode %{public}u", static_cast<uint32_t>(mode));
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;

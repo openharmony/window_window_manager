@@ -69,6 +69,7 @@ public:
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+    void OnLostFocus();
 
 private:
     struct MoveDragProperty {
