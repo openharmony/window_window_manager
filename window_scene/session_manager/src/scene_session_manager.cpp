@@ -2250,7 +2250,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
             }
             break;
-        }  
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;
@@ -2933,13 +2933,16 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         WLOGFE("GetSessionDumpInfo permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
-        return GetAllSessionDumpInfo(dumpInfo);
-    }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
-        return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
-    }
-    return WSError::WS_ERROR_INVALID_OPERATION;
+    auto task = [this, params, &dumpInfo]() {
+        if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
+            return GetAllSessionDumpInfo(dumpInfo);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
+            return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+        }
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
