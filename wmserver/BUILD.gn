@@ -73,10 +73,6 @@ config("libmockwms_config") {
     # for window_manager_hilog
     "${window_base_path}/utils/include",
 
-    # for screenlock_manager_interface
-    "${screenlock_mgr_path}/services/include",
-    "${screenlock_mgr_path}/utils/include",
-    "${screenlock_mgr_path}/frameworks/native/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
 
