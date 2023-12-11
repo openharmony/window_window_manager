@@ -829,7 +829,7 @@ bool WindowManagerService::CheckAnimationPermission(const sptr<WindowProperty>& 
         return true;
     }
     // If the animation type is CUSTOM
-    if (Permission::IsSystemCalling() || Permission::IsStartByHdcd()) {
+    if (Permission::IsSystemCalling()) {
         WLOGFD("check IsSystemCalling permission success, show with animation calling.");
         return true;
     }
@@ -860,7 +860,7 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         WLOGFD("check create permission success, normal app create float window with request permission.");
         return true;
     }
-    if (Permission::IsSystemCalling() || Permission::IsStartByHdcd()) {
+    if (Permission::IsSystemCalling()) {
         WLOGFD("check create permission success, create with system calling.");
         return true;
     }
@@ -921,7 +921,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId, bool isFromInnerkits)
 {
-    if (!isFromInnerkits && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!isFromInnerkits && !Permission::IsSystemCalling()) {
         WLOGFE("remove window permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1000,7 +1000,7 @@ AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaT
 WMError WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("register windowManager agent permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1020,7 +1020,7 @@ WMError WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType 
 WMError WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("unregister windowManager agent permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1035,7 +1035,7 @@ WMError WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentTyp
 
 WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set window animation controller permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1183,7 +1183,7 @@ void WindowManagerService::NotifyWindowClientPointUp(uint32_t windowId,
 
 WMError WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("minimize all appWindows permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1197,7 +1197,7 @@ WMError WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("toggle shown state for all appwindows permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1217,7 +1217,7 @@ WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWi
 
 WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("set window layout mode permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1237,7 +1237,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     }
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
         action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
-        !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        !Permission::IsSystemCalling()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -1311,7 +1311,7 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 
 WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("window raise to app top permission denied!");
         return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1342,7 +1342,7 @@ void WindowManagerService::NotifyDumpInfoResult(const std::vector<std::string>& 
 WMError WindowManagerService::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
     std::vector<sptr<RSWindowAnimationTarget>>& targets)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("get window animation targets permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1369,7 +1369,7 @@ WMError WindowManagerService::GetModeChangeHotZones(DisplayId displayId, ModeCha
 void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
     sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("minimize windows by launcher permission denied!");
         return;
     }
@@ -1433,7 +1433,7 @@ void WindowManagerService::OnScreenshot(DisplayId displayId)
 
 WMError WindowManagerService::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         WLOGFE("bind dialog target permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
