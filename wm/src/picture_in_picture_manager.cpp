@@ -29,9 +29,9 @@ namespace {
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
-sptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr; // todo delete
+sptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
 std::map<std::string, sptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
-std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {}; // todo delete
+std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 
 PictureInPictureManager::PictureInPictureManager()
