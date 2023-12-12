@@ -28,7 +28,8 @@ bool AccessibilityWindowInfo::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteBool(isDecorEnable_) &&
-        parcel.WriteUint64(displayId_)  && parcel.WriteUint32(layer_) && parcel.WriteFloat(scaleVal_) &&
+        parcel.WriteUint64(displayId_) && parcel.WriteUint32(layer_) && parcel.WriteFloat(scaleVal_) &&
+        parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
 }
 
@@ -43,7 +44,8 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
         parcel.ReadUint32(info->windowRect_.height_) && parcel.ReadInt32(info->windowRect_.posX_) &&
         parcel.ReadInt32(info->windowRect_.posY_) && parcel.ReadBool(info->focused_) &&
         parcel.ReadBool(info->isDecorEnable_) && parcel.ReadUint64(info->displayId_) &&
-        parcel.ReadUint32(info->layer_) && parcel.ReadFloat(info->scaleVal_);
+        parcel.ReadUint32(info->layer_) && parcel.ReadFloat(info->scaleVal_) &&
+        parcel.ReadFloat(info->scaleX_) && parcel.ReadFloat(info->scaleY_);
     if (!res) {
         delete info;
         return nullptr;

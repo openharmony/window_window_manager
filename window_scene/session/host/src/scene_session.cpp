@@ -18,6 +18,9 @@
 
 #include <algorithm>
 #include <hitrace_meter.h>
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif // IMF_ENABLE
 #include <ipc_skeleton.h>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
@@ -2101,5 +2104,15 @@ void SceneSession::NotifyUILostFocus()
         moveDragController_->OnLostFocus();
     }
     Session::NotifyUILostFocus();
+}
+
+void SceneSession::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    if (scaleX_ != scaleX || scaleY_ != scaleY || pivotX_ != pivotX || pivotY_ != pivotY) {
+        Session::SetScale(scaleX, scaleY, pivotX, pivotY);
+        if (specificCallback_ != nullptr) {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+        }
+    }
 }
 } // namespace OHOS::Rosen
