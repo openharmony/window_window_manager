@@ -5320,6 +5320,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         }
         if (haveListener) {
             avoidAreaListenerSessionSet_.insert(persistentId);
+            UpdateAvoidArea(persistentId);
         } else {
             lastUpdatedAvoidArea_.erase(persistentId);
             avoidAreaListenerSessionSet_.erase(persistentId);
@@ -5345,14 +5346,17 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
         } else {
             if (avoidArea.isEmptyAvoidArea()) {
                 needUpdate = false;
+                return needUpdate;
             }
         }
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
             needUpdate = false;
+            return needUpdate;
         }
     }
-    if (needUpdate) {
+    if (needUpdate ||
+        avoidAreaType == AvoidAreaType::TYPE_SYSTEM || avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
         lastUpdatedAvoidArea_[persistentId][avoidAreaType] = avoidArea;
         sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
     }
@@ -5450,6 +5454,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 WLOGFD("NotifyAINavigationBarShowStatus: barArea should be empty if invisible");
                 currAINavigationBarArea_ = WSRect();
             }
+            WLOGFI("NotifyAINavigationBarShowStatus: enter: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
+                isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 auto sceneSession = GetSceneSession(persistentId);
                 if (sceneSession == nullptr) {
@@ -5460,6 +5466,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                     !avoidArea.rightRect_.IsUninitializedRect()) {
                     continue;
                 }
+                if (isVisible && avoidArea.isEmptyAvoidArea()) {
+                    continue;
+                }
+                WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
+                    "{%{public}d,%{public}d,%{public}d,%{public}d}", persistentId,
+                    avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+                    avoidArea.bottomRect_.width_, avoidArea.bottomRect_.height_);
                 UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
                                              AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
             }
