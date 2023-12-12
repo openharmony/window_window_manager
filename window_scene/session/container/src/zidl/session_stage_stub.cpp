@@ -217,6 +217,9 @@ int SessionStageStub::HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& 
 {
     WLOGFD("HandleUpdateAvoidArea!");
     sptr<AvoidArea> avoidArea = data.ReadStrongParcelable<AvoidArea>();
+    if (!avoidArea) {
+        return ERR_INVALID_VALUE;
+    }
     uint32_t type;
     if (!data.ReadUint32(type)) {
         return ERR_INVALID_VALUE;
