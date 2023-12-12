@@ -26,6 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneP
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
+constexpr uint8_t SUCCESS = 0;
 const std::string SNAPSHOT_THREAD = "SnapshotThread";
 } // namespace
 
@@ -181,7 +182,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     int32_t decoderWidth = 0;
     int32_t decoderHeight = 0;
     errorCode = imageSource->GetImageInfo(info);
-    if (errorCode == Media::SUCCESS) {
+    if (errorCode == SUCCESS) {
         decoderWidth = info.size.width;
         decoderHeight = info.size.height;
     }
