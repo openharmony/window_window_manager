@@ -67,7 +67,6 @@
           "frame_aware_sched_override",
           "imf",
           "frame_aware_sched",
-          "screenlock_mgr",
           "previewer",
           "hilog",
           "memmgr_plugin",
