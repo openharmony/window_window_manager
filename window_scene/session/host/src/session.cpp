@@ -1477,16 +1477,6 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-WSError Session::UpdateConfiguration()
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    sessionStage_->NotifyConfigurationUpdated();
-    return WSError::WS_OK;
-}
-
 std::shared_ptr<Media::PixelMap> Session::Snapshot(const float& scaleParam) const
 {
     if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {

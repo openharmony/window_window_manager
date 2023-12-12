@@ -1851,7 +1851,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
                 WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
                 task.Resolve(env, nativeData);
             } else {
-                WLOGD("[NAPI]create native pixelmap fail");
+                WLOGE("[NAPI]create native pixelmap fail");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             }
         };
