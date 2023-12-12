@@ -165,6 +165,8 @@ public:
     WindowMode mode_;
     WindowType type_;
     float scaleVal_;
+    float scaleX_;
+    float scaleY_;
 };
 
 /**

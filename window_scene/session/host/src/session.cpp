@@ -1944,6 +1944,34 @@ float Session::GetFloatingScale() const
     return floatingScale_;
 }
 
+void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    scaleX_ = scaleX;
+    scaleY_ = scaleY;
+    pivotX_ = pivotX;
+    pivotY_ = pivotY;
+}
+
+float Session::GetScaleX() const
+{
+    return scaleX_;
+}
+
+float Session::GetScaleY() const
+{
+    return scaleY_;
+}
+
+float Session::GetPivotX() const
+{
+    return pivotX_;
+}
+
+float Session::GetPivotY() const
+{
+    return pivotY_;
+}
+
 void Session::SetSCBKeepKeyboard(bool scbKeepKeyboardFlag)
 {
     scbKeepKeyboardFlag_ = scbKeepKeyboardFlag;
