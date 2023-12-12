@@ -146,7 +146,7 @@ public:
     void SetAnchorAndScale(int32_t x, int32_t y, float scale) override;
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
     void OffWindowZoom() override;
-    void PostAsyncTask(Task task);
+    void PostAsyncTask(Task task, const std::string& taskName = "WMSTask");
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
@@ -167,14 +167,14 @@ private:
     bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
     bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void ConfigureWindowManagerService();
-    void PostVoidSyncTask(Task task);
+    void PostVoidSyncTask(Task task, const std::string& taskName = "WMSTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
-    Return PostSyncTask(SyncTask&& task)
+    Return PostSyncTask(SyncTask&& task, const std::string& taskName = "WMSTask")
     {
         Return ret;
         std::function<void()> syncTask([&ret, &task]() {ret = task();});
         if (handler_) {
-            handler_->PostSyncTask(syncTask, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            handler_->PostSyncTask(syncTask, "wms:" + taskName, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
         return ret;
     }

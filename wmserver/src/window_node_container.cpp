@@ -2096,7 +2096,7 @@ void WindowNodeContainer::BackUpAllAppWindows()
         backupWindowIds_.emplace_back(appNode->GetWindowId());
         WindowManagerService::GetInstance().RemoveWindow(appNode->GetWindowId(), true);
         wptr<IRemoteObject> abilityToken = appNode->abilityToken_;
-        WindowInnerManager::GetInstance().PostTask([abilityToken]() {
+        auto task = [abilityToken]() {
             auto token = abilityToken.promote();
             if (token == nullptr) {
                 WLOGFW("Ability token is null");
@@ -2104,7 +2104,8 @@ void WindowNodeContainer::BackUpAllAppWindows()
             }
             AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(token,
                 static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
-        });
+        };
+        WindowInnerManager::GetInstance().PostTask(task, "DoAbilityBackground");
     }
     backupDividerWindowRect_.clear();
     for (auto displayId : displayIdSet) {

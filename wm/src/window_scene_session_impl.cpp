@@ -1250,6 +1250,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
         UpdateDecorEnable(true);
+        NotifyWindowStatusChange(GetMode());
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
@@ -1274,6 +1275,7 @@ WMError WindowSceneSessionImpl::Recover()
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+        NotifyWindowStatusChange(GetMode());
     } else {
         WLOGFE("recovery is invalid on sub window");
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -1395,7 +1397,7 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         }
         weakSession->PerformBack();
     };
-    if (!handler_->PostTask(task)) {
+    if (!handler_->PostTask(task, "wms:PerformBack")) {
         WLOGFE("Failed to post PerformBack");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
@@ -2082,11 +2084,6 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
     if (property_ == nullptr) {
         WLOGFE("[WMSInput] Set calling window id failed, property_ is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
-    }
-    uint32_t lastCallingWindowId = property_->GetCallingWindow();
-    if (callingWindowId == lastCallingWindowId) {
-        WLOGFD("[WMSInput] Calling window id does not need to be updated!");
-        return WMError::WM_OK;
     }
     WLOGFI("[WMSInput] Set calling window id: %{public}d", callingWindowId);
     property_->SetCallingWindow(callingWindowId);

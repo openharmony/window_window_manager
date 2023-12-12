@@ -58,13 +58,15 @@ public:
         int32_t action, int32_t baseParent) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         const std::vector<int32_t>& uiExtensionIdLevelVec) override;
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
     void NotifyBackpressedEvent(bool& isConsumed) override;
-    void NotifyConfigurationUpdated() override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -72,6 +74,8 @@ protected:
 
 private:
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
+    static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowExtensionSessionMap_;
+    static std::shared_mutex windowExtensionSessionMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

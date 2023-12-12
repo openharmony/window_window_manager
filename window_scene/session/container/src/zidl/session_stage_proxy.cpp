@@ -469,23 +469,6 @@ WSError SessionStageProxy::UpdateMaximizeMode(MaximizeMode mode)
     return static_cast<WSError>(ret);
 }
 
-void SessionStageProxy::NotifyConfigurationUpdated()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CONFIGURATION_UPDATED),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-    }
-}
-
 void  SessionStageProxy::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     MessageParcel data;

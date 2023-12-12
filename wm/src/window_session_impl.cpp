@@ -1181,19 +1181,22 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         if (!window) {
             return;
         }
-        if (window->uiContent_ != nullptr) {
+        bool isNeedKeyboard = false;
+        {
             std::lock_guard<std::recursive_mutex> lock(window->mutex_);
-            // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
-            bool isNeedKeyboard = window->uiContent_->NeedSoftKeyboard();
-            // whether keep the keyboard created by other windows, support system window and app subwindow.
-            bool keepKeyboardFlag = (window->property_ != nullptr) ? window->property_->GetKeepKeyboardFlag() : false;
-            WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-                isNeedKeyboard, keepKeyboardFlag);
-            RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
+            if (window->uiContent_ != nullptr) {
+                // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
+                isNeedKeyboard = window->uiContent_->NeedSoftKeyboard();
+            }
         }
+        // whether keep the keyboard created by other windows, support system window and app subwindow.
+        bool keepKeyboardFlag = (window->property_) ? window->property_->GetKeepKeyboardFlag() : false;
+        WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+            isNeedKeyboard, keepKeyboardFlag);
+        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ != nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
         uiContent_->SetOnWindowFocused(task);
         WLOGFI("[WMSInput] set need soft keyboard callback success!");
     }
@@ -1240,7 +1243,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
     };
     if (handler_) {
-        handler_->PostSyncTask(task);
+        handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");
     } else {
         task();
     }
@@ -1540,7 +1543,11 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    WLOGI("UpdateAvoidArea, id:%{public}d", GetPersistentId());
+    WLOGI("UpdateAvoidArea: id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
+        "down{%{public}d,%{public}d,%{public}d,%{public}d}", GetPersistentId(), type,
+        avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_, avoidArea->topRect_.height_,
+        avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
+        avoidArea->bottomRect_.height_);
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }
@@ -2032,10 +2039,8 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
         }
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_PRIMARY;
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLIT_SECONDARY;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;

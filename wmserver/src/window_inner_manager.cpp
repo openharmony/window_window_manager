@@ -54,7 +54,8 @@ bool WindowInnerManager::Init()
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
-    eventHandler_->PostTask([]() { MemoryGuard cacheGuard; }, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    eventHandler_->PostTask([]() { MemoryGuard cacheGuard; }, "wms:Init:cacheGuard",
+        0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     moveDragController_ = new MoveDragController();
     if (!moveDragController_->Init()) {
         WLOGFE("Init window drag controller failed");
@@ -252,7 +253,7 @@ void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPrior
         WLOGFE("listener handler is nullptr");
         return;
     }
-    bool ret = eventHandler_->PostTask(task, name, 0, priority); // 0 is task delay time
+    bool ret = eventHandler_->PostTask(task, "wms:" + name, 0, priority); // 0 is task delay time
     if (!ret) {
         WLOGFE("post listener callback task failed.");
         return;
@@ -334,7 +335,7 @@ void WindowInnerManager::StartWindowInfoReportLoop()
         StartWindowInfoReportLoop();
     };
     int64_t delayTime = 1000 * 60 * 60; // an hour.
-    bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
+    bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
         WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
         return;

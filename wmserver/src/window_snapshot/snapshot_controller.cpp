@@ -56,7 +56,7 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
             }
         }
     };
-    handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostSyncTask(task, "wms:GetSnapshot", AppExecFwk::EventQueue::Priority::IMMEDIATE);
 
     // do snapshot if no cache
     if (pixelMap == nullptr) {
