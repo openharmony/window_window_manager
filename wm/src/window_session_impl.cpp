@@ -1181,19 +1181,22 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         if (!window) {
             return;
         }
-        if (window->uiContent_ != nullptr) {
+        bool isNeedKeyboard = false;
+        {
             std::lock_guard<std::recursive_mutex> lock(window->mutex_);
-            // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
-            bool isNeedKeyboard = window->uiContent_->NeedSoftKeyboard();
-            // whether keep the keyboard created by other windows, support system window and app subwindow.
-            bool keepKeyboardFlag = (window->property_ != nullptr) ? window->property_->GetKeepKeyboardFlag() : false;
-            WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-                isNeedKeyboard, keepKeyboardFlag);
-            RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
+            if (window->uiContent_ != nullptr) {
+                // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
+                isNeedKeyboard = window->uiContent_->NeedSoftKeyboard();
+            }
         }
+        // whether keep the keyboard created by other windows, support system window and app subwindow.
+        bool keepKeyboardFlag = (window->property_) ? window->property_->GetKeepKeyboardFlag() : false;
+        WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+            isNeedKeyboard, keepKeyboardFlag);
+        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ != nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
         uiContent_->SetOnWindowFocused(task);
         WLOGFI("[WMSInput] set need soft keyboard callback success!");
     }
