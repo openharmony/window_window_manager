@@ -1138,7 +1138,9 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
-    VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
+    }
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1151,7 +1153,9 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
-    VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
+    }
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
@@ -1815,7 +1819,9 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 void WindowSessionImpl::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    VsyncStation::GetInstance().FlushFrameRate(rate);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        VsyncStation::GetInstance().FlushFrameRate(rate);
+    }
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
