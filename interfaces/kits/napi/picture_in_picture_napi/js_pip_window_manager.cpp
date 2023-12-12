@@ -30,6 +30,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
 }
 
+std::mutex JsPipWindowManager::mutex_;
+
 static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionObject, PipOption& option)
 {
     napi_value contextPtrValue = nullptr;
@@ -100,6 +102,7 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
     WLOGI("OnCreatePipController called");
+    std::lock_guard<std::mutex> lock(mutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
