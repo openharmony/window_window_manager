@@ -5161,7 +5161,7 @@ void SceneSessionManager::InitWithRenderServiceAdded()
 
 WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType)
 {
-    if (sceneType > SystemAnimatedSceneType::SCENE_UNKNOWN) {
+    if (sceneType > SystemAnimatedSceneType::SCENE_OTHERS) {
         WLOGFE("The input scene type is valid, scene type is %{public}d", sceneType);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
