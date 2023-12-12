@@ -757,6 +757,52 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty, Function | SmallTest | L
 }
 
 /*
+ * @tc.name: SpecificBarProperty
+ * @tc.desc: SpecificBarProperty01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SpecificBarProperty, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    SystemBarProperty property = SystemBarProperty();
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    if (window->property_ == nullptr) {
+        ASSERT_EQ(WMError::WMError::WM_ERROR_NULLPTR,
+            window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    }
+}
+
+/*
+ * @tc.name: NotifySpecificWindowSessionProperty
+ * @tc.desc: NotifySpecificWindowSessionProperty01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    SystemBarProperty property = SystemBarProperty();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    window->property_->SetPersistentId(190);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+}
+
+/*
  * @tc.name: LimitCameraFloatWindowMininumSize
  * @tc.desc: LimitCameraFloatWindowMininumSize01 test
  * @tc.type: FUNC
