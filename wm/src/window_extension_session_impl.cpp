@@ -17,14 +17,16 @@
 
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
-#include "app_mgr_client.h"
-#include "app_mgr_constants.h"
+#include "anr_handler.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 }
+
+std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowExtensionSessionImpl::windowExtensionSessionMap_;
+std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -44,8 +46,61 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
     hostSession_ = iSession;
     context_ = context;
-    Connect();
+    WMError ret = Connect();
+    if (ret == WMError::WM_OK) {
+        std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+        windowExtensionSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    }
     state_ = WindowState::STATE_CREATED;
+    return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ != nullptr) {
+        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        uiContent_->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    WLOGD("notify scene ace update config");
+    std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& winPair : windowExtensionSessionMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfiguration(configuration);
+    }
+}
+
+WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
+{
+    WLOGFI("[WMSLife]Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
+        "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("[WMSLife]session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (hostSession_ != nullptr) {
+        hostSession_->Disconnect();
+    }
+    NotifyBeforeDestroy(GetWindowName());
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        state_ = WindowState::STATE_DESTROYED;
+        requestState_ = WindowState::STATE_DESTROYED;
+    }
+    hostSession_ = nullptr;
+    {
+        std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+        windowExtensionSessionMap_.erase(property_->GetWindowName());
+    }
+    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
+    NotifyAfterDestroy();
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
     return WMError::WM_OK;
 }
 
@@ -166,21 +221,6 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
         isConsumed = uiContent_->ProcessBackPressed();
     }
     WLOGFD("Backpressed event is not cosumed");
-}
-
-void WindowExtensionSessionImpl::NotifyConfigurationUpdated()
-{
-    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService() != AppExecFwk::AppMgrResultCode::RESULT_OK) {
-        WLOGFE("Failed to connnect AppManagerService");
-        return;
-    }
-    auto systemConfig = AppExecFwk::Configuration();
-    appMgrClient->GetConfiguration(systemConfig);
-    auto newConfig = std::make_shared<AppExecFwk::Configuration>(systemConfig);
-    if (uiContent_) {
-        uiContent_->UpdateConfiguration(newConfig);
-    }
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
