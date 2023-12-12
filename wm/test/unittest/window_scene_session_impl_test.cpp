@@ -768,7 +768,6 @@ HWTEST_F(WindowSceneSessionImplTest, SpecificBarProperty, Function | SmallTest |
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
 
     SystemBarProperty property = SystemBarProperty();
-
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     if (window->property_ == nullptr) {
