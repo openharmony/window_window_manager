@@ -214,6 +214,13 @@ protected:
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
 
+    std::string GetRectInfo(const WSRect& rect)
+    {
+        using std::to_string;
+        return "[" + to_string(rect.width_) + ", " + to_string(rect.height_) + "; "
+        + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
+    }
+
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;

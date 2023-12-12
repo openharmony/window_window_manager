@@ -65,7 +65,7 @@ void WindowCommonEvent::SubscriberEventInner(int retry)
     }
     std::function<void()> func = std::bind(&WindowCommonEvent::SubscriberEventInner, this, retry);
     // post task delay 500ms
-    eventHandler_->PostTask(func, 500, AppExecFwk::EventQueue::Priority::HIGH);
+    eventHandler_->PostTask(func, "wms:SubscriberEventInner", 500, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void WindowCommonEvent::UnSubscriberEvent()
@@ -73,7 +73,7 @@ void WindowCommonEvent::UnSubscriberEvent()
     auto task = [this] {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
     };
-    eventHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    eventHandler_->PostTask(task, "wms:UnSubscriberEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
@@ -86,7 +86,7 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
             (this->*handleCommonEventFuncs_[action])(data);
         }
     };
-    eventHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void WindowCommonEvent::HandleAccountSwitched(const EventFwk::CommonEventData& data) const

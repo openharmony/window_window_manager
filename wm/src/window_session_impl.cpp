@@ -1243,7 +1243,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
     };
     if (handler_) {
-        handler_->PostSyncTask(task);
+        handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");
     } else {
         task();
     }
