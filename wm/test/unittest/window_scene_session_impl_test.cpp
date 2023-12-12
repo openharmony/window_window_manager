@@ -771,7 +771,7 @@ HWTEST_F(WindowSceneSessionImplTest, SpecificBarProperty, Function | SmallTest |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     if (window->property_ == nullptr) {
-        ASSERT_EQ(WMError::WMError::WM_ERROR_NULLPTR,
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }
 }
@@ -796,9 +796,12 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK,window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(WMError::WM_OK,
+        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     window->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK,window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+
+    ASSERT_EQ(WMError::WM_OK,
+        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
 }
 
 /*
