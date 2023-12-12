@@ -180,6 +180,7 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         WindowSceneSessionImpl::UpdateConfigurationForAll(configuration);
         RootScene::UpdateConfigurationForAll(configuration);
+        WindowExtensionSessionImpl::UpdateConfigurationForAll(configuration);
     } else {
         WindowImpl::UpdateConfigurationForAll(configuration);
     }

@@ -80,7 +80,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     auto task = [displayGroupInfo = displayGroupInfo_]() {
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
-    WindowInnerManager::GetInstance().PostTask(std::move(task), "UpdateDisplayInfoBydisplayId");
+    WindowInnerManager::GetInstance().PostTask(std::move(task), "wms:UpdateDisplayInfoBydisplayId");
 }
 
 void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,

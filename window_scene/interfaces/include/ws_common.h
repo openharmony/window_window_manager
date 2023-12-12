@@ -167,7 +167,7 @@ struct SessionInfo {
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    int32_t resultCode;
+    int32_t resultCode = -1;
     int32_t requestCode;
     int32_t errorCode;
     std::string errorReason;
@@ -391,20 +391,20 @@ enum class TerminateType : uint32_t {
  * @brief System animaged scene type.
  */
 enum class SystemAnimatedSceneType : uint32_t {
-    SCENE_ENTER_MISSION_CENTER,
-    SCENE_DISPLAY_MISSION_CENTER,
-    SCENE_EXIT_MISSION_CENTER,
-    SCENE_TFU_WINDOW_DISPLAY, // The three-finger-up window display
-    SCENE_TFU_WINDOW_DISAPPEAR, // The three-finger-up window disappears
-    SCENE_ENTER_FULL_SCREEN_WINDOW,
-    SCENE_EXIT_FULL_SCREEN_WINDOW,
-    SCENE_ENTER_MAX_WINDOW,
-    SCENE_EXIT_MAX_WINDOW,
-    SCENE_ENTER_SPLIT_SCREEN,
-    SCENE_EXIT_SPLIT_SCREEN,
-    SCENE_ENTER_APP_CENTER,
-    SCENE_EXIT_APP_CENTER,
-    SCENE_UNKNOWN,
+    SCENE_ENTER_MISSION_CENTER, // Enter the mission center
+    SCENE_EXIT_MISSION_CENTER, // Exit the mission center
+    SCENE_ENTER_TFS_WINDOW, // Three-finger sliding window recovery
+    SCENE_EXIT_TFU_WINDOW, // The three-finger up window disappears
+    SCENE_ENTER_WINDOW_FULL_SCREEN, // Enter the window full screen
+    SCENE_EXIT_WINDOW_FULL_SCREEN, // Exit the window full screen
+    SCENE_ENTER_MAX_WINDOW, // Enter the window maximization state
+    SCENE_EXIT_MAX_WINDOW, // Exit the window maximization state
+    SCENE_ENTER_SPLIT_SCREEN, // Enter the split screen
+    SCENE_EXIT_SPLIT_SCREEN, // Exit the split screen
+    SCENE_ENTER_APP_CENTER, // Enter the app center
+    SCENE_EXIT_APP_CENTER, // Exit the app center
+    SCENE_APPEAR_MISSION_CENTER, // A special case scenario that displays the mission center
+    SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

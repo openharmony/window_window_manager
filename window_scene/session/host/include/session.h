@@ -130,7 +130,6 @@ public:
     WSError TransferFocusStateEvent(bool focusState);
     virtual WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t baseParent);
-    WSError UpdateConfiguration();
 
     int32_t GetPersistentId() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
@@ -170,6 +169,9 @@ public:
 
     void SetShowRecent(bool showRecent);
     bool GetShowRecent() const;
+    void SetOffset(float x, float y);
+    float GetOffsetX() const;
+    float GetOffsetY() const;
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -334,16 +336,16 @@ protected:
     bool NeedSystemPermission(WindowType type);
 
     using Task = std::function<void()>;
-    void PostTask(Task&& task, int64_t delayTime = 0);
+    void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
-    Return PostSyncTask(SyncTask&& task)
+    Return PostSyncTask(SyncTask&& task, const std::string& name = "sessionTask")
     {
         if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
             return task();
         }
         Return ret;
         auto syncTask = [&ret, &task]() { ret = task(); };
-        handler_->PostSyncTask(std::move(syncTask), AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        handler_->PostSyncTask(std::move(syncTask), name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }
 
@@ -357,6 +359,8 @@ protected:
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
     WSRect winRect_;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;

@@ -51,7 +51,7 @@ ANRHandler::~ANRHandler() {}
 
 void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
-    PostTask([this, eventId, sessionStage]() {
+    auto task = [this, eventId, sessionStage]() {
         sptr<ISessionStage> session = sessionStage.promote();
         if (session == nullptr) {
             WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
@@ -61,12 +61,13 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
         int32_t persistentId = session->GetPersistentId();
         sessionStageMap_[eventId] = { persistentId, sessionStage };
         WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
-    });
+    };
+    PostTask(task, "SetSessionStage:EID:" + std::to_string(eventId));
 }
 
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
 {
-    PostTask([this, eventId, actionTime]() {
+    auto task = [this, eventId, actionTime]() {
         int32_t currentPersistentId = GetPersistentIdOfEvent(eventId);
         WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
         if (IsOnEventHandler(currentPersistentId)) {
@@ -84,12 +85,13 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
         } else {
             SendEvent(eventId, 0);
         }
-    });
+    };
+    PostTask(task, "HandleEventConsumed:EID:" + std::to_string(eventId));
 }
 
 void ANRHandler::OnWindowDestroyed(int32_t persistentId)
 {
-    PostTask([this, persistentId]() {
+    auto task = [this, persistentId]() {
         anrHandlerState_.sendStatus.erase(persistentId);
         for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
             if (iter->second.persistentId == persistentId) {
@@ -99,10 +101,11 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
             }
         }
         WLOGFD("PersistentId:%{public}d and its events erased in ANRHandler", persistentId);
-    });
+    };
+    PostTask(task, "OnWindowDestroyed:PID:" + std::to_string(persistentId));
 }
 
-bool ANRHandler::PostTask(Task&& task, int64_t delayTime)
+bool ANRHandler::PostTask(Task &&task, const std::string& name, int64_t delayTime)
 {
     if (eventHandler_ == nullptr) {
         WLOGFE("EventHandler is nullptr");
@@ -113,7 +116,8 @@ bool ANRHandler::PostTask(Task&& task, int64_t delayTime)
         task();
         return true;
     }
-    if (!eventHandler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!eventHandler_->PostTask(std::move(task), "wms:" + name, delayTime,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         WLOGFE("PostTask failed");
         return false;
     }
@@ -165,10 +169,11 @@ void ANRHandler::SendEvent(int32_t eventId, int64_t delayTime)
 {
     CALL_DEBUG_ENTER;
     SetAnrHandleState(eventId, true);
+    auto task = [this]() {
+        MarkProcessed();
+    };
     if (eventHandler_ != nullptr &&
-        eventHandler_->PostHighPriorityTask([this]() {
-            MarkProcessed();
-        }, delayTime)) {
+        eventHandler_->PostHighPriorityTask(task, "MarkProcessed", delayTime)) {
         WLOGFD("Post eventId:%{public}d, delayTime:%{public}" PRId64 " successfully", eventId, delayTime);
     } else {
         WLOGFE("Post eventId:%{public}d, delayTime:%{public}" PRId64 " failed", eventId, delayTime);

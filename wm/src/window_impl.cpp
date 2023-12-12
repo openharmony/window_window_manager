@@ -2335,7 +2335,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
-        handler_->PostTask(task);
+        handler_->PostTask(task, "wms:UpdateRect");
     } else {
         if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_) || !postTaskDone_) {
             NotifySizeChange(rectToAce, reason, rsTransaction);

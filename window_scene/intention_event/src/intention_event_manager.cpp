@@ -111,7 +111,8 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         WLOGFE("ProcessEnterLeaveEventAsync eventHandler is null");
         return;
     }
-    eventHandler->PostTask(std::move(task), DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    eventHandler->PostTask(std::move(task), "wms:ProcessEventLeaveEventAsync",
+        DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
