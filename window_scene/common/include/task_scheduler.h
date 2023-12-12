@@ -26,19 +26,19 @@ public:
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
     using Task = std::function<void()>;
-    void PostAsyncTask(Task&& task, int64_t delayTime = 0);
-    void PostVoidSyncTask(Task&& task);
+    void PostAsyncTask(Task&& task, const std::string& name = "ssmTask", int64_t delayTime = 0);
+    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
     void PostTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void RemoveTask(const std::string& name);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
-    Return PostSyncTask(SyncTask&& task)
+    Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
         if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
             return task();
         }
         Return ret;
         auto syncTask = [&ret, &task]() { ret = task(); };
-        handler_->PostSyncTask(std::move(syncTask), AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        handler_->PostSyncTask(std::move(syncTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }
 
@@ -46,5 +46,4 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H

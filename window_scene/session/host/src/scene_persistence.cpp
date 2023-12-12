@@ -26,7 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneP
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
-const std::string SNAPSHOT_THREAD = "SnapshotThread";
+const std::string SNAPSHOT_THREAD = "OS_SnapshotThread";
 } // namespace
 
 std::string ScenePersistence::snapshotDirectory_;
@@ -97,7 +97,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         imagePacker.FinalizePacking(packedSize);
         WLOGFD("Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotScheduler_->PostAsyncTask(task);
+    snapshotScheduler_->PostAsyncTask(task, "SaveSnapshot");
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()
@@ -110,7 +110,7 @@ std::string ScenePersistence::GetSnapshotFilePath()
         }
         return scenePersistence->snapshotPath_;
     };
-    return snapshotScheduler_->PostSyncTask(task);
+    return snapshotScheduler_->PostSyncTask(task, "GetSnapshotFilePath");
 }
 
 void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)

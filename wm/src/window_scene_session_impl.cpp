@@ -1397,7 +1397,7 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         }
         weakSession->PerformBack();
     };
-    if (!handler_->PostTask(task)) {
+    if (!handler_->PostTask(task, "wms:PerformBack")) {
         WLOGFE("Failed to post PerformBack");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }

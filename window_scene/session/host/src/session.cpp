@@ -64,12 +64,12 @@ void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& h
     handler_ = handler;
 }
 
-void Session::PostTask(Task&& task, int64_t delayTime)
+void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
     if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
     }
-    handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 int32_t Session::GetPersistentId() const
@@ -1519,7 +1519,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
 
 void Session::UnregisterSessionChangeListeners()
 {
-    PostTask([weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             WLOGFE("session is null");
@@ -1530,7 +1530,8 @@ void Session::UnregisterSessionChangeListeners()
         session->sessionTouchableChangeFunc_ = nullptr;
         session->clickFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
-    });
+    };
+    PostTask(task, "UnregisterSessionChangeListeners");
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
@@ -1561,7 +1562,7 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    PostTask([weakThis = wptr(this), state]() {
+    auto task = [weakThis = wptr(this), state]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             WLOGFE("session is null");
@@ -1576,7 +1577,8 @@ void Session::NotifySessionStateChange(const SessionState& state)
         if (session->sessionStateChangeNotifyManagerFunc_) {
             session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
         }
-    });
+    };
+    PostTask(task, "NotifySessionStateChange");
 }
 
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)

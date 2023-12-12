@@ -251,7 +251,7 @@ void ScreenSessionManager::RegisterScreenChangeListener()
         [this](ScreenId screenId, ScreenEvent screenEvent) { OnScreenChange(screenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
         auto task = [this]() { RegisterScreenChangeListener(); };
-        taskScheduler_->PostAsyncTask(task, 50); // Retry after 50 ms.
+        taskScheduler_->PostAsyncTask(task, "RegisterScreenChangeListener", 50); // Retry after 50 ms.
     }
 }
 
@@ -491,7 +491,7 @@ void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, Scre
             agent->OnScreenChange(screenInfo, event);
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenChanged:SID:" + std::to_string(screenInfo->GetScreenId()));
 }
 
 DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
@@ -1058,7 +1058,7 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             agent->OnDisplayChange(displayInfo, event);
         }
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
 }
 
 DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation)
@@ -2405,7 +2405,7 @@ void ScreenSessionManager::NotifyScreenConnected(sptr<ScreenInfo> screenInfo)
         WLOGFI("SCB: NotifyScreenConnected,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         OnScreenConnect(screenInfo);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenConnected");
 }
 
 void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
@@ -2414,7 +2414,7 @@ void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
         WLOGFI("NotifyScreenDisconnected,  screenId:%{public}" PRIu64"", screenId);
         OnScreenDisconnect(screenId);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenDisconnected");
 }
 
 void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
@@ -2456,7 +2456,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
         WLOGFI("SCB: screenId:%{public}" PRIu64", trigger:[%{public}s]", screenInfo->GetScreenId(), trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenGroupChanged:PID");
 }
 
 void ScreenSessionManager::NotifyScreenGroupChanged(
@@ -2470,7 +2470,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
         WLOGFI("SCB: trigger:[%{public}s]", trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenGroupChanged");
 }
 
 void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
