@@ -799,7 +799,6 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
     ASSERT_EQ(WMError::WM_OK,
         window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     window->state_ = WindowState::STATE_SHOWN;
-
     ASSERT_EQ(WMError::WM_OK,
         window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
 }
