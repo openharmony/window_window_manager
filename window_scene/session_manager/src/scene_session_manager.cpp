@@ -1053,17 +1053,17 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
         return;
     }
 
-    uint32_t callingWindowId_ = INVALID_WINDOW_ID;
+    uint32_t callingWindowId = INVALID_WINDOW_ID;
     if (scnSession->GetSessionProperty() != nullptr) {
-        callingWindowId_ = scnSession->GetSessionProperty()->GetCallingWindow();
+        callingWindowId = scnSession->GetSessionProperty()->GetCallingWindow();
     }
-    WLOGFD("[WMSInput] Calling window id: %{public}d", callingWindowId_);
-    callingSession_ = GetSceneSession(callingWindowId_);
+    WLOGFI("[WMSInput] Calling window id: %{public}d", callingWindowId);
+    callingSession_ = GetSceneSession(callingWindowId);
     if (callingSession_ == nullptr) {
-        WLOGFI("[WMSInput] The calling session obtained through callingWindowId_ is nullptr");
+        WLOGFI("[WMSInput] Calling session obtained through callingWindowId is nullptr");
         callingSession_ = GetSceneSession(focusedSessionId_);
         if (callingSession_ == nullptr) {
-            WLOGFE("[WMSInput] The calling session obtained through focusedSessionId_ is nullptr");
+            WLOGFE("[WMSInput] Calling session obtained through focusedSessionId_ is nullptr");
             return;
         }
     }

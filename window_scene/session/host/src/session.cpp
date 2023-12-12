@@ -803,6 +803,10 @@ WSError Session::Background()
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionBackground();
+        if (property_) {
+            WLOGFI("[WMSInput] When the soft keyboard is hidden, set the callingWindowId to 0.");
+            property_->SetCallingWindow(INVALID_WINDOW_ID);
+        }
     }
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
