@@ -17,7 +17,6 @@
 
 #include <event_handler.h>
 #include <refbase.h>
-#include "parameters.h"
 #include <power_mgr_client.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
@@ -34,8 +33,10 @@ namespace {
     constexpr int32_t DELAY_ANIM = 500;
     constexpr int32_t SUCCESS = 1;
     constexpr int32_t FAILED = 0;
-    const std::string PROP_DEFAULT_PAGE_NAME = "const.window.pip.debug.useDefaultPage";
-    const std::string DEFAULT_PAGE_PATH = "pages/pipwindow/PiPWindow";
+    const std::string VIDEO_PAGE_PATH = "/system/etc/window/resources/pip_video.abc";
+    const std::string CALL_PAGE_PATH = "/system/etc/window/resources/pip_call.abc";
+    const std::string MEETING_PAGE_PATH = "/system/etc/window/resources/pip_meeting.abc";
+    const std::string LIVE_PAGE_PATH = "/system/etc/window/resources/pip_live.abc";
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, uint32_t windowId, napi_env env)
@@ -99,9 +100,25 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStart();
     }
-    bool useDefaultPage = system::GetParameter(PROP_DEFAULT_PAGE_NAME, "") != "";
-    if (useDefaultPage && env_ != nullptr) {
-        window_->NapiSetUIContent(DEFAULT_PAGE_PATH, env_, nullptr, false, nullptr);
+    if (pipOption_ == nullptr) {
+        WLOGFE("Get PictureInPicture option failed");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    auto pipTemplateType = static_cast<PipTemplateType>(pipOption_->GetPipTemplate());
+    switch (pipTemplateType) {
+        default:
+        case PipTemplateType::VIDEO_PLAY:
+            window_->SetUIContentByAbc(VIDEO_PAGE_PATH, env_, nullptr, nullptr);
+            break;
+        case PipTemplateType::VIDEO_CALL:
+            window_->SetUIContentByAbc(CALL_PAGE_PATH, env_, nullptr, nullptr);
+            break;
+        case PipTemplateType::VIDEO_MEETING:
+            window_->SetUIContentByAbc(MEETING_PAGE_PATH, env_, nullptr, nullptr);
+            break;
+        case PipTemplateType::VIDEO_LIVE:
+            window_->SetUIContentByAbc(LIVE_PAGE_PATH, env_, nullptr, nullptr);
+            break;
     }
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {

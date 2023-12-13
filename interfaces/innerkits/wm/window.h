@@ -1153,6 +1153,20 @@ public:
         return WMError::WM_OK;
     }
     /**
+     * @brief set window ui content by abc
+     *
+     * @param abcPath abc path
+     * @param env
+     * @param storage
+     * @param ability
+     * @return WMError
+     */
+    virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    /**
      * @brief Get ui content info.
      *
      * @return UI content info.

@@ -214,6 +214,11 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
