@@ -1452,7 +1452,7 @@ public:
      * @param func Function to notify transfer component data.
     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+        int32_t uiExtensionIdLevel) { return WMError::WM_OK; };
 
     /**
      * @brief Notify prepare to close window

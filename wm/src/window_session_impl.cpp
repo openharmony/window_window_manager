@@ -2033,7 +2033,7 @@ WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 }
 
 WMError WindowSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    const std::vector<int32_t>& uiExtensionIdLevelVec)
+    int32_t uiExtensionIdLevel)
 {
     return WMError::WM_OK;
 }

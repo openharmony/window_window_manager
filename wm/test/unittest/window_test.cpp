@@ -2219,8 +2219,8 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     Accessibility::AccessibilityEventInfo info;
-    vector<int32_t> uiExtensionIdLevelVec;
-    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    int32_t uiExtensionIdLevel = 0;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
 
 /**

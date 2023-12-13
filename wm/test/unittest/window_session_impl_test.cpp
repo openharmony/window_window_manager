@@ -1512,8 +1512,8 @@ HWTEST_F(WindowSessionImplTest, TransferAccessibilityEvent, Function | SmallTest
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     Accessibility::AccessibilityEventInfo info;
-    vector<int32_t> uiExtensionIdLevelVec;
-    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    int32_t uiExtensionIdLevel = 0;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevel));
     GTEST_LOG_(INFO) << "WindowSessionImplTest: TransferAccessibilityEvent end";
 }
 
