@@ -95,6 +95,7 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
+            "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
@@ -166,6 +167,16 @@
             "header": {
               "header_files": [
                 "window_extension_connection.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
+            "header": {
+              "header_files": [
+                "modal_system_ui_extension.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
             }
