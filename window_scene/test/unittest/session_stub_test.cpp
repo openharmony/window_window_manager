@@ -190,11 +190,11 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     MessageOption option(MessageOption::TF_ASYNC);
 
     Accessibility::AccessibilityEventInfo info;
-    AccessibilityEventInfoParcel infoParcel(info);
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
     data.WriteParcelable(&infoParcel);
 
-    std::vector<int32_t> uiExtensionIdLevelVec;
-    data.WriteInt32Vector(uiExtensionIdLevelVec);
+    int32_t uiExtensionIdLevel = 0;
+    data.WriteInt32(uiExtensionIdLevel);
     ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
 }
 }
