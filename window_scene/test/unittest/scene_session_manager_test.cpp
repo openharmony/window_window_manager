@@ -2341,6 +2341,30 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest |
 }
 
 /**
+ * @tc.name: HandleUpdateProperty03
+ * @tc.desc: SceneSesionManager handle update property
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty03, Function | SmallTest | Level3)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSPropertyChangeAction action;
+    action = WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    delete scensession;
+    delete property;
+}
+
+/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
