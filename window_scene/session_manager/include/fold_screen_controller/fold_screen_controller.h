@@ -40,6 +40,8 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
+    void SetOnBootAnimation(bool onBootAnimation);
+    void UpdateForPhyScreenPropertyChange();
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

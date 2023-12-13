@@ -78,6 +78,7 @@ ScreenSessionManager::ScreenSessionManager()
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
     if (foldScreenFlag) {
         foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_);
+        foldScreenController_->SetOnBootAnimation(true);
         rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
         SetFoldScreenPowerInit([&]() {
             int64_t timeStamp = 50;
@@ -118,6 +119,7 @@ ScreenSessionManager::ScreenSessionManager()
             } else {
                 WLOGFI("ScreenSessionManager Fold Screen Power Init, invalid active screen id");
             }
+            foldScreenController_->SetOnBootAnimation(false);
         });
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
@@ -286,22 +288,6 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (!screenSession) {
         WLOGFE("screenSession is nullptr");
         return;
-    }
-    // If SetDisplayMode failed, try again
-    if (foldScreenController_ != nullptr && foldScreenController_->GetCurrentScreenId() == SCREEN_ID_INVALID) {
-        auto foldStatus = GetFoldStatus();
-        switch (foldStatus) {
-            case FoldStatus::EXPAND: {
-                foldScreenController_->SetDisplayMode(FoldDisplayMode::FULL);
-                break;
-            }
-            case FoldStatus::FOLDED: {
-                foldScreenController_->SetDisplayMode(FoldDisplayMode::MAIN);
-                break;
-            }
-            default:
-                break;
-        }
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
@@ -683,8 +669,12 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         phyScreenPropMap_[screenId] = property;
     }
 
-    if (foldScreenController_ != nullptr && screenId != 0) {
-        return nullptr;
+    if (foldScreenController_ != nullptr) {
+        // sensor may earlier than screen connect, when physical screen property changed, update
+        foldScreenController_->UpdateForPhyScreenPropertyChange();
+        if (screenId != 0) {
+            return nullptr;
+        }
     }
 
     sptr<ScreenSession> session = new ScreenSession(screenId, property, GetDefaultScreenId());
