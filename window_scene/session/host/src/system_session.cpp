@@ -26,6 +26,9 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     WLOGFD("[WMSSystem] Create SystemSession");
+    // moveDragController for WINDOW_TYPE_PIP
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    SetMoveDragCallback();
 }
 
 SystemSession::~SystemSession()
