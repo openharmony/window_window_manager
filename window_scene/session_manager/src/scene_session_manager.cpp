@@ -4034,6 +4034,7 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
         }
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::vector<sptr<SceneSession>> sceneSessionInfos;
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
             auto sceneSession = iter->second;
             if (sceneSession == nullptr) {
@@ -4098,6 +4099,7 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             }
         }
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         iter = sceneSessionMap_.find(persistentId);
         if (iter != sceneSessionMap_.end()) {
             auto sceneSession = iter->second;
