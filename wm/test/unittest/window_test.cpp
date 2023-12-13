@@ -2235,6 +2235,20 @@ HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level
     ASSERT_EQ(WMError::WM_OK, window->SetSingleFrameComposerEnabled(false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: FlushFrameRate
+ * @tc.desc: FlushFrameRate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    uint32_t rate = 120;
+    window->FlushFrameRate(rate);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
