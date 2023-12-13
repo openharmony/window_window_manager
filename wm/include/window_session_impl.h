@@ -262,17 +262,16 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
 
-    static std::recursive_mutex globalMutex_;
-    std::mutex lifeCycleListenerMutex_;
-    std::mutex windowChangeListenerMutex_;
-    std::mutex avoidAreaChangeListenerMutex_;
-    std::mutex dialogDeathRecipientListenerMutex_;
-    std::mutex dialogTargetTouchListenerMutex_;
-    std::mutex occupiedAreaChangeListenerMutex_;
-    std::mutex screenshotListenerMutex_;
-    std::mutex touchOutsideListenerMutex_;
-    std::mutex windowVisibilityChangeListenerMutex_;
-    std::mutex windowStatusChangeListenerMutex_;
+    static std::mutex lifeCycleListenerMutex_;
+    static std::mutex windowChangeListenerMutex_;
+    static std::mutex avoidAreaChangeListenerMutex_;
+    static std::mutex dialogDeathRecipientListenerMutex_;
+    static std::mutex dialogTargetTouchListenerMutex_;
+    static std::mutex occupiedAreaChangeListenerMutex_;
+    static std::mutex screenshotListenerMutex_;
+    static std::mutex touchOutsideListenerMutex_;
+    static std::mutex windowVisibilityChangeListenerMutex_;
+    static std::mutex windowStatusChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
