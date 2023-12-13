@@ -80,7 +80,7 @@ public:
     virtual void OnDisconnect() = 0;
     virtual void OnExtensionDied() = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) = 0;
+        int32_t uiExtensionIdLevel) = 0;
 };
 
 class Session : public SessionStub {
@@ -110,7 +110,7 @@ public:
     void NotifyDisconnect();
     void NotifyExtensionDied() override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
+        int32_t uiExtensionIdLevel) override;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);

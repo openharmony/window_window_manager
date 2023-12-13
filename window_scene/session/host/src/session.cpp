@@ -291,13 +291,13 @@ void Session::NotifyExtensionDied()
 }
 
 void Session::NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    const std::vector<int32_t>& uiExtensionIdLevelVec)
+    int32_t uiExtensionIdLevel)
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
-            listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevelVec);
+            listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevel);
         }
     }
 }

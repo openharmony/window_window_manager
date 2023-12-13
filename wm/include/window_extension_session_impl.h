@@ -57,7 +57,7 @@ public:
     WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int32_t baseParent) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
+        int32_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;

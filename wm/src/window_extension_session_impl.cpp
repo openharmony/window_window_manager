@@ -348,13 +348,13 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int32_t elementId,
 }
 
 WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    const std::vector<int32_t>& uiExtensionIdLevelVec)
+    int32_t uiExtensionIdLevel)
 {
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
 
 void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
