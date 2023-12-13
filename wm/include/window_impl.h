@@ -267,6 +267,8 @@ public:
         napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
+    virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
@@ -576,7 +578,8 @@ private:
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability);
+        WindowSetUIContentType type, AppExecFwk::Ability* ability);
+    std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
