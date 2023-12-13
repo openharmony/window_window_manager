@@ -6263,6 +6263,62 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    WLOGI("run ShiftAppWindowFocus, form id: %{public}d to id: %{public}d", sourcePersistentId, targetPersistentId);
+    if (sourcePersistentId != focusedSessionId_) {
+        WLOGE("source session need be focused");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (targetPersistentId == focusedSessionId_) {
+        WLOGE("target session has been focused");
+        return WSError::WS_DO_NOTHING;
+    }
+    WSError ret = WSError::WS_OK;
+    auto sourceSession = GetSceneSession(sourcePersistentId);
+    if (ret == WSError::WS_OK && sourceSession != nullptr) {
+        ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
+    }
+    auto targetSession = GetSceneSession(targetPersistentId);
+    if (ret == WSError::WS_OK && targetSession != nullptr) {
+        ret = GetAppMainSceneSession(targetSession, targetPersistentId);
+    }
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
+        WLOGE("verify bundle name failed, source bundle name is %{public}s but target bundle name is %{public}s)",
+            sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    targetSession->NotifyClick();
+    return RequestSessionFocus(targetPersistentId);
+}
+
+WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)
+{
+    if (sceneSession == nullptr) {
+        WLOGE("session(id: %{public}d) is nullptr", persistentId);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+            WLOGE("session(id: %{public}d) is not main window or sub window", persistentId);
+            return WSError::WS_ERROR_INVALID_CALLING;
+        }
+        if (GetSceneSession(sceneSession->GetParentPersistentId()) != nullptr) {
+            sceneSession = GetSceneSession(sceneSession->GetParentPersistentId());
+            return WSError::WS_OK;
+        }
+        WLOGE("session(id: %{public}d) parent is nullptr", persistentId);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return WSError::WS_OK;
+}
+
 void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
 {
     WLOGFI("AppAnrListener OnAppDebugStarted");

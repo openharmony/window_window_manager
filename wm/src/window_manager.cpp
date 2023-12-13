@@ -856,5 +856,14 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
     return ret;
 }
 
+WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("shift application window focus failed");
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS

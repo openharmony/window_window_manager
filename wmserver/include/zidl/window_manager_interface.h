@@ -170,6 +170,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
