@@ -92,6 +92,7 @@ public:
         TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE,
         TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
+        TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -193,6 +194,10 @@ public:
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
     WSError RaiseWindowToTop(int32_t persistentId) override { return WSError::WS_OK; }
+    WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

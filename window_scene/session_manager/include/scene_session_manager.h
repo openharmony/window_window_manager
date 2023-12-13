@@ -114,6 +114,7 @@ public:
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
         const std::string& moduleName, const std::string& abilityName, const int32_t appIndex);
 
@@ -254,6 +255,7 @@ public:
     void NotifyUpdateRectAfterLayout();
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
+    WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
@@ -494,6 +496,7 @@ private:
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
+    WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
 };
 } // namespace OHOS::Rosen
 
