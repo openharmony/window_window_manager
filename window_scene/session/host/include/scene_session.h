@@ -140,6 +140,7 @@ public:
     WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
+    void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
