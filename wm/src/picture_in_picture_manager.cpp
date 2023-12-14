@@ -61,7 +61,6 @@ void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 
 sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
 {
-    WLOGD("GetPipControllerInfo called");
     if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
         WLOGE("GetPipControllerInfo error, %{public}d not registered!", windowId);
         return nullptr;
@@ -71,17 +70,17 @@ sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(i
 
 bool PictureInPictureManager::HasActiveController()
 {
-    WLOGD("HasActiveController called");
     return activeController_ != nullptr;
 }
 
 bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
 {
-    WLOGD("IsActiveController called");
     if (!HasActiveController()) {
         return false;
     }
-    return pipController.GetRefPtr() == activeController_.GetRefPtr();
+    bool res = pipController.GetRefPtr() == activeController_.GetRefPtr();
+    WLOGD("IsActiveController %{public}u", res);
+    return res;
 }
 
 void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
@@ -109,7 +108,7 @@ void PictureInPictureManager::RemoveActiveControllerSafe()
 void PictureInPictureManager::AttachAutoStartController(std::string pageName,
     sptr<PictureInPictureController> pipController)
 {
-    WLOGD("AttachAutoStartController called");
+    WLOGD("AttachAutoStartController, %{public}s", pageName.c_str());
     if (pipController == nullptr) {
         return;
     }
@@ -133,7 +132,7 @@ void PictureInPictureManager::AttachAutoStartController(std::string pageName,
 void PictureInPictureManager::DetachAutoStartController(std::string pageName,
     sptr<PictureInPictureController> pipController)
 {
-    WLOGD("Detach active pipController");
+    WLOGD("Detach active pipController, %{public}s", pageName.c_str());
     if (pipController != nullptr &&
         pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
         WLOGFE("not same pip controller or no active pip controller");
@@ -150,7 +149,7 @@ void PictureInPictureManager::DetachAutoStartController(std::string pageName,
 
 bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 {
-    WLOGD("IsAttachedToSameWindow called");
+    WLOGD("IsAttachedToSameWindow called %{public}u", windowId);
     if (!HasActiveController()) {
         return false;
     }
@@ -159,7 +158,6 @@ bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 
 sptr<Window> PictureInPictureManager::GetCurrentWindow()
 {
-    WLOGD("GetCurrentWindow is called");
     if (!HasActiveController()) {
         return nullptr;
     }
