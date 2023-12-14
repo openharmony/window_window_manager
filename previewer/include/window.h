@@ -269,6 +269,12 @@ public:
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
+    virtual WMError SetDecorVisible(bool isVisible) = 0;
+    virtual WMError SetDecorHeight(uint32_t decorHeight) = 0;
+    virtual WMError GetDecorHeight(int32_t& height) = 0;
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) = 0;
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
 };
 }
 }
