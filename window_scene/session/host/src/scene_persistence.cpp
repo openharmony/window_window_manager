@@ -161,8 +161,8 @@ bool ScenePersistence::IsSnapshotExisted() const
     return S_ISREG(buf.st_mode);
 }
 
-std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float& oriScale,
-    const float& newScale) const
+std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float oriScale,
+    const float newScale) const
 {
     if (!IsSnapshotExisted()) {
         WLOGE("local snapshot pic is not existed");

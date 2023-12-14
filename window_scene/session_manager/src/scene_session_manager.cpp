@@ -6256,28 +6256,38 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t& persistentId,
-    const float& scaleParam)
+std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
+    const float scaleParam)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
         WLOGFE("get scene session is nullptr");
         return nullptr;
     }
 
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    if (sceneSession->GetSessionState() == SessionState::STATE_ACTIVE ||
-        sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
-        pixelMap = sceneSession->Snapshot(scaleParam);
-    }
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, persistentId, scaleParam, weakSceneSession]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
+        auto scnSession = weakSceneSession.promote();
+        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return pixelMap;
+        }
+        
+        if (scnSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+            scnSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+            pixelMap = scnSession->Snapshot(scaleParam);
+        }
 
-    if (!pixelMap && sceneSession->GetScenePersistence()) {
-        WLOGFE("get local snapshot pixelmap start");
-        pixelMap = sceneSession->GetScenePersistence()->GetLocalSnapshotPixelMap(snapshotScale_, scaleParam);
-    }
+        if (!pixelMap && scnSession->GetScenePersistence()) {
+            WLOGFE("get local snapshot pixelmap start");
+            pixelMap = scnSession->GetScenePersistence()->GetLocalSnapshotPixelMap(snapshotScale_, scaleParam);
+        }
 
-    return pixelMap;
+        return pixelMap;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotPixelMap" + std::to_string(persistentId));
 }
 
 void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
