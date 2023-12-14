@@ -202,6 +202,7 @@ struct SystemBarPropertyFlag {
     napi_value WindowErrorCodeInit(napi_env env);
     napi_value WindowErrorInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
+    napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)

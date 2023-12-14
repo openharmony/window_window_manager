@@ -445,5 +445,38 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
+void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect titleButtonRect)
+{
+    WLOGFD("[NAPI]OnWindowTitleButtonRectChanged");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, titleButtonRect, eng = env_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or eng is nullptr");
+                return;
+            }
+            napi_value titleButtonRectValue = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
+            if (titleButtonRectValue == nullptr) {
+                return;
+            }
+            napi_value objValue = nullptr;
+            napi_create_object(env, &objValue);
+            if (objValue == nullptr) {
+                WLOGFE("Failed to get object");
+                return;
+            }
+            napi_set_named_property(env, objValue, "titleButtonRect", titleButtonRectValue);
+            napi_value argv[] = { objValue };
+            thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowTitleButtonRectChanged",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -695,6 +695,34 @@ napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowLimits(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowDecorVisible(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowDecorVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowDecorVisible(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowDecorHeight");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowDecorHeight(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetWindowDecorHeight");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowDecorHeight(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetTitleButtonsRect");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -4855,6 +4883,117 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
     }
 }
 
+napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]SetWindowDecorVisible is not allowed since window is not main window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to visible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isVisible = true;
+    napi_get_value_bool(env, nativeVal, &isVisible);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorVisible(isVisible));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window decor set visible failed");
+        return NapiThrowError(env, ret);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnSetWindowDecorVisible end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to height");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t height = 0;
+    napi_get_value_uint32(env, nativeVal, &height);
+    if (height < 48 || height > 100) {
+        WLOGFE("height should greater than 48 or smaller than 100");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorHeight(height));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Set window decor height failed");
+        return NapiThrowError(env, ret);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    int32_t height = 0;
+    WMError ret = window->GetDecorHeight(height);
+    if (ret != WMError::WM_OK)
+    {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), height);
+    return CreateJsValue(env, height);
+}
+
+napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TitleButtonRect titleButtonRect;
+    WMError ret = windowToken_->GetTitleButtonArea(titleButtonRect);
+    if (ret != WMError::WM_OK)
+    {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetTitleButtonRect end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+    napi_value TitleButtonAreaObj = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
+    if (TitleButtonAreaObj == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return TitleButtonAreaObj;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -4947,6 +5086,10 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
         JsWindow::SetSingleFrameComposerEnabled);
+    BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
+    BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
+    BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
+    BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
 }
 }  // namespace Rosen
 }  // namespace OHOS
