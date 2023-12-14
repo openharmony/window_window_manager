@@ -2106,7 +2106,7 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
         if (sceneSession == nullptr) {
-            WLOGFE("the scene session is nullptr");
+            WLOGFW("the scene session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
         WLOGD("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
@@ -3282,7 +3282,6 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
 void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSComm]session is nullptr");
         if (isFocused) {
             SetFocusedSession(INVALID_SESSION_ID);
         }
@@ -3488,7 +3487,6 @@ bool SceneSessionManager::IsScreenLocked() const
 
 void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 {
-    WLOGFE("RegisterWindowChanged in");
     WindowChangedFunc_ = func;
 }
 
@@ -4600,7 +4598,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
     if (callingSession_ == nullptr) {
-        WLOGFE("[WMSInput] calling session is nullptr");
+        WLOGFI("[WMSInput] calling session is nullptr");
         return;
     }
     SessionGravity gravity;
@@ -4672,7 +4670,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
     WLOGFD("[WMSInput] RestoreCallingSessionSizeIfNeed");
     if (callingSession_ == nullptr) {
-        WLOGFE("[WMSInput] Calling session is nullptr");
+        WLOGFI("[WMSInput] Calling session is nullptr");
         return;
     }
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
@@ -5832,7 +5830,7 @@ WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistent
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)
 {
     if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE) {
-        WLOGFD("type is invalid");
+        WLOGFI("type is invalid");
         return false;
     }
     return true;
@@ -5873,7 +5871,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
     WLOGFI("run NotifyStartAbility");
     auto iter = collaboratorMap_.find(collaboratorType);
     if (iter == collaboratorMap_.end()) {
-        WLOGFE("Fail to found collaborator with type: %{public}d", collaboratorType);
+        WLOGFI("Fail to found collaborator with type: %{public}d", collaboratorType);
         return BrokerStates::BROKER_UNKOWN;
     }
     if (sessionInfo.want == nullptr) {
@@ -5913,12 +5911,12 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         return;
     }
     if (sessionInfo.want == nullptr) {
-        WLOGFE("sessionInfo.want is nullptr");
+        WLOGFI("sessionInfo.want is nullptr");
         return;
     }
     auto iter = collaboratorMap_.find(sceneSession->GetCollaboratorType());
     if (iter == collaboratorMap_.end()) {
-        WLOGFE("Fail to found collaborator with type: %{public}d", sceneSession->GetCollaboratorType());
+        WLOGFI("Fail to found collaborator with type: %{public}d", sceneSession->GetCollaboratorType());
         return;
     }
     auto collaborator = iter->second;
@@ -6026,7 +6024,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY));
         WLOGFI("affinity: %{public}s", sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
-        WLOGFE("sceneSession->GetSessionInfo().want is nullptr");
+        WLOGFI("sceneSession->GetSessionInfo().want is nullptr");
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);

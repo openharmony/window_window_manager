@@ -790,7 +790,7 @@ WSError Session::Background()
         isActive_ = false;
     }
     if (state != SessionState::STATE_INACTIVE) {
-        WLOGFE("[WMSCom] Background state invalid! state:%{public}u", state);
+        WLOGFW("[WMSCom] Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1460,7 +1460,9 @@ WSError Session::TransferFocusActiveEvent(bool isFocusActive)
 WSError Session::TransferFocusStateEvent(bool focusState)
 {
     if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
+        if (!IsSystemSession()) {
+            WLOGFE("windowEventChannel_ is null");
+        }
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferFocusState(focusState);
@@ -1846,7 +1848,7 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
     if (!sessionStage_) {
-        WLOGFE("session stage is nullptr");
+        WLOGFD("session stage is nullptr");
         return;
     }
     sessionStage_->NotifyOccupiedAreaChangeInfo(info);

@@ -149,7 +149,7 @@ void ANRHandler::MarkProcessed()
     WLOGFI("InputTracking MarkProcessed eventId:%{public}d, persistentId:%{public}d",
         eventId, GetPersistentIdOfEvent(eventId));
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
-        WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
+        WLOGFW("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
     } else {
         sptr<ISessionStage> session = sessionStageMap_[eventId].sessionStage.promote();
         if (session == nullptr) {
@@ -196,7 +196,7 @@ int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
     if (sessionStageMap_.find(eventId) != sessionStageMap_.end()) {
         return sessionStageMap_[eventId].persistentId;
     }
-    WLOGFE("No sessionStage for eventId:%{public}d", eventId);
+    WLOGFW("No sessionStage for eventId:%{public}d", eventId);
     return INVALID_PERSISTENT_ID;
 }
 

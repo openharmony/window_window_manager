@@ -356,7 +356,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     WLOGFI("[WMSLife]Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife]session is invalid");
+        WLOGFW("[WMSLife]session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (hostSession_ != nullptr) {
@@ -536,7 +536,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is null!");
+        WLOGFW("uiContent_ is null!");
         return;
     }
     Ace::ViewportConfig config;
@@ -1868,7 +1868,7 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
+    WLOGFD("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -1906,7 +1906,7 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
     if (aceAbilityHandler_ != nullptr) {
         return aceAbilityHandler_->GetBackgroundColor();
     }
-    WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
+    WLOGFD("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
 }
 

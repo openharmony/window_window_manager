@@ -81,7 +81,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
 
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
-        WLOGFE("Repeat to register screen change listener!");
+        WLOGFI("Repeat to register screen change listener!");
         return;
     }
 
