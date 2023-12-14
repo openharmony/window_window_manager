@@ -78,7 +78,7 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
     if (!HasActiveController()) {
         return false;
     }
-    bool res = pipController.GetRefPtr() == activeController_.GetRefPtr();
+    bool res = !pipController && (pipController.GetRefPtr() == activeController_.GetRefPtr());
     WLOGD("IsActiveController %{public}u", res);
     return res;
 }
@@ -89,20 +89,13 @@ void PictureInPictureManager::SetActiveController(sptr<PictureInPictureControlle
     activeController_ = pipController;
 }
 
-void PictureInPictureManager::RemoveActiveController()
+void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureController> pipController)
 {
     WLOGD("RemoveActiveController called");
-    activeController_ = nullptr;
-}
-
-void PictureInPictureManager::RemoveActiveControllerSafe()
-{
-    WLOGD("RemoveActiveControllerSafe called");
-    if (!HasActiveController()) {
+    if (!IsActiveController(pipController)) {
         return;
     }
-    activeController_->SetPipWindow(nullptr);
-    RemoveActiveController();
+    activeController_ = nullptr;
 }
 
 void PictureInPictureManager::AttachAutoStartController(std::string pageName,

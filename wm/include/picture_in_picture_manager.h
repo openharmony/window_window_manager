@@ -37,8 +37,7 @@ public:
     static bool HasActiveController();
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
     static void SetActiveController(sptr<PictureInPictureController> pipController);
-    static void RemoveActiveController();
-    static void RemoveActiveControllerSafe();
+    static void RemoveActiveController(wptr<PictureInPictureController> pipController);
     static void AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
     static void DetachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
     static bool IsAttachedToSameWindow(uint32_t windowId);
