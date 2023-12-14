@@ -6279,12 +6279,10 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
             scnSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
             pixelMap = scnSession->Snapshot(scaleParam);
         }
-
         if (!pixelMap && scnSession->GetScenePersistence()) {
             WLOGFE("get local snapshot pixelmap start");
             pixelMap = scnSession->GetScenePersistence()->GetLocalSnapshotPixelMap(snapshotScale_, scaleParam);
         }
-
         return pixelMap;
     };
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotPixelMap" + std::to_string(persistentId));
