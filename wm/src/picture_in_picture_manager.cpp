@@ -78,7 +78,7 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
     if (!HasActiveController()) {
         return false;
     }
-    bool res = !pipController && (pipController.GetRefPtr() == activeController_.GetRefPtr());
+    bool res = pipController.GetRefPtr() == activeController_.GetRefPtr();
     WLOGD("IsActiveController %{public}u", res);
     return res;
 }
