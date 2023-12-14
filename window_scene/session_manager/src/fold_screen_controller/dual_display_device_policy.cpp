@@ -263,8 +263,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
             ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
-        ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-            DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         // on main screen
         RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         WLOGFI("changeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
@@ -277,8 +275,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
             ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
-        ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-            DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         // on main screen
         WLOGFI("changeScreenDisplayMode screenIdFull no need to OFF and screenIdMain ON");
         screenSession->SetDisplayNodeScreenId(SCREEN_ID_MAIN);
@@ -302,8 +298,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
     screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
-    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // on full screen
     RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
     WLOGFI("changeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
