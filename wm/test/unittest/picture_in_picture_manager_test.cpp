@@ -64,8 +64,7 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 
 /**
  * @tc.name: PictureInPictureController
- * @tc.desc: SetActiveController/IsActiveController/HasActiveController/RemoveActiveController/
- * RemoveActiveControllerSafe
+ * @tc.desc: SetActiveController/IsActiveController/HasActiveController/RemoveActiveController
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
