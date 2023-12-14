@@ -143,7 +143,8 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     WLOGI("StartPictureInPicture called");
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PipWindowState::STATE_STARTING || curState_ == PipWindowState::STATE_STARTED) {
-        WLOGFW("pip window is starting, state: %{public}u", curState_);
+        WLOGFW("pip window is starting, state: %{public}u, pipWindow: %{public}u, mainWindow: %{public}u",
+            curState_, window_->GetWindowId(), mainWindowId_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
@@ -303,7 +304,7 @@ void PictureInPictureController::SetPipWindow(sptr<Window> window)
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
-    WLOGI("SetAutoStartEnabled called, enable: %{public}u", enable);
+    WLOGI("SetAutoStartEnabled called, enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
     if (isAutoStartEnabled_) {
         PictureInPictureManager::AttachAutoStartController(pipOption_->GetNavigationId(), this);
