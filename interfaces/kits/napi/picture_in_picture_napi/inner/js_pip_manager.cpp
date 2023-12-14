@@ -161,6 +161,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         WLOGFE("[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
+    WLOGFI("[NAPI]set xComponentController to window: %{public}u", windowId);
     WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
         WLOGFE("[NAPI]Failed to set xComponentController");
