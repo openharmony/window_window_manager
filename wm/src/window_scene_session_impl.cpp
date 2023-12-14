@@ -87,7 +87,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
-        type == WindowType::WINDOW_TYPE_PIP)) {
+        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH)) {
         WLOGFW("[WMSSystem] Invalid type: %{public}u", GetType());
         return false;
     }
@@ -571,6 +571,7 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
+        case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
         case WindowType::WINDOW_TYPE_DIALOG:
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);

@@ -83,6 +83,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
 
     return objValue;
 }
