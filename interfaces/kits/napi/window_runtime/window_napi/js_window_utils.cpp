@@ -620,7 +620,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         }
         std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
         if (!std::regex_match(colorStr, pattern)) {
-            WLOGFE("Invalid color input");
+            WLOGFD("Invalid color input");
             return defaultColor;
         }
         std::string color = colorStr.substr(1);

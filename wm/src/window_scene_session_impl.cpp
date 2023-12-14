@@ -1987,7 +1987,7 @@ WMError WindowSceneSessionImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd
 void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGE("[WMSCom]AdjustWindowAnimationFlag failed since session invalid!");
+        WLOGW("[WMSCom]AdjustWindowAnimationFlag failed since session invalid!");
         return;
     }
     // when show/hide with animation

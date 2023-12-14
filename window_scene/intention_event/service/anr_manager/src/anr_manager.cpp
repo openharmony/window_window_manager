@@ -190,7 +190,7 @@ std::string ANRManager::GetBundleName(int32_t pid, int32_t uid)
     std::lock_guard<std::mutex> guard(mtx_);
     std::string bundleName { "unknow" };
     if (appInfoGetter_ == nullptr) {
-        WLOGFE("AppInfoGetter is nullptr");
+        WLOGFW("AppInfoGetter is nullptr");
         return bundleName;
     }
     appInfoGetter_(pid, bundleName, uid);
