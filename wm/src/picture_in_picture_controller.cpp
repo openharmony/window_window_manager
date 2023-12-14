@@ -237,7 +237,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
         if (pipLifeCycleListener_) {
             pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        PictureInPictureManager::RemoveActiveController();
+        PictureInPictureManager::RemoveActiveController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
@@ -271,7 +271,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        PictureInPictureManager::RemoveActiveController();
+        PictureInPictureManager::RemoveActiveController(session);
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
         session->curState_ = PipWindowState::STATE_STOPPED;
