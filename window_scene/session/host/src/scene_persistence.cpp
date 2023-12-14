@@ -189,8 +189,11 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
     if (oriScale != 0 && decoderWidth > 0 && decoderHeight > 0) {
-        decodeOpts.desiredSize.width = static_cast<int>(decoderWidth * newScale / oriScale);
-        decodeOpts.desiredSize.height = static_cast<int>(decoderHeight * newScale / oriScale);
+        auto isNeedToScale = newScale < oriScale;
+        decodeOpts.desiredSize.width = isNeedToScale ?
+            static_cast<int>(decoderWidth * newScale / oriScale) : decoderWidth;
+        decodeOpts.desiredSize.height = isNeedToScale ?
+            static_cast<int>(decoderHeight * newScale / oriScale) : decoderHeight;
     }
     return imageSource->CreatePixelMap(decodeOpts, errorCode);
 }
