@@ -143,7 +143,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != NUMBER_ONE) {
+    if (argc < NUMBER_ONE) {
         WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
