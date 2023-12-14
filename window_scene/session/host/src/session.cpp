@@ -1477,7 +1477,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(const float& scaleParam) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 {
     if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         return nullptr;
