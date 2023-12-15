@@ -80,189 +80,20 @@ DMError ScreenSessionManagerLite::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     ConnectToServer();
-    return screenSessionManager_->RegisterDisplayManagerAgent(displayManagerAgent, type);
+    if (screenSessionManager_) {
+        return screenSessionManager_->RegisterDisplayManagerAgent(displayManagerAgent, type);
+    }
+    return DMError::DM_ERROR_NULLPTR;
 }
 
 DMError ScreenSessionManagerLite::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     ConnectToServer();
-    return screenSessionManager_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
-}
-
-std::vector<DisplayId> ScreenSessionManagerLite::GetAllDisplayIds()
-{
-    ConnectToServer();
-    return screenSessionManager_->GetAllDisplayIds();
-}
-
-sptr<DisplayInfo> ScreenSessionManagerLite::GetDisplayInfoById(DisplayId displayId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetDisplayInfoById(displayId);
-}
-
-sptr<DisplayInfo> ScreenSessionManagerLite::GetDefaultDisplayInfo()
-{
-    ConnectToServer();
-    return screenSessionManager_->GetDefaultDisplayInfo();
-}
-
-sptr<DisplayInfo> ScreenSessionManagerLite::GetDisplayInfoByScreen(ScreenId screenId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetDisplayInfoByScreen(screenId);
-}
-
-DMError ScreenSessionManagerLite::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
-{
-    ConnectToServer();
-    return screenSessionManager_->HasPrivateWindow(id, hasPrivateWindow);
-}
-
-DMError ScreenSessionManagerLite::DisableDisplaySnapshot(bool disableOrNot)
-{
-    ConnectToServer();
-    return screenSessionManager_->DisableDisplaySnapshot(disableOrNot);
-}
-
-bool ScreenSessionManagerLite::WakeUpBegin(PowerStateChangeReason reason)
-{
-    ConnectToServer();
-    return screenSessionManager_->WakeUpBegin(reason);
-}
-
-bool ScreenSessionManagerLite::WakeUpEnd()
-{
-    ConnectToServer();
-    return screenSessionManager_->WakeUpEnd();
-}
-
-bool ScreenSessionManagerLite::SuspendBegin(PowerStateChangeReason reason)
-{
-    ConnectToServer();
-    return screenSessionManager_->SuspendBegin(reason);
-}
-
-bool ScreenSessionManagerLite::SuspendEnd()
-{
-    ConnectToServer();
-    return screenSessionManager_->SuspendEnd();
-}
-
-bool ScreenSessionManagerLite::SetDisplayState(DisplayState state)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetDisplayState(state);
-}
-
-DisplayState ScreenSessionManagerLite::GetDisplayState(DisplayId displayId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetDisplayState(displayId);
-}
-
-void ScreenSessionManagerLite::NotifyDisplayEvent(DisplayEvent event)
-{
-    ConnectToServer();
-    return screenSessionManager_->NotifyDisplayEvent(event);
-}
-
-void ScreenSessionManagerLite::SetFoldDisplayMode(const FoldDisplayMode displayMode)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetFoldDisplayMode(displayMode);
-}
-
-FoldDisplayMode ScreenSessionManagerLite::GetFoldDisplayMode()
-{
-    ConnectToServer();
-    return screenSessionManager_->GetFoldDisplayMode();
-}
-
-bool ScreenSessionManagerLite::IsFoldable()
-{
-    ConnectToServer();
-    return screenSessionManager_->IsFoldable();
-}
-
-FoldStatus ScreenSessionManagerLite::GetFoldStatus()
-{
-    ConnectToServer();
-    return screenSessionManager_->GetFoldStatus();
-}
-
-sptr<FoldCreaseRegion> ScreenSessionManagerLite::GetCurrentFoldCreaseRegion()
-{
-    ConnectToServer();
-    return screenSessionManager_->GetCurrentFoldCreaseRegion();
-}
-
-sptr<ScreenInfo> ScreenSessionManagerLite::GetScreenInfoById(ScreenId screenId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetScreenInfoById(screenId);
-}
-
-sptr<ScreenGroupInfo> ScreenSessionManagerLite::GetScreenGroupInfoById(ScreenId screenId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetScreenGroupInfoById(screenId);
-}
-
-DMError ScreenSessionManagerLite::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetAllScreenInfos(screenInfos);
-}
-
-bool ScreenSessionManagerLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
-    PowerStateChangeReason reason)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetSpecifiedScreenPower(screenId, state, reason);
-}
-
-bool ScreenSessionManagerLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetScreenPowerForAll(state, reason);
-}
-
-ScreenPowerState ScreenSessionManagerLite::GetScreenPower(ScreenId screenId)
-{
-    ConnectToServer();
-    return screenSessionManager_->GetScreenPower(screenId);
-}
-
-DMError ScreenSessionManagerLite::SetScreenRotationLocked(bool isLocked)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetScreenRotationLocked(isLocked);
-}
-
-DMError ScreenSessionManagerLite::IsScreenRotationLocked(bool& isLocked)
-{
-    ConnectToServer();
-    return screenSessionManager_->IsScreenRotationLocked(isLocked);
-}
-
-DMError ScreenSessionManagerLite::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetScreenActiveMode(screenId, modeId);
-}
-
-DMError ScreenSessionManagerLite::SetOrientation(ScreenId screenId, Orientation orientation)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetOrientation(screenId, orientation);
-}
-
-DMError ScreenSessionManagerLite::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
-{
-    ConnectToServer();
-    return screenSessionManager_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    if (screenSessionManager_) {
+        return screenSessionManager_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
+    }
+    return DMError::DM_ERROR_NULLPTR;
 }
 
 void ScreenSessionManagerLite::Clear()

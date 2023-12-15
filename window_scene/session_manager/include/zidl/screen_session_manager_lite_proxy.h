@@ -34,37 +34,6 @@ public:
         DisplayManagerAgentType type) override;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
-    virtual std::vector<DisplayId> GetAllDisplayIds() override;
-    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
-    virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
-    virtual DMError DisableDisplaySnapshot(bool disableOrNot) override;
-    virtual bool WakeUpBegin(PowerStateChangeReason reason) override;
-    virtual bool WakeUpEnd() override;
-    virtual bool SuspendBegin(PowerStateChangeReason reason) override;
-    virtual bool SuspendEnd() override;
-    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
-    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    virtual bool SetDisplayState(DisplayState state) override;
-    virtual DisplayState GetDisplayState(DisplayId displayId) override;
-    virtual void NotifyDisplayEvent(DisplayEvent event) override;
-    // Fold Screen
-    bool IsFoldable() override;
-    FoldStatus GetFoldStatus() override;
-    FoldDisplayMode GetFoldDisplayMode() override;
-    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
-    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
-
-    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
-    virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
-    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
-    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
-    virtual DMError SetScreenRotationLocked(bool isLocked) override;
-    virtual DMError IsScreenRotationLocked(bool& isLocked) override;
-    virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
-    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
-    virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
