@@ -261,7 +261,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_FULL;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
+            PowerStateChangeReason::POWER_BUTTON);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -272,7 +273,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_MAIN;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+            PowerStateChangeReason::POWER_BUTTON);
         WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
         screenSession->SetDisplayNodeScreenId(SCREEN_ID_MAIN);
     } else { // When the screen is off and folded, it is not powered on
@@ -280,7 +282,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_FULL;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
+            PowerStateChangeReason::POWER_BUTTON);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -309,7 +312,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_MAIN;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
+            PowerStateChangeReason::POWER_BUTTON);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -318,7 +322,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_FULL;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+            PowerStateChangeReason::POWER_BUTTON);
         WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
         screenSession->SetDisplayNodeScreenId(SCREEN_ID_FULL);
     } else { //AOD scene
@@ -326,7 +331,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         screenId_ = SCREEN_ID_MAIN;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         WLOGFI("ChangeScreenDisplayModeToMain keyguardDrawnDone_ is false");
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::POWER_BUTTON);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
+            PowerStateChangeReason::POWER_BUTTON);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
