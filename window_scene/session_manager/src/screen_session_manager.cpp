@@ -134,7 +134,13 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
-    SetSensorSubscriptionEnabled();
+
+    bool isPcDevice = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPcDevice) {
+        WLOGFI("Current device type not support SetSensorSubscriptionEnabled.");
+    } else {
+        SetSensorSubscriptionEnabled();
+    }
 }
 
 void ScreenSessionManager::OnStart()
