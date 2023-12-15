@@ -74,7 +74,7 @@ void SessionManager::InitSessionManagerServiceProxy()
         }
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     if (!remoteObject) {
-        WLOGFE("Remote object is nullptr");
+        WLOGFI("Remote object is nullptr");
         return;
     }
     mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
