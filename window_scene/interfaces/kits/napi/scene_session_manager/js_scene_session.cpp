@@ -95,6 +95,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha", moduleName,
         JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
+    BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
+        JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
@@ -798,6 +800,13 @@ napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetSystemSceneBlockingFocus");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSystemSceneBlockingFocus(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::UpdateSizeChangeReason(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]UpdateSizeChangeReason");
@@ -983,7 +992,7 @@ napi_value JsSceneSession::OnSetPrivacyMode(napi_env env, napi_callback_info inf
 
 napi_value JsSceneSession::OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
+    size_t argc = 0;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
@@ -1039,6 +1048,36 @@ napi_value JsSceneSession::OnSetFocusable(napi_env env, napi_callback_info info)
     }
     session->SetFocusable(isFocusable);
     WLOGFI("[WMSFocus][NAPI]OnSetFocusable end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool blocking = false;
+    if (!ConvertFromJsValue(env, argv[0], blocking)) {
+        WLOGFE("[NAPI]Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetSystemSceneBlockingFocus(blocking);
+    WLOGFI("[NAPI]OnSetSystemSceneBlockingFocus end");
     return NapiGetUndefined(env);
 }
 

@@ -1727,6 +1727,23 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
+WSError Session::SetSystemSceneBlockingFocus(bool blocking)
+{
+    WLOGFD("[WMSFocus]Session set blocking focus of lower session, id: %{public}d, mode: %{public}d", GetPersistentId(),
+        blocking);
+    if (!sessionInfo_.isSystem_) {
+        WLOGFW("[WMSFocus]Session is not system.");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    blockingFocus_ = blocking;
+    return WSError::WS_OK;
+}
+
+bool Session::GetBlockingFocus() const
+{
+    return blockingFocus_;
+}
+
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
     std::unique_lock<std::shared_mutex> lock(propertyMutex_);
