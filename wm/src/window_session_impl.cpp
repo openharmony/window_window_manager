@@ -69,6 +69,7 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>> WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -1110,14 +1111,14 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     }
     Rect decorRect;
     Rect titleButtonLeftRect;
-    bool res = uiContent_->GetContainerModalButtionsRect(decorRect, titleButtonLeftRect);
+    bool res = uiContent_->GetContainerModalButtionRect(decorRect, titleButtonLeftRect);
     if (!res) {
         WLOGFE("get window title buttons area failed");
         titleButtonRect.IsUninitializedRect();
         return WMError::WM_DO_NOTHING;
     }
-    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.x_;
-    titleButtonRect.posY_ = titleButtonLeftRect.y_;
+    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+    titleButtonRect.posY_ = titleButtonLeftRect.posY_;
     titleButtonRect.width_ = titleButtonLeftRect.width_;
     titleButtonRect.height_ = titleButtonLeftRect.height_;
     return WMError::WM_OK;
@@ -1143,8 +1144,8 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     }
         uiContent_->WatchContainerModalButtonsRect([this](Rect& decorRect, Rect& titleButtonLeftRect) {
             TitleButtonRect titleButtonRect;
-            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.x_;
-            titleButtonRect.posY_ = titleButtonLeftRect.y_;
+            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+            titleButtonRect.posY_ = titleButtonLeftRect.posY_;
             titleButtonRect.width_ = titleButtonLeftRect.width_;
             titleButtonRect.height_ = titleButtonLeftRect.height_;
             NotifyWindowTitleButtonRectChange(titleButtonRect);
