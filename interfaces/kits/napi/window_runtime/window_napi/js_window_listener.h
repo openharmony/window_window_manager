@@ -90,7 +90,7 @@ public:
     void SetMainEventHandler();
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
-    void OnWindowTitleButtonRectChanged(const TitleButtonRect titleButtonRect) override;
+    void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
