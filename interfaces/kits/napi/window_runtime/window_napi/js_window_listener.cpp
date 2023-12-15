@@ -446,7 +446,7 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect titleButtonRect)
+void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
     WLOGFD("[NAPI]OnWindowTitleButtonRectChanged");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (

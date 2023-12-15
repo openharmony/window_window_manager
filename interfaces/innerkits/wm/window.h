@@ -397,7 +397,7 @@ public:
      * @brief Notify caller when window size or the height of title bar changed.
      * @param titleButtonRect An area of title buttons relative to the upper right corner of the window.
      */
-    virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect titleButtonRect) {}
+    virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
