@@ -54,7 +54,7 @@ void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delay
 void TaskScheduler::RemoveTask(const std::string& name)
 {
     if (handler_) {
-        handler_->RemoveTask(name);
+        handler_->RemoveTask("wms:" + name);
     }
 }
 } // namespace OHOS::Rosen
