@@ -234,6 +234,8 @@ public:
     WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
+    WSError SetSystemSceneBlockingFocus(bool blocking);
+    bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -399,6 +401,7 @@ protected:
     uint32_t zOrder_ = 0;
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
+    bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
