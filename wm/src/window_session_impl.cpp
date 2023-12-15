@@ -69,7 +69,8 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
-std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>> WindowSessionImpl::windowTitleButtonRectChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+    WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -1111,7 +1112,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     }
     Rect decorRect;
     Rect titleButtonLeftRect;
-    bool res = uiContent_->GetContainerModalButtionRect(decorRect, titleButtonLeftRect);
+    bool res = uiContent_->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         WLOGFE("get window title buttons area failed");
         titleButtonRect.IsUninitializedRect();
@@ -1136,7 +1137,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     }
 
     {
-        std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1165,7 +1166,7 @@ WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
     }
 
     {
-        std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1188,7 +1189,7 @@ EnableIfSame<T, IWindowTitleButtonRectChangedListener,
 
 void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect)
 {
-    std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
     auto windowTitleButtonRectListeners = GetListeners<IWindowTitleButtonRectChangedListener>();
     for (auto& listener : windowTitleButtonRectListeners) {
         if (listener != nullptr) {

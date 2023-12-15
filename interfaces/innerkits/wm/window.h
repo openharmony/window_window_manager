@@ -1608,9 +1608,9 @@ public:
      * @param titleButtonRect.
      * @return WMError.
     */
-    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) 
-    { 
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; 
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
