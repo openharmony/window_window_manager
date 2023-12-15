@@ -33,28 +33,28 @@ SceneSessionManagerLite& SceneSessionManagerLite::GetInstance()
     return *instance;
 }
 
-WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject> &token,
+WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
     WLOGFD("run SetSessionContinueState");
     return SceneSessionManager::GetInstance().SetSessionContinueState(token, continueState);
 }
 
-WSError SceneSessionManagerLite::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+WSError SceneSessionManagerLite::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
     WLOGFD("run SetSessionLabel");
     return SceneSessionManager::GetInstance().SetSessionLabel(token, label);
 }
 
-WSError SceneSessionManagerLite::SetSessionIcon(const sptr<IRemoteObject> &token,
-    const std::shared_ptr<Media::PixelMap> &icon)
+WSError SceneSessionManagerLite::SetSessionIcon(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFD("run SetSessionIcon");
     return SceneSessionManager::GetInstance().SetSessionIcon(token, icon);
 }
 
 WSError SceneSessionManagerLite::IsValidSessionIds(
-    const std::vector<int32_t> &sessionIds, std::vector<bool> &results)
+    const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {
     WLOGFD("run IsValidSessionIds");
     return SceneSessionManager::GetInstance().IsValidSessionIds(sessionIds, results);
@@ -99,19 +99,19 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject> &token)
+WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
     WLOGFD("run PendingSessionToForeground");
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token)
+WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
 {
     WLOGFD("run PendingSessionToBackgroundForDelegator");
     return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token);
 }
 
-WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject> &token)
+WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     WLOGFD("run GetFocusSessionToken");
     return SceneSessionManager::GetInstance().GetFocusSessionToken(token);

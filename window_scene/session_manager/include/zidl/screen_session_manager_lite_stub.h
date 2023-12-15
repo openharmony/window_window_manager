@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MOCK_SESSION_MANAGER_INTERFACE_H
-#define OHOS_MOCK_SESSION_MANAGER_INTERFACE_H
+#ifndef OHOS_ROSEN_SCREEN_SESSION_MANAGER_LITE_STUB_H
+#define OHOS_ROSEN_SCREEN_SESSION_MANAGER_LITE_STUB_H
 
-#include <iremote_broker.h>
-#include <refbase.h>
-#include <parcel.h>
+#include "screen_session_manager_lite_interface.h"
+#include "iremote_stub.h"
 
 namespace OHOS {
 namespace Rosen {
 
-class IMockSessionManagerInterface : public IRemoteBroker {
+class ScreenSessionManagerLiteStub : public IRemoteStub<IScreenSessionManagerLite> {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockSessionManager");
-    enum class MockSessionManagerServiceMessage : uint32_t {
-        TRANS_ID_GET_SESSION_MANAGER_SERVICE,
-        TRANS_ID_GET_SCREEN_SESSION_MANAGER,
-    };
+    ScreenSessionManagerLiteStub() = default;
 
-    virtual sptr<IRemoteObject> GetSessionManagerService() = 0;
-    virtual sptr<IRemoteObject> GetScreenSessionManagerLite() = 0;
+    ~ScreenSessionManagerLiteStub() = default;
+
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option) override;
 };
-}
-}
-#endif // OHOS_MOCK_SESSION_MANAGER_INTERFACE_H
+
+} // namespace Rosen
+} // namespace OHOS
+
+#endif // OHOS_ROSEN_SCREEN_SESSION_MANAGER_LITE_STUB_H
