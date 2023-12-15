@@ -180,8 +180,10 @@ public:
     virtual WMError SetDecorHeight(uint32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
-    virtual WMError RegisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
-    virtual WMError UnregisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
 
 protected:

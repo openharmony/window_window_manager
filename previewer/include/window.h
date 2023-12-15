@@ -96,6 +96,8 @@ class IDialogTargetTouchListener : virtual public RefBase {
 };
 class IDialogDeathRecipientListener : virtual public RefBase {
 };
+class IWindowTitleButtonRectChangedListener : virtual public RefBase {
+};
 class IWindowVisibilityChangedListener : virtual public RefBase {
 };
 using WindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
@@ -273,8 +275,10 @@ public:
     virtual WMError SetDecorHeight(uint32_t decorHeight) = 0;
     virtual WMError GetDecorHeight(int32_t& height) = 0;
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) = 0;
-    virtual WMError RegisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
-    virtual WMError UnregisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
 };
 }
 }

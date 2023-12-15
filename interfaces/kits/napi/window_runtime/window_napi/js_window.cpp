@@ -41,6 +41,8 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
+    constexpr uint32_t MIN_DECOR_HEIGHT = 48;
+    constexpr uint32_t MAX_DECOR_HEIGHT = 100;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -4937,7 +4939,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
     }
     uint32_t height = 0;
     napi_get_value_uint32(env, nativeVal, &height);
-    if (height < 48 || height > 100) {
+    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         WLOGFE("height should greater than 48 or smaller than 100");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -4962,8 +4964,7 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
     }
     int32_t height = 0;
     WMError ret = window->GetDecorHeight(height);
-    if (ret != WMError::WM_OK)
-    {
+    if (ret != WMError::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
@@ -4981,8 +4982,7 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     }
     TitleButtonRect titleButtonRect;
     WMError ret = windowToken_->GetTitleButtonArea(titleButtonRect);
-    if (ret != WMError::WM_OK)
-    {
+    if (ret != WMError::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetTitleButtonRect end",

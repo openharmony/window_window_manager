@@ -389,7 +389,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 /**
  * @class IWindowTitleButtonRectChangedListener
  *
- * @brief IWindowTitleButtonRectChangedListener is a Listener to observe event when window size or the height of title bar changed.
+ * @brief Listener to observe event when window size or the height of title bar changed.
  */
 class IWindowTitleButtonRectChangedListener : virtual public RefBase {
 public:
@@ -1608,7 +1608,10 @@ public:
      * @param titleButtonRect.
      * @return WMError.
     */
-    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) 
+    { 
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; 
+    }
 
     /**
      * @brief Register window title buttons change listener.
@@ -1616,7 +1619,8 @@ public:
      * @param listener IWindowTitleButtonRectChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1627,7 +1631,8 @@ public:
      * @param listener IWindowTitleButtonRectChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

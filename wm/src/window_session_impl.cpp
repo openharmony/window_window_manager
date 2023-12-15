@@ -1095,8 +1095,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return WMError::WM_ERROR_NULLPTR;
     }
     height = uiContent_->GetContainerModalTitleHeight();
-    if (height == -1)
-    {
+    if (height == -1) {
         return WMError::WM_DO_NOTHING;
     }
     WLOGI("Get app window decor height success, height : %{public}d", height);
@@ -1124,7 +1123,8 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener)
+WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
@@ -1152,7 +1152,8 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(const spt
     return ret;
 }
 
-WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(const sptr<IWindowTitleButtonRectChangedListener>& listener)
+WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
