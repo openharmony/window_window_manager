@@ -1066,7 +1066,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateAnimationFinished
     auto callbackTask = [callback, timeOutTaskName]() {
         auto handler = wmsTaskHandler_.lock();
         if (handler != nullptr) {
-            handler->RemoveTask(timeOutTaskName);
+            handler->RemoveTask("wms:" + timeOutTaskName);
             WLOGFD("remove task %{public}s since animationCallback Come", timeOutTaskName.c_str());
             handler->PostTask(callback, "wms:CreateAnimationFinishedCallback",
                 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
