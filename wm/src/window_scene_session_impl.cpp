@@ -443,7 +443,11 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         WLOGFE("[WMSCom] session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    UpdateDecorEnable(true);
+
+    auto isDecorEnable = IsDecorEnable();
+    UpdateDecorEnableToAce(isDecorEnable);
+    property_->SetDecorEnable(isDecorEnable);
+
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("[WMSCom] window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
