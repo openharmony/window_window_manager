@@ -254,7 +254,8 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IWindowTitleButtonRectChangedListener, std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
+    EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+        std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     template<typename T>
@@ -294,7 +295,8 @@ private:
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
-    static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>> windowTitleButtonRectChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+        windowTitleButtonRectChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

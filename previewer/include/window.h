@@ -271,14 +271,23 @@ public:
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
-    virtual WMError SetDecorVisible(bool isVisible) = 0;
-    virtual WMError SetDecorHeight(uint32_t decorHeight) = 0;
-    virtual WMError GetDecorHeight(int32_t& height) = 0;
-    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) = 0;
+    virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorHeight(uint32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
-        const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError UnregisterWindowTitleButtonRectChangeListener(
-        const sptr<IWindowTitleButtonRectChangedListener>& listener) = 0;
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
