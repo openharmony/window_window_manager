@@ -710,7 +710,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
-        if (Session::GetScaleX() == miniScale) {
+        if (MathHelper::NearZero(Session::GetScaleX() - miniScale)) {
             return;
         }
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
