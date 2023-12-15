@@ -266,6 +266,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
             ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
+        ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         // on main screen
         screenId_ = SCREEN_ID_MAIN;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
@@ -283,6 +285,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
         screenSession->PropertyChange(screenSession->GetScreenProperty(),
             ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
+        ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         // on main screen
         WLOGFI("ChangeScreenDisplayMode screenIdFull no need to OFF and screenIdMain ON");
         screenSession->SetDisplayNodeScreenId(SCREEN_ID_MAIN);
