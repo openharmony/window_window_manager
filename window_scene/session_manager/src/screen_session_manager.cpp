@@ -854,7 +854,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     }
 
     if (foldScreenController_ != nullptr) {
-        WLOGFI("SetScreenPower fold screenid:%{public}u"PRIu64".", foldScreenController_->GetCurrentScreenId());
+        WLOGFI("SetScreenPower fold screenid:%{public}u" PRIu64".", foldScreenController_->GetCurrentScreenId());
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
     } else {
         for (auto screenId : screenIds) {
