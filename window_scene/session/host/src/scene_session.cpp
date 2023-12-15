@@ -113,6 +113,12 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+
+        if (property && session->GetSessionProperty()) {
+            session->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
+            session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
+        }
+
         WLOGFI("[WMSCom] Foreground session, id: %{public}d", session->GetPersistentId());
         weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
         auto ret = session->Session::Foreground(property);
