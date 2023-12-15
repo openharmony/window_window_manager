@@ -28,6 +28,7 @@
 #include <system_ability_definition.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
+#include <hisysevent.h>
 
 #include "dm_common.h"
 #include "scene_board_judgement.h"
@@ -1394,6 +1395,15 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen ENTER");
+
+    int32_t eventRet = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "CREATE_VIRTUAL_SCREEN",
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "PID", getpid(),
+        "UID", getuid());
+    WLOGI("CreateVirtualScreen: Write HiSysEvent ret:%{public}d", eventRet);
+
     if (clientProxy_ && option.missionIds_.size() > 0) {
         std::vector<uint64_t> surfaceNodeIds;
         clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
@@ -2308,6 +2318,15 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
 {
     WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
+
+    int32_t eventRet = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "GET_DISPLAY_SNAPSHOT",
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "PID", getpid(),
+        "UID", getuid());
+    WLOGI("GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet);
+
     if (disableDisplaySnapshotOrNot_) {
         WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled!");
         return nullptr;
