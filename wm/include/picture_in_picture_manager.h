@@ -39,8 +39,8 @@ public:
     static void SetActiveController(sptr<PictureInPictureController> pipController);
     static void RemoveActiveController();
     static void RemoveActiveControllerSafe();
-    static void AttachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
-    static void DetachAutoStartController(std::string pageName, sptr<PictureInPictureController> pipController);
+    static void AttachAutoStartController(int32_t handleId, sptr<PictureInPictureController> pipController);
+    static void DetachAutoStartController(int32_t handleId, sptr<PictureInPictureController> pipController);
     static bool IsAttachedToSameWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
 
@@ -49,13 +49,13 @@ public:
     static void DoStartMove();
     static void DoScale();
     static void DoActionEvent(std::string actionName);
-    static void AutoStartPipWindow();
+    static void AutoStartPipWindow(std::string navigationId);
 private:
     // controller in use
     static sptr<PictureInPictureController> activeController_;
     static sptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
-    static std::map<std::string, sptr<PictureInPictureController>> autoStartControllerMap_;
+    static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
     static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
