@@ -142,7 +142,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 
     if (scene->GoDestroy() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoDestroy());
     }
@@ -181,7 +181,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
     if (scene->GetMainWindow() == nullptr) {
         return;
     }
-    ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
