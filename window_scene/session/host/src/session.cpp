@@ -1978,6 +1978,15 @@ void Session::SetOffset(float x, float y)
 {
     offsetX_ = x;
     offsetY_ = y;
+    WSRect newRect {
+        .posX_ = std::round(bounds_.posX_ + x),
+        .posY_ = std::round(bounds_.posY_ + y),
+        .width_ = std::round(winRect_.width_),
+        .height_ = std::round(winRect_.height_),
+    };
+    if (newRect != winRect_) {
+        UpdateRect(newRect, SizeChangeReason::UNDEFINED);
+    }
 }
 
 float Session::GetOffsetX() const
@@ -1988,6 +1997,16 @@ float Session::GetOffsetX() const
 float Session::GetOffsetY() const
 {
     return offsetY_;
+}
+
+void Session::SetBounds(const WSRectF& bounds)
+{
+    bounds_ = bounds;
+}
+
+WSRectF Session::GetBounds()
+{
+    return bounds_;
 }
 
 WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
