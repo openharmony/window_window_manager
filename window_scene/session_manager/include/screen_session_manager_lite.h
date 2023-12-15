@@ -39,37 +39,6 @@ public:
         DisplayManagerAgentType type) override;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
-    std::vector<DisplayId> GetAllDisplayIds() override;
-    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
-    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
-    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
-    DMError DisableDisplaySnapshot(bool disableOrNot) override;
-    bool WakeUpBegin(PowerStateChangeReason reason) override;
-    bool WakeUpEnd() override;
-    bool SuspendBegin(PowerStateChangeReason reason) override;
-    bool SuspendEnd() override;
-    bool SetDisplayState(DisplayState state) override;
-    DisplayState GetDisplayState(DisplayId displayId) override;
-    void NotifyDisplayEvent(DisplayEvent event) override;
-    //Fold Screen
-    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
-    FoldDisplayMode GetFoldDisplayMode() override;
-    bool IsFoldable() override;
-    FoldStatus GetFoldStatus() override;
-    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
-
-    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
-    virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
-    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
-    bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    ScreenPowerState GetScreenPower(ScreenId screenId) override;
-    DMError SetScreenRotationLocked(bool isLocked) override;
-    DMError IsScreenRotationLocked(bool& isLocked) override;
-    DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
-    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
-    DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
 protected:
     ScreenSessionManagerLite() = default;
     virtual ~ScreenSessionManagerLite();
