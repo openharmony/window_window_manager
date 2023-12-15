@@ -1074,8 +1074,8 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->SetContainerModalTitleVisible(!isVisible, true);
-    WLOGI("Set app window decor visible or not success");
+    uiContent_->SetContainerModalTitleVisible(isVisible, true);
+    WLOGI("Change the visibility of decor success");
     return WMError::WM_OK;
 }
 
@@ -1098,6 +1098,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     }
     height = uiContent_->GetContainerModalTitleHeight();
     if (height == -1) {
+        WLOGFE("Get app window decor height failed");
         return WMError::WM_DO_NOTHING;
     }
     WLOGI("Get app window decor height success, height : %{public}d", height);
@@ -1140,6 +1141,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
+            WLOGFE("register the listener of window title button rect change failed");
             return ret;
         }
     }
@@ -1169,6 +1171,7 @@ WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
         std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
+            WLOGFE("unregister the listener of window title button rect change failed");
             return ret;
         }
     }
