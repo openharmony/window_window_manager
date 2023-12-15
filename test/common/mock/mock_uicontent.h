@@ -88,6 +88,10 @@ public:
         FocusMoveSearch, void(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo &output));
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
+    MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
+    MOCK_METHOD1(SetContainerModalTitleHeight, void(uint32_t height));
+    MOCK_METHOD0(GetContainerModalTitleHeight, int());
+    MOCK_METHOD2(GetContainerModalButtonsRect, bool(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons));
 };
 } // namespace Ace
 } // namespace OHOS
