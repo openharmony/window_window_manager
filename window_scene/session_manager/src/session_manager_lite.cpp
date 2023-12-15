@@ -45,6 +45,7 @@ void SessionManagerLite::ClearSessionManagerProxy()
     mockSessionManagerServiceProxy_ = nullptr;
     sessionManagerServiceProxy_ = nullptr;
     sceneSessionManagerLiteProxy_ = nullptr;
+    screenSessionManagerLiteProxy_ = nullptr;
 }
 
 sptr<ISceneSessionManagerLite> SessionManagerLite::GetSceneSessionManagerLiteProxy()
@@ -53,6 +54,14 @@ sptr<ISceneSessionManagerLite> SessionManagerLite::GetSceneSessionManagerLitePro
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerLiteProxy();
     return sceneSessionManagerLiteProxy_;
+}
+
+sptr<IScreenSessionManagerLite> SessionManagerLite::GetScreenSessionManagerLiteProxy()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    InitSessionManagerServiceProxy();
+    InitScreenSessionManagerLiteProxy();
+    return screenSessionManagerLiteProxy_;
 }
 
 void SessionManagerLite::InitSessionManagerServiceProxy()
@@ -84,6 +93,27 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
+    }
+}
+
+void SessionManagerLite::InitScreenSessionManagerLiteProxy()
+{
+    if (screenSessionManagerLiteProxy_) {
+        return;
+    }
+    if (!mockSessionManagerServiceProxy_) {
+        WLOGFE("mockSessionManagerServiceProxy_ is nullptr");
+        return;
+    }
+
+    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetScreenSessionManagerLite();
+    if (!remoteObject) {
+        WLOGFW("Get screen session manager lite proxy failed, scene session manager service is null");
+        return;
+    }
+    screenSessionManagerLiteProxy_ = iface_cast<IScreenSessionManagerLite>(remoteObject);
+    if (!screenSessionManagerLiteProxy_) {
+        WLOGFW("Get screen session manager lite proxy failed, nullptr");
     }
 }
 

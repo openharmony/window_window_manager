@@ -16,6 +16,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 
 #include <refbase.h>
+#include <mutex>
 
 #include "dm_common.h"
 #include "session/screen/include/screen_property.h"

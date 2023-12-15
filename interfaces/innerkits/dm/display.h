@@ -24,10 +24,6 @@ namespace OHOS::Rosen {
 class DisplayInfo;
 class CutoutInfo;
 
-enum class DisplayType : uint32_t {
-    DEFAULT = 0,
-};
-
 class Display : public RefBase {
 friend class DisplayManager;
 public:
