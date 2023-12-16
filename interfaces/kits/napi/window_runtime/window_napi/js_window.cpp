@@ -4937,7 +4937,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
         WLOGFE("Failed to convert parameter to height");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t height = 0;
+    int32_t height = 0;
     napi_get_value_uint32(env, nativeVal, &height);
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         WLOGFE("height should greater than 48 or smaller than 100");
@@ -4949,7 +4949,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
         WLOGFE("Set window decor height failed");
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}u",
+    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
     return NapiGetUndefined(env);
 }
