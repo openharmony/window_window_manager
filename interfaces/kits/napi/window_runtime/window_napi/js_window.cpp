@@ -41,8 +41,8 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
-    constexpr uint32_t MIN_DECOR_HEIGHT = 48;
-    constexpr uint32_t MAX_DECOR_HEIGHT = 100;
+    constexpr int32_t MIN_DECOR_HEIGHT = 48;
+    constexpr int32_t MAX_DECOR_HEIGHT = 100;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -4938,7 +4938,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t height = 0;
-    napi_get_value_uint32(env, nativeVal, &height);
+    napi_get_value_int32(env, nativeVal, &height);
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         WLOGFE("height should greater than 48 or smaller than 100");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
