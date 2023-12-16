@@ -136,7 +136,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
             }
             sptr<Window> mainWindow = Window::GetTopWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
-                new PictureInPictureController(pipOptionPtr, mainWindow->GetWindowId(), env);
+                new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));
         };
     napi_value result = nullptr;

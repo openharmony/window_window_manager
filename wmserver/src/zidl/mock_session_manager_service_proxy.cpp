@@ -42,6 +42,25 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
     return remoteObject;
 }
 
+
+sptr<IRemoteObject> MockSessionManagerServiceProxy::GetScreenSessionManagerLite()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER),
+        data, reply, option) != ERR_NONE) {
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = reply.ReadRemoteObject();
+    return remoteObject;
+}
+
 void MockSessionManagerServiceProxy::NotifySceneBoardAvailable()
 {
     MessageParcel data;
@@ -113,6 +132,5 @@ void MockSessionManagerServiceProxy::UnRegisterSessionManagerServiceRecoverListe
         return;
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS

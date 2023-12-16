@@ -39,6 +39,7 @@
 #include "ws_common.h"
 #include "session_manager_service_interface.h"
 #include "scene_session_manager_interface.h"
+#include "screen_session_manager_lite.h"
 
 #define PATH_LEN 1024
 #define O_RDWR   02
@@ -231,6 +232,15 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient()
             it.second->OnSessionManagerServiceRecover(sessionManagerService_);
         }
     }
+}
+
+sptr<IRemoteObject> MockSessionManagerService::GetScreenSessionManagerLite()
+{
+    if (screenSessionManager_) {
+        return screenSessionManager_;
+    }
+    screenSessionManager_ = ScreenSessionManagerLite::GetInstance().AsObject();
+    return screenSessionManager_;
 }
 
 void MockSessionManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
