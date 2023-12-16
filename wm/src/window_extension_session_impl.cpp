@@ -80,7 +80,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     WLOGFI("[WMSLife]Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife]session is invalid");
+        WLOGFW("[WMSLife]session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (hostSession_ != nullptr) {
@@ -152,7 +152,7 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("Window session invalid.");
+        WLOGFW("Window session invalid.");
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);
