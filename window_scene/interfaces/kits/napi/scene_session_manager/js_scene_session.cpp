@@ -177,7 +177,7 @@ JsSceneSession::~JsSceneSession()
     WLOGD("~JsSceneSession");
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        WLOGFD("session is nullptr");
         return;
     }
     session->UnregisterSessionChangeListeners();
@@ -1885,7 +1885,7 @@ napi_value JsSceneSession::OnSetZOrder(napi_env env, napi_callback_info info)
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("[NAPI]session is null");
+        WLOGFW("[NAPI]session is null");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "session is null"));
         return NapiGetUndefined(env);

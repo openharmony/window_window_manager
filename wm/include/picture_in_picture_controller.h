@@ -28,6 +28,7 @@
 #include "picture_in_picture_interface.h"
 #include "xcomponent_controller.h"
 #include "pip_report.h"
+#include "navigation_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -50,7 +51,7 @@ using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
     constexpr static int32_t DEFAULT_TIME_DELAY = 400;
-    PictureInPictureController(sptr<PipOption> pipOption, uint32_t mainWindowId, napi_env env);
+    PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture(StartPipType startType);
     WMError StopPictureInPicture(bool destroyWindow, bool needAnim, StopPipType stopPipType);
@@ -70,13 +71,19 @@ public:
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PipWindowState GetControllerState();
+    std::string GetPiPNavigationId();
 
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
     public:
-        PipMainWindowLifeCycleImpl() {};
+        PipMainWindowLifeCycleImpl(const std::string& navigationId)
+        {
+            navigationId_ = navigationId;
+        };
         ~PipMainWindowLifeCycleImpl() {};
         void AfterBackground() override;
         void BackgroundFailed(int32_t type) override;
+    private:
+        std::string navigationId_ = "";
     };
 private:
     WMError CreatePictureInPictureWindow();
@@ -85,6 +92,7 @@ private:
     WMError StopPictureInPictureInner(bool needAnim, StopPipType stopType);
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
+    bool IsPullPiPAndHandleNavigation();
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
     sptr<IPiPLifeCycle> pipLifeCycleListener_;
@@ -100,6 +108,7 @@ private:
     std::shared_ptr<XComponentController> mainWindowXComponentController_;
     napi_env env_;
     std::mutex mutex_;
+    int32_t handleId_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

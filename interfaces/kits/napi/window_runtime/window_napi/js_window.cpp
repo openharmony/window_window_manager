@@ -1764,7 +1764,7 @@ napi_value JsWindow::OnGetUIContext(napi_env env, napi_callback_info info)
 
     auto uicontent = window->GetUIContent();
     if (uicontent == nullptr) {
-        WLOGFE("uicontent is nullptr");
+        WLOGFW("uicontent is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 

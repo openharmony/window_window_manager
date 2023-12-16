@@ -81,7 +81,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
 
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
-        WLOGFE("Repeat to register screen change listener!");
+        WLOGFI("Repeat to register screen change listener!");
         return;
     }
 
@@ -110,6 +110,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    uint32_t refreshRate = RSInterfaces::GetInstance().GetScreenCurrentRefreshRate(screenId_);
     displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
@@ -117,7 +118,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
-    displayInfo->SetRefreshRate(property_.GetRefreshRate());
+    displayInfo->SetRefreshRate(refreshRate);
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());

@@ -27,9 +27,27 @@ public:
         : IRemoteProxy<ISceneSessionManagerLite>(impl) {}
     virtual ~SceneSessionManagerLiteProxy() = default;
 
-    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
-    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
-    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
+    WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                            std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
+    WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) override;
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
+    WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                               SessionSnapshot& snapshot, bool isLowResolution) override;
+    WSError LockSession(int32_t persistentId) override;
+    WSError UnlockSession(int32_t persistentId) override;
+    WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
+    WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
+    WSError ClearSession(int32_t persistentId) override;
+    WSError ClearAllSessions() override;
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

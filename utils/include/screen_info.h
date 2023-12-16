@@ -19,7 +19,8 @@
 #include <parcel.h>
 
 #include "class_var_definition.h"
-#include "screen.h"
+#include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 enum class ScreenType : uint32_t {
