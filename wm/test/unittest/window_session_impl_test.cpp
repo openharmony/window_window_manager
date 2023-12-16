@@ -925,6 +925,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowVisibilityChangeListener(listener8);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    sptr<IWindowTitleButtonRectChangedListener> listener9 = nullptr;
+    res = window->RegisterWindowTitleButtonRectChangeListener(listener9);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
@@ -1555,6 +1561,82 @@ HWTEST_F(WindowSessionImplTest, SetSingleFrameComposerEnabled01, Function | Smal
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetSingleFrameComposerEnabled(false);
     ASSERT_EQ(retCode, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetDecorVisible
+ * @tc.desc: SetDecorVisible and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetDecorVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisibletest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetDecorVisible");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool isVisble = true;
+    WMError res = window->SetDecorVisible(isVisble);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisibletest01 end";
+}
+
+/**
+ * @tc.name: SetDecorHeight
+ * @tc.desc: SetDecorHeight and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetDecorHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorHeighttest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetDecorHeight");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    int32_t height = 50;
+    WMError res = window->GetDecorHeight(height);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorHeighttest01 end";
+}
+
+/**
+ * @tc.name: GetDecorHeight
+ * @tc.desc: GetDecorHeight and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetDecorHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetDecorHeight");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    int32_t height = 0;
+    WMError res = window->GetDecorHeight(height);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
+}
+
+/**
+ * @tc.name: GetTitleButtonArea
+ * @tc.desc: GetTitleButtonArea and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTitleButtonAreatest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonArea");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    TitleButtonRect titleButtonRect;
+    WMError res = window->GetTitleButtonArea(titleButtonRect);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
 }
 }
 } // namespace Rosen

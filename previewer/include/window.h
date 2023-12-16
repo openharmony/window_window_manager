@@ -96,6 +96,8 @@ class IDialogTargetTouchListener : virtual public RefBase {
 };
 class IDialogDeathRecipientListener : virtual public RefBase {
 };
+class IWindowTitleButtonRectChangedListener : virtual public RefBase {
+};
 class IWindowVisibilityChangedListener : virtual public RefBase {
 };
 using WindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
@@ -269,6 +271,23 @@ public:
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
+    virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
