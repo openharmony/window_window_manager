@@ -64,6 +64,8 @@ class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifyRecoverSceneSessionFunc =
+    std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
@@ -121,10 +123,18 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token = nullptr) override;
+    WSError RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) override;
+    WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        SystemSessionConfig& systemConfig, sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     void SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
+    void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
@@ -228,6 +238,10 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WSError RecoveryPullPiPMainWindow(const int32_t& persistentId, const Rect& rect);
+
+    bool IsInputEventEnabled();
+    void SetEnableInputEvent(bool enabled);
+    void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     int GetSceneSessionPrivacyModeCount();
@@ -404,6 +418,7 @@ private:
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     std::map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
+    NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
     ProcessStatusBarEnabledChangeFunc statusBarEnabledChangeFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     ProcessOutsideDownEventFunc outsideDownEventFunc_;
@@ -428,6 +443,7 @@ private:
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     bool needUpdateSessionRect_ = false;
     int32_t currentUserId_;
+    bool enableInputEvent_ = true;
     bool gestureNavigationEnabled_ {true};
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
@@ -488,6 +504,7 @@ private:
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session);
+    void RecoverWindowSessionProperty(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);

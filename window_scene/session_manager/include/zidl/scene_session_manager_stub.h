@@ -39,6 +39,8 @@ private:
     int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
     int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleRecoverAndReconnectSceneSession(MessageParcel &data, MessageParcel &reply);
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);

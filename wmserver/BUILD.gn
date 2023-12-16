@@ -91,6 +91,7 @@ ohos_shared_library("sms") {
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
     "src/mock_session_manager_service.cpp",
     "src/zidl/mock_session_manager_service_stub.cpp",
+    "src/zidl/session_manager_service_recover_proxy.cpp",
   ]
 
   public_configs = [ ":libmockwms_config" ]
