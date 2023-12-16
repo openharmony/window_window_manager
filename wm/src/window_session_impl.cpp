@@ -512,7 +512,7 @@ void WindowSessionImpl::UpdateDensity()
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
-    WLOGFD("[WMSFocus]Report update focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
+    WLOGFI("[WMSFocus]Report update focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
     isFocused_ = isFocused;
     if (isFocused) {
         HiSysEventWrite(

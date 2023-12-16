@@ -169,6 +169,7 @@ public:
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     const std::string& GetWindowName() const;
+    const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
