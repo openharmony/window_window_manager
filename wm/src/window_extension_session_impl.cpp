@@ -37,6 +37,7 @@ WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
+    WLOGFI("In");
     if (!context || !iSession) {
         WLOGFE("context is nullptr: %{public}u or sessionToken is nullptr: %{public}u",
             context == nullptr, iSession == nullptr);
