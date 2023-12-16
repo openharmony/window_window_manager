@@ -18,7 +18,6 @@
 
 #include <parcel.h>
 
-#include "screen_group.h"
 #include "screen_info.h"
 
 namespace OHOS::Rosen {

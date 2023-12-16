@@ -22,12 +22,6 @@
 
 namespace OHOS::Rosen {
 class ScreenGroupInfo;
-enum class ScreenCombination : uint32_t {
-    SCREEN_ALONE,
-    SCREEN_EXPAND,
-    SCREEN_MIRROR,
-    SCREEN_UNIQUE,
-};
 
 class ScreenGroup : public Screen {
 friend class ScreenManager;
