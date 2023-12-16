@@ -101,7 +101,7 @@ void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureContro
 void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
     sptr<PictureInPictureController> pipController)
 {
-    WLOGD("AttachAutoStartController, %{public}s", pageName.c_str());
+    WLOGD("AttachAutoStartController, %{public}u", handleId);
     if (pipController == nullptr) {
         return;
     }
@@ -126,7 +126,7 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
 void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     sptr<PictureInPictureController> pipController)
 {
-    WLOGD("Detach active pipController, %{public}s", pageName.c_str());
+    WLOGD("Detach active pipController, %{public}u", handleId);
     if (pipController != nullptr &&
         pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
         WLOGFE("not same pip controller or no active pip controller");
