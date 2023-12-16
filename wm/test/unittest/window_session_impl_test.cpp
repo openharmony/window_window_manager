@@ -1559,7 +1559,8 @@ HWTEST_F(WindowSessionImplTest, SetDecorVisible, Function | SmallTest | Level2)
     option->SetWindowName("SetDecorVisible");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WMError res = window->SetDecorVisible();
+    bool isVisble = true;
+    WMError res = window->SetDecorVisible(isVisble);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisibletest01 end";
 }
@@ -1577,7 +1578,8 @@ HWTEST_F(WindowSessionImplTest, SetDecorHeight, Function | SmallTest | Level2)
     option->SetWindowName("SetDecorHeight");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WMError res = window->SetDecorHeight();
+    int32_t height = 50;
+    WMError res = window->GetDecorHeight(height);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorHeighttest01 end";
 }
