@@ -69,6 +69,8 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+    WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -79,6 +81,7 @@ std::mutex WindowSessionImpl::screenshotListenerMutex_;
 std::mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
+std::mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1127,6 +1130,138 @@ WMError WindowSessionImpl::UnregisterWindowStatusChangeListener(const sptr<IWind
     return UnregisterListener(windowStatusChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleVisible(isVisible, true);
+    WLOGI("Change the visibility of decor success");
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleHeight(decorHeight);
+    WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    height = uiContent_->GetContainerModalTitleHeight();
+    if (height == -1) {
+        WLOGFE("Get app window decor height failed");
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGI("Get app window decor height success, height : %{public}d", height);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    Rect decorRect;
+    Rect titleButtonLeftRect;
+    bool res = uiContent_->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
+    if (!res) {
+        WLOGFE("get window title buttons area failed");
+        titleButtonRect.IsUninitializedRect();
+        return WMError::WM_DO_NOTHING;
+    }
+    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+    titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+    titleButtonRect.width_ = titleButtonLeftRect.width_;
+    titleButtonRect.height_ = titleButtonLeftRect.height_;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("register the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+        uiContent_->SubscribeContainerModalButtonsRectChange([this](Rect& decorRect, Rect& titleButtonLeftRect) {
+            TitleButtonRect titleButtonRect;
+            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+            titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+            titleButtonRect.width_ = titleButtonLeftRect.width_;
+            titleButtonRect.height_ = titleButtonLeftRect.height_;
+            NotifyWindowTitleButtonRectChange(titleButtonRect);
+    });
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start unregister windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("unregister the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+    uiContent_->SubscribeContainerModalButtonsRectChange(nullptr);
+    return ret;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>> windowTitleButtonRectListeners;
+        for (auto& listener : windowTitleButtonRectChangeListeners_[GetPersistentId()]) {
+            windowTitleButtonRectListeners.push_back(listener);
+        }
+    return windowTitleButtonRectListeners;
+}
+
+void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect)
+{
+    std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    auto windowTitleButtonRectListeners = GetListeners<IWindowTitleButtonRectChangedListener>();
+    for (auto& listener : windowTitleButtonRectListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowTitleButtonRectChanged(titleButtonRect);
+        }
+    }
+}
 
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
@@ -1232,6 +1367,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
         ClearUselessListeners(windowStatusChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
 }
 

@@ -732,6 +732,22 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     return objValue;
 }
 
+napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert titleButtonRect to jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "right", CreateJsValue(env, titleButtonRect.posX_));
+    napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, titleButtonRect.width_));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, titleButtonRect.height_));
+    return objValue;
+}
+
 bool CheckCallingPermission(std::string permission)
 {
     WLOGD("Permission: %{public}s", permission.c_str());
