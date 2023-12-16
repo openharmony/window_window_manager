@@ -161,10 +161,12 @@ const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSI
     {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
 };
 
+JsSessionType GetApiType(WindowType type);
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);

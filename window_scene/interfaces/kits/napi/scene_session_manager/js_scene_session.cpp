@@ -26,6 +26,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
+const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
@@ -102,23 +103,13 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     return objValue;
 }
 
-JsSessionType JsSceneSession::GetApiType(WindowType type)
-{
-    auto iter = WINDOW_TO_JS_SESSION_TYPE_MAP.find(type);
-    if (iter == WINDOW_TO_JS_SESSION_TYPE_MAP.end()) {
-        WLOGFE("[NAPI]window type: %{public}u cannot map to api type!", type);
-        return JsSessionType::TYPE_UNDEFINED;
-    } else {
-        return iter->second;
-    }
-}
-
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session)
 {
     listenerFunc_ = {
         { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
         { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
+        { BUFFER_AVAILABLE_CHANGE_CB,            &JsSceneSession::ProcessBufferAvailableChangeRegister},
         { SESSION_EVENT_CB,                      &JsSceneSession::ProcessSessionEventRegister },
         { SESSION_RECT_CHANGE_CB,                &JsSceneSession::ProcessSessionRectChangeRegister },
         { CREATE_SUB_SESSION_CB,                 &JsSceneSession::ProcessCreateSubSessionRegister },
@@ -358,6 +349,20 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
     }
     session->SetSessionStateChangeListenser(func);
     WLOGFD("ProcessSessionStateChangeRegister success");
+}
+
+void JsSceneSession::ProcessBufferAvailableChangeRegister()
+{
+    NotifyBufferAvailableChangeFunc func = [this](const bool isAvailable) {
+        this->OnBufferAvailableChange(isAvailable);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetBufferAvailableChangeListener(func);
+    WLOGFD("ProcessBufferAvailableChangeRegister success");
 }
 
 void JsSceneSession::ProcessCreateSubSessionRegister()
@@ -1163,6 +1168,26 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionStateChange, state:" + std::to_string(static_cast<int>(state)));
+}
+
+void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
+{
+    WLOGFD("[NAPI]OnBufferAvailableChange, state: %{public}u", isBufferAvailable);
+    auto iter = jsCbMap_.find(BUFFER_AVAILABLE_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto task = [isBufferAvailable, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsBufferAvailableObj = CreateJsValue(env, isBufferAvailable);
+        napi_value argv[] = { jsBufferAvailableObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)

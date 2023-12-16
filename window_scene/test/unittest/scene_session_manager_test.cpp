@@ -1637,6 +1637,24 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: check func RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: ConfigStartingWindowAnimation
  * @tc.desc: SceneSesionManager config start window animation
  * @tc.type: FUNC

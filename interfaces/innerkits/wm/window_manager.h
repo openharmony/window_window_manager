@@ -462,7 +462,6 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;
-    void OnRemoteDied();
 };
 } // namespace Rosen
 } // namespace OHOS
