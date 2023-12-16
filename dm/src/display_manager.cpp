@@ -1239,7 +1239,7 @@ void DisplayManager::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is null");
+        WLOGFW("displayInfo is null");
         return false;
     }
     DisplayId displayId = displayInfo->GetDisplayId();

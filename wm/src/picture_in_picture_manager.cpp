@@ -30,7 +30,7 @@ namespace {
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
 sptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
-std::map<std::string, sptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
+std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 
@@ -98,7 +98,7 @@ void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureContro
     activeController_ = nullptr;
 }
 
-void PictureInPictureManager::AttachAutoStartController(std::string pageName,
+void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
     sptr<PictureInPictureController> pipController)
 {
     WLOGD("AttachAutoStartController, %{public}s", pageName.c_str());
@@ -116,13 +116,14 @@ void PictureInPictureManager::AttachAutoStartController(std::string pageName,
     sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
         autoStartController_->GetMainWindowId());
     if (mainWindow != nullptr) {
-        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl();
+        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl(
+            pipController->GetPiPNavigationId());
         mainWindow->RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
-    autoStartControllerMap_.insert(std::make_pair(pageName, pipController));
+    autoStartControllerMap_[handleId] = wptr(pipController);
 }
 
-void PictureInPictureManager::DetachAutoStartController(std::string pageName,
+void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     sptr<PictureInPictureController> pipController)
 {
     WLOGD("Detach active pipController, %{public}s", pageName.c_str());
@@ -136,7 +137,7 @@ void PictureInPictureManager::DetachAutoStartController(std::string pageName,
     if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
         mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
-    autoStartControllerMap_.erase(pageName);
+    autoStartControllerMap_.erase(handleId);
     autoStartController_ = nullptr;
 }
 
@@ -208,14 +209,39 @@ void PictureInPictureManager::DoActionEvent(std::string actionName)
     activeController_->DoActionEvent(actionName);
 }
 
-void PictureInPictureManager::AutoStartPipWindow()
+void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
 {
     WLOGD("AutoStartPipWindow is called");
     if (autoStartController_ == nullptr) {
         WLOGFE("autoStartController_ is null");
         return;
     }
-    autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
+    if (navigationId == "") {
+        WLOGFI("No use navigationId for auto start");
+        autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
+        return;
+    }
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        autoStartController_->GetMainWindowId());
+    if (mainWindow) {
+        auto navController = NavigationController::GetNavigationController(mainWindow->GetUIContent(), navigationId);
+        if (!navController) {
+            WLOGFE("navController is nullptr");
+            return;
+        }
+        if (navController->IsNavDestinationInTopStack()) {
+            int handleId = navController->GetTopHandle();
+            if (autoStartControllerMap_.empty() ||
+                autoStartControllerMap_.find(handleId) == autoStartControllerMap_.end()) {
+                WLOGFE("GetNAvController info error, %{public}d not registered", handleId);
+                return;
+            }
+            auto pipController = autoStartControllerMap_[handleId];
+            pipController->StartPictureInPicture(StartPipType::AUTO_START);
+        } else {
+            WLOGFE("Top is not navDestination");
+        }
+    }
 }
 }
 }

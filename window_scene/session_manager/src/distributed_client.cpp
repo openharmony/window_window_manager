@@ -128,7 +128,7 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
     WLOGFI("SetMissionContinueState called. Mission id: %{public}d, state: %{public}d", missionId, state);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        WLOGFE("remote system ablity is null");
+        WLOGFI("remote system ablity is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;

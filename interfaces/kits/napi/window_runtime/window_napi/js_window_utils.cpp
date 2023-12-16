@@ -83,6 +83,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
 
     return objValue;
 }
@@ -620,7 +622,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         }
         std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
         if (!std::regex_match(colorStr, pattern)) {
-            WLOGFE("Invalid color input");
+            WLOGFD("Invalid color input");
             return defaultColor;
         }
         std::string color = colorStr.substr(1);

@@ -99,10 +99,12 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     // return when screen is locked and show without ShowWhenLocked flag
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
-        !IsShowWhenLocked()) {
+        !IsShowWhenLocked() &&
+        sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
+        sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
         WLOGFW("[WMSCom] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
-        return WSError::WS_ERROR_INVALID_OPERATION;
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
 
     auto task = [weakThis = wptr(this), property]() {
@@ -699,6 +701,7 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     float vpr = 3.5f; // 3.5f: default pixel ratio
+    float miniScale = 0.3f; // 0.3: floating miniScale
     int32_t floatingBarHeight = 32; // 32: floating windowBar Height
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
@@ -707,6 +710,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        if (MathHelper::NearZero(Session::GetScaleX() - miniScale)) {
+            return;
+        }
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
             vpr = display->GetVirtualPixelRatio();

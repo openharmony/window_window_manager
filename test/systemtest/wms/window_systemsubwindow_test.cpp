@@ -164,6 +164,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         WindowType::WINDOW_TYPE_FLOAT_CAMERA,
         WindowType::WINDOW_TYPE_PLACEHOLDER,
         WindowType::WINDOW_TYPE_SCREENSHOT,
+        WindowType::WINDOW_TYPE_GLOBAL_SEARCH,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
         struct Rect baseRect = {0, 0, 100, 200};

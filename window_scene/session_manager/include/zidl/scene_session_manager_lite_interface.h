@@ -54,9 +54,28 @@ public:
         TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND,
     };
 
-    virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
-    virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
-    virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
+    virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
+    virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
+    virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError GetSessionInfos(const std::string& deviceId,
+                                    int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
+    virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
+    virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
+    virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                                       SessionSnapshot& snapshot, bool isLowResolution) = 0;
+    virtual WSError ClearSession(int32_t persistentId) = 0;
+    virtual WSError ClearAllSessions() = 0;
+    virtual WSError LockSession(int32_t sessionId) = 0;
+    virtual WSError UnlockSession(int32_t sessionId) = 0;
+    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
+    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
+        std::vector<std::int32_t>& result) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
