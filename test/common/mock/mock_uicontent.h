@@ -92,6 +92,7 @@ public:
     MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
     MOCK_METHOD0(GetContainerModalTitleHeight, int());
     MOCK_METHOD2(GetContainerModalButtonsRect, bool(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons));
+    MOCK_METHOD1(WatchContainerModalButtonsRect, void(std::function<void(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons)>&& callback));
 };
 } // namespace Ace
 } // namespace OHOS
