@@ -561,4 +561,29 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
+
+void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    WLOGFI("get focus Winow info lite proxy");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+    sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
+    if (info) {
+        focusInfo = *info;
+    } else {
+        WLOGFE("info is null.");
+    }
+}
+
 } // namespace OHOS::Rosen

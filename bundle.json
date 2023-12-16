@@ -98,6 +98,7 @@
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
+            "//foundation/window/window_manager/wm:libwm_lite",
             "//foundation/window/window_manager/utils:libwmutil",
             "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
@@ -119,6 +120,20 @@
                 "window_manager.h",
                 "window_option.h",
                 "window_scene.h",
+                "wm_common.h",
+                "occupied_area_change_info.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/wm:libwm_lite",
+            "header": {
+              "header_files": [
+                "window_accessibility_controller.h",
+                "window_manager.h",
+                "window_option.h",
                 "wm_common.h",
                 "occupied_area_change_info.h"
               ],
