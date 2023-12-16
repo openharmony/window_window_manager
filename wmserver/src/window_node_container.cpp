@@ -1675,14 +1675,14 @@ void WindowNodeContainer::DumpScreenWindowTreeByWinId(uint32_t winid)
 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
-    WLOGD("------ dump window info begin -------");
-    WLOGD("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation firstFrameCallback [   x    y    w    h]");
+    WLOGI("------ dump window info begin -------");
+    WLOGI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation firstFrameCallback [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetWindowRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-        WLOGD("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
+        WLOGI("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
             "%{public}4u %{public}11u %{public}12d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
@@ -1690,7 +1690,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
         return false;
     };
     TraverseWindowTree(func, true);
-    WLOGD("------ dump window info end -------");
+    WLOGI("------ dump window info end -------");
 }
 
 bool WindowNodeContainer::IsVerticalDisplay(DisplayId displayId) const
