@@ -1593,7 +1593,7 @@ public:
      * @param decorHeight Decor height of window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetDecorHeight(uint32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get decor height of window.

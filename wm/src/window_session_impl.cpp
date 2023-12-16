@@ -1079,14 +1079,14 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetDecorHeight(uint32_t decorHeight)
+WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     if (uiContent_ == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent_->SetContainerModalTitleHeight(decorHeight);
-    WLOGI("Set app window decor height success, height : %{public}u", decorHeight);
+    WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
     return WMError::WM_OK;
 }
 
