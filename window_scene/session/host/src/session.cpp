@@ -1509,7 +1509,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 {
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
-            WLOGFE("windowEventChannel_ is null");
+            WLOGFW("windowEventChannel_ is null");
         }
         return WSError::WS_ERROR_NULLPTR;
     }

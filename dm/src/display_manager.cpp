@@ -777,7 +777,7 @@ DMError DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> l
 DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterDisplayListener listener is nullptr.");
+        WLOGFW("UnregisterDisplayListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayListener(listener);
