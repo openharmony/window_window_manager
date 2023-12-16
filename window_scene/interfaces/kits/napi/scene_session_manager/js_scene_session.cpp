@@ -1134,20 +1134,22 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
         jsCallBack = iter->second;
     }
 
-    WLOGFD("[WMSSub][NAPI]OnCreateSubSession, id: %{public}d", sceneSession->GetPersistentId());
+    WLOGFI("[WMSLife][NAPI]OnCreateSubSession, id: %{public}d, parentId: %{public}d",
+        sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            WLOGFE("[WMSSub][NAPI]root session or target session or env is nullptr");
+            WLOGFE("[WMSLife][NAPI]root session or target session or env is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
         if (jsSceneSessionObj == nullptr || !jsCallBack) {
-            WLOGFE("[WMSSub][NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+            WLOGFE("[WMSLife][NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("[WMSSub]CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
+        WLOGFI("[WMSLife]CreateJsSceneSessionObject success, id: %{public}d, parentId: %{public}d",
+            specificSession->GetPersistentId(), specificSession->GetParentPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -1193,16 +1195,24 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 
 void JsSceneSession::OnSessionStateChange(const SessionState& state)
 {
-    WLOGFD("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFW("[WMSLife] session is nullptr");
+        return;
+    }
+
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(SESSION_STATE_CHANGE_CB);
         if (iter == jsCbMap_.end()) {
+            WLOGFW("[WMSLife] Not find sessionStateChangeCallback, id: %{public}d", session->GetPersistentId());
             return;
         }
         jsCallBack = iter->second;
     }
+
+    WLOGFI("[WMSLife] id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
     auto task = [state, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
