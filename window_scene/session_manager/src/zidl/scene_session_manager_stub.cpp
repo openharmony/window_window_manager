@@ -124,6 +124,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
         &SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS),
+        &SceneSessionManagerStub::HandleShiftAppWindowFocus),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -687,6 +689,15 @@ int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(Message
     int32_t persistendId = data.ReadInt32();
     bool haveListener = data.ReadBool();
     WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t sourcePersistentId = data.ReadInt32();
+    int32_t targetPersistentId = data.ReadInt32();
+    const WSError& ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

@@ -43,6 +43,7 @@ public:
     static napi_value SetWindowLayoutMode(napi_env env, napi_callback_info info);
     static napi_value SetGestureNavigationEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkImage(napi_env env, napi_callback_info info);
+    static napi_value ShiftAppWindowFocus(napi_env env, napi_callback_info info);
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
     static napi_value OnCreateWindow(napi_env env, napi_callback_info info);
@@ -57,6 +58,7 @@ private:
     static napi_value OnSetWindowLayoutMode(napi_env env, napi_callback_info info);
     static napi_value OnSetGestureNavigationEnabled(napi_env env, napi_callback_info info);
     static napi_value OnSetWaterMarkImage(napi_env env, napi_callback_info info);
+    static napi_value OnShiftAppWindowFocus(napi_env env, napi_callback_info info);
     static bool ParseConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

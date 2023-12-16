@@ -2522,6 +2522,25 @@ HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: ShiftAppWindowFocus
+ * @tc.desc: SceneSesionManager shift app window focus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ShiftAppWindowFocus, Function | SmallTest | Level3)
+{
+    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
+    int32_t sourcePersistentId_ = INVALID_SESSION_ID;
+    int32_t targetPersistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
+    EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
+    targetPersistentId_ = 1;
+    sourcePersistentId_ = 1;
+    WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
+    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: RegisterSessionExceptionFunc
  * @tc.desc: SceneSesionManager register session expection func
  * @tc.type: FUNC

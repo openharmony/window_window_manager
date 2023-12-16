@@ -404,7 +404,8 @@ WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t& persistentId, boo
 WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
 }
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -464,6 +465,13 @@ WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentI
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     WSError ret = windowManagerServiceProxy_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     return static_cast<WMError>(ret);
+}
+
+WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 } // namespace Rosen
 } // namespace OHOS
