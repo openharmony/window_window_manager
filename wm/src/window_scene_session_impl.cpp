@@ -1011,7 +1011,7 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     uint32_t windowId = GetWindowId();
-    WLOGFD("GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
+    WLOGFI("[WMSImms]GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
     WindowMode mode = GetMode();
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
@@ -1019,7 +1019,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
         !(mode == WindowMode::WINDOW_MODE_FLOATING &&
           system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
-        WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+        WLOGI("[WMSImms]avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
@@ -1032,7 +1032,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
 
 WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
 {
-    WLOGFD("NotifyWindowNeedAvoid called windowId:%{public}u status:%{public}d",
+    WLOGFD("[WMSImms]NotifyWindowNeedAvoid called windowId:%{public}u status:%{public}d",
         GetWindowId(), static_cast<int32_t>(status));
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
@@ -1059,11 +1059,15 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     isIgnoreSafeArea_ = status;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
+        WLOGFI("[WMSImms]SetIgnoreViewSafeArea winId:%{public}u status:%{public}d",
+            GetWindowId(), static_cast<int32_t>(status));
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
         }
         isIgnoreSafeAreaNeedNotify_ = true;
     } else {
+        WLOGFI("[WMSImms]SetWindowNeedAvoidFlag winId:%{public}u status:%{public}d",
+            GetWindowId(), static_cast<int32_t>(status));
         WMError ret = WMError::WM_OK;
         if (status) {
             RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
@@ -1092,7 +1096,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WLOGFI("[WMSImms]winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -1126,7 +1130,7 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
 {
-    WLOGFD("GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
+    WLOGFD("[WMSImms]GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
         GetWindowId(), static_cast<uint32_t>(type));
     if (property_ == nullptr) {
         return SystemBarProperty();
@@ -1137,7 +1141,7 @@ SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType 
 
 WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
 {
-    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    WLOGFD("[WMSImms]NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1145,6 +1149,7 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
     if ((state_ == WindowState::STATE_CREATED &&
          property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
          state_ == WindowState::STATE_HIDDEN) {
+        WLOGFI("[WMSImms]NotifyWindowSessionProperty window state is created or hidden");
         return WMError::WM_OK;
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
@@ -1175,13 +1180,15 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
+    WLOGFI("[WMSImms]SetSystemBarProperty windowId:%{public}u type:%{public}u"
         "enable:%{public}u bgColor:%{public}x Color:%{public}x",
         GetWindowId(), static_cast<uint32_t>(type),
         property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        WLOGFE("[WMSImms]SetSystemBarProperty window state is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
+        WLOGFI("[WMSImms]SetSystemBarProperty property is same");
         return WMError::WM_OK;
     }
 
@@ -1192,7 +1199,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifyWindowSessionProperty();
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        WLOGFE("[WMSImms]NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
@@ -1225,7 +1232,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
-    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WLOGFI("[WMSImms]winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }

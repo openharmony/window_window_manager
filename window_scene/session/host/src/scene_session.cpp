@@ -621,7 +621,10 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
-    WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
+    WLOGFI("[WMSImms]SceneSession SetSystemBarProperty persistentId():%{public}u type:%{public}u"
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetPersistentId(), static_cast<uint32_t>(type),
+        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
@@ -665,7 +668,7 @@ WSError SceneSession::OnNeedAvoid(bool status)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+        WLOGFI("[WMSImms]SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
             session->sessionChangeCallback_->OnNeedAvoid_(status);
         }
@@ -825,7 +828,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
-        WLOGFD("GetAvoidAreaByType avoidAreaType:%{public}u", type);
+        WLOGFD("[WMSImms]GetAvoidAreaByType avoidAreaType:%{public}u", type);
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
@@ -844,7 +847,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                WLOGFD("cannot find avoidAreaType: %{public}u", type);
+                WLOGFI("[WMSImms]cannot find avoidAreaType: %{public}u", type);
                 return avoidArea;
             }
         }
