@@ -55,7 +55,7 @@ namespace {
 HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, 100, nullptr);
+    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::PutPipControllerInfo(100, pipController);
     ASSERT_EQ(1, static_cast<int>(PictureInPictureManager::windowToControllerMap_.size()));
     PictureInPictureManager::RemovePipControllerInfo(100);
@@ -71,7 +71,7 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, 100, nullptr);
+    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::SetActiveController(pipController);
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
