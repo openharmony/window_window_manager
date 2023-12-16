@@ -68,7 +68,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100, nullptr);
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->window_ = mw;
     EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -87,7 +87,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, 100, nullptr);
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(PipWindowState::STATE_UNDEFINED, pipControl->GetControllerState());
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY,
         pipControl->StopPictureInPicture(true, false, StopPipType::NULL_STOP));
