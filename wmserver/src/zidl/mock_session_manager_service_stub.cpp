@@ -54,6 +54,11 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             UnRegisterSessionManagerServiceRecoverListener(pid);
             break;
         }
+        case MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER: {
+            sptr<IRemoteObject> remoteObject = GetScreenSessionManagerLite();
+            reply.WriteRemoteObject(remoteObject);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -31,6 +31,7 @@ public:
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
     void NotifySceneBoardAvailable() override;
     sptr<IRemoteObject> GetSessionManagerService() override;
+    sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
     void RegisterSessionManagerServiceRecoverListener(int64_t pid, const sptr<IRemoteObject>& listener) override;
     void UnRegisterSessionManagerServiceRecoverListener(int64_t pid) override;
@@ -65,6 +66,7 @@ private:
     };
 
     sptr<IRemoteObject> sessionManagerService_;
+    sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
     sptr<SMSDeathRecipient> smsDeathRecipient_;
 
