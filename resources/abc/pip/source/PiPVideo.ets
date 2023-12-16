@@ -16,9 +16,8 @@
 import curves from '@ohos.curves';
 import PiPWindow from '@ohos.PiPWindow';
 import pip from '@ohos.pip';
-import window from '@ohos.window';
 
-const TAG: string = 'PiPLive';
+const TAG: string = 'PiPVideo';
 const TIMEOUT: number = 3000;
 
 @Styles
@@ -28,9 +27,9 @@ function fillSize() {
 
 @Entry
 @Component
-export struct PiPLive {
+export struct PiPVideo {
   xComponentId: string = 'pip';
-  windowType: PiPWindow.PiPTemplateType = PiPWindow.PiPTemplateType.VIDEO_LIVE;
+  windowType: PiPWindow.PiPTemplateType = PiPWindow.PiPTemplateType.VIDEO_PLAY;
   private hideEventId: number = -1;
   @State private showControl: boolean = false;
   private xComponentController: XComponentController = new XComponentController();
@@ -89,7 +88,7 @@ export struct PiPLive {
       RelativeContainer() {
         RelativeContainer() {
           DefaultControl();
-          LiveControl();
+          VideoControl();
         }
         .fillSize()
         .visibility(this.showControl ? Visibility.Visible : Visibility.None)
@@ -190,9 +189,12 @@ struct DefaultControl {
   }
 }
 
+
 @Component
-struct LiveControl {
+struct VideoControl {
   @State isPlaying: boolean = true;
+  @State shouldShowNextAndPrev: boolean = true;
+  @State horMargin: number = 12;
   @Consume hideControlDelay: boolean;
 
   build() {
@@ -204,9 +206,9 @@ struct LiveControl {
       }
       .backgroundColor('#00FFFFFF')
       .size({ width: 24, height: 24 })
-      .margin(12)
+      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
       .alignRules({
-        top: { anchor: '__container__', align: VerticalAlign.Top },
+        center: { anchor: '__container__', align: VerticalAlign.Center },
         middle: { anchor: '__container__', align: HorizontalAlign.Center }
       })
       .id('control_play')
@@ -215,29 +217,72 @@ struct LiveControl {
         this.isPlaying = !this.isPlaying;
         this.hideControlDelay = true;
         pip.triggerAction('playbackStateChanged');
-        console.debug(TAG, 'action: live play');
+        console.debug(TAG, 'action: play or pause');
       })
 
-      Progress({ value: 0, total: 100, type: ProgressType.Linear })
-        .size({ width: '100%', height: 4 })
-        .color('#33EEEEEE')
-        .margin({ left: 16, right: 16, top: -4, bottom: 8 })
-        .alignRules({
-          bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .id('control_progress')
+      Button({ type: ButtonType.Circle }) {
+        Image($r('sys.media.ohos_ic_public_play_last'))
+          .fillColor($r('sys.color.ohos_id_color_primary_contrary'))
+          .objectFit(ImageFit.Contain)
+      }
+      .backgroundColor('#00FFFFFF')
+      .size({ width: 24, height: 24 })
+      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
+      .visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None)
+      .alignRules({
+        center: { anchor: '__container__', align: VerticalAlign.Center },
+        right: { anchor: 'control_play', align: HorizontalAlign.Start }
+      })
+      .id('control_play_last')
+      .responseRegion({ x: '-50%', y: '-50%', width: '200%', height: '200%' })
+      .onClick(() => {
+        this.hideControlDelay = true;
+        pip.triggerAction('previousVideo');
+        console.debug(TAG, 'action: play last');
+      })
+
+      Button({ type: ButtonType.Circle }) {
+        Image($r('sys.media.ohos_ic_public_play_next'))
+          .fillColor($r('sys.color.ohos_id_color_primary_contrary'))
+          .objectFit(ImageFit.Contain)
+      }
+      .backgroundColor('#00FFFFFF')
+      .size({ width: 24, height: 24 })
+      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
+      .visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None)
+      .alignRules({
+        center: { anchor: '__container__', align: VerticalAlign.Center },
+        left: { anchor: 'control_play', align: HorizontalAlign.End }
+      })
+      .id('control_play_next')
+      .responseRegion({ x: '-50%', y: '-50%', width: '200%', height: '200%' })
+      .onClick(() => {
+        this.hideControlDelay = true;
+        pip.triggerAction('nextVideo');
+        console.debug(TAG, 'action: play next');
+      })
     }
     .width('100%')
-    .height(56)
+    .height(48)
     .linearGradient({
       angle: 0,
       colors: [['#30000000', 0.0], ['#00000000', 1.0]]
+    })
+    .onAreaChange((oldValue, newValue) => {
+      if (newValue.width < 104) {
+        this.shouldShowNextAndPrev = false;
+      } else if (newValue.width < 152) {
+        this.horMargin = (newValue.width as number - 104) / 4;
+        this.shouldShowNextAndPrev = true;
+      } else {
+        this.horMargin = 12;
+        this.shouldShowNextAndPrev = true;
+      }
     })
     .alignRules({
       bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
       left: { anchor: '__container__', align: HorizontalAlign.Start }
     })
-    .id('live_control')
+    .id('video_control')
   }
 }
