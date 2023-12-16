@@ -86,6 +86,18 @@ HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: IsSameBundleNameAsCalling
+ * @tc.desc: test function : IsSameBundleNameAsCalling1
+ * @tc.type: FUNC
+*/
+HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, Function | SmallTest | Level1)
+{
+    const std::string *bundleName = new string;
+    bool result = SessionPermission::IsSameBundleNameAsCalling(*bundleName);
+    ASSERT_EQ(false, result);
+}
+
+/**
  * @tc.name: VerifySessionPermission
  * @tc.desc: test function : VerifySessionPermission
  * @tc.type: FUNC

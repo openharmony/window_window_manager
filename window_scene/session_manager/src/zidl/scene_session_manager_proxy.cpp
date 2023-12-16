@@ -1304,4 +1304,34 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    WLOGFD("run SceneSessionManagerProxy::ShiftAppWindowFocus");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteUint32(sourcePersistentId)) {
+        WLOGFE("Write sourcePersistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteUint32(targetPersistentId)) {
+        WLOGFE("Write targetPersistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

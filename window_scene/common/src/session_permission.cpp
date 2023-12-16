@@ -112,7 +112,7 @@ bool SessionPermission::IsSACalling()
     return false;
 }
 
-bool SessionPermission::VerifyCallingPermission(const std::string &permissionName)
+bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
     WLOGFI("VerifyCallingPermission permission %{public}s", permissionName.c_str());
     auto callerToken = IPCSkeleton::GetCallingTokenID();
@@ -208,6 +208,31 @@ bool SessionPermission::IsStartedByInputMethod()
             return (extensionInfo.type == AppExecFwk::ExtensionAbilityType::INPUTMETHOD);
         });
     return extensionInfo != bundleInfo.extensionInfos.end() && extensionInfo->bundleName == inputMethodBundleName;
+}
+
+bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
+{
+    if (bundleName == "") {
+        return false;
+    }
+    auto bundleManagerServiceProxy_ = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy_) {
+        WLOGFE("failed to get BundleManagerServiceProxy");
+        return false;
+    }
+    int uid = IPCSkeleton::GetCallingUid();
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string callingBundleName;
+    bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
+    if (callingBundleName == bundleName) {
+        WLOGFI("verify bundle name success");
+        return true;
+    } else {
+        WLOGFE("verify bundle name failed, calling bundle name is %{public}s, but window bundle name is %{public}s",
+            callingBundleName.c_str(), bundleName.c_str());
+        return false;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
