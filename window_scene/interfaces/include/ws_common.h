@@ -186,6 +186,8 @@ struct SessionInfo {
     bool isClearSession = false;
     std::string sessionAffinity;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    SessionState sessionState_ = SessionState::STATE_DISCONNECT;
+    uint32_t requestOrientation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {

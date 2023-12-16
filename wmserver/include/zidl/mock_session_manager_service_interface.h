@@ -28,9 +28,19 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockSessionManager");
     enum class MockSessionManagerServiceMessage : uint32_t {
         TRANS_ID_GET_SESSION_MANAGER_SERVICE,
+        TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE,
+        TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER,
+        TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER,
     };
 
     virtual sptr<IRemoteObject> GetSessionManagerService() = 0;
+
+    virtual void NotifySceneBoardAvailable() = 0;
+
+    virtual void RegisterSessionManagerServiceRecoverListener(
+        int64_t pid, const sptr<IRemoteObject>& listener) = 0;
+
+    virtual void UnRegisterSessionManagerServiceRecoverListener(int64_t pid) = 0;
 };
 }
 }

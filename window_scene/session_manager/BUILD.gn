@@ -111,7 +111,6 @@ ohos_shared_library("scene_session_manager") {
     "config_policy:configpolicy_util",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
-    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
@@ -275,7 +274,10 @@ ohos_shared_library("session_manager") {
 
   public_configs = [ ":session_manager_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/common:window_scene_common",
+  ]
 
   external_deps = [
     "ability_base:session_info",

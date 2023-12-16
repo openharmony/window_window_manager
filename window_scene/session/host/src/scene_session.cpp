@@ -94,6 +94,28 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
     return PostSyncTask(task, "Connect");
 }
 
+WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+{
+    pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
+    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
+    return PostSyncTask(
+        [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
+            auto session = weakThis.promote();
+            if (!session) {
+                WLOGFE("session is null");
+                return WSError::WS_ERROR_DESTROYED_OBJECT;
+            }
+            auto ret = session->Session::Reconnect(
+                sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
+            if (ret != WSError::WS_OK) {
+                return ret;
+            }
+            return ret;
+        });
+}
+
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
     // return when screen is locked and show without ShowWhenLocked flag
