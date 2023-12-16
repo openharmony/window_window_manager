@@ -17,15 +17,15 @@ const curves = requireNativeModule('ohos.curves');
 const PiPWindow = requireNapi('PiPWindow');
 const pip = requireNapi('pip');
 
-const TAG = "PiPCall";
+const TAG = "PiPVideo";
 const TIMEOUT = 3e3;
 
-export class PiPCall extends ViewPU {
+export class PiPVideo extends ViewPU {
     constructor(e, t, o, i = -1, n = void 0) {
         super(e, o, i);
         "function" == typeof n && (this.paramsGenerator_ = n);
         this.xComponentId = "pip";
-        this.windowType = PiPWindow.PiPTemplateType.VIDEO_CALL;
+        this.windowType = PiPWindow.PiPTemplateType.VIDEO_PLAY;
         this.hideEventId = -1;
         this.__showControl = new ObservedPropertySimplePU(!1, this, "showControl");
         this.xComponentController = new XComponentController;
@@ -183,7 +183,7 @@ export class PiPCall extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             if (t) {
                 let t = () => ({});
-                ViewPU.create(new CallControl(this, {}, void 0, e, t))
+                ViewPU.create(new VideoControl(this, {}, void 0, e, t))
             } else this.updateStateVarsOfChildByElmtId(e, {})
         }), null);
         RelativeContainer.pop();
@@ -319,102 +319,64 @@ class DefaultControl extends ViewPU {
     }
 }
 
-const sizeArray = [1, 1.5];
-
-class CallControl extends ViewPU {
+class VideoControl extends ViewPU {
     constructor(e, t, o, i = -1, n = void 0) {
         super(e, o, i);
         "function" == typeof n && (this.paramsGenerator_ = n);
-        this.__isMute = new ObservedPropertySimplePU(!0, this, "isMute");
-        this.__isRecord = new ObservedPropertySimplePU(!0, this, "isRecord");
-        this.__defaultMargin = new ObservedPropertySimplePU(8, this, "defaultMargin");
-        this.__defaultSize = new ObservedPropertySimplePU(12, this, "defaultSize");
-        this.__defaultBigSize = new ObservedPropertySimplePU(24, this, "defaultBigSize");
-        this.__sizeIndex = new ObservedPropertySimplePU(0, this, "sizeIndex");
+        this.__isPlaying = new ObservedPropertySimplePU(!0, this, "isPlaying");
+        this.__shouldShowNextAndPrev = new ObservedPropertySimplePU(!0, this, "shouldShowNextAndPrev");
+        this.__horMargin = new ObservedPropertySimplePU(12, this, "horMargin");
         this.__hideControlDelay = this.initializeConsume("hideControlDelay", "hideControlDelay");
         this.setInitiallyProvidedValue(t)
     }
 
     setInitiallyProvidedValue(e) {
-        void 0 !== e.isMute && (this.isMute = e.isMute);
-        void 0 !== e.isRecord && (this.isRecord = e.isRecord);
-        void 0 !== e.defaultMargin && (this.defaultMargin = e.defaultMargin);
-        void 0 !== e.defaultSize && (this.defaultSize = e.defaultSize);
-        void 0 !== e.defaultBigSize && (this.defaultBigSize = e.defaultBigSize);
-        void 0 !== e.sizeIndex && (this.sizeIndex = e.sizeIndex)
+        void 0 !== e.isPlaying && (this.isPlaying = e.isPlaying);
+        void 0 !== e.shouldShowNextAndPrev && (this.shouldShowNextAndPrev = e.shouldShowNextAndPrev);
+        void 0 !== e.horMargin && (this.horMargin = e.horMargin)
     }
 
     updateStateVars(e) {
     }
 
     purgeVariableDependenciesOnElmtId(e) {
-        this.__isMute.purgeDependencyOnElmtId(e);
-        this.__isRecord.purgeDependencyOnElmtId(e);
-        this.__defaultMargin.purgeDependencyOnElmtId(e);
-        this.__defaultSize.purgeDependencyOnElmtId(e);
-        this.__defaultBigSize.purgeDependencyOnElmtId(e);
-        this.__sizeIndex.purgeDependencyOnElmtId(e);
+        this.__isPlaying.purgeDependencyOnElmtId(e);
+        this.__shouldShowNextAndPrev.purgeDependencyOnElmtId(e);
+        this.__horMargin.purgeDependencyOnElmtId(e);
         this.__hideControlDelay.purgeDependencyOnElmtId(e)
     }
 
     aboutToBeDeleted() {
-        this.__isMute.aboutToBeDeleted();
-        this.__isRecord.aboutToBeDeleted();
-        this.__defaultMargin.aboutToBeDeleted();
-        this.__defaultSize.aboutToBeDeleted();
-        this.__defaultBigSize.aboutToBeDeleted();
-        this.__sizeIndex.aboutToBeDeleted();
+        this.__isPlaying.aboutToBeDeleted();
+        this.__shouldShowNextAndPrev.aboutToBeDeleted();
+        this.__horMargin.aboutToBeDeleted();
         this.__hideControlDelay.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
 
-    get isMute() {
-        return this.__isMute.get()
+    get isPlaying() {
+        return this.__isPlaying.get()
     }
 
-    set isMute(e) {
-        this.__isMute.set(e)
+    set isPlaying(e) {
+        this.__isPlaying.set(e)
     }
 
-    get isRecord() {
-        return this.__isRecord.get()
+    get shouldShowNextAndPrev() {
+        return this.__shouldShowNextAndPrev.get()
     }
 
-    set isRecord(e) {
-        this.__isRecord.set(e)
+    set shouldShowNextAndPrev(e) {
+        this.__shouldShowNextAndPrev.set(e)
     }
 
-    get defaultMargin() {
-        return this.__defaultMargin.get()
+    get horMargin() {
+        return this.__horMargin.get()
     }
 
-    set defaultMargin(e) {
-        this.__defaultMargin.set(e)
-    }
-
-    get defaultSize() {
-        return this.__defaultSize.get()
-    }
-
-    set defaultSize(e) {
-        this.__defaultSize.set(e)
-    }
-
-    get defaultBigSize() {
-        return this.__defaultBigSize.get()
-    }
-
-    set defaultBigSize(e) {
-        this.__defaultBigSize.set(e)
-    }
-
-    get sizeIndex() {
-        return this.__sizeIndex.get()
-    }
-
-    set sizeIndex(e) {
-        this.__sizeIndex.set(e)
+    set horMargin(e) {
+        this.__horMargin.set(e)
     }
 
     get hideControlDelay() {
@@ -430,51 +392,54 @@ class CallControl extends ViewPU {
             RelativeContainer.create();
             RelativeContainer.width("100%");
             RelativeContainer.height(48);
+            RelativeContainer.linearGradient({ angle: 0, colors: [["#30000000", 0], ["#00000000", 1]] });
             RelativeContainer.onAreaChange(((e, t) => {
-                e.width != t.width && (this.sizeIndex = t.width >= 150 ? 1 : 0)
+                if (t.width < 104) this.shouldShowNextAndPrev = !1; else if (t.width < 152) {
+                    this.horMargin = (t.width - 104) / 4;
+                    this.shouldShowNextAndPrev = !0
+                } else {
+                    this.horMargin = 12;
+                    this.shouldShowNextAndPrev = !0
+                }
             }));
             RelativeContainer.alignRules({
                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom },
                 left: { anchor: "__container__", align: HorizontalAlign.Start }
             });
-            RelativeContainer.id("call_control")
+            RelativeContainer.id("video_control")
         }), RelativeContainer);
         this.observeComponentCreation2(((e, t) => {
             Button.createWithChild({ type: ButtonType.Circle });
-            Button.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_handup"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Button.size({ width: 24 * sizeArray[this.sizeIndex], height: 24 * sizeArray[this.sizeIndex] });
-            Button.margin({
-                left: 8 * sizeArray[this.sizeIndex],
-                right: 8 * sizeArray[this.sizeIndex],
-                top: 12,
-                bottom: 12
-            });
+            Button.backgroundColor("#00FFFFFF");
+            Button.size({ width: 24, height: 24 });
+            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
             Button.alignRules({
-                bottom: { anchor: "__container__", align: VerticalAlign.Bottom },
+                center: { anchor: "__container__", align: VerticalAlign.Center },
                 middle: { anchor: "__container__", align: HorizontalAlign.Center }
             });
-            Button.id("control_hangup");
+            Button.id("control_play");
+            Button.responseRegion({ x: "-50%", y: "-50%", width: "200%", height: "200%" });
             Button.onClick((() => {
+                this.isPlaying = !this.isPlaying;
                 this.hideControlDelay = !0;
-                pip.triggerAction("hangUp");
-                console.debug(TAG, "action: hangup")
+                pip.triggerAction("playbackStateChanged");
+                console.debug(TAG, "action: play or pause")
             }))
         }), Button);
         this.observeComponentCreation2(((e, t) => {
-            Image.create({
+            Image.create(this.isPlaying ? {
                 id: -1,
                 type: 2e4,
-                params: ["sys.media.ohos_ic_public_hang_up"],
+                params: ["sys.media.ohos_ic_public_pause"],
+                bundleName: "",
+                moduleName: ""
+            } : {
+                id: -1,
+                type: 2e4,
+                params: ["sys.media.ohos_ic_public_play"],
                 bundleName: "",
                 moduleName: ""
             });
-            Image.size({ width: 12 * sizeArray[this.sizeIndex], height: 12 * sizeArray[this.sizeIndex] });
             Image.fillColor({
                 id: -1,
                 type: 10001,
@@ -487,45 +452,34 @@ class CallControl extends ViewPU {
         Button.pop();
         this.observeComponentCreation2(((e, t) => {
             Button.createWithChild({ type: ButtonType.Circle });
-            Button.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_floating_button_icon"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Button.size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] });
+            Button.backgroundColor("#00FFFFFF");
+            Button.size({ width: 24, height: 24 });
+            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
+            Button.visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None);
             Button.alignRules({
-                center: { anchor: "control_hangup", align: VerticalAlign.Center },
-                right: { anchor: "control_hangup", align: HorizontalAlign.Start }
+                center: { anchor: "__container__", align: VerticalAlign.Center },
+                right: { anchor: "control_play", align: HorizontalAlign.Start }
             });
-            Button.id("control_mute");
+            Button.id("control_play_last");
+            Button.responseRegion({ x: "-50%", y: "-50%", width: "200%", height: "200%" });
             Button.onClick((() => {
                 this.hideControlDelay = !0;
-                this.isMute = !this.isMute;
-                pip.triggerAction("micStateChanged");
-                console.debug(TAG, "action: mic enable or disable")
+                pip.triggerAction("previousVideo");
+                console.debug(TAG, "action: play last")
             }))
         }), Button);
         this.observeComponentCreation2(((e, t) => {
-            Image.create(this.isMute ? {
+            Image.create({
                 id: -1,
                 type: 2e4,
-                params: ["sys.media.ohos_ic_public_voice"],
-                bundleName: "",
-                moduleName: ""
-            } : {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_voice_off"],
+                params: ["sys.media.ohos_ic_public_play_last"],
                 bundleName: "",
                 moduleName: ""
             });
-            Image.size({ width: 8 * sizeArray[this.sizeIndex], height: 8 * sizeArray[this.sizeIndex] });
             Image.fillColor({
                 id: -1,
                 type: 10001,
-                params: ["sys.color.ohos_id_color_primary"],
+                params: ["sys.color.ohos_id_color_primary_contrary"],
                 bundleName: "",
                 moduleName: ""
             });
@@ -534,45 +488,34 @@ class CallControl extends ViewPU {
         Button.pop();
         this.observeComponentCreation2(((e, t) => {
             Button.createWithChild({ type: ButtonType.Circle });
-            Button.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_floating_button_icon"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Button.size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] });
+            Button.backgroundColor("#00FFFFFF");
+            Button.size({ width: 24, height: 24 });
+            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
+            Button.visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None);
             Button.alignRules({
-                center: { anchor: "control_hangup", align: VerticalAlign.Center },
-                left: { anchor: "control_hangup", align: HorizontalAlign.End }
+                center: { anchor: "__container__", align: VerticalAlign.Center },
+                left: { anchor: "control_play", align: HorizontalAlign.End }
             });
-            Button.id("control_record");
+            Button.id("control_play_next");
+            Button.responseRegion({ x: "-50%", y: "-50%", width: "200%", height: "200%" });
             Button.onClick((() => {
                 this.hideControlDelay = !0;
-                this.isRecord = !this.isRecord;
-                pip.triggerAction("videoStateChanged");
-                console.debug(TAG, "action: video enable or disable")
+                pip.triggerAction("nextVideo");
+                console.debug(TAG, "action: play next")
             }))
         }), Button);
         this.observeComponentCreation2(((e, t) => {
-            Image.create(this.isRecord ? {
+            Image.create({
                 id: -1,
                 type: 2e4,
-                params: ["sys.media.ohos_ic_public_video"],
-                bundleName: "",
-                moduleName: ""
-            } : {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_video_off"],
+                params: ["sys.media.ohos_ic_public_play_next"],
                 bundleName: "",
                 moduleName: ""
             });
-            Image.size({ width: 8 * sizeArray[this.sizeIndex], height: 8 * sizeArray[this.sizeIndex] });
             Image.fillColor({
                 id: -1,
                 type: 10001,
-                params: ["sys.color.ohos_id_color_primary"],
+                params: ["sys.color.ohos_id_color_primary_contrary"],
                 bundleName: "",
                 moduleName: ""
             });
@@ -588,5 +531,5 @@ class CallControl extends ViewPU {
 }
 
 ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
-loadDocument(new PiPCall(void 0, {}));
+loadDocument(new PiPVideo(void 0, {}));
 ViewStackProcessor.StopGetAccessRecording();
