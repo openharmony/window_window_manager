@@ -1145,7 +1145,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             return ret;
         }
     }
-        uiContent_->WatchContainerModalButtonsRect([this](Rect& decorRect, Rect& titleButtonLeftRect) {
+        uiContent_->SubscribeContainerModalButtonsRectChange([this](Rect& decorRect, Rect& titleButtonLeftRect) {
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
             titleButtonRect.posY_ = titleButtonLeftRect.posY_;
@@ -1175,7 +1175,7 @@ WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
             return ret;
         }
     }
-    uiContent_->WatchContainerModalButtonsRect(nullptr);
+    uiContent_->SubscribeContainerModalButtonsRectChange(nullptr);
     return ret;
 }
 
