@@ -65,6 +65,7 @@ public:
     static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
     static napi_value ReportData(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
@@ -100,6 +101,7 @@ private:
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
+    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
@@ -109,11 +111,13 @@ private:
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
+    void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnShiftFocus(int32_t persistentId);
     void OnShowPiPMainWindow(int32_t persistentId);
     void OnCallingWindowIdChange(const uint32_t callingWindowId);
     void ProcessCreateSystemSessionRegister();
+    void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();

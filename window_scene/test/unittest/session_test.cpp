@@ -351,6 +351,38 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Reconnect01
+ * @tc.desc: check func Reconnect01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Reconnect01, Function | SmallTest | Level2)
+{
+    auto surfaceNode = CreateRSSurfaceNode();
+    SystemSessionConfig systemConfig;
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Reconnect(nullptr, nullptr, nullptr, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    result = session_->Reconnect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    EXPECT_NE(nullptr, testWindowEventChannel);
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    result = session_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: Foreground01
  * @tc.desc: check func Foreground
  * @tc.type: FUNC
