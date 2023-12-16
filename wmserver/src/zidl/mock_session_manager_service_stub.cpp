@@ -32,10 +32,26 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
         return -1;
     }
     auto msgId = static_cast<MockSessionManagerServiceMessage>(code);
+    WLOGFI("Receive MockSessionManagerServiceMessage = %{public}u", msgId);
     switch (msgId) {
         case MockSessionManagerServiceMessage::TRANS_ID_GET_SESSION_MANAGER_SERVICE: {
             sptr<IRemoteObject> remoteObject = GetSessionManagerService();
             reply.WriteRemoteObject(remoteObject);
+            break;
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE: {
+            NotifySceneBoardAvailable();
+            break;
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER: {
+            auto pid = data.ReadInt64();
+            sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+            RegisterSessionManagerServiceRecoverListener(pid, listenerObject);
+            break;
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER: {
+            auto pid = data.ReadInt64();
+            UnRegisterSessionManagerServiceRecoverListener(pid);
             break;
         }
         case MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER: {

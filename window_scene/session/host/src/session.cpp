@@ -700,6 +700,43 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     return WSError::WS_OK;
 }
 
+WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+{
+    if (property == nullptr) {
+        WLOGFE("[RECOVER]property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFI("[RECOVER]Reconnect session with: persistentId=%{public}d, windowState=%{public}u",
+        property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()));
+    if (sessionStage == nullptr || eventChannel == nullptr) {
+        WLOGFE("[RECOVER]session stage or eventChannel is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_ = sessionStage;
+    surfaceNode_ = surfaceNode;
+    windowEventChannel_ = eventChannel;
+    abilityToken_ = token;
+    systemConfig = systemConfig_;
+    SetSessionProperty(property);
+    persistentId_ = property->GetPersistentId();
+    callingPid_ = pid;
+    callingUid_ = uid;
+    WindowState windowState = property->GetWindowState();
+    if (windowState == WindowState::STATE_SHOWN) {
+        isActive_ = true;
+        UpdateSessionState(SessionState::STATE_ACTIVE);
+    } else {
+        isActive_ = false;
+        UpdateSessionState(SessionState::STATE_BACKGROUND);
+    }
+    bufferAvailable_ = true;
+    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
+    return WSError::WS_OK;
+}
+
 WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     HandleDialogForeground();
@@ -1481,7 +1518,8 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 
 std::shared_ptr<Media::PixelMap> Session::Snapshot() const
 {
-    if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
+    if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
+        WLOGFE("surfaceNode_ is null or buffer is not available");
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
@@ -1507,6 +1545,15 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     sessionStateChangeFunc_ = func;
     NotifySessionStateChange(state_);
     WLOGFD("SetSessionStateChangeListenser, id: %{public}d", GetPersistentId());
+}
+
+void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
+{
+    bufferAvailableChangeFunc_ = func;
+    if (bufferAvailable_ && bufferAvailableChangeFunc_ != nullptr) {
+        bufferAvailableChangeFunc_(bufferAvailable_);
+    }
+    WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
 void Session::UnregisterSessionChangeListeners()
@@ -1932,6 +1979,10 @@ bool Session::GetShowRecent() const
 
 void Session::SetBufferAvailable(bool bufferAvailable)
 {
+    WLOGFI("SetBufferAvailable: %{public}d", bufferAvailable);
+    if (bufferAvailableChangeFunc_) {
+        bufferAvailableChangeFunc_(bufferAvailable);
+    }
     bufferAvailable_ = bufferAvailable;
 }
 
