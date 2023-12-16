@@ -542,6 +542,23 @@ HWTEST_F(WindowSessionImplTest, GetFloatingWindowParentId, Function | SmallTest 
 }
 
 /**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RecoverAndReconnectSceneSession start";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RecoverAndReconnectSceneSession");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RecoverAndReconnectSceneSession());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RecoverAndReconnectSceneSession end";
+}
+
+/**
  * @tc.name: UpdateDecorEnable
  * @tc.desc: UpdateDecorEnable
  * @tc.type: FUNC

@@ -48,6 +48,7 @@ constexpr int MIN_ARG_COUNT = 3;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
+const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
@@ -113,6 +114,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
     BindNativeFunction(env, exportObj, "updateSessionDisplayId", moduleName,
         JsSceneSessionManager::UpdateSessionDisplayId);
+    BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
+        JsSceneSessionManager::NotifySessionRecoverStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
@@ -126,6 +129,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
     listenerFunc_ = {
         { CREATE_SYSTEM_SESSION_CB,     &JsSceneSessionManager::ProcessCreateSystemSessionRegister },
+        { RECOVER_SCENE_SESSION_CB, &JsSceneSessionManager::ProcessRecoverSceneSessionRegister },
         { STATUS_BAR_ENABLED_CHANGE_CB, &JsSceneSessionManager::ProcessStatusBarEnabledChangeListener},
         { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
         { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
@@ -167,6 +171,48 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnCreateSystemSession");
+}
+
+void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& info)
+{
+    if (sceneSession == nullptr) {
+        WLOGFI("[NAPI]sceneSession is nullptr");
+        return;
+    }
+    WLOGFI("[NAPI]OnRecoverSceneSession");
+    auto iter = jsCbMap_.find(RECOVER_SCENE_SESSION_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    wptr<SceneSession> weakSession(sceneSession);
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    auto task = [this, weakSession, sessionInfo, jsCallBack, env = env_]() {
+        auto sceneSession = weakSession.promote();
+        if (sceneSession == nullptr) {
+            WLOGFE("[NAPI]sceneSession is nullptr");
+            return;
+        }
+        napi_value jsSceneSessionObj = JsSceneSession::Create(env, sceneSession);
+        if (jsSceneSessionObj == nullptr) {
+            WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
+            return;
+        }
+
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+        }
+
+        napi_value argv[] = { jsSceneSessionObj, jsSessionInfo };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    WLOGFI("[NAPI]OnRecoverSceneSession post task");
+    taskScheduler_->PostMainThreadTask(task);
 }
 
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
@@ -281,6 +327,15 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
+{
+    NotifyRecoverSceneSessionFunc func = [this](const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {
+        WLOGFD("[RECOVER]RecoverSceneSession");
+        this->OnRecoverSceneSession(session, sessionInfo);
+    };
+    SceneSessionManager::GetInstance().SetRecoverSceneSessionListener(func);
 }
 
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
@@ -571,6 +626,13 @@ napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, 
     WLOGI("[NAPI]NotifyAINavigationBarShowStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyAINavigationBarShowStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifySessionRecoverStatus(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]NotifySessionRecoverStatus");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifySessionRecoverStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::UpdateTitleInTargetPos(napi_env env, napi_callback_info info)
@@ -1724,6 +1786,49 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isRecovering;
+    if (!ConvertFromJsValue(env, argv[0], isRecovering)) {
+        WLOGFE("[NAPI]Failed to convert parameter to isRecovering");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WLOGFD("[NAPI]IsRecovering: %{public}u", isRecovering);
+    if (!isRecovering) {
+        // Sceneboard recover finished
+        if (argc != ARGC_TWO) {
+            WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                "Recovered persistentId List not received"));
+            return NapiGetUndefined(env);
+        }
+        // Recovered sessions persistentId list as second argument
+        std::vector<int32_t> recoveredPersistentIds;
+        if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
+            WLOGFE("[NAPI]Failed to convert recovered persistentId array");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+
+        SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    }
+    SceneSessionManager::GetInstance().SetEnableInputEvent(!isRecovering);
+
     return NapiGetUndefined(env);
 }
 

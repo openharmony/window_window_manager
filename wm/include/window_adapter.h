@@ -37,6 +37,7 @@ public:
 class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
+    using WindowAdapterRecoverCallbackFunc = std::function<void()>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
@@ -108,10 +109,16 @@ private:
     bool InitWMSProxy();
     bool InitSSMProxy();
 
+    void WindowManagerRecover();
+    void RegisterWindowManagerRecoverCallbackFunc();
+
     std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ { false };
+
+    bool recoverInitialized = false;
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
 };
 } // namespace Rosen
 } // namespace OHOS
