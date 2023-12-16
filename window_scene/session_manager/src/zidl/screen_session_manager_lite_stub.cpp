@@ -35,6 +35,11 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
     }
     ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
     switch (msgId) {
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
+            auto info = GetDefaultDisplayInfo();
+            reply.WriteParcelable(info);
+            break;
+        }
         case ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
@@ -47,6 +52,69 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = UnregisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_WAKE_UP_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(WakeUpBegin(reason));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_WAKE_UP_END: {
+            reply.WriteBool(WakeUpEnd());
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SUSPEND_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SuspendBegin(reason));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SUSPEND_END: {
+            reply.WriteBool(SuspendEnd());
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SET_DISPLAY_STATE: {
+            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+            reply.WriteBool(SetDisplayState(state));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_STATE: {
+            DisplayState state = GetDisplayState(data.ReadUint64());
+            reply.WriteUint32(static_cast<uint32_t>(state));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT: {
+            DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
+            NotifyDisplayEvent(event);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
+            DisplayId displayId = data.ReadUint64();
+            auto info = GetDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
+            ScreenId screenId = data.ReadUint64();
+            auto info = GetDisplayInfoByScreen(screenId);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            reply.WriteUInt64Vector(allDisplayIds);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
+            DMError ret = DisableDisplaySnapshot(data.ReadBool());
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_HAS_PRIVATE_WINDOW: {
+            DisplayId id = static_cast<DisplayId>(data.ReadUint64());
+            bool hasPrivateWindow = false;
+            DMError ret = HasPrivateWindow(id, hasPrivateWindow);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(hasPrivateWindow);
             break;
         }
         default:
