@@ -6257,7 +6257,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
-    const float scaleParam1)
+    const float scaleParam)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
