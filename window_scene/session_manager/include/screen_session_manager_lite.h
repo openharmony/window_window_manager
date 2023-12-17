@@ -39,19 +39,6 @@ public:
         DisplayManagerAgentType type) override;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
-    std::vector<DisplayId> GetAllDisplayIds() override;
-    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
-    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
-    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
-    DMError DisableDisplaySnapshot(bool disableOrNot) override;
-    bool WakeUpBegin(PowerStateChangeReason reason) override;
-    bool WakeUpEnd() override;
-    bool SuspendBegin(PowerStateChangeReason reason) override;
-    bool SuspendEnd() override;
-    bool SetDisplayState(DisplayState state) override;
-    DisplayState GetDisplayState(DisplayId displayId) override;
-    void NotifyDisplayEvent(DisplayEvent event) override;
 protected:
     ScreenSessionManagerLite() = default;
     virtual ~ScreenSessionManagerLite();
