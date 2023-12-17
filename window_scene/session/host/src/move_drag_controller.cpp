@@ -276,8 +276,8 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.targetRect_ = {
             moveDragProperty_.originalRect_.posX_ + offsetX,
             moveDragProperty_.originalRect_.posY_ + offsetY,
-            moveDragProperty_.originalRect_.width_,
-            moveDragProperty_.originalRect_.height_ };
+            originalRect.width_,
+            originalRect.height_};
         WLOGFD("move rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             moveDragProperty_.targetRect_.posX_, moveDragProperty_.targetRect_.posY_,
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);

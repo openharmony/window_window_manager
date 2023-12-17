@@ -83,6 +83,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
 
     return objValue;
 }
@@ -620,7 +622,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         }
         std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
         if (!std::regex_match(colorStr, pattern)) {
-            WLOGFE("Invalid color input");
+            WLOGFD("Invalid color input");
             return defaultColor;
         }
         std::string color = colorStr.substr(1);
@@ -727,6 +729,22 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
     napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
+    return objValue;
+}
+
+napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert titleButtonRect to jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "right", CreateJsValue(env, titleButtonRect.posX_));
+    napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, titleButtonRect.width_));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, titleButtonRect.height_));
     return objValue;
 }
 

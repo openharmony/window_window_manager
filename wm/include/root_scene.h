@@ -45,6 +45,7 @@ public:
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
+    void FlushFrameRate(uint32_t rate) override;
 
     void OnBundleUpdated(const std::string& bundleName);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);

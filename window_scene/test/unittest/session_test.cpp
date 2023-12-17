@@ -128,6 +128,12 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    WSError TransferSearchElementInfo(bool isChannelNull);
+    WSError TransferSearchElementInfosByText(bool isChannelNull);
+    WSError TransferFindFocusedElementInfo(bool isChannelNull);
+    WSError TransferFocusMoveSearch(bool isChannelNull);
+    WSError TransferExecuteAction(bool isChannelNull);
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
@@ -163,6 +169,77 @@ RSSurfaceNode::SharedPtr WindowSessionTest::CreateRSSurfaceNode()
     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
     return surfaceNode;
+}
+
+
+WSError WindowSessionTest::TransferSearchElementInfo(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t mode = 0;
+    int32_t baseParent = 0;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    if (isChannelNull) {
+        return session_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+    } else {
+        session_->windowEventChannel_ = new TestWindowEventChannel();
+        return session_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+    }
+}
+
+WSError WindowSessionTest::TransferSearchElementInfosByText(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    std::string text;
+    int32_t baseParent = 0;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    if (isChannelNull) {
+        return session_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+    } else {
+        session_->windowEventChannel_ = new TestWindowEventChannel();
+        return session_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+    }
+}
+
+WSError WindowSessionTest::TransferFindFocusedElementInfo(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t focusType = 0;
+    int32_t baseParent = 0;
+    Accessibility::AccessibilityElementInfo info;
+    if (isChannelNull) {
+        return session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+    } else {
+        session_->windowEventChannel_ = new TestWindowEventChannel();
+        return session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+    }
+}
+
+WSError WindowSessionTest::TransferFocusMoveSearch(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    int32_t direction = 0;
+    int32_t baseParent = 0;
+    Accessibility::AccessibilityElementInfo info;
+    if (isChannelNull) {
+        return session_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
+    } else {
+        session_->windowEventChannel_ = new TestWindowEventChannel();
+        return session_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
+    }
+}
+
+WSError WindowSessionTest::TransferExecuteAction(bool isChannelNull)
+{
+    int32_t elementId = 0;
+    std::map<std::string, std::string> actionArguments;
+    int32_t action = 0;
+    int32_t baseParent = 0;
+    if (isChannelNull) {
+        return session_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+    } else {
+        session_->windowEventChannel_ = new TestWindowEventChannel();
+        return session_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+    }
 }
 
 namespace {
@@ -270,6 +347,38 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
     result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Reconnect01
+ * @tc.desc: check func Reconnect01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Reconnect01, Function | SmallTest | Level2)
+{
+    auto surfaceNode = CreateRSSurfaceNode();
+    SystemSessionConfig systemConfig;
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Reconnect(nullptr, nullptr, nullptr, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    result = session_->Reconnect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    EXPECT_NE(nullptr, testWindowEventChannel);
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    result = session_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, systemConfig, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1972,6 +2081,116 @@ HWTEST_F(WindowSessionTest, NotifyForegroundInteractiveStatus, Function | SmallT
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
+
+/**
+ * @tc.name: TransferSearchElementInfo01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfo(false));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfo02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfo(true));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfosByText(false));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfosByText(true));
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferFindFocusedElementInfo(false));
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFindFocusedElementInfo(true));
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferFocusMoveSearch(false));
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFocusMoveSearch(true));
+}
+
+/**
+ * @tc.name: TransferExecuteAction01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferExecuteAction01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferExecuteAction(false));
+}
+
+/**
+ * @tc.name: TransferExecuteAction02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferExecuteAction02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferExecuteAction(true));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

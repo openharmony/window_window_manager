@@ -458,8 +458,8 @@ HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Le
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
-    std::vector<int32_t> uiExtensionIdLevelVec;
-    WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevelVec);
+    int32_t uiExtensionIdLevel = 0;
+    WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent end";

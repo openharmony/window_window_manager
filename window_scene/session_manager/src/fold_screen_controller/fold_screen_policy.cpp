@@ -26,4 +26,11 @@ FoldStatus FoldScreenPolicy::GetFoldStatus() { return FoldStatus::UNKNOWN; }
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
 sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; }
+
+void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
+{
+    onBootAnimation_ = onBootAnimation;
+}
+
+void FoldScreenPolicy::UpdateForPhyScreenPropertyChange() {}
 } // namespace OHOS::Rosen

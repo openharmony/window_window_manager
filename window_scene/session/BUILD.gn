@@ -33,8 +33,8 @@ config("session_public_config") {
     "${multimodalinput_path}/input/util/common/include",
 
     #for element
+    "${accessibility_path}/common/interface/include/parcel",
     "${accessibility_path}/interfaces/innerkits/common/include",
-    "${window_base_path}/window_scene/session/container/include/parcel/",
   ]
 }
 
@@ -46,8 +46,6 @@ ohos_shared_library("scene_session") {
     debug = false
   }
   sources = [
-    "container/src/parcel/accessibility_element_info_parcel.cpp",
-    "container/src/parcel/accessibility_event_info_parcel.cpp",
     "container/src/window_event_channel.cpp",
     "container/src/zidl/session_stage_proxy.cpp",
     "container/src/zidl/session_stage_stub.cpp",
@@ -85,6 +83,7 @@ ohos_shared_library("scene_session") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_start_setting",
+    "accessibility:accessibility_interface",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",

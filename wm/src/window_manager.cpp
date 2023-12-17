@@ -778,22 +778,6 @@ void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
     pImpl_->NotifyGestureNavigationEnabledResult(enable);
 }
 
-
-void WindowManager::OnRemoteDied()
-{
-    WLOGI("wms is died");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (destroyed_) {
-        WLOGE("Already destroyed");
-        return;
-    }
-    pImpl_->focusChangedListenerAgent_ = nullptr;
-    pImpl_->systemBarChangedListenerAgent_ = nullptr;
-    pImpl_->windowUpdateListenerAgent_ = nullptr;
-    pImpl_->windowVisibilityListenerAgent_ = nullptr;
-    pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
-}
-
 WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().RaiseWindowToTop(persistentId);
@@ -852,6 +836,15 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
         if (ret == WMError::WM_OK) {
             pImpl_->windowDrawingContentListenerAgent_ = nullptr;
         }
+    }
+    return ret;
+}
+
+WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("shift application window focus failed");
     }
     return ret;
 }

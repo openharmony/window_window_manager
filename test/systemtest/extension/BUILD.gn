@@ -17,7 +17,10 @@ module_out_path = "window_manager/extension"
 
 group("systemtest") {
   testonly = true
-  deps = [ ":window_extension_connection_test" ]
+  deps = [
+    ":modal_system_ui_extension_test",
+    ":window_extension_connection_test",
+  ]
 }
 
 config("we_systemtest_common_public_config") {
@@ -26,6 +29,34 @@ config("we_systemtest_common_public_config") {
     "../../../interfaces/innerkits/extension",
     "../../../interfaces/innerkits/wm",
     "//third_party/googletest/googlemock/include",
+  ]
+}
+
+ohos_systemtest("modal_system_ui_extension_test") {
+  module_out_path = module_out_path
+
+  sources = [ "modal_system_ui_extension_test.cpp" ]
+
+  public_configs = [
+    ":we_systemtest_common_public_config",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
+  ]
+
+  public_deps = [
+    "../../../extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
   ]
 }
 

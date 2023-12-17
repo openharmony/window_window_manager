@@ -53,8 +53,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     option->SetContext(static_cast<void*>(context));
     std::string navigationId = "nav_id";
     option->SetNavigationId(navigationId);
-    std::shared_ptr<XComponentController> xComponentController;
-    startPos += GetObject(xComponentController, data + startPos, size - startPos);
+    std::shared_ptr<XComponentController> xComponentController = nullptr;
     option->SetXComponentController(xComponentController);
     uint32_t templateType = 0;
     startPos += GetObject<uint32_t>(templateType, data + startPos, size - startPos);
@@ -68,7 +67,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     startPos += GetObject(windowId, data + startPos, size - startPos);
     napi_env env = nullptr;
     startPos += GetObject(env, data + startPos, size - startPos);
-    sptr<PictureInPictureController> controller = new PictureInPictureController(option, windowId, env);
+    sptr<Window> window = new Window();
+    sptr<PictureInPictureController> controller = new PictureInPictureController(option, window, windowId, env);
     if (controller == nullptr) {
         return false;
     }

@@ -58,6 +58,7 @@ HWTEST_F(TimerManagerTest, Init, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::Init start";
     TimerManager* timermanager = new TimerManager();
     timermanager->Init();
+    timermanager->Init();
     int32_t res = timermanager->RemoveTimer(0);
     ASSERT_EQ(-1, res);
     GTEST_LOG_(INFO) << "TimerManagerTest::Init end";

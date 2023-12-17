@@ -1637,6 +1637,24 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: check func RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: ConfigStartingWindowAnimation
  * @tc.desc: SceneSesionManager config start window animation
  * @tc.type: FUNC
@@ -2341,6 +2359,30 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest |
 }
 
 /**
+ * @tc.name: HandleUpdateProperty03
+ * @tc.desc: SceneSesionManager handle update property
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty03, Function | SmallTest | Level3)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSPropertyChangeAction action;
+    action = WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    delete scensession;
+    delete property;
+}
+
+/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
@@ -2495,6 +2537,25 @@ HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level
     EXPECT_EQ(result02, WSError::WS_OK);
     WSError result03 = ssm_->RaiseWindowToTop(persistentId_);
     EXPECT_EQ(result03, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ShiftAppWindowFocus
+ * @tc.desc: SceneSesionManager shift app window focus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ShiftAppWindowFocus, Function | SmallTest | Level3)
+{
+    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
+    int32_t sourcePersistentId_ = INVALID_SESSION_ID;
+    int32_t targetPersistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
+    EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
+    targetPersistentId_ = 1;
+    sourcePersistentId_ = 1;
+    WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
+    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**

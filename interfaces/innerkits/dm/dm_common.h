@@ -313,6 +313,36 @@ enum class FoldDisplayMode: uint32_t {
     COORDINATION = 4,
 };
 
+enum class DisplayType : uint32_t {
+    DEFAULT = 0,
+};
+
+enum class ScreenCombination : uint32_t {
+    SCREEN_ALONE,
+    SCREEN_EXPAND,
+    SCREEN_MIRROR,
+    SCREEN_UNIQUE,
+};
+
+struct Point {
+    int32_t posX_;
+    int32_t posY_;
+    Point() : posX_(0), posY_(0) {};
+    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
+};
+
+struct SupportedScreenModes : public RefBase {
+    uint32_t id_;
+    uint32_t width_;
+    uint32_t height_;
+    uint32_t refreshRate_;
+};
+
+struct ExpandOption {
+    ScreenId screenId_;
+    uint32_t startX_;
+    uint32_t startY_;
+};
 
 /**
  * @brief displayRect

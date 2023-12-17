@@ -386,6 +386,20 @@ public:
 };
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
+/**
+ * @class IWindowTitleButtonRectChangedListener
+ *
+ * @brief Listener to observe event when window size or the height of title bar changed.
+ */
+class IWindowTitleButtonRectChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window size or the height of title bar changed.
+     * @param titleButtonRect An area of title buttons relative to the upper right corner of the window.
+     */
+    virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1153,6 +1167,20 @@ public:
         return WMError::WM_OK;
     }
     /**
+     * @brief set window ui content by abc
+     *
+     * @param abcPath abc path
+     * @param env
+     * @param storage
+     * @param ability
+     * @return WMError
+     */
+    virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    /**
      * @brief Get ui content info.
      *
      * @return UI content info.
@@ -1438,7 +1466,7 @@ public:
      * @param func Function to notify transfer component data.
     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) { return WMError::WM_OK; };
+        int32_t uiExtensionIdLevel) { return WMError::WM_OK; };
 
     /**
      * @brief Notify prepare to close window
@@ -1550,6 +1578,64 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetSingleFrameComposerEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the visibility of window decor.
+     *
+     * @param isVisible whether the window decor is visible.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set decor height of window.
+     *
+     * @param decorHeight Decor height of window
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get decor height of window.
+     *
+     * @return Decor height of window.
+     */
+    virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the title buttons area of window.
+     *
+     * @param titleButtonRect.
+     * @return WMError.
+    */
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window title buttons change listener.
+     *
+     * @param listener IWindowTitleButtonRectChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window title buttons change listener.
+     *
+     * @param listener IWindowTitleButtonRectChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
