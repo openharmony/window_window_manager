@@ -82,6 +82,8 @@ public:
     virtual bool SetDisplayState(DisplayState state) { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) {return DisplayState::UNKNOWN; }
     virtual void NotifyDisplayEvent(DisplayEvent event) {}
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) { return false; }
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS

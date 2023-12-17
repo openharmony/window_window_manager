@@ -177,6 +177,19 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/dm_lite:libdm_lite",
+            "header": {
+              "header_files": [
+                "display_lite.h",
+                "display_manager_lite.h",
+                "../dm/display_property.h",
+                "../dm/dm_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/dm_lite"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "header": {
               "header_files": [
