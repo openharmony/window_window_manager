@@ -6257,7 +6257,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
-    const float scaleParam)
+    const float scaleParam1)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -6274,7 +6274,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
             WLOGFE("session is nullptr");
             return pixelMap;
         }
-        
+
         if (scnSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             scnSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
             pixelMap = scnSession->Snapshot(scaleParam);
