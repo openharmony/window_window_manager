@@ -487,6 +487,8 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
         }
         abilitySessionInfos.emplace_back(*abilitySessionInfo);
     }
+    AAFwk::AbilityManagerClient::GetInstance()->UpdateSessionInfoBySCB(
+        abilitySessionInfos, SceneSessionManager::GetInstance().GetCurrentUserId());
 }
 
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
