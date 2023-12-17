@@ -69,21 +69,6 @@ public:
         DisplayManagerAgentType type) { return DMError::DM_OK; }
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) { return DMError::DM_OK; }
-    virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
-    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }
-    virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) {return nullptr; }
-    virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) { return DMError::DM_OK; }
-    virtual DMError DisableDisplaySnapshot(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
-    virtual bool WakeUpBegin(PowerStateChangeReason reason) { return false; }
-    virtual bool WakeUpEnd() { return false; }
-    virtual bool SuspendBegin(PowerStateChangeReason reason) { return false; }
-    virtual bool SuspendEnd() { return false; }
-    virtual bool SetDisplayState(DisplayState state) { return false; }
-    virtual DisplayState GetDisplayState(DisplayId displayId) {return DisplayState::UNKNOWN; }
-    virtual void NotifyDisplayEvent(DisplayEvent event) {}
-    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) { return false; }
-    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS
