@@ -27,6 +27,10 @@ public:
         IRemoteProxy<IMockSessionManagerInterface>(impl) {};
     ~MockSessionManagerServiceProxy() {};
     sptr<IRemoteObject> GetSessionManagerService() override;
+    void NotifySceneBoardAvailable() override;
+    void RegisterSessionManagerServiceRecoverListener(int64_t pid, const sptr<IRemoteObject>& listener) override;
+    void UnRegisterSessionManagerServiceRecoverListener(int64_t pid) override;
+    sptr<IRemoteObject> GetScreenSessionManagerLite() override;
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
 };

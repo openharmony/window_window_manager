@@ -18,6 +18,7 @@
 #include <transaction/rs_transaction.h>
 #include "accessibility_event_info.h"
 #include "window_manager_hilog.h"
+#include "window_impl.h"
 #include "native_engine.h"
 #include "window_extension_session_impl.h"
 #include "mock_uicontent.h"
@@ -378,10 +379,10 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
     sptr<WindowOption> option = new WindowOption();
     WindowExtensionSessionImpl windowExtensionSessionImpl(option);
     AccessibilityEventInfo info;
-    vector<int32_t> uiExtensionIdLevelVec;
+    int32_t uiExtensionIdLevel = 0;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-        windowExtensionSessionImpl.TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+        windowExtensionSessionImpl.TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
 }
 } // namespace Rosen

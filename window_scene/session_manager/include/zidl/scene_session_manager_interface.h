@@ -90,10 +90,16 @@ public:
         TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER,
         TRANS_ID_RAISE_WINDOW_TO_TOP,
         TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE,
+        TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION,
+		TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION,
         TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
+        TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
     };
 
+virtual WSError RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
@@ -135,6 +141,10 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     // interfaces of IWindowManager
+    virtual WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        SystemSessionConfig& systemConfig, sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) = 0;
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         uint32_t& windowId, sptr<IRemoteObject> token) override { return WMError::WM_OK; }
@@ -193,6 +203,10 @@ public:
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
     WSError RaiseWindowToTop(int32_t persistentId) override { return WSError::WS_OK; }
+    WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

@@ -32,6 +32,10 @@ constexpr uint32_t MAX_VECTOR_SIZE = 100;
 const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
         &SceneSessionManagerStub::HandleCreateAndConnectSpecificSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION),
+        &SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION),
+        &SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
@@ -124,6 +128,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
         &SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS),
+        &SceneSessionManagerStub::HandleShiftAppWindowFocus),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -179,6 +185,82 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
         return ERR_INVALID_STATE;
     }
     reply.WriteInt32(persistentId);
+    reply.WriteRemoteObject(sceneSession->AsObject());
+    reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("[RECOVER] run HandleCreateAndConnectSpecificSession!");
+    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
+    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
+    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
+        WLOGFE("[RECOVER] Failed to read scene session stage object or event channel object!");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+    }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
+
+    sptr<ISession> sceneSession;
+    auto ret = RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, sceneSession, token);
+    if (sceneSession== nullptr) {
+        return ERR_INVALID_STATE;
+    }
+    reply.WriteRemoteObject(sceneSession->AsObject());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleRecoverAndReconnectSceneSession!");
+    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
+    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
+    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
+        WLOGFE("Failed to read scene session stage object or event channel object!");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+    }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
+
+    sptr<ISession> sceneSession;
+    SystemSessionConfig systemConfig;
+    RecoverAndReconnectSceneSession(
+        sessionStage, eventChannel, surfaceNode, systemConfig, sceneSession, property, token);
+    if (sceneSession == nullptr) {
+        return ERR_INVALID_STATE;
+    }
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
@@ -687,6 +769,15 @@ int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(Message
     int32_t persistendId = data.ReadInt32();
     bool haveListener = data.ReadBool();
     WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t sourcePersistentId = data.ReadInt32();
+    int32_t targetPersistentId = data.ReadInt32();
+    const WSError& ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

@@ -19,6 +19,8 @@
 #include <optional>
 
 #include <common/rs_common_def.h>
+#include <filesystem>
+#include <fstream>
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -67,7 +69,19 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
-std::recursive_mutex WindowSessionImpl::globalMutex_;
+std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+    WindowSessionImpl::windowTitleButtonRectChangeListeners_;
+std::mutex WindowSessionImpl::lifeCycleListenerMutex_;
+std::mutex WindowSessionImpl::windowChangeListenerMutex_;
+std::mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
+std::mutex WindowSessionImpl::dialogDeathRecipientListenerMutex_;
+std::mutex WindowSessionImpl::dialogTargetTouchListenerMutex_;
+std::mutex WindowSessionImpl::occupiedAreaChangeListenerMutex_;
+std::mutex WindowSessionImpl::screenshotListenerMutex_;
+std::mutex WindowSessionImpl::touchOutsideListenerMutex_;
+std::mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
+std::mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
+std::mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -303,6 +317,25 @@ WMError WindowSessionImpl::Connect()
     return static_cast<WMError>(ret);
 }
 
+void WindowSessionImpl::RegisterSessionRecoverListener(std::function<void()> callbackFunc)
+{
+    auto persistentId = GetPersistentId();
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("[Recover] persistentId is invalid, session auto recover cannot be enable");
+        return;
+    }
+    SessionManager::GetInstance().RegisterSessionRecoverCallbackFunc(persistentId, callbackFunc);
+}
+
+void WindowSessionImpl::UnRegisterSessionRecoverListener()
+{
+    auto persistentId = GetPersistentId();
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("persistentId is invalid");
+        return;
+    }
+    SessionManager::GetInstance().UnRegisterSessionRecoverCallbackFunc(persistentId);
+}
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     WLOGFI("[WMSLife]Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{public}u",
@@ -356,7 +389,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     WLOGFI("[WMSLife]Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife]session is invalid");
+        WLOGFW("[WMSLife]session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (hostSession_ != nullptr) {
@@ -419,7 +452,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
-    WLOGFI("[WMSWinLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
+    WLOGFI("[WMSLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
         "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
@@ -510,6 +543,49 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+WMError WindowSessionImpl::RecoverAndReconnectSceneSession()
+{
+    SessionInfo info;
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.bundleName_ = property_->GetSessionInfo().bundleName_;
+    } else {
+        WLOGE("[RECOVER]property_ or context_ or abilityContext is null, recovered session failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetSessionInfo(info);
+    property_->SetWindowState(state_);
+    WLOGI(
+        "[RECOVER]Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
+        "abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, persistentId=%{public}d, windowState=%{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
+        info.persistentId_, state_);
+    sptr<ISessionStage> iSessionStage(this);
+    auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    sptr<Rosen::ISession> session;
+    auto ret = SessionManager::GetInstance().RecoverAndReconnectSceneSession(
+        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, session, property_, token);
+    if (session == nullptr) {
+        WLOGE("[RECOVER]session is null, recovered session failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (avoidAreaChangeListeners_.find(info.persistentId_) != avoidAreaChangeListeners_.end() &&
+        !avoidAreaChangeListeners_[info.persistentId_].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(info.persistentId_, true);
+    }
+    if (touchOutsideListeners_.find(info.persistentId_) != touchOutsideListeners_.end() &&
+        !touchOutsideListeners_[info.persistentId_].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(info.persistentId_, true);
+    }
+    WLOGI("[RECOVER]Recover and reconnect sceneSession successful");
+    hostSession_ = session;
+    return static_cast<WMError>(ret);
+}
+
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
@@ -536,7 +612,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is null!");
+        WLOGFW("uiContent_ is null!");
         return;
     }
     Ace::ViewportConfig config;
@@ -553,8 +629,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
-    WLOGFI("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], orientation: %{public}d",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+    WLOGFI("[WMSLayout] Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
+        "orientation: %{public}d", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
@@ -605,17 +681,24 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, isdistributed, false, ability);
+    return SetUIContentInner(contentInfo, env, storage,
+        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, false, true, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+}
+
+WMError WindowSessionImpl::SetUIContentByAbc(
+    const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability)
+    WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
     WLOGFD("[WMSLife]NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
@@ -631,12 +714,21 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         WLOGFE("[WMSLife]fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (isdistributed) {
-        uiContent->Restore(this, contentInfo, storage);
-    } else if (isLoadedByName) {
-        uiContent->InitializeByName(this, contentInfo, storage);
-    } else {
-        uiContent->Initialize(this, contentInfo, storage);
+    switch (type) {
+        default:
+        case WindowSetUIContentType::DEFAULT:
+            uiContent->Initialize(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::DISTRIBUTE:
+            uiContent->Restore(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::BY_NAME:
+            uiContent->InitializeByName(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::BY_ABC:
+            auto abcContent = GetAbcContent(contentInfo);
+            uiContent->Initialize(this, abcContent, storage);
+            break;
     }
     // make uiContent available after Initialize/Restore
     {
@@ -676,6 +768,35 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     WLOGFD("[WMSLife]notify uiContent window size change end");
     return WMError::WM_OK;
+}
+
+std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std::string& abcPath)
+{
+    std::filesystem::path abcFile { abcPath };
+    if (abcFile.empty() || !abcFile.is_absolute() || !std::filesystem::exists(abcFile)) {
+        WLOGFE("abc file path is not valid");
+        return nullptr;
+    }
+    int begin, end;
+    std::fstream file(abcFile, std::ios::in | std::ios::binary);
+    if (!file) {
+        WLOGFE("abc file is not valid");
+        return nullptr;
+    }
+    begin = file.tellg();
+    file.seekg(0, std::ios::end);
+    end = file.tellg();
+    size_t len = end - begin;
+    WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
+
+    if (len <= 0) {
+        WLOGFE("abc file size is 0");
+        return nullptr;
+    }
+    std::vector<uint8_t> abcBytes(len);
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char *>(abcBytes.data()), len);
+    return std::make_shared<std::vector<uint8_t>>(abcBytes);
 }
 
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
@@ -957,7 +1078,6 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(lifeCycleListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
@@ -965,7 +1085,6 @@ WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupi
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(occupiedAreaChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -973,7 +1092,6 @@ WMError WindowSessionImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccu
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(occupiedAreaChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -981,7 +1099,6 @@ WMError WindowSessionImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCyc
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::mutex> lockListener(lifeCycleListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
@@ -989,7 +1106,6 @@ WMError WindowSessionImpl::RegisterWindowChangeListener(const sptr<IWindowChange
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(windowChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(windowChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -997,7 +1113,6 @@ WMError WindowSessionImpl::UnregisterWindowChangeListener(const sptr<IWindowChan
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(windowChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(windowChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -1005,7 +1120,6 @@ WMError WindowSessionImpl::RegisterWindowStatusChangeListener(const sptr<IWindow
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(windowStatusChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -1013,20 +1127,148 @@ WMError WindowSessionImpl::UnregisterWindowStatusChangeListener(const sptr<IWind
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(windowStatusChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleVisible(isVisible, true);
+    WLOGI("Change the visibility of decor success");
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleHeight(decorHeight);
+    WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    height = uiContent_->GetContainerModalTitleHeight();
+    if (height == -1) {
+        WLOGFE("Get app window decor height failed");
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGI("Get app window decor height success, height : %{public}d", height);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    Rect decorRect;
+    Rect titleButtonLeftRect;
+    bool res = uiContent_->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
+    if (!res) {
+        WLOGFE("get window title buttons area failed");
+        titleButtonRect.IsUninitializedRect();
+        return WMError::WM_DO_NOTHING;
+    }
+    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+    titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+    titleButtonRect.width_ = titleButtonLeftRect.width_;
+    titleButtonRect.height_ = titleButtonLeftRect.height_;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("register the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+        uiContent_->SubscribeContainerModalButtonsRectChange([this](Rect& decorRect, Rect& titleButtonLeftRect) {
+            TitleButtonRect titleButtonRect;
+            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+            titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+            titleButtonRect.width_ = titleButtonLeftRect.width_;
+            titleButtonRect.height_ = titleButtonLeftRect.height_;
+            NotifyWindowTitleButtonRectChange(titleButtonRect);
+    });
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start unregister windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("unregister the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+    uiContent_->SubscribeContainerModalButtonsRectChange(nullptr);
+    return ret;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>> windowTitleButtonRectListeners;
+        for (auto& listener : windowTitleButtonRectChangeListeners_[GetPersistentId()]) {
+            windowTitleButtonRectListeners.push_back(listener);
+        }
+    return windowTitleButtonRectListeners;
+}
+
+void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect)
+{
+    std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    auto windowTitleButtonRectListeners = GetListeners<IWindowTitleButtonRectChangedListener>();
+    for (auto& listener : windowTitleButtonRectListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowTitleButtonRectChanged(titleButtonRect);
+        }
+    }
+}
 
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : lifecycleListeners_[GetPersistentId()]) {
-            lifecycleListeners.push_back(listener);
-        }
+    for (auto& listener : lifecycleListeners_[GetPersistentId()]) {
+        lifecycleListeners.push_back(listener);
     }
     return lifecycleListeners;
 }
@@ -1035,11 +1277,8 @@ template<typename T>
 EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : windowChangeListeners_[GetPersistentId()]) {
-            windowChangeListeners.push_back(listener);
-        }
+    for (auto& listener : windowChangeListeners_[GetPersistentId()]) {
+        windowChangeListeners.push_back(listener);
     }
     return windowChangeListeners;
 }
@@ -1048,11 +1287,8 @@ template<typename T>
 EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : occupiedAreaChangeListeners_[GetPersistentId()]) {
-            occupiedAreaChangeListeners.push_back(listener);
-        }
+    for (auto& listener : occupiedAreaChangeListeners_[GetPersistentId()]) {
+        occupiedAreaChangeListeners.push_back(listener);
     }
     return occupiedAreaChangeListeners;
 }
@@ -1096,25 +1332,46 @@ template<typename T>
 EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : windowStatusChangeListeners_[GetPersistentId()]) {
-            windowStatusChangeListeners.push_back(listener);
-        }
+    for (auto& listener : windowStatusChangeListeners_[GetPersistentId()]) {
+        windowStatusChangeListeners.push_back(listener);
     }
     return windowStatusChangeListeners;
 }
 
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    ClearUselessListeners(lifecycleListeners_, persistentId);
-    ClearUselessListeners(windowChangeListeners_, persistentId);
-    ClearUselessListeners(avoidAreaChangeListeners_, persistentId);
-    ClearUselessListeners(dialogDeathRecipientListeners_, persistentId);
-    ClearUselessListeners(dialogTargetTouchListener_, persistentId);
-    ClearUselessListeners(screenshotListeners_, persistentId);
-    ClearUselessListeners(windowStatusChangeListeners_, persistentId);
+    {
+        std::lock_guard<std::mutex> lockListener(lifeCycleListenerMutex_);
+        ClearUselessListeners(lifecycleListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowChangeListenerMutex_);
+        ClearUselessListeners(windowChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(avoidAreaChangeListenerMutex_);
+        ClearUselessListeners(avoidAreaChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(dialogDeathRecipientListenerMutex_);
+        ClearUselessListeners(dialogDeathRecipientListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(dialogTargetTouchListenerMutex_);
+        ClearUselessListeners(dialogTargetTouchListener_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(screenshotListenerMutex_);
+        ClearUselessListeners(screenshotListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
+        ClearUselessListeners(windowStatusChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
+    }
 }
 
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -1138,7 +1395,9 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
-    VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsUIExtensionWindow(GetType())) {
+        VsyncStation::GetInstance().SetFrameRateLinkerEnable(true);
+    }
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1151,7 +1410,9 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
-    VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsUIExtensionWindow(GetType())) {
+        VsyncStation::GetInstance().SetFrameRateLinkerEnable(false);
+    }
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
@@ -1319,7 +1580,6 @@ void WindowSessionImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogD
         return;
     }
     std::lock_guard<std::mutex> lockListener(dialogDeathRecipientListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     RegisterListener(dialogDeathRecipientListeners_[GetPersistentId()], listener);
 }
 
@@ -1327,7 +1587,6 @@ void WindowSessionImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialo
 {
     WLOGFD("Start unregister DialogDeathRecipientListener");
     std::lock_guard<std::mutex> lockListener(dialogDeathRecipientListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     UnregisterListener(dialogDeathRecipientListeners_[GetPersistentId()], listener);
 }
 
@@ -1339,7 +1598,6 @@ WMError WindowSessionImpl::RegisterDialogTargetTouchListener(const sptr<IDialogT
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::mutex> lockListener(dialogTargetTouchListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(dialogTargetTouchListener_[GetPersistentId()], listener);
 }
 
@@ -1347,7 +1605,6 @@ WMError WindowSessionImpl::UnregisterDialogTargetTouchListener(const sptr<IDialo
 {
     WLOGFD("Start unregister DialogTargetTouchListener");
     std::lock_guard<std::mutex> lockListener(dialogTargetTouchListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(dialogTargetTouchListener_[GetPersistentId()], listener);
 }
 
@@ -1355,7 +1612,6 @@ WMError WindowSessionImpl::RegisterScreenshotListener(const sptr<IScreenshotList
 {
     WLOGFD("Start register ScreenshotListener");
     std::lock_guard<std::mutex> lockListener(screenshotListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(screenshotListeners_[GetPersistentId()], listener);
 }
 
@@ -1363,7 +1619,6 @@ WMError WindowSessionImpl::UnregisterScreenshotListener(const sptr<IScreenshotLi
 {
     WLOGFD("Start unregister ScreenshotListener");
     std::lock_guard<std::mutex> lockListener(screenshotListenerMutex_);
-    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(screenshotListeners_[GetPersistentId()], listener);
 }
 
@@ -1372,11 +1627,8 @@ EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathReci
     GetListeners()
 {
     std::vector<sptr<IDialogDeathRecipientListener>> dialogDeathRecipientListener;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : dialogDeathRecipientListeners_[GetPersistentId()]) {
-            dialogDeathRecipientListener.push_back(listener);
-        }
+    for (auto& listener : dialogDeathRecipientListeners_[GetPersistentId()]) {
+        dialogDeathRecipientListener.push_back(listener);
     }
     return dialogDeathRecipientListener;
 }
@@ -1386,11 +1638,8 @@ EnableIfSame<T, IDialogTargetTouchListener,
     std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListener;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : dialogTargetTouchListener_[GetPersistentId()]) {
-            dialogTargetTouchListener.push_back(listener);
-        }
+    for (auto& listener : dialogTargetTouchListener_[GetPersistentId()]) {
+        dialogTargetTouchListener.push_back(listener);
     }
     return dialogTargetTouchListener;
 }
@@ -1399,11 +1648,8 @@ template<typename T>
 EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IScreenshotListener>> screenshotListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : screenshotListeners_[GetPersistentId()]) {
-            screenshotListeners.push_back(listener);
-        }
+    for (auto& listener : screenshotListeners_[GetPersistentId()]) {
+        screenshotListeners.push_back(listener);
     }
     return screenshotListeners;
 }
@@ -1423,7 +1669,7 @@ WSError WindowSessionImpl::NotifyDestroy()
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
     WLOGFD("WindowSessionImpl::NotifyCloseExistPipWindow");
-    PictureInPictureManager::DoClose(false);
+    PictureInPictureManager::DoClose(true, false);
     return WSError::WS_OK;
 }
 
@@ -1473,7 +1719,6 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
 
     {
         std::lock_guard<std::mutex> lockListener(avoidAreaChangeListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1501,7 +1746,6 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
 
     {
         std::lock_guard<std::mutex> lockListener(avoidAreaChangeListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1521,11 +1765,8 @@ EnableIfSame<T, IAvoidAreaChangedListener,
     std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IAvoidAreaChangedListener>> windowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : avoidAreaChangeListeners_[GetPersistentId()]) {
-            windowChangeListeners.push_back(listener);
-        }
+    for (auto& listener : avoidAreaChangeListeners_[GetPersistentId()]) {
+        windowChangeListeners.push_back(listener);
     }
     return windowChangeListeners;
 }
@@ -1565,7 +1806,6 @@ WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutside
 
     {
         std::lock_guard<std::mutex> lockListener(touchOutsideListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = RegisterListener(touchOutsideListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1593,7 +1833,6 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
 
     {
         std::lock_guard<std::mutex> lockListener(touchOutsideListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = UnregisterListener(touchOutsideListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1612,11 +1851,8 @@ template<typename T>
 EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<ITouchOutsideListener>> windowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : touchOutsideListeners_[GetPersistentId()]) {
-            windowChangeListeners.push_back(listener);
-        }
+    for (auto& listener : touchOutsideListeners_[GetPersistentId()]) {
+        windowChangeListeners.push_back(listener);
     }
     return windowChangeListeners;
 }
@@ -1641,7 +1877,6 @@ WMError WindowSessionImpl::RegisterWindowVisibilityChangeListener(const IWindowV
     bool isFirstRegister = false;
     {
         std::lock_guard<std::mutex> lockListener(windowVisibilityChangeListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = RegisterListener(windowVisibilityChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1663,14 +1898,13 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
     bool isFirstUnregister = false;
     {
         std::lock_guard<std::mutex> lockListener(windowVisibilityChangeListenerMutex_);
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         ret = UnregisterListener(windowVisibilityChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
         }
         isFirstUnregister = windowVisibilityChangeListeners_[persistentId].empty();
     }
-    
+
     if (isFirstUnregister) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, false);
     }
@@ -1681,11 +1915,8 @@ template<typename T>
 EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::GetListeners()
 {
     std::vector<IWindowVisibilityListenerSptr> windowVisibilityChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        for (auto& listener : windowVisibilityChangeListeners_[GetPersistentId()]) {
-            windowVisibilityChangeListeners.push_back(listener);
-        }
+    for (auto& listener : windowVisibilityChangeListeners_[GetPersistentId()]) {
+        windowVisibilityChangeListeners.push_back(listener);
     }
     return windowVisibilityChangeListeners;
 }
@@ -1819,7 +2050,9 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 void WindowSessionImpl::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    VsyncStation::GetInstance().FlushFrameRate(rate);
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsUIExtensionWindow(GetType())) {
+        VsyncStation::GetInstance().FlushFrameRate(rate);
+    }
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
@@ -1893,7 +2126,7 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
+    WLOGFD("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -1931,7 +2164,7 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
     if (aceAbilityHandler_ != nullptr) {
         return aceAbilityHandler_->GetBackgroundColor();
     }
-    WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
+    WLOGFD("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
 }
 
@@ -2001,7 +2234,7 @@ WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 }
 
 WMError WindowSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    const std::vector<int32_t>& uiExtensionIdLevelVec)
+    int32_t uiExtensionIdLevel)
 {
     return WMError::WM_OK;
 }

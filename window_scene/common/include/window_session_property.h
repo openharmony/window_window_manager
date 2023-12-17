@@ -126,6 +126,9 @@ public:
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
 
+    WindowState GetWindowState() const;
+    void SetWindowState(WindowState state);
+
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
 
@@ -157,6 +160,7 @@ private:
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;

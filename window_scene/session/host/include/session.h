@@ -47,6 +47,7 @@ class RSTransaction;
 class RSSyncTransactionController;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
+using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyRequestFocusStatusNotifyManagerFunc = std::function<void(int32_t persistentId, const bool isFocused)>;
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
@@ -80,7 +81,7 @@ public:
     virtual void OnDisconnect() = 0;
     virtual void OnExtensionDied() = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) = 0;
+        int32_t uiExtensionIdLevel) = 0;
 };
 
 class Session : public SessionStub {
@@ -94,6 +95,10 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
+    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr, int32_t pid = -1,
+        int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -110,7 +115,7 @@ public:
     void NotifyDisconnect();
     void NotifyExtensionDied() override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) override;
+        int32_t uiExtensionIdLevel) override;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -190,6 +195,7 @@ public:
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
+    void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
     void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
@@ -234,6 +240,8 @@ public:
     WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
+    WSError SetSystemSceneBlockingFocus(bool blocking);
+    bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -275,6 +283,11 @@ public:
     float GetFloatingScale() const;
     void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
     bool GetSCBKeepKeyboardFlag() const;
+    virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    float GetScaleX() const;
+    float GetScaleY() const;
+    float GetPivotX() const;
+    float GetPivotY() const;
 
     void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func);
     void NotifyCallingSessionUpdateRect();
@@ -364,6 +377,7 @@ protected:
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
+    NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
     NotifyUIRequestFocusFunc requestFocusFunc_;
@@ -394,12 +408,17 @@ protected:
     uint32_t zOrder_ = 0;
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
+    bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
     bool scbKeepKeyboardFlag_ = false;
     bool isDirty_ = false;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+    float pivotX_ = 0.0f;
+    float pivotY_ = 0.0f;
 
 private:
     void HandleDialogForeground();

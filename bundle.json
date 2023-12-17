@@ -67,7 +67,6 @@
           "frame_aware_sched_override",
           "imf",
           "frame_aware_sched",
-          "screenlock_mgr",
           "previewer",
           "hilog",
           "memmgr_plugin",
@@ -95,6 +94,7 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
+            "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
@@ -172,6 +172,16 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
+            "header": {
+              "header_files": [
+                "modal_system_ui_extension.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/window_scene/interfaces/innerkits:libwsutils",
             "header": {
               "header_files": [
@@ -228,6 +238,15 @@
           {
             "type": "so",
             "name": "//foundation/window/window_manager/window_scene/session_manager:session_manager",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/session_manager:session_manager_lite",
             "header": {
               "header_files": [
               ],

@@ -25,10 +25,14 @@ class SessionManagerService : public SessionManagerServiceStub {
 WM_DECLARE_SINGLE_INSTANCE(SessionManagerService)
 public:
     void Init();
+    void NotifySceneBoardAvailable();
     sptr<IRemoteObject> GetSceneSessionManager() override;
+    sptr<IRemoteObject> GetSceneSessionManagerLite() override;
 
 private:
+    std::recursive_mutex mutex_;
     sptr<IRemoteObject> sceneSessionManagerObj_;
+    sptr<IRemoteObject> sceneSessionManagerLiteObj_;
 };
 } // namesapce OHOS::Rosen
 

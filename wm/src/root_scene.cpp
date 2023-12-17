@@ -182,6 +182,12 @@ int64_t RootScene::GetVSyncPeriod()
     return VsyncStation::GetInstance().GetVSyncPeriod();
 }
 
+void RootScene::FlushFrameRate(uint32_t rate)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    VsyncStation::GetInstance().FlushFrameRate(rate);
+}
+
 void RootScene::OnBundleUpdated(const std::string& bundleName)
 {
     WLOGFD("bundle %{public}s updated", bundleName.c_str());
@@ -196,7 +202,7 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
-    WLOGFI("[WMSWinLayout] SetFrameLayoutFinishCallback end");
+    WLOGFI("[WMSLayout] SetFrameLayoutFinishCallback end");
 }
 } // namespace Rosen
 } // namespace OHOS

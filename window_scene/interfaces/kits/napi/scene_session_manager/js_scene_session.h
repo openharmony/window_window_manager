@@ -50,9 +50,11 @@ private:
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
+    static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
+    static napi_value SetScale(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -62,15 +64,18 @@ private:
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
+    napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);
+    napi_value OnSetScale(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
 
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
+    void ProcessBufferAvailableChangeRegister();
     void ProcessSessionEventRegister();
     void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
@@ -105,6 +110,7 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
+    void OnBufferAvailableChange(const bool isAvailable);
     void OnSessionEvent(uint32_t eventId);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
@@ -122,7 +128,6 @@ private:
     void UpdateSessionLabel(const std::string &label);
     void UpdateSessionIcon(const std::string &iconPath);
     void OnSessionException(const SessionInfo& info);
-    static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
     void PendingSessionToForeground(const SessionInfo& info);
