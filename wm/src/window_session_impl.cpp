@@ -193,7 +193,8 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((hostSession_ == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        WLOGW("[WMSCom]already destroyed or not created! id: %{public}d state_: %{public}u", GetPersistentId(), state_);
+        WLOGW("[WMSLife] already destroyed or not created! id: %{public}d state_: %{public}u",
+            GetPersistentId(), state_);
     }
     return res;
 }
@@ -629,8 +630,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
-    WLOGFI("[WMSLayout] Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
-        "orientation: %{public}d", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+    WLOGFI("[WMSLayout] Id:%{public}d, reason:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
+        "orientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
+        rect.width_, rect.height_, orientation);
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
