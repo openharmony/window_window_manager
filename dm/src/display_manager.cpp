@@ -55,6 +55,8 @@ public:
 
     void SetFoldDisplayMode(const FoldDisplayMode);
 
+    void SetFoldStatusLocked(bool locked);
+
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -647,6 +649,16 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
+}
+
+void DisplayManager::SetFoldStatusLocked(bool locked)
+{
+    pImpl_->SetFoldStatusLocked(locked);
+}
+
+void DisplayManager::Impl::SetFoldStatusLocked(bool locked)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLocked(locked);
 }
 
 sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
