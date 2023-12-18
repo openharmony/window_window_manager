@@ -335,7 +335,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        WLOGFW("Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
