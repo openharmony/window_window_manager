@@ -115,6 +115,12 @@ static napi_value SetFoldDisplayMode(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetFoldDisplayMode(env, info) : nullptr;
 }
 
+static napi_value SetFoldStatusLocked(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnSetFoldStatusLocked(env, info) : nullptr;
+}
+
 static napi_value GetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
     auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -571,6 +577,26 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
+napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    bool locked = false;
+    if (!ConvertFromJsValue(env, argv[0], locked)) {
+        WLOGFE("[NAPI]Failed to convert parameter to SetFoldStatusLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    SingletonContainer::Get<DisplayManager>().SetFoldStatusLocked(locked);
+    WLOGI("[NAPI]" PRIu64", SetFoldStatusLocked");
+    return NapiGetUndefined(env);
+}
+
 napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -922,6 +948,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsDisplayManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getFoldDisplayMode", moduleName, JsDisplayManager::GetFoldDisplayMode);
     BindNativeFunction(env, exportObj, "setFoldDisplayMode", moduleName, JsDisplayManager::SetFoldDisplayMode);
+    BindNativeFunction(env, exportObj, "setFoldStatusLocked", moduleName, JsDisplayManager::SetFoldStatusLocked);
     BindNativeFunction(env, exportObj, "getCurrentFoldCreaseRegion", moduleName,
         JsDisplayManager::GetCurrentFoldCreaseRegion);
     BindNativeFunction(env, exportObj, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
