@@ -177,6 +177,8 @@ public:
     void SetOffset(float x, float y);
     float GetOffsetX() const;
     float GetOffsetY() const;
+    void SetBounds(const WSRectF& bounds);
+    WSRectF GetBounds();
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -372,6 +374,7 @@ protected:
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
     WSRect winRect_;
+    WSRectF bounds_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
 
