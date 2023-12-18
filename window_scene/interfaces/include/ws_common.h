@@ -230,6 +230,7 @@ enum class SessionEvent : uint32_t {
     EVENT_EXCEPTION,
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
+    EVENT_DRAG_START,
 };
 
 enum class BrokerStates: uint32_t {

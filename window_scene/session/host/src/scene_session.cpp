@@ -1253,6 +1253,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
+    if (reason == SizeChangeReason::DRAG_START) {
+        OnSessionEvent(SessionEvent::EVENT_DRAG_START);
+    }
 }
 
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
