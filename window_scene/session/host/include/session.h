@@ -437,7 +437,7 @@ private:
     {
         std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
         {
-            std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+            std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
             for (auto& listener : lifecycleListeners_) {
                 lifecycleListeners.push_back(listener);
             }
@@ -445,7 +445,7 @@ private:
         return lifecycleListeners;
     }
 
-    std::mutex lifecycleListenersMutex_;
+    std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
