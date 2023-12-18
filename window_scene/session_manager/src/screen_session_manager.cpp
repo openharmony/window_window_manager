@@ -2738,14 +2738,14 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     foldScreenController_->SetDisplayMode(displayMode);
 }
 
-void ScreenSessionManager::LockFoldDisplayStatus(bool locked)
+void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 {
     if (foldScreenController_ == nullptr) {
-        WLOGFW("LockFoldDisplayStatus foldScreenController_ is null");
+        WLOGFW("SetFoldStatusLocked foldScreenController_ is null");
         return;
     }
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("LockFoldDisplayStatus permission denied!");
+        WLOGFE("SetFoldStatusLocked permission denied!");
         return;
     }
     foldScreenController_->LockDisplayStatus(locked);
@@ -3020,7 +3020,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         }
     } else if (params.size() == 1 && (params[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
-        int errCode = LockFoldDisplayStatus(params[0]);
+        int errCode = SetFoldStatusLocked(params[0]);
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
@@ -3057,7 +3057,7 @@ int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
     return 0;
 }
 
-int ScreenSessionManager::LockFoldDisplayStatus(const std::string& lockParam)
+int ScreenSessionManager::SetFoldStatusLocked(const std::string& lockParam)
 {
     if (lockParam.empty()) {
         return -1;
@@ -3068,10 +3068,10 @@ int ScreenSessionManager::LockFoldDisplayStatus(const std::string& lockParam)
     } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
         lockDisplayStatus = false;
     } else {
-        WLOGFW("LockFoldDisplayStatus status not support");
+        WLOGFW("SetFoldStatusLocked status not support");
         return -1;
     }
-    LockFoldDisplayStatus(lockDisplayStatus);
+    SetFoldStatusLocked(lockDisplayStatus);
     return 0;
 }
 

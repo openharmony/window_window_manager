@@ -509,7 +509,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS: {
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
-            LockFoldDisplayStatus(lockDisplayStatus);
+            SetFoldStatusLocked(lockDisplayStatus);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
