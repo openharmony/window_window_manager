@@ -2177,4 +2177,14 @@ void SceneSession::SetScale(float scaleX, float scaleY, float pivotX, float pivo
         }
     }
 }
+
+void SceneSession::RequestHideKeyboard()
+{
+#ifdef IMF_ENABLE
+    WLOGFI("Notify InputMethod framework hide keyboard, id: %{public}d", Session::GetPersistentId());
+    if (MiscServices::InputMethodController::GetInstance()) {
+        MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+    }
+#endif
+}
 } // namespace OHOS::Rosen
