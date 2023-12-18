@@ -51,6 +51,7 @@ enum class WSError : int32_t {
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
     WS_ERROR_INVALID_SESSION,
+    WS_ERROR_INVALID_CALLING,
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
@@ -186,6 +187,8 @@ struct SessionInfo {
     bool isClearSession = false;
     std::string sessionAffinity;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    SessionState sessionState_ = SessionState::STATE_DISCONNECT;
+    uint32_t requestOrientation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {

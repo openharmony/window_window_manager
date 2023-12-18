@@ -301,6 +301,40 @@ ohos_shared_library("libwm") {
   subsystem_name = "window"
 }
 
+## Build libwm_lite.so
+ohos_shared_library("libwm_lite") {
+  include_dirs = [ "../utils/include" ]
+  sources = [
+    "src/window_adapter_lite.cpp",
+    "src/window_manager_lite.cpp",
+    "src/window_option.cpp",
+  ]
+
+  configs = [
+    ":libwm_private_config",
+    "../resources/config/build:coverage_flags",
+  ]
+
+  public_configs = [ ":libwm_public_config" ]
+
+  deps = [
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/session_manager:session_manager_lite",
+  ]
+
+  external_deps = [
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
 group("test") {
   testonly = true
   deps = [ "test:test" ]
