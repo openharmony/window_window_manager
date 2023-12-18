@@ -101,6 +101,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
+    BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -2156,6 +2157,28 @@ napi_value JsSceneSession::OnSetScale(napi_env env, napi_callback_info info)
         static_cast<float_t>(pivotY));
     return NapiGetUndefined(env);
 }
+
+napi_value JsSceneSession::RequestHideKeyboard(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]RequestHideKeyboard");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnRequestHideKeyboard(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnRequestHideKeyboard(napi_env env, napi_callback_info info)
+{
+    WLOGFI("[NAPI]OnRequestHideKeyboard");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->RequestHideKeyboard();
+    return NapiGetUndefined(env);
+}
+
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
 {
