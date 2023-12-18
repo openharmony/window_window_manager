@@ -1517,14 +1517,15 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot() const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 {
     if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
         WLOGFE("surfaceNode_ is null or buffer is not available");
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
+    auto scaleValue = scaleParam == 0.0f ? snapshotScale_ : scaleParam;
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scaleValue, scaleValue);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;

@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "napi_common_want.h"
 #include "native_value.h"
+#include "pixel_map_napi.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
@@ -122,6 +123,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
     BindNativeFunction(env, exportObj, "setSystemAnimatedScenes", moduleName,
         JsSceneSessionManager::SetSystemAnimatedScenes);
+    BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMap", moduleName,
+        JsSceneSessionManager::GetSessionSnapshotPixelMap);
     return NapiGetUndefined(env);
 }
 
@@ -647,6 +650,13 @@ napi_value JsSceneSessionManager::ReportData(napi_env env, napi_callback_info in
     WLOGI("[NAPI]ReportData");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnReportData(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetSessionSnapshotPixelMap");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSessionSnapshotPixelMap(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1908,4 +1918,52 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t scaleValue;
+    if (!ConvertFromJsValue(env, argv[1], scaleValue)) {
+        WLOGFE("[NAPI]Failed to convert parameter to scaleValue");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    const float scaleParam = (scaleValue > 0.0 && scaleValue < 1.0) ? static_cast<float>(scaleValue) : 0.0f;
+    NapiAsyncTask::CompleteCallback complete =
+        [persistentId, scaleParam](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto pixelMap = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam);
+            napi_value nativeData = nullptr;
+            if (pixelMap) {
+                nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            }
+            if (nativeData) {
+                WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+                task.Resolve(env, nativeData);
+            } else {
+                WLOGE("[NAPI]create native pixelmap fail");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            }
+        };
+    napi_value result = nullptr;
+    napi_value lastParam = argv[1];
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 } // namespace OHOS::Rosen
