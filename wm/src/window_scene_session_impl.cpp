@@ -88,9 +88,10 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
         type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH)) {
-        WLOGFW("[WMSSystem] Invalid type: %{public}u", GetType());
+        WLOGFI("[WMSSystem] Invalid type: %{public}u", type);
         return false;
     }
+    WLOGFI("[WMSSystem] Valid type: %{public}u", type);
     return true;
 }
 
@@ -129,8 +130,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<ISessionStage> iSessionStage(this);
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
     if (channel == nullptr || property_ == nullptr) {
-        WLOGFE("[WMSLife] inputChannel or property is nullptr, name: %{public}s",
-            property_->GetWindowName().c_str());
+        WLOGFE("[WMSLife] inputChannel or property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> eventChannel(channel);
@@ -159,7 +159,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     } else { // system window
         if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
-            WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
+            WLOGFI("[WMSSystem] set parentId: %{public}d, type: %{public}d", property_->GetParentPersistentId(), type);
             auto mainWindow = FindMainWindowWithContext();
             property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
@@ -270,11 +270,15 @@ void WindowSceneSessionImpl::UpdateWindowState()
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    WLOGFD("[WMSLife] Window Create [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
+    if (property_ == nullptr) {
+        WLOGFE("[WMSLife] Window Create failed, property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("[WMSLife] Window Create name:%{public}s, state:%{public}u, windowmode:%{public}u",
+        property_->GetWindowName().c_str(), state_, GetMode());
     // allow iSession is nullptr when create window by innerkits
     if (!context) {
-        WLOGFW("context is nullptr!");
+        WLOGFW("[WMSLife] context is nullptr, name:%{public}s", property_->GetWindowName().c_str());
     }
     WMError ret = WindowSessionCreateCheck();
     if (ret != WMError::WM_OK) {
@@ -297,16 +301,18 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     } else { // system or sub window
         WLOGFI("[WMSLife]Create system or sub window");
         isSpacialSession = true;
-        if (WindowHelper::IsSystemWindow(GetType())) {
-            if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
-                WLOGFI("[WMSLife]System sub window is not support");
+        const auto& type = GetType();
+        if (WindowHelper::IsSystemWindow(type)) {
+            if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+                WLOGFI("[WMSSystem] System sub window is not support");
                 return WMError::WM_ERROR_INVALID_TYPE;
             }
             // Not valid system window type for session should return WMError::WM_OK;
-            if (!IsValidSystemWindowType(GetType())) {
+            if (!IsValidSystemWindowType(type)) {
                 return WMError::WM_OK;
             }
-        } else if (!WindowHelper::IsSubWindow(GetType())) {
+        } else if (!WindowHelper::IsSubWindow(type)) {
+            WLOGFI("[WMSLife] create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_TYPE;
         }
         ret = CreateAndConnectSpecificSession();
@@ -522,12 +528,16 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
+    if (property_ == nullptr) {
+        WLOGFE("[WMSLife] Window show failed, property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     const auto& type = GetType();
     WLOGFI("[WMSLife] Window show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u,"
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(),
-        property_->GetPersistentId(), type, reason, state_, requestState_);
+        GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife] session is invalid");
+        WLOGFI("[WMSLife] session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -580,11 +590,16 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
+    if (property_ == nullptr) {
+        WLOGFE("[WMSLife] Window hide failed, property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
     const auto& type = GetType();
     WLOGFI("[WMSLife] Window hide [id:%{public}d, type: %{public}d, reason:%{public}u, state:%{public}u, "
-        "requestState:%{public}u", property_->GetPersistentId(), type, reason, state_, requestState_);
+        "requestState:%{public}u", GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        WLOGFI("[WMSLife] session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -757,10 +772,14 @@ void WindowSceneSessionImpl::DestroySubWindow()
 
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
+    if (property_ == nullptr) {
+        WLOGFE("[WMSLife] Window destroy failed, property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     WLOGFI("[WMSLife] Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
-        "needClearListener: %{public}d", property_->GetPersistentId(), state_, needNotifyServer, needClearListener);
+        "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife] session is invalid");
+        WLOGFI("[WMSLife] session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     WSError ret = WSError::WS_OK;
