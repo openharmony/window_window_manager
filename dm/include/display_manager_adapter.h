@@ -86,6 +86,8 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
 
+    virtual void SetFoldStatusLocked(bool locked);
+
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

@@ -552,6 +552,13 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManagerAdapter::SetFoldStatusLocked(bool locked)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetFoldStatusLocked(locked);
+}
+
 sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
