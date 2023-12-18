@@ -799,6 +799,14 @@ std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std
     return std::make_shared<std::vector<uint8_t>>(abcBytes);
 }
 
+void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
+{
+    if (uiContent_ != nullptr) {
+        uiContent_->UpdateWindowMode(GetMode(), isDecorEnable);
+        WLOGFD("Notify uiContent window mode change end");
+    }
+}
+
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
 {
     if (mode == WindowMode::WINDOW_MODE_UNDEFINED){

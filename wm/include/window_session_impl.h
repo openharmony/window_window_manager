@@ -199,6 +199,7 @@ protected:
     void RegisterSessionRecoverListener(std::function<void()> callbackFunc);
     void UnRegisterSessionRecoverListener();
     WMError WindowSessionCreateCheck();
+    void UpdateDecorEnableToAce(bool isDecorEnable);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
