@@ -924,17 +924,6 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
     SceneSessionManager::GetInstance().SetDumpRootSceneElementInfoListener(func);
 }
 
-void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
-{
-    ProcessVirtualPixelRatioChangeFunc func = [this](float density, const Rect& rect) {
-        WLOGFI("VirtualPixelRatioChangeListener %{public}d,%{public}d,%{public}d,%{public}d;%{public}f",
-            rect.posX_, rect.posY_, rect.width_, rect.height_, density);
-        RootScene::staticRootScene_->SetDisplayDensity(density);
-        RootScene::staticRootScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
-    };
-    SceneSessionManager::GetInstance().SetVirtualPixelRatioChangeListener(func);
-}
-
 napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]OnGetRootSceneSession");
@@ -950,7 +939,6 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
-    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, env, storage, context);

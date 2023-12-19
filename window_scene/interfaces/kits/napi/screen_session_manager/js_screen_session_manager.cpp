@@ -75,6 +75,62 @@ void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<JsScreenSessionManager>(static_cast<JsScreenSessionManager*>(data));
 }
 
+napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]RegisterCallback");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UpdateScreenRotationProperty(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateScreenRotationProperty");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateScreenRotationProperty(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetCurvedCompressionArea(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]GetCurvedCompressionArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetCurvedCompressionArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]RegisterShutdownCallback");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterShutdownCallback(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UnRegisterShutdownCallback");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetPhyScreenProperty(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]GetPhyScreenProperty");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPhyScreenProperty(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyScreenLockEvent(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]NotifyScreenLockEvent");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenLockEvent(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateAvailableArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
@@ -167,27 +223,6 @@ bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
     return true;
 }
 
-napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_callback_info info)
-{
-    WLOGD("Register RegisterShutdownCallback.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRegisterShutdownCallback(env, info) : nullptr;
-}
-
-napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
-{
-    WLOGD("Register UnRegisterShutdownCallback.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
-}
-
-napi_value JsScreenSessionManager::GetPhyScreenProperty(napi_env env, napi_callback_info info)
-{
-    WLOGD("Register GetPhyScreenProperty.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetPhyScreenProperty(env, info) : nullptr;
-}
-
 napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnRegisterShutdownCallback");
@@ -233,20 +268,6 @@ napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, co
 #endif
     shutdownCallback_ = nullptr;
     return NapiGetUndefined(env);
-}
-
-napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
-{
-    WLOGD("Register callback.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
-}
-
-napi_value JsScreenSessionManager::UpdateScreenRotationProperty(napi_env env, napi_callback_info info)
-{
-    WLOGD("Update screen rotation property.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateScreenRotationProperty(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_callback_info info)
@@ -331,13 +352,6 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     return NapiGetUndefined(env);
 }
 
-napi_value JsScreenSessionManager::NotifyScreenLockEvent(napi_env env, napi_callback_info info)
-{
-    WLOGD("Notify screen lock event.");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnNotifyScreenLockEvent(env, info) : nullptr;
-}
-
 napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
     const napi_callback_info info)
 {
@@ -359,13 +373,6 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
     }
     DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
-}
-
-napi_value JsScreenSessionManager::GetCurvedCompressionArea(napi_env env, napi_callback_info info)
-{
-    WLOGD("[NAPI]GetCurvedCompressionArea");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetCurvedCompressionArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info)
@@ -399,17 +406,9 @@ napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const na
     return JsScreenUtils::CreateJsScreenProperty(env, screenProperty);
 }
 
-
-napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callback_info info)
-{
-    WLOGD("OnUpdateAvailableArea");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
-}
-
 napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetPhyScreenProperty");
+    WLOGD("[NAPI]OnUpdateAvailableArea");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

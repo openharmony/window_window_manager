@@ -20,7 +20,7 @@
 #include <event_handler.h>
 #include <js_runtime_utils.h>
 
-#include "display_manager.h"
+#include "root_scene.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -332,12 +332,7 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (!display) {
-        WLOGFE("[NAPI]Default display is null");
-        return false;
-    }
-    auto vpr = display->GetVirtualPixelRatio();
+    auto vpr = RootScene::staticRootScene_->GetDisplayDensity();
     MMI::PointerEvent::PointerItem pointerItem;
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
