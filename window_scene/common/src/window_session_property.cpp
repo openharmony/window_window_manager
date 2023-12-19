@@ -332,6 +332,16 @@ WindowMode WindowSessionProperty::GetWindowMode() const
     return windowMode_;
 }
 
+WindowState WindowSessionProperty::GetWindowState() const
+{
+    return windowState_;
+}
+
+void WindowSessionProperty::SetWindowState(WindowState state)
+{
+    windowState_ = state;
+}
+
 void WindowSessionProperty::SetSessionGravity(SessionGravity gravity, uint32_t percent)
 {
     sessionGravity_ = gravity;
@@ -531,6 +541,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_);
 }
 
@@ -577,6 +588,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSystemCalling(parcel.ReadBool());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
+    property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingWindow(parcel.ReadUint32());
     return property;

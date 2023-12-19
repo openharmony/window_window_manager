@@ -21,7 +21,9 @@
 #include "session_manager_service_interface.h"
 #include "mock_session_manager_service_interface.h"
 #include "zidl/scene_session_manager_lite_interface.h"
+#include "zidl/screen_session_manager_lite_interface.h"
 #include "wm_single_instance.h"
+#include "wm_common.h"
 
 namespace OHOS::Rosen {
 class SSMDeathRecipientLite : public IRemoteObject::DeathRecipient {
@@ -36,6 +38,7 @@ public:
     void Clear();
 
     sptr<ISceneSessionManagerLite> GetSceneSessionManagerLiteProxy();
+    sptr<IScreenSessionManagerLite> GetScreenSessionManagerLiteProxy();
 
 protected:
     SessionManagerLite() = default;
@@ -44,10 +47,12 @@ protected:
 private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
+    void InitScreenSessionManagerLiteProxy();
 
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManagerLite> sceneSessionManagerLiteProxy_ = nullptr;
+    sptr<IScreenSessionManagerLite> screenSessionManagerLiteProxy_ = nullptr;
     sptr<SSMDeathRecipientLite> ssmDeath_ = nullptr;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;

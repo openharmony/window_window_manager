@@ -67,7 +67,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     startPos += GetObject(windowId, data + startPos, size - startPos);
     napi_env env = nullptr;
     startPos += GetObject(env, data + startPos, size - startPos);
-    sptr<PictureInPictureController> controller = new PictureInPictureController(option, windowId, env);
+    sptr<Window> window = new Window();
+    sptr<PictureInPictureController> controller = new PictureInPictureController(option, window, windowId, env);
     if (controller == nullptr) {
         return false;
     }

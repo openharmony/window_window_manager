@@ -223,7 +223,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual void LockFoldDisplayStatus(bool locked) {}
+    virtual void SetFoldStatusLocked(bool locked) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 

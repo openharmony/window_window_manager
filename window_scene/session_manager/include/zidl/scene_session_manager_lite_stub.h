@@ -23,37 +23,39 @@
 
 namespace OHOS::Rosen {
 class SceneSessionManagerLiteStub;
-using SceneSessionManagerLiteStubFunc = int (SceneSessionManagerLiteStub::*)(MessageParcel &data, MessageParcel &reply);
+using SceneSessionManagerLiteStubFunc = int (SceneSessionManagerLiteStub::*)(MessageParcel& data, MessageParcel& reply);
 
 class SceneSessionManagerLiteStub : public IRemoteStub<ISceneSessionManagerLite> {
 public:
     SceneSessionManagerLiteStub() = default;
     virtual ~SceneSessionManagerLiteStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     static const std::map<uint32_t, SceneSessionManagerLiteStubFunc> stubFuncMap_;
 
-    int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
-    int HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply);
+    int HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
-    int HandleClearSession(MessageParcel &data, MessageParcel &reply);
-    int HandleClearAllSessions(MessageParcel &data, MessageParcel &reply);
-    int HandleLockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleUnlockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply);
+    int HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply);
+    int HandleClearSession(MessageParcel& data, MessageParcel& reply);
+    int HandleClearAllSessions(MessageParcel& data, MessageParcel& reply);
+    int HandleLockSession(MessageParcel& data, MessageParcel& reply);
+    int HandleUnlockSession(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
+    //for window manager service
+    int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_STUB_H

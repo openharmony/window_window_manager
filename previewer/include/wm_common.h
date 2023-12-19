@@ -599,6 +599,39 @@ struct WindowLimits {
     }
 };
 
+/**
+ * @struct TitleButtonRect
+ *
+ * @brief An area of title buttons relative to the upper right corner of the window.
+ */
+struct TitleButtonRect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+
+    bool operator==(const TitleButtonRect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool operator!=(const TitleButtonRect& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
+    bool IsInsideOf(const TitleButtonRect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+};
+
 /*
  * Config of keyboard animation
  */

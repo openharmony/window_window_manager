@@ -28,20 +28,6 @@
 namespace OHOS::Rosen {
 class ScreenInfo;
 
-struct Point {
-    int32_t posX_;
-    int32_t posY_;
-    Point() : posX_(0), posY_(0) {};
-    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
-};
-
-struct SupportedScreenModes : public RefBase {
-    uint32_t id_;
-    uint32_t width_;
-    uint32_t height_;
-    uint32_t refreshRate_;
-};
-
 struct VirtualScreenOption {
     std::string name_;
     uint32_t width_;
@@ -51,12 +37,6 @@ struct VirtualScreenOption {
     int32_t flags_;
     bool isForShot_ {true};
     std::vector<uint64_t> missionIds_ {};
-};
-
-struct ExpandOption {
-    ScreenId screenId_;
-    uint32_t startX_;
-    uint32_t startY_;
 };
 
 class Screen : public RefBase {

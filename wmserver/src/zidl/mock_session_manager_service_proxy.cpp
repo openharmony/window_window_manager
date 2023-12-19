@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include "zidl/mock_session_manager_service_proxy.h"
 #include "window_manager_hilog.h"
 
@@ -21,6 +22,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceProxy"};
 }
+
 sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
 {
     MessageParcel data;
@@ -33,10 +35,102 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
     if (Remote()->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_GET_SESSION_MANAGER_SERVICE),
         data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObject = reply.ReadRemoteObject();
     return remoteObject;
+}
+
+
+sptr<IRemoteObject> MockSessionManagerServiceProxy::GetScreenSessionManagerLite()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER),
+        data, reply, option) != ERR_NONE) {
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = reply.ReadRemoteObject();
+    return remoteObject;
+}
+
+void MockSessionManagerServiceProxy::NotifySceneBoardAvailable()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[RECOVER] WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("[RECOVER] SendRequest failed");
+        return;
+    }
+}
+
+void MockSessionManagerServiceProxy::RegisterSessionManagerServiceRecoverListener(
+    int64_t pid, const sptr<IRemoteObject>& listener)
+{
+    WLOGFD("[RECOVER] RegisterSessionManagerServiceRecoverListener pid = %{public}" PRId64, pid);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[RECOVER] WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt64(pid)) {
+        WLOGFE("[RECOVER] Write pid failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(listener)) {
+        WLOGFE("[RECOVER] WriteRemoteObject listener failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("[RECOVER] SendRequest failed");
+        return;
+    }
+}
+
+void MockSessionManagerServiceProxy::UnRegisterSessionManagerServiceRecoverListener(int64_t pid)
+{
+    WLOGFD("[RECOVER] UnRegisterSessionManagerServiceRecoverListener pid = %{public}" PRId64, pid);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[RECOVER] WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt64(pid)) {
+        WLOGFE("[RECOVER] Write pid failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("[RECOVER] SendRequest failed");
+        return;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -20,6 +20,7 @@
 
 #include "wm_single_instance.h"
 #include "zidl/mock_session_manager_service_stub.h"
+#include "zidl/session_manager_service_recover_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -28,8 +29,12 @@ DECLARE_SYSTEM_ABILITY(MockSessionManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(MockSessionManagerService);
 public:
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
+    void NotifySceneBoardAvailable() override;
     sptr<IRemoteObject> GetSessionManagerService() override;
+    sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
+    void RegisterSessionManagerServiceRecoverListener(int64_t pid, const sptr<IRemoteObject>& listener) override;
+    void UnRegisterSessionManagerServiceRecoverListener(int64_t pid) override;
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void NotifyNotKillService()
@@ -45,6 +50,7 @@ protected:
 
 private:
     bool RegisterMockSessionManagerService();
+    void NotifySceneBoardAvailableToClient();
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
@@ -60,8 +66,12 @@ private:
     };
 
     sptr<IRemoteObject> sessionManagerService_;
+    sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
     sptr<SMSDeathRecipient> smsDeathRecipient_;
+
+    std::mutex smsRecoverListenerLock_;
+    std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsRecoverListenerMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

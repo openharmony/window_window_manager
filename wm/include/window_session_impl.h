@@ -36,6 +36,7 @@
 #include "window_option.h"
 #include "wm_common.h"
 
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -170,12 +171,22 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+    WMError RecoverAndReconnectSceneSession();
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetDecorVisible(bool isVisible) override;
+    virtual WMError SetDecorHeight(int32_t decorHeight) override;
+    virtual WMError GetDecorHeight(int32_t& height) override;
+    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
+    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
+    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+        const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
+    void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
 
 protected:
     WMError Connect();
@@ -185,7 +196,10 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
+    void RegisterSessionRecoverListener(std::function<void()> callbackFunc);
+    void UnRegisterSessionRecoverListener();
     WMError WindowSessionCreateCheck();
+    void UpdateDecorEnableToAce(bool isDecorEnable);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
@@ -244,6 +258,9 @@ private:
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+        std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     template<typename T>
@@ -272,6 +289,7 @@ private:
     static std::mutex touchOutsideListenerMutex_;
     static std::mutex windowVisibilityChangeListenerMutex_;
     static std::mutex windowStatusChangeListenerMutex_;
+    static std::mutex windowTitleButtonRectChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
@@ -282,6 +300,8 @@ private:
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+        windowTitleButtonRectChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

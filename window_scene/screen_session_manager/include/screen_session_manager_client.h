@@ -73,6 +73,8 @@ private:
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
 
+    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
+
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 

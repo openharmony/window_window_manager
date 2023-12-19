@@ -202,7 +202,7 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
-    WLOGFI("[WMSWinLayout] SetFrameLayoutFinishCallback end");
+    WLOGFI("[WMSLayout] SetFrameLayoutFinishCallback end");
 }
 } // namespace Rosen
 } // namespace OHOS

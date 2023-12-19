@@ -55,6 +55,8 @@ public:
 
     void SetFoldDisplayMode(const FoldDisplayMode);
 
+    void SetFoldStatusLocked(bool locked);
+
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -649,6 +651,16 @@ void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
 }
 
+void DisplayManager::SetFoldStatusLocked(bool locked)
+{
+    pImpl_->SetFoldStatusLocked(locked);
+}
+
+void DisplayManager::Impl::SetFoldStatusLocked(bool locked)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLocked(locked);
+}
+
 sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
 {
     return pImpl_->GetCurrentFoldCreaseRegion();
@@ -777,7 +789,7 @@ DMError DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> l
 DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterDisplayListener listener is nullptr.");
+        WLOGFW("UnregisterDisplayListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayListener(listener);
