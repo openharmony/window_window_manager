@@ -55,6 +55,11 @@ public:
         density_ = density;
     }
 
+    float GetDisplayDensity()
+    {
+        return density_;
+    }
+
     WindowState GetWindowState() const override
     {
         return WindowState::STATE_SHOWN;
