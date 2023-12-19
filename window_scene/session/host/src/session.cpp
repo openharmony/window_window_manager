@@ -32,6 +32,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "parameters.h"
+#include <hisysevent.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -1959,8 +1960,25 @@ uint32_t Session::GetZOrder() const
     return zOrder_;
 }
 
+void Session::AttachToFrameNode(bool isAttach)
+{
+    WLOGFI("[WMSLife] Attach info: isAttach: %{public}d, persistentId: %{public}d, "
+           "windowType: %{public}d, name: %{public}s", isAttach, GetPersistentId(),
+           GetWindowType(), sessionInfo_.bundleName_.c_str());
+}
+
 void Session::SetUINodeId(uint32_t uiNodeId)
 {
+    if (uiNodeId_ != 0 && uiNodeId != 0 && !IsSystemSession()) {
+        int32_t eventRet = HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "REPEAT_SET_UI_NODE_ID",
+            OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+            "PID", getpid(),
+            "UID", getuid());
+        WLOGE("[WMSLife] SetUINodeId: Repeat set UINodeId ret:%{public}d", eventRet);
+        return;
+    }
     uiNodeId_ = uiNodeId;
 }
 
