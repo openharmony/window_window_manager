@@ -49,7 +49,7 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
-    PictureInPictureManager::DetachAutoStartController(handleId_, this);
+    PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
 }
 
 WMError PictureInPictureController::CreatePictureInPictureWindow()
@@ -326,9 +326,9 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
             WLOGFE("Navigation operate failed");
             return;
         }
-        PictureInPictureManager::AttachAutoStartController(handleId_, this);
+        PictureInPictureManager::AttachAutoStartController(handleId_, weakRef_);
     } else {
-        PictureInPictureManager::DetachAutoStartController(handleId_, this);
+        PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
     }
 }
 

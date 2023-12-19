@@ -51,7 +51,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityRuntime::Context* context = nullptr;
     startPos += GetObject(context, data + startPos, size - startPos);
     option->SetContext(static_cast<void*>(context));
-    std::string navigationId = "nav_id";
+    std::string navigationId = "";
     option->SetNavigationId(navigationId);
     std::shared_ptr<XComponentController> xComponentController = nullptr;
     option->SetXComponentController(xComponentController);
