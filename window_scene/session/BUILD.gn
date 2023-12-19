@@ -94,6 +94,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "preferences:native_preferences",
+    "hisysevent:libhisysevent",
   ]
 
   defines = []
