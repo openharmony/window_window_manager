@@ -22,8 +22,6 @@
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
 
-const int ERROR_CODE_LEN = 16; // 16 is the max len of error code
-
 namespace OHOS {
 napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value)
 {
@@ -70,9 +68,7 @@ void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string& errM
     }
     napi_value code = nullptr;
     napi_value message = nullptr;
-    char errorCode[ERROR_CODE_LEN];
-    (void)sprintf_s(errorCode, sizeof(errorCode), "%d", static_cast<int32_t>(wret));
-    napi_create_string_utf8(env, errorCode, strlen(errorCode), &code);
+    napi_create_int32(env, static_cast<int32_t>(wret), &code);
     napi_create_string_utf8(env, errMessage.c_str(), strlen(errMessage.c_str()), &message);
     napi_create_error(env, code, message, &result[0]);
     napi_get_undefined(env, &result[1]);
