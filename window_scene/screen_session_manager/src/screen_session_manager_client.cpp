@@ -210,6 +210,16 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
 }
 
+void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->SetDisplayNodeScreenId(displayNodeScreenId);
+}
+
 uint32_t ScreenSessionManagerClient::GetCurvedCompressionArea()
 {
     if (!screenSessionManager_) {

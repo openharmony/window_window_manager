@@ -68,7 +68,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
-        RSTransaction::FlushImplicitTransaction();
     }
 }
 
@@ -226,6 +225,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
+    property_ = newProperty;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             continue;
