@@ -1243,10 +1243,17 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     WLOGFI("[WMSMain]begin StartUIAbility: %{public}d isSystem:%{public}u", persistentId,
         static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-    auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
-    if (systemConfig_.backgroundswitch) {
+    int32_t errCode = ERR_INVALID_VALUE;
+    if (systemConfig_.backgroundswitch == false) {
+        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+    } else {
         WLOGFD("[WMSMain]RequestSceneSessionActivationInner: %{public}d", systemConfig_.backgroundswitch);
-        scnSession->NotifySessionForeground(1, true);
+        if (scnSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
+            scnSession->GetSessionState() == SessionState::STATE_END) {
+            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+        } else {
+            scnSession->NotifySessionForeground(1, true);
+        }
     }
     auto sessionInfo = scnSession->GetSessionInfo();
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
