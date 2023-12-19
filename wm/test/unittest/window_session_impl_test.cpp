@@ -207,7 +207,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -1386,7 +1386,7 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetRaiseByClickEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -1409,7 +1409,7 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->HideNonSystemFloatingWindows(false);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
