@@ -16,12 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
-#include <memory>
-#include <mutex>
-#include <shared_mutex>
-
-#include "iremote_object.h"
-#include "platform/image_native/pixel_map.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
