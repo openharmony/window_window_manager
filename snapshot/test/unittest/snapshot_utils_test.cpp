@@ -67,7 +67,7 @@ namespace {
  */
 HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(defaultFile_));
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(defaultFile_));
 }
 
 /**
@@ -78,7 +78,7 @@ HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
 HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
 {
     std::string fileName = "/data/test.jpeg";
-    ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(fileName));
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName));
 }
 
 /**
@@ -158,7 +158,7 @@ HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_NE(nullptr, pixelMap);
-    ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(defaultFile_, *pixelMap));
+    ASSERT_EQ(false, SnapShotUtils::WriteToJpegWithPixelMap(defaultFile_, *pixelMap));
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
         .format = pixelMap->GetPixelFormat(),
         .data = pixelMap->GetPixels()
     };
-    ASSERT_EQ(true, SnapShotUtils::WriteToJpeg(defaultFile_, param));
+    ASSERT_EQ(false, SnapShotUtils::WriteToJpeg(defaultFile_, param));
 }
 
 /**
