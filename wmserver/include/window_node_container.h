@@ -29,6 +29,7 @@
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "window_pair.h"
+#include "window_root.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -134,6 +135,7 @@ public:
     void SetWindowPairFrameGravity(DisplayId displayId, Gravity gravity);
 
 private:
+    friend class WindowRoot;
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;

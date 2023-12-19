@@ -2059,6 +2059,34 @@ HWTEST_F(SceneSessionTest, Connect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Reconnect
+ * @tc.desc: Reconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, Reconnect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "Reconnect";
+    info.abilityName_ = "Reconnect1";
+    info.windowType_ = 1;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+
+    sptr<ISessionStage> sessionStage = nullptr;
+    sptr<IWindowEventChannel> eventChannel = nullptr;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    SystemSessionConfig systemConfig;
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<IRemoteObject> token;
+    int32_t pid = -1;
+    int32_t uid = -1;
+    WSError res =
+        scensession->Reconnect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    delete scensession;
+}
+
+/**
  * @tc.name: ForegroundAndBackground02
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2382,6 +2410,50 @@ HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
     WSError result = scenesession->UpdatePiPRect(width, height, reason);
     ASSERT_EQ(result, WSError::WS_OK);
     delete scenesession;
+}
+
+/**
+ * @tc.name: SetScale
+ * @tc.desc: SetScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetScale, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetScale";
+    info.bundleName_ = "SetScale";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    int resultValue = 0;
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->SetScale(1.0f, 1.0f, 0.0f, 0.0f);
+    ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: RequestHideKeyboard
+ * @tc.desc:  * @tc.name: RequestHideKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RequestHideKeyboard";
+    info.bundleName_ = "RequestHideKeyboard";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    int resultValue = 0;
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->RequestHideKeyboard();
+    ASSERT_EQ(0, resultValue);
 }
 }
 }

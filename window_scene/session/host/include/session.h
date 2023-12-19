@@ -47,6 +47,7 @@ class RSTransaction;
 class RSSyncTransactionController;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
+using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyRequestFocusStatusNotifyManagerFunc = std::function<void(int32_t persistentId, const bool isFocused)>;
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
@@ -94,6 +95,10 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
+    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr, int32_t pid = -1,
+        int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -135,7 +140,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
     SessionState GetSessionState() const;
     void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -172,6 +177,8 @@ public:
     void SetOffset(float x, float y);
     float GetOffsetX() const;
     float GetOffsetY() const;
+    void SetBounds(const WSRectF& bounds);
+    WSRectF GetBounds();
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -190,6 +197,7 @@ public:
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
+    void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
     void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
@@ -234,6 +242,8 @@ public:
     WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     WSError UpdateWindowMode(WindowMode mode);
+    WSError SetSystemSceneBlockingFocus(bool blocking);
+    bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -364,11 +374,13 @@ protected:
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
     WSRect winRect_;
+    WSRectF bounds_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
+    NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
     NotifyUIRequestFocusFunc requestFocusFunc_;
@@ -399,6 +411,7 @@ protected:
     uint32_t zOrder_ = 0;
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
+    bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;

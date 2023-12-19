@@ -25,6 +25,8 @@
 #include "scene_board_judgement.h"
 #include "session_manager.h"
 #include "focus_change_info.h"
+#include <unistd.h>
+#include "window_session_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -83,6 +85,15 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (windowManagerAgentMap_.find(type) == windowManagerAgentMap_.end()) {
+            windowManagerAgentMap_[type] = std::set<sptr<IWindowManagerAgent>>();
+        }
+        windowManagerAgentMap_[type].insert(windowManagerAgent);
+    }
+
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
@@ -90,7 +101,23 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    auto ret = windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (windowManagerAgentMap_.find(type) == windowManagerAgentMap_.end()) {
+        WLOGFW("WindowManagerAgentType = %{public}d not found", type);
+        return ret;
+    }
+
+    auto& agentSet = windowManagerAgentMap_[type];
+    auto agent = std::find(agentSet.begin(), agentSet.end(), windowManagerAgent);
+    if (agent == agentSet.end()) {
+        WLOGFW("Cannot find agent,  type = %{public}d", type);
+        return ret;
+    }
+    agentSet.erase(agent);
+
+    return ret;
 }
 
 WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t &pid)
@@ -204,6 +231,43 @@ bool WindowAdapter::InitWMSProxy()
     return true;
 }
 
+void WindowAdapter::WindowManagerRecover()
+{
+    WLOGFI("[RECOVER] Run recover callback func in");
+        ClearWindowAdapter();
+        if (!InitSSMProxy()) {
+            WLOGFE("[RECOVER] InitSSMProxy failed");
+            return;
+        }
+
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (const auto& it: windowManagerAgentMap_) {
+            WLOGFI("[RECOVER] RecoverWindowManagerAgents type = %{public}" PRIu32 ", size = %{public}" PRIu64,
+                it.first, static_cast<uint64_t>(it.second.size()));
+            for (auto& agent: it.second) {
+                if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                    WLOGFE("[RECOVER] RecoverWindowManagerAgent failed");
+                }
+            }
+        }
+
+        WLOGFI("[RECOVER] Run recover callback func out");
+}
+
+void WindowAdapter::RegisterWindowManagerRecoverCallbackFunc()
+{
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        WLOGFI("[RECOVER] IsSceneBoardEnabled false");
+        return;
+    }
+
+    auto callbackFunc = [this] () {
+        this->WindowManagerRecover();
+    };
+
+    SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFuc(callbackFunc);
+}
+
 bool WindowAdapter::InitSSMProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -223,6 +287,10 @@ bool WindowAdapter::InitSSMProxy()
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
             WLOGFE("Failed to add death recipient");
             return false;
+        }
+        if (!recoverInitialized) {
+            RegisterWindowManagerRecoverCallbackFunc();
+            recoverInitialized = true;
         }
         isProxyValid_ = true;
     }
@@ -252,8 +320,6 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     }
     WLOGI("wms OnRemoteDied");
     SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
-    SingletonContainer::Get<WindowManager>().OnRemoteDied();
-    SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
 }
 
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
@@ -404,7 +470,8 @@ WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t& persistentId, boo
 WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->UpdateSessionTouchOutsideListener(persistentId, haveListener));
 }
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -464,6 +531,13 @@ WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentI
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     WSError ret = windowManagerServiceProxy_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     return static_cast<WMError>(ret);
+}
+
+WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 } // namespace Rosen
 } // namespace OHOS

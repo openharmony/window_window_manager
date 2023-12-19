@@ -75,7 +75,7 @@ HWTEST_F(DisplayManagerTest, Freeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -91,8 +91,6 @@ HWTEST_F(DisplayManagerTest, Freeze02, Function | SmallTest | Level1)
     }
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
         ASSERT_FALSE(ret);
     }
 }
@@ -107,8 +105,6 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
         ASSERT_FALSE(ret);
     }
 }

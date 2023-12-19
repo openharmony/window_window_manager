@@ -68,7 +68,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
-        RSTransaction::FlushImplicitTransaction();
     }
 }
 
@@ -226,6 +225,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
+    property_ = newProperty;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             continue;
@@ -362,7 +362,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
-        WLOGE("SCB: ScreenSession::GetActiveScreenMode active mode index is wrong: %{public}d", activeIdx_);
+        WLOGW("SCB: ScreenSession::GetActiveScreenMode active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
     return modes_[activeIdx_];

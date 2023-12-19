@@ -176,14 +176,19 @@ public:
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 
-    void LockFoldDisplayStatus(bool locked) override;
+    void SetFoldStatusLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
 
     FoldStatus GetFoldStatus() override;
+
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+
+    void SetKeyguardDrawnDoneFlag(bool flag);
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
@@ -233,7 +238,6 @@ private:
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
-    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void HandlerSensor(ScreenPowerStatus status);
 
     // notify scb virtual screen change
@@ -247,7 +251,7 @@ private:
     int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
-    int LockFoldDisplayStatus(const std::string& lockParam);
+    int SetFoldStatusLocked(const std::string& lockParam);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;

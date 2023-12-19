@@ -443,6 +443,15 @@ public:
      */
     void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) const;
 
+    /**
+     * @brief Shift window focus within the same application. Only main window and subwindow.
+     *
+     * @param sourcePersistentId Window id which the focus shift from
+     * @param targetPersistentId Window id which the focus shift to
+     * @return WM_OK means shift window focus success, others means failed.
+    */
+    WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+    
 private:
     WindowManager();
     ~WindowManager();
@@ -464,7 +473,6 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;
-    void OnRemoteDied();
 };
 } // namespace Rosen
 } // namespace OHOS
