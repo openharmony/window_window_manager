@@ -1457,7 +1457,7 @@ napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OnPerfRequestEx");
+    WLOGD("[NAPI]OnPerfRequestEx");
 #ifdef SOC_PERF_ENABLE
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
