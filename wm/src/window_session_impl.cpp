@@ -337,6 +337,18 @@ void WindowSessionImpl::UnRegisterSessionRecoverListener()
     }
     SessionManager::GetInstance().UnRegisterSessionRecoverCallbackFunc(persistentId);
 }
+
+void WindowSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    NotifyPointerEvent(pointerEvent);
+}
+
+void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    bool isConsumed = false;
+    NotifyKeyEvent(keyEvent, isConsumed);
+}
+
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     WLOGFI("[WMSLife]Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{public}u",

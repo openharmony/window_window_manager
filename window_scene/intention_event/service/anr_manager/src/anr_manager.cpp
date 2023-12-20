@@ -37,7 +37,7 @@ ANRManager::~ANRManager() {}
 void ANRManager::Init()
 {
     CALL_DEBUG_ENTER;
-    SwitchAnr(true);
+    SwitchAnr(false);
     DelayedSingleton<TimerManager>::GetInstance()->Init();
 }
 

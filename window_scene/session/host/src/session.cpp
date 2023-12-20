@@ -371,6 +371,7 @@ bool Session::NeedNotify() const
 
 WSError Session::SetTouchable(bool touchable)
 {
+    SetSystemTouchable(touchable);
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -381,6 +382,17 @@ WSError Session::SetTouchable(bool touchable)
 bool Session::GetTouchable() const
 {
     return GetSessionProperty()->GetTouchable();
+}
+
+void Session::SetSystemTouchable(bool touchable)
+{
+    systemTouchable_ = touchable;
+    NotifySessionInfoChange();
+}
+
+bool Session::GetSystemTouchable() const
+{
+    return systemTouchable_;
 }
 
 WSError Session::SetVisible(bool isVisible)
@@ -482,6 +494,16 @@ bool Session::IsActive() const
 bool Session::IsSystemSession() const
 {
     return sessionInfo_.isSystem_;
+}
+
+bool Session::IsSystemActive() const
+{
+    return isSystemActive_;
+}
+
+void Session::SetSystemActive(bool systemActive)
+{
+    isSystemActive_ = systemActive;
 }
 
 bool Session::IsTerminated() const
@@ -1581,6 +1603,11 @@ void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStat
     NotifySessionStateChange(state_);
 }
 
+void Session::SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func)
+{
+    sessionInfoChangeNotifyManagerFunc_ = func;
+}
+
 void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func)
 {
     requestFocusStatusNotifyManagerFunc_ = func;
@@ -1649,7 +1676,7 @@ void Session::NotifySessionFocusableChange(bool isFocusable)
 
 void Session::NotifySessionTouchableChange(bool touchable)
 {
-    WLOGFD("Notify session touchable change: %{public}u", touchable);
+    WLOGFD("Notify session touchable change: %{public}d", touchable);
     if (sessionTouchableChangeFunc_) {
         sessionTouchableChangeFunc_(touchable);
     }
@@ -1799,6 +1826,20 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
     std::unique_lock<std::shared_mutex> lock(propertyMutex_);
     property_ = property;
+    NotifySessionInfoChange();
+    if (property_ == nullptr) {
+        return WSError::WS_OK;
+    }
+
+    auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is nullptr");
+            return;
+        }
+        session->NotifySessionInfoChange();
+    };
+    property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 
@@ -1952,6 +1993,7 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
+    NotifySessionInfoChange();
 }
 
 uint32_t Session::GetZOrder() const
@@ -2161,5 +2203,39 @@ bool Session::NeedSystemPermission(WindowType type)
         type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
         type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
         type == WindowType::WINDOW_TYPE_PIP);
+}
+
+void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    systemSessionPointerEventFunc_ = func;
+}
+
+void Session::SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func)
+{
+    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    systemSessionKeyEventFunc_ = func;
+}
+
+void Session::NotifySessionInfoChange()
+{
+    if (sessionInfoChangeNotifyManagerFunc_) {
+        sessionInfoChangeNotifyManagerFunc_(GetPersistentId());
+    }
+}
+
+bool Session::IsSystemInput()
+{
+    return sessionInfo_.isSystemInput_;
+}
+
+void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+
+    property->SetTouchHotAreas(touchHotAreas);
 }
 } // namespace OHOS::Rosen

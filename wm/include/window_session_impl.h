@@ -47,6 +47,8 @@ class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
+    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
@@ -233,6 +235,7 @@ protected:
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
+    bool needRemoveWindowInputChannel_ = false;
 
 private:
     //Trans between colorGamut and colorSpace
