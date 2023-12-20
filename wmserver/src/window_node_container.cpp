@@ -250,6 +250,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+        DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
+    }
     WLOGFD("AddWindowNode windowId: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
     return WMError::WM_OK;
@@ -389,9 +392,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
         SetBelowScreenlockVisible(node, true);
-    }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
-        DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
     }
     WLOGFD("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
