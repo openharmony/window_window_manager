@@ -215,10 +215,18 @@ void PictureInPictureManager::DoActionEvent(std::string actionName)
 
 void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
 {
-    WLOGD("AutoStartPipWindow is called");
+    WLOGD("AutoStartPipWindow is called, navId: %{public}s", navigationId.c_str());
     if (autoStartController_ == nullptr) {
-        WLOGFE("autoStartController_ is null");
-        return;
+        if (autoStartControllerMap_.size() == 0) {
+            WLOGFE("autoStartController_ is null while autoStart");
+            return;
+        }
+        auto iter = autoStartControllerMap_.begin();
+        autoStartController_ = iter->second;
+        if (autoStartController_ == nullptr) {
+            WLOGFE("Failed to get autoStartController, skip autoStart");
+            return;
+        }
     }
     if (navigationId == "") {
         WLOGFI("No use navigationId for auto start");
