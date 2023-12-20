@@ -286,7 +286,6 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
         WLOGFE("Parameter action is invalid!");
         return ERR_INVALID_DATA;
     }
-
     std::vector<std::string> actionArgumentsKey;
     std::vector<std::string> actionArgumentsValue;
     std::map<std::string, std::string> actionArguments;
