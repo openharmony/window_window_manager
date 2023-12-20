@@ -3526,11 +3526,15 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
 
 void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
 {
+    if (sceneSession == nullptr) {
+        WLOGFE("[WMSComm]session is nullptr");
+        return;
+    }
     int32_t persistentId = sceneSession->GetPersistentId();
     WLOGFI("[WMSFocus]NotifyFocusStatus, id: %{public}d, isFocused: %{public}d",
         sceneSession->GetPersistentId(), isFocused);
     if (isFocused) {
-        if (sceneSession && IsSessionVisible(sceneSession)) {
+        if (IsSessionVisible(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         }
         UpdateBrightness(focusedSessionId_);
@@ -5321,7 +5325,7 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
     std::vector<std::pair<uint64_t, bool>> currDrawingContentData)
 {
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
-    for (auto& data : currDrawingContentData) {
+    for (const auto& data : currDrawingContentData) {
         uint64_t windowId = data.first;
         bool currentDrawingContentState = data.second;
         int32_t pid = 0;
@@ -5356,7 +5360,7 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid,
 {
     bool isChange = true;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto& item : sceneSessionMap_) {
+    for (const auto& item : sceneSessionMap_) {
         auto sceneSession = item.second;
         if (sceneSession == nullptr) {
             continue;
@@ -6418,7 +6422,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     }
     auto task = [this, rsTransaction]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto& iter: sceneSessionMap_) {
+        for (const auto& iter: sceneSessionMap_) {
             auto sceneSession = iter.second;
             if (sceneSession && sceneSession->IsDirtyWindow()) {
                 sceneSession->NotifyClientToUpdateRect(rsTransaction);
