@@ -3555,6 +3555,17 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     WSError res = WSError::WS_OK;
     res = sceneSession->NotifyFocusStatus(isFocused);
+    std::string sName = "FoucusWindow:";
+    if (sceneSession->GetSessionInfo().isSystem_) {
+        sName += sceneSession->GetSessionInfo().abilityName_;
+    } else {
+        sName += sceneSession->GetWindowName();
+    }
+    if (isFocused) {
+        StartAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, sName, sceneSession->GetPersistentId());
+    } else {
+        FinishAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, sName, sceneSession->GetPersistentId());
+    }
     if (res != WSError::WS_OK) {
         return;
     }
