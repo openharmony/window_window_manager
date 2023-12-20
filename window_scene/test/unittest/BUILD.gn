@@ -48,14 +48,18 @@ group("unittest") {
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_permission_test",
+    ":ws_session_proxy_mock_test",
     ":ws_session_proxy_test",
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_test",
+    ":ws_session_stub_mock_test",
     ":ws_session_stub_test",
     ":ws_session_test",
     ":ws_task_scheduler_test",
     ":ws_timer_manager_test",
+    ":ws_window_event_channel_proxy_mock_test",
     ":ws_window_event_channel_proxy_test",
+    ":ws_window_event_channel_stub_mock_test",
     ":ws_window_event_channel_stub_test",
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
@@ -514,6 +518,30 @@ ohos_unittest("ws_session_proxy_test") {
   ]
 }
 
+ohos_unittest("ws_session_proxy_mock_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include/zidl",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "session_proxy_mock_test.cpp",
+  ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+  ]
+}
 ohos_unittest("ws_session_display_power_controller_test") {
   module_out_path = module_out_path
 
@@ -583,6 +611,30 @@ ohos_unittest("ws_window_event_channel_proxy_test") {
   ]
 }
 
+ohos_unittest("ws_window_event_channel_proxy_mock_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "window_event_channel_proxy_mock_test.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  defines = [
+    "ENABLE_MOCK_WRITE_STRING",
+    "ENABLE_MOCK_WRITE_STRING_VECTOR",
+    "ENABLE_MOCK_READ_INT32",
+  ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_extension_session_manager_test") {
   module_out_path = module_out_path
 
@@ -600,6 +652,25 @@ ohos_unittest("ws_window_event_channel_stub_test") {
   module_out_path = module_out_path
 
   sources = [ "window_event_channel_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_event_channel_stub_mock_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "window_event_channel_stub_mock_test.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -628,6 +699,24 @@ ohos_unittest("ws_session_stub_test") {
   module_out_path = module_out_path
 
   sources = [ "session_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_stub_mock_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "session_stub_mock_test.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   deps = [ ":ws_unittest_common" ]
 

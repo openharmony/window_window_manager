@@ -67,6 +67,27 @@ void SessionStubTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: HandleTransferAccessibilityEvent
+ * @tc.desc: sessionStub HandleTransferAccessibilityEvent
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+
+    int32_t uiExtensionIdLevel = 0;
+    data.WriteInt32(uiExtensionIdLevel);
+    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
+}
+
+/**
  * @tc.name: OnRemoteRequest01
  * @tc.desc: sessionStub OnRemoteRequest01
  * @tc.type: FUNC
@@ -175,27 +196,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(0, res);
-}
-
-/**
- * @tc.name: HandleTransferAccessibilityEvent
- * @tc.desc: sessionStub HandleTransferAccessibilityEvent
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-
-    Accessibility::AccessibilityEventInfo info;
-    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
-    data.WriteParcelable(&infoParcel);
-
-    int32_t uiExtensionIdLevel = 0;
-    data.WriteInt32(uiExtensionIdLevel);
-    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
 }
 }
 } // namespace Rosen
