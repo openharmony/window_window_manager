@@ -1402,7 +1402,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
 
 void JsSceneSession::OnClick()
 {
-    WLOGFI("[NAPI]OnClick");
+    WLOGFD("[NAPI]OnClick");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
