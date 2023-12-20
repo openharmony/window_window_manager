@@ -106,6 +106,10 @@
 #include "sec_comp_enhance_kit.h"
 #endif
 
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif // IMF_ENABLE
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
@@ -1219,10 +1223,31 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
     return future;
 }
 
+void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("[WMSInput] session is nullptr");
+        return;
+    }
+    if (!sceneSession->IsSessionValid()) {
+#ifdef IMF_ENABLE
+        WLOGFI("[WMSInput] When the app is cold-started, Notify InputMethod framework close keyboard");
+        if (MiscServices::InputMethodController::GetInstance()) {
+            int32_t ret = MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+            if (ret != 0) { // 0 - NO_ERROR
+                WLOGFE("[WMSInput] InputMethod framework close keyboard failed, ret: %{public}d", ret);
+            }
+        }
+#endif
+    }
+}
+
 WSError SceneSessionManager::RequestSceneSessionActivationInner(
     sptr<SceneSession>& scnSession, bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise)
 {
     auto persistentId = scnSession->GetPersistentId();
+    RequestInputMethodCloseKeyboard(persistentId);
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
         RequestSessionFocusImmediately(persistentId);
     }
