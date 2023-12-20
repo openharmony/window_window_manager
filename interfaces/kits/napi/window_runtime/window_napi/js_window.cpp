@@ -321,7 +321,7 @@ napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetWindowAvoidAreaSync");
+    WLOGD("GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -496,7 +496,7 @@ napi_value JsWindow::SetCallingWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPreferredOrientation");
+    WLOGD("SetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
