@@ -2161,6 +2161,22 @@ WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpda
     return WSError::WS_OK;
 }
 
+void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    if (systemSessionPointerEventFunc_ != nullptr) {
+        systemSessionPointerEventFunc_(pointerEvent);
+    }
+}
+
+void SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent)
+{
+    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    if (systemSessionKeyEventFunc_ != nullptr) {
+        systemSessionKeyEventFunc_(keyEvent);
+    }
+}
+
 WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 {
     auto task = [weakThis = wptr(this), reason]() {

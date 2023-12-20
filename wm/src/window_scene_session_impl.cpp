@@ -24,6 +24,7 @@
 #include "display_info.h"
 #include "singleton_container.h"
 #include "display_manager.h"
+#include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
@@ -323,6 +324,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     }
     WLOGFD("[WMSLife] Window Create success [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
+    sptr<Window> self(this);
+    InputTransferStation::GetInstance().AddInputWindow(self);
+    needRemoveWindowInputChannel_ = true;
     return ret;
 }
 
@@ -778,6 +782,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     WLOGFI("[WMSLife] Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+    if (needRemoveWindowInputChannel_) {
+        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+        needRemoveWindowInputChannel_ = false;
+    }
     if (IsWindowSessionInvalid()) {
         WLOGFI("[WMSLife] session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_OK;

@@ -392,6 +392,9 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
     touchHotAreas_ = rects;
+    if (touchHotAreasChangeCallback_) {
+        touchHotAreasChangeCallback_();
+    }
 }
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
@@ -662,6 +665,11 @@ double WindowSessionProperty::GetTextFieldPositionY() const
 double WindowSessionProperty::GetTextFieldHeight() const
 {
     return textFieldHeight_;
+}
+
+void WindowSessionProperty::SetSessionPropertyChangeCallback(std::function<void()>&& callback)
+{
+    touchHotAreasChangeCallback_ = std::move(callback);
 }
 } // namespace Rosen
 } // namespace OHOS

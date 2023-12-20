@@ -45,6 +45,9 @@ void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBa
 
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
+    if (pidChangeCallback_) {
+        pidChangeCallback_(persistentId_, flag);
+    }
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
             hasPointDown_, isStartDrag_);
@@ -52,6 +55,11 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     }
     isStartMove_ = flag;
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
+}
+
+void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback)
+{
+    pidChangeCallback_ = callback;
 }
 
 bool MoveDragController::GetStartMoveFlag() const
@@ -133,7 +141,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             WLOGFD("Reset hasPointDown_ when point up or cancel");
             hasPointDown_ = false;
         }
-        WLOGFD("No need to move");
+        WLOGFD("No need to move action id: %{public}d", action);
         return false;
     }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;

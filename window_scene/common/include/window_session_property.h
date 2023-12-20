@@ -132,6 +132,8 @@ public:
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
 
+    void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -184,6 +186,7 @@ private:
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
     bool isNeedUpdateWindowMode_ = false;
+    std::function<void()> touchHotAreasChangeCallback_;
 };
 
 struct SystemSessionConfig : public Parcelable {
