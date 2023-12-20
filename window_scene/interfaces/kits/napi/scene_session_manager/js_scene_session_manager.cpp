@@ -408,7 +408,7 @@ void JsSceneSessionManager::ProcessShowPiPMainWindow()
 
 void JsSceneSessionManager::ProcessCallingWindowIdChangeRegister()
 {
-    ProcessCallingWindowIdChangeFunc func = [this](const uint32_t callingWindowId) {
+    ProcessCallingWindowIdChangeFunc func = [this](uint32_t callingWindowId) {
         WLOGFD("ProcessCallingWindowIdChangeRegister called, callingWindowId: %{public}d", callingWindowId);
         this->OnCallingWindowIdChange(callingWindowId);
     };
