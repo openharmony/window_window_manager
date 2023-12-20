@@ -305,6 +305,11 @@ struct WSRectT {
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
     }
 
+    inline bool IsInvalid() const
+    {
+        return IsEmpty() || NearZero(width_) || NearZero(height_);
+    }
+
     inline std::string ToString() const
     {
         constexpr int precision = 2;
