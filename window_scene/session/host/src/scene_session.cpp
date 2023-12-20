@@ -404,7 +404,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rect, reason]() {
+    auto task = [weakThis = wptr(this), rect, reason, rsTransaction]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -414,13 +414,29 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFW("[WMSLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
             return WSError::WS_OK;
         }
-        session->winRect_ = rect;
-        session->isDirty_ = true;
+        if (rect.IsInvalid()) {
+            WLOGFE("[WMSLayout] id:%{public}d rect:[%{public}d, %{public}d, %{public}u, %{public}u] is invalid",
+                session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        // position change no need to notify client, since frame layout finish will notify
+        if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_)) {
+            WLOGFI("[WMSLayout] position change no need notify client id:%{public}d, rect:[%{public}d, %{public}d, \
+                %{public}u, %{public}u], preRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+                session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_,
+                session->winRect_.posX_, session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
+            session->winRect_ = rect;
+            session->isDirty_ = true;
+        } else {
+            session->winRect_ = rect;
+            session->NotifyClientToUpdateRect(rsTransaction);
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateRect" + GetRectInfo(rect));
@@ -445,7 +461,14 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             WLOGFD("[WMSLayout] skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+        WSError ret = WSError::WS_OK;
+        // once reason is undefined, not use rsTransaction
+        // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
+        if (session->reason_ == SizeChangeReason::UNDEFINED) {
+            ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
+        } else {
+            ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+        }
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
