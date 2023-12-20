@@ -1037,6 +1037,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (CheckDialogOnForeground()) {
+            HandlePointDownDialog(pointerEvent->GetPointerAction());
             WLOGFI("[WMSDialog] There is dialog window foreground");
             return WSError::WS_OK;
         }
@@ -1072,8 +1073,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    bool raiseEnabled = (WindowHelper::IsSubWindow(property->GetWindowType()) ||
-        property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && property->GetRaiseEnabled() &&
+    bool raiseEnabled = property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();

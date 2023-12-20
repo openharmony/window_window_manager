@@ -362,6 +362,7 @@ protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     bool IsTopDialog() const;
     bool NeedSystemPermission(WindowType type);
+    void HandlePointDownDialog(int32_t pointAction);
 
     using Task = std::function<void()>;
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
@@ -446,9 +447,9 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    void HandlePointDownDialog(int32_t pointAction);
     void NotifyPointerEventToRs(int32_t pointAction);
     void NotifySessionInfoChange();
+    WSError HandleSubWindowClick(int32_t action);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
