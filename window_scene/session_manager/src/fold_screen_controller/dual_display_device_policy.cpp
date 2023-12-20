@@ -252,11 +252,11 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
     }
-    ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_FULL, (int32_t)SCREEN_ID_MAIN);
     #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
     #endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_FULL, (int32_t)SCREEN_ID_MAIN);
         // off full screen
         screenId_ = SCREEN_ID_FULL;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
