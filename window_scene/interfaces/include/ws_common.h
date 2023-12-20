@@ -189,6 +189,8 @@ struct SessionInfo {
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
+    bool isRotable_ = false;
+    bool isSystemInput_ = false;
 };
 
 enum class SessionFlag : uint32_t {

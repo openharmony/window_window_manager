@@ -71,6 +71,9 @@ using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
+using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
+using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
+using NotifySystemSessionKeyEventFunc = std::function<void(std::shared_ptr<MMI::KeyEvent> keyEvent)>;
 
 class ILifecycleListener {
 public:
@@ -173,6 +176,7 @@ public:
     WSError UpdateDensity();
 
     void SetShowRecent(bool showRecent);
+    void SetSystemActive(bool systemActive);
     bool GetShowRecent() const;
     void SetOffset(float x, float y);
     float GetOffsetX() const;
@@ -200,6 +204,7 @@ public:
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
     void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
+    void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
@@ -250,6 +255,8 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    void SetSystemTouchable(bool touchable);
+    bool GetSystemTouchable() const;
     WSError SetVisible(bool isVisible);
     bool GetVisible() const;
     WSError SetDrawingContentState(bool isRSDrawing);
@@ -262,6 +269,7 @@ public:
 
     bool IsSessionValid() const;
     bool IsActive() const;
+    bool IsSystemActive() const;
     bool IsSystemSession() const;
     bool IsTerminated() const;
     bool IsSessionForeground() const;
@@ -307,6 +315,8 @@ public:
         return std::vector<Rect>();
     }
 
+    virtual void SetTouchHotAreas(const std::vector<Rect>& touchHotAreas);
+
     void SetVpr(float vpr)
     {
         vpr_ = vpr;
@@ -333,6 +343,9 @@ public:
 
     void NotifyForegroundInteractiveStatus(bool interactive);
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height);
+    void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
+    void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
+    bool IsSystemInput();
 
 protected:
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
@@ -373,6 +386,7 @@ protected:
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;
+    bool isSystemActive_ = false;
     WSRect winRect_;
     WSRectF bounds_;
     float offsetX_ = 0.0f;
@@ -381,6 +395,7 @@ protected:
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
+    NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
     NotifyUIRequestFocusFunc requestFocusFunc_;
@@ -404,6 +419,8 @@ protected:
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
+    NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
+    NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -423,10 +440,14 @@ protected:
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
 
+    mutable std::mutex pointerEventMutex_;
+    mutable std::mutex keyEventMutex_;
+
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     void HandlePointDownDialog(int32_t pointAction);
+    void NotifySessionInfoChange();
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -473,6 +494,7 @@ private:
     bool isRSDrawing_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };
+    bool systemTouchable_ { true };
 };
 } // namespace OHOS::Rosen
 

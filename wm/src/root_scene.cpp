@@ -23,6 +23,7 @@
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
+#include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
 
@@ -168,6 +169,7 @@ void RootScene::RegisterInputEventListener()
         uiContent_.get(), eventHandler_))) {
         WLOGFE("EnableInputEventListener fail");
     }
+    InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)

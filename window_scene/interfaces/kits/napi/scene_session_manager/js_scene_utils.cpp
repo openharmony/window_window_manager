@@ -210,6 +210,32 @@ bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRec
     return true;
 }
 
+bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsRotatable) != napi_undefined) {
+        bool isRotable = false;
+        if (!ConvertFromJsValue(env, jsIsRotatable, isRotable)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isRotable");
+            return false;
+        }
+        sessionInfo.isRotable_ = isRotable;
+    }
+    return true;
+}
+
+bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsSystemInput) != napi_undefined) {
+        bool isSystemInput = false;
+        if (!ConvertFromJsValue(env, jsIsSystemInput, isSystemInput)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isSystemInput");
+            return false;
+        }
+        sessionInfo.isSystemInput_ = isSystemInput;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -252,6 +278,10 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsPersistentRecover = nullptr;
     napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
+    napi_value jsIsRotable = nullptr;
+    napi_get_named_property(env, jsObject, "isRotable", &jsIsRotable);
+    napi_value jsIsSystemInput = nullptr;
+    napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -266,6 +296,12 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsPersistentRecoverUndefined(env, jsIsPersistentRecover, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsRotatableUndefined(env, jsIsRotable, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
         return false;
     }
     return true;
