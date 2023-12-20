@@ -201,7 +201,7 @@ bool Session::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, co
         WLOGFE("listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         WLOGFE("Listener already registered");
         return false;
@@ -217,7 +217,7 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
         WLOGFE("listener could not be null");
         return false;
     }
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
         holder.end());
@@ -227,7 +227,7 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
 void Session::NotifyActivation()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnActivation();
@@ -238,7 +238,7 @@ void Session::NotifyActivation()
 void Session::NotifyConnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnConnect();
@@ -249,7 +249,7 @@ void Session::NotifyConnect()
 void Session::NotifyForeground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnForeground();
@@ -260,7 +260,7 @@ void Session::NotifyForeground()
 void Session::NotifyBackground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnBackground();
@@ -271,7 +271,7 @@ void Session::NotifyBackground()
 void Session::NotifyDisconnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnDisconnect();
@@ -282,7 +282,7 @@ void Session::NotifyDisconnect()
 void Session::NotifyExtensionDied()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnExtensionDied();
@@ -294,7 +294,7 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
     int32_t uiExtensionIdLevel)
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevel);
