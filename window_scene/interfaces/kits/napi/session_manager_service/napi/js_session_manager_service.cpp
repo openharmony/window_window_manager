@@ -59,15 +59,19 @@ public:
 private:
     napi_value OnInitSessionManagerService(napi_env env, napi_callback_info info)
     {
-        WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
-        SessionManagerService::GetInstance().Init();
+        WLOGI("[WMSRecover] JsSessionManagerService: OnInitSessionManagerService is called");
+        if (SessionManagerService::GetInstance() != nullptr) {
+            SessionManagerService::GetInstance()->Init();
+        }
         return NapiGetUndefined(env);
     }
 
     napi_value OnNotifySceneBoardAvailable(napi_env env, napi_callback_info info)
     {
-        WLOGI("[RECOVER]JsSessionManagerService: OnNotifySceneBoardAvailable is called");
-        SessionManagerService::GetInstance().NotifySceneBoardAvailable();
+        WLOGI("[WMSRecover] JsSessionManagerService: OnNotifySceneBoardAvailable is called");
+        if (SessionManagerService::GetInstance() != nullptr) {
+            SessionManagerService::GetInstance()->NotifySceneBoardAvailable();
+        }
         return NapiGetUndefined(env);
     }
 };
