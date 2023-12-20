@@ -31,7 +31,7 @@ public:
     {
         T object{};
         auto objSize = sizeof(object);
-        if (!data_ || objSize > size_ - pos_) {
+        if (!data_ || (objSize > size_ - pos_)) {
             return object;
         }
         auto ret = memcpy_s(&object, objSize, data_ + pos_, objSize);
@@ -44,11 +44,12 @@ public:
 
     const std::uint8_t* GetRaw(size_t rawSize)
     {
-        if (!data_ || rawSize > size_ - pos_) {
+        if (!data_ || (rawSize > size_ - pos_)) {
             return nullptr;
         }
+        auto current = pos_;
         pos_ += rawSize;
-        return data_ + rawSize;
+        return data_ + current;
     }
 
     std::string GetString()
