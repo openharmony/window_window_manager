@@ -91,6 +91,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "updateNativeVisibility", moduleName, JsSceneSession::UpdateNativeVisibility);
     BindNativeFunction(env, objValue, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
     BindNativeFunction(env, objValue, "setZOrder", moduleName, JsSceneSession::SetZOrder);
+    BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
+    BindNativeFunction(env, objValue, "setSystemActive", moduleName, JsSceneSession::SetSystemActive);
     BindNativeFunction(env, objValue, "setPrivacyMode", moduleName, JsSceneSession::SetPrivacyMode);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha", moduleName,
@@ -832,6 +834,18 @@ napi_value JsSceneSession::SetZOrder(napi_env env, napi_callback_info info)
     WLOGD("[NAPI]SetZOrder");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetZOrder(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetTouchable(env, info): nullptr;
+}
+
+napi_value JsSceneSession::SetSystemActive(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSystemActive(env, info): nullptr;
 }
 
 napi_value JsSceneSession::SetFloatingScale(napi_env env, napi_callback_info info)
@@ -1940,6 +1954,35 @@ napi_value JsSceneSession::OnSetShowRecent(napi_env env, napi_callback_info info
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetSystemActive(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+       WLOGFE("[NAPI]argc is invalid : %{public}zu", argc);
+       napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), 
+       "Input parameter is missing or invalid"));
+       return NapiGetUndefined(env);
+    }
+    bool scbSystemActive = false;
+    if (!ConvertFromJsValue(env, argv[0], scbSystemActive)){
+        WLOGFE("[NAPI] Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), 
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI] session_ is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), 
+        "session is null"));
+        return NapiGetUndefined(env);
+    }
+    session->SetSystemActive(scbSystemActive);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetZOrder(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1995,6 +2038,38 @@ napi_value JsSceneSession::OnSetFloatingScale(napi_env env, napi_callback_info i
         return NapiGetUndefined(env);
     }
     session->SetFloatingScale(static_cast<float_t>(floatingScale));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        WLOGFE("[NAPI] Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid" ));
+        return NapiGetUndefined(env);
+    }
+
+    bool touchable = false;
+    if (!ConvertFromJsValue(env, argv[0], touchable)) {
+      WLOGFE("[NAPI] Failed to  convert parameter to touchable");
+      napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid" ));
+      return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI] Session is null");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "session is null"));
+        return NapiGetUndefined(env);
+    }
+
+    session->SetSystemTouchable(touchable);
     return NapiGetUndefined(env);
 }
 
