@@ -407,16 +407,11 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
                 WLOGFE("[NAPI]this listener or eng is nullptr");
                 return;
             }
-            napi_value propertyValue = nullptr;
-            napi_create_object(eng, &propertyValue);
-            if (propertyValue == nullptr) {
-                WLOGFE("[NAPI]Failed to convert prop to jsObject");
-                return;
-            }
-            napi_set_named_property(env, propertyValue, "status",
-                CreateJsValue(eng, static_cast<uint32_t>(windowstatus)));
-            napi_value argv[] = {propertyValue};
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(eng, &scope);
+            napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(windowstatus))};
             thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            napi_close_handle_scope(eng, scope);
         }
     );
 
