@@ -45,7 +45,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-    std::string name = "PipFuzzTest";
     size_t startPos = 0;
     sptr<PipOption> option = new PipOption();
     AbilityRuntime::Context* context = nullptr;

@@ -980,7 +980,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
     } else {
         if (argc > 0 && GetType(env, argv[0]) == napi_object) {
             nativeObject = argv[0];
-            nativeBoolean = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_boolean ? argv[1] : nullptr);
+            nativeBoolean = (GetType(env, argv[1]) == napi_boolean ? argv[1] : nullptr);
         }
     }
     
