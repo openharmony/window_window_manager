@@ -791,7 +791,7 @@ static void GetTopWindowTask(void* contextPtr, napi_env env, NapiAsyncTask& task
     } else {
         task.Resolve(env, CreateJsWindowObject(env, window));
     }
-    WLOGI("Get top window %{public}s success", windowName.c_str());
+    WLOGD("Get top window %{public}s success", windowName.c_str());
     return;
 }
 
