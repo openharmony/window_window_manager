@@ -163,6 +163,18 @@ ohos_shared_library("scene_session_manager") {
     defines += [ "SECURITY_COMPONENT_MANAGER_ENABLE" ]
   }
 
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.inputmethod_imf)) {
+    imf_enable = true
+  } else {
+    imf_enable = false
+  }
+  print("imf_enable: ", imf_enable)
+  if (imf_enable == true) {
+    external_deps += [ "imf:inputmethod_client" ]
+    defines += [ "IMF_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
