@@ -3530,15 +3530,8 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
         }
         return;
     }
-    // name
-    std::string sName;
-    if (sceneSession->GetSessionInfo().isSystem_) {
-        sName = sceneSession->GetSessionInfo().abilityName_;
-    } else {
-        sName = sceneSession->GetWindowName();
-    }
     WLOGFI("[WMSFocus]UpdateFocusStatus, name: %{public}s, id: %{public}d, isFocused: %{public}d",
-        sName.c_str(), sceneSession->GetPersistentId(), isFocused);
+        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused);
     // set focused
     if (isFocused) {
         SetFocusedSession(sceneSession->GetPersistentId());
@@ -3552,8 +3545,8 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
 void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
 {
     int32_t persistentId = sceneSession->GetPersistentId();
-    WLOGFI("[WMSFocus]NotifyFocusStatus, id: %{public}d, isFocused: %{public}d",
-        sceneSession->GetPersistentId(), isFocused);
+    WLOGFI("[WMSFocus]NotifyFocusStatus, name: %{public}s, id: %{public}d, isFocused: %{public}d",
+        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused);
     if (isFocused) {
         if (sceneSession && IsSessionVisible(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);

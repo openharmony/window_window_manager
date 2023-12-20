@@ -1375,6 +1375,15 @@ const std::string& SceneSession::GetWindowName() const
     return GetSessionProperty()->GetWindowName();
 }
 
+const std::string& SceneSession::GetWindowNameAllType() const
+{
+    if (GetSessionInfo().isSystem_) {
+        return GetSessionInfo().abilityName_;
+    } else {
+        return GetWindowName();
+    }
+}
+
 WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
 {
     GetSessionProperty()->SetTurnScreenOn(turnScreenOn);
