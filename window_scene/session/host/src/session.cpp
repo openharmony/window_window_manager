@@ -727,13 +727,13 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     int32_t pid, int32_t uid)
 {
     if (property == nullptr) {
-        WLOGFE("[WMSRecover]property is nullptr");
+        WLOGFE("[WMSRecover] property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFI("[WMSRecover]Reconnect session with: persistentId=%{public}d, windowState=%{public}u",
+    WLOGFI("[WMSRecover] Reconnect session with: persistentId=%{public}d, windowState=%{public}u",
         property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()));
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("[WMSRecover]session stage or eventChannel is nullptr");
+        WLOGFE("[WMSRecover] session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;

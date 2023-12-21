@@ -65,7 +65,7 @@ public:
 
     void OnRemoteDied(const wptr<IRemoteObject> &wptrDeath) override
     {
-        WLOGFD("[WMSRecover]OnRemoteDied, pid = %{public}" PRId64, pid_);
+        WLOGFD("[WMSRecover] OnRemoteDied, pid = %{public}" PRId64, pid_);
         MockSessionManagerService::GetInstance().UnRegisterSessionManagerServiceRecoverListener(pid_);
     }
 
@@ -190,7 +190,7 @@ sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
 
 void MockSessionManagerService::NotifySceneBoardAvailable()
 {
-    WLOGFI("[WMSRecover]scene board is available");
+    WLOGFI("[WMSRecover] scene board is available");
     NotifySceneBoardAvailableToClient();
 }
 
@@ -200,7 +200,7 @@ void MockSessionManagerService::RegisterSessionManagerServiceRecoverListener(con
     WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
     if (listener == nullptr) {
-        WLOGFE("[WMSRecover]listener is nullptr");
+        WLOGFE("[WMSRecover] listener is nullptr");
         return;
     }
     sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient();
@@ -228,11 +228,11 @@ void MockSessionManagerService::UnRegisterSessionManagerServiceRecoverListener(i
 
 void MockSessionManagerService::NotifySceneBoardAvailableToClient()
 {
-    WLOGFD("[WMSRecover]Remote process count = %{public}" PRIu64, static_cast<uint64_t>(smsRecoverListenerMap_.size()));
+    WLOGFI("[WMSRecover] Remote process count = %{public}" PRIu64, static_cast<uint64_t>(smsRecoverListenerMap_.size()));
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
     for (auto& it: smsRecoverListenerMap_) {
         if (it.second != nullptr) {
-            WLOGFD("[WMSRecover]Call OnSessionManagerServiceRecover pid = %{public}" PRId64, it.first);
+            WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover pid = %{public}" PRId64, it.first);
             it.second->OnSessionManagerServiceRecover(sessionManagerService_);
         }
     }

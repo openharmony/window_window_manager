@@ -1225,7 +1225,7 @@ void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleB
 void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
-    WLOGI("[WMSRecover]RecoverSessionListener with persistentId=%{public}d", persistentId);
+    WLOGI("[WMSRecover] RecoverSessionListener with persistentId=%{public}d", persistentId);
     if (avoidAreaChangeListeners_.find(persistentId) != avoidAreaChangeListeners_.end() &&
         !avoidAreaChangeListeners_[persistentId].empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
