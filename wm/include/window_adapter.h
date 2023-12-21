@@ -37,7 +37,7 @@ public:
 class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
-    using WindowAdapterRecoverCallbackFunc = std::function<void()>;
+    using SessionRecoverCallbackFunc = std::function<void()>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
@@ -97,7 +97,15 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token = nullptr);
+    virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
     virtual void DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
+    virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
+    void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
+    void UnRegisterSessionRecoverCallbackFunc(int32_t persistentId);
     virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
@@ -109,8 +117,7 @@ private:
     bool InitWMSProxy();
     bool InitSSMProxy();
 
-    void WindowManagerRecover();
-    void RegisterWindowManagerRecoverCallbackFunc();
+    void WindowManagerAndSessionRecover();
 
     std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
@@ -118,6 +125,7 @@ private:
     bool isProxyValid_ { false };
 
     bool recoverInitialized = false;
+    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
 };
 } // namespace Rosen

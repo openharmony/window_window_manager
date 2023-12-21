@@ -129,8 +129,8 @@ public:
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) override;
     WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        SystemSessionConfig& systemConfig, sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
-        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
+        sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     void SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func);
@@ -450,7 +450,7 @@ private:
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     bool needUpdateSessionRect_ = false;
     int32_t currentUserId_;
-    bool enableInputEvent_ = true;
+    std::atomic<bool> enableInputEvent_ = true;
     bool gestureNavigationEnabled_ {true};
 
     std::shared_ptr<TaskScheduler> taskScheduler_;

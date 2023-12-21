@@ -1242,12 +1242,17 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
 
 void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 {
-    WLOGFD("[NAPI]OnBufferAvailableChange, state: %{public}u", isBufferAvailable);
-    auto iter = jsCbMap_.find(BUFFER_AVAILABLE_CHANGE_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(BUFFER_AVAILABLE_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            WLOGFW("[NAPI]Not found bufferAvailableChange key in jsCbMap_");
+            return;
+        }
+        jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
+    WLOGFD("[NAPI]OnBufferAvailableChange, state: %{public}u", isBufferAvailable);
     auto task = [isBufferAvailable, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");

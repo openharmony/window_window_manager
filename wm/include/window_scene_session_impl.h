@@ -139,6 +139,7 @@ protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     WMError RecoverAndConnectSpecificSession();
+    WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
