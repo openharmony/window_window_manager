@@ -19,6 +19,7 @@
 #include <transaction/rs_transaction.h>
 
 #include "js_runtime_utils.h"
+#include "scene_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -78,19 +79,36 @@ napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callbac
 
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto transactionController = RSSyncTransactionController::GetInstance();
-    if (transactionController) {
-        RSTransaction::FlushImplicitTransaction();
-        transactionController->OpenSyncTransaction();
+    auto task = []() {
+        auto transactionController = RSSyncTransactionController::GetInstance();
+        if (transactionController) {
+            RSTransaction::FlushImplicitTransaction();
+            transactionController->OpenSyncTransaction();
+        };
+    };
+    auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
+    if (handler) {
+        // must sync to include change
+        handler->PostVoidSyncTask(task);
+    } else {
+        task();
     }
     return NapiGetUndefined(env);
 }
 
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto transactionController = RSSyncTransactionController::GetInstance();
-    if (transactionController) {
-        transactionController->CloseSyncTransaction();
+    auto task = []() {
+        auto transactionController = RSSyncTransactionController::GetInstance();
+        if (transactionController) {
+            transactionController->CloseSyncTransaction();
+        }
+    };
+    auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
+    if (handler) {
+        handler->PostAsyncTask(task);
+    } else {
+        task();
     }
     return NapiGetUndefined(env);
 }

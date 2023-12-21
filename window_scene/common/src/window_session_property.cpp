@@ -300,7 +300,9 @@ void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
 
 void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR
+        || type ==WindowType::WINDOW_TYPE_NAVIGATION_BAR
+        || type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
         sysBarPropMap_[type] = property;
     }
 }
@@ -328,6 +330,16 @@ void WindowSessionProperty::SetWindowMode(WindowMode mode)
 WindowMode WindowSessionProperty::GetWindowMode() const
 {
     return windowMode_;
+}
+
+WindowState WindowSessionProperty::GetWindowState() const
+{
+    return windowState_;
+}
+
+void WindowSessionProperty::SetWindowState(WindowState state)
+{
+    windowState_ = state;
 }
 
 void WindowSessionProperty::SetSessionGravity(SessionGravity gravity, uint32_t percent)
@@ -380,6 +392,9 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
     touchHotAreas_ = rects;
+    if (touchHotAreasChangeCallback_) {
+        touchHotAreasChangeCallback_();
+    }
 }
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
@@ -387,14 +402,14 @@ void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
-void WindowSessionProperty::SetNeedKeepKeyboard(bool isNeedKeepKeyboard)
+void WindowSessionProperty::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
-    isNeedKeepKeyboard_ = isNeedKeepKeyboard;
+    keepKeyboardFlag_ = keepKeyboardFlag;
 }
 
-bool WindowSessionProperty::IsNeedKeepKeyboard() const
+bool WindowSessionProperty::GetKeepKeyboardFlag() const
 {
-    return isNeedKeepKeyboard_;
+    return keepKeyboardFlag_;
 }
 
 void WindowSessionProperty::SetCallingWindow(uint32_t windowId)
@@ -438,7 +453,8 @@ void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSess
 bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
-    if (size > 1) { // 1 max systembar number
+    uint32_t maxSystemBarNumber = 3;
+    if (size > maxSystemBarNumber) { // max systembar number
         return false;
     }
 
@@ -460,7 +476,8 @@ bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
 void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property)
 {
     uint32_t size = parcel.ReadUint32();
-    if (size > 1) { // 1 max systembar number
+    uint32_t maxSystemBarNumber = 3;
+    if (size > maxSystemBarNumber) { // max systembar number
         return;
     }
 
@@ -527,6 +544,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_);
 }
 
@@ -573,6 +591,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSystemCalling(parcel.ReadBool());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
+    property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingWindow(parcel.ReadUint32());
     return property;
@@ -646,6 +665,11 @@ double WindowSessionProperty::GetTextFieldPositionY() const
 double WindowSessionProperty::GetTextFieldHeight() const
 {
     return textFieldHeight_;
+}
+
+void WindowSessionProperty::SetSessionPropertyChangeCallback(std::function<void()>&& callback)
+{
+    touchHotAreasChangeCallback_ = std::move(callback);
 }
 } // namespace Rosen
 } // namespace OHOS

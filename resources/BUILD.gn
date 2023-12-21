@@ -13,6 +13,7 @@
 
 group("window_resources") {
   deps = [
+    "abc:window_resources_abc",
     "config:window_config",
     "media:window_resources_media",
   ]

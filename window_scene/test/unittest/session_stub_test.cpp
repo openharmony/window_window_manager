@@ -116,9 +116,6 @@ HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
     EXPECT_NE(data.WriteParcelable(&options), false);
     res = session_->HandleTerminateSession(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleSessionException(data, reply);
-    ASSERT_EQ(0, res);
-    ASSERT_EQ(data.WriteUint64(2), true);
     res = session_->HandleUpdateActivateStatus(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateSessionRect(data, reply);
@@ -148,7 +145,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     auto res = session_->HandleRaiseAboveTarget(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
-    ASSERT_EQ(5, res);
+    ASSERT_EQ(0, res);
     res = session_->HandleBackPressed(data, reply);
     ASSERT_EQ(5, res);
     res = session_->HandleMarkProcessed(data, reply);
@@ -190,11 +187,11 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     MessageOption option(MessageOption::TF_ASYNC);
 
     Accessibility::AccessibilityEventInfo info;
-    AccessibilityEventInfoParcel infoParcel(info);
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
     data.WriteParcelable(&infoParcel);
 
-    std::vector<int32_t> uiExtensionIdLevelVec;
-    data.WriteInt32Vector(uiExtensionIdLevelVec);
+    int32_t uiExtensionIdLevel = 0;
+    data.WriteInt32(uiExtensionIdLevel);
     ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
 }
 }

@@ -77,6 +77,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SYSTEM_FLOAT,
     WINDOW_TYPE_PIP,
     WINDOW_TYPE_THEME_EDITOR,
+    WINDOW_TYPE_NAVIGATION_INDICATOR,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -214,8 +215,7 @@ enum class WindowStatus : uint32_t {
     WINDOW_STATUS_MAXMIZE,
     WINDOW_STATUS_MINIMIZE,
     WINDOW_STATUS_FLOATING,
-    WINDOW_STATUS_SPLIT_PRIMARY = 100,
-    WINDOW_STATUS_SPLIT_SECONDARY
+    WINDOW_STATUS_SPLITSCREEN
 };
 
 
@@ -250,6 +250,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_PIP_INTERNAL_ERROR,             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR     },
     {WMError::WM_ERROR_PIP_REPEAT_OPERATION,           WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION   },
     {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING        },
+    {WMError::WM_ERROR_INVALID_SESSION,                WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
 };
 
 /**
@@ -328,6 +329,16 @@ enum class WindowSessionType : uint32_t {
 enum class WindowGravity : uint32_t {
     WINDOW_GRAVITY_FLOAT = 0,
     WINDOW_GRAVITY_BOTTOM,
+};
+
+/**
+ * @brief Enumerates window setuicontent type.
+ */
+enum class WindowSetUIContentType: uint32_t {
+    DEFAULT,
+    DISTRIBUTE,
+    BY_NAME,
+    BY_ABC,
 };
 
 /**
@@ -615,7 +626,7 @@ enum class PipWindowState : uint32_t {
 /**
  * @brief Enumerates picture in picture template type.
  */
-enum class PipTemplateType : int32_t {
+enum class PipTemplateType : uint32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
@@ -702,6 +713,39 @@ struct WindowLimits {
     bool IsEmpty() const
     {
         return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+};
+
+/**
+ * @struct TitleButtonRect
+ *
+ * @brief An area of title buttons relative to the upper right corner of the window.
+ */
+struct TitleButtonRect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+
+    bool operator==(const TitleButtonRect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool operator!=(const TitleButtonRect& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
+    bool IsInsideOf(const TitleButtonRect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 };
 

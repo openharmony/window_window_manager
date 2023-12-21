@@ -68,7 +68,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
-        RSTransaction::FlushImplicitTransaction();
     }
 }
 
@@ -81,7 +80,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
 
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
-        WLOGFE("Repeat to register screen change listener!");
+        WLOGFI("Repeat to register screen change listener!");
         return;
     }
 
@@ -110,6 +109,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    uint32_t refreshRate = RSInterfaces::GetInstance().GetScreenCurrentRefreshRate(screenId_);
     displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
@@ -117,7 +117,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
-    displayInfo->SetRefreshRate(property_.GetRefreshRate());
+    displayInfo->SetRefreshRate(refreshRate);
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
@@ -225,6 +225,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
+    property_ = newProperty;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             continue;
@@ -315,14 +316,29 @@ void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> u
     updateToInputManagerCallback_ = updateToInputManagerCallback;
 }
 
-void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
     if (foldDisplayMode == FoldDisplayMode::FULL &&
-        property_.GetBounds() == bounds &&
-        property_.GetRotation() != static_cast<float>(rotation)) {
+        property_.GetBounds() == bounds && property_.GetRotation() != static_cast<float>(rotation)) {
         needUpdateToInputManager = true;
     }
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    property_.SetBounds(bounds);
+    property_.SetRotation(static_cast<float>(rotation));
+    property_.UpdateScreenRotation(targetRotation);
+    property_.SetDisplayOrientation(displayOrientation);
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+        // fold phone need fix 90 degree by remainder 360 degree
+        int foldRotation = (rotation + 90) % 360;
+        updateToInputManagerCallback_(static_cast<float>(foldRotation));
+        WLOGFI("updateToInputManagerCallback_:%{public}d", foldRotation);
+    }
+}
+
+void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+{
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -337,12 +353,6 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     } else {
         displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
     }
-    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
-        // fold phone need fix 90 degree by remainder 360 degree
-        int foldRotation = (rotation + 90) % 360;
-        updateToInputManagerCallback_(static_cast<float>(foldRotation));
-        WLOGFI("UpdatePropertyAfterRotation updateToInputManagerCallback_:%{public}d", foldRotation);
-    }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
@@ -352,7 +362,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
-        WLOGE("SCB: ScreenSession::GetActiveScreenMode active mode index is wrong: %{public}d", activeIdx_);
+        WLOGW("SCB: ScreenSession::GetActiveScreenMode active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
     return modes_[activeIdx_];
@@ -773,6 +783,10 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
 {
     if (displayNode_ != nullptr) {
         displayNode_->SetDisplayNodeMirrorConfig(config);
+        if (screenId_ == 0 && isFold_) {
+            WLOGFI("Return InitRSDisplayNode flodScreen0");
+            return;
+        }
     } else {
         std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
         if (rsDisplayNode == nullptr) {
@@ -797,6 +811,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         WLOGFI("virtualScreen SetSecurityDisplay success");
     }
     // If setDisplayOffset is not valid for SetFrame/SetBounds
+    WLOGFI("InitRSDisplayNode screnId:%{public}" PRIu64" width:%{public}u height:%{public}u", screenId_, width, height);
     displayNode_->SetFrame(0, 0, width, height);
     displayNode_->SetBounds(0, 0, width, height);
     auto transactionProxy = RSTransactionProxy::GetInstance();
@@ -1014,5 +1029,11 @@ void ScreenSession::SetAvailableArea(DMRect area)
 DMRect ScreenSession::GetAvailableArea()
 {
     return property_.GetAvailableArea();
+}
+
+void ScreenSession::SetFoldScreen(bool isFold)
+{
+    WLOGFI("SetFoldScreen %{public}u", isFold);
+    isFold_ = isFold;
 }
 } // namespace OHOS::Rosen

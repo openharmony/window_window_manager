@@ -72,7 +72,7 @@ public:
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
-    void SetNeedKeepKeyboard(bool isNeedKeepKeyboard);
+    void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingWindow(uint32_t windowId);
 
@@ -113,7 +113,7 @@ public:
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
-    bool IsNeedKeepKeyboard() const;
+    bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingWindow() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -126,8 +126,13 @@ public:
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
 
+    WindowState GetWindowState() const;
+    void SetWindowState(WindowState state);
+
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
+
+    void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -157,12 +162,15 @@ private:
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
-        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+        { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+        { WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
     };
     bool isDecorEnable_ = false;
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
@@ -172,12 +180,13 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
-    bool isNeedKeepKeyboard_ = false;
+    bool keepKeyboardFlag_ = false;
     uint32_t callingWindowId_ = INVALID_WINDOW_ID;
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
     bool isNeedUpdateWindowMode_ = false;
+    std::function<void()> touchHotAreasChangeCallback_;
 };
 
 struct SystemSessionConfig : public Parcelable {

@@ -55,6 +55,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_SCREENSHOT,
     TYPE_SYSTEM_TOAST,
     TYPE_DIVIDER,
+    TYPE_GLOBAL_SEARCH,
     TYPE_END
 };
 
@@ -65,6 +66,7 @@ enum class LifeCycleEventType : uint32_t {
     BACKGROUND,
     RESUMED,
     PAUSED,
+    DESTROYED,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
@@ -88,6 +90,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SCREENSHOT,          ApiWindowType::TYPE_SCREENSHOT        },
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
+    { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -111,6 +114,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_SCREENSHOT,          WindowType::WINDOW_TYPE_SCREENSHOT          },
     { ApiWindowType::TYPE_SYSTEM_TOAST,        WindowType::WINDOW_TYPE_SYSTEM_TOAST        },
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
+    { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -183,6 +187,8 @@ struct SystemBarPropertyFlag {
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         napi_env env, napi_callback_info info, sptr<Window>& window);
+    bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        napi_env env, napi_callback_info info, sptr<Window>& window);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
@@ -199,6 +205,7 @@ struct SystemBarPropertyFlag {
     napi_value WindowErrorCodeInit(napi_env env);
     napi_value WindowErrorInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
+    napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)

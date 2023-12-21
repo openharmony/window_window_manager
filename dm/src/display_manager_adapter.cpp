@@ -366,7 +366,7 @@ bool BaseAdapter::InitDMSProxy()
             displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
         }
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
-            WLOGFE("Failed to get system display manager services");
+            WLOGFW("Failed to get system display manager services");
             return false;
         }
 
@@ -483,7 +483,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        WLOGFW("screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -550,6 +550,13 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     INIT_PROXY_CHECK_RETURN();
 
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
+}
+
+void DisplayManagerAdapter::SetFoldStatusLocked(bool locked)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetFoldStatusLocked(locked);
 }
 
 sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()

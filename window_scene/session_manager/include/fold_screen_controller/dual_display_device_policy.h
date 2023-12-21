@@ -32,9 +32,17 @@ public:
     FoldStatus GetFoldStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
+    void SetOnBootAnimation(bool onBootAnimation) override;
+    void UpdateForPhyScreenPropertyChange() override;
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
+    void RecoverWhenBootAnimationExit();
+    void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
+    FoldDisplayMode GetModeMatchStatus();
+    void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     std::recursive_mutex& displayInfoMutex_;
 };

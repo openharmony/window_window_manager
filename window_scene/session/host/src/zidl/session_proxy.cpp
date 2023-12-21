@@ -831,7 +831,7 @@ WSError SessionProxy::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 }
 
 WSError SessionProxy::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    const std::vector<int32_t>& uiExtensionIdLevelVec)
+    int32_t uiExtensionIdLevel)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -840,12 +840,12 @@ WSError SessionProxy::TransferAccessibilityEvent(const Accessibility::Accessibil
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    AccessibilityEventInfoParcel infoParcel(info);
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
     if (!data.WriteParcelable(&infoParcel)) {
         WLOGFE("infoParcel write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32Vector(uiExtensionIdLevelVec)) {
+    if (!data.WriteInt32(uiExtensionIdLevel)) {
         WLOGFE("idVec write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }

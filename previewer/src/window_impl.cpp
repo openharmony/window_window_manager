@@ -306,6 +306,11 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     return WMError::WM_OK;
@@ -871,6 +876,16 @@ WMError WindowImpl::RegisterWindowVisibilityChangeListener(const WindowVisibilit
 }
 
 WMError WindowImpl::UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+WmErrorCode WindowImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
+{
+    return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+WMError WindowImpl::SetSingleFrameComposerEnabled(bool enable)
 {
     return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }

@@ -33,6 +33,8 @@ using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
 
 using NotifyWindowDragHotAreaFunc = std::function<void(int32_t type, const SizeChangeReason& reason)>;
 
+using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
+
 const int32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = -1;
 
 enum class AreaType : uint32_t {
@@ -56,6 +58,7 @@ public:
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
+    void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
@@ -69,6 +72,7 @@ public:
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+    void OnLostFocus();
 
 private:
     struct MoveDragProperty {
@@ -169,6 +173,7 @@ private:
     void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
     int32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
+    NotifyWindowPidChangeCallback pidChangeCallback_;
 
     const std::map<AreaType, Gravity> GRAVITY_MAP = {
         {AreaType::LEFT,            Gravity::RIGHT},

@@ -145,6 +145,18 @@ HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
+/**
+ * @tc.name: FlushFrameRate
+ * @tc.desc: FlushFrameRate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    uint32_t rate = 120;
+    rootScene.FlushFrameRate(rate);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

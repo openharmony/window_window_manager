@@ -109,7 +109,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
-    virtual WMError SetNeedKeepKeyboard(bool isNeedKeepKeyboard) override;
+    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingWindowId) override;
 
     virtual bool IsTransparent() const override;
@@ -133,10 +133,12 @@ public:
     WMError NotifyPrepareClosePiPWindow() override;
     WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
     void UpdateSubWindowState(const WindowType& type);
+    WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
+    WMError RecoverAndConnectSpecificSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
@@ -148,6 +150,7 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
@@ -155,6 +158,7 @@ private:
     static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
+    void RegisterSessionRecoverListener(bool isSpacialSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);

@@ -41,6 +41,8 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
+    constexpr int32_t MIN_DECOR_HEIGHT = 48;
+    constexpr int32_t MAX_DECOR_HEIGHT = 100;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -51,13 +53,14 @@ static int finalizerCnt = 0;
 JsWindow::JsWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
-    NotifyNativeWinDestroyFunc func = [](std::string windowName) {
+    NotifyNativeWinDestroyFunc func = [this](std::string windowName) {
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
         if (windowName.empty() || g_jsWindowMap.count(windowName) == 0) {
             WLOGFE("Can not find window %{public}s ", windowName.c_str());
             return;
         }
         g_jsWindowMap.erase(windowName);
+        windowToken_ = nullptr;
         WLOGI("Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
@@ -288,6 +291,13 @@ napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info i
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetSystemBarEnable");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
     WLOGI("SetSystemBarProperties");
@@ -311,7 +321,7 @@ napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetWindowAvoidAreaSync");
+    WLOGD("GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -486,7 +496,7 @@ napi_value JsWindow::SetCallingWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPreferredOrientation");
+    WLOGD("SetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
@@ -496,6 +506,13 @@ napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
     WLOGI("SetSnapshotSkip");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetSingleFrameComposerEnabled");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSingleFrameComposerEnabled(env, info) : nullptr;
 }
 
 napi_value JsWindow::RaiseToAppTop(napi_env env, napi_callback_info info)
@@ -659,11 +676,11 @@ napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]SetNeedKeepKeyboard");
+    WLOGI("[NAPI]KeepKeyboardOnFocus");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetNeedKeepKeyboard(env, info) : nullptr;
+    return (me != nullptr) ? me->OnKeepKeyboardOnFocus(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
@@ -678,6 +695,34 @@ napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]SetWindowLimits");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLimits(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowDecorVisible(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowDecorVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowDecorVisible(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowDecorHeight");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowDecorHeight(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetWindowDecorHeight");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowDecorHeight(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetTitleButtonsRect");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -1433,7 +1478,7 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
     wptr<Window> weakToken(windowToken_);
     auto window = weakToken.promote();
     if (window == nullptr) {
-        WLOGFE("window is nullptr or get invalid param");
+        WLOGFW("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     Rect drawableRect = g_emptyRect;
@@ -1749,7 +1794,7 @@ napi_value JsWindow::OnGetUIContext(napi_env env, napi_callback_info info)
 
     auto uicontent = window->GetUIContent();
     if (uicontent == nullptr) {
-        WLOGFE("uicontent is nullptr");
+        WLOGFW("uicontent is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -2059,6 +2104,56 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowSystemBarEnable",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
+{
+    std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string name;
+    if (!ConvertFromJsValue(env, argv[0], name)) {
+        WLOGFE("Failed to convert parameter to SystemBarName");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (err == WmErrorCode::WM_OK && (argc < 1 || // 1: params num
+        !GetSpecificBarStatus(systemBarProperties, env, info, windowToken_))) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, name, err]
+            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        auto weakWindow = weakToken.promote();
+        err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
+        if (err != WmErrorCode::WM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err)));
+            return;
+        }
+        if (name.compare("status") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+                WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+        } else if (name.compare("navigation") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+        } else if (name.compare("navigationIndicator") == 0) {
+            err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
+                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+                systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
+        }
+        if (err == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err),
+                "JsWindow::OnSetSpecificSystemBarEnabled failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetSpecificSystemBarEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -3241,6 +3336,58 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
     return result;
 }
 
+napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set single frame composer enabled denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) { // 1: the param num
+        WLOGFE("Invalid parameter, argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Invalid parameter, failed to convert parameter to enabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    } else {
+        napi_get_value_bool(env, nativeVal, &enabled);
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, enabled](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            WmErrorCode wmErrorCode;
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr");
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "window is nullptr."));
+                return;
+            }
+            WMError ret = weakWindow->SetSingleFrameComposerEnabled(enabled);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
+                            "Set single frame composer enabled failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] Set single frame composer enabled end, enabled flag = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), enabled);
+        };
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::SetSingleFrameComposerEnabled",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode &errCode, int32_t &subWindowId)
 {
     if (nativeVal == nullptr) {
@@ -3305,7 +3452,7 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -3314,28 +3461,33 @@ napi_value JsWindow::OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool isNeedKeepKeyboard = false;
+    bool keepKeyboardFlag = false;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to get parameter isNeedKeepKeyboard");
+        WLOGFE("Failed to get parameter keepKeyboardFlag");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     } else {
-        napi_get_value_bool(env, nativeVal, &isNeedKeepKeyboard);
+        napi_get_value_bool(env, nativeVal, &keepKeyboardFlag);
     }
 
     if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        WLOGFE("KeepKeyboardOnFocus is not allowed since window is not system window or app subwindow");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
 
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetNeedKeepKeyboard(isNeedKeepKeyboard));
+    WmErrorCode ret = windowToken_->KeepKeyboardOnFocus(keepKeyboardFlag);
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetNeedKeepKeyboard failed");
+        WLOGFE("Window KeepKeyboardOnFocus failed");
         return NapiThrowError(env, ret);
     }
 
-    WLOGI("Window [%{public}u, %{public}s] SetNeedKeepKeyboard end, isNeedKeepKeyboard = %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isNeedKeepKeyboard);
+    WLOGI("Window [%{public}u, %{public}s] KeepKeyboardOnFocus end, keepKeyboardFlag = %{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), keepKeyboardFlag);
 
     return NapiGetUndefined(env);
 }
@@ -4733,6 +4885,115 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
     }
 }
 
+napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]SetWindowDecorVisible is not allowed since window is not main window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to visible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isVisible = true;
+    napi_get_value_bool(env, nativeVal, &isVisible);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorVisible(isVisible));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window decor set visible failed");
+        return NapiThrowError(env, ret);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnSetWindowDecorVisible end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to height");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t height = 0;
+    napi_get_value_int32(env, nativeVal, &height);
+    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
+        WLOGFE("height should greater than 48 or smaller than 100");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorHeight(height));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Set window decor height failed");
+        return NapiThrowError(env, ret);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    int32_t height = 0;
+    WMError ret = window->GetDecorHeight(height);
+    if (ret != WMError::WM_OK) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), height);
+    return CreateJsValue(env, height);
+}
+
+napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TitleButtonRect titleButtonRect;
+    WMError ret = windowToken_->GetTitleButtonArea(titleButtonRect);
+    if (ret != WMError::WM_OK) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetTitleButtonRect end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+    napi_value TitleButtonAreaObj = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
+    if (TitleButtonAreaObj == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return TitleButtonAreaObj;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -4819,9 +5080,16 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
-    BindNativeFunction(env, object, "setNeedKeepKeyboard", moduleName, JsWindow::SetNeedKeepKeyboard);
+    BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
+    BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
+    BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
+        JsWindow::SetSingleFrameComposerEnabled);
+    BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
+    BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
+    BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
+    BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
 }
 }  // namespace Rosen
 }  // namespace OHOS

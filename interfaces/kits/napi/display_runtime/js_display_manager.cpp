@@ -115,6 +115,12 @@ static napi_value SetFoldDisplayMode(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetFoldDisplayMode(env, info) : nullptr;
 }
 
+static napi_value SetFoldStatusLocked(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnSetFoldStatusLocked(env, info) : nullptr;
+}
+
 static napi_value GetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
     auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -197,7 +203,7 @@ napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
                 task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
-                WLOGI("GetAllDisplays success");
+                WLOGD("GetAllDisplays success");
             } else {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetAllDisplay failed."));
@@ -216,14 +222,14 @@ napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
 
 napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAllDisplays is called");
+    WLOGD("GetAllDisplays is called");
 
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
                 task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
-                WLOGI("GetAllDisplays success");
+                WLOGD("GetAllDisplays success");
             } else {
                 auto errorPending = false;
                 napi_is_exception_pending(env, &errorPending);
@@ -448,7 +454,7 @@ napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info i
         }
     }
     if (ret != DmErrorCode::DM_OK) {
-        WLOGFE("failed to unregister display listener with type");
+        WLOGFW("failed to unregister display listener with type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -490,7 +496,7 @@ napi_value OnHasPrivateWindow(napi_env env, napi_callback_info info)
 
 napi_value CreateJsDisplayArrayObject(napi_env env, std::vector<sptr<Display>>& displays)
 {
-    WLOGI("CreateJsDisplayArrayObject is called");
+    WLOGD("CreateJsDisplayArrayObject is called");
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, displays.size(), &arrayValue);
     if (arrayValue == nullptr) {
@@ -571,6 +577,26 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
+napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    bool locked = false;
+    if (!ConvertFromJsValue(env, argv[0], locked)) {
+        WLOGFE("[NAPI]Failed to convert parameter to SetFoldStatusLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    SingletonContainer::Get<DisplayManager>().SetFoldStatusLocked(locked);
+    WLOGI("[NAPI]" PRIu64", SetFoldStatusLocked");
+    return NapiGetUndefined(env);
+}
+
 napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -595,7 +621,7 @@ napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> r
         return NapiGetUndefined(env);
     }
     if (region == nullptr) {
-        WLOGFE("Get null fold crease region");
+        WLOGFW("Get null fold crease region");
         return NapiGetUndefined(env);
     }
     DisplayId displayId = region->GetDisplayId();
@@ -651,7 +677,7 @@ napi_value InitDisplayState(napi_env env)
 
 napi_value InitOrientation(napi_env env)
 {
-    WLOGI("InitOrientation called");
+    WLOGD("InitOrientation called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -678,7 +704,7 @@ napi_value InitOrientation(napi_env env)
 
 napi_value InitDisplayErrorCode(napi_env env)
 {
-    WLOGI("InitDisplayErrorCode called");
+    WLOGD("InitDisplayErrorCode called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -710,7 +736,7 @@ napi_value InitDisplayErrorCode(napi_env env)
 
 napi_value InitDisplayError(napi_env env)
 {
-    WLOGI("InitDisplayError called");
+    WLOGD("InitDisplayError called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -756,7 +782,7 @@ napi_value InitDisplayError(napi_env env)
 
 napi_value InitFoldStatus(napi_env env)
 {
-    WLOGI("InitFoldStatus called");
+    WLOGD("InitFoldStatus called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -782,7 +808,7 @@ napi_value InitFoldStatus(napi_env env)
 
 napi_value InitFoldDisplayMode(napi_env env)
 {
-    WLOGI("IniFoldDisplayMode called");
+    WLOGD("IniFoldDisplayMode called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -893,7 +919,7 @@ napi_value InitHDRFormat(napi_env env)
 
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
-    WLOGI("JsDisplayManagerInit is called");
+    WLOGD("JsDisplayManagerInit is called");
 
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("JsDisplayManagerInit env or exportObj is nullptr");
@@ -922,6 +948,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsDisplayManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getFoldDisplayMode", moduleName, JsDisplayManager::GetFoldDisplayMode);
     BindNativeFunction(env, exportObj, "setFoldDisplayMode", moduleName, JsDisplayManager::SetFoldDisplayMode);
+    BindNativeFunction(env, exportObj, "setFoldStatusLocked", moduleName, JsDisplayManager::SetFoldStatusLocked);
     BindNativeFunction(env, exportObj, "getCurrentFoldCreaseRegion", moduleName,
         JsDisplayManager::GetCurrentFoldCreaseRegion);
     BindNativeFunction(env, exportObj, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);

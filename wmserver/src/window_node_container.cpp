@@ -291,6 +291,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+        DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
+    }
     WLOGI("AddWindowNode Id: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
     // update private window count and notify dms private status changed
@@ -435,9 +438,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
         SetBelowScreenlockVisible(node, true);
-    }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
-        DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
     }
     WLOGI("Remove Id: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
@@ -1675,14 +1675,14 @@ void WindowNodeContainer::DumpScreenWindowTreeByWinId(uint32_t winid)
 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
-    WLOGD("------ dump window info begin -------");
-    WLOGD("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation firstFrameCallback [   x    y    w    h]");
+    WLOGI("------ dump window info begin -------");
+    WLOGI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation firstFrameCallback [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetWindowRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-        WLOGD("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
+        WLOGI("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
             "%{public}4u %{public}11u %{public}12d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
@@ -1690,7 +1690,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
         return false;
     };
     TraverseWindowTree(func, true);
-    WLOGD("------ dump window info end -------");
+    WLOGI("------ dump window info end -------");
 }
 
 bool WindowNodeContainer::IsVerticalDisplay(DisplayId displayId) const
@@ -2096,7 +2096,7 @@ void WindowNodeContainer::BackUpAllAppWindows()
         backupWindowIds_.emplace_back(appNode->GetWindowId());
         WindowManagerService::GetInstance().RemoveWindow(appNode->GetWindowId(), true);
         wptr<IRemoteObject> abilityToken = appNode->abilityToken_;
-        WindowInnerManager::GetInstance().PostTask([abilityToken]() {
+        auto task = [abilityToken]() {
             auto token = abilityToken.promote();
             if (token == nullptr) {
                 WLOGFW("Ability token is null");
@@ -2104,7 +2104,8 @@ void WindowNodeContainer::BackUpAllAppWindows()
             }
             AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(token,
                 static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
-        });
+        };
+        WindowInnerManager::GetInstance().PostTask(task, "DoAbilityBackground");
     }
     backupDividerWindowRect_.clear();
     for (auto displayId : displayIdSet) {

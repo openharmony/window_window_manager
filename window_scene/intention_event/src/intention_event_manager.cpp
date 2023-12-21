@@ -18,6 +18,7 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include "scene_session.h"
+#include "session_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
@@ -29,6 +30,47 @@ std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
 
+void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        return;
+    }
+
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
+    WLOGFD("point source:%{public}d", pointerEvent->GetSourceType());
+    auto actionId = pointerEvent->GetPointerId();
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem item;
+    if (pointerEvent->GetPointerItem(actionId, item)) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+            WLOGFI("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
+                "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
+                "%{public}f, tiltx :%{public}f, tiltY :%{public}f", 
+            windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(), 
+            pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+        } else {
+            WLOGFD("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
+                "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
+                "%{public}f, tiltx :%{public}f, tiltY :%{public}f", 
+            windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(), 
+            pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+        }
+    }
+    auto ids = pointerEvent->GetPointerIds();
+    for (auto&& id :ids) {
+        MMI::PointerEvent::PointerItem item;
+        if (pointerEvent->GetPointerItem(id, item)) {
+            WLOGFD("[WMSEvent] all point info: id: %{public}d, x:%{public}d, y:%{public}d, isPressend:%{public}d, "
+                "pressure:%{public}f, tiltX:%{public}f, tiltY:%{public}f", 
+            actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
+            item.GetTiltX(), item.GetTiltY());
+        }
+    }
+}
 } // namespace
 
 IntentionEventManager::IntentionEventManager() {}
@@ -59,17 +101,7 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
 }
 
 void IntentionEventManager::InputEventListener::RegisterWindowChanged()
-{
-    SceneSessionManager::GetInstance().RegisterWindowChanged(
-        [this](int32_t persistentId, WindowUpdateType type) {
-            WLOGFD("Window changed, persistentId:%{public}d, type:%{public}d",
-                persistentId, type);
-            if (type == WindowUpdateType::WINDOW_UPDATE_BOUNDS) {
-                this->ProcessEnterLeaveEventAsync();
-            }
-        }
-    );
-}
+{}
 
 void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
 {
@@ -111,7 +143,8 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         WLOGFE("ProcessEnterLeaveEventAsync eventHandler is null");
         return;
     }
-    eventHandler->PostTask(std::move(task), DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    eventHandler->PostTask(std::move(task), "wms:ProcessEventLeaveEventAsync",
+        DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
@@ -145,6 +178,12 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGFE("OnInputEvent uiContent_ is null");
         return;
     }
+    if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
+        WLOGFE("OnInputEvent is disabled temporarily");
+        return;
+    }
+
+    LogPointInfo(pointerEvent);
 
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
@@ -161,13 +200,31 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
                 pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
     }
-    uiContent_->ProcessPointerEvent(pointerEvent);
+    
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
+    auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
+    if (sceneSession == nullptr) {
+        return;
+    }
+
+    if (sceneSession->GetSessionInfo().isSystem_) {
+        WLOGD("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u",
+                pointerEvent->GetId(), windowId);
+        sceneSession->SendPointerEventToUI(pointerEvent);
+    } else {
+        // transfer pointer event for move and drag
+        sceneSession->TransferPointerEvent(pointerEvent);
+    }
     UpdateLastMouseEvent(pointerEvent);
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
+    if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
+        WLOGFE("OnInputEvent is disabled temporarily");
+        return;
+    }
     auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
     if (focusedSessionId == INVALID_SESSION_ID) {
         WLOGFE("focusedSessionId is invalid");
@@ -199,10 +256,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             WLOGFE("uiContent_ is null");
             return;
         }
-        uiContent_->ProcessKeyEvent(keyEvent);
-        return;
+        focusedSceneSession->SendKeyEventToUI(keyEvent);
+    } else {
+        focusedSceneSession->TransferKeyEvent(keyEvent);
     }
-    focusedSceneSession->TransferKeyEvent(keyEvent);
 }
 
 bool IntentionEventManager::InputEventListener::IsKeyboardEvent(

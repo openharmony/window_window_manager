@@ -269,7 +269,7 @@ HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | L
 {
     bool immersive = false;
     DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 }

@@ -15,7 +15,6 @@
 
 #include "session/container/include/zidl/window_event_channel_stub.h"
 #include "session/container/include/zidl/window_event_ipc_interface_code.h"
-#include "session/container/include/parcel/accessibility_element_info_parcel.h"
 
 #include <axis_event.h>
 #include <ipc_types.h>
@@ -23,6 +22,7 @@
 #include <pointer_event.h>
 
 #include "accessibility_element_info.h"
+#include "accessibility_element_info_parcel.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -165,7 +165,7 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     for (auto &info : infos) {
-        AccessibilityElementInfoParcel infoParcel(info);
+        Accessibility::AccessibilityElementInfoParcel infoParcel(info);
         if (!reply.WriteParcelable(&infoParcel)) {
             WLOGFE("Failed to WriteParcelable info");
             return ERR_INVALID_DATA;
@@ -203,7 +203,7 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
         return ERR_INVALID_DATA;
     }
     for (auto &info : infos) {
-        AccessibilityElementInfoParcel infoParcel(info);
+        Accessibility::AccessibilityElementInfoParcel infoParcel(info);
         if (!reply.WriteParcelable(&infoParcel)) {
             WLOGFE("Failed to WriteParcelable info");
             return ERR_INVALID_DATA;
@@ -235,7 +235,7 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
         WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    AccessibilityElementInfoParcel infoParcel(info);
+    Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;
@@ -266,7 +266,7 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
         WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    AccessibilityElementInfoParcel infoParcel(info);
+    Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;

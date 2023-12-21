@@ -53,7 +53,7 @@ DisplayId ScreenRotationProperty::GetDefaultDisplayId()
 {
     sptr<DisplayInfo> defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
+        WLOGFW("GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
         return DISPLAY_ID_INVALID;
     }
     return defaultDisplayInfo->GetDisplayId();
@@ -119,7 +119,7 @@ Rotation ScreenRotationProperty::GetCurrentDisplayRotation()
 {
     sptr<DisplayInfo> defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("Cannot get default display info");
+        WLOGFW("Cannot get default display info");
         return defaultDeviceRotation_ == 0 ? ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT) :
             ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
     }

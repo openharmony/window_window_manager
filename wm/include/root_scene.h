@@ -45,6 +45,7 @@ public:
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
+    void FlushFrameRate(uint32_t rate) override;
 
     void OnBundleUpdated(const std::string& bundleName);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
@@ -52,6 +53,11 @@ public:
     void SetDisplayDensity(float density)
     {
         density_ = density;
+    }
+
+    float GetDisplayDensity()
+    {
+        return density_;
     }
 
     WindowState GetWindowState() const override

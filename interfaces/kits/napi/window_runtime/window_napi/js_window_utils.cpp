@@ -83,6 +83,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
 
     return objValue;
 }
@@ -266,6 +268,8 @@ napi_value WindowEventTypeInit(napi_env env)
         static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
     napi_set_named_property(env, objValue, "WINDOW_HIDDEN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    napi_set_named_property(env, objValue, "WINDOW_DESTROYED", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::DESTROYED)));
     return objValue;
 }
 
@@ -568,6 +572,43 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     return true;
 }
 
+bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+                          napi_env env, napi_callback_info info, sptr<Window>& window)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    uint32_t paramNumber = 2;
+    if (argc < paramNumber) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return false;
+    }
+    std::string name;
+    if (!ConvertFromJsValue(env, argv[0], name)) {
+        WLOGFE("Failed to convert parameter to SystemBarName");
+        return false;
+    }
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[1], enable)) {
+        WLOGFE("Failed to convert parameter to bool");
+        return NapiGetUndefined(env);
+    }
+    if (name.compare("status") == 0) {
+        auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
+    } else if (name.compare("navigation") == 0) {
+        auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
+    } else if (name.compare("navigationIndicator") == 0) {
+        auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
+    }
+    return true;
+}
+
 static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
     const char* name, uint32_t defaultColor, bool& flag)
 {
@@ -581,7 +622,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         }
         std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
         if (!std::regex_match(colorStr, pattern)) {
-            WLOGFE("Invalid color input");
+            WLOGFD("Invalid color input");
             return defaultColor;
         }
         std::string color = colorStr.substr(1);
@@ -688,6 +729,22 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
     napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
+    return objValue;
+}
+
+napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert titleButtonRect to jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "right", CreateJsValue(env, titleButtonRect.posX_));
+    napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, titleButtonRect.width_));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, titleButtonRect.height_));
     return objValue;
 }
 

@@ -25,23 +25,25 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    WLOGFD("[WMSSub] Create SubSession");
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    SetMoveDragCallback();
+    WLOGFD("[WMSLife] Create SubSession");
 }
 
 SubSession::~SubSession()
 {
-    WLOGD("[WMSSub] ~SubSession, id: %{public}d", GetPersistentId());
+    WLOGD("[WMSLife] ~SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
-    PostTask([weakThis = wptr(this), property]() {
+    auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("[WMSSub] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("[WMSSub] Show session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -50,19 +52,20 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         auto ret = session->SceneSession::Foreground(property);
         return ret;
-    });
+    };
+    PostTask(task, "Show");
     return WSError::WS_OK;
 }
 
 WSError SubSession::Hide()
 {
-    PostTask([weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("[WMSSub] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("[WMSSub] Hide session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -76,7 +79,8 @@ WSError SubSession::Hide()
         }
         ret = session->SceneSession::Background();
         return ret;
-    });
+    };
+    PostTask(task, "Hide");
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

@@ -30,6 +30,8 @@
 #include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
+using ScreenInfoChangeClientListener = std::function<void(uint64_t)>;
+
 class IScreenConnectionListener {
 public:
     virtual void OnScreenConnected(const sptr<ScreenSession>& screenSession) = 0;
@@ -40,10 +42,13 @@ class ScreenSessionManagerClient : public ScreenSessionManagerClientStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManagerClient)
 
 public:
+    void RegisterScreenInfoChangeListener(const ScreenInfoChangeClientListener& listener);
     void RegisterScreenConnectionListener(IScreenConnectionListener* listener);
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
+    std::unordered_map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
+    FoldDisplayMode GetFoldDisplayMode() const;
 
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation);
     uint32_t GetCurvedCompressionArea();
@@ -73,6 +78,8 @@ private:
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
 
+    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
+
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 
@@ -80,6 +87,7 @@ private:
 
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
+    ScreenInfoChangeClientListener screenInfoChangeListener_;
 };
 } // namespace OHOS::Rosen
 

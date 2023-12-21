@@ -32,18 +32,19 @@ JsWindowRegisterManager::JsWindowRegisterManager()
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        { WINDOW_SIZE_CHANGE_CB,       &JsWindowRegisterManager::ProcessWindowChangeRegister               },
-        { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister      },
-        { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister            },
-        { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        { WINDOW_EVENT_CB,             &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister         },
-        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister               },
-        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister                 },
-        { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister          },
-        { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
-        { WINDOW_STATUS_CHANGE_CB,     &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
-        { WINDOW_VISIBILITY_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
+        { WINDOW_SIZE_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowChangeRegister               },
+        { SYSTEM_AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister      },
+        { AVOID_AREA_CHANGE_CB,               &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister            },
+        { LIFECYCLE_EVENT_CB,                 &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
+        { WINDOW_EVENT_CB,                    &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
+        { KEYBOARD_HEIGHT_CHANGE_CB,          &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister         },
+        { TOUCH_OUTSIDE_CB,                   &JsWindowRegisterManager::ProcessTouchOutsideRegister               },
+        { SCREENSHOT_EVENT_CB,                &JsWindowRegisterManager::ProcessScreenshotRegister                 },
+        { DIALOG_TARGET_TOUCH_CB,             &JsWindowRegisterManager::ProcessDialogTargetTouchRegister          },
+        { DIALOG_DEATH_RECIPIENT_CB,          &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
+        { WINDOW_STATUS_CHANGE_CB,            &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
+        { WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
+        { WINDOW_VISIBILITY_CHANGE_CB,        &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -270,6 +271,24 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<Js
         window->UnregisterDialogDeathRecipientListener(thisListener);
     }
     return WmErrorCode::WM_OK;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    WLOGD("called");
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowTitleButtonRectChangedListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowTitleButtonRectChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowTitleButtonRectChangeListener(thisListener));
+    }
+    return ret;
 }
 
 bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)

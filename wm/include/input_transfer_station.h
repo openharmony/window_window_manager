@@ -37,10 +37,18 @@ public:
     }
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(uint32_t windowId);
+    void MarkRegisterToMMI()
+    {
+        isRegisteredMMI_ = true;
+    }
 protected:
     InputTransferStation() = default;
     ~InputTransferStation();
 private:
+    bool IsRegisterToMMI() const
+    {
+        return isRegisteredMMI_;
+    }
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);
 
     std::mutex mtx_;
@@ -49,6 +57,8 @@ private:
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+
+    bool isRegisteredMMI_ { false };  
 };
 
 class InputEventListener : public MMI::IInputEventConsumer {
