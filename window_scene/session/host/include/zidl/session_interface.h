@@ -85,6 +85,11 @@ public:
     virtual WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
         { return WSError::WS_OK; }
     virtual WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) { return WSError::WS_OK; }
+    virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
+    virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

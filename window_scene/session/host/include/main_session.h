@@ -23,6 +23,8 @@ class MainSession : public SceneSession {
 public:
     MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~MainSession();
+
+    WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

@@ -134,6 +134,7 @@ public:
     WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 protected:
     void DestroySubWindow();
@@ -164,6 +165,8 @@ private:
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
     void UpdateNewSize();
+    void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem);
 
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;

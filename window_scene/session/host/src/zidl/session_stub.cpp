@@ -19,6 +19,8 @@
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
+#include "pointer_event.h"
+#include "key_event.h"
 
 #include "accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
@@ -84,6 +86,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleTerminateSession),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
         &SessionStub::HandleSessionException),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_PROCESS_POINT_DOWN_SESSION),
+        &SessionStub::HandleProcessPointDownSession),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG),
+        &SessionStub::HandleSendPointerEvenForMoveDrag),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -525,6 +531,29 @@ int SessionStub::HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessagePar
     }
     Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
     WSError errCode = RecoveryPullPiPMainWindow(persistentId, rect);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleProcessPointDownSession!");
+    uint32_t posX = data.ReadInt32();
+    uint32_t posY = data.ReadInt32();
+    WSError errCode = ProcessPointDownSession(posX, posY);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleSendPointerEvenForMoveDrag!");
+    auto pointerEvent = MMI::PointerEvent::Create();
+    if (!pointerEvent->ReadFromParcel(data)) {
+        WLOGFE("Read pointer event failed");
+        return -1;
+    }
+    WSError errCode = SendPointEventForMoveDrag(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
