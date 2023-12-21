@@ -444,7 +444,7 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     ConsumePointerEventInner(pointerEvent, pointerItem);
 }
 
-void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpacialSession)
+void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
