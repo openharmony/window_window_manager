@@ -29,7 +29,7 @@ namespace {
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
-sptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
+wptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
 std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
@@ -99,7 +99,7 @@ void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureContro
 }
 
 void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
-    sptr<PictureInPictureController> pipController)
+    wptr<PictureInPictureController> pipController)
 {
     WLOGD("AttachAutoStartController, %{public}u", handleId);
     if (pipController == nullptr) {
@@ -120,13 +120,17 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
             pipController->GetPiPNavigationId());
         mainWindow->RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
-    autoStartControllerMap_[handleId] = wptr(pipController);
+    autoStartControllerMap_[handleId] = pipController;
 }
 
 void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
-    sptr<PictureInPictureController> pipController)
+    wptr<PictureInPictureController> pipController)
 {
     WLOGD("Detach active pipController, %{public}u", handleId);
+    autoStartControllerMap_.erase(handleId);
+    if (autoStartController_ == nullptr) {
+        return;
+    }
     if (pipController != nullptr &&
         pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
         WLOGFE("not same pip controller or no active pip controller");
@@ -137,7 +141,6 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
         mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
-    autoStartControllerMap_.erase(handleId);
     autoStartController_ = nullptr;
 }
 
@@ -211,7 +214,7 @@ void PictureInPictureManager::DoActionEvent(std::string actionName)
 
 void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
 {
-    WLOGD("AutoStartPipWindow is called");
+    WLOGD("AutoStartPipWindow is called, navId: %{public}s", navigationId.c_str());
     if (autoStartController_ == nullptr) {
         WLOGFE("autoStartController_ is null");
         return;
