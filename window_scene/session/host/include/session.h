@@ -447,6 +447,7 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     void HandlePointDownDialog(int32_t pointAction);
+    void NotifyPointerEventToRs(int32_t pointAction);
     void NotifySessionInfoChange();
 
     template<typename T>
