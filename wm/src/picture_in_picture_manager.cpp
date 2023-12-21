@@ -127,21 +127,17 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     wptr<PictureInPictureController> pipController)
 {
     WLOGD("Detach active pipController, %{public}u", handleId);
-    autoStartControllerMap_.erase(handleId);
-    if (autoStartController_ == nullptr) {
-        return;
-    }
-    if (autoStartControllerMap_.size() == 0) {
-        sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-            autoStartController_->GetMainWindowId());
-        if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
-            mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
-        }
-    }
-    if (pipController != nullptr && pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
+    if (pipController != nullptr &&
+        pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
         WLOGFE("not same pip controller or no active pip controller");
         return;
     }
+    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
+        autoStartController_->GetMainWindowId());
+    if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
+        mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
+    }
+    autoStartControllerMap_.erase(handleId);
     autoStartController_ = nullptr;
 }
 
@@ -217,16 +213,8 @@ void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
 {
     WLOGD("AutoStartPipWindow is called, navId: %{public}s", navigationId.c_str());
     if (autoStartController_ == nullptr) {
-        if (autoStartControllerMap_.size() == 0) {
-            WLOGFE("autoStartController_ is null while autoStart");
-            return;
-        }
-        auto iter = autoStartControllerMap_.begin();
-        autoStartController_ = iter->second;
-        if (autoStartController_ == nullptr) {
-            WLOGFE("Failed to get autoStartController, skip autoStart");
-            return;
-        }
+        WLOGFE("autoStartController_ is null");
+        return;
     }
     if (navigationId == "") {
         WLOGFI("No use navigationId for auto start");
