@@ -174,23 +174,6 @@ WSError SessionStageProxy::NotifyCloseExistPipWindow()
     return static_cast<WSError>(ret);
 }
 
-void SessionStageProxy::NotifyTouchDialogTarget()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return;
-    }
-}
-
 WSError SessionStageProxy::UpdateFocus(bool focus)
 {
     MessageParcel data;

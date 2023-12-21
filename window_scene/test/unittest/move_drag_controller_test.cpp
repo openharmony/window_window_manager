@@ -233,7 +233,7 @@ HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    
+
     auto res = moveDragController->EventDownInit(pointerEvent, originalRect, property, sysConfig);
     ASSERT_EQ(false, res);
 }
@@ -262,26 +262,6 @@ HWTEST_F(MoveDragControllerTest, EventDownInit01, Function | SmallTest | Level1)
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     auto res = moveDragController->EventDownInit(pointerEvent, originalRect, property, sysConfig);
     ASSERT_EQ(true, res);
-}
-
-/**
- * @tc.name: GetAreaType
- * @tc.desc: test function : GetAreaType
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, GetAreaType, Function | SmallTest | Level1)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    WSRect originalRect = { 100, 100, 1000, 1000 };
-
-    pointerEvent = MMI::PointerEvent::Create();
-    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    int32_t sourceType = pointerEvent->GetSourceType();
-    int32_t pointerPosX = 10;
-    int32_t pointerPosY = 30;
-    ASSERT_TRUE((moveDragController != nullptr));
-    moveDragController->GetAreaType(pointerPosX, pointerPosY, sourceType, originalRect);
 }
 
 /**

@@ -62,4 +62,16 @@ MainSession::~MainSession()
 {
     WLOGD("~MainSession, id: %{public}d", GetPersistentId());
 }
+
+WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
+{
+    const auto& id = GetPersistentId();
+    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    if (CheckDialogOnForeground()) {
+        HandlePointDownDialog();
+        return WSError::WS_OK;
+    }
+    PresentFocusIfPointDown();
+    return SceneSession::ProcessPointDownSession(posX, posY);
+}
 } // namespace OHOS::Rosen

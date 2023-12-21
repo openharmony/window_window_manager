@@ -167,7 +167,7 @@ public:
     virtual int64_t GetVSyncPeriod() override;
     virtual void FlushFrameRate(uint32_t rate) override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
-    void NotifyTouchDialogTarget() override;
+    void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
 
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;

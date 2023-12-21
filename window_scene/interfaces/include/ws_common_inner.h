@@ -52,6 +52,18 @@ enum class WSPropertyChangeAction : uint32_t {
     ACTION_UPDATE_NAVIGATION_PROPS = 1 << 25,
     ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS = 1 << 26,
 };
+
+enum class AreaType : uint32_t {
+    UNDEFINED = 0,
+    LEFT = 1 << 0,
+    TOP = 1 << 1,
+    RIGHT = 1 << 2,
+    BOTTOM = 1 << 3,
+    LEFT_TOP = LEFT | TOP,
+    RIGHT_TOP = RIGHT | TOP,
+    RIGHT_BOTTOM = RIGHT | BOTTOM,
+    LEFT_BOTTOM = LEFT | BOTTOM,
+};
 }
 }
 #endif // OHOS_ROSEN_WS_COMMON_INNER_H

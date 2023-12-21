@@ -80,7 +80,10 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
         if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
             pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            window_->NotifyTouchDialogTarget();
+            MMI::PointerEvent::PointerItem pointerItem;
+            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+                window_->NotifyTouchDialogTarget(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            }
         }
         pointerEvent->MarkProcessed();
         return;

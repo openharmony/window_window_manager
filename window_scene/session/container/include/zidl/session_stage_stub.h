@@ -42,7 +42,6 @@ private:
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
     int HandleBackEventInner(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
     int HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTransferComponentDataSync(MessageParcel& data, MessageParcel& reply);
