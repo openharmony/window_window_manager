@@ -28,6 +28,9 @@ using namespace OHOS::Accessibility;
 using namespace std;
 
 namespace OHOS::Rosen {
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelTest" };
+}
 class WindowEventChannelTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -254,8 +257,10 @@ HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Leve
  */
 HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferSearchElementInfo01 begin");
     auto res = TransferSearchElementInfo(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferSearchElementInfo01 end");
 }
 
 /**
@@ -265,8 +270,10 @@ HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo01, Function | SmallTe
  */
 HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferSearchElementInfo02 begin");
     auto res = TransferSearchElementInfo(false);
     ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferSearchElementInfo02 end");
 }
 
 /**
@@ -276,9 +283,11 @@ HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo02, Function | SmallTe
  */
 HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferSearchElementInfosByText01 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferSearchElementInfosByText(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferSearchElementInfosByText01 end");
 }
 
 /**
@@ -288,9 +297,11 @@ HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText01, Function | 
  */
 HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferSearchElementInfosByText02 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferSearchElementInfosByText(false);
     ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferSearchElementInfosByText02 end");
 }
 
 /**
@@ -300,9 +311,11 @@ HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText02, Function | 
  */
 HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferFindFocusedElementInfo01 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferFindFocusedElementInfo(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferFindFocusedElementInfo01 end");
 }
 
 /**
@@ -312,9 +325,11 @@ HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo01, Function | Sm
  */
 HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferFindFocusedElementInfo02 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferFindFocusedElementInfo(false);
     ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferFindFocusedElementInfo02 end");
 }
 
 /**
@@ -324,9 +339,11 @@ HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo02, Function | Sm
  */
 HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferFocusMoveSearch01 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferFocusMoveSearch(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferFocusMoveSearch01 end");
 }
 
 /**
@@ -336,9 +353,11 @@ HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch01, Function | SmallTest
  */
 HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferFocusMoveSearch02 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferFocusMoveSearch(false);
     ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferFocusMoveSearch02 end");
 }
 
 /**
@@ -348,9 +367,11 @@ HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch02, Function | SmallTest
  */
 HWTEST_F(WindowEventChannelTest, TransferExecuteAction01, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferExecuteAction01 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferExecuteAction(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferExecuteAction01 end");
 }
 
 /**
@@ -360,9 +381,11 @@ HWTEST_F(WindowEventChannelTest, TransferExecuteAction01, Function | SmallTest |
  */
 HWTEST_F(WindowEventChannelTest, TransferExecuteAction02, Function | SmallTest | Level2)
 {
+    WLOGFI("TransferExecuteAction02 begin");
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     auto res = TransferExecuteAction(false);
     ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferExecuteAction02 end");
 }
 }
 }
