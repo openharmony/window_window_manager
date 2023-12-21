@@ -161,21 +161,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: HandleNotifyTouchDialogTarget
- * @tc.desc: test function : HandleNotifyTouchDialogTarget
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyTouchDialogTarget, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(false);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyTouchDialogTarget(data, reply));
-}
-
-/**
  * @tc.name: HandleNotifyTransferComponentData
  * @tc.desc: test function : HandleNotifyTransferComponentData
  * @tc.type: FUNC

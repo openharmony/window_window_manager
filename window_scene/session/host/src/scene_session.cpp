@@ -982,9 +982,34 @@ WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent
     return HandleEnterWinwdowArea(mousePointX, mousePointY);
 }
 
-WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
-    WLOGFD("[WMSCom] TransferPointEvent, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    const auto& id = GetPersistentId();
+    WLOGFI("id: %{public}d, type: %{public}d, pos: [%{public}d, %{public}d]", id, GetWindowType(), posX, posY);
+
+    // notify touch outside
+    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_) {
+        specificCallback_->onSessionTouchOutside_(id);
+    }
+
+    // notify outside down event
+    if (specificCallback_ != nullptr && specificCallback_->onOutsideDownEvent_) {
+        specificCallback_->onOutsideDownEvent_(posX, posY);
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    TransferPointerEvent(pointerEvent, false);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool needNotifyClient)
+{
+    WLOGFD("[WMSCom] TransferPointEvent, id: %{public}d, type: %{public}d, needNotifyClient: %{public}d",
+        GetPersistentId(), GetWindowType(), needNotifyClient);
     if (pointerEvent == nullptr) {
         WLOGFE("pointerEvent is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -1010,9 +1035,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFI("Do not dispatch this pointer event");
         return WSError::WS_DO_NOTHING;
     }
-
-    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr && isPointDown) {
         specificCallback_->onSessionTouchOutside_(GetPersistentId());
     }
 
@@ -1025,20 +1050,20 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        return Session::TransferPointerEvent(pointerEvent);
+        return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
     auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        if (CheckDialogOnForeground()) {
-            HandlePointDownDialog(pointerEvent->GetPointerAction());
+        if (CheckDialogOnForeground() && isPointDown) {
+            HandlePointDownDialog();
             WLOGFI("[WMSDialog] There is dialog window foreground");
             return WSError::WS_OK;
         }
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
-            return Session::TransferPointerEvent(pointerEvent);
+            return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (property->GetDragEnabled()) {
             if (!isNew) {
@@ -1061,7 +1086,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WindowHelper::IsPipWindow(property->GetWindowType())) {
         if (!moveDragController_) {
             WLOGFE("moveDragController is null");
-            return Session::TransferPointerEvent(pointerEvent);
+            return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             return WSError::WS_OK;
@@ -1073,7 +1098,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
     }
-    return Session::TransferPointerEvent(pointerEvent);
+    return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)

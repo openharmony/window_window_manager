@@ -1128,7 +1128,7 @@ public:
     /**
      * @brief Notify touch dialog target.
      */
-    virtual void NotifyTouchDialogTarget() {}
+    virtual void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) {}
     /**
      * @brief Set ace ability handler.
      *
@@ -1537,7 +1537,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    
+
     /**
      * @brief Register window status change listener.
      *

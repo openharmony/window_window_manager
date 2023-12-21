@@ -206,7 +206,7 @@ public:
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
-    virtual void NotifyTouchDialogTarget() = 0;
+    virtual void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,

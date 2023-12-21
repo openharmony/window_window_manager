@@ -156,7 +156,7 @@ public:
     WSError NotifyCloseExistPipWindow() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
-    void NotifyTouchDialogTarget() override;
+    void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     // colorspace, gamut

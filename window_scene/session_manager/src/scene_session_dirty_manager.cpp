@@ -23,6 +23,7 @@
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "wm_common_inner.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -78,6 +79,55 @@ void SceneSessionDirtyManager::CalTramform(const sptr<SceneSession> sceneSession
     tranform = tranform.Inverse();
 }
 
+void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+    std::vector<MMI::Rect>& pointerHotAreas) const
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+
+    WSRect windowRect = sceneSession->GetSessionRect();
+    const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
+    for (auto area : hotAreas) {
+        MMI::Rect rect;
+        rect.x = area.posX_;
+        rect.y = area.posY_;
+        rect.width = area.width_;
+        rect.height = area.height_;
+        touchHotAreas.emplace_back(rect);
+        pointerHotAreas.emplace_back(rect);
+    }
+
+    float vpr = 1.5f; // 1.5: default vp
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (display) {
+        vpr = display->GetVirtualPixelRatio();
+    }
+
+    uint32_t touchOffset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
+    uint32_t pointerOffset = static_cast<uint32_t>(HOTZONE_POINTER * vpr);
+
+    MMI::Rect touchRect = {
+        .x = -touchOffset,
+        .y = -touchOffset,
+        .width = windowRect.width_ + touchOffset * 2,  // 2 : double touchOffset
+        .height = windowRect.height_ + touchOffset * 2 // 2 : double touchOffset
+    };
+
+    MMI::Rect pointerRect = {
+        .x = -pointerOffset,
+        .y = -pointerOffset,
+        .width = windowRect.width_ + pointerOffset * 2,  // 2 : double pointerOffset
+        .height = windowRect.height_ + pointerOffset * 2 // 2 : double pointerOffset
+    };
+
+    if (touchHotAreas.empty()) {
+        touchHotAreas.emplace_back(touchRect);
+        pointerHotAreas.emplace_back(pointerRect);
+    }
+}
+
 MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> sceneSession, int action) const
 {
     if (sceneSession == nullptr) {
@@ -100,30 +150,17 @@ MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> s
     const std::vector<int32_t> pointerChangeAreas{ POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE,
         POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN,
         POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE };
-    const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
-    std::vector<MMI::Rect> mmiHotAreas;
-    for (auto area : hotAreas) {
-        MMI::Rect rect;
-        rect.x = area.posX_;
-        rect.y = area.posY_;
-        rect.width = area.width_;
-        rect.height = area.height_;
-        mmiHotAreas.emplace_back(rect);
-    }
 
-    MMI::Rect rect{ 0, 0, windowRect.width_, windowRect.height_ };
-    if (mmiHotAreas.empty()) {
-        mmiHotAreas.emplace_back(rect);
-    }
-    rect.x = windowRect.posX_;
-    rect.y = windowRect.posY_;
+    std::vector<MMI::Rect> touchHotAreas;
+    std::vector<MMI::Rect> pointerHotAreas;
+    UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = pid,
         .uid = uid,
-        .area = rect,
-        .defaultHotAreas = mmiHotAreas,
-        .pointerHotAreas = mmiHotAreas,
+        .area = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ },
+        .defaultHotAreas = touchHotAreas,
+        .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
         .flags = (!sceneSession->GetSystemTouchable()),
         .displayId = displayId,
@@ -154,6 +191,26 @@ void SceneSessionDirtyManager::Init()
     RegisterScreenInfoChangeListener();
 }
 
+std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSessionMap(
+    const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
+{
+    std::map<int32_t, sptr<SceneSession>> dialogMap;
+
+    for (const auto& elem: sessionMap) {
+        const auto& session = elem.second;
+        if (session != nullptr && session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+            const auto& parentSession = session->GetParentSession();
+            if (parentSession == nullptr) {
+                continue;
+            }
+            dialogMap.insert(std::make_pair(parentSession->GetPersistentId(), session));
+            WLOGFI("Add dialog session, id: %{public}d, parentId: %{public}d",
+                session->GetPersistentId(), parentSession->GetPersistentId());
+        }
+    }
+    return dialogMap;
+}
+
 std::vector<MMI::WindowInfo> SceneSessionDirtyManager::FullSceneSessionInfoUpdate() const
 {
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -169,8 +226,19 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::FullSceneSessionInfoUpdat
         if (IsWindowBackGround(sceneSessionValue)) {
             continue;
         }
-        const auto windowinfo = GetWindowInfo(sceneSessionValue, WindowAction::UNKNOWN);
-        windowInfoList.emplace_back(windowinfo);
+        auto windowInfo = GetWindowInfo(sceneSessionValue, WindowAction::UNKNOWN);
+
+        // all input event should trans to dialog window if dialog exists
+        const auto& dialogMap = GetDialogSessionMap(sceneSessionMap);
+        auto iter = (sceneSessionValue->GetParentPersistentId() == INVALID_SESSION_ID) ?
+            dialogMap.find(sceneSessionValue->GetPersistentId()) :
+            dialogMap.find(sceneSessionValue->GetParentPersistentId());
+        if (iter != dialogMap.end() && iter->second != nullptr) {
+            windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
+            WLOGFI("Change agentId, dialogId: %{public}d, parentId: %{public}d",
+                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId());
+        }
+        windowInfoList.emplace_back(windowInfo);
     }
     return windowInfoList;
 }

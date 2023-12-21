@@ -1137,14 +1137,6 @@ void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDow
     raiseToTopForPointDownFunc_ = func;
 }
 
-void Session::NotifyTouchDialogTarget()
-{
-    if (!sessionStage_) {
-        return;
-    }
-    sessionStage_->NotifyTouchDialogTarget();
-}
-
 void Session::NotifyScreenshot()
 {
     if (!sessionStage_) {
@@ -1237,7 +1229,6 @@ bool Session::CheckDialogOnForeground()
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
-            dialogSession->NotifyTouchDialogTarget();
             WLOGFD("[WMSDialog] Notify touch dialog window, id: %{public}d", GetPersistentId());
             return true;
         }
@@ -1344,23 +1335,29 @@ WSError Session::RaiseToAppTopForPointDown()
 {
     if (raiseToTopForPointDownFunc_) {
         raiseToTopForPointDownFunc_();
-        WLOGFD("RaiseToAppTopForPointDown, id: %{public}d", GetPersistentId());
+        WLOGFD("RaiseToAppTopForPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     }
     return WSError::WS_OK;
 }
 
-void Session::HandlePointDownDialog(int32_t pointAction)
+void Session::PresentFocusIfPointDown()
 {
-    if (!(pointAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
-        WLOGFD("Point main window, action is not down, id: %{public}d", GetPersistentId());
-        return;
+    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    if (!isFocused_ && GetFocusable()) {
+        NotifyRequestFocusStatusNotifyManager(true);
     }
+    if (!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) {
+        NotifyClick();
+    }
+}
+
+void Session::HandlePointDownDialog()
+{
     for (auto dialog : dialogVec_) {
         if (dialog && (dialog->GetSessionState() == SessionState::STATE_FOREGROUND ||
             dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
             dialog->RaiseToAppTopForPointDown();
-            dialog->PresentFoucusIfNeed(pointAction);
+            dialog->PresentFocusIfPointDown();
             WLOGFD("[WMSDialog] Point main window, raise to top and dialog need focus, "
                 "id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
         }
@@ -1371,7 +1368,7 @@ void Session::NotifyPointerEventToRs(int32_t pointAction)
 {
     if ((pointAction == MMI::PointerEvent::POINTER_ACTION_UP) |
         (pointAction == MMI::PointerEvent::POINTER_ACTION_DOWN)) {
-        RSInterfaces::GetInstance().NotifyTouchEvent(pointAction);
+        // RSInterfaces::GetInstance().NotifyTouchEvent(pointAction);
     }
 }
 
@@ -1390,7 +1387,7 @@ WSError Session::HandleSubWindowClick(int32_t action)
     return WSError::WS_OK;
 }
 
-WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool needNotifyClient)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
     if (!IsSystemSession() && !IsSessionValid()) {
@@ -1402,9 +1399,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     auto pointerAction = pointerEvent->GetPointerAction();
     NotifyPointerEventToRs(pointerAction);
+    bool isPointDown = (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        if (CheckDialogOnForeground()) {
-            HandlePointDownDialog(pointerAction);
+        if (CheckDialogOnForeground() && isPointDown) {
+            HandlePointDownDialog();
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
@@ -1413,8 +1412,8 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return ret;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            parentSession_->HandlePointDownDialog(pointerAction);
+        if (parentSession_ && parentSession_->CheckDialogOnForeground() && isPointDown) {
+            parentSession_->HandlePointDownDialog();
             if (!IsTopDialog()) {
                 WLOGFI("[WMSDialog] There is at least one active dialog upon this dialog, id: %{public}d",
                     GetPersistentId());
@@ -1436,11 +1435,15 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
-        WLOGFE("InputTracking id:%{public}d, TransferPointer failed, ret:%{public}d ",
-            pointerEvent->GetId(), ret);
+    if (needNotifyClient) {
+        WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent);
+        if (ret != WSError::WS_OK) {
+            WLOGFE("InputTracking id:%{public}d, TransferPointer failed, ret:%{public}d ",
+                pointerEvent->GetId(), ret);
+        }
         return ret;
     }
+
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "

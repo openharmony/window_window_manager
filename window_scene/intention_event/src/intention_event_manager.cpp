@@ -49,15 +49,15 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
             WLOGFI("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
                 "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-                "%{public}f, tiltx :%{public}f, tiltY :%{public}f", 
-            windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(), 
-            pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+                "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
+                windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
+                pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
         } else {
             WLOGFD("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
                 "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-                "%{public}f, tiltx :%{public}f, tiltY :%{public}f", 
-            windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(), 
-            pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+                "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
+                windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
+                pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
         }
     }
     auto ids = pointerEvent->GetPointerIds();
@@ -65,7 +65,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
             WLOGFD("[WMSEvent] all point info: id: %{public}d, x:%{public}d, y:%{public}d, isPressend:%{public}d, "
-                "pressure:%{public}f, tiltX:%{public}f, tiltY:%{public}f", 
+                "pressure:%{public}f, tiltX:%{public}f, tiltY:%{public}f",
             actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
             item.GetTiltX(), item.GetTiltY());
         }
@@ -189,18 +189,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent", pointerEvent->GetId());
     }
-    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        int32_t pointerId = pointerEvent->GetPointerId();
-        MMI::PointerEvent::PointerItem pointerItem;
-        if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            WLOGFE("OnInputEvent GetPointerItem failed, pointerId:%{public}d", pointerId);
-        } else {
-            SceneSessionManager::GetInstance().OnOutsideDownEvent(
-                pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
-    }
-    
+
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
     if (sceneSession == nullptr) {
@@ -211,6 +200,12 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGD("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u",
                 pointerEvent->GetId(), windowId);
         sceneSession->SendPointerEventToUI(pointerEvent);
+
+        // notify touchOutside and touchDown event
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+            sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     } else {
         // transfer pointer event for move and drag
         sceneSession->TransferPointerEvent(pointerEvent);
