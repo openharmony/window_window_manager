@@ -38,8 +38,8 @@ public:
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
     static void SetActiveController(sptr<PictureInPictureController> pipController);
     static void RemoveActiveController(wptr<PictureInPictureController> pipController);
-    static void AttachAutoStartController(int32_t handleId, sptr<PictureInPictureController> pipController);
-    static void DetachAutoStartController(int32_t handleId, sptr<PictureInPictureController> pipController);
+    static void AttachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
+    static void DetachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
     static bool IsAttachedToSameWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
 
@@ -52,7 +52,7 @@ public:
 private:
     // controller in use
     static sptr<PictureInPictureController> activeController_;
-    static sptr<PictureInPictureController> autoStartController_;
+    static wptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
     static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
