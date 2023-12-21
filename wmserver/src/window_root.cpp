@@ -1125,6 +1125,9 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     if (nextFocusableWindow != nullptr) {
         WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
+    } else {
+        WLOGFW("next focus window is invalid");
+        container->SetFocusWindow(INVALID_WINDOW_ID);
     }
 }
 
