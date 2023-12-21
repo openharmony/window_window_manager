@@ -135,8 +135,8 @@ int ScreenSessionManagerClientStub::HandleOnDisplayStateChanged(MessageParcel& d
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     while (mapSize--) {
         auto displayId = data.ReadUint64();
-        auto displayInfo = data.ReadStrongParcelable<DisplayInfo>();
-        displayInfoMap.emplace(displayId, displayInfo);
+        auto displayInfoValue = data.ReadStrongParcelable<DisplayInfo>();
+        displayInfoMap.emplace(displayId, displayInfoValue);
     }
     auto type = static_cast<DisplayStateChangeType>(data.ReadUint32());
     OnDisplayStateChanged(defaultDisplayId, displayInfo, displayInfoMap, type);
