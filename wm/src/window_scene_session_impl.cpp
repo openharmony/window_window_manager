@@ -636,6 +636,18 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        WLOGFE("[WMSLife] WindowSceneSessionImpl::Show display is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    float density = displayInfo->GetVirtualPixelRatio();
+    if (virtualPixelRatio_ != density) {
+        UpdateDensity();
+    }
+
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
