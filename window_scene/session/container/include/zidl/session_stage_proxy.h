@@ -38,7 +38,6 @@ public:
     WSError UpdateFocus(bool isFocused) override;
     WSError NotifyDestroy() override;
     WSError NotifyCloseExistPipWindow() override;
-    void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                 AAFwk::WantParams& reWantParams) override;

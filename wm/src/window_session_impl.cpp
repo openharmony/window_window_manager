@@ -1695,9 +1695,12 @@ WSError WindowSessionImpl::NotifyCloseExistPipWindow()
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::NotifyTouchDialogTarget()
+void WindowSessionImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
     std::lock_guard<std::recursive_mutex> lockListener(dialogTargetTouchListenerMutex_);
+    if (hostSession_ != nullptr) {
+        hostSession_->ProcessPointDownSession(posX, posY);
+    }
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
     for (auto& listener : dialogTargetTouchListener) {
         if (listener != nullptr) {

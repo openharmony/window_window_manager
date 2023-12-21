@@ -37,8 +37,6 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleBackEventInner),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DESTROY),
         &SessionStageStub::HandleNotifyDestroy),
-    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
-        &SessionStageStub::HandleNotifyTouchDialogTarget),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE),
         &SessionStageStub::HandleUpdateFocus),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
@@ -148,13 +146,6 @@ int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, Messa
     WLOGFD("Notify Pip AlreadyExists");
     WSError errCode = NotifyCloseExistPipWindow();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("Notify touch dialog target");
-    NotifyTouchDialogTarget();
     return ERR_NONE;
 }
 

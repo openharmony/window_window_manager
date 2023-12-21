@@ -3266,7 +3266,7 @@ void WindowImpl::NotifyTouchOutside()
     }
 }
 
-void WindowImpl::NotifyTouchDialogTarget()
+void WindowImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
     auto dialogTargetTouchListeners = GetListeners<IDialogTargetTouchListener>();

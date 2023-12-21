@@ -888,6 +888,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
     specificCb->onRecoveryPullPiPMainWindow_ = std::bind(&SceneSessionManager::RecoveryPullPiPMainWindow,
         this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onOutsideDownEvent_ = std::bind(&SceneSessionManager::OnOutsideDownEvent,
+        this, std::placeholders::_1, std::placeholders::_2);
     return specificCb;
 }
 
@@ -1956,13 +1958,11 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 WLOGFD("id: %{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
                 continue;
             }
-            if (sessionId == callingSessionId) {
-                WLOGFD("id: %{public}d is callingSession, don't notify.", sessionId);
+            if (sessionId == callingSessionId || sessionId == persistentId) {
+                WLOGFD("No need to notify touch window, id: %{public}d", sessionId);
                 continue;
             }
-            if (sessionId != persistentId) {
-                sceneSession->NotifyTouchOutside();
-            }
+            sceneSession->NotifyTouchOutside();
         }
     };
 
@@ -5109,7 +5109,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-    
+
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
@@ -6653,7 +6653,7 @@ void SceneSessionManager::FlushWindowInfoToMMI()
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
         return WSError::WS_OK;
-    }; 
+    };
     return taskScheduler_->PostAsyncTask(task);
 }
 } // namespace OHOS::Rosen

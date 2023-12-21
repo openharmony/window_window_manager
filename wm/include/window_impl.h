@@ -255,7 +255,7 @@ public:
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
     void NotifyScreenshot();
-    void NotifyTouchDialogTarget() override;
+    void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
     void NotifyBackground();
