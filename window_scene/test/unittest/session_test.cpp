@@ -1497,21 +1497,6 @@ HWTEST_F(WindowSessionTest, SetNotifyCallingSessionForegroundFunc, Function | Sm
 }
 
 /**
- * @tc.name: NotifyTouchDialogTarget
- * @tc.desc: NotifyTouchDialogTarget Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->sessionStage_ = nullptr;
-    session_->NotifyTouchDialogTarget();
-
-    session_->property_ = new WindowSessionProperty();
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
-}
-
-/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot Test
  * @tc.type: FUNC

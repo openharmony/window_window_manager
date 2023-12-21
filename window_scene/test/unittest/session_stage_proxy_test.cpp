@@ -141,17 +141,6 @@ HWTEST_F(SessionStageProxyTest, NotifyDestroy, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: NotifyTouchDialogTarget
- * @tc.desc: test function : NotifyTouchDialogTarget
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, NotifyTouchDialogTarget, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE((sessionStage_ != nullptr));
-    sessionStage_->NotifyTouchDialogTarget();
-}
-
-/**
  * @tc.name: NotifyTransferComponentData
  * @tc.desc: test function : NotifyTransferComponentData
  * @tc.type: FUNC

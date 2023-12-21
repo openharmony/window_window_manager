@@ -137,10 +137,10 @@ constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int ORIEN_MAX_WIDTH = 12;
-constexpr int OFFSET_MAX_WIDTH = 10;
+constexpr int OFFSET_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
-constexpr int SCALE_MAX_WIDTH = 10;
+constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
 constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
@@ -890,6 +890,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1);
     specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
     specificCb->onRecoveryPullPiPMainWindow_ = std::bind(&SceneSessionManager::RecoveryPullPiPMainWindow,
+        this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onOutsideDownEvent_ = std::bind(&SceneSessionManager::OnOutsideDownEvent,
         this, std::placeholders::_1, std::placeholders::_2);
     return specificCb;
 }
@@ -1959,13 +1961,11 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 WLOGFD("id: %{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
                 continue;
             }
-            if (sessionId == callingSessionId) {
-                WLOGFD("id: %{public}d is callingSession, don't notify.", sessionId);
+            if (sessionId == callingSessionId || sessionId == persistentId) {
+                WLOGFD("No need to notify touch window, id: %{public}d", sessionId);
                 continue;
             }
-            if (sessionId != persistentId) {
-                sceneSession->NotifyTouchOutside();
-            }
+            sceneSession->NotifyTouchOutside();
         }
     };
 
@@ -3026,11 +3026,17 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posY_
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.width_
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
+        << "]"
+        << " [ "
         << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetX()
         << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetY()
         << "]"
+        << " [ "
         << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetScaleX()
         << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetScaleY()
+        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetPivotX()
+        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetPivotY()
+        << "]"
         << std::endl;
 }
 
@@ -3074,8 +3080,8 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     std::ostringstream oss;
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------" << std::endl;
-    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    "
-        << "offsetX   offsetY ] scaleX    ScaleY"
+    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]"
         << std::endl;
 
     std::vector<sptr<SceneSession>> allSession;
@@ -3180,8 +3186,12 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;
-    oss << "scaleX: " << session->GetScaleX() << std::endl;
-    oss << "scaleY: " << session->GetScaleY() << std::endl;
+    oss << "Offset: " << "[ "
+        << session->GetOffsetX() << ", " << session->GetOffsetY() << " ]" << std::endl;
+    oss << "Scale: " << "[ "
+        << session->GetScaleX() << ", " << session->GetScaleY() << ", "
+        << session->GetPivotX() << ", " << session->GetPivotY()
+        << " ]" << std::endl;
     dumpInfo.append(oss.str());
 
     DumpSessionElementInfo(session, params, dumpInfo);
@@ -5112,7 +5122,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-    
+
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
@@ -6656,7 +6666,7 @@ void SceneSessionManager::FlushWindowInfoToMMI()
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
         return WSError::WS_OK;
-    }; 
+    };
     return taskScheduler_->PostAsyncTask(task);
 }
 } // namespace OHOS::Rosen

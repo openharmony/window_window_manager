@@ -26,6 +26,7 @@
 #include "display_manager.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
+#include "session_helper.h"
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
@@ -35,6 +36,7 @@
 #include "window_manager_hilog.h"
 #include "window_prepare_terminate.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
 #include <transaction/rs_interfaces.h>
@@ -344,6 +346,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
                 WLOGFI("[WMSSystem] System sub window is not support");
                 return WMError::WM_ERROR_INVALID_TYPE;
             }
+
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(type)) {
                 return WMError::WM_OK;
@@ -366,7 +369,82 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
+void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const MMI::PointerEvent::PointerItem& pointerItem)
+{
+    const int32_t& action = pointerEvent->GetPointerAction();
+    const auto& sourceType = pointerEvent->GetSourceType();
+    const auto& rect = SessionHelper::TransferToWSRect(GetRect());
+    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    bool needNotifyEvent = true;
+    if (isPointDown) {
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+            return;
+        }
+        float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+        if (MathHelper::NearZero(vpr)) {
+            WLOGFW("vpr is zero");
+            return;
+        }
+        uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
+        bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
+            pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
+            (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(titleBarHeight));
+        int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
+            static_cast<int>(HOTZONE_TOUCH * vpr);
+        auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
+            sourceType, outside, vpr, rect);
+        if (dragType != AreaType::UNDEFINED) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+            needNotifyEvent = false;
+        } else if (isMoveArea) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
+    }
+
+    bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    if (isPointUp) {
+        hostSession_->SendPointEventForMoveDrag(pointerEvent);
+    }
+
+    if (needNotifyEvent) {
+        NotifyPointerEvent(pointerEvent);
+    }
+    if (isPointDown || isPointUp) {
+        WLOGFI("[WMSEvent]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
+            "pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
+            "%{public}u]", GetWindowId(), pointerEvent->GetPointerId(), sourceType, pointerItem.GetDisplayX(),
+            pointerItem.GetDisplayY(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+}
+
+void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        WLOGFE("PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        return;
+    }
+
+    if (hostSession_ == nullptr) {
+        WLOGFE("[WMSEvent] hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        return;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFW("[WMSEvent] invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        return;
+    }
+
+    ConsumePointerEventInner(pointerEvent, pointerItem);
+}
+
+void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpacialSession)
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");

@@ -25,6 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/session_utils.h"
 #include "window_helper.h"
+#include "session_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 
@@ -43,16 +44,22 @@ void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBa
     moveDragCallback_ = callBack;
 }
 
-void MoveDragController::SetStartMoveFlag(bool flag)
+void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
 {
     if (pidChangeCallback_) {
-        pidChangeCallback_(persistentId_, flag);
+        pidChangeCallback_(persistentId_, isServerPid);
+        WLOGFI("id: %{public}d, isServerPid:%{public}d", persistentId_, isServerPid);
     }
+}
+
+void MoveDragController::SetStartMoveFlag(bool flag)
+{
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
             hasPointDown_, isStartDrag_);
         return;
     }
+    NotifyWindowInputPidChange(flag);
     isStartMove_ = flag;
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
@@ -184,7 +191,7 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
     }
 }
 
-void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
@@ -241,6 +248,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
+            NotifyWindowInputPidChange(isStartDrag_);
             break;
         }
         default:
@@ -296,7 +304,8 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
 bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
 {
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+    const auto& sourceType = pointerEvent->GetSourceType();
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
         return false;
     }
@@ -313,7 +322,10 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     } else {
         vpr_ = 1.5f; // 1.5f: default virtual pixel ratio
     }
-    type_ = GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), pointerEvent->GetSourceType(),
+
+    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ :
+        HOTZONE_TOUCH * vpr_;
+    type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
         moveDragProperty_.originalRect_);
     if (type_ == AreaType::UNDEFINED) {
         return false;
@@ -321,7 +333,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     InitDecorValue(property, sysConfig);
     limits_ = property->GetWindowLimits();
     moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
-    moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+    moveDragProperty_.pointerType_ = sourceType;
     moveDragProperty_.originalPointerPosX_ = pointerItem.GetDisplayX();
     moveDragProperty_.originalPointerPosY_ = pointerItem.GetDisplayY();
     if (aspectRatio_ <= NEAR_ZERO) {
@@ -331,57 +343,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     moveDragProperty_.originalRect_.posY_ = pointerItem.GetDisplayY() - pointerItem.GetWindowY();
     mainMoveAxis_ = AxisType::UNDEFINED;
     isStartDrag_ = true;
+    NotifyWindowInputPidChange(isStartDrag_);
     return true;
-}
-
-AreaType MoveDragController::GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect)
-{
-    int32_t insideCorner = WINDOW_FRAME_CORNER_WIDTH * vpr_;
-    int32_t insideEdge = WINDOW_FRAME_WIDTH * vpr_;
-    int32_t outside;
-    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        outside = HOTZONE_POINTER * vpr_;
-    } else {
-        outside = HOTZONE_TOUCH * vpr_;
-    }
-
-    int32_t leftOut = -outside;
-    int32_t leftIn = insideEdge;
-    int32_t leftCorner = insideCorner;
-    int32_t rightCorner = rect.width_ - insideCorner;
-    int32_t rightIn = rect.width_ - insideEdge;
-    int32_t rightOut = rect.width_ + outside;
-    int32_t topOut = -outside;
-    int32_t topIn = insideEdge;
-    int32_t topCorner = insideCorner;
-    int32_t bottomCorner = rect.height_ - insideCorner;
-    int32_t bottomIn = rect.height_ - insideEdge;
-    int32_t bottomOut = rect.height_ + outside;
-
-    auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
-
-    AreaType type;
-    if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
-        type = AreaType::LEFT_TOP;
-    } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
-        type = AreaType::RIGHT_TOP;
-    } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
-        type = AreaType::RIGHT_BOTTOM;
-    } else if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
-        type = AreaType::LEFT_BOTTOM;
-    } else if (isInRange(leftOut, leftIn, pointWinX)) {
-        type = AreaType::LEFT;
-    } else if (isInRange(topOut, topIn, pointWinY)) {
-        type = AreaType::TOP;
-    } else if (isInRange(rightIn, rightOut, pointWinX)) {
-        type = AreaType::RIGHT;
-    } else if (isInRange(bottomIn, bottomOut, pointWinY)) {
-        type = AreaType::BOTTOM;
-    } else {
-        type = AreaType::UNDEFINED;
-    }
-    WLOGD("HotAreaType :%{public}d", type);
-    return type;
 }
 
 WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, int32_t tranY, WSRect originalRect)
@@ -746,6 +709,8 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             moveTempProperty_.pointerType_ = pointerType;
             moveTempProperty_.lastDownPointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastDownPointerPosY_ = pointerDisplayY;
+            moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
+            moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
             moveTempProperty_.lastDownPointerWindowX_ = pointerItem.GetWindowX();
             moveTempProperty_.lastDownPointerWindowY_ = pointerItem.GetWindowY();
             break;
@@ -861,6 +826,7 @@ void MoveDragController::OnLostFocus()
             persistentId_, isStartMove_, isStartDrag_);
         isStartMove_ = false;
         isStartDrag_ = false;
+        NotifyWindowInputPidChange(isStartDrag_);
         if (windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED) {
             ProcessWindowDragHotAreaFunc(true, SizeChangeReason::DRAG_END);
         }
