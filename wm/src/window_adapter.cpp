@@ -231,41 +231,44 @@ bool WindowAdapter::InitWMSProxy()
     return true;
 }
 
-void WindowAdapter::WindowManagerRecover()
+void WindowAdapter::RegisterSessionRecoverCallbackFunc(
+    int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc)
 {
-    WLOGFI("[RECOVER] Run recover callback func in");
-        ClearWindowAdapter();
-        if (!InitSSMProxy()) {
-            WLOGFE("[RECOVER] InitSSMProxy failed");
-            return;
-        }
-
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        for (const auto& it: windowManagerAgentMap_) {
-            WLOGFI("[RECOVER] RecoverWindowManagerAgents type = %{public}" PRIu32 ", size = %{public}" PRIu64,
-                it.first, static_cast<uint64_t>(it.second.size()));
-            for (auto& agent: it.second) {
-                if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
-                    WLOGFE("[RECOVER] RecoverWindowManagerAgent failed");
-                }
-            }
-        }
-
-        WLOGFI("[RECOVER] Run recover callback func out");
+    WLOGFI("[WMSRecover] RegisterSessionRecoverCallbackFunc persistentId = %{public}d", persistentId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
 
-void WindowAdapter::RegisterWindowManagerRecoverCallbackFunc()
+void WindowAdapter::UnRegisterSessionRecoverCallbackFunc(int32_t persistentId)
 {
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        WLOGFI("[RECOVER] IsSceneBoardEnabled false");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto it = sessionRecoverCallbackFuncMap_.find(persistentId);
+    if (it != sessionRecoverCallbackFuncMap_.end()) {
+        sessionRecoverCallbackFuncMap_.erase(it);
+    }
+}
+
+void WindowAdapter::WindowManagerAndSessionRecover()
+{
+    ClearWindowAdapter();
+    if (!InitSSMProxy()) {
+        WLOGFE("[WMSRecover]InitSSMProxy failed");
         return;
     }
-
-    auto callbackFunc = [this] () {
-        this->WindowManagerRecover();
-    };
-
-    SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFuc(callbackFunc);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (const auto& it : windowManagerAgentMap_) {
+        WLOGFI("[WMSRecover] RecoverWindowManagerAgents type = %{public}" PRIu32 ", size = %{public}" PRIu64, it.first,
+            static_cast<uint64_t>(it.second.size()));
+        for (auto& agent : it.second) {
+            if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                WLOGFE("[WMSRecover] RecoverWindowManagerAgent failed");
+            }
+        }
+    }
+    for (const auto& it : sessionRecoverCallbackFuncMap_) {
+        WLOGFD("[WMSRecover] Session recover callback, persistentId = %{public}" PRId32, it.first);
+        it.second();
+    }
 }
 
 bool WindowAdapter::InitSSMProxy()
@@ -289,7 +292,8 @@ bool WindowAdapter::InitSSMProxy()
             return false;
         }
         if (!recoverInitialized) {
-            RegisterWindowManagerRecoverCallbackFunc();
+            SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFunc(
+                std::bind(&WindowAdapter::WindowManagerAndSessionRecover, this));
             recoverInitialized = true;
         }
         isProxyValid_ = true;
@@ -483,10 +487,35 @@ void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& s
         surfaceNode, property, persistentId, session, token);
 }
 
+void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->RecoverAndConnectSpecificSession(
+        sessionStage, eventChannel, surfaceNode, property, session, token);
+}
+
 void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId);
+}
+
+WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    WLOGFD("RecoverAndReconnectSceneSession");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto ret = windowManagerServiceProxy_->RecoverAndReconnectSceneSession(
+        sessionStage, eventChannel, surfaceNode, session, property, token);
+    if (ret != WSError::WS_OK) {
+        WLOGFE("RecoverAndReconnectSceneSession failed, ret = %{public}d", ret);
+        return WMError::WM_DO_NOTHING;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowAdapter::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
