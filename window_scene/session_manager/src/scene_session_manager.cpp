@@ -2173,7 +2173,12 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         return nullptr;
     }
     resourceMgr->GetResConfig(*resConfig);
-    resourceMgr.reset(Global::Resource::CreateResourceManager());
+    resourceMgr = Global::Resource::CreateResourceManager(
+        abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig);
+    if (!resourceMgr) {
+        WLOGFE("resourceMgr is nullptr.");
+        return nullptr;
+    }
     resourceMgr->UpdateResConfig(*resConfig);
 
     std::string loadPath;
@@ -2184,8 +2189,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
     }
 
     if (!resourceMgr->AddResource(loadPath.c_str())) {
-        WLOGFE("Add resource %{private}s failed.", loadPath.c_str());
-        return nullptr;
+        WLOGFW("Add resource %{private}s failed.", loadPath.c_str());
     }
     return resourceMgr;
 }
@@ -2194,8 +2198,8 @@ void SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     std::string& path, uint32_t& bgColor)
 {
     auto resourceMgr = GetResourceManager(abilityInfo);
-    if (resourceMgr == nullptr) {
-        WLOGFE("resource manager is nullptr.");
+    if (!resourceMgr) {
+        WLOGFE("resourceMgr is nullptr.");
         return;
     }
 
@@ -2221,21 +2225,22 @@ void SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
     if (!bundleMgr_) {
-        WLOGFE("bundle manager is nullptr.");
+        WLOGFE("bundleMgr_ is nullptr.");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
-    bool ret = bundleMgr_->QueryAbilityInfo(
-        want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo);
-    if (!ret) {
+    if (!bundleMgr_->QueryAbilityInfo(
+        want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
         WLOGFE("Get ability info from BMS failed!");
         return;
     }
 
     GetStartupPageFromResource(abilityInfo, path, bgColor);
+    WLOGFI("%{public}d, %{public}d, %{public}s, %{public}x",
+        abilityInfo.startWindowIconId, abilityInfo.startWindowBackgroundId, path.c_str(), bgColor);
 }
 
 void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
