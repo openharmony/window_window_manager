@@ -716,7 +716,10 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    jsCbMap_[cbType] = callbackRef;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        jsCbMap_[cbType] = callbackRef;
+    }
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
