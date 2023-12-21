@@ -88,7 +88,7 @@ public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
-    void OnWindowStatusChange(WindowStatus status) override;
+    void OnWindowStatusChange(WindowStatus windowstatus) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
 private:
