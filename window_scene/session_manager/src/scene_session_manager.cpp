@@ -463,7 +463,7 @@ bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::C
 
 void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
-    WLOGFI("[WMSRecover]Set enable input event: %{public}u", enabled);
+    WLOGFI("[WMSRecover] Set enable input event: %{public}u", enabled);
     enableInputEvent_ = enabled;
 }
 
@@ -474,7 +474,7 @@ bool SceneSessionManager::IsInputEventEnabled()
 
 void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds)
 {
-    WLOGFI("[WMSRecover]Number of persistentIds recovered = %{public}zu. CurrentUserId = "
+    WLOGFI("[WMSRecover] Number of persistentIds recovered = %{public}zu. CurrentUserId = "
            "%{public}d",
         recoveredPersistentIds.size(), currentUserId_);
     std::vector<AAFwk::SessionInfo> abilitySessionInfos;
@@ -484,11 +484,11 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
         if (search == sceneSessionMap_.end() || search->second == nullptr) {
             continue;
         }
-        WLOGFD("[WMSRecover]recovered persistentId = %{public}d", search->first);
+        WLOGFD("[WMSRecover] recovered persistentId = %{public}d", search->first);
         auto sceneSession = search->second;
         const auto& abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
         if (!abilitySessionInfo) {
-            WLOGFW("[WMSRecover]abilitySessionInfo is null");
+            WLOGFW("[WMSRecover] abilitySessionInfo is null");
             return;
         }
         abilitySessionInfos.emplace_back(*abilitySessionInfo);
@@ -1661,7 +1661,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     if (property == nullptr) {
-        WLOGFE("[WMSRecover]property is nullptr");
+        WLOGFE("[WMSRecover] property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
 
@@ -1679,7 +1679,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         info.sessionState_ = (property->GetWindowState() == WindowState::STATE_SHOWN) ? SessionState::STATE_ACTIVE
                                                                                       : SessionState::STATE_BACKGROUND;
 
-        WLOGI("[WMSRecover]RecoverAndConnectSpecificSession windowName = %{public}s, windowMode = %{public}d, "
+        WLOGI("[WMSRecover] RecoverAndConnectSpecificSession windowName = %{public}s, windowMode = %{public}d, "
               "windowType = %{public}u, persistentId = %{public}d, windowState = %{public}u",
             property->GetWindowName().c_str(), info.windowMode, info.windowType_, info.persistentId_,
             property->GetWindowState());
@@ -1687,20 +1687,20 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         ClosePipWindowIfExist(type);
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
-            WLOGFE("[WMSRecover]RequestSceneSession failed");
+            WLOGFE("[WMSRecover] RequestSceneSession failed");
             return WSError::WS_ERROR_NULLPTR;
         }
 
         auto persistentId = sceneSession->GetPersistentId();
         if (persistentId != info.persistentId_) {
-            WLOGFW("[WMSRecover]PersistentId changed, from %{public}" PRId32 " to %{public}" PRId32,
+            WLOGFW("[WMSRecover] PersistentId changed, from %{public}" PRId32 " to %{public}" PRId32,
                 info.persistentId_, persistentId);
         }
 
         auto errCode =
             sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
         if (errCode != WSError::WS_OK) {
-            WLOGFE("[WMSRecover]SceneSession reconnect failed");
+            WLOGFE("[WMSRecover] SceneSession reconnect failed");
             EraseSceneSessionMapById(persistentId);
             return errCode;
         }
@@ -1719,11 +1719,11 @@ void SceneSessionManager::RecoverWindowSessionProperty(
     sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
 {
     if (sceneSession == nullptr || property == nullptr) {
-        WLOGFE("[WMSRecover]sceneSession or property is nullptr");
+        WLOGFE("[WMSRecover] sceneSession or property is nullptr");
         return;
     }
 
-    WLOGFI("[WMSRecover]WindowType = %{public}u", property->GetWindowType());
+    WLOGFI("[WMSRecover] WindowType = %{public}u", property->GetWindowType());
 
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         RelayoutKeyBoard(sceneSession);
@@ -1746,7 +1746,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     if (property == nullptr) {
-        WLOGFE("[WMSRecover]property is nullptr!");
+        WLOGFE("[WMSRecover] property is nullptr!");
         return WSError::WS_ERROR_NULLPTR;
     }
     SessionInfo sessionInfo = property->GetSessionInfo();
@@ -1755,7 +1755,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
     sessionInfo.requestOrientation_ = static_cast<uint32_t>(property->GetRequestedOrientation());
     WindowState windowState = property->GetWindowState();
-    WLOGFI("[WMSRecover]Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
+    WLOGFI("[WMSRecover] Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
            "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
            "windowState=%{public}u",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
@@ -1767,24 +1767,24 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         sceneSession = RequestSceneSession(sessionInfo, property);
     }
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSRecover]Request sceneSession failed");
+        WLOGFE("[WMSRecover] Request sceneSession failed");
         return WSError::WS_ERROR_NULLPTR;
     }
     auto pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     if (ret != WSError::WS_OK) {
-        WLOGFE("[WMSRecover]Reconnect failed");
+        WLOGFE("[WMSRecover] Reconnect failed");
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         sceneSessionMap_.erase(sessionInfo.persistentId_);
         return ret;
     }
     sessionInfo.sessionState_ = sceneSession->GetSessionState();
-    WLOGFI("[WMSRecover]sessionState=%{public}d", sessionInfo.sessionState_);
+    WLOGFI("[WMSRecover] sessionState=%{public}d", sessionInfo.sessionState_);
     if (recoverSceneSessionFunc_) {
         recoverSceneSessionFunc_(sceneSession, sessionInfo);
     } else {
-        WLOGFE("[WMSRecover]recoverSceneSessionFunc_ is null");
+        WLOGFE("[WMSRecover] recoverSceneSessionFunc_ is null");
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         sceneSessionMap_.erase(sessionInfo.persistentId_);
         return WSError::WS_ERROR_NULLPTR;
@@ -1795,7 +1795,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
 
 void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func)
 {
-    WLOGFI("[WMSRecover]SetRecoverSceneSessionListener");
+    WLOGFI("[WMSRecover] SetRecoverSceneSessionListener");
     recoverSceneSessionFunc_ = func;
 }
 

@@ -66,7 +66,7 @@ private:
 
     napi_value OnNotifySceneBoardAvailable(napi_env env, napi_callback_info info)
     {
-        WLOGI("[WMSRecover]JsSessionManagerService: OnNotifySceneBoardAvailable is called");
+        WLOGI("[WMSRecover] JsSessionManagerService: OnNotifySceneBoardAvailable is called");
         SessionManagerService::GetInstance().NotifySceneBoardAvailable();
         return NapiGetUndefined(env);
     }

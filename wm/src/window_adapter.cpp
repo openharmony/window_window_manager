@@ -252,9 +252,10 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 {
     ClearWindowAdapter();
     if (!InitSSMProxy()) {
-        WLOGFE("[WMSRecover]InitSSMProxy failed");
+        WLOGFE("[WMSRecover] InitSSMProxy failed");
         return;
     }
+
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (const auto& it : windowManagerAgentMap_) {
         WLOGFI("[WMSRecover] RecoverWindowManagerAgents type = %{public}" PRIu32 ", size = %{public}" PRIu64, it.first,
@@ -265,6 +266,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
             }
         }
     }
+
     for (const auto& it : sessionRecoverCallbackFuncMap_) {
         WLOGFD("[WMSRecover] Session recover callback, persistentId = %{public}" PRId32, it.first);
         it.second();

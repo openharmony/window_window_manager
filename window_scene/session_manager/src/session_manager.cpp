@@ -67,10 +67,11 @@ void SessionManager::OnSessionManagerServiceRecover(const sptr<IRemoteObject>& s
         sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(sessionManagerService);
         sceneSessionManagerProxy_ = nullptr;
     }
-    WLOGFD("[WMSRecover]Run recover");
+
+    WLOGFI("[WMSRecover] Run recover");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (windowManagerRecoverFunc_ != nullptr) {
-        WLOGFD("[WMSRecover]windowManagerRecover");
+        WLOGFD("[WMSRecover] windowManagerRecover");
         windowManagerRecoverFunc_();
     }
 }

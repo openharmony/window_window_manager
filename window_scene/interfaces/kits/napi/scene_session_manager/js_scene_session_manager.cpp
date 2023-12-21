@@ -341,7 +341,7 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 {
     NotifyRecoverSceneSessionFunc func = [this](const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {
-        WLOGFD("[WMSRecover]RecoverSceneSession");
+        WLOGFD("[WMSRecover] RecoverSceneSession");
         this->OnRecoverSceneSession(session, sessionInfo);
     };
     SceneSessionManager::GetInstance().SetRecoverSceneSessionListener(func);

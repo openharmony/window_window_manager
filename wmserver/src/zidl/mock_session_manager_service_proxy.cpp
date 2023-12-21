@@ -67,14 +67,14 @@ void MockSessionManagerServiceProxy::NotifySceneBoardAvailable()
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[WMSRecover]WriteInterfaceToken failed");
+        WLOGFE("[WMSRecover] WriteInterfaceToken failed");
         return;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("[WMSRecover]SendRequest failed");
+        WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }
@@ -86,19 +86,19 @@ void MockSessionManagerServiceProxy::RegisterSessionManagerServiceRecoverListene
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[WMSRecover]WriteInterfaceToken failed");
+        WLOGFE("[WMSRecover] WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteRemoteObject(listener)) {
-        WLOGFE("[WMSRecover]WriteRemoteObject listener failed");
+        WLOGFE("[WMSRecover] WriteRemoteObject listener failed");
         return;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("[WMSRecover]SendRequest failed");
+        WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }
@@ -115,7 +115,7 @@ void MockSessionManagerServiceProxy::UnRegisterSessionManagerServiceRecoverListe
     if (Remote()->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("[WMSRecover]SendRequest failed");
+        WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }
