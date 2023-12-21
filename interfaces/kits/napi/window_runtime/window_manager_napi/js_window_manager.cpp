@@ -589,10 +589,10 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
         return NapiGetUndefined(env);
     }
 
-    WLOGI("Window name = %{public}s, err = %{public}d", windowName.c_str(), errCode);
+    WLOGD("Window name = %{public}s, err = %{public}d", windowName.c_str(), errCode);
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
     if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
-        WLOGI("Find window: %{public}s, use exist js window", windowName.c_str());
+        WLOGD("Find window: %{public}s, use exist js window", windowName.c_str());
         return jsWindowObj->GetNapiValue();
     } else {
         sptr<Window> window = Window::Find(windowName);
