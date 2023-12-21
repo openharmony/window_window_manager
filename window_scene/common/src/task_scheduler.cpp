@@ -27,20 +27,20 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
     return handler_;
 }
 
-void TaskScheduler::PostAsyncTask(Task&& task, int64_t delayTime)
+void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime)
 {
     if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
         return task();
     }
-    handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void TaskScheduler::PostVoidSyncTask(Task&& task)
+void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
 {
     if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
     }
-    handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostSyncTask(std::move(task), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
@@ -48,13 +48,13 @@ void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delay
     if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
         return task();
     }
-    handler_->PostTask(std::move(task), name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::RemoveTask(const std::string& name)
 {
     if (handler_) {
-        handler_->RemoveTask(name);
+        handler_->RemoveTask("wms:" + name);
     }
 }
 } // namespace OHOS::Rosen

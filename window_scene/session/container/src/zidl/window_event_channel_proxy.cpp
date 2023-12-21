@@ -15,7 +15,6 @@
 
 #include "session/container/include/zidl/window_event_channel_proxy.h"
 #include "session/container/include/zidl/window_event_ipc_interface_code.h"
-#include "session/container/include/parcel/accessibility_element_info_parcel.h"
 
 #include <axis_event.h>
 #include <ipc_types.h>
@@ -186,8 +185,8 @@ WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::Accessibi
     }
     infos.clear();
     for (int i = 0; i < count; i++) {
-        sptr<AccessibilityElementInfoParcel> infoPtr =
-            reply.ReadStrongParcelable<AccessibilityElementInfoParcel>();
+        sptr<Accessibility::AccessibilityElementInfoParcel> infoPtr =
+            reply.ReadStrongParcelable<Accessibility::AccessibilityElementInfoParcel>();
         if (infoPtr != nullptr) {
             infos.push_back(*infoPtr);
         }
@@ -260,8 +259,8 @@ WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int32_t elemen
 
 WSError GetElementInfo(MessageParcel& reply, Accessibility::AccessibilityElementInfo& info)
 {
-    sptr<AccessibilityElementInfoParcel> infoPtr =
-        reply.ReadStrongParcelable<AccessibilityElementInfoParcel>();
+    sptr<Accessibility::AccessibilityElementInfoParcel> infoPtr =
+        reply.ReadStrongParcelable<Accessibility::AccessibilityElementInfoParcel>();
     if (infoPtr != nullptr) {
         info = *infoPtr;
     }

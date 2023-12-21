@@ -39,8 +39,7 @@ WSError ExtensionSession::Connect(
     // Get pid and uid before posting task.
     pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
     uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
-    return PostSyncTask(
-        [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
+    auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -48,7 +47,8 @@ WSError ExtensionSession::Connect(
         }
         return session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
-    });
+    };
+    return PostSyncTask(task, "Connect");
 }
 
 WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
@@ -124,5 +124,12 @@ sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExten
     }
 
     return extSessionEventCallback_;
+}
+
+WSError ExtensionSession::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+    int32_t uiExtensionIdLevel)
+{
+    NotifyTransferAccessibilityEvent(info, uiExtensionIdLevel);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

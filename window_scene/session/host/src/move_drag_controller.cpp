@@ -45,18 +45,26 @@ void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBa
 
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
+    if (pidChangeCallback_) {
+        pidChangeCallback_(persistentId_, flag);
+    }
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
             hasPointDown_, isStartDrag_);
         return;
     }
     isStartMove_ = flag;
-    WLOGFD("SetStartMoveFlag, isStartMove_: %{public}d", isStartMove_);
+    WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
+}
+
+void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback)
+{
+    pidChangeCallback_ = callback;
 }
 
 bool MoveDragController::GetStartMoveFlag() const
 {
-    WLOGFD("GetStartMoveFlag, isStartMove_: %{public}d", isStartMove_);
+    WLOGFD("GetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
     return isStartMove_;
 }
 
@@ -113,8 +121,9 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     int32_t sourceType = pointerEvent->GetSourceType();
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
         (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
-        WLOGFW("invalid pointerEvent");
+        (pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
+        !GetStartMoveFlag()))) {
+        WLOGFD("invalid pointerEvent id: %{public}d", persistentId_);
         return false;
     }
 
@@ -132,7 +141,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             WLOGFD("Reset hasPointDown_ when point up or cancel");
             hasPointDown_ = false;
         }
-        WLOGFD("No need to move");
+        WLOGFD("No need to move action id: %{public}d", action);
         return false;
     }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -146,7 +155,9 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         }
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
-        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
             reason = SizeChangeReason::DRAG_END;
             SetStartMoveFlag(false);
             hasPointDown_ = false;
@@ -164,8 +175,10 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
 
 void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage, const SizeChangeReason& reason)
 {
-    WLOGFI("ProcessWindowDragHotAreaFunc start, isSendHotAreaMessage: %{public}u, reason: %{public}d",
-        isSendHotAreaMessage, reason);
+    if (isSendHotAreaMessage) {
+        WLOGFI("ProcessWindowDragHotAreaFunc start, isSendHotAreaMessage: %{public}u, reason: %{public}d",
+            isSendHotAreaMessage, reason);
+    }
     if (windowDragHotAreaFunc_ && isSendHotAreaMessage) {
         windowDragHotAreaFunc_(windowDragHotAreaType_, reason);
     }
@@ -271,8 +284,8 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.targetRect_ = {
             moveDragProperty_.originalRect_.posX_ + offsetX,
             moveDragProperty_.originalRect_.posY_ + offsetY,
-            moveDragProperty_.originalRect_.width_,
-            moveDragProperty_.originalRect_.height_ };
+            originalRect.width_,
+            originalRect.height_};
         WLOGFD("move rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             moveDragProperty_.targetRect_.posX_, moveDragProperty_.targetRect_.posY_,
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);
@@ -794,7 +807,7 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
         return false;
     }
     if (GetStartMoveFlag()) {
-        WLOGFI("the window is being moved");
+        WLOGFD("the window is being moved");
         return false;
     }
     if (!GetStartDragFlag() && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN &&
@@ -839,5 +852,19 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
 void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func)
 {
     windowDragHotAreaFunc_ = func;
+}
+
+void MoveDragController::OnLostFocus()
+{
+    if (isStartMove_ || isStartDrag_) {
+        WLOGFI("window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d, isDrag: %{public}d",
+            persistentId_, isStartMove_, isStartDrag_);
+        isStartMove_ = false;
+        isStartDrag_ = false;
+        if (windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED) {
+            ProcessWindowDragHotAreaFunc(true, SizeChangeReason::DRAG_END);
+        }
+        ProcessSessionRectChange(SizeChangeReason::DRAG_END);
+    }
 }
 } // namespace OHOS::Rosen

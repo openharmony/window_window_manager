@@ -44,13 +44,13 @@ using GraphicCM_ColorSpaceType = enum {
     GRAPHIC_CM_COLORSPACE_NONE,
 
     GRAPHIC_CM_BT601_EBU_FULL      = 2 | (1 << 8) | (2 << 16) | (1 << 21),  // COLORPRIMARIES_BT601_P | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_P << 16) | (RANGE_FULL << 21)
-    GRAPHIC_CM_BT601_SMPLE_C_FULL  = 3 | (1 << 8) | (3 << 16) | (1 << 21),  // COLORPRIMARIES_BT601_N | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_N << 16) | (RANGE_FULL << 21)
+    GRAPHIC_CM_BT601_SMPTE_C_FULL  = 3 | (1 << 8) | (3 << 16) | (1 << 21),  // COLORPRIMARIES_BT601_N | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_N << 16) | (RANGE_FULL << 21)
     GRAPHIC_CM_BT709_FULL          = 1 | (1 << 8) | (1 << 16) | (1 << 21),  // COLORPRIMARIES_BT709   | (TRANSFUNC_BT709 << 8) | (MATRIX_BT709   << 16) | (RANGE_FULL << 21)
     GRAPHIC_CM_BT2020_HLG_FULL     = 4 | (5 << 8) | (4 << 16) | (1 << 21),  // COLORPRIMARIES_BT2020  | (TRANSFUNC_HLG   << 8) | (MATRIX_BT2020  << 16) | (RANGE_FULL << 21)
     GRAPHIC_CM_BT2020_PQ_FULL      = 4 | (4 << 8) | (4 << 16) | (1 << 21),  // COLORPRIMARIES_BT2020  | (TRANSFUNC_PQ    << 8) | (MATRIX_BT2020  << 16) | (RANGE_FULL << 21)
 
     GRAPHIC_CM_BT601_EBU_LIMIT     = 2 | (1 << 8) | (2 << 16) | (2 << 21),  // COLORPRIMARIES_BT601_P | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_P << 16) | (RANGE_LIMITED << 21)
-    GRAPHIC_CM_BT601_SMPLE_C_LIMIT = 3 | (1 << 8) | (3 << 16) | (2 << 21),  // COLORPRIMARIES_BT601_N | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_N << 16) | (RANGE_LIMITED << 21)
+    GRAPHIC_CM_BT601_SMPTE_C_LIMIT = 3 | (1 << 8) | (3 << 16) | (2 << 21),  // COLORPRIMARIES_BT601_N | (TRANSFUNC_BT709 << 8) | (MATRIX_BT601_N << 16) | (RANGE_LIMITED << 21)
     GRAPHIC_CM_BT709_LIMIT         = 1 | (1 << 8) | (1 << 16) | (2 << 21),  // COLORPRIMARIES_BT709   | (TRANSFUNC_BT709 << 8) | (MATRIX_BT709   << 16) | (RANGE_LIMITED << 21)
     GRAPHIC_CM_BT2020_HLG_LIMIT    = 4 | (5 << 8) | (4 << 16) | (2 << 21),  // COLORPRIMARIES_BT2020  | (TRANSFUNC_HLG   << 8) | (MATRIX_BT2020  << 16) | (RANGE_LIMITED << 21)
     GRAPHIC_CM_BT2020_PQ_LIMIT     = 4 | (4 << 8) | (4 << 16) | (2 << 21),  // COLORPRIMARIES_BT2020  | (TRANSFUNC_PQ    << 8) | (MATRIX_BT2020  << 16) | (RANGE_LIMITED << 21)
@@ -104,8 +104,8 @@ const std::map<GraphicCM_ColorSpaceType, ColorSpace> NATIVE_TO_JS_COLOR_SPACE_TY
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_BT2020_PQ,      ColorSpace::BT2020_PQ },
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_FULL,         ColorSpace::BT601_EBU },
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_LIMIT,        ColorSpace::BT601_EBU },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPLE_C_FULL,     ColorSpace::BT601_SMPTE_C },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPLE_C_LIMIT,    ColorSpace::BT601_SMPTE_C },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_FULL,     ColorSpace::BT601_SMPTE_C },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_LIMIT,    ColorSpace::BT601_SMPTE_C },
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_FULL,             ColorSpace::BT709 },
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_LIMIT,            ColorSpace::BT709 },
     { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_HLG_FULL,            ColorSpace::P3_HLG },

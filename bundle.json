@@ -67,12 +67,12 @@
           "frame_aware_sched_override",
           "imf",
           "frame_aware_sched",
-          "screenlock_mgr",
           "previewer",
           "hilog",
           "memmgr_plugin",
           "data_share",
-          "accessibility"
+          "accessibility",
+          "security_component_manager"
         ],
         "third_party": [
           "libjpeg-turbo",
@@ -94,9 +94,11 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
+            "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
+            "//foundation/window/window_manager/wm:libwm_lite",
             "//foundation/window/window_manager/utils:libwmutil",
             "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
@@ -118,6 +120,20 @@
                 "window_manager.h",
                 "window_option.h",
                 "window_scene.h",
+                "wm_common.h",
+                "occupied_area_change_info.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/wm:libwm_lite",
+            "header": {
+              "header_files": [
+                "window_accessibility_controller.h",
+                "window_manager.h",
+                "window_option.h",
                 "wm_common.h",
                 "occupied_area_change_info.h"
               ],
@@ -161,10 +177,33 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/dm_lite:libdm_lite",
+            "header": {
+              "header_files": [
+                "display_lite.h",
+                "display_manager_lite.h",
+                "../dm/display_property.h",
+                "../dm/dm_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/dm_lite"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "header": {
               "header_files": [
                 "window_extension_connection.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
+            "header": {
+              "header_files": [
+                "modal_system_ui_extension.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
             }
@@ -235,7 +274,7 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/session_manager_service:session_manager_service",
+            "name": "//foundation/window/window_manager/window_scene/session_manager:session_manager_lite",
             "header": {
               "header_files": [
               ],

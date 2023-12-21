@@ -51,6 +51,7 @@ enum class WSError : int32_t {
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
     WS_ERROR_INVALID_SESSION,
+    WS_ERROR_INVALID_CALLING,
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
     WS_ERROR_INTERNAL_ERROR,
@@ -167,7 +168,7 @@ struct SessionInfo {
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    int32_t resultCode;
+    int32_t resultCode = -1;
     int32_t requestCode;
     int32_t errorCode;
     std::string errorReason;
@@ -186,6 +187,10 @@ struct SessionInfo {
     bool isClearSession = false;
     std::string sessionAffinity;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    SessionState sessionState_ = SessionState::STATE_DISCONNECT;
+    uint32_t requestOrientation_ = 0;
+    bool isRotable_ = false;
+    bool isSystemInput_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -227,6 +232,7 @@ enum class SessionEvent : uint32_t {
     EVENT_EXCEPTION,
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
+    EVENT_DRAG_START,
 };
 
 enum class BrokerStates: uint32_t {
@@ -299,6 +305,11 @@ struct WSRectT {
     {
         return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
+    }
+
+    inline bool IsInvalid() const
+    {
+        return IsEmpty() || NearZero(width_) || NearZero(height_);
     }
 
     inline std::string ToString() const
@@ -385,6 +396,26 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_CLEAR_MULTITASK,
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
+};
+
+/**
+ * @brief System animaged scene type.
+ */
+enum class SystemAnimatedSceneType : uint32_t {
+    SCENE_ENTER_MISSION_CENTER, // Enter the mission center
+    SCENE_EXIT_MISSION_CENTER, // Exit the mission center
+    SCENE_ENTER_TFS_WINDOW, // Three-finger sliding window recovery
+    SCENE_EXIT_TFU_WINDOW, // The three-finger up window disappears
+    SCENE_ENTER_WINDOW_FULL_SCREEN, // Enter the window full screen
+    SCENE_EXIT_WINDOW_FULL_SCREEN, // Exit the window full screen
+    SCENE_ENTER_MAX_WINDOW, // Enter the window maximization state
+    SCENE_EXIT_MAX_WINDOW, // Exit the window maximization state
+    SCENE_ENTER_SPLIT_SCREEN, // Enter the split screen
+    SCENE_EXIT_SPLIT_SCREEN, // Exit the split screen
+    SCENE_ENTER_APP_CENTER, // Enter the app center
+    SCENE_EXIT_APP_CENTER, // Exit the app center
+    SCENE_APPEAR_MISSION_CENTER, // A special case scenario that displays the mission center
+    SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

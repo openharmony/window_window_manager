@@ -1342,6 +1342,22 @@ HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetUIContentByAbc
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetUIContentByAbc, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    napi_env env = nullptr;
+    napi_value storage = nullptr;
+    auto ret = window->SetUIContentByAbc("/system/etc/window/resources/test.abc", env, storage);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetContentInfo
  * @tc.desc: get
  * @tc.type: FUNC
@@ -1576,7 +1592,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
-    ASSERT_EQ(true, ret == WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2148,7 +2164,7 @@ HWTEST_F(WindowTest, GetWindowLimits, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     WindowLimits windowLimits;
     auto ret = window->GetWindowLimits(windowLimits);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2163,7 +2179,7 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     WindowLimits windowLimits;
     auto ret = window->SetWindowLimits(windowLimits);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2203,8 +2219,35 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     Accessibility::AccessibilityEventInfo info;
-    vector<int32_t> uiExtensionIdLevelVec;
-    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevelVec));
+    int32_t uiExtensionIdLevel = 0;
+    ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevel));
+}
+
+/**
+ * @tc.name: SetSingleFrameComposerEnabled
+ * @tc.desc: set single frame composer enable flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetSingleFrameComposerEnabled(false));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: FlushFrameRate
+ * @tc.desc: FlushFrameRate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    uint32_t rate = 120;
+    window->FlushFrameRate(rate);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen

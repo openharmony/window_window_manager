@@ -29,6 +29,7 @@ public:
     MOCK_METHOD3(Initialize,
         void(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage));
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
+    MOCK_METHOD2(InitializeDynamic, void(const std::string& hapPath, const std::string& abcPath));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
     MOCK_METHOD0(Foreground, void());
@@ -88,6 +89,12 @@ public:
         FocusMoveSearch, void(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo &output));
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
+    MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
+    MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
+    MOCK_METHOD0(GetContainerModalTitleHeight, int());
+    MOCK_METHOD2(GetContainerModalButtonsRect, bool(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons));
+    MOCK_METHOD1(SubscribeContainerModalButtonsRectChange,
+        void(std::function<void(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons)>&& callback));
 };
 } // namespace Ace
 } // namespace OHOS

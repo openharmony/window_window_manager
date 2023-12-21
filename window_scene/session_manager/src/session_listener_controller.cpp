@@ -110,7 +110,7 @@ void SessionListenerController::NotifySessionCreated(int32_t persistentId)
         WLOGFI("NotifySessionCreated, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionCreated, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionCreated:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionDestroyed(int32_t persistentId)
@@ -132,7 +132,7 @@ void SessionListenerController::NotifySessionDestroyed(int32_t persistentId)
         WLOGFI("NotifySessionDestroyed, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionDestroyed, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionDestroyed:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::HandleUnInstallApp(const std::list<int32_t>& sessions)
@@ -155,7 +155,7 @@ void SessionListenerController::HandleUnInstallApp(const std::list<int32_t>& ses
             self->CallListeners(&ISessionListener::OnMissionDestroyed, id);
         }
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "HandleUnInstallApp");
 }
 
 void SessionListenerController::NotifySessionSnapshotChanged(int32_t persistentId)
@@ -177,7 +177,7 @@ void SessionListenerController::NotifySessionSnapshotChanged(int32_t persistentI
         WLOGFI("NotifySessionSnapshotChanged, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionSnapshotChanged, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionSnapshotChanged:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionMovedToFront(int32_t persistentId)
@@ -199,7 +199,7 @@ void SessionListenerController::NotifySessionMovedToFront(int32_t persistentId)
         WLOGFI("NotifySessionMovedToFront, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionMovedToFront, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionMovedToFront" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionFocused(int32_t persistentId)
@@ -221,7 +221,7 @@ void SessionListenerController::NotifySessionFocused(int32_t persistentId)
         WLOGFI("NotifySessionFocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionFocused, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionFocused" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
@@ -243,7 +243,7 @@ void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
         WLOGFI("NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionUnfocused, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionUnfocused:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionIconChanged(int32_t persistentId,
@@ -266,7 +266,7 @@ void SessionListenerController::NotifySessionIconChanged(int32_t persistentId,
         WLOGFI("NotifySessionIconChanged, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionIconUpdated, persistentId, icon);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionIconChanged:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionClosed(int32_t persistentId)
@@ -288,7 +288,7 @@ void SessionListenerController::NotifySessionClosed(int32_t persistentId)
         WLOGFI("NotifySessionClosed, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionClosed, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionClosed:PID:" + std::to_string(persistentId));
 }
 
 void SessionListenerController::NotifySessionLabelUpdated(int32_t persistentId)
@@ -310,7 +310,7 @@ void SessionListenerController::NotifySessionLabelUpdated(int32_t persistentId)
         WLOGFI("NotifySessionLabelUpdated, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionLabelUpdated, persistentId);
     };
-    taskScheduler_->PostVoidSyncTask(task);
+    taskScheduler_->PostVoidSyncTask(task, "NotifySessionLabelUpdated" + std::to_string(persistentId));
 }
 
 void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote)

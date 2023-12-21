@@ -84,6 +84,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
@@ -212,6 +213,8 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
+    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
+    virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;

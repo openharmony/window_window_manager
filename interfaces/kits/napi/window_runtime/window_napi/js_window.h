@@ -105,9 +105,11 @@ public:
     static napi_value ResetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value Minimize(napi_env env, napi_callback_info info);
     static napi_value RaiseAboveTarget(napi_env env, napi_callback_info info);
-    static napi_value SetNeedKeepKeyboard(napi_env env, napi_callback_info info);
+    static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
+    static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -134,6 +136,10 @@ public:
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
+    static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
+    static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
+    static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -182,9 +188,14 @@ private:
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnMinimize(napi_env env, napi_callback_info info);
     napi_value OnRaiseAboveTarget(napi_env env, napi_callback_info info);
-    napi_value OnSetNeedKeepKeyboard(napi_env env, napi_callback_info info);
+    napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
+    napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -218,6 +229,7 @@ private:
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
+    napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
 
     // animation Config
     napi_value OnOpacity(napi_env env, napi_callback_info info);

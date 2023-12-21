@@ -81,7 +81,7 @@ ohos_shared_library("window_native_kit") {
     "hitrace:hitrace_meter",
     "image_framework:image",
     "image_framework:image_native",
-    "ipc:ipc_napi_common",
+    "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]

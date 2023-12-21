@@ -20,7 +20,7 @@
 #include <event_handler.h>
 #include <js_runtime_utils.h>
 
-#include "display_manager.h"
+#include "root_scene.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -210,7 +210,33 @@ bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRec
     return true;
 }
 
-bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsRotatable) != napi_undefined) {
+        bool isRotable = false;
+        if (!ConvertFromJsValue(env, jsIsRotatable, isRotable)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isRotable");
+            return false;
+        }
+        sessionInfo.isRotable_ = isRotable;
+    }
+    return true;
+}
+
+bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsSystemInput) != napi_undefined) {
+        bool isSystemInput = false;
+        if (!ConvertFromJsValue(env, jsIsSystemInput, isSystemInput)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isSystemInput");
+            return false;
+        }
+        sessionInfo.isSystemInput_ = isSystemInput;
+    }
+    return true;
+}
+
+bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
     napi_get_named_property(env, jsObject, "bundleName", &jsBundleName);
@@ -222,17 +248,6 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
-    napi_value jsPersistentId = nullptr;
-    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
-    napi_value jsCallState = nullptr;
-    napi_get_named_property(env, jsObject, "callState", &jsCallState);
-    napi_value jsSessionType = nullptr;
-    napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
-    napi_value jsScreenId = nullptr;
-    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
-    napi_value jsIsPersistentRecover = nullptr;
-    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
-
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -248,6 +263,26 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
+    return true;
+}
+
+bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+{
+    napi_value jsPersistentId = nullptr;
+    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_value jsCallState = nullptr;
+    napi_get_named_property(env, jsObject, "callState", &jsCallState);
+    napi_value jsSessionType = nullptr;
+    napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
+    napi_value jsIsPersistentRecover = nullptr;
+    napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
+    napi_value jsIsRotable = nullptr;
+    napi_get_named_property(env, jsObject, "isRotable", &jsIsRotable);
+    napi_value jsIsSystemInput = nullptr;
+    napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
+
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
     }
@@ -261,6 +296,23 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
         return false;
     }
     if (!IsJsIsPersistentRecoverUndefined(env, jsIsPersistentRecover, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsRotatableUndefined(env, jsIsRotable, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
+{
+    if (!ConvertSessionInfoName(env, jsObject, sessionInfo)) {
+        return false;
+    }
+    if (!ConvertSessionInfoState(env, jsObject, sessionInfo)) {
         return false;
     }
     return true;
@@ -316,12 +368,7 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (!display) {
-        WLOGFE("[NAPI]Default display is null");
-        return false;
-    }
-    auto vpr = display->GetVirtualPixelRatio();
+    auto vpr = RootScene::staticRootScene_->GetDisplayDensity();
     MMI::PointerEvent::PointerItem pointerItem;
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
@@ -413,6 +460,42 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     return true;
 }
 
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+{
+    bool isArray = false;
+    napi_is_array(env, jsObject, &isArray);
+    if (jsObject == nullptr || !isArray) {
+        WLOGFE("[NAPI]Failed to convert to integer list");
+        return false;
+    }
+
+    uint32_t length = 0;
+    napi_get_array_length(env, jsObject, &length);
+    for (uint32_t i = 0; i < length; i++) {
+        int32_t persistentId;
+        napi_value elementVal = nullptr;
+        napi_get_element(env, jsObject, i, &elementVal);
+        if (!ConvertFromJsValue(env, elementVal, persistentId)) {
+            WLOGFE("[NAPI]Failed to convert to index %{public}u to integer", i);
+            return false;
+        }
+        intList.push_back(persistentId);
+    }
+
+    return true;
+}
+
+JsSessionType GetApiType(WindowType type)
+{
+    auto iter = WINDOW_TO_JS_SESSION_TYPE_MAP.find(type);
+    if (iter == WINDOW_TO_JS_SESSION_TYPE_MAP.end()) {
+        WLOGFE("[NAPI]window type: %{public}u cannot map to api type!", type);
+        return JsSessionType::TYPE_UNDEFINED;
+    } else {
+        return iter->second;
+    }
+}
+
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 {
     napi_value objValue = nullptr;
@@ -436,6 +519,14 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.windowMode)));
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.screenId_)));
+    napi_set_named_property(env, objValue, "sessionType",
+        CreateJsValue(env, static_cast<uint32_t>(GetApiType(static_cast<WindowType>(sessionInfo.windowType_)))));
+    napi_set_named_property(env, objValue, "sessionState",
+        CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
+    auto requestOrientation =
+        WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    napi_set_named_property(env, objValue, "requestOrientation",
+        CreateJsValue(env, static_cast<uint32_t>(requestOrientation)));
 
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "windowTop",
@@ -664,9 +755,9 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_FLOAT", JsSessionType::TYPE_SYSTEM_FLOAT);
     SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
+    SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     return objValue;
 }
-} // namespace OHOS::Rosen
 
 
 struct AsyncInfo {
@@ -724,8 +815,10 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
     if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         return task();
     } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        handler_->PostTask(std::move(task), OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
+            OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
         NapiAsyncWork(env_, task);
     }
 }
+} // namespace OHOS::Rosen

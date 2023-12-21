@@ -63,6 +63,15 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     ConnectToServer();
 }
 
+void ScreenSessionManagerClient::RegisterScreenInfoChangeListener(const ScreenInfoChangeClientListener& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("Failed RegisterScreenInfoChangeListener while listener is nullptr");
+        return;
+    }
+    screenInfoChangeListener_  = listener;
+}
+
 void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
     ScreenId rsId, const std::string& name)
 {
@@ -118,6 +127,9 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         return;
     }
     screenSession->PropertyChange(property, reason);
+    if (screenInfoChangeListener_) {
+        screenInfoChangeListener_(screenId);
+    }
 }
 
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -193,6 +205,29 @@ void ScreenSessionManagerClient::OnImmersiveStateChanged(bool& immersive)
     }
 }
 
+std::unordered_map<ScreenId, ScreenProperty> ScreenSessionManagerClient::GetAllScreensProperties() const
+{
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::unordered_map<ScreenId, ScreenProperty> screensProperties;
+    for (const auto& iter: screenSessionMap_) {
+        auto session = iter.second;
+        if (session == nullptr) {
+            continue;        
+        }
+        screensProperties[iter.first] = session->GetScreenProperty();
+    }
+    return screensProperties;
+}
+
+FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
+{
+    if (screenSessionManager_ == nullptr) {
+        WLOGFE("screenSessionManager_ is null while get displayMode");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return screenSessionManager_->GetFoldDisplayMode();
+}
+
 void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
 {
     if (!screenSessionManager_) {
@@ -200,6 +235,27 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
+    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    if (screenInfoChangeListener_) {
+        screenInfoChangeListener_(screenId);
+    }
+}
+
+void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->SetDisplayNodeScreenId(displayNodeScreenId);
 }
 
 uint32_t ScreenSessionManagerClient::GetCurvedCompressionArea()

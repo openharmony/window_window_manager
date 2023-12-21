@@ -24,7 +24,7 @@ using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};
-    constexpr int32_t NUMBER_TWO = 2;
+    constexpr int32_t NUMBER_ONE = 1;
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -119,7 +119,7 @@ napi_value JsPipManager::OnRestore(napi_env env, napi_callback_info info)
 napi_value JsPipManager::OnClose(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]JsPipManager::OnClose");
-    PictureInPictureManager::DoClose(true);
+    PictureInPictureManager::DoClose(true, true);
     return NapiGetUndefined(env);
 }
 
@@ -143,25 +143,26 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != NUMBER_TWO) {
+    if (argc < NUMBER_ONE) {
         WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
     napi_value xComponentController = argv[0];
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(xComponentController);
-    int32_t windowId = 0;
-    if (!ConvertFromJsValue(env, argv[1], windowId)) {
-        WLOGFE("[NAPI]Failed to convert params to int32_t");
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (!pipWindow) {
+        WLOGFE("[NAPI]Failed to find pip window");
         return NapiGetUndefined(env);
     }
-    sptr<PictureInPictureController> pictureInPictureController =
-        PictureInPictureManager::GetPipControllerInfo(windowId);
-    if (pictureInPictureController == nullptr) {
+    int32_t windowId = pipWindow->GetWindowId();
+    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
         WLOGFE("[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    WMError errCode = pictureInPictureController->SetXComponentController(xComponentControllerResult);
+    WLOGFI("[NAPI]set xComponentController to window: %{public}u", windowId);
+    WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
         WLOGFE("[NAPI]Failed to set xComponentController");
     }

@@ -477,7 +477,8 @@ void RemoteAnimation::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info
         auto finishCallback = CreateAnimationFinishedCallback(func, nullptr);
         windowAnimationController_->OnCloseWindow(target, finishCallback);
     };
-    bool ret = handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = handler->PostTask(task, "wms:NotifyAnimationAbilityDied",
+        0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (!ret) {
         WLOGFE("EventHandler PostTask Failed");
         task();
@@ -668,7 +669,8 @@ void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullSc
         windowAnimationController_->OnWindowAnimationTargetsUpdate(fullScreenAnimationTarget,
             floatAnimationTargets);
     };
-    bool ret = handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = handler->PostTask(task, "wms:NotifyAnimationTargetsUpdate", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (!ret) {
         WLOGFE("EventHandler PostTask Failed");
         task();
@@ -1064,14 +1066,15 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateAnimationFinished
     auto callbackTask = [callback, timeOutTaskName]() {
         auto handler = wmsTaskHandler_.lock();
         if (handler != nullptr) {
-            handler->RemoveTask(timeOutTaskName);
+            handler->RemoveTask("wms:" + timeOutTaskName);
             WLOGFD("remove task %{public}s since animationCallback Come", timeOutTaskName.c_str());
-            handler->PostTask(callback, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            handler->PostTask(callback, "wms:CreateAnimationFinishedCallback",
+                0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
     };
     auto handlerSptr = wmsTaskHandler_.lock();
     if (handlerSptr != nullptr) {
-        handlerSptr->PostTask(timeoutFunc, timeOutTaskName, ANIMATION_TIME_OUT_MILLISECONDS);
+        handlerSptr->PostTask(timeoutFunc, "wms:" + timeOutTaskName, ANIMATION_TIME_OUT_MILLISECONDS);
         WLOGFD("PostTask task %{public}s", timeOutTaskName.c_str());
     }
     sptr<RSWindowAnimationFinishedCallback> finishCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(

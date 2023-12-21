@@ -16,12 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
-#include <memory>
-#include <mutex>
-#include <shared_mutex>
-
-#include "iremote_object.h"
-#include "platform/image_native/pixel_map.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
@@ -43,6 +37,7 @@ using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessToken
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
+using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
 using GetAINavigationBarArea = std::function<WSRect()>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
@@ -73,6 +68,7 @@ public:
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
+        NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
         RecoveryCallback onRecoveryPullPiPMainWindow_;
@@ -109,6 +105,10 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
+    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr, int32_t pid = -1,
+        int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -140,6 +140,8 @@ public:
     WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
+    void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
+    void RequestHideKeyboard();
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -164,6 +166,7 @@ public:
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     const std::string& GetWindowName() const;
+    const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
@@ -178,6 +181,7 @@ public:
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
+    void NotifyUILostFocus() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -198,6 +202,8 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     WSError UpdateSizeChangeReason(SizeChangeReason reason);
     void ClearSpecificSessionCbMap();
+    void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
@@ -212,6 +218,13 @@ protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
+
+    std::string GetRectInfo(const WSRect& rect)
+    {
+        using std::to_string;
+        return "[" + to_string(rect.width_) + ", " + to_string(rect.height_) + "; "
+        + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
+    }
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;

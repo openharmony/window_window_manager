@@ -1734,7 +1734,7 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
     }
 }
 
-void ScreenSessionManagerProxy::LockFoldDisplayStatus(bool locked)
+void ScreenSessionManagerProxy::SetFoldStatusLocked(bool locked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

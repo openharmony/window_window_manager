@@ -23,6 +23,7 @@
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
+#include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
 
@@ -168,6 +169,7 @@ void RootScene::RegisterInputEventListener()
         uiContent_.get(), eventHandler_))) {
         WLOGFE("EnableInputEventListener fail");
     }
+    InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
@@ -180,6 +182,12 @@ int64_t RootScene::GetVSyncPeriod()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return VsyncStation::GetInstance().GetVSyncPeriod();
+}
+
+void RootScene::FlushFrameRate(uint32_t rate)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    VsyncStation::GetInstance().FlushFrameRate(rate);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)
@@ -196,7 +204,7 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
-    WLOGFI("[WMSWinLayout] SetFrameLayoutFinishCallback end");
+    WLOGFI("[WMSLayout] SetFrameLayoutFinishCallback end");
 }
 } // namespace Rosen
 } // namespace OHOS

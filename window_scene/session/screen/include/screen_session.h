@@ -118,6 +118,8 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
+
+    void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
@@ -149,6 +151,7 @@ public:
     DMRect GetAvailableArea();
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
+    void SetFoldScreen(bool isFold);
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
@@ -161,6 +164,7 @@ private:
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
+    bool isFold_ = false;
 };
 
 class ScreenSessionGroup : public ScreenSession {

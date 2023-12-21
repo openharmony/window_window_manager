@@ -63,6 +63,7 @@ config("libmockwms_config") {
     "${window_base_path}/dm/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/dmserver/include",
+    "${window_base_path}/window_scene/screen_session_manager/include",
 
     # for scene session manager
     "${window_base_path}/interfaces/innerkits/wm",
@@ -73,10 +74,6 @@ config("libmockwms_config") {
     # for window_manager_hilog
     "${window_base_path}/utils/include",
 
-    # for screenlock_manager_interface
-    "${screenlock_mgr_path}/services/include",
-    "${screenlock_mgr_path}/utils/include",
-    "${screenlock_mgr_path}/frameworks/native/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
 
@@ -92,9 +89,12 @@ ohos_shared_library("sms") {
     debug = false
   }
   sources = [
+    "${window_base_path}/window_scene/session_manager/src/screen_session_manager_lite.cpp",
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
+    "${window_base_path}/window_scene/session_manager/src/zidl/screen_session_manager_lite_stub.cpp",
     "src/mock_session_manager_service.cpp",
     "src/zidl/mock_session_manager_service_stub.cpp",
+    "src/zidl/session_manager_service_recover_proxy.cpp",
   ]
 
   public_configs = [ ":libmockwms_config" ]
@@ -102,10 +102,10 @@ ohos_shared_library("sms") {
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session_manager_service:session_manager_service",
     "../utils:libwmutil",
   ]
   external_deps = [
+    "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:mission_info",
     "bundle_framework:appexecfwk_base",
@@ -118,6 +118,9 @@ ohos_shared_library("sms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (scene_board_enabled) {
+    deps += [ "${window_base_path}/window_scene/session_manager_service:session_manager_service" ]
+  }
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
   } else {
@@ -128,140 +131,150 @@ ohos_shared_library("sms") {
   subsystem_name = "window"
 }
 
-ohos_shared_library("libwms") {
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
+if (scene_board_enabled) {
+  group("libwms") {
+    deps = []
   }
-  defines = []
-  if (use_musl) {
-    if (use_jemalloc && use_jemalloc_dfx_intf) {
-      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+} else {
+  ohos_shared_library("libwms") {
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
     }
+    defines = []
+    if (use_musl) {
+      if (use_jemalloc && use_jemalloc_dfx_intf) {
+        defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+      }
+    }
+    sources = [
+      "../wm/src/zidl/window_manager_agent_proxy.cpp",
+      "../wm/src/zidl/window_proxy.cpp",
+      "src/accessibility_connection.cpp",
+      "src/avoid_area_controller.cpp",
+      "src/display_group_controller.cpp",
+      "src/display_group_info.cpp",
+      "src/display_zoom_controller.cpp",
+      "src/drag_controller.cpp",
+      "src/freeze_controller.cpp",
+      "src/inner_window.cpp",
+      "src/input_window_monitor.cpp",
+      "src/memory_guard.cpp",
+      "src/minimize_app.cpp",
+      "src/remote_animation.cpp",
+      "src/starting_window.cpp",
+      "src/utils/window_manager_service_utils.cpp",
+      "src/window_common_event.cpp",
+      "src/window_controller.cpp",
+      "src/window_dumper.cpp",
+      "src/window_group_mgr.cpp",
+      "src/window_inner_manager.cpp",
+      "src/window_layout_policy.cpp",
+      "src/window_layout_policy_cascade.cpp",
+      "src/window_layout_policy_tile.cpp",
+      "src/window_manager_agent_controller.cpp",
+      "src/window_manager_config.cpp",
+      "src/window_manager_service.cpp",
+      "src/window_node.cpp",
+      "src/window_node_container.cpp",
+      "src/window_node_state_machine.cpp",
+      "src/window_pair.cpp",
+      "src/window_root.cpp",
+      "src/window_snapshot/snapshot_controller.cpp",
+      "src/window_snapshot/snapshot_proxy.cpp",
+      "src/window_snapshot/snapshot_stub.cpp",
+      "src/window_system_effect.cpp",
+      "src/window_zorder_policy.cpp",
+      "src/zidl/window_manager_stub.cpp",
+    ]
+
+    configs = [
+      ":libwms_config",
+      "../resources/config/build:coverage_flags",
+    ]
+
+    deps = [
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+      "../dmserver:libdms",
+      "../etc:wms_etc",
+      "../utils:libwmutil",
+      "../wm:libwm",
+      "//third_party/libxml2:libxml2",
+    ]
+
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:ability_manager",
+      "c_utils:utils",
+      "common_event_service:cesfwk_innerkits",
+      "config_policy:configpolicy_util",
+      "eventhandler:libeventhandler",
+      "graphic_2d:librender_service_client",
+      "graphic_2d:window_animation",
+      "hicollie:libhicollie",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
+      "image_framework:image_native",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "safwk:system_ability_fwk",
+    ]
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_memmgr_plugin)) {
+      external_deps += [ "memmgr_plugin:memmgrclient" ]
+      defines += [ "MEMMGR_WINDOW_ENABLE" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_memmgr)) {
+      external_deps += [ "memmgr:memmgrclient" ]
+      defines += [ "MEMMGR_WINDOW_ENABLE" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+      external_deps += [ "resource_schedule_service:ressched_client" ]
+      defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_soc_perf)) {
+      external_deps += [ "soc_perf:socperf_client" ]
+      defines += [ "SOC_PERF_ENABLE" ]
+    }
+
+    if (is_standard_system) {
+      external_deps += [ "init:libbegetutil" ]
+    } else {
+      external_deps += [ "init_lite:libbegetutil" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.powermgr_power_manager)) {
+      external_deps += [ "power_manager:powermgr_client" ]
+      defines += [ "POWER_MANAGER_ENABLE" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.powermgr_display_manager)) {
+      external_deps += [ "display_manager:displaymgr" ]
+      defines += [ "POWERMGR_DISPLAY_MANAGER_ENABLE" ]
+    }
+
+    part_name = "window_manager"
+    subsystem_name = "window"
   }
-  sources = [
-    "../wm/src/zidl/window_manager_agent_proxy.cpp",
-    "../wm/src/zidl/window_proxy.cpp",
-    "src/accessibility_connection.cpp",
-    "src/avoid_area_controller.cpp",
-    "src/display_group_controller.cpp",
-    "src/display_group_info.cpp",
-    "src/display_zoom_controller.cpp",
-    "src/drag_controller.cpp",
-    "src/freeze_controller.cpp",
-    "src/inner_window.cpp",
-    "src/input_window_monitor.cpp",
-    "src/memory_guard.cpp",
-    "src/minimize_app.cpp",
-    "src/remote_animation.cpp",
-    "src/starting_window.cpp",
-    "src/utils/window_manager_service_utils.cpp",
-    "src/window_common_event.cpp",
-    "src/window_controller.cpp",
-    "src/window_dumper.cpp",
-    "src/window_group_mgr.cpp",
-    "src/window_inner_manager.cpp",
-    "src/window_layout_policy.cpp",
-    "src/window_layout_policy_cascade.cpp",
-    "src/window_layout_policy_tile.cpp",
-    "src/window_manager_agent_controller.cpp",
-    "src/window_manager_config.cpp",
-    "src/window_manager_service.cpp",
-    "src/window_node.cpp",
-    "src/window_node_container.cpp",
-    "src/window_node_state_machine.cpp",
-    "src/window_pair.cpp",
-    "src/window_root.cpp",
-    "src/window_snapshot/snapshot_controller.cpp",
-    "src/window_snapshot/snapshot_proxy.cpp",
-    "src/window_snapshot/snapshot_stub.cpp",
-    "src/window_system_effect.cpp",
-    "src/window_zorder_policy.cpp",
-    "src/zidl/window_manager_stub.cpp",
-  ]
-
-  configs = [
-    ":libwms_config",
-    "../resources/config/build:coverage_flags",
-  ]
-
-  deps = [
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "../dmserver:libdms",
-    "../etc:wms_etc",
-    "../utils:libwmutil",
-    "../wm:libwm",
-    "//third_party/libxml2:libxml2",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "config_policy:configpolicy_util",
-    "eventhandler:libeventhandler",
-    "graphic_2d:librender_service_client",
-    "graphic_2d:window_animation",
-    "hicollie:libhicollie",
-    "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "hitrace:hitrace_meter",
-    "image_framework:image_native",
-    "input:libmmi-client",
-    "ipc:ipc_single",
-    "safwk:system_ability_fwk",
-  ]
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_memmgr_plugin)) {
-    external_deps += [ "memmgr_plugin:memmgrclient" ]
-    defines += [ "MEMMGR_WINDOW_ENABLE" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_memmgr)) {
-    external_deps += [ "memmgr:memmgrclient" ]
-    defines += [ "MEMMGR_WINDOW_ENABLE" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
-    external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_soc_perf)) {
-    external_deps += [ "soc_perf:socperf_client" ]
-    defines += [ "SOC_PERF_ENABLE" ]
-  }
-
-  if (is_standard_system) {
-    external_deps += [ "init:libbegetutil" ]
-  } else {
-    external_deps += [ "init_lite:libbegetutil" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.powermgr_power_manager)) {
-    external_deps += [ "power_manager:powermgr_client" ]
-    defines += [ "POWER_MANAGER_ENABLE" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.powermgr_display_manager)) {
-    external_deps += [ "display_manager:displaymgr" ]
-    defines += [ "POWERMGR_DISPLAY_MANAGER_ENABLE" ]
-  }
-
-  part_name = "window_manager"
-  subsystem_name = "window"
 }
 
 group("test") {
   testonly = true
-  deps = [ "test:test" ]
+  if (scene_board_enabled) {
+    deps = []
+  } else {
+    deps = [ "test:test" ]
+  }
 }

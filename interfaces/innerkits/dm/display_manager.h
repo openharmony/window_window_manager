@@ -461,6 +461,13 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
+     * @brief Locked fold status.
+     *
+     * @param mode locked fold status is locked.
+     */
+    void SetFoldStatusLocked(bool locked);
+
+    /**
      * @brief Get the fold crease region in the current display mode.
      *
      * @return fold crease region in the current display mode.

@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 
+#include <shared_mutex>
 #include <system_ability.h>
 
 #include "common/include/task_scheduler.h"
@@ -175,14 +176,19 @@ public:
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 
-    void LockFoldDisplayStatus(bool locked) override;
+    void SetFoldStatusLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
 
     FoldStatus GetFoldStatus() override;
+
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+
+    void SetKeyguardDrawnDoneFlag(bool flag);
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
@@ -232,7 +238,6 @@ private:
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
-    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void HandlerSensor(ScreenPowerStatus status);
 
     // notify scb virtual screen change
@@ -246,7 +251,7 @@ private:
     int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
-    int LockFoldDisplayStatus(const std::string& lockParam);
+    int SetFoldStatusLocked(const std::string& lockParam);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -255,6 +260,7 @@ private:
         ~ScreenIdManager() = default;
         WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
         ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        void UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId);
         bool DeleteScreenId(ScreenId smsScreenId);
         bool HasRsScreenId(ScreenId smsScreenId) const;
         bool ConvertToRsScreenId(ScreenId, ScreenId&) const;
@@ -262,9 +268,11 @@ private:
         bool ConvertToSmsScreenId(ScreenId, ScreenId&) const;
         ScreenId ConvertToSmsScreenId(ScreenId) const;
 
+    private:
         std::atomic<ScreenId> smsScreenCount_ {2};
         std::map<ScreenId, ScreenId> rs2SmsScreenIdMap_;
         std::map<ScreenId, ScreenId> sms2RsScreenIdMap_;
+        mutable std::shared_mutex screenIdMapMutex_;
     };
 
     RSInterfaces& rsInterface_;

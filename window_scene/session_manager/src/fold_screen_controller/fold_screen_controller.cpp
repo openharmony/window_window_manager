@@ -114,4 +114,22 @@ ScreenId FoldScreenController::GetCurrentScreenId()
     }
     return foldScreenPolicy_->GetCurrentScreenId();
 }
+
+void FoldScreenController::SetOnBootAnimation(bool onBootAnimation)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("SetOnBootAnimation: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetOnBootAnimation(onBootAnimation);
+}
+
+void FoldScreenController::UpdateForPhyScreenPropertyChange()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("UpdateForPhyScreenPropertyChange: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->UpdateForPhyScreenPropertyChange();
+}
 } // namespace OHOS::Rosen

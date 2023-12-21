@@ -50,11 +50,24 @@ public:
         return (me != nullptr) ? me->OnInitSessionManagerService(env, info) : nullptr;
     }
 
+    static napi_value NotifySceneBoardAvailable(napi_env env, napi_callback_info info)
+    {
+        JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(env, info);
+        return (me != nullptr) ? me->OnNotifySceneBoardAvailable(env, info) : nullptr;
+    }
+
 private:
     napi_value OnInitSessionManagerService(napi_env env, napi_callback_info info)
     {
         WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
         SessionManagerService::GetInstance().Init();
+        return NapiGetUndefined(env);
+    }
+
+    napi_value OnNotifySceneBoardAvailable(napi_env env, napi_callback_info info)
+    {
+        WLOGI("[RECOVER]JsSessionManagerService: OnNotifySceneBoardAvailable is called");
+        SessionManagerService::GetInstance().NotifySceneBoardAvailable();
         return NapiGetUndefined(env);
     }
 };
@@ -73,6 +86,8 @@ napi_value JsSessionManagerServiceInit(napi_env env, napi_value exportObj)
     const char* moduleName = "JsSessionManagerService";
     BindNativeFunction(env, exportObj, "initSessionManagerService", moduleName,
         JsSessionManagerService::InitSessionManagerService);
+    BindNativeFunction(env, exportObj, "notifySceneBoardAvailable", moduleName,
+        JsSessionManagerService::NotifySceneBoardAvailable);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

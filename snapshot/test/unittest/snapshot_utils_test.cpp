@@ -35,7 +35,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    const std::string defaultFile_ = "/data/snapshot_display_1.jpeg";
+    const std::string defaultFile_ = "/data/local/tmp/snapshot_display_1.jpeg";
     const int defaultBitDepth_ = 8;
 };
 
@@ -77,7 +77,7 @@ HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
 {
-    std::string fileName = "/data/test.jpeg";
+    std::string fileName = "/data/local/tmp/test.jpeg";
     ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(fileName));
 }
 
