@@ -647,7 +647,7 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
 }
 
-void WindowImpl::NotifyTouchDialogTarget()
+void WindowImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
     return;
 }

@@ -22,6 +22,7 @@
 #include "common/include/window_session_property.h"
 #include "property/rs_properties_def.h"
 #include "window.h"
+#include "ws_common_inner.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -36,18 +37,6 @@ using NotifyWindowDragHotAreaFunc = std::function<void(int32_t type, const SizeC
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
 const int32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = -1;
-
-enum class AreaType : uint32_t {
-    UNDEFINED = 0,
-    LEFT = 1 << 0,
-    TOP = 1 << 1,
-    RIGHT = 1 << 2,
-    BOTTOM = 1 << 3,
-    LEFT_TOP = LEFT | TOP,
-    RIGHT_TOP = RIGHT | TOP,
-    RIGHT_BOTTOM = RIGHT | BOTTOM,
-    LEFT_BOTTOM = LEFT | BOTTOM,
-};
 
 class MoveDragController : public RefBase {
 public:
@@ -70,7 +59,7 @@ public:
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
     void ClacFirstMoveTargetRect(const WSRect& windowRect);
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
-    void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+    void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
 
@@ -131,6 +120,7 @@ private:
     WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
+    void NotifyWindowInputPidChange(bool isServerPid);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;

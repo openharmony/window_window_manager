@@ -61,6 +61,8 @@ private:
     int HandlePendingSessionActivation(MessageParcel &data, MessageParcel &reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
+    int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
+    int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

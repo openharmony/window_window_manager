@@ -115,4 +115,23 @@ WSError SystemSession::Disconnect()
     PostTask(task, "Disconnect");
     return WSError::WS_OK;
 }
+
+WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
+{
+    const auto& id = GetPersistentId();
+    const auto& type = GetWindowType();
+    WLOGFI("id: %{public}d, type: %{public}d", id, type);
+    if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+        WLOGFI("Parent has dialog foreground, id: %{public}d, type: %{public}d", id, type);
+        parentSession_->HandlePointDownDialog();
+        if (!IsTopDialog()) {
+            return WSError::WS_OK;
+        }
+    }
+    if (type == WindowType::WINDOW_TYPE_DIALOG && GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
+        RaiseToAppTopForPointDown();
+    }
+    PresentFocusIfPointDown();
+    return SceneSession::ProcessPointDownSession(posX, posY);
+}
 } // namespace OHOS::Rosen

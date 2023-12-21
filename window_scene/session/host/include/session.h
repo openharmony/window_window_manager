@@ -120,7 +120,8 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int32_t uiExtensionIdLevel) override;
 
-    virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     virtual WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
@@ -223,7 +224,6 @@ public:
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
     void ClearDialogVector();
-    void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
     WSError NotifyCloseExistPipWindow();
 
@@ -310,6 +310,9 @@ public:
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    void HandlePointDownDialog();
+    bool CheckDialogOnForeground();
+    void PresentFocusIfPointDown();
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
         return std::vector<Rect>();
@@ -357,7 +360,6 @@ protected:
     WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area);
     void UpdatePointerArea(const WSRect& rect);
-    bool CheckDialogOnForeground();
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     bool IsTopDialog() const;
@@ -440,6 +442,9 @@ protected:
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
+    mutable std::mutex dialogVecMutex_;
+    std::vector<sptr<Session>> dialogVec_;
+    sptr<Session> parentSession_;
 
     mutable std::mutex pointerEventMutex_;
     mutable std::mutex keyEventMutex_;
@@ -481,11 +486,6 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
-
-    mutable std::mutex dialogVecMutex_;
-    std::vector<sptr<Session>> dialogVec_;
-    sptr<Session> parentSession_;
-
     WSRect preRect_;
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
