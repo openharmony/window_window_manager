@@ -1378,6 +1378,21 @@ void Session::NotifyPointerEventToRs(int32_t pointAction)
     }
 }
 
+WSError Session::HandleSubWindowClick(int32_t action)
+{
+    if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+        WLOGFD("[WMSDialog] Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
+    bool raiseEnabled = property_->GetRaiseEnabled() &&
+        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    if (raiseEnabled) {
+        RaiseToAppTopForPointDown();
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
@@ -1396,9 +1411,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            WLOGFD("[WMSDialog] Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+        WSError ret = HandleSubWindowClick(pointerAction);
+        if (ret != WSError::WS_OK) {
+            return ret;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
         if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
