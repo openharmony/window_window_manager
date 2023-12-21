@@ -328,6 +328,7 @@
         ],
         "test": [
           "//foundation/window/window_manager/dm:test",
+          "//foundation/window/window_manager/dm_lite:test",
           "//foundation/window/window_manager/dmserver:test",
           "//foundation/window/window_manager/snapshot:test",
           "//foundation/window/window_manager/utils:test",
