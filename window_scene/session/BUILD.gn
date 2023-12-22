@@ -88,13 +88,13 @@ ohos_shared_library("scene_session") {
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "preferences:native_preferences",
-    "hisysevent:libhisysevent",
   ]
 
   defines = []
