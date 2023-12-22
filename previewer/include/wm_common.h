@@ -193,6 +193,19 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
 };
 
+
+/**
+ * @brief Enumerates status of window.
+ */
+enum class WindowStatus : uint32_t {
+    WINDOW_STATUS_UNDEFINED = 0,
+    WINDOW_STATUS_FULLSCREEN = 1,
+    WINDOW_STATUS_MAXMIZE,
+    WINDOW_STATUS_MINIMIZE,
+    WINDOW_STATUS_FLOATING,
+    WINDOW_STATUS_SPLITSCREEN
+};
+
 /**
  * @brief Used to map from WMError to WmErrorCode.
  */

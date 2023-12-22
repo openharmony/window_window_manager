@@ -69,3 +69,12 @@ ohos_shared_library("libdm_lite") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
+group("test") {
+  testonly = true
+  if (scene_board_enabled) {
+    deps = [ "test:test" ]
+  } else {
+    deps = []
+  }
+}

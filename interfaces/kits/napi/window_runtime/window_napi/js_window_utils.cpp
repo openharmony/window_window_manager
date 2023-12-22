@@ -408,6 +408,35 @@ napi_value WindowErrorCodeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowStatusTypeInit(napi_env env)
+{
+    WLOGFD("WindowStatusTypeInit");
+    if (env == nullptr) {
+        WLOGFE("Engine is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
+    napi_set_named_property(env, objValue, "FULL_SCREEN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_FULLSCREEN)));
+    napi_set_named_property(env, objValue, "MAXMIZE", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MAXMIZE)));
+    napi_set_named_property(env, objValue, "MINIMIZE", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MINIMIZE)));
+    napi_set_named_property(env, objValue, "FLOATING", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_FLOATING)));
+    napi_set_named_property(env, objValue, "SPLIT_SCREEN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_SPLITSCREEN)));
+    return objValue;
+}
+
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
     napi_value objValue = nullptr;
