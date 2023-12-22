@@ -27,9 +27,29 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerService" };
+std::mutex g_instanceMutex;
+SessionManagerService* g_sessionManagerService;
 }
 
-WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
+SessionManagerService::~SessionManagerService()
+{
+    if (g_sessionManagerService != nullptr) {
+        g_sessionManagerService = nullptr;
+    }
+    WLOGFI("[WMSRecover] ~SessionManagerService");
+}
+
+SessionManagerService* SessionManagerService::GetInstance()
+{
+    if (g_sessionManagerService == nullptr) {
+        std::lock_guard<std::mutex> lock(g_instanceMutex);
+        if (g_sessionManagerService == nullptr) {
+            WLOGFI("[WMSRecover] new SessionManagerService");
+            g_sessionManagerService = new SessionManagerService();
+        }
+    }
+    return g_sessionManagerService;
+}
 
 void SessionManagerService::Init()
 {
