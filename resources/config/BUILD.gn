@@ -16,6 +16,9 @@ ohos_prebuilt_etc("window_manager_config") {
   if (device_name == "rk3568") {
     source = "//foundation/window/window_manager/resources/config/rk3568/window_manager_config.xml"
     install_enable = true
+  } else if (device_name == "dayu800") {
+    source = "//foundation/window/window_manager/resources/config/dayu800/window_manager_config.xml"
+    install_enable = true
   } else {
     source = "//foundation/window/window_manager/resources/config/other/window_manager_config.xml"
     install_enable = false
@@ -28,6 +31,9 @@ ohos_prebuilt_etc("window_manager_config") {
 ohos_prebuilt_etc("display_manager_config") {
   if (device_name == "rk3568") {
     source = "//foundation/window/window_manager/resources/config/rk3568/display_manager_config.xml"
+    install_enable = true
+  } else if (device_name == "dayu800") {
+    source = "//foundation/window/window_manager/resources/config/dayu800/display_manager_config.xml"
     install_enable = true
   } else {
     source = "//foundation/window/window_manager/resources/config/other/display_manager_config.xml"
