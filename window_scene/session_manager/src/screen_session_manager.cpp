@@ -1219,7 +1219,7 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
     if (agents.empty()) {
         return false;
     }
-    WLOGFI("NotifyDisplayPowerEvent");
+    WLOGFD("NotifyDisplayPowerEvent");
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
     }

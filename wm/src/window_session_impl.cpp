@@ -2115,7 +2115,7 @@ sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
     }
     for (auto iter = windowSessionMap_.begin(); iter != windowSessionMap_.end(); iter++) {
         if (winId == iter->second.first) {
-            WLOGI("FindWindow id: %{public}u", winId);
+            WLOGD("FindWindow id: %{public}u", winId);
             return iter->second.second;
         }
     }

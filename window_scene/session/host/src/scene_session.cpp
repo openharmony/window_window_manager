@@ -414,6 +414,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
                 session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
+            session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_)) {
             WLOGFI("[WMSLayout] position change no need notify client id:%{public}d, rect:[%{public}d, %{public}d, \
@@ -426,9 +429,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(rsTransaction);
         }
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
-            session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
 
@@ -457,6 +457,10 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         WSError ret = WSError::WS_OK;
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
+            session->GetPersistentId(), session->winRect_.posX_,
+            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
         // once reason is undefined, not use rsTransaction
         // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
         if (session->reason_ == SizeChangeReason::UNDEFINED) {
@@ -467,10 +471,6 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
         if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
-            session->GetPersistentId(), session->winRect_.posX_,
-            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
         // clear after use
         if (ret == WSError::WS_OK || session->sessionInfo_.isSystem_) {
             session->reason_ = SizeChangeReason::UNDEFINED;

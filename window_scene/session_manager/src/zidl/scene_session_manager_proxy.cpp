@@ -987,7 +987,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
     }
     token = reply.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFI("get token nullptr.");
+        WLOGFD("get token nullptr.");
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
