@@ -358,27 +358,26 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, Reconnect01, Function | SmallTest | Level2)
 {
     auto surfaceNode = CreateRSSurfaceNode();
-    SystemSessionConfig systemConfig;
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    auto result = session_->Reconnect(nullptr, nullptr, nullptr, systemConfig, property);
+    auto result = session_->Reconnect(nullptr, nullptr, nullptr, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
-    result = session_->Reconnect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
+    result = session_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, nullptr);
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = session_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, systemConfig, property);
+    result = session_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
+    result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

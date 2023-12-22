@@ -27,21 +27,21 @@ void SessionManagerServiceRecoverProxy::OnSessionManagerServiceRecover(
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[RECOVER] WriteInterfaceToken failed");
+        WLOGFE("[WMSRecover] WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteRemoteObject(sessionManagerService)) {
-        WLOGFE("[RECOVER] WriteRemoteObject failed");
+        WLOGFE("[WMSRecover] WriteRemoteObject failed");
         return;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
         SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("[RECOVER] SendRequest failed");
+        WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }

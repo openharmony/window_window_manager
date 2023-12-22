@@ -2075,13 +2075,12 @@ HWTEST_F(SceneSessionTest, Reconnect, Function | SmallTest | Level2)
     sptr<ISessionStage> sessionStage = nullptr;
     sptr<IWindowEventChannel> eventChannel = nullptr;
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
-    SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     sptr<IRemoteObject> token;
     int32_t pid = -1;
     int32_t uid = -1;
     WSError res =
-        scensession->Reconnect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
+        scensession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
     delete scensession;
 }

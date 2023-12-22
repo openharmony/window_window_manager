@@ -182,12 +182,17 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         WLOGFI("[NAPI]sceneSession is nullptr");
         return;
     }
-    WLOGFI("[NAPI]OnRecoverSceneSession");
-    auto iter = jsCbMap_.find(RECOVER_SCENE_SESSION_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(RECOVER_SCENE_SESSION_CB);
+        if (iter == jsCbMap_.end()) {
+            WLOGFW("[NAPI]Not found recoverSceneSession key in jsCbMap_");
+            return;
+        }
+        jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
+    WLOGFI("[NAPI]OnRecoverSceneSession");
     wptr<SceneSession> weakSession(sceneSession);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, weakSession, sessionInfo, jsCallBack, env = env_]() {
@@ -209,6 +214,7 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             WLOGFE("[NAPI]this target session info is nullptr");
+            return;
         }
 
         napi_value argv[] = { jsSceneSessionObj, jsSessionInfo };
@@ -335,7 +341,7 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 {
     NotifyRecoverSceneSessionFunc func = [this](const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {
-        WLOGFD("[RECOVER]RecoverSceneSession");
+        WLOGFD("[WMSRecover] RecoverSceneSession");
         this->OnRecoverSceneSession(session, sessionInfo);
     };
     SceneSessionManager::GetInstance().SetRecoverSceneSessionListener(func);
@@ -710,7 +716,10 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    jsCbMap_[cbType] = callbackRef;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        jsCbMap_[cbType] = callbackRef;
+    }
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -1799,7 +1808,7 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
                             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool isRecovering;
+    bool isRecovering = false;
     if (!ConvertFromJsValue(env, argv[0], isRecovering)) {
         WLOGFE("[NAPI]Failed to convert parameter to isRecovering");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

@@ -179,7 +179,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        WLOGFE("OnInputEvent is disabled temporarily");
+        WLOGFD("OnInputEvent is disabled temporarily");
         return;
     }
 
@@ -217,7 +217,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        WLOGFE("OnInputEvent is disabled temporarily");
+        WLOGFD("OnInputEvent is disabled temporarily");
         return;
     }
     auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();

@@ -90,9 +90,9 @@ WSError SceneSessionManagerProxy::RecoverAndConnectSpecificSession(const sptr<IS
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
-    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -142,8 +142,7 @@ WSError SceneSessionManagerProxy::RecoverAndConnectSpecificSession(const sptr<IS
 }
 WSError SceneSessionManagerProxy::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    SystemSessionConfig& systemConfig, sptr<ISession>& session, sptr<WindowSessionProperty> property,
-    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;

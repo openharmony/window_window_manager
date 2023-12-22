@@ -724,24 +724,23 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 }
 
 WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+    int32_t pid, int32_t uid)
 {
     if (property == nullptr) {
-        WLOGFE("[RECOVER]property is nullptr");
+        WLOGFE("[WMSRecover] property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFI("[RECOVER]Reconnect session with: persistentId=%{public}d, windowState=%{public}u",
+    WLOGFI("[WMSRecover] Reconnect session with: persistentId=%{public}d, windowState=%{public}u",
         property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()));
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("[RECOVER]session stage or eventChannel is nullptr");
+        WLOGFE("[WMSRecover] session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
     surfaceNode_ = surfaceNode;
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
-    systemConfig = systemConfig_;
     SetSessionProperty(property);
     persistentId_ = property->GetPersistentId();
     callingPid_ = pid;
@@ -755,8 +754,6 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         UpdateSessionState(SessionState::STATE_BACKGROUND);
     }
     bufferAvailable_ = true;
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
