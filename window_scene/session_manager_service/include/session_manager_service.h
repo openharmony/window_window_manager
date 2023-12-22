@@ -22,14 +22,16 @@
 
 namespace OHOS::Rosen {
 class SessionManagerService : public SessionManagerServiceStub {
-WM_DECLARE_SINGLE_INSTANCE(SessionManagerService)
 public:
+    static SessionManagerService* GetInstance();
     void Init();
     void NotifySceneBoardAvailable();
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetSceneSessionManagerLite() override;
 
 private:
+    SessionManagerService() {};
+    ~SessionManagerService();
     std::recursive_mutex mutex_;
     sptr<IRemoteObject> sceneSessionManagerObj_;
     sptr<IRemoteObject> sceneSessionManagerLiteObj_;
