@@ -887,7 +887,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
             WLOGFI("subscribe rotation sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
-        } else if (status == ScreenPowerStatus::POWER_STATUS_OFF) {
+        } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
             WLOGFI("unsubscribe rotation sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
         } else {
