@@ -1375,7 +1375,7 @@ WMError WindowSceneSessionImpl::Recover()
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         //need notify arkui maximize mode change
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            UpdateMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+            UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
