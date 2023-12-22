@@ -597,7 +597,7 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
 
 napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    WLOGI("[WMSFocus][NAPI]RequestFocusStatus");
+    WLOGD("[WMSFocus][NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }

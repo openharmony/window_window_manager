@@ -1845,11 +1845,11 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
             mainWinId = win->GetWindowId();
-            WLOGI("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+            WLOGD("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
             break;
         }
     }
-    WLOGFI("[GetTopWin] mainId: %{public}u!", mainWinId);
+    WLOGFD("[GetTopWin] mainId: %{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
         WLOGFE("[GetTopWin] Cannot find topWindow!");
         return nullptr;

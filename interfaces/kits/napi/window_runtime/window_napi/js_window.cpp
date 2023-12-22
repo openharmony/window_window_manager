@@ -132,7 +132,7 @@ napi_value JsWindow::DestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::Hide(napi_env env, napi_callback_info info)
 {
-    WLOGI("Hide");
+    WLOGD("Hide");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHide(env, info) : nullptr;
 }
@@ -328,7 +328,7 @@ napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsShowing");
+    WLOGD("IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsShowing(env, info) : nullptr;
 }
@@ -4751,7 +4751,7 @@ napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
     // avoid repeatedly create js window when getWindow
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
     if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
-        WLOGI("FindJsWindowObject %{public}s", windowName.c_str());
+        WLOGD("FindJsWindowObject %{public}s", windowName.c_str());
         return jsWindowObj->GetNapiValue();
     }
     napi_value objValue = nullptr;
