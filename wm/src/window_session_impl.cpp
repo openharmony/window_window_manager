@@ -576,6 +576,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     auto displayInfo = display->GetDisplayInfo();
     float density = displayInfo->GetVirtualPixelRatio();
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    virtualPixelRatio_ = density;
     config.SetDensity(density);
     config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);

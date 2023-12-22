@@ -234,6 +234,7 @@ protected:
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool needRemoveWindowInputChannel_ = false;
+    float virtualPixelRatio_ { 1.0f };
 
 private:
     //Trans between colorGamut and colorSpace
