@@ -97,10 +97,61 @@ test_public_config = [
   "../../../resources/config/build:testcase_flags",
 ]
 
+ohos_unittest("wmserver_window_manager_service_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_service_test.cpp" ]
+  configs = test_public_config
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wmserver_input_window_monitor_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "input_window_monitor_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_avoid_area_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "avoid_area_controller_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_controller_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_minimize_app_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "minimize_app_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_layout_policy_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_layout_policy_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
@@ -118,6 +169,18 @@ ohos_unittest("wmserver_window_manager_config_test") {
   deps += [ "//third_party/libxml2:libxml2" ]
 }
 
+ohos_unittest("wmserver_window_snapshot_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_snapshot_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+
+  external_deps += [ "image_framework:image_native" ]
+}
+
 ohos_unittest("wmserver_window_zorder_policy_test") {
   module_out_path = module_out_path
   configs = test_public_config
@@ -128,10 +191,51 @@ ohos_unittest("wmserver_window_zorder_policy_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("wmserver_window_node_container_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_node_container_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_node_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_node_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_pair_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+
+  sources = [ "window_pair_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wmserver_window_manager_stub_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_manager_stub_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_starting_window_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "starting_window_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
@@ -152,6 +256,16 @@ ohos_unittest("wmserver_window_dumper_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_dumper_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_display_group_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "display_group_controller_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
@@ -188,6 +302,16 @@ ohos_unittest("wmserver_accessibility_connection_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("wmserver_window_freeze_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_freeze_controller_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wmserver_window_inner_window_test") {
   module_out_path = module_out_path
   configs = test_public_config
@@ -198,10 +322,50 @@ ohos_unittest("wmserver_window_inner_window_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("wmserver_remote_animation_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "remote_animation_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_drag_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "drag_controller_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wmserver_window_inner_manager_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_inner_manager_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_root_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_root_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_system_effect_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_system_effect_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
