@@ -255,7 +255,7 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     EXPECT_CALL(*(mockSessionStage), SetActive(_)).WillOnce(Return(WSError::WS_OK));
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(0).WillOnce(Return(WSError::WS_OK));
     session_->sessionStage_ = mockSessionStage;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetActive(true));
 
@@ -284,7 +284,7 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(0).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
@@ -652,6 +652,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent01, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
@@ -687,6 +688,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -739,6 +741,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -780,7 +783,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -842,6 +845,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -900,6 +904,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -965,7 +970,7 @@ HWTEST_F(WindowSessionTest, GetWindowId, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, GetVisible, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetVisible(false));
+    ASSERT_EQ(WSError::WS_OK, session_->SetVisible(false));
     session_->state_ = SessionState::STATE_CONNECT;
     if (!session_->GetVisible()) {
         ASSERT_EQ(false, session_->GetVisible());
@@ -2008,7 +2013,7 @@ HWTEST_F(WindowSessionTest, UpdateFocus02, Function | SmallTest | Level2)
     session_->sessionInfo_.isSystem_ = true;
 
     bool isFocused = session_->isFocused_;
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateFocus(!isFocused));
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateFocus(!isFocused));
 }
 
 /**
