@@ -1644,13 +1644,12 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
     sptr<ISession> session;
-    SystemSessionConfig systemConfig;
-    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, nullptr);
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 

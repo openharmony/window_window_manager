@@ -318,26 +318,6 @@ WMError WindowSessionImpl::Connect()
     return static_cast<WMError>(ret);
 }
 
-void WindowSessionImpl::RegisterSessionRecoverListener(std::function<void()> callbackFunc)
-{
-    auto persistentId = GetPersistentId();
-    if (persistentId == INVALID_SESSION_ID) {
-        WLOGFE("[Recover] persistentId is invalid, session auto recover cannot be enable");
-        return;
-    }
-    SessionManager::GetInstance().RegisterSessionRecoverCallbackFunc(persistentId, callbackFunc);
-}
-
-void WindowSessionImpl::UnRegisterSessionRecoverListener()
-{
-    auto persistentId = GetPersistentId();
-    if (persistentId == INVALID_SESSION_ID) {
-        WLOGFE("persistentId is invalid");
-        return;
-    }
-    SessionManager::GetInstance().UnRegisterSessionRecoverCallbackFunc(persistentId);
-}
-
 void WindowSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     NotifyPointerEvent(pointerEvent);
@@ -554,49 +534,6 @@ WMError WindowSessionImpl::RequestFocus() const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
-}
-
-WMError WindowSessionImpl::RecoverAndReconnectSceneSession()
-{
-    SessionInfo info;
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
-        info.bundleName_ = property_->GetSessionInfo().bundleName_;
-    } else {
-        WLOGE("[RECOVER]property_ or context_ or abilityContext is null, recovered session failed");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    property_->SetSessionInfo(info);
-    property_->SetWindowState(state_);
-    WLOGI(
-        "[RECOVER]Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
-        "abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, persistentId=%{public}d, windowState=%{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
-        info.persistentId_, state_);
-    sptr<ISessionStage> iSessionStage(this);
-    auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
-    sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
-    sptr<Rosen::ISession> session;
-    auto ret = SessionManager::GetInstance().RecoverAndReconnectSceneSession(
-        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, session, property_, token);
-    if (session == nullptr) {
-        WLOGE("[RECOVER]session is null, recovered session failed");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (avoidAreaChangeListeners_.find(info.persistentId_) != avoidAreaChangeListeners_.end() &&
-        !avoidAreaChangeListeners_[info.persistentId_].empty()) {
-        SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(info.persistentId_, true);
-    }
-    if (touchOutsideListeners_.find(info.persistentId_) != touchOutsideListeners_.end() &&
-        !touchOutsideListeners_[info.persistentId_].empty()) {
-        SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(info.persistentId_, true);
-    }
-    WLOGI("[RECOVER]Recover and reconnect sceneSession successful");
-    hostSession_ = session;
-    return static_cast<WMError>(ret);
 }
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
@@ -1283,6 +1220,20 @@ void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleB
         if (listener != nullptr) {
             listener->OnWindowTitleButtonRectChanged(titleButtonRect);
         }
+    }
+}
+
+void WindowSessionImpl::RecoverSessionListener()
+{
+    auto persistentId = GetPersistentId();
+    WLOGI("[WMSRecover] RecoverSessionListener with persistentId=%{public}d", persistentId);
+    if (avoidAreaChangeListeners_.find(persistentId) != avoidAreaChangeListeners_.end() &&
+        !avoidAreaChangeListeners_[persistentId].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
+    }
+    if (touchOutsideListeners_.find(persistentId) != touchOutsideListeners_.end() &&
+        !touchOutsideListeners_[persistentId].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(persistentId, true);
     }
 }
 

@@ -140,6 +140,7 @@ protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     WMError RecoverAndConnectSpecificSession();
+    WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
@@ -159,7 +160,7 @@ private:
     static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
-    void RegisterSessionRecoverListener(bool isSpacialSession);
+    void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);

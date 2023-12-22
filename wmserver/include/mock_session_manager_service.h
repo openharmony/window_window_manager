@@ -33,8 +33,9 @@ public:
     sptr<IRemoteObject> GetSessionManagerService() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
-    void RegisterSessionManagerServiceRecoverListener(int64_t pid, const sptr<IRemoteObject>& listener) override;
-    void UnRegisterSessionManagerServiceRecoverListener(int64_t pid) override;
+    void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) override;
+    void UnRegisterSessionManagerServiceRecoverListener() override;
+    void UnRegisterSessionManagerServiceRecoverListener(int64_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void NotifyNotKillService()
@@ -70,7 +71,7 @@ private:
     sptr<IRemoteObject> sceneSessionManager_;
     sptr<SMSDeathRecipient> smsDeathRecipient_;
 
-    std::mutex smsRecoverListenerLock_;
+    std::recursive_mutex smsRecoverListenerLock_;
     std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsRecoverListenerMap_;
 };
 } // namespace Rosen

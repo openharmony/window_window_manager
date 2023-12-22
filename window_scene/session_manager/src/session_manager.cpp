@@ -35,7 +35,7 @@ SessionManager::~SessionManager()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
     if (mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_->UnRegisterSessionManagerServiceRecoverListener(getpid());
+        mockSessionManagerServiceProxy_->UnRegisterSessionManagerServiceRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
     }
 }
@@ -68,19 +68,12 @@ void SessionManager::OnSessionManagerServiceRecover(const sptr<IRemoteObject>& s
         sceneSessionManagerProxy_ = nullptr;
     }
 
-    taskScheduler_->PostAsyncTask([this] () {
-        WLOGFI("[RECOVER] Run recover task");
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (windowManagerRecoverFunc_ != nullptr) {
-            WLOGFI("[RECOVER] windowManagerRecover");
-            windowManagerRecoverFunc_();
-        }
-
-        for (const auto& it: sessionRecoverCallbackFuncMap_) {
-            WLOGFI("[RECOVER] Session recover callback, persistentId = %{public}d", it.first);
-            it.second();
-        }
-    });
+    WLOGFI("[WMSRecover] Run recover");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (windowManagerRecoverFunc_ != nullptr) {
+        WLOGFD("[WMSRecover] windowManagerRecover");
+        windowManagerRecoverFunc_();
+    }
 }
 
 void SessionManager::ClearSessionManagerProxy()
@@ -131,7 +124,7 @@ void SessionManager::InitSessionManagerServiceProxy()
     }
 
     sptr<IRemoteObject> listener = this;
-    mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(getpid(), listener);
+    mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(listener);
 
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
@@ -176,6 +169,11 @@ void SessionManager::InitSceneSessionManagerProxy()
     }
 }
 
+void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc)
+{
+    windowManagerRecoverFunc_ = callbackFunc;
+}
+
 void SessionManager::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -199,73 +197,5 @@ void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     WLOGI("ssm OnRemoteDied");
     SessionManager::GetInstance().Clear();
     SessionManager::GetInstance().ClearSessionManagerProxy();
-}
-
-void SessionManager::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
-{
-    WLOGFI("[RECOVER] RecoverAndConnectSpecificSession");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("[RECOVER] sceneSessionManagerProxy_ is nullptr");
-        return;
-    }
-    auto ret = sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
-    if (ret != WSError::WS_OK) {
-        WLOGFE("[RECOVER] call ipc failed");
-        return;
-    }
-}
-
-WMError SessionManager::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
-    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    SystemSessionConfig& systemConfig, sptr<ISession>& session, sptr<WindowSessionProperty> property,
-    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
-{
-    WLOGFD("RecoverAndReconnectSceneSession");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_DO_NOTHING;
-    }
-    auto ret = sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(
-        sessionStage, eventChannel, surfaceNode, systemConfig, session, property, token);
-    if (ret != WSError::WS_OK) {
-        WLOGFE("RecoverAndReconnectSceneSession failed, ret = %{public}d", ret);
-        return WMError::WM_DO_NOTHING;
-    }
-
-    return WMError::WM_OK;
-}
-
-void SessionManager::RegisterSessionRecoverCallbackFunc(
-    int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc)
-{
-    WLOGFI("[RECOVER] RegisterSessionRecoverCallbackFunc persistentId = %{public}d", persistentId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
-}
-
-void SessionManager::UnRegisterSessionRecoverCallbackFunc(int32_t persistentId)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto it = sessionRecoverCallbackFuncMap_.find(persistentId);
-    if (it != sessionRecoverCallbackFuncMap_.end()) {
-        sessionRecoverCallbackFuncMap_.erase(it);
-    }
-}
-
-void SessionManager::RegisterWindowManagerRecoverCallbackFuc(const WindowManagerRecoverCallbackFunc& callbackFunc)
-{
-    windowManagerRecoverFunc_ = callbackFunc;
-}
-
-void SessionManager::UnRegisterWindowManagerRecoverCallbackFuc()
-{
-    windowManagerRecoverFunc_ = nullptr;
 }
 } // namespace OHOS::Rosen

@@ -290,10 +290,7 @@ ohos_shared_library("session_manager") {
 
   public_configs = [ ":session_manager_public_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/window_scene/common:window_scene_common",
-  ]
+  deps = [ "${window_base_path}/utils:libwmutil" ]
 
   external_deps = [
     "ability_base:session_info",

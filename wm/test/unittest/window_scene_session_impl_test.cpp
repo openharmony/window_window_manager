@@ -164,6 +164,23 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
 }
 
 /**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RecoverAndReconnectSceneSession start";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RecoverAndReconnectSceneSession");
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->RecoverAndReconnectSceneSession());
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RecoverAndReconnectSceneSession end";
+}
+
+/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC
