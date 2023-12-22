@@ -1443,6 +1443,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
+        screenSession->SetName(option.name_);
         screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
@@ -1731,11 +1732,6 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
     std::vector<Point> startPoints;
     startPoints.insert(startPoints.begin(), screenIds.size(), point);
     ChangeScreenGroup(group, screenIds, startPoints, true, ScreenCombination::SCREEN_UNIQUE);
-
-    auto uniqueScreenSession = GetScreenSession(uniqueScreenId);
-    if (uniqueScreenSession != nullptr) {
-        uniqueScreenSession->SetName("HiCar");
-    }
 
     // virtual screen create callback to notify scb
     OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
