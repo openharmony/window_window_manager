@@ -287,6 +287,7 @@ public:
     WindowMode GetWindowMode();
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
+    void AttachToFrameNode(bool isAttach);
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
