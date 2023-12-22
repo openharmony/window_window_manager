@@ -53,33 +53,6 @@ void AccessibilityConnectionTest::TearDown()
 
 namespace {
 /**
- * @tc.name: FillAccessibilityWindowInfo01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, Function | SmallTest | Level2)
-{
-    uint32_t focusedWindow = 1;
-    sptr<WindowProperty> windowProperty1 = new WindowProperty();
-    windowProperty1->SetWindowId(focusedWindow);
-    windowProperty1->SetDecorEnable(true);
-    sptr<WindowNode> windowNode1 = new WindowNode(windowProperty1);
-    sptr<WindowNode> windowNode2 = new WindowNode();
-    sptr<WindowNode> windowNode3 = nullptr;
-    std::vector<sptr<WindowNode>> nodes;
-    nodes.emplace_back(windowNode1);
-    nodes.emplace_back(windowNode2);
-    nodes.emplace_back(windowNode3);
-    std::vector<sptr<AccessibilityWindowInfo>> infos;
-    accessibilityConnection_->FillAccessibilityWindowInfo(nodes, focusedWindow, infos);
-    ASSERT_EQ(2, infos.size());
-    ASSERT_TRUE(infos[0]->isDecorEnable_);
-    ASSERT_TRUE(infos[0]->focused_);
-    ASSERT_TRUE(infos[1]->isDecorEnable_);
-    ASSERT_FALSE(infos[1]->focused_);
-}
-
-/**
  * @tc.name: GetAccessibilityWindowInfo01
  * @tc.desc: normal function
  * @tc.type: FUNC

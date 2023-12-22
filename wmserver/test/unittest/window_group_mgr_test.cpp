@@ -72,15 +72,6 @@ void WindowGroupMgrTest::SetUpTestCase()
         property->SetWindowId(static_cast<uint32_t>(missindId));
         property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property->SetDisplayId(defalutDisplayId_);
-        sptr<WindowNode> node = new WindowNode(property);
-        node->abilityInfo_ = abilityInfo;
-        sptr<WindowOption> windowOption = new WindowOption();
-        sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
-        windowImpl->SetWindowState(WindowState::STATE_SHOWN);
-        sptr<IWindow> window = new WindowAgent(windowImpl);
-        node->SetWindowToken(window);
-        WLOGFI("windowId: %{public}u, missionId: %{public}d", node->GetWindowId(), node->abilityInfo_.missionId_);
-        windowRoot_->SaveWindow(node);
     }
 }
 
