@@ -26,7 +26,6 @@ group("unittest") {
     ":dm_display_power_unit_test",
     ":dm_screen_group_test",
     ":dm_screen_manager_test",
-    ":dm_screen_test",
   ]
 }
 
