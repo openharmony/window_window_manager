@@ -2050,6 +2050,7 @@ bool SceneSession::InitPiPRectInfo()
     if (requestRect.width_ == 0 || requestRect.height_ == 0) {
         return false;
     }
+    ClearPiPRectPivotInfo();
     pipRectInfo_.originWidth_ = requestRect.width_;
     pipRectInfo_.originHeight_ = requestRect.height_;
     int32_t level = 0;
