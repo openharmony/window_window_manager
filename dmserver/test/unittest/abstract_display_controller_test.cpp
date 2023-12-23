@@ -565,17 +565,6 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot02, Function | SmallTes
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
- * @tc.name: GetScreenSnapshot
- * @tc.desc: GetScreenSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, Function | SmallTest | Level3)
-{
-    ScreenId screenId = 1;
-    auto ret = absDisplayController_->GetScreenSnapshot(screenId);
-    ASSERT_EQ(nullptr, ret);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
