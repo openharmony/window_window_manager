@@ -31,7 +31,6 @@ group("unittest") {
     ":ws_scene_session_converter_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
-    ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
