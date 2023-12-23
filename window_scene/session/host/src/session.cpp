@@ -1517,14 +1517,15 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot() const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 {
     if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
         WLOGFE("surfaceNode_ is null or buffer is not available");
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
+    auto scaleValue = scaleParam == 0.0f ? snapshotScale_ : scaleParam;
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scaleValue, scaleValue);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
@@ -2049,6 +2050,15 @@ void Session::SetOffset(float x, float y)
 {
     offsetX_ = x;
     offsetY_ = y;
+    WSRect newRect {
+        .posX_ = std::round(bounds_.posX_ + x),
+        .posY_ = std::round(bounds_.posY_ + y),
+        .width_ = std::round(winRect_.width_),
+        .height_ = std::round(winRect_.height_),
+    };
+    if (newRect != winRect_) {
+        UpdateRect(newRect, SizeChangeReason::UNDEFINED);
+    }
 }
 
 float Session::GetOffsetX() const
@@ -2059,6 +2069,16 @@ float Session::GetOffsetX() const
 float Session::GetOffsetY() const
 {
     return offsetY_;
+}
+
+void Session::SetBounds(const WSRectF& bounds)
+{
+    bounds_ = bounds;
+}
+
+WSRectF Session::GetBounds()
+{
+    return bounds_;
 }
 
 WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,

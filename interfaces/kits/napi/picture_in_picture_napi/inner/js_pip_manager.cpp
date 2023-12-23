@@ -24,7 +24,7 @@ using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};
-    constexpr int32_t NUMBER_TWO = 2;
+    constexpr int32_t NUMBER_ONE = 1;
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -143,7 +143,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != NUMBER_TWO) {
+    if (argc < NUMBER_ONE) {
         WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
@@ -161,6 +161,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         WLOGFE("[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
+    WLOGFI("[NAPI]set xComponentController to window: %{public}u", windowId);
     WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
         WLOGFE("[NAPI]Failed to set xComponentController");

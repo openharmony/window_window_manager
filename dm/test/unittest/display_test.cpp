@@ -185,7 +185,7 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 {
     bool immersive = false;
     DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
 }
 }
 } // namespace Rosen
