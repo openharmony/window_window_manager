@@ -429,6 +429,42 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     return true;
 }
 
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+{
+    bool isArray = false;
+    napi_is_array(env, jsObject, &isArray);
+    if (jsObject == nullptr || !isArray) {
+        WLOGFE("[NAPI]Failed to convert to integer list");
+        return false;
+    }
+
+    uint32_t length = 0;
+    napi_get_array_length(env, jsObject, &length);
+    for (uint32_t i = 0; i < length; i++) {
+        int32_t persistentId;
+        napi_value elementVal = nullptr;
+        napi_get_element(env, jsObject, i, &elementVal);
+        if (!ConvertFromJsValue(env, elementVal, persistentId)) {
+            WLOGFE("[NAPI]Failed to convert to index %{public}u to integer", i);
+            return false;
+        }
+        intList.push_back(persistentId);
+    }
+
+    return true;
+}
+
+JsSessionType GetApiType(WindowType type)
+{
+    auto iter = WINDOW_TO_JS_SESSION_TYPE_MAP.find(type);
+    if (iter == WINDOW_TO_JS_SESSION_TYPE_MAP.end()) {
+        WLOGFE("[NAPI]window type: %{public}u cannot map to api type!", type);
+        return JsSessionType::TYPE_UNDEFINED;
+    } else {
+        return iter->second;
+    }
+}
+
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 {
     napi_value objValue = nullptr;
@@ -452,6 +488,14 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.windowMode)));
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.screenId_)));
+    napi_set_named_property(env, objValue, "sessionType",
+        CreateJsValue(env, static_cast<uint32_t>(GetApiType(static_cast<WindowType>(sessionInfo.windowType_)))));
+    napi_set_named_property(env, objValue, "sessionState",
+        CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
+    auto requestOrientation =
+        WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    napi_set_named_property(env, objValue, "requestOrientation",
+        CreateJsValue(env, static_cast<uint32_t>(requestOrientation)));
 
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "windowTop",

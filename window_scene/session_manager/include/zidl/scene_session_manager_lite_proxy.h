@@ -48,6 +48,9 @@ public:
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
+ 
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

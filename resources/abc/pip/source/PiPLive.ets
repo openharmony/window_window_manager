@@ -136,7 +136,8 @@ struct DefaultControl {
   build() {
     RelativeContainer() {
       Button({ type: ButtonType.Circle }) {
-        Image($r('sys.media.ohos_ic_public_cancel'))
+        Image($r('sys.media.ohos_ic_public_close'))
+          .size({ width: 24, height: 24 })
           .fillColor($r('sys.color.ohos_id_color_primary_contrary'))
           .objectFit(ImageFit.Contain)
       }
