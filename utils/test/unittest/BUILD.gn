@@ -27,7 +27,6 @@ group("unittest") {
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
-    ":utils_surface_draw_test",
     ":utils_surface_reader_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",

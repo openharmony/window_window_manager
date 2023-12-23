@@ -171,7 +171,6 @@ HWTEST_F(DisplayTest, GetName01, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
 {
     auto dpi = defaultDisplay_->GetDpi();
-    
     auto vpr = defaultDisplay_->GetVirtualPixelRatio();
     ASSERT_EQ(vpr * DOT_PER_INCH, dpi);
 }
