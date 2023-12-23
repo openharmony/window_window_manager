@@ -31,7 +31,6 @@ group("unittest") {
     ":wm_window_manager_stub_proxy_test",
     ":wm_window_manager_test",
     ":wm_window_option_test",
-    ":wm_window_scene_effect_test",
     ":wm_window_scene_test",
     ":wm_window_stub_test",
   ]
