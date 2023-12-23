@@ -3862,7 +3862,7 @@ HWTEST_F(WindowImplTest, SetAspectRatio02, Function | SmallTest | Level2)
     ASSERT_NE(option, nullptr);
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetAspectRatio(0.0));
 }
 
 /*

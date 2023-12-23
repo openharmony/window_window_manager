@@ -61,12 +61,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     GeneratePersistentId(false, info.persistentId_);
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
-    WLOGFI("[WMSCom] Create session, id: %{public}d", GetPersistentId());
+    WLOGFI("[WMSLife] Create session, id: %{public}d", GetPersistentId());
 }
 
 SceneSession::~SceneSession()
 {
-    WLOGI("[WMSCom] ~SceneSession, id: %{public}d", GetPersistentId());
+    WLOGI("[WMSLife] ~SceneSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -124,7 +124,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         !IsShowWhenLocked() &&
         sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
         sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
-        WLOGFW("[WMSCom] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
+        WLOGFW("[WMSLife] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -132,10 +132,10 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] Foreground session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Foreground session, id: %{public}d", session->GetPersistentId());
         weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
@@ -165,10 +165,10 @@ WSError SceneSession::Background()
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] Background session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Background session, id: %{public}d", session->GetPersistentId());
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
@@ -215,10 +215,10 @@ WSError SceneSession::Disconnect()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] Disconnect session, id: %{public}d", session->GetPersistentId());
+        WLOGFI("[WMSLife] Disconnect session, id: %{public}d", session->GetPersistentId());
         if (session->needSnapshot_) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
@@ -405,7 +405,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->winRect_ == rect) {
-            WLOGFW("[WMSWinLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
+            WLOGFW("[WMSLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
             return WSError::WS_OK;
         }
         session->winRect_ = rect;
@@ -413,7 +413,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-        WLOGFD("[WMSWinLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return WSError::WS_OK;
     };
@@ -429,14 +429,14 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGD("[WMSWinLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:[%{public}d, "
+        WLOGD("[WMSLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:[%{public}d, "
             "%{public}d, %{public}u, %{public}u]",
             session->GetPersistentId(), session->reason_, session->winRect_.posX_,
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
         bool isMoveOrDrag = session->moveDragController_ &&
             (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
         if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
-            WLOGFD("[WMSWinLayout] skip redundant rect update!");
+            WLOGFD("[WMSLayout] skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         WSError ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
@@ -517,7 +517,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            WLOGFE("[WMSLayout] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto newWinRect = session->winRect_;
@@ -551,7 +551,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             session->NotifySessionRectChange(rect, reason);
         }
 
-        WLOGFI("[WMSCom] Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
+        WLOGFI("[WMSLayout] Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
             "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
             newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return WSError::WS_OK;
@@ -621,7 +621,10 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
-    WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
+    WLOGFI("[WMSImms]SceneSession SetSystemBarProperty persistentId():%{public}u type:%{public}u"
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetPersistentId(), static_cast<uint32_t>(type),
+        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
@@ -665,7 +668,7 @@ WSError SceneSession::OnNeedAvoid(bool status)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+        WLOGFI("[WMSImms]SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
             session->sessionChangeCallback_->OnNeedAvoid_(status);
         }
@@ -825,7 +828,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
-        WLOGFD("GetAvoidAreaByType avoidAreaType:%{public}u", type);
+        WLOGFD("[WMSImms]GetAvoidAreaByType avoidAreaType:%{public}u", type);
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
@@ -844,7 +847,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                WLOGFD("cannot find avoidAreaType: %{public}u", type);
+                WLOGFI("[WMSImms]cannot find avoidAreaType: %{public}u", type);
                 return avoidArea;
             }
         }
@@ -1397,8 +1400,9 @@ std::string SceneSession::GetUpdatedIconPath() const
 
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
+    WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
+        sessionInfo_.bundleName_.c_str(), GetPersistentId(), visible);
     isVisible_ = visible;
-
     if (specificCallback_ == nullptr) {
         WLOGFW("specific callback is null.");
         return;
@@ -2142,7 +2146,7 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                 "SceneSession::UpdateSizeChangeReason%d reason:%d",
                 session->GetPersistentId(), static_cast<uint32_t>(reason));
-            WLOGFD("[WMSWinLayout]UpdateSizeChangeReason Id: %{public}d, reason: %{public}d",
+            WLOGFD("[WMSLayout]UpdateSizeChangeReason Id: %{public}d, reason: %{public}d",
                 session->GetPersistentId(), reason);
         }
         return WSError::WS_OK;

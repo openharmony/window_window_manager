@@ -1637,6 +1637,24 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: check func RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, systemConfig, session, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: ConfigStartingWindowAnimation
  * @tc.desc: SceneSesionManager config start window animation
  * @tc.type: FUNC
@@ -3030,6 +3048,29 @@ HWTEST_F(SceneSessionManagerTest, UpdateSessionWindowVisibilityListener, Functio
     bool haveListener = true;
     WSError result = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotPixelMap
+ * @tc.desc: SceneSesionManager get session snapshot pixelmap
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetPixelMap";
+    info.bundleName_ = "GetPixelMap1";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+
+    int32_t persistentId = 65535;
+    float scaleValue = 0.5f;
+    auto pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
+    EXPECT_EQ(pixelMap, nullptr);
+
+    persistentId = 1;
+    pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
+    EXPECT_EQ(pixelMap, nullptr);
 }
 }
 } // namespace Rosen

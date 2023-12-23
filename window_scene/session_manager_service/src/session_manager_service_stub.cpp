@@ -42,7 +42,7 @@ int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             break;
         }
         default: {
-            WLOGFW("unknown transaction code.");
+            WLOGFW("unknown transaction code. %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }

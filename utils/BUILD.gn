@@ -117,6 +117,8 @@ ohos_shared_library("libwmutil_base") {
     "src/cutout_info.cpp",
     "src/display_change_info.cpp",
     "src/display_info.cpp",
+    "src/screen_group_info.cpp",
+    "src/screen_info.cpp",
     "src/screenshot_info.cpp",
     "src/singleton_container.cpp",
     "src/string_util.cpp",
