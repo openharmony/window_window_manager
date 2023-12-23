@@ -23,7 +23,6 @@ group("unittest") {
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
     ":wm_window_agent_test",
-    ":wm_window_effect_test",
     ":wm_window_extension_session_impl_test",
     ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",

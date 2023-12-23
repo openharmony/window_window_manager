@@ -34,8 +34,9 @@ DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    WLOGFD("ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("RegisterDisplayManagerAgent WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
@@ -49,7 +50,7 @@ DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -63,8 +64,9 @@ DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    WLOGFD("ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("UnregisterDisplayManagerAgent WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
@@ -78,12 +80,11 @@ DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
-
 } // namespace OHOS::Rosen

@@ -448,7 +448,7 @@ napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info i
         }
     }
     if (ret != DmErrorCode::DM_OK) {
-        WLOGFE("failed to unregister display listener with type");
+        WLOGFW("failed to unregister display listener with type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -595,7 +595,7 @@ napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> r
         return NapiGetUndefined(env);
     }
     if (region == nullptr) {
-        WLOGFE("Get null fold crease region");
+        WLOGFW("Get null fold crease region");
         return NapiGetUndefined(env);
     }
     DisplayId displayId = region->GetDisplayId();

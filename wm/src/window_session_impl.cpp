@@ -69,6 +69,8 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+    WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -79,6 +81,7 @@ std::mutex WindowSessionImpl::screenshotListenerMutex_;
 std::mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
+std::mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -314,6 +317,25 @@ WMError WindowSessionImpl::Connect()
     return static_cast<WMError>(ret);
 }
 
+void WindowSessionImpl::RegisterSessionRecoverListener(std::function<void()> callbackFunc)
+{
+    auto persistentId = GetPersistentId();
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("[Recover] persistentId is invalid, session auto recover cannot be enable");
+        return;
+    }
+    SessionManager::GetInstance().RegisterSessionRecoverCallbackFunc(persistentId, callbackFunc);
+}
+
+void WindowSessionImpl::UnRegisterSessionRecoverListener()
+{
+    auto persistentId = GetPersistentId();
+    if (persistentId == INVALID_SESSION_ID) {
+        WLOGFE("persistentId is invalid");
+        return;
+    }
+    SessionManager::GetInstance().UnRegisterSessionRecoverCallbackFunc(persistentId);
+}
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     WLOGFI("[WMSLife]Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{public}u",
@@ -430,7 +452,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
-    WLOGFI("[WMSWinLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
+    WLOGFI("[WMSLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
         "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
@@ -521,6 +543,49 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+WMError WindowSessionImpl::RecoverAndReconnectSceneSession()
+{
+    SessionInfo info;
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.bundleName_ = property_->GetSessionInfo().bundleName_;
+    } else {
+        WLOGE("[RECOVER]property_ or context_ or abilityContext is null, recovered session failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetSessionInfo(info);
+    property_->SetWindowState(state_);
+    WLOGI(
+        "[RECOVER]Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
+        "abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, persistentId=%{public}d, windowState=%{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
+        info.persistentId_, state_);
+    sptr<ISessionStage> iSessionStage(this);
+    auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    sptr<Rosen::ISession> session;
+    auto ret = SessionManager::GetInstance().RecoverAndReconnectSceneSession(
+        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, session, property_, token);
+    if (session == nullptr) {
+        WLOGE("[RECOVER]session is null, recovered session failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (avoidAreaChangeListeners_.find(info.persistentId_) != avoidAreaChangeListeners_.end() &&
+        !avoidAreaChangeListeners_[info.persistentId_].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(info.persistentId_, true);
+    }
+    if (touchOutsideListeners_.find(info.persistentId_) != touchOutsideListeners_.end() &&
+        !touchOutsideListeners_[info.persistentId_].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(info.persistentId_, true);
+    }
+    WLOGI("[RECOVER]Recover and reconnect sceneSession successful");
+    hostSession_ = session;
+    return static_cast<WMError>(ret);
+}
+
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
@@ -564,8 +629,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     config.SetOrientation(orientation);
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
-    WLOGFI("Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], orientation: %{public}d",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+    WLOGFI("[WMSLayout] Id:%{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
+        "orientation: %{public}d", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
@@ -1065,6 +1130,138 @@ WMError WindowSessionImpl::UnregisterWindowStatusChangeListener(const sptr<IWind
     return UnregisterListener(windowStatusChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleVisible(isVisible, true);
+    WLOGI("Change the visibility of decor success");
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetContainerModalTitleHeight(decorHeight);
+    WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    height = uiContent_->GetContainerModalTitleHeight();
+    if (height == -1) {
+        WLOGFE("Get app window decor height failed");
+        return WMError::WM_DO_NOTHING;
+    }
+    WLOGI("Get app window decor height success, height : %{public}d", height);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    Rect decorRect;
+    Rect titleButtonLeftRect;
+    bool res = uiContent_->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
+    if (!res) {
+        WLOGFE("get window title buttons area failed");
+        titleButtonRect.IsUninitializedRect();
+        return WMError::WM_DO_NOTHING;
+    }
+    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+    titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+    titleButtonRect.width_ = titleButtonLeftRect.width_;
+    titleButtonRect.height_ = titleButtonLeftRect.height_;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("register the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+        uiContent_->SubscribeContainerModalButtonsRectChange([this](Rect& decorRect, Rect& titleButtonLeftRect) {
+            TitleButtonRect titleButtonRect;
+            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+            titleButtonRect.posY_ = titleButtonLeftRect.posY_;
+            titleButtonRect.width_ = titleButtonLeftRect.width_;
+            titleButtonRect.height_ = titleButtonLeftRect.height_;
+            NotifyWindowTitleButtonRectChange(titleButtonRect);
+    });
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
+    const sptr<IWindowTitleButtonRectChangedListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    WLOGFD("Start unregister windowTitleButtonRectChange listener, id:%{public}d", persistentId);
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("unregister the listener of window title button rect change failed");
+            return ret;
+        }
+    }
+    uiContent_->SubscribeContainerModalButtonsRectChange(nullptr);
+    return ret;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowTitleButtonRectChangedListener>> windowTitleButtonRectListeners;
+        for (auto& listener : windowTitleButtonRectChangeListeners_[GetPersistentId()]) {
+            windowTitleButtonRectListeners.push_back(listener);
+        }
+    return windowTitleButtonRectListeners;
+}
+
+void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect)
+{
+    std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    auto windowTitleButtonRectListeners = GetListeners<IWindowTitleButtonRectChangedListener>();
+    for (auto& listener : windowTitleButtonRectListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowTitleButtonRectChanged(titleButtonRect);
+        }
+    }
+}
 
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
@@ -1170,6 +1367,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
         ClearUselessListeners(windowStatusChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+        ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
 }
 
@@ -1703,7 +1904,7 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
         }
         isFirstUnregister = windowVisibilityChangeListeners_[persistentId].empty();
     }
-    
+
     if (isFirstUnregister) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, false);
     }

@@ -54,6 +54,8 @@ private:
     int HandleUnlockSession(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
+    //for window manager service
+    int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_STUB_H
