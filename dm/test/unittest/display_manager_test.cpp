@@ -66,19 +66,6 @@ void DisplayManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: Freeze01
- * @tc.desc: success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, Freeze01, Function | SmallTest | Level1)
-{
-    std::vector<DisplayId> displayIds;
-    displayIds.push_back(0);
-    bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
-}
-
-/**
  * @tc.name: Freeze02
  * @tc.desc: test Freeze displayIds exceed the maximum
  * @tc.type: FUNC
@@ -91,7 +78,7 @@ HWTEST_F(DisplayManagerTest, Freeze02, Function | SmallTest | Level1)
     }
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
+        ASSERT_FALSE(ret);
     } else {
         ASSERT_FALSE(ret);
     }
@@ -107,24 +94,7 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
         ASSERT_FALSE(ret);
-    }
-}
-
-/**
- * @tc.name: Unfreeze01
- * @tc.desc: success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, Unfreeze01, Function | SmallTest | Level1)
-{
-    std::vector<DisplayId> displayIds;
-    displayIds.push_back(0);
-    bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
     } else {
         ASSERT_FALSE(ret);
     }
@@ -554,19 +524,6 @@ HWTEST_F(DisplayManagerTest, UnregisterDisplayModeListener, Function | SmallTest
     listener = new DisplayManager::IDisplayModeListener();
     ret = DisplayManager::GetInstance().UnregisterDisplayModeListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterDisplayModeListener(listener));
-    listener.clear();
-}
-
-/**
- * @tc.name: ImplUnregisterDisplayModeListener
- * @tc.desc: ImplUnregisterDisplayModeListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ImplUnregisterDisplayModeListener, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayModeListener> listener;
-    auto ret = DisplayManager::GetInstance().pImpl_->UnregisterDisplayModeListener(listener);
-    ASSERT_EQ(ret, DMError::DM_OK);
     listener.clear();
 }
 

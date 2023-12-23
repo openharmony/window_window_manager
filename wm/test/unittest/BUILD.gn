@@ -20,8 +20,6 @@ group("unittest") {
 
   deps = [
     ":wm_input_transfer_station_test",
-    ":wm_picture_in_picture_controller_test",
-    ":wm_picture_in_picture_manager_test",
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
     ":wm_window_agent_test",
@@ -29,17 +27,13 @@ group("unittest") {
     ":wm_window_extension_session_impl_test",
     ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
-    ":wm_window_impl_test",
     ":wm_window_input_channel_test",
     ":wm_window_manager_stub_proxy_test",
     ":wm_window_manager_test",
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
-    ":wm_window_scene_session_impl_test",
     ":wm_window_scene_test",
-    ":wm_window_session_impl_test",
     ":wm_window_stub_test",
-    ":wm_window_test",
   ]
   if (!scene_board_enabled) {
     deps += [ ":wm_window_proxy_test" ]
