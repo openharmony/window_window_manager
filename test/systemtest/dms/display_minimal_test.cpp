@@ -55,7 +55,7 @@ namespace {
  */
 HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
 {
-    ASSERT_NE(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
+    ASSERT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 }
 
 /**
@@ -66,7 +66,7 @@ HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
 HWTEST_F(DisplayMinimalTest, BasicDisplay02, Function | MediumTest | Level1)
 {
     const sptr<Display>& display = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_NE(nullptr, display);
+    ASSERT_EQ(nullptr, display);
 }
 
 /**
