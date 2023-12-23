@@ -93,6 +93,7 @@ void SessionManager::ClearSessionManagerProxy()
     sceneSessionManagerProxy_ = nullptr;
 }
 
+__attribute__((no_sanitize("cfi")))
 sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -137,6 +138,7 @@ void SessionManager::InitSessionManagerServiceProxy()
     }
 }
 
+__attribute__((no_sanitize("cfi")))
 void SessionManager::InitSceneSessionManagerProxy()
 {
     if (sceneSessionManagerProxy_) {
