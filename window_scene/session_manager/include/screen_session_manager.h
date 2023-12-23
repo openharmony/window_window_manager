@@ -185,6 +185,10 @@ public:
 
     FoldStatus GetFoldStatus() override;
 
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+
+    void SetKeyguardDrawnDoneFlag(bool flag);
+
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
@@ -233,7 +237,6 @@ private:
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
-    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void HandlerSensor(ScreenPowerStatus status);
 
     // notify scb virtual screen change
