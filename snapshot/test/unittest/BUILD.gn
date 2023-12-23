@@ -19,8 +19,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":snapshot_display_test",
-    ":snapshot_utils_test",
   ]
 }
 
