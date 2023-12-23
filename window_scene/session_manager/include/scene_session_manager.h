@@ -270,6 +270,7 @@ public:
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
 protected:
