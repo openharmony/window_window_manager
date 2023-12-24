@@ -172,7 +172,6 @@ public:
     const std::string& GetWindowName() const;
     const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
-    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
 
@@ -239,6 +238,7 @@ private:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
     WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

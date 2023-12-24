@@ -5677,6 +5677,23 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
     return;
 }
 
+static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (isVisible) {
+        if (avoidArea.bottomRect_.IsUninitializedRect() ||
+            (avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) != sessionBottom)) {
+            return false;
+        }
+    } else if (!avoidArea.bottomRect_.IsUninitializedRect()) {
+        return false;
+    }
+    return true;
+}
+
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
     const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
@@ -5694,6 +5711,11 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
+            !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
+                sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
+            continue;
+        }
         ret = UpdateSessionAvoidAreaIfNeed(
             persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
         needUpdate = needUpdate || ret;
@@ -5781,7 +5803,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                     !avoidArea.rightRect_.IsUninitializedRect()) {
                     continue;
                 }
-                if (isVisible && avoidArea.isEmptyAvoidArea()) {
+                if (isVisible && avoidArea.bottomRect_.IsUninitializedRect()) {
                     continue;
                 }
                 WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "

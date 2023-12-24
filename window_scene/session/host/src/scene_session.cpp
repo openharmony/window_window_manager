@@ -836,8 +836,12 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
-void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const
+void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
 {
+    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        return;
+    }
     WSRect barArea = specificCallback_->onGetAINavigationBarArea_();
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
