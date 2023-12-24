@@ -2379,6 +2379,12 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         avoidArea.rightRect_ = g_emptyRect;
         avoidArea.bottomRect_ = g_emptyRect;
     }
+    WLOGI("Window [%{public}u, %{public}s] get avoid area type %{public}d end, ret %{public}d "
+          "top{%{public}d,%{public}d,%{public}d,%{public}d}, down{%{public}d,%{public}d,%{public}d,%{public}d}",
+          window->GetWindowId(), window->GetWindowName().c_str(), avoidAreaType, ret,
+          avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
+          avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
+          avoidArea.bottomRect_.height_);
     napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType);
     if (avoidAreaObj != nullptr) {
         return avoidAreaObj;
