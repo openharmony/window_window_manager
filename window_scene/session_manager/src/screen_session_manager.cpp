@@ -2164,6 +2164,19 @@ sptr<ScreenSessionGroup> ScreenSessionManager::GetAbstractScreenGroup(ScreenId s
     return iter->second;
 }
 
+bool ScreenSessionManager::CheckScreenInScreenGroup(sptr<ScreenSession> screen) const
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    auto groupSmsId = screen->groupSmsId_;
+    auto iter = smsScreenGroupMap_.find(groupSmsId);
+    if (iter == smsScreenGroupMap_.end()) {
+        WLOGFE("groupSmsId:%{public}" PRIu64"is not in smsScreenGroupMap_.", groupSmsId);
+        return false;
+    }
+    sptr<ScreenSessionGroup> screenGroup = iter->second;
+    return screenGroup->HasChild(screen->screenId_);
+}
+
 void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
     const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
 {
@@ -2183,7 +2196,9 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
             continue;
         }
-        NotifyDisplayDestroy(screenId);
+        if (CheckScreenInScreenGroup(screen)) {
+            NotifyDisplayDestroy(screenId);
+        }
         auto originGroup = RemoveFromGroupLocked(screen);
         addChildPos.emplace_back(startPoints[i]);
         removeChildResMap[screenId] = originGroup != nullptr;
