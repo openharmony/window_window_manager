@@ -50,6 +50,7 @@ public:
         return (me != nullptr) ? me->OnInitSessionManagerService(env, info) : nullptr;
     }
 
+    __attribute__((no_sanitize("cfi")))
     static napi_value NotifySceneBoardAvailable(napi_env env, napi_callback_info info)
     {
         JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(env, info);
