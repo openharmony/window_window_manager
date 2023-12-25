@@ -35,7 +35,7 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 private:
-    static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
+    static inline BrokerDelegator<ScreenSessionManagerLiteProxy> delegator_;
 };
 
 } // namespace Rosen

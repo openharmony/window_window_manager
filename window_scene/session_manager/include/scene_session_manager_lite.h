@@ -19,6 +19,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
+#include "wm_single_instance.h"
 
 
 namespace OHOS::Rosen {
@@ -47,6 +48,9 @@ public:
     WSError UnlockSession(int32_t sessionId) override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
+
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+
 protected:
     SceneSessionManagerLite() = default;
     virtual ~SceneSessionManagerLite() = default;

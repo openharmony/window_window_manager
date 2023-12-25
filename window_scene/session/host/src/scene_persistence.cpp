@@ -26,6 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneP
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
+constexpr uint8_t SUCCESS = 0;
 const std::string SNAPSHOT_THREAD = "OS_SnapshotThread";
 } // namespace
 
@@ -158,5 +159,42 @@ bool ScenePersistence::IsSnapshotExisted() const
         return false;
     }
     return S_ISREG(buf.st_mode);
+}
+
+std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float oriScale,
+    const float newScale) const
+{
+    if (!IsSnapshotExisted()) {
+        WLOGE("local snapshot pic is not existed");
+        return nullptr;
+    }
+
+    uint32_t errorCode = 0;
+    Media::SourceOptions sourceOpts;
+    sourceOpts.formatHint = "image/png";
+    auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
+    if (!imageSource) {
+        WLOGE("create image source fail, errCode : %{public}d", errorCode);
+        return nullptr;
+    }
+
+    Media::ImageInfo info;
+    int32_t decoderWidth = 0;
+    int32_t decoderHeight = 0;
+    errorCode = imageSource->GetImageInfo(info);
+    if (errorCode == SUCCESS) {
+        decoderWidth = info.size.width;
+        decoderHeight = info.size.height;
+    }
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
+    if (oriScale != 0 && decoderWidth > 0 && decoderHeight > 0) {
+        auto isNeedToScale = newScale < oriScale;
+        decodeOpts.desiredSize.width = isNeedToScale ?
+            static_cast<int>(decoderWidth * newScale / oriScale) : decoderWidth;
+        decodeOpts.desiredSize.height = isNeedToScale ?
+            static_cast<int>(decoderHeight * newScale / oriScale) : decoderHeight;
+    }
+    return imageSource->CreatePixelMap(decodeOpts, errorCode);
 }
 } // namespace OHOS::Rosen

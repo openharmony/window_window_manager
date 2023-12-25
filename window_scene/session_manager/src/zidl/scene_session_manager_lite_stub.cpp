@@ -65,6 +65,9 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleMoveSessionsToForeground),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
         &SceneSessionManagerLiteStub::HandleMoveSessionsToBackground),
+    // for window manager service
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
+        &SceneSessionManagerLiteStub::HandleGetFocusSessionInfo),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -291,4 +294,14 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel &d
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
+
+int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleGetFocusSessionInfo lite!");
+    FocusChangeInfo focusInfo;
+    GetFocusWindowInfo(focusInfo);
+    reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen

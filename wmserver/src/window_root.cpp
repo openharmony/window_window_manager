@@ -554,7 +554,9 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         sptr<WindowNode> focusWin = GetWindowNode(container->GetFocusWindow());
         if (focusWin == nullptr ||
             !(WindowHelper::IsFullScreenWindow(focusWin->GetWindowMode()) && focusWin->zOrder_ > node->zOrder_)) {
+            WLOGFI("set focus window on id:%{public}d", node->GetWindowId());
             container->SetFocusWindow(node->GetWindowId());
+            container->DumpScreenWindowTree();
             needCheckFocusWindow = true;
         }
     }
@@ -1101,7 +1103,8 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t focusedWindowId = container->GetFocusWindow();
-    WLOGFD("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
+    WLOGFI("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
+    container->DumpScreenWindowTree();
     if (windowId != focusedWindowId) {
         auto iter = std::find_if(node->children_.begin(), node->children_.end(),
             [focusedWindowId](sptr<WindowNode> node) {
@@ -1120,8 +1123,11 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
 
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
+    } else {
+        WLOGFW("next focus window is invalid");
+        container->SetFocusWindow(INVALID_WINDOW_ID);
     }
 }
 
