@@ -589,7 +589,7 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
         }
     }
     if (windowName == PIP_WINDOW) {
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
