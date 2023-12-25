@@ -135,7 +135,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         }
 
         WLOGFI("[WMSLife] Foreground session, id: %{public}d", session->GetPersistentId());
-        if (!property) {
+        if (property) {
             weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
         }
         auto ret = session->Session::Foreground(property);
