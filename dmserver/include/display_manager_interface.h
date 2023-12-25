@@ -116,6 +116,7 @@ public:
         TRANS_ID_SET_SCREEN_PRIVACY_STATE,
         TRANS_ID_RESIZE_VIRTUAL_SCREEN,
         TRANS_ID_GET_AVAILABLE_AREA,
+        TRANS_ID_GET_SCREEN_SNAPSHOT,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;

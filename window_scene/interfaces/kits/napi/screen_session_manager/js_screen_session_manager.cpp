@@ -21,6 +21,7 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+#include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
 
 #ifdef POWER_MANAGER_ENABLE
@@ -29,6 +30,9 @@
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
+constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
+
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager" };
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
@@ -67,6 +71,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenLockEvent);
     BindNativeFunction(env, exportObj, "updateAvailableArea", moduleName,
         JsScreenSessionManager::UpdateAvailableArea);
+    BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
+        JsScreenSessionManager::GetScreenSnapshot);
     return NapiGetUndefined(env);
 }
 
@@ -129,6 +135,13 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
     WLOGD("[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateAvailableArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -436,5 +449,57 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnGetScreenSnapshot");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_THREE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::array<double, ARGC_TWO> scaleParam;
+    for (uint8_t i = 0; i < ARGC_TWO; i++) {
+        if (!ConvertFromJsValue(env, argv[i + 1], scaleParam[i])) {
+            WLOGFE("[NAPI]Failed to convert parameter to scale[%d]", i + 1);
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        scaleParam[i] = (scaleParam[i] > 0.0 && scaleParam[i] < 1.0) ? scaleParam[i] : 1.0;
+    }
+    NapiAsyncTask::CompleteCallback complete = [screenId, scaleParam]
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
+            napi_value nativeData = nullptr;
+            auto pixelMap = ScreenSessionManagerClient::GetInstance().GetScreenSnapshot(screenId,
+                static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]));
+            if (pixelMap) {
+                nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            }
+            if (nativeData) {
+                WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+                task.Resolve(env, nativeData);
+            } else {
+                WLOGE("[NAPI]create native pixelmap fail");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            }
+        };
+    napi_value result = nullptr;
+    napi_value lastParam = argv[2];
+    NapiAsyncTask::Schedule("JsScreenSessionManager::OnGetScreenSnapshot",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 } // namespace OHOS::Rosen

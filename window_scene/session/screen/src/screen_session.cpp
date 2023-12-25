@@ -16,9 +16,11 @@
 #include "session/screen/include/screen_session.h"
 
 #include "window_manager_hilog.h"
+#include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include "dm_common.h"
+#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1035,5 +1037,29 @@ void ScreenSession::SetFoldScreen(bool isFold)
 {
     WLOGFI("SetFoldScreen %{public}u", isFold);
     isFold_ = isFold;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
+{
+    if (displayNode_ == nullptr) {
+        WLOGFE("get screen snapshot displayNode_ is null")
+        return nullptr;
+    }
+
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshot");
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, scaleX, scaleY);
+    if (!ret) {
+        WLOGFE("get screen snapshot TakeSurfaceCapture failed");
+        return nullptr;
+    }
+
+    auto pixelMap = callback->GetResult(2000);
+    if (pixelMap != nullptr) {
+        WLOGFD("save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("failed to get pixelMap, return nullptr");
+    }
+    return pixelMap;
 }
 } // namespace OHOS::Rosen
