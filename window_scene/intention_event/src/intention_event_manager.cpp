@@ -146,6 +146,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGFE("OnInputEvent uiContent_ is null");
         return;
     }
+    if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
+        WLOGFE("OnInputEvent is disabled temporarily");
+        return;
+    }
 
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
@@ -169,6 +173,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
+    if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
+        WLOGFE("OnInputEvent is disabled temporarily");
+        return;
+    }
     auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
     if (focusedSessionId == INVALID_SESSION_ID) {
         WLOGFE("focusedSessionId is invalid");

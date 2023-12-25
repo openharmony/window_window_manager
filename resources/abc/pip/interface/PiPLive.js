@@ -261,10 +261,11 @@ class DefaultControl extends ViewPU {
             Image.create({
                 id: -1,
                 type: 2e4,
-                params: ["sys.media.ohos_ic_public_cancel"],
+                params: ["sys.media.ohos_ic_public_close"],
                 bundleName: "",
                 moduleName: ""
             });
+            Image.size({ width: 24, height: 24 });
             Image.fillColor({
                 id: -1,
                 type: 10001,

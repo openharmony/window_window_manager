@@ -153,4 +153,9 @@ WSError SceneSessionManagerLite::MoveSessionsToBackground(const std::vector<int3
     WLOGFD("run MoveSessionsToBackground");
     return SceneSessionManager::GetInstance().MoveSessionsToBackground(sessionIds, result);
 }
+
+void SceneSessionManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    return SceneSessionManager::GetInstance().GetFocusWindowInfo(focusInfo);
+}
 } // namespace OHOS::Rosen

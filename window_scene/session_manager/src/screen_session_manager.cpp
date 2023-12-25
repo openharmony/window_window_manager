@@ -821,6 +821,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             if (keyguardDrawnDone_) {
+                WLOGFI("ScreenSessionManager::SetScreenPowerForAll keyguardDrawnDone_ is true step 1");
                 status = ScreenPowerStatus::POWER_STATUS_ON;
                 break;
             } else {
@@ -830,6 +831,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                     needScreenOnWhenKeyguardNotify_ = false;
                     keyguardDrawnDone_ = true;
+                    WLOGFI("ScreenSessionManager::SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
                 };
                 taskScheduler_->PostTask(task, "screenOnTask", 300); // Retry after 300 ms.
                 return true;
@@ -837,6 +839,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
         }
         case ScreenPowerState::POWER_OFF: {
             keyguardDrawnDone_ = false;
+            WLOGFI("ScreenSessionManager::SetScreenPowerForAll keyguardDrawnDone_ is false");
             status = ScreenPowerStatus::POWER_STATUS_OFF;
             break;
         }
@@ -850,7 +853,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    WLOGFI("ScreenSessionManager::SetScreenPower enter");
+    WLOGFI("ScreenSessionManager::SetScreenPower enter status:%{public}u", status);
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         WLOGFE("no screen info");
@@ -870,6 +873,11 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+}
+
+void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
+{
+    keyguardDrawnDone_ = flag;
 }
 
 void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
@@ -955,6 +963,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         keyguardDrawnDone_ = true;
+        WLOGFI("ScreenSessionManager::NotifyDisplayEvent keyguardDrawnDone_ is true");
         if (needScreenOnWhenKeyguardNotify_) {
             taskScheduler_->RemoveTask("screenOnTask");
             usleep(SLEEP_US);
@@ -2919,6 +2928,19 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     clientProxy_ = client;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
+        if (!iter.second) {
+            continue;
+        }
+        auto localScreenBounds = iter.second->GetScreenProperty().GetBounds();
+        auto remoteScreenMode = rsInterface_.GetScreenActiveMode(iter.first);
+        bool isModeChanged = (localScreenBounds.rect_.width_ < localScreenBounds.rect_.height_) !=
+                             (remoteScreenMode.GetScreenWidth() < remoteScreenMode.GetScreenHeight());
+        if (isModeChanged) {
+            WLOGFI("[RECOVER]screen(id:%{public}" PRIu64 ") current mode is not default mode, reset it", iter.first);
+            SetRotation(iter.first, Rotation::ROTATION_0, false);
+            iter.second->SetDisplayBoundary(
+                RectF(0, 0, remoteScreenMode.GetScreenWidth(), remoteScreenMode.GetScreenHeight()), 0);
+        }
         clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
             iter.second->GetRSScreenId(), iter.second->GetName());
     }
