@@ -303,4 +303,14 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
     }
     screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
+    float scaleX, float scaleY)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return nullptr;
+    }
+    return screenSessionManager_->GetScreenSnapshot(screenId, scaleX, scaleY);
+}
 } // namespace OHOS::Rosen

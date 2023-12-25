@@ -152,6 +152,7 @@ public:
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
     void SetFoldScreen(bool isFold);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
 
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);

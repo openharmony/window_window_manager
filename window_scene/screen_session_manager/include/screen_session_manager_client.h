@@ -62,6 +62,8 @@ public:
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
+
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
