@@ -150,6 +150,7 @@ public:
     void AddScreenToGroup(sptr<ScreenSessionGroup> group,
         const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
         std::map<ScreenId, bool>& removeChildResMap);
+    bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
     DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
