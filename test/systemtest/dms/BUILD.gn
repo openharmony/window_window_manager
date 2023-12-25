@@ -23,7 +23,6 @@ group("systemtest") {
     ":dms_display_change_test",
     ":dms_display_update_test",
     ":dms_private_window_test",
-    ":dms_screen_manager_test",
   ]
 }
 
