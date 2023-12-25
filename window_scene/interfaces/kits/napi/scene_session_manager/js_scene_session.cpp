@@ -163,7 +163,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         sessionchangeCallback->clearCallbackFunc_ = [weak = weak_from_this()](bool needRemove, int32_t persistentId) {
             auto weakJsSceneSession = weak.lock();
             if (weakJsSceneSession) weakJsSceneSession->ClearCbMap(needRemove, persistentId);
-        }
+        };
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
     }
@@ -313,7 +313,7 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onWindowAnimationFlagChange_ = [weak = weak_from_this()](bool isNeedDefaultAnimationFlag){
+    sessionchangeCallback->onWindowAnimationFlagChange_ = [weak = weak_from_this()](bool isNeedDefaultAnimationFlag) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
     };
@@ -366,7 +366,7 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
     NotifySessionStateChangeFunc func = [weak = weak_from_this()](const SessionState& state) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnSessionStateChange(state);
-    } ;
+    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr");
@@ -413,7 +413,7 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
         WLOGFE("[WMSDialog] sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onBindDialogTarget_ = [weak = weak_from_this()](const sptr<SceneSession>& sceneSession){
+    sessionchangeCallback->onBindDialogTarget_ = [weak = weak_from_this()](const sptr<SceneSession>& sceneSession) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnBindDialogTarget(sceneSession);
     };
@@ -442,7 +442,7 @@ void JsSceneSession::ProcessRaiseToTopRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onRaiseToTop_ = [weak = weak_from_this()](){
+    sessionchangeCallback->onRaiseToTop_ = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTop(); 
     };
@@ -485,7 +485,7 @@ void JsSceneSession::ProcessSessionEventRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = [weak = weak_from_this()](uint32_t eventId){
+    sessionchangeCallback->OnSessionEvent_ = [weak = weak_from_this()](uint32_t eventId) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnSessionEvent(eventId);
     };
@@ -676,8 +676,8 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSystemBarPropertyChange_ = [weak = weak_from_this()](
-        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){
+    sessionchangeCallback->OnSystemBarPropertyChange_ = [weak = weak_from_this()]
+        (const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
             auto weakJsSceneSession = weak.lock();
             if (weakJsSceneSession) weakJsSceneSession->OnSystemBarPropertyChange(propertyMap);
     };
@@ -691,7 +691,7 @@ void JsSceneSession::ProcessNeedAvoidRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnNeedAvoid_ = [weak = weak_from_this()](bool status){
+    sessionchangeCallback->OnNeedAvoid_ = [weak = weak_from_this()](bool status) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnNeedAvoid(status);
     };
@@ -705,7 +705,7 @@ void JsSceneSession::ProcessIsCustomAnimationPlaying()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onIsCustomAnimationPlaying_ = [weak = weak_from_this()](bool status){
+    sessionchangeCallback->onIsCustomAnimationPlaying_ = [weak = weak_from_this()](bool status) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnIsCustomAnimationPlaying(status);
     };
@@ -719,7 +719,7 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_ = [weak = weak_from_this()](bool showWhenLocked){
+    sessionchangeCallback->OnShowWhenLocked_ = [weak = weak_from_this()](bool showWhenLocked) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnShowWhenLocked(showWhenLocked);
     };
@@ -739,9 +739,10 @@ void JsSceneSession::ProcessRequestedOrientationChange()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnRequestedOrientationChange_ = [weak = weak_from_this()](uint32_t orientation){
+    sessionchangeCallback->OnRequestedOrientationChange_ = [weak = weak_from_this()](uint32_t orientation) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnReuqestedOrientationChange(orientation);
+    };
     WLOGFD("ProcessRequestedOrientationChange success");
 }
 
@@ -752,7 +753,7 @@ void JsSceneSession::ProcessForceHideChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnForceHideChange_ = [weak = weak_from_this()](bool hide){
+    sessionchangeCallback->OnForceHideChange_ = [weak = weak_from_this()](bool hide) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnForceHideChange(hide);
     };
@@ -790,7 +791,7 @@ void JsSceneSession::ProcessTouchOutsideRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnTouchOutside_ = [weak = weak_from_this()](){
+    sessionchangeCallback->OnTouchOutside_ = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnTouchOutside();
     };
@@ -2218,7 +2219,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onPrepareClosePiPSession_ = [weak = weak_from_this()](){
+    sessionchangeCallback->onPrepareClosePiPSession_ = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnPrepareClosePiPSession();
     };
