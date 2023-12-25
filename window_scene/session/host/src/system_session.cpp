@@ -14,7 +14,9 @@
  */
 
 #include "session/host/include/system_session.h"
-
+#include "common/include/session_permission.h"
+#include "session/host/include/session.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -69,6 +71,13 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
+    auto type = GetWindowType();
+    if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
+        if (!SessionPermission::IsSystemCalling()) {
+            WLOGFE("[WMSLife]Hide permission denied id: %{public}d type:%{public}u", GetPersistentId(), type);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
