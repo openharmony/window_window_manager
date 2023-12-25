@@ -288,9 +288,28 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
 }
 
+void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession)
+{
+    bool phyMirrorEnable = system::GetParameter("persist.display.mirror.enabled", "0") == "1";
+    if (mirrorSession == nullptr || !phyMirrorEnable) {
+        return;
+    }
+    std::shared_ptr<RSDisplayNode> displayNode = mirrorSession->GetDisplayNode();
+    if (displayNode == nullptr) {
+        return;
+    }
+    displayNode->RemoveFromTree();
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        WLOGFI("FreeDisplayMirrorNodeInner free displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
+}
+
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
+    bool phyMirrorEnable = system::GetParameter("persist.display.mirror.enabled", "0") == "1";
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is nullptr");
@@ -309,13 +328,17 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
             }
             return;
         }
-        if (clientProxy_) {
+
+        if (clientProxy_ && !phyMirrorEnable) {
             clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
                 screenSession->GetRSScreenId(), screenSession->GetName());
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
+        if (phyMirrorEnable) {
+            FreeDisplayMirrorNodeInner(screenSession);
+        }
         if (clientProxy_) {
             clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
                 screenSession->GetRSScreenId(), screenSession->GetName());
@@ -639,6 +662,25 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     return screenSession->SetScreenColorTransform();
 }
 
+sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property)
+{
+    bool phyMirrorEnable = system::GetParameter("persist.display.mirror.enabled", "0") == "1";
+    sptr<ScreenSession> session = nullptr;
+    ScreenId defScreenId = GetDefaultScreenId();
+    if (phyMirrorEnable && screenId != defScreenId) {
+        NodeId nodeId = 0;
+        auto sIt = screenSessionMap_.find(defScreenId);
+        if (sIt != screenSessionMap_.end() && sIt->second != nullptr && sIt->second->GetDisplayNode() != nullptr) {
+            nodeId = sIt->second->GetDisplayNode()->GetId();
+        }
+        WLOGFI("GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
+        session = new ScreenSession(screenId, property, nodeId, defScreenId);
+    } else {
+        session = new ScreenSession(screenId, property, defScreenId);
+    }
+    return session;
+}
+
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
     WLOGFI("SCB: ScreenSessionManager::GetOrCreateScreenSession ENTER");
@@ -648,7 +690,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return sessionIt->second;
     }
 
-    ScreenId rsId = rsInterface_.GetDefaultScreenId();
+    ScreenId rsId = screenId;
     screenIdManager_.UpdateScreenId(rsId, screenId);
 
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
@@ -684,12 +726,13 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     if (foldScreenController_ != nullptr) {
         // sensor may earlier than screen connect, when physical screen property changed, update
         foldScreenController_->UpdateForPhyScreenPropertyChange();
-        if (screenId != 0) {
+        /* folder screen outer screenId is 5 */
+        if (screenId == 5) {
             return nullptr;
         }
     }
 
-    sptr<ScreenSession> session = new ScreenSession(screenId, property, GetDefaultScreenId());
+    sptr<ScreenSession> session = GetScreenSessionInner(screenId, property);
     session->RegisterScreenChangeListener(this);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;

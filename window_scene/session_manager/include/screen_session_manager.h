@@ -230,6 +230,8 @@ private:
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
+    sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
+    void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
 
     ScreenId GetDefaultScreenId();
 
