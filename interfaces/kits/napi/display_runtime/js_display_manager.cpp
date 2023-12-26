@@ -203,7 +203,7 @@ napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
                 task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
-                WLOGD("GetAllDisplays success");
+                WLOGI("GetAllDisplays success");
             } else {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetAllDisplay failed."));
