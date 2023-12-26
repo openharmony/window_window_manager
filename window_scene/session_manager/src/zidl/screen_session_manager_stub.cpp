@@ -635,14 +635,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(area.height_);
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_SNAPSHOT: {
-            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            float scaleX = data.ReadFloat();
-            float scaleY = data.ReadFloat();
-            std::shared_ptr<Media::PixelMap> screenPixelMap = GetScreenSnapshot(screenId, scaleX, scaleY);
-            reply.WriteParcelable(screenPixelMap == nullptr ? nullptr : screenPixelMap.get());
-            break;
-        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

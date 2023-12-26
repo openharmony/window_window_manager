@@ -2117,40 +2117,4 @@ DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect&
     area = {posX, posY, width, height};
     return ret;
 }
-
-std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenSnapshot(ScreenId screenId,
-    float scaleX, float scaleY)
-{
-    WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenSnapshot start");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenSnapshot: remote is nullptr");
-        return nullptr;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetScreenSnapshot: WriteInterfaceToken failed");
-        return nullptr;
-    }
-
-    if (!data.WriteUint64(screenId || !data.WriteFloat(scaleX) || !data.WriteFloat(scaleY))) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetScreenSnapshot: Write screenId or scaleX or scale Y failed");
-        return nullptr;
-    }
-
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_SNAPSHOT),
-        data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenSnapshot: SendRequest failed");
-        return nullptr;
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
-    if (pixelMap == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenSnapshot: pixelmap is null");
-        return nullptr;
-    }
-    return pixelMap;
-}
 } // namespace OHOS::Rosen
