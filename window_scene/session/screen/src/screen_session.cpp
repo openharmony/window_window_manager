@@ -46,6 +46,24 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
     RSTransaction::FlushImplicitTransaction();
 }
 
+ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
+    NodeId nodeId, ScreenId defaultScreenId)
+    : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
+{
+    rsId_ = screenId;
+    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId};
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    if (displayNode_) {
+        displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+    } else {
+        WLOGFE("Failed to create displayNode, displayNode is null!");
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
