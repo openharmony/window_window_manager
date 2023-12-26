@@ -535,7 +535,7 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
     }
-    if (windowName == PIP_WINDOW) {
+    if (windowName.compare(PIP_WINDOW) == 0) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     WLOGI("Window name = %{public}s, err = %{public}d", windowName.c_str(), errCode);
@@ -588,7 +588,7 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     }
-    if (windowName == PIP_WINDOW) {
+    if (windowName.compare(PIP_WINDOW) == 0) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
