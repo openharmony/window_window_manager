@@ -286,12 +286,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
     if (!needRemove) {
         return;
     }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto weakJsSceneSession = weak.lock();
-        if (!weakJsSceneSession) {
-            WLOGFE("ClearCbMap: weakJsSceneSession is nullptr");
-            return;
-        };
+    auto task = [this, persistentId]() {
         WLOGFI("clear callbackMap");
         {
             std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1206,12 +1201,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
     WLOGFI("[WMSLife][NAPI]OnCreateSubSession, id: %{public}d, parentId: %{public}d",
         sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
-    auto task = [weak = weak_from_this(), weakSession, jsCallBack, env = env_]() {
-        auto weakJsSceneSession = weak.lock();
-        if (!weakJsSceneSession) {
-            WLOGFE("OnCreateSubSession: weakJsSceneSession is nullptr");
-            return;
-        };
+    auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
             WLOGFE("[WMSLife][NAPI]root session or target session or env is nullptr");
@@ -1248,12 +1238,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
         jsCallBack = iter->second;
     }
     wptr<SceneSession> weakSession(sceneSession);
-    auto task = [weak = weak_from_this(), weakSession, jsCallBack, env = env_]() {
-        auto weakJsSceneSession = weak.lock();
-        if (!weakJsSceneSession) {
-            WLOGFE("OnBindDialogTarget: weakJsSceneSession is nullptr");
-            return;
-        };
+    auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
             WLOGFE("[NAPI]root session or target session or env is nullptr");
