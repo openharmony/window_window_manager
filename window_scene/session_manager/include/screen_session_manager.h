@@ -283,6 +283,7 @@ private:
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::recursive_mutex mutex_;
+    std::recursive_mutex keyguardDrawnDoneMutex_;
     std::recursive_mutex displayInfoMutex_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
