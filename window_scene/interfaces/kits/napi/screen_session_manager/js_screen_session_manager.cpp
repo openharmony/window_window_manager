@@ -493,7 +493,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
                 task.Resolve(env, nativeData);
             } else {
                 WLOGE("[NAPI]create native pixelmap fail");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_CONTEXT_ABNORMALLY)));
             }
         };
     napi_value result = nullptr;
