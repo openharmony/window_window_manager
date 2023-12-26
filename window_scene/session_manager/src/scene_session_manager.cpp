@@ -5795,7 +5795,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 auto sceneSession = GetSceneSession(persistentId);
-                if (sceneSession == nullptr) {
+                if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
                     continue;
                 }
                 AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
