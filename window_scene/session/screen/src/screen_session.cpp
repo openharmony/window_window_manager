@@ -1042,7 +1042,7 @@ void ScreenSession::SetFoldScreen(bool isFold)
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
 {
     if (displayNode_ == nullptr) {
-        WLOGFE("get screen snapshot displayNode_ is null")
+        WLOGFE("get screen snapshot displayNode_ is null");
         return nullptr;
     }
 
