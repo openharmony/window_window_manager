@@ -133,7 +133,7 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX,
-        float scaleY) { return nulltr; }
+        float scaleY) { return nullptr; }
 };
 } // namespace Rosen
 } // namespace OHOS
