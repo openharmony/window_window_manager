@@ -1229,7 +1229,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     }
     float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
     if (MathHelper::NearZero(vpr)) {
-        WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
+        WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
@@ -1266,7 +1266,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     }
     float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
     if (MathHelper::NearZero(vpr)) {
-        WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
+        WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     uiContent_->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
