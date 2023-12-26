@@ -829,7 +829,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        WLOGFI("[WMSLayout] Unsupported operation for pip window");
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     const auto& windowRect = GetRect();
@@ -937,7 +937,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        WLOGFI("[WMSLayout] Unsupported operation for pip window");
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // Float camera window has special limits
