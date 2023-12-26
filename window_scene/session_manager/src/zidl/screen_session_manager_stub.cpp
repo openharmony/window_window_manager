@@ -640,7 +640,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             float scaleX = data.ReadFloat();
             float scaleY = data.ReadFloat();
             std::shared_ptr<Media::PixelMap> screenPixelMap = GetScreenSnapshot(screenId, scaleX, scaleY);
-            reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : screenPixelMap.get());
+            reply.WriteParcelable(screenPixelMap == nullptr ? nullptr : screenPixelMap.get());
             break;
         }
         default:
