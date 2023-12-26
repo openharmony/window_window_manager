@@ -4145,10 +4145,6 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
 
     auto task = [this, &token, &label]() {
         auto sceneSession = FindSessionByToken(token);
