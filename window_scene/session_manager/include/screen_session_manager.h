@@ -216,9 +216,7 @@ public:
     void SetScreenPrivacyState(bool hasPrivate) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
-    void NotifyAvailableAreaChanged(DMRect area);
-    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY) override;
-    
+    void NotifyAvailableAreaChanged(DMRect area);  
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
