@@ -855,7 +855,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
 
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(keyguardDrawnDoneMutex_);
     ScreenPowerStatus status;
     if (blockScreenPowerChange_) {
         WLOGFI("ScreenSessionManager::SetScreenPowerForAll block screen power change");
@@ -920,6 +920,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
 void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 {
+    std::lock_guard<std::recursive_mutex> lock(keyguardDrawnDoneMutex_);
     keyguardDrawnDone_ = flag;
 }
 
@@ -995,7 +996,6 @@ std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
 
 DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return sessionDisplayPowerController_->GetDisplayState(displayId);
 }
 
@@ -1004,7 +1004,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     WLOGFI("ScreenSessionManager::NotifyDisplayEvent receive keyguardDrawnDone");
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::lock_guard<std::recursive_mutex> lock(keyguardDrawnDoneMutex_);
         keyguardDrawnDone_ = true;
         WLOGFI("ScreenSessionManager::NotifyDisplayEvent keyguardDrawnDone_ is true");
         if (needScreenOnWhenKeyguardNotify_) {
