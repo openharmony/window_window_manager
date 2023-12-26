@@ -1641,7 +1641,6 @@ DMError ScreenSessionManager::DisableMirror(bool disableOrNot)
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGFI("SCB:ScreenSessionManager::DisableMirror enter %{public}d", disableOrNot);
-    disableMirrorOrNot_ = disableOrNot;
     if (disableOrNot) {
         std::vector<ScreenId> screenIds;
         auto allScreenIds = GetAllScreenIds();
@@ -1664,8 +1663,8 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
         WLOGFE("SCB:ScreenSessionManager::MakeMirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    if (disableMirrorOrNot_) {
-        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled!");
+    if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
+        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled by edm!");
         return DMError::DM_ERROR_INVALID_PERMISSION;
     }
     WLOGFI("SCB:ScreenSessionManager::MakeMirror mainScreenId :%{public}" PRIu64"", mainScreenId);
@@ -2381,8 +2380,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         "UID", getuid());
     WLOGI("GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet);
 
-    if (disableDisplaySnapshotOrNot_) {
-        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled!");
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled by edm!");
         return nullptr;
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -2397,18 +2396,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return nullptr;
-}
-
-DMError ScreenSessionManager::DisableDisplaySnapshot(bool disableOrNot)
-{
-    WLOGFD("SCB: ScreenSessionManager::DisableDisplaySnapshot %{public}d", disableOrNot);
-    if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("DisableDisplaySnapshot permission denied!");
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
-    WLOGFI("SCB: ScreenSessionManager::DisableDisplaySnapshot enter %{public}d", disableOrNot);
-    disableDisplaySnapshotOrNot_ = disableOrNot;
-    return DMError::DM_OK;
 }
 
 bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
