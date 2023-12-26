@@ -17,10 +17,10 @@
 
 #include "window_manager_hilog.h"
 #include <hitrace_meter.h>
+#include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include "dm_common.h"
-#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
