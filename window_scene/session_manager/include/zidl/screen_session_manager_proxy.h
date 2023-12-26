@@ -139,7 +139,6 @@ public:
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
-    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

@@ -3168,20 +3168,4 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
     }
     NotifyAvailableAreaChanged(area);
 }
-
-std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY)
-{
-    WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
-    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION))) {
-        auto screenSession = GetScreenSession(screenId);
-        if (screenSession == nullptr) {
-            WLOGFE("GetScreenSnapshot get screen session is null");
-            return nullptr;
-        }
-        return screenSession->GetScreenSnapshot(scaleX, scaleY);
-    }
-
-    WLOGFE("GetScreenSnapshot permission denied");
-    return nullptr;
-}
 } // namespace OHOS::Rosen
