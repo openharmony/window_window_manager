@@ -139,7 +139,7 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
 
 napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateAvailableArea");
+    WLOGD("[NAPI]GetScreenSnapshot");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
 }
