@@ -461,6 +461,7 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 
 std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
 {
+    WLOGFI("DisplayManagerAdapter::GetAllDisplayIds enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     return displayManagerServiceProxy_->GetAllDisplayIds();
@@ -482,6 +483,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
+    WLOGFI("DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFW("screen id is invalid");
         return nullptr;
