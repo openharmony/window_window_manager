@@ -1415,6 +1415,26 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
     return static_cast<WMError>(ret);
 }
 
+WMError SceneSessionManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetVisibilityWindowInfo Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
+        WLOGFE("read visibility window infos failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     WLOGFD("run SceneSessionManagerProxy::ShiftAppWindowFocus");

@@ -29,6 +29,7 @@
 #include "session/host/include/scene_persistence.h"
 #include "wm_common.h"
 #include "occupied_area_change_info.h"
+#include "window_visibility_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -258,6 +259,8 @@ public:
     bool GetSystemTouchable() const;
     WSError SetVisible(bool isVisible);
     bool GetVisible() const;
+    WSError SetVisibilityState(WindowVisibilityState state);
+    WindowVisibilityState GetVisibilityState() const;
     WSError SetDrawingContentState(bool isRSDrawing);
     bool GetDrawingContentState() const;
     WSError SetBrightness(float brightness);
@@ -492,6 +495,7 @@ private:
     int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
     bool isRSVisible_ {false};
+    WindowVisibilityState visibilityState_ { WINDOW_LAYER_STATE_MAX};
     bool needNotify_ {true};
     bool isRSDrawing_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
