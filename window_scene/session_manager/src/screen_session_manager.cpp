@@ -961,7 +961,7 @@ void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScre
 void ScreenSessionManager::RegisterSettingDpiObserver()
 {
     WLOGFI("Register Setting Dpi Observer");
-    PowerMgr::SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
     ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
 }
 
