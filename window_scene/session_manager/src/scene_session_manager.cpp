@@ -5328,6 +5328,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
                 }
         }
         session->SetVisible(isVisible);
+        session->SetVisibilityState(visibleState);
         int32_t windowId = session->GetWindowId();
         if (windowVisibilityListenerSessionSet_.find(windowId) != windowVisibilityListenerSessionSet_.end()) {
             session->NotifyWindowVisibility();
@@ -5487,6 +5488,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
 #endif
         sceneSession->SetVisible(false);
+        sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
             WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
@@ -6698,5 +6700,25 @@ void SceneSessionManager::FlushWindowInfoToMMI()
         return WSError::WS_OK;
     };
     return taskScheduler_->PostAsyncTask(task);
+}
+
+WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("GetVisibilityWindowInfo permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, &infos]() {
+        for (auto [surfaceId, _] : lastVisibleData_) {
+            sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+            if (session == nullptr) {
+                continue;
+            }
+            infos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
+                session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType()));
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 } // namespace OHOS::Rosen
