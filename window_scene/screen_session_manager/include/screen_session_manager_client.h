@@ -62,6 +62,7 @@ public:
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    FoldStatus GetFoldStatus();
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

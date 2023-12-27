@@ -67,6 +67,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenLockEvent);
     BindNativeFunction(env, exportObj, "updateAvailableArea", moduleName,
         JsScreenSessionManager::UpdateAvailableArea);
+    BindNativeFunction(env, exportObj, "getFoldStatus", moduleName,
+        JsScreenSessionManager::GetFoldStatus);
     return NapiGetUndefined(env);
 }
 
@@ -129,6 +131,13 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
     WLOGD("[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]GetFoldStatus");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetFoldStatus(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -436,5 +445,20 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]OnGetFoldStatus");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    FoldStatus status = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
+    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    return CreateJsValue(env, status);
 }
 } // namespace OHOS::Rosen
