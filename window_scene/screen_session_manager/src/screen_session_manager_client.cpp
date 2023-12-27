@@ -310,6 +310,6 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
         WLOGFE("screenSessionManager_ is null");
         return FoldStatus::UNKNOWN;
     }
-    screenSessionManager_->GetFoldStatus();
+    return screenSessionManager_->GetFoldStatus();
 }
 } // namespace OHOS::Rosen
