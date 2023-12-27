@@ -2552,9 +2552,11 @@ HWTEST_F(SceneSessionManagerTest, ShiftAppWindowFocus, Function | SmallTest | Le
     WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     targetPersistentId_ = 1;
-    sourcePersistentId_ = 1;
     WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_SESSION);
+    sourcePersistentId_ = 1;
+    WSError result03 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
+    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
