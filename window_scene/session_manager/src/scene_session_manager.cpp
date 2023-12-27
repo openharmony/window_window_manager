@@ -6595,15 +6595,13 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         WLOGE("target session has been focused");
         return WSError::WS_DO_NOTHING;
     }
-    WSError ret = WSError::WS_OK;
-    auto sourceSession = GetSceneSession(sourcePersistentId);
-    if (ret == WSError::WS_OK && sourceSession != nullptr) {
-        ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
+    sptr<SceneSession> sourceSession = nullptr;
+    WSError ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
+    if (ret != WSError::WS_OK) {
+        return ret;
     }
-    auto targetSession = GetSceneSession(targetPersistentId);
-    if (ret == WSError::WS_OK && targetSession != nullptr) {
-        ret = GetAppMainSceneSession(targetSession, targetPersistentId);
-    }
+    sptr<SceneSession> targetSession = nullptr;
+    ret = GetAppMainSceneSession(targetSession, targetPersistentId);
     if (ret != WSError::WS_OK) {
         return ret;
     }
@@ -6621,6 +6619,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
 
 WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
+    sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGE("session(id: %{public}d) is nullptr", persistentId);
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -6630,12 +6629,11 @@ WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSes
             WLOGE("session(id: %{public}d) is not main window or sub window", persistentId);
             return WSError::WS_ERROR_INVALID_CALLING;
         }
-        if (GetSceneSession(sceneSession->GetParentPersistentId()) != nullptr) {
-            sceneSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            return WSError::WS_OK;
+        sceneSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        if (sceneSession == nullptr) {
+            WLOGE("session(id: %{public}d) parent is nullptr", persistentId);
+            return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGE("session(id: %{public}d) parent is nullptr", persistentId);
-        return WSError::WS_ERROR_INVALID_SESSION;
     }
     return WSError::WS_OK;
 }

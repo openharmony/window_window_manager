@@ -1524,7 +1524,7 @@ WMError WindowSceneSessionImpl::Recover()
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-        //need notify arkui maximize mode change
+        // need notify arkui maximize mode change
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
