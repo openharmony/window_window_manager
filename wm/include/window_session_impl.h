@@ -189,7 +189,7 @@ public:
         const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
     void RecoverSessionListener();
-
+    void SetDefaultDisplayIdIfNeed();
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
