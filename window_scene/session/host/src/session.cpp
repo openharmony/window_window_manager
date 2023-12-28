@@ -407,6 +407,17 @@ bool Session::GetVisible() const
     return isRSVisible_;
 }
 
+WSError Session::SetVisibilityState(WindowVisibilityState state)
+{
+    visibilityState_ = state;
+    return WSError::WS_OK;
+}
+
+WindowVisibilityState Session::GetVisibilityState() const
+{
+    return visibilityState_;
+}
+
 WSError Session::SetDrawingContentState(bool isRSDrawing)
 {
     isRSDrawing_ = isRSDrawing;

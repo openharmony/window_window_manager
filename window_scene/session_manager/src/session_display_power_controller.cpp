@@ -75,6 +75,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 
 DisplayState SessionDisplayPowerController::GetDisplayState(DisplayId displayId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayState_;
 }
 

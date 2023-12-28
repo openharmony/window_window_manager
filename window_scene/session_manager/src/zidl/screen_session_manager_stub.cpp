@@ -293,11 +293,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
-            DMError ret = DisableDisplaySnapshot(data.ReadBool());
-            reply.WriteInt32(static_cast<int32_t>(ret));
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
