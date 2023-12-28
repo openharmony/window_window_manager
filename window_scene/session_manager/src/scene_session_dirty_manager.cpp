@@ -101,9 +101,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         rect.width = area.width_;
         rect.height = area.height_;
         auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
-            [&rect](const MMI::Rect& var) { 
-                return rect == var;
-            });
+            [&rect](const MMI::Rect& var) { return rect == var; });
         if (iter != touchHotAreas.end()) {
             continue;
         }
