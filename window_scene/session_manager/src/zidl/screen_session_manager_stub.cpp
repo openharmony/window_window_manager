@@ -635,6 +635,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(area.height_);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
+            bool foldToExpand = data.ReadBool();
+            NotifyFoldToExpandCompletion(foldToExpand);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

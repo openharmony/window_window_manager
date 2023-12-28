@@ -2117,4 +2117,24 @@ DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect&
     area = {posX, posY, width, height};
     return ret;
 }
+
+void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
+{
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteBool(foldToExpand)) {
+        WLOGFE("Write foldToExpand failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
