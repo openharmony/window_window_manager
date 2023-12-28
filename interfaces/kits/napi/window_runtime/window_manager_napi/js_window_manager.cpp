@@ -35,6 +35,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
+    const std::string PIP_WINDOW = "pip_window";
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -534,6 +535,9 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
     }
+    if (windowName.compare(PIP_WINDOW) == 0) {
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
     WLOGI("Window name = %{public}s, err = %{public}d", windowName.c_str(), errCode);
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -583,6 +587,9 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
             WLOGFE("Failed to convert parameter to windowName");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
+    }
+    if (windowName.compare(PIP_WINDOW) == 0) {
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
