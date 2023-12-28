@@ -101,7 +101,9 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         rect.width = area.width_;
         rect.height = area.height_;
         auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
-            [&rect](const MMI::Rect& var){return rect == var;});
+            [&rect](const MMI::Rect& var) { 
+                return rect == var;
+            });
         if (iter != touchHotAreas.end()) {
             continue;
         }
@@ -109,7 +111,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         pointerHotAreas.emplace_back(rect);
         if (touchHotAreas.size() == static_cast<int>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
             auto sessionid = sceneSession->GetWindowId();
-            WLOGFE("id = %{public}d hotAreas size > %{public}d",sessionid,static_cast<int>(hotAreas.size()));
+            WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionid, static_cast<int>(hotAreas.size()));
             break;
         }
     }
@@ -359,7 +361,9 @@ void SceneSessionDirtyManager::PushWindowInfoList(uint64_t displayID, const MMI:
     auto& twindowinlist = screen2windowInfo_[displayID];
     if (static_cast<WindowAction>(windowinfo.action) == WindowAction::WINDOW_CHANGE) {
         auto iter = std::find_if(twindowinlist.rbegin(), twindowinlist.rend(),
-        [&windowinfo](const MMI::WindowInfo& var){return var.id == windowinfo.id;});
+        [&windowinfo](const MMI::WindowInfo& var) {
+            return var.id == windowinfo.id;
+        });
         if (iter != twindowinlist.rend()) {
             auto action = iter->action;
             *iter = windowinfo;
