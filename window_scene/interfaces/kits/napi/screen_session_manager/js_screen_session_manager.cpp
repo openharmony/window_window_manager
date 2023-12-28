@@ -140,6 +140,8 @@ napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, na
     WLOGD("[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]GetFoldStatus");
