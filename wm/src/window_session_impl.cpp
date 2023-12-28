@@ -967,12 +967,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
         return;
     }
     property_->SetRequestedOrientation(orientation);
-    if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
-    } else {
-        WLOGFW("[WMSMain]id:%{public}u set orientation %{public}u failed since state_:%{public}u",
-            GetPersistentId(), orientation, state_);
-    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
 
 Orientation WindowSessionImpl::GetRequestedOrientation()

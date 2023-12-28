@@ -105,7 +105,6 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
-    DMError DisableDisplaySnapshot(bool disableOrNot) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds() override;
@@ -150,6 +149,7 @@ public:
     void AddScreenToGroup(sptr<ScreenSessionGroup> group,
         const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
         std::map<ScreenId, bool>& removeChildResMap);
+    bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
     DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
@@ -296,9 +296,6 @@ private:
     std::atomic<ScreenId> defaultRsScreenId_ { SCREEN_ID_INVALID };
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
-
-    std::atomic_bool disableDisplaySnapshotOrNot_ = false;
-    std::atomic_bool disableMirrorOrNot_ = false;
 
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;

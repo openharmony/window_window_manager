@@ -956,7 +956,10 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
@@ -1060,6 +1063,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     WLOGFI("[WMSLayout] Id:%{public}d Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
@@ -1524,7 +1531,7 @@ WMError WindowSceneSessionImpl::Recover()
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-        //need notify arkui maximize mode change
+        // need notify arkui maximize mode change
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }

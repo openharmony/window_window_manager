@@ -312,4 +312,13 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
+
+FoldStatus ScreenSessionManagerClient::GetFoldStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return FoldStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetFoldStatus();
+}
 } // namespace OHOS::Rosen

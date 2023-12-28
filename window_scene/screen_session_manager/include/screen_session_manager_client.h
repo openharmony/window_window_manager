@@ -63,6 +63,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
+    FoldStatus GetFoldStatus();
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

@@ -90,7 +90,6 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
-    DMError DisableDisplaySnapshot(bool disableOrNot) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;

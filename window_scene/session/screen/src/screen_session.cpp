@@ -363,6 +363,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    if (!displayNode_) {
+        WLOGFI("update failed since null display node with rotation:%{public}d displayOrientation:%{public}u",
+            rotation, displayOrientation);
+        return;
+    }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->Begin();

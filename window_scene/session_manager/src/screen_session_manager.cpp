@@ -961,7 +961,7 @@ void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScre
 void ScreenSessionManager::RegisterSettingDpiObserver()
 {
     WLOGFI("Register Setting Dpi Observer");
-    PowerMgr::SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
     ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
 }
 
@@ -1641,7 +1641,6 @@ DMError ScreenSessionManager::DisableMirror(bool disableOrNot)
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGFI("SCB:ScreenSessionManager::DisableMirror enter %{public}d", disableOrNot);
-    disableMirrorOrNot_ = disableOrNot;
     if (disableOrNot) {
         std::vector<ScreenId> screenIds;
         auto allScreenIds = GetAllScreenIds();
@@ -1664,8 +1663,8 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
         WLOGFE("SCB:ScreenSessionManager::MakeMirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    if (disableMirrorOrNot_) {
-        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled!");
+    if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
+        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled by edm!");
         return DMError::DM_ERROR_INVALID_PERMISSION;
     }
     WLOGFI("SCB:ScreenSessionManager::MakeMirror mainScreenId :%{public}" PRIu64"", mainScreenId);
@@ -2203,6 +2202,19 @@ sptr<ScreenSessionGroup> ScreenSessionManager::GetAbstractScreenGroup(ScreenId s
     return iter->second;
 }
 
+bool ScreenSessionManager::CheckScreenInScreenGroup(sptr<ScreenSession> screen) const
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    auto groupSmsId = screen->groupSmsId_;
+    auto iter = smsScreenGroupMap_.find(groupSmsId);
+    if (iter == smsScreenGroupMap_.end()) {
+        WLOGFE("groupSmsId:%{public}" PRIu64"is not in smsScreenGroupMap_.", groupSmsId);
+        return false;
+    }
+    sptr<ScreenSessionGroup> screenGroup = iter->second;
+    return screenGroup->HasChild(screen->screenId_);
+}
+
 void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
     const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
 {
@@ -2222,7 +2234,9 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
             continue;
         }
-        NotifyDisplayDestroy(screenId);
+        if (CheckScreenInScreenGroup(screen)) {
+            NotifyDisplayDestroy(screenId);
+        }
         auto originGroup = RemoveFromGroupLocked(screen);
         addChildPos.emplace_back(startPoints[i]);
         removeChildResMap[screenId] = originGroup != nullptr;
@@ -2381,8 +2395,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         "UID", getuid());
     WLOGI("GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet);
 
-    if (disableDisplaySnapshotOrNot_) {
-        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled!");
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled by edm!");
         return nullptr;
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -2397,18 +2411,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return nullptr;
-}
-
-DMError ScreenSessionManager::DisableDisplaySnapshot(bool disableOrNot)
-{
-    WLOGFD("SCB: ScreenSessionManager::DisableDisplaySnapshot %{public}d", disableOrNot);
-    if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("DisableDisplaySnapshot permission denied!");
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
-    WLOGFI("SCB: ScreenSessionManager::DisableDisplaySnapshot enter %{public}d", disableOrNot);
-    disableDisplaySnapshotOrNot_ = disableOrNot;
-    return DMError::DM_OK;
 }
 
 bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)

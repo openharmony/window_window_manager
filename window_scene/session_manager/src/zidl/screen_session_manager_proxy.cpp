@@ -1280,34 +1280,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
     return pixelMap;
 }
 
-DMError ScreenSessionManagerProxy::DisableDisplaySnapshot(bool disableOrNot)
-{
-    WLOGFI("SCB: ScreenSessionManagerProxy::DisableDisplaySnapshot %{public}d", disableOrNot);
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("DisableDisplaySnapshot fail: remote is null");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("DisableDisplaySnapshot fail: WriteinterfaceToken failed");
-        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
-    }
-    if (!data.WriteBool(disableOrNot)) {
-        WLOGFE("DisableDisplaySnapshot fail: data write failed");
-        return DMError::DM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT),
-        data, reply, option) != ERR_NONE) {
-        WLOGFW("DisableDisplaySnapshot fail: SendRequest failed");
-        return DMError::DM_ERROR_IPC_FAILED;
-    }
-    return static_cast<DMError>(reply.ReadInt32());
-}
-
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
