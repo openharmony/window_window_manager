@@ -42,7 +42,7 @@ sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
 
 void ScreenSessionManagerTest::SetUpTestCase()
 {
-    ssm_ = &ScreenSessionManager::GetInstance();
+    ssm_ = new ScreenSessionManager();
 }
 
 void ScreenSessionManagerTest::TearDownTestCase()
@@ -347,7 +347,7 @@ HWTEST_F(ScreenSessionManagerTest, SetResolution, Function | SmallTest | Level3)
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetResolution(2, 100, 100, 0.5));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(2, 100, 100, 0.5));
 }
 
 /**
@@ -812,7 +812,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenRotationLocked, Function | SmallTest
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     ssm_->GetRSDisplayNodeByScreenId(2);
-    ASSERT_EQ( DMError::DM_ERROR_INVALID_PARAM,ssm_->SetScreenRotationLocked(false));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetScreenRotationLocked(false));
 }
 
 /**
@@ -829,14 +829,15 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, Function | Smal
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     int rotation = 1;
-    ssm_->UpdateScreenRotationProperty(1,bounds,1);
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1);
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(virtualOption,
+        displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ssm_->UpdateScreenRotationProperty(1, bounds, rotation);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, rotation);
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession();
-    ASSERT_NE(screenSession, ssm_->InitAndGetScreen(2));
+    ASSERT_NE(screenSession, ScreenSessionManager::GetInstance().InitAndGetScreen(2));
 }
 
 /**
@@ -849,12 +850,12 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTes
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientationFromWindow(1, Orientation::AUTO_ROTATION_RESTRICTED));
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_NE(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
+    ASSERT_NE(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(1, Orientation::AUTO_ROTATION_RESTRICTED));
 }
 
 /**
@@ -897,7 +898,9 @@ HWTEST_F(ScreenSessionManagerTest, DisableMirror, Function | SmallTest | Level3)
 HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Level3)
 {
     bool immersive = false;
-    ASSERT_EQ(DMError::DM_OK, ssm_->HasImmersiveWindow(immersive));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(immersive));
+    immersive = true;
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(immersive));
 }
 
 /**
@@ -905,14 +908,16 @@ HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Le
  * @tc.desc: ScreenSessionManager screen power
  * @tc.type: FUNC
  */
- HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest | Level3)
- {
+HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest | Level3)
+{
     ScreenId mainScreenId(DEFAULT_SCREEN_ID);
     ScreenPowerState state = ScreenPowerState::POWER_ON;
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
+    ASSERT_EQ(false, ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
 
-    ASSERT_EQ(true, ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
- }
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
+    EXPECT_TRUE(ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
+}
 
 }
 } // namespace Rosen
