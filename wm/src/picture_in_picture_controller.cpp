@@ -412,6 +412,9 @@ void PictureInPictureController::RestorePictureInPictureWindow()
     }
     WLOGFI("restore pipWindow %{public}u to [%{public}u, %{public}u, %{public}u, %{public}u]", window_->GetWindowId(),
         windowRect_.posX_, windowRect_.posY_, windowRect_.width_, windowRect_.height_);
+    if (pipLifeCycleListener_) {
+        pipLifeCycleListener_->OnRestoreUserInterface();
+    }
     window_->RecoveryPullPiPMainWindow(windowRect_);
     std::string navId = pipOption_->GetNavigationId();
     if (navId != "") {

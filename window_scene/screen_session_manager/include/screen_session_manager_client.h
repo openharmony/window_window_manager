@@ -64,6 +64,7 @@ public:
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
 
+    FoldStatus GetFoldStatus();
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

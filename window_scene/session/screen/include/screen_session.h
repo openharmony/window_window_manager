@@ -58,6 +58,7 @@ public:
     ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
         const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
     ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
+    ScreenSession(ScreenId screenId, const ScreenProperty& property, NodeId nodeId, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
     virtual ~ScreenSession() = default;
 
@@ -130,6 +131,8 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+
+    ScreenId nodeId_ {};
 
     int32_t activeIdx_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};

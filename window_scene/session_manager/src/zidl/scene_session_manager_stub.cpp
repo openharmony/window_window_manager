@@ -130,6 +130,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS),
         &SceneSessionManagerStub::HandleShiftAppWindowFocus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
+        &SceneSessionManagerStub::HandleGetVisibilityWindowInfo),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -777,6 +779,18 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
     int32_t targetPersistentId = data.ReadInt32();
     const WSError& ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    WMError errCode = GetVisibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
+        WLOGFE("Write visibility window infos failed");
+        return -1;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

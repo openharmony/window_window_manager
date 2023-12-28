@@ -12,27 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SETTING_HELPER_H
-#define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SETTING_HELPER_H
 
-#include <cstdint>
-#include <string>
+#ifndef OHOS_ROSEN_SETTING_OBSERVER_H
+#define OHOS_ROSEN_SETTING_OBSERVER_H
 
-#include "setting_observer.h"
+#include "data_ability_observer_stub.h"
 
 namespace OHOS {
 namespace Rosen {
-class ScreenSettingHelper {
+class SettingObserver : public AAFwk::DataAbilityObserverStub {
 public:
-    static void RegisterSettingDpiObserver(SettingObserver::UpdateFunc func);
-    static void UnregisterSettingDpiObserver();
-    static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
+    SettingObserver();
+    ~SettingObserver() override;
+    void OnChange() override;
 
+    void SetKey(const std::string& key);
+    const std::string& GetKey();
+
+    using UpdateFunc = std::function<void(const std::string&)>;
+    void SetUpdateFunc(UpdateFunc& func);
 private:
-    static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
-    static sptr<SettingObserver> dpiObserver_;
+    std::string key_ {};
+    UpdateFunc update_ = nullptr;
 };
-} // namespace Rosen
-} // namespace OHOS
+} // OHOS
+} // Rosen
 
-#endif // OHOS_ROSEN_WINDOW_SCENE_SCREEN_SETTING_HELPER_H
+#endif // OHOS_ROSEN_SETTING_OBSERVER_H

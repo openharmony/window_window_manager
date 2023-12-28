@@ -869,15 +869,6 @@ HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Leve
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
 }
 
-/**
- * @tc.name: DisableDisplaySnapshot
- * @tc.desc: DisableDisplaySnapshot test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, DisableDisplaySnapshot, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(DMError::DM_OK, ssm_->DisableDisplaySnapshot(false));
-}
 
 /**
  * @tc.name: DisableMirror
