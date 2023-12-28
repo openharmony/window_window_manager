@@ -2148,8 +2148,8 @@ void Session::SetOffset(float x, float y)
     WSRect newRect {
         .posX_ = std::round(bounds_.posX_ + x),
         .posY_ = std::round(bounds_.posY_ + y),
-        .width_ = std::round(winRect_.width_),
-        .height_ = std::round(winRect_.height_),
+        .width_ = std::round(bounds_.width_),
+        .height_ = std::round(bounds_.height_),
     };
     if (newRect != winRect_) {
         UpdateRect(newRect, SizeChangeReason::UNDEFINED);

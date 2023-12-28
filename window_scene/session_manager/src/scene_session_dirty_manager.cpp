@@ -36,13 +36,18 @@ constexpr int POINTER_CHANGE_AREA_SEXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 } //namespace
 
+static bool operator==(const MMI::Rect left, const MMI::Rect right)
+{
+    return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
+}
+
 void SceneSessionDirtyManager::PrintLogGetFullWindowInfoList(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     WLOGFD("[WMSEvent] GetFullWindowInfoList Start WindowInfoList_.size = %{public}d", int(windowInfoList.size()));
     for (const auto& e: windowInfoList) {
         auto sessionleft = SceneSessionManager::GetInstance().GetSceneSession(e.id);
         WLOGFD("[WMSEvent] GetFullWindowInfoList windowInfoList id = %{public}d area.x = %{public}d  area.y = %{public}d"
-            "area.w = %{public}d area.h = %{public}d  agentWindowId = %{public}d flags = %{pulic}d "
+            "area.w = %{public}d area.h = %{public}d  agentWindowId = %{public}d flags = %{public}d "
             "GetZOrder = %{public}d", e.id , e.area.x, e.area.y, e.area.width, e.area.height, e.agentWindowId,
             e.flags, int(sessionleft->GetZOrder()));
     }
@@ -56,7 +61,7 @@ void SceneSessionDirtyManager::PrintLogGetIncrementWindowInfoList(
             int(windowinfolist.first), int(windowinfolist.second.size()));
         for (const auto& e: windowinfolist.second) {
             WLOGFD("[WMSEvent] GetIncrementWindowInfoList  windowInfoList id = %{public}d action = %{public}d"
-                "area.x = %{public}d area.y = %{public}d area.w = %{publid}d area.h = %{public}d"
+                "area.x = %{public}d area.y = %{public}d area.w = %{public}d area.h = %{public}d"
                 " agentWindowId = %{public}d  flags = %{public}d", e.id, int(e.action), e.area.x,
                 e.area.y, e.area.width, e.area.height, e.agentWindowId, e.flags);
         }
@@ -95,8 +100,18 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         rect.y = area.posY_;
         rect.width = area.width_;
         rect.height = area.height_;
+        auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
+        [&rect](const MMI::Rect& var){return rect == var;});
+        if (iter != touchHotAreas.end()) {
+            continue;
+        }
         touchHotAreas.emplace_back(rect);
         pointerHotAreas.emplace_back(rect);
+        if (touchHotAreas.size() == static_cast<int>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
+            auto sessionid = sceneSession->GetWindowId();
+            WLOGFE("id = %{public}d hotAreas size > %{public}d",sessionid,static_cast<int>(hotAreas.size()));
+            break;
+        }
     }
 
     float vpr = 1.5f; // 1.5: default vp
@@ -172,12 +187,6 @@ MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> s
     return windowInfo;
 }
 
-void SceneSessionDirtyManager::Clear()
-{
-    screen2windowInfo_.clear();
-    isScreenSessionChange_ = false;
-}
-
 void SceneSessionDirtyManager::Init()
 {
     windowType2Action_ = {
@@ -223,7 +232,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::FullSceneSessionInfoUpdat
         WLOGFD("[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
             " windowId = %{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId());
-        if (IsWindowBackGround(sceneSessionValue)) {
+        if (IsFilterSession(sceneSessionValue)) {
             continue;
         }
         auto windowInfo = GetWindowInfo(sceneSessionValue, WindowAction::UNKNOWN);
@@ -243,7 +252,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::FullSceneSessionInfoUpdat
     return windowInfoList;
 }
 
-bool SceneSessionDirtyManager::IsWindowBackGround(const sptr<SceneSession>& sceneSession) const
+bool SceneSessionDirtyManager::IsFilterSession(const sptr<SceneSession>& sceneSession) const
 {
     if (sceneSession == nullptr) {
         return true;
@@ -283,7 +292,7 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
         windowinfo.pid = sceneSession->GetCallingPid();
         windowinfo.uid = sceneSession->GetCallingUid();
     } else {
-        if (action == WindowAction::WINDOW_CHANGE && IsWindowBackGround(sceneSession)) {
+        if (action == WindowAction::WINDOW_CHANGE && IsFilterSession(sceneSession)) {
             return;
         }
         windowinfo = GetWindowInfo(sceneSession, action);
@@ -298,15 +307,19 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
 {
     auto windowInfoList = FullSceneSessionInfoUpdate();
     PrintLogGetFullWindowInfoList(windowInfoList);
-    Clear();
+    if (screen2windowInfo_.size() > 0) {
+        std::lock_guard<std::mutex> lock(mutexlock_);
+        screen2windowInfo_.clear();
+    }
     return windowInfoList;
 }
 
 std::map<uint64_t, std::vector<MMI::WindowInfo>> SceneSessionDirtyManager::GetIncrementWindowInfoList()
 {
+    std::lock_guard<std::mutex> lock(mutexlock_);
     auto screen2windowInfo = screen2windowInfo_;
     PrintLogGetIncrementWindowInfoList(screen2windowInfo);
-    Clear();
+    screen2windowInfo_.clear();
     return screen2windowInfo;
 }
 
@@ -339,10 +352,22 @@ void SceneSessionDirtyManager::SetScreenChange(uint64_t id)
 
 void SceneSessionDirtyManager::PushWindowInfoList(uint64_t displayID, const MMI::WindowInfo& windowinfo)
 {
+    std::lock_guard<std::mutex> lock(mutexlock_);
     if (screen2windowInfo_.find(displayID) == screen2windowInfo_.end()) {
         screen2windowInfo_.emplace(displayID, std::vector<MMI::WindowInfo>());
     }
     auto& twindowinlist = screen2windowInfo_[displayID];
+    if (static_cast<WindowAction>(windowinfo.action) == WindowAction::WINDOW_CHANGE) {
+        auto iter = std::find_if(twindowinlist.rbegin(), twindowinlist.rend(),
+        [&windowinfo](const MMI::WindowInfo& var){return var.id == windowinfo.id;});
+        if (iter != twindowinlist.rend()) {
+            auto action = iter->action;
+            *iter = windowinfo;
+            iter->action = action;
+            return;
+        }
+    }
+
     twindowinlist.emplace_back(windowinfo);
 }
 
