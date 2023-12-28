@@ -510,13 +510,8 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     if (pixelMap) {
         nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     }
-    if (nativeData) {
-        WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
-        task.Resolve(env, nativeData);
-    } else {
-        WLOGE("[NAPI]create native pixelmap fail");
-        task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_CONTEXT_ABNORMALLY)));
-    }
+    nativeData ? WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight()) :
+        WLOGE("[NAPI]create native pixelmap failed");
     return nativeData;
 }
 } // namespace OHOS::Rosen
