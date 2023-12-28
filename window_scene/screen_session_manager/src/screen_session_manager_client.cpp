@@ -212,7 +212,7 @@ std::unordered_map<ScreenId, ScreenProperty> ScreenSessionManagerClient::GetAllS
     for (const auto& iter: screenSessionMap_) {
         auto session = iter.second;
         if (session == nullptr) {
-            continue;        
+            continue;
         }
         screensProperties[iter.first] = session->GetScreenProperty();
     }
@@ -302,5 +302,14 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
         return;
     }
     screenSessionManager_->UpdateAvailableArea(screenId, area);
+}
+
+void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
 } // namespace OHOS::Rosen

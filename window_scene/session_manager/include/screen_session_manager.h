@@ -217,6 +217,8 @@ public:
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area);
+    void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
