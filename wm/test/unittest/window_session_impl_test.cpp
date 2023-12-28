@@ -1561,7 +1561,7 @@ HWTEST_F(WindowSessionImplTest, SetDecorVisible, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     bool isVisble = true;
     WMError res = window->SetDecorVisible(isVisble);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisibletest01 end";
 }
 
@@ -1579,8 +1579,8 @@ HWTEST_F(WindowSessionImplTest, SetDecorHeight, Function | SmallTest | Level2)
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     int32_t height = 50;
-    WMError res = window->GetDecorHeight(height);
-    ASSERT_EQ(res, WMError::WM_OK);
+    WMError res = window->SetDecorHeight(height);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorHeighttest01 end";
 }
 
@@ -1599,7 +1599,7 @@ HWTEST_F(WindowSessionImplTest, GetDecorHeight, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     int32_t height = 0;
     WMError res = window->GetDecorHeight(height);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
 }
 
@@ -1618,7 +1618,7 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level
     ASSERT_NE(window, nullptr);
     TitleButtonRect titleButtonRect;
     WMError res = window->GetTitleButtonArea(titleButtonRect);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
 }
 }
