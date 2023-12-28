@@ -304,6 +304,15 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
     screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 
+void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()
 {
     if (!screenSessionManager_) {

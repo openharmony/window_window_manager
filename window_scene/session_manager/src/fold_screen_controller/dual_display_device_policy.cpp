@@ -276,7 +276,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
             PowerStateChangeReason::POWER_BUTTON);
         WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
-        ScreenSessionManager::GetInstance().SetDisplayNodeScreenId(screenSession->GetScreenId(), SCREEN_ID_MAIN);
     } else { // When the screen is off and folded, it is not powered on
         // off full screen
         screenId_ = SCREEN_ID_FULL;
@@ -292,7 +291,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         // on main screen
         WLOGFI("ChangeScreenDisplayMode screenIdFull no need to OFF and screenIdMain ON");
-        ScreenSessionManager::GetInstance().SetDisplayNodeScreenId(screenSession->GetScreenId(), SCREEN_ID_MAIN);
         screenId_ = SCREEN_ID_MAIN;
     }
 }
@@ -325,7 +323,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
             PowerStateChangeReason::POWER_BUTTON);
         WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
-        ScreenSessionManager::GetInstance().SetDisplayNodeScreenId(screenSession->GetScreenId(), SCREEN_ID_FULL);
     } else { //AOD scene
         // off main screen
         screenId_ = SCREEN_ID_MAIN;
@@ -342,7 +339,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         WLOGFI("ChangeScreenDisplayModeToMain WakeupDevice begin");
         PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
-        ScreenSessionManager::GetInstance().SetDisplayNodeScreenId(screenSession->GetScreenId(), SCREEN_ID_FULL);
     }
 }
 

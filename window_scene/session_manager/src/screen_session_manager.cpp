@@ -2910,6 +2910,7 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
 {
     WLOGFI("screenId: %{public}" PRIu64 " displayNodeScreenId: %{public}" PRIu64, screenId, displayNodeScreenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetDisplayNodeScreenId");
     if (!clientProxy_) {
         WLOGFD("clientProxy_ is null");
         return;
@@ -3212,6 +3213,12 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         return;
     }
     NotifyAvailableAreaChanged(area);
+}
+
+void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
+{
+    WLOGFI("ScreenSessionManager::NotifyFoldToExpandCompletion");
+    SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
 }
 
 } // namespace OHOS::Rosen
