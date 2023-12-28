@@ -3344,30 +3344,41 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
 
 napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
 {
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("set single frame composer enabled denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        WLOGFE("set single frame composer enabled permission denied!");
+        errCode = WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
     }
 
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) { // 1: the param num
-        WLOGFE("Invalid parameter, argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     bool enabled = false;
-    napi_value nativeVal = argv[0];
-    if (nativeVal == nullptr) {
-        WLOGFE("Invalid parameter, failed to convert parameter to enabled");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    } else {
-        napi_get_value_bool(env, nativeVal, &enabled);
+    if (errCode == WmErrorCode::WM_OK) {
+        size_t argc = 4;
+        napi_value argv[4] = {nullptr};
+        napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+        if (argc != 1) { // 1: the param num
+            WLOGFE("Invalid parameter, argc is invalid: %{public}zu", argc);
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+        if (errCode == WmErrorCode::WM_OK) {
+            napi_value nativeVal = argv[0];
+            if (nativeVal == nullptr) {
+                WLOGFE("Invalid parameter, failed to convert parameter to enabled");
+                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            } else {
+                napi_get_value_bool(env, nativeVal, &enabled);
+            }
+        }
     }
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, enabled](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, enabled, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WmErrorCode::WM_OK) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode),
+                    "permission denied or invalid parameter."));
+                return;
+            }
+
             auto weakWindow = weakToken.promote();
             WmErrorCode wmErrorCode;
             if (weakWindow == nullptr) {
@@ -3376,13 +3387,16 @@ napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "window is nullptr."));
                 return;
             }
+
             WMError ret = weakWindow->SetSingleFrameComposerEnabled(enabled);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                WLOGFE("Set single frame composer enabled failed, ret is %{public}d", wmErrorCode);
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
                             "Set single frame composer enabled failed"));
+                return;
             }
             WLOGI("Window [%{public}u, %{public}s] Set single frame composer enabled end, enabled flag = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), enabled);
