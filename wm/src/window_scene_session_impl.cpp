@@ -323,6 +323,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret != WMError::WM_OK) {
         return ret;
     }
+    SetDefaultDisplayIdIfNeed();
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();

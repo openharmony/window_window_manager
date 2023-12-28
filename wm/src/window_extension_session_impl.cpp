@@ -45,6 +45,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
             context == nullptr, iSession == nullptr);
         return WMError::WM_ERROR_NULLPTR;
     }
+    SetDefaultDisplayIdIfNeed();
     hostSession_ = iSession;
     context_ = context;
     WMError ret = Connect();
