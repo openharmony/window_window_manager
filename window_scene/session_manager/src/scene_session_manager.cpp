@@ -3931,6 +3931,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             WLOGFD("sub session is not active");
             continue;
         }
+        RequestSessionFocus(subSession->GetPersistentId(), true);
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
         HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn());
     }
