@@ -67,6 +67,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenLockEvent);
     BindNativeFunction(env, exportObj, "updateAvailableArea", moduleName,
         JsScreenSessionManager::UpdateAvailableArea);
+    BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
+        JsScreenSessionManager::NotifyFoldToExpandCompletion);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName,
         JsScreenSessionManager::GetFoldStatus);
     return NapiGetUndefined(env);
@@ -131,6 +133,13 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
     WLOGD("[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]NotifyFoldToExpandCompletion");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
@@ -444,6 +453,29 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnNotifyFoldToExpandCompletion");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool foldToExpand;
+    if (!ConvertFromJsValue(env, argv[0], foldToExpand)) {
+        WLOGFE("[NAPI]Failed to convert parameter to foldToExpand");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().NotifyFoldToExpandCompletion(foldToExpand);
     return NapiGetUndefined(env);
 }
 

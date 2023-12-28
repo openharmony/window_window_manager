@@ -138,6 +138,7 @@ public:
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
+    void NotifyFoldToExpandCompletion(bool foldToExpand) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

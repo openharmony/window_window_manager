@@ -48,6 +48,7 @@ private:
     static napi_value GetPhyScreenProperty(napi_env env, napi_callback_info info);
     static napi_value NotifyScreenLockEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateAvailableArea(napi_env env, napi_callback_info info);
+    static napi_value NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info);
     static napi_value GetFoldStatus(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
@@ -58,6 +59,7 @@ private:
     napi_value OnGetPhyScreenProperty(napi_env env, const napi_callback_info info);
     napi_value OnNotifyScreenLockEvent(napi_env env, const napi_callback_info info);
     napi_value OnUpdateAvailableArea(napi_env env, const napi_callback_info info);
+    napi_value OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info);
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
