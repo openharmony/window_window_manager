@@ -755,6 +755,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetScaleX() <= miniScale) {
@@ -767,6 +768,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         int32_t floatingBarHeight = 32; // 32: floating windowBar Height
         avoidArea.topRect_.height_ = vpr * floatingBarHeight;
+        avoidArea.topRect_.width_ = display->GetWidth();
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =

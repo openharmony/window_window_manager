@@ -69,6 +69,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UpdateAvailableArea);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
+    BindNativeFunction(env, exportObj, "getFoldStatus", moduleName,
+        JsScreenSessionManager::GetFoldStatus);
     return NapiGetUndefined(env);
 }
 
@@ -138,6 +140,11 @@ napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, na
     WLOGD("[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
+napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]GetFoldStatus");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetFoldStatus(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -468,5 +475,20 @@ napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, 
     }
     ScreenSessionManagerClient::GetInstance().NotifyFoldToExpandCompletion(foldToExpand);
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]OnGetFoldStatus");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    FoldStatus status = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
+    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    return CreateJsValue(env, status);
 }
 } // namespace OHOS::Rosen

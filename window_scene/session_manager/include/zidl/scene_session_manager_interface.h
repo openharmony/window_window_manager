@@ -95,6 +95,7 @@ public:
         TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
+        TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;

@@ -273,6 +273,7 @@ public:
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     void FlushWindowInfoToMMI();
 
 public:
