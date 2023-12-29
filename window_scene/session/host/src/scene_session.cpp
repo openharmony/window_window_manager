@@ -40,7 +40,6 @@
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include <running_lock.h>
-#include "parameters.h"
 #include "singleton_container.h"
 #include "pip_report.h"
 

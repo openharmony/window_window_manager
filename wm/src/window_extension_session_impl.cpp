@@ -17,6 +17,7 @@
 
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
+#include "parameters.h"
 #include "anr_handler.h"
 
 namespace OHOS {
@@ -366,5 +367,14 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
+WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+{
+    WLOGFI("Window Extension Session Get Avoid Area Type");
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    avoidArea = hostSession_->GetAvoidAreaByType(type);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
