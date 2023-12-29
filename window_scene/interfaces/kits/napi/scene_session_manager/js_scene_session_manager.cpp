@@ -268,8 +268,8 @@ void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
         return;
     }
     auto jsCallBack = iter->second;
-    auto task = [this, enable, jsCallBack, env = env_]() {
-        napi_value argv[] = {CreateJsValue(env, enable)};
+    auto task = [this, errorCode, jsCallBack, env = env_]() {
+        napi_value argv[] = {CreateJsValue(env, errorCode)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnStartUIAbilityError, errorCode: " + std::to_string(errorCode));
