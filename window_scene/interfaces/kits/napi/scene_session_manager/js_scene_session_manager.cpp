@@ -102,8 +102,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
-    BindNativeFunction(env, exportObj, "getStartUIAbilityError", moduleName,
-        JsSceneSessionManager::GetStartUIAbilityError);
     BindNativeFunction(env, exportObj, "getAllAbilityInfo", moduleName, JsSceneSessionManager::GetAllAbilityInfos);
     BindNativeFunction(env, exportObj, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
     BindNativeFunction(env, exportObj, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
@@ -503,13 +501,6 @@ napi_value JsSceneSessionManager::UpdateSceneSessionWant(napi_env env, napi_call
     WLOGI("[NAPI]UpdateSceneSessionWant");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSceneSessionWant(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::GetStartUIAbilityError(napi_env env, napi_callback_info info)
-{
-    WLOGI("[NAPI]GetStartUIAbilityError");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetStartUIAbilityError(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RequestSceneSessionActivation(napi_env env, napi_callback_info info)
@@ -1433,30 +1424,6 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
     std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(persistentId);
     napi_value result = nullptr;
     napi_create_string_utf8(env, path.c_str(), path.length(), &result);
-    return result;
-}
-
-napi_value JsSceneSessionManager::OnGetStartUIAbilityError(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 0) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is invalid"));
-        return NapiGetUndefined(env);
-    }
-    NapiAsyncTask::CompleteCallback complete =
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto ret = SceneSessionManager::GetInstance().GetStartAbilityError();
-            task.Resolve(env, CreateJsValue(env, ret));
-            WLOGFI("JsSceneSessionManager::OnGetStartUIAbilityError start ability error: %{public}d", ret);
-        };
-    napi_value result = nullptr;
-    napi_value lastParam = nullptr;
-    NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetStartUIAbilityError",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
