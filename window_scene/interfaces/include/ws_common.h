@@ -73,6 +73,8 @@ enum class WSError : int32_t {
     WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED,
+
+    WS_ERROR_EDM_CONTROLLED = 2097215, // enterprise limit
 };
 
 enum class WSErrorCode : int32_t {
@@ -89,6 +91,8 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_INVALID_CALLING = 1300004,
     WS_ERROR_STAGE_ABNORMALLY = 1300005,
     WS_ERROR_CONTEXT_ABNORMALLY = 1300006,
+
+    WS_ERROR_EDM_CONTROLLED = 16000013, // enterprise limit
 };
 
 const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
@@ -98,6 +102,7 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_ERROR_INVALID_PARAM, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
     { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED},
 };
 
 enum class SessionState : uint32_t {

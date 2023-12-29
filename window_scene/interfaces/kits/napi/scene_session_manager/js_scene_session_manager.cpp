@@ -53,6 +53,7 @@ const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
+const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string SHOW_PIP_MAIN_WINDOW_CB = "showPiPMainWindow";
@@ -137,6 +138,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
         { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
         { SHOW_PIP_MAIN_WINDOW_CB,      &JsSceneSessionManager::ProcessShowPiPMainWindow },
+        { START_UI_ABILITY_ERROR,       &JsSceneSessionManager::ProcessStartUIAbilityErrorRegister},
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
         { CALLING_WINDOW_ID_CHANGE_CB,  &JsSceneSessionManager::ProcessCallingWindowIdChangeRegister},
@@ -256,6 +258,21 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
     taskScheduler_->PostMainThreadTask(task, "OnGestureNavigationEnabledUpdate" + std::to_string(enable));
 }
 
+void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
+{
+    WLOGFI("[NAPI]OnStartUIAbilityError");
+    auto iter = jsCbMap_.find(START_UI_ABILITY_ERROR);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto task = [this, errorCode, jsCallBack, env = env_]() {
+        napi_value argv[] = {CreateJsValue(env, errorCode)};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnStartUIAbilityError, errorCode: " + std::to_string(errorCode));
+}
+
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
     WLOGFD("[NAPI]OnOutsideDownEvent");
@@ -336,6 +353,15 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()
+{
+    ProcessStartUIAbilityErrorFunc func = [this](uint32_t startUIAbilityError) {
+        WLOGFD("ProcessStartUIAbilityErrorFunc called, startUIAbilityError: %{public}d", startUIAbilityError);
+        this->OnStartUIAbilityError(startUIAbilityError);
+    };
+    SceneSessionManager::GetInstance().SetStartUIAbilityErrorListener(func);
 }
 
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
