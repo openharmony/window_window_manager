@@ -1496,13 +1496,13 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
+    sptr<SceneSession> sceneSession = nullptr;
     if (info.persistentId_ == 0) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (result == BrokerStates::BROKER_NOT_START) {
             WLOGE("[NAPI] The BrokerStates is not opened");
             return;
         }
-        sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
             WLOGFI("session need to be reusesd.");
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
@@ -1526,18 +1526,21 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
     } else {
-        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
+        sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             WLOGFE("GetSceneSession return nullptr");
             return;
         }
         sceneSession->SetSessionInfo(info);
     }
-
-    PendingSessionActivationInner(info);
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    auto task = [this, sessionInfo]() {
+        PendingSessionActivationInner(sessionInfo);
+    };
+    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
-void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
+void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
@@ -1548,7 +1551,6 @@ void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
         }
         jsCallBack = iter->second;
     }
-    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack, env_ref]() {
         if (!jsCallBack) {

@@ -1224,7 +1224,9 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             WLOGFI("collaborator use native session");
             scnSession = GetSceneSession(persistentId);
         }
-        return RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
+        auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
+        scnSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
+        return ret;
     };
     std::string taskName = "RequestSceneSessionActivation:PID:" +
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
@@ -1497,28 +1499,37 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             OHOS::AAFwk::Want want;
             scnSessionInfo->want = want;
         }
-        NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
-        WLOGFI("[WMSMain]begin CloseUIAbility: %{public}d isSystem:%{public}u",
-            persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
-        scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
-        if (needRemoveSession) {
-            if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-                NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
-            }
-            EraseSceneSessionMapById(persistentId);
-        } else {
-            // if terminate, set want to null. so start from recent, start a new one.
-            scnSession->SetSessionInfoWant(nullptr);
-        }
-        if (listenerController_ != nullptr) {
-            NotifySessionForCallback(scnSession, needRemoveSession);
-        }
-        return WSError::WS_OK;
+        return RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession);
     };
     std::string taskName = "RequestSceneSessionDestruction:PID:" +
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::RequestSceneSessionDestructionInner(
+    sptr<SceneSession> &scnSession, sptr<AAFwk::SessionInfo> scnSessionInfo, const bool needRemoveSession)
+{
+    auto persistentId = scnSession->GetPersistentId();
+    NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
+    WLOGFI("[WMSMain]begin CloseUIAbility: %{public}d isSystem:%{public}u",
+        persistentId,
+        static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
+    AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
+    scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
+    if (needRemoveSession) {
+        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
+            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
+        }
+        EraseSceneSessionMapById(persistentId);
+    } else {
+        // if terminate, set want to null. so start from recent, start a new one.
+        scnSession->SetSessionInfoWant(nullptr);
+    }
+    if (listenerController_ != nullptr) {
+        NotifySessionForCallback(scnSession, needRemoveSession);
+    }
+    scnSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
@@ -4555,18 +4566,22 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
 
 WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
 {
-    WLOGFI("run TerminateSessionNew");
     if (info == nullptr) {
         WLOGFI("sessionInfo is nullptr.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
-    if (sceneSession == nullptr) {
-        WLOGFI("fail to find session by token.");
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
-    return errCode;
+    WLOGFI("run TerminateSessionNew, bundleName=%{public}s, needStartCaller=%{public}d",
+        info->want.GetElement().GetBundleName().c_str(), needStartCaller);
+    auto task = [this, info, needStartCaller]() {
+        sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
+        if (sceneSession == nullptr) {
+            WLOGFE("fail to find session by token.");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
+        return errCode;
+    };
+    return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
 }
 
 WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
@@ -4694,6 +4709,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         WLOGFI("[WMSMain]RequestSceneSessionByCall callState:%{public}d, persistentId: %{public}d",
             sessionInfo.callState_, persistentId);
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo);
+        scnSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
         return WSError::WS_OK;
     };
     std::string taskName = "RequestSceneSessionByCall:PID:" +
