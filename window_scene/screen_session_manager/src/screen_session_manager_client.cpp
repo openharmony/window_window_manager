@@ -18,13 +18,11 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
-#include "permission.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClient" };
-const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
@@ -318,11 +316,6 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
     float scaleX, float scaleY)
 {
-    if (!Permission::IsSystemCalling() || !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) {
-        WLOGFE("get screen session is not system calling, permission denied!");
-        return nullptr;
-    }
-
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("get screen session is null");
