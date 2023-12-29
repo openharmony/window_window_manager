@@ -251,7 +251,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
     window_->NotifyPrepareClosePiPWindow();
     auto task = [weakThis = wptr(this), currentStopType = stopType, currentPipOption = pipOption_]() {
         auto session = weakThis.promote();
-        if (!session) {
+        if (!session || !session->window_) {
             WLOGFE("session is null");
             SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
                 currentPipOption->GetPipTemplate(), FAILED, "session is null");
