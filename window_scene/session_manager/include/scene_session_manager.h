@@ -446,7 +446,6 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
-    int32_t startUIAbilityError_ = ERR_OK;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
