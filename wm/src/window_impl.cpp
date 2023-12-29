@@ -3005,7 +3005,11 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetPosition(rect.posX_, rect.posY_);
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
-        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
+
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr) {
+            config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
+        }
     }
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
