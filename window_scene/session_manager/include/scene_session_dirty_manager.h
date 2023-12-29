@@ -55,9 +55,8 @@ public:
     std::map<uint64_t, std::vector<MMI::WindowInfo>> GetIncrementWindowInfoList();
 
 private:
-    void Clear();
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
-    bool IsWindowBackGround(const sptr<SceneSession>& sceneSession) const;
+    bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
     void PushWindowInfoList(uint64_t displayID, const MMI::WindowInfo& windowinfo);
     WindowAction GetSceneSessionAction(const WindowUpdateType& type);
