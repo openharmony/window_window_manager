@@ -53,6 +53,7 @@ const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
+const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string SHOW_PIP_MAIN_WINDOW_CB = "showPiPMainWindow";
@@ -101,6 +102,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
+    BindNativeFunction(env, exportObj, "getStartUIAbilityError", moduleName,
+        JsSceneSessionManager::GetStartUIAbilityError);
     BindNativeFunction(env, exportObj, "getAllAbilityInfo", moduleName, JsSceneSessionManager::GetAllAbilityInfos);
     BindNativeFunction(env, exportObj, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
     BindNativeFunction(env, exportObj, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
@@ -137,6 +140,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
         { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
         { SHOW_PIP_MAIN_WINDOW_CB,      &JsSceneSessionManager::ProcessShowPiPMainWindow },
+        { START_UI_ABILITY_ERROR,       &JsSceneSessionManager::ProcessStartUIAbilityErrorRegister},
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
         { CALLING_WINDOW_ID_CHANGE_CB,  &JsSceneSessionManager::ProcessCallingWindowIdChangeRegister},
@@ -256,6 +260,21 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
     taskScheduler_->PostMainThreadTask(task, "OnGestureNavigationEnabledUpdate" + std::to_string(enable));
 }
 
+void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
+{
+    WLOGFI("[NAPI]OnStartUIAbilityError");
+    auto iter = jsCbMap_.find(START_UI_ABILITY_ERROR);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto task = [this, enable, jsCallBack, env = env_]() {
+        napi_value argv[] = {CreateJsValue(env, enable)};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnStartUIAbilityError, errorCode: " + std::to_string(errorCode));
+}
+
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
     WLOGFD("[NAPI]OnOutsideDownEvent");
@@ -337,6 +356,16 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
 }
+
+void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()
+{
+    ProcessStartUIAbilityErrorFunc func = [this](uint32_t startUIAbilityError) {
+        WLOGFD("ProcessStartUIAbilityErrorFunc called, startUIAbilityError: %{public}d", startUIAbilityError);
+        this->OnStartUIAbilityError(startUIAbilityError);
+    };
+    SceneSessionManager::GetInstance().SetStartUIAbilityErrorListener(func);
+}
+
 
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 {
@@ -474,6 +503,13 @@ napi_value JsSceneSessionManager::UpdateSceneSessionWant(napi_env env, napi_call
     WLOGI("[NAPI]UpdateSceneSessionWant");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSceneSessionWant(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetStartUIAbilityError(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetStartUIAbilityError");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetStartUIAbilityError(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RequestSceneSessionActivation(napi_env env, napi_callback_info info)
@@ -1397,6 +1433,30 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
     std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(persistentId);
     napi_value result = nullptr;
     napi_create_string_utf8(env, path.c_str(), path.length(), &result);
+    return result;
+}
+
+napi_value JsSceneSessionManager::OnGetStartUIAbilityError(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid"));
+        return NapiGetUndefined(env);
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto ret = SceneSessionManager::GetInstance().GetStartAbilityError();
+            task.Resolve(env, CreateJsValue(env, ret));
+            WLOGFI("JsSceneSessionManager::OnGetStartUIAbilityError start ability error: %{public}d", ret);
+        };
+    napi_value result = nullptr;
+    napi_value lastParam = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetStartUIAbilityError",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 

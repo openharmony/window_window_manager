@@ -57,6 +57,7 @@ public:
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
+    static napi_value GetStartUIAbilityError(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
@@ -94,6 +95,7 @@ private:
     napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
+    napi_value OnGetStartUIAbilityError(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
@@ -115,6 +117,7 @@ private:
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void OnOutsideDownEvent(int32_t x, int32_t y);
+    void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnShowPiPMainWindow(int32_t persistentId);
     void OnCallingWindowIdChange(const uint32_t callingWindowId);
@@ -122,6 +125,7 @@ private:
     void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
+    void ProcessStartUIAbilityErrorRegister();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessShowPiPMainWindow();

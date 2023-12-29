@@ -1297,6 +1297,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     NotifyCollaboratorAfterStart(scnSession, scnSessionInfo);
     promise->set_value(static_cast<int32_t>(errCode));
+    if (static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
+        scnSession->NotifySessionException(scnSessionInfo)
+        if (startUIAbilityErrorFunc_) {
+            startUIAbilityErrorFunc_(
+                static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -3526,6 +3533,17 @@ void SceneSessionManager::SetCallingWindowIdChangeListenser(const ProcessCalling
 {
     WLOGFD("SetCallingWindowIdChangeListenser");
     callingWindowIdChangeFunc_ = func;
+}
+
+void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func)
+{
+    WLOGFD("SetStartUIAbilityErrorListener");
+    startUIAbilityErrorFunc_ = func;
+}
+
+int32_t SceneSessionManager::GetStartAbilityError()
+{
+    return startUIAbilityError_;
 }
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
