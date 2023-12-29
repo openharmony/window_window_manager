@@ -364,7 +364,6 @@ void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()
     SceneSessionManager::GetInstance().SetStartUIAbilityErrorListener(func);
 }
 
-
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 {
     NotifyRecoverSceneSessionFunc func = [this](const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {
