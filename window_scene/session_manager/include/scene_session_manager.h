@@ -78,6 +78,7 @@ using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessShowPiPMainWindowFunc = std::function<void(int32_t persistentId)>;
+using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbilityError)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingWindowIdChangeFunc = std::function<void(uint32_t callingWindowId)>;
 
@@ -135,6 +136,7 @@ public:
     WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     void SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
+    void SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func);
     void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
@@ -272,6 +274,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
+    int32_t GetStartAbilityError();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     void FlushWindowInfoToMMI();
@@ -437,12 +440,14 @@ private:
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
     ProcessShowPiPMainWindowFunc showPiPMainWindowFunc_;
     ProcessCallingWindowIdChangeFunc callingWindowIdChangeFunc_;
+    ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
+    int32_t startUIAbilityError_ = ERR_OK;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
