@@ -274,7 +274,6 @@ public:
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
-    int32_t GetStartAbilityError();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     void FlushWindowInfoToMMI();

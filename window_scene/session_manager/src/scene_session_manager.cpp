@@ -3541,11 +3541,6 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
     startUIAbilityErrorFunc_ = func;
 }
 
-int32_t SceneSessionManager::GetStartAbilityError()
-{
-    return startUIAbilityError_;
-}
-
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
 {
     // unfocus
