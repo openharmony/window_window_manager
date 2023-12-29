@@ -386,6 +386,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
+    WLOGFI("GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
@@ -399,6 +400,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             continue;
         }
         if (displayId == displayInfo->GetDisplayId()) {
+            WLOGFI("GetDisplayInfoById success");
             return displayInfo;
         }
     }
@@ -430,6 +432,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId
 
 std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
+    WLOGFI("GetAllDisplayIds enter");
     std::vector<DisplayId> res;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
