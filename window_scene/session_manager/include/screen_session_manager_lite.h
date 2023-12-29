@@ -39,6 +39,13 @@ public:
         DisplayManagerAgentType type) override;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
+
+    FoldDisplayMode GetFoldDisplayMode() override;
+    bool IsFoldable() override;
+    FoldStatus GetFoldStatus() override;
+    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 protected:
     ScreenSessionManagerLite() = default;
     virtual ~ScreenSessionManagerLite();

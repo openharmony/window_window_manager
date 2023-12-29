@@ -32,12 +32,48 @@ public:
     DisplayLite(DisplayLite&&) = delete;
     DisplayLite& operator=(const DisplayLite&) = delete;
     DisplayLite& operator=(DisplayLite&&) = delete;
+
+    /**
+     * @brief Get id of the display.
+     *
+     * @return Display id.
+     */
+    DisplayId GetId() const;
+
+    /**
+     * @brief Get info of the display.
+     *
+     * @return Info of the display.
+     */
+    sptr<DisplayInfo> GetDisplayInfo() const;
+
+    /**
+     * @brief Get width of the display.
+     *
+     * @return Width of the display.
+     */
+    int32_t GetWidth() const;
+
+    /**
+     * @brief Get height of the display.
+     *
+     * @return Height of the display.
+     */
+    int32_t GetHeight() const;
+
+    /**
+     * @brief Get cutout info of the display.
+     *
+     * @return Cutout info of the display.
+     */
+    sptr<CutoutInfo> GetCutoutInfo() const;
 protected:
     // No more methods or variables can be defined here.
     DisplayLite(const std::string& name, sptr<DisplayInfo> info);
 private:
     // No more methods or variables can be defined here.
     void UpdateDisplayInfo(sptr<DisplayInfo>) const;
+    void UpdateDisplayInfo() const;
     class Impl;
     sptr<Impl> pImpl_;
 };
