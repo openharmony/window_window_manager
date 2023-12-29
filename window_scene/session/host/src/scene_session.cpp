@@ -1850,7 +1850,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "TerminateSession");
+    PostLifeCycleTask(task, "TerminateSession", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
@@ -1896,7 +1896,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "NotifySessionException");
+    PostLifeCycleTask(task, "NotifySessionException", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
