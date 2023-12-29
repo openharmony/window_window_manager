@@ -114,7 +114,7 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
 
     void PendingSessionActivation(SessionInfo& info);
-    void PendingSessionActivationInner(SessionInfo& info);
+    void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
     void OnBufferAvailableChange(const bool isAvailable);
     void OnSessionEvent(uint32_t eventId);
