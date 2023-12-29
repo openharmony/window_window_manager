@@ -207,14 +207,13 @@ bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& t
     return false;
 }
 
-void JsRootSceneSession::PendingSessionActivationInner(SessionInfo& info)
+void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
     }
     auto jsCallBack = iter->second;
-    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack, env_ref]() {
         if (!jsCallBack) {
@@ -265,8 +264,11 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             }
         }
     }
-
-    PendingSessionActivationInner(info);
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    auto task = [this, sessionInfo]() {
+        PendingSessionActivationInner(sessionInfo);
+    };
+    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)

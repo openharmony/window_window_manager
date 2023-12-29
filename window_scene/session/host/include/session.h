@@ -88,8 +88,14 @@ public:
         int32_t uiExtensionIdLevel) = 0;
 };
 
+enum class LifeCycleTaskType : uint32_t {
+    START,
+    STOP
+};
+
 class Session : public SessionStub {
 public:
+    using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
 
@@ -310,6 +316,8 @@ public:
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
+    void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
+    void PostLifeCycleTask(Task &&task, const std::string &name, const LifeCycleTaskType &taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
@@ -354,6 +362,17 @@ public:
     bool IsSystemInput();
 
 protected:
+    class SessionLifeCycleTask : public virtual RefBase {
+    public:
+        SessionLifeCycleTask(const Task &task, const std::string &name, const LifeCycleTaskType &type)
+            : task(task), name(name), type(type) {}
+        Task task;
+        const std::string name;
+        LifeCycleTaskType type;
+        std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+        bool running = false;
+    };
+    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
@@ -369,7 +388,6 @@ protected:
     bool NeedSystemPermission(WindowType type);
     void HandlePointDownDialog(int32_t pointAction);
 
-    using Task = std::function<void()>;
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "sessionTask")
@@ -391,6 +409,8 @@ protected:
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
+    std::mutex lifeCycleTaskQueueMutex_;
+    std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
