@@ -321,4 +321,15 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
     }
     return screenSessionManager_->GetFoldStatus();
 }
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
+    float scaleX, float scaleY)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("get screen session is null");
+        return nullptr;
+    }
+    return screenSession->GetScreenSnapshot(scaleX, scaleY);
+}
 } // namespace OHOS::Rosen
