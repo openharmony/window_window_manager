@@ -22,7 +22,7 @@
 #include "display_manager_lite.h"
 #include "dm_common.h"
 #include "window_manager_hilog.h"
-#include "session_manager_lite.h"
+#include "zidl/mock_session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -59,7 +59,29 @@ bool BaseAdapterLite::InitDMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!isProxyValid_) {
-        displayManagerServiceProxy_ = SessionManagerLite::GetInstance().GetScreenSessionManagerLiteProxy();
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (!systemAbilityManager) {
+            WLOGFE("Failed to get system ability mgr.");
+            return false;
+        }
+        sptr<IRemoteObject> mockRemoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
+        if (!mockRemoteObject) {
+            WLOGFI("Remote object is nullptr");
+            return false;
+        }
+        auto mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(mockRemoteObject);
+        if (!mockSessionManagerServiceProxy_) {
+            WLOGFW("Get mock session manager service proxy failed, nullptr");
+            return false;
+        }
+
+        sptr<IRemoteObject> displayRemoteObject = mockSessionManagerServiceProxy_->GetScreenSessionManagerLite();
+        if (!displayRemoteObject) {
+            WLOGFE("displayRemoteObject is nullptr");
+            return false;
+        }
+        displayManagerServiceProxy_ = iface_cast<IScreenSessionManagerLite>(displayRemoteObject);
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
             WLOGFE("Failed to get system scene session manager services");
             return false;
@@ -78,6 +100,56 @@ bool BaseAdapterLite::InitDMSProxy()
     }
     return true;
 }
+
+sptr<DisplayInfo> DisplayManagerAdapterLite::GetDefaultDisplayInfo()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+}
+
+bool DisplayManagerAdapterLite::IsFoldable()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->IsFoldable();
+}
+
+FoldStatus DisplayManagerAdapterLite::GetFoldStatus()
+{
+    INIT_PROXY_CHECK_RETURN(FoldStatus::UNKNOWN);
+
+    return displayManagerServiceProxy_->GetFoldStatus();
+}
+
+FoldDisplayMode DisplayManagerAdapterLite::GetFoldDisplayMode()
+{
+    INIT_PROXY_CHECK_RETURN(FoldDisplayMode::UNKNOWN);
+
+    return displayManagerServiceProxy_->GetFoldDisplayMode();
+}
+
+sptr<DisplayInfo> DisplayManagerAdapterLite::GetDisplayInfo(DisplayId displayId)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFW("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+}
+
+sptr<CutoutInfo> DisplayManagerAdapterLite::GetCutoutInfo(DisplayId displayId)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetCutoutInfo(displayId);
+}
+
 
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)
 {
@@ -98,7 +170,6 @@ void DMSDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
     SingletonContainer::Get<DisplayManagerLite>().OnRemoteDied();
-    SingletonContainer::Get<SessionManagerLite>().ClearSessionManagerProxy();
     return;
 }
 

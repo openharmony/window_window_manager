@@ -63,12 +63,20 @@ public:
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
+        TRANS_ID_GET_CUTOUT_INFO,
     };
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) { return DMError::DM_OK; }
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) { return DMError::DM_OK; }
+
+    virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+    virtual bool IsFoldable() { return false; };
+    virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; };
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
 };
 } // namespace Rosen
 } // namespace OHOS
