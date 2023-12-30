@@ -1148,6 +1148,17 @@ void WindowImpl::ChangePropertyByApiVersion()
     }
 }
 
+void WindowImpl::SetDefaultDisplayIdIfNeed()
+{
+    auto displayId = property_->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALID) {
+        auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
+            SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
+        property_->SetDisplayId(defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+    }
+}
+
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFD("Window[%{public}s] Create", name_.c_str());
@@ -1155,7 +1166,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
-
+    SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));
@@ -3005,7 +3016,11 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetPosition(rect.posX_, rect.posY_);
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
-        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
+
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr) {
+            config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
+        }
     }
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",

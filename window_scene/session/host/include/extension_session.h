@@ -26,6 +26,7 @@ using NotifyTransferExtensionDataFunc = std::function<void(const AAFwk::WantPara
 using NotifyRemoteReadyFunc = std::function<void()>;
 using NotifySyncOnFunc = std::function<void()>;
 using NotifyAsyncOnFunc = std::function<void()>;
+using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
 class ExtensionSession : public Session {
 public:
     struct ExtensionSessionEventCallback : public RefBase {
@@ -34,6 +35,7 @@ public:
         NotifyRemoteReadyFunc notifyRemoteReadyFunc_;
         NotifySyncOnFunc notifySyncOnFunc_;
         NotifyAsyncOnFunc notifyAsyncOnFunc_;
+        NotifyGetAvoidAreaByTypeFunc notifyGetAvoidAreaByTypeFunc_;
     };
 
     explicit ExtensionSession(const SessionInfo& info);
@@ -43,6 +45,9 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid) override;
 
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);

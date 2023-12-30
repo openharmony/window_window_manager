@@ -116,6 +116,7 @@ public:
         TRANS_ID_SET_SCREEN_PRIVACY_STATE,
         TRANS_ID_RESIZE_VIRTUAL_SCREEN,
         TRANS_ID_GET_AVAILABLE_AREA,
+        TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -131,7 +132,6 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
-    virtual DMError DisableDisplaySnapshot(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 

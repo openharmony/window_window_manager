@@ -115,6 +115,7 @@ private:
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void OnOutsideDownEvent(int32_t x, int32_t y);
+    void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnShowPiPMainWindow(int32_t persistentId);
     void OnCallingWindowIdChange(const uint32_t callingWindowId);
@@ -122,6 +123,7 @@ private:
     void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
+    void ProcessStartUIAbilityErrorRegister();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessShowPiPMainWindow();

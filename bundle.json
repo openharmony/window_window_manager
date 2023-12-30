@@ -85,6 +85,7 @@
           "base_group": [
             "//foundation/window/window_manager/snapshot:snapshot_display",
             "//foundation/window/window_manager/setresolution:setresolution_screen",
+            "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
             "//foundation/window/window_manager/resources:window_resources",
@@ -305,6 +306,16 @@
             "header": {
               "header_files": [],
               "header_base": "//foundation/window/window_manager/previewer/include"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow_napi",
+            "header": {
+              "header_files": [
+                "js_extension_window.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/napi/extension_window"
             }
           },
           {

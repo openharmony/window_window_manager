@@ -383,7 +383,7 @@ private:
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
     bool touchable_ { true };
-    DisplayId displayId_ { 0 };
+    DisplayId displayId_ { DISPLAY_ID_INVALID };
     uint32_t parentId_ = INVALID_WINDOW_ID;
     std::string windowName_ { "" };
     std::string bundleName_ { "" };

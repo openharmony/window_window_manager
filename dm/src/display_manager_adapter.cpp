@@ -62,13 +62,6 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode);
 }
 
-DMError DisplayManagerAdapter::DisableDisplaySnapshot(bool disableOrNot)
-{
-    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-
-    return displayManagerServiceProxy_->DisableDisplaySnapshot(disableOrNot);
-}
-
 DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
@@ -461,6 +454,7 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 
 std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
 {
+    WLOGFI("DisplayManagerAdapter::GetAllDisplayIds enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     return displayManagerServiceProxy_->GetAllDisplayIds();
@@ -482,6 +476,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
+    WLOGFI("DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFW("screen id is invalid");
         return nullptr;

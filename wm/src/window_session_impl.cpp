@@ -292,6 +292,17 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
     return WMError::WM_OK;
 }
 
+void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
+{
+    auto displayId = property_->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALID) {
+        auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
+            SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
+        property_->SetDisplayId(defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+    }
+}
+
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
@@ -967,12 +978,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
         return;
     }
     property_->SetRequestedOrientation(orientation);
-    if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
-    } else {
-        WLOGFW("[WMSMain]id:%{public}u set orientation %{public}u failed since state_:%{public}u",
-            GetPersistentId(), orientation, state_);
-    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
 
 Orientation WindowSessionImpl::GetRequestedOrientation()
@@ -1107,7 +1113,14 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->SetContainerModalTitleHeight(decorHeight);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    int32_t decorHeightWithPx = static_cast<int32_t>(decorHeight * vpr);
+    uiContent_->SetContainerModalTitleHeight(decorHeightWithPx);
     WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
     return WMError::WM_OK;
 }
@@ -1123,6 +1136,17 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         WLOGFE("Get app window decor height failed");
         return WMError::WM_DO_NOTHING;
     }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    height = static_cast<int32_t>(height / vpr);
     WLOGI("Get app window decor height success, height : %{public}d", height);
     return WMError::WM_OK;
 }
@@ -1141,10 +1165,21 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         titleButtonRect.IsUninitializedRect();
         return WMError::WM_DO_NOTHING;
     }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
-    titleButtonRect.posY_ = titleButtonLeftRect.posY_;
-    titleButtonRect.width_ = titleButtonLeftRect.width_;
-    titleButtonRect.height_ = titleButtonLeftRect.height_;
+    titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
+    titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
+    titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
+    titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
     return WMError::WM_OK;
 }
 
@@ -1167,13 +1202,24 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             return ret;
         }
     }
-        uiContent_->SubscribeContainerModalButtonsRectChange([this](Rect& decorRect, Rect& titleButtonLeftRect) {
-            TitleButtonRect titleButtonRect;
-            titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
-            titleButtonRect.posY_ = titleButtonLeftRect.posY_;
-            titleButtonRect.width_ = titleButtonLeftRect.width_;
-            titleButtonRect.height_ = titleButtonLeftRect.height_;
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uiContent_->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+        TitleButtonRect titleButtonRect;
+        titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+        titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
+        titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
+        titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
+        titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
+        NotifyWindowTitleButtonRectChange(titleButtonRect);
     });
     return ret;
 }

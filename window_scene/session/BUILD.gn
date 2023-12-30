@@ -147,6 +147,7 @@ ohos_shared_library("screen_session") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "init:libbegetutil",
   ]
 
