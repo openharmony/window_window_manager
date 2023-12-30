@@ -61,6 +61,9 @@ public:
         int32_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
+    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
     void NotifyBackpressedEvent(bool& isConsumed) override;

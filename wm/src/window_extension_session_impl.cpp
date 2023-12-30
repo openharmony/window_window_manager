@@ -377,5 +377,16 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     avoidArea = hostSession_->GetAvoidAreaByType(type);
     return WMError::WM_OK;
 }
+
+WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    return RegisterExtensionAvoidAreaChangeListener(listener);
+}
+
+WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    return UnregisterExtensionAvoidAreaChangeListener(listener);
+}
+
 } // namespace Rosen
 } // namespace OHOS

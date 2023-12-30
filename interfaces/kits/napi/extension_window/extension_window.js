@@ -16,6 +16,7 @@
 class ExtensionWindow {
   constructor(obj) {
     this.__extension_window__ = obj;
+    this.properties = obj.properties;
   }
 
   getWindowAvoidArea(type) {
