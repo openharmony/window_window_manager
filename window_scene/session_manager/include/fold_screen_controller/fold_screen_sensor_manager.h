@@ -32,7 +32,9 @@ class FoldScreenSensorManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(FoldScreenSensorManager);
 
 public:
-    void UnRegisterSensorCallback();
+    void UnRegisterPostureCallback();
+
+    void UnRegisterHallCallback();
 
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
 
@@ -44,9 +46,13 @@ private:
 
     FoldStatus mState_ = FoldStatus::UNKNOWN;
 
-    SensorUser user;
+    SensorUser postureuser;
 
-    void RegisterSensorCallback();
+    SensorUser halluser;
+
+    void RegisterPostureCallback();
+
+    void RegisterHallCallback();
 
     void HandleSensorData(float, int);
 
