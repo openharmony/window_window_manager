@@ -40,7 +40,6 @@
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include <running_lock.h>
-#include "parameters.h"
 #include "singleton_container.h"
 #include "pip_report.h"
 
@@ -755,6 +754,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetScaleX() <= miniScale) {
@@ -767,6 +767,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         int32_t floatingBarHeight = 32; // 32: floating windowBar Height
         avoidArea.topRect_.height_ = vpr * floatingBarHeight;
+        avoidArea.topRect_.width_ = display->GetWidth();
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
@@ -1848,7 +1849,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "TerminateSession");
+    PostLifeCycleTask(task, "TerminateSession", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
@@ -1894,7 +1895,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "NotifySessionException");
+    PostLifeCycleTask(task, "NotifySessionException", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 

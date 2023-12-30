@@ -212,7 +212,7 @@ std::unordered_map<ScreenId, ScreenProperty> ScreenSessionManagerClient::GetAllS
     for (const auto& iter: screenSessionMap_) {
         auto session = iter.second;
         if (session == nullptr) {
-            continue;        
+            continue;
         }
         screensProperties[iter.first] = session->GetScreenProperty();
     }
@@ -302,5 +302,34 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
         return;
     }
     screenSessionManager_->UpdateAvailableArea(screenId, area);
+}
+
+void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+FoldStatus ScreenSessionManagerClient::GetFoldStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return FoldStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetFoldStatus();
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
+    float scaleX, float scaleY)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("get screen session is null");
+        return nullptr;
+    }
+    return screenSession->GetScreenSnapshot(scaleX, scaleY);
 }
 } // namespace OHOS::Rosen

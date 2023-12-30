@@ -293,11 +293,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
-            DMError ret = DisableDisplaySnapshot(data.ReadBool());
-            reply.WriteInt32(static_cast<int32_t>(ret));
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
@@ -633,6 +628,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(area.posY_);
             reply.WriteUint32(area.width_);
             reply.WriteUint32(area.height_);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
+            bool foldToExpand = data.ReadBool();
+            NotifyFoldToExpandCompletion(foldToExpand);
             break;
         }
         default:

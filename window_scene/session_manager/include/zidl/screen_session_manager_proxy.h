@@ -90,7 +90,6 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
-    DMError DisableDisplaySnapshot(bool disableOrNot) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
@@ -139,6 +138,7 @@ public:
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
+    void NotifyFoldToExpandCompletion(bool foldToExpand) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

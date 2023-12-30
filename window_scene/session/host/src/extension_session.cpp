@@ -132,4 +132,21 @@ WSError ExtensionSession::TransferAccessibilityEvent(const Accessibility::Access
     NotifyTransferAccessibilityEvent(info, uiExtensionIdLevel);
     return WSError::WS_OK;
 }
+
+WSError ExtensionSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateAvoidArea(avoidArea, type);
+}
+
+AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
+{
+    Rosen::AvoidArea avoidArea;
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ != nullptr) {
+        avoidArea = extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_(type);
+    }
+    return avoidArea;
+}
 } // namespace OHOS::Rosen

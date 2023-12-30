@@ -30,7 +30,6 @@
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
-#include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -323,6 +322,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret != WMError::WM_OK) {
         return ret;
     }
+    SetDefaultDisplayIdIfNeed();
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();
@@ -956,7 +956,10 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
@@ -1060,6 +1063,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     WLOGFI("[WMSLayout] Id:%{public}d Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
@@ -1310,12 +1317,6 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if ((state_ == WindowState::STATE_CREATED &&
-         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
-         state_ == WindowState::STATE_HIDDEN) {
-        WLOGFI("[WMSImms]NotifyWindowSessionProperty window state is created or hidden");
-        return WMError::WM_OK;
-    }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
 }
@@ -1388,7 +1389,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
@@ -1524,7 +1525,7 @@ WMError WindowSceneSessionImpl::Recover()
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-        //need notify arkui maximize mode change
+        // need notify arkui maximize mode change
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }

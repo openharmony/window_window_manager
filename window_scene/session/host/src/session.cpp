@@ -42,6 +42,8 @@ std::set<int32_t> g_persistentIdSet;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
+constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
+constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI = 200;
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -405,6 +407,17 @@ WSError Session::SetVisible(bool isVisible)
 bool Session::GetVisible() const
 {
     return isRSVisible_;
+}
+
+WSError Session::SetVisibilityState(WindowVisibilityState state)
+{
+    visibilityState_ = state;
+    return WSError::WS_OK;
+}
+
+WindowVisibilityState Session::GetVisibilityState() const
+{
+    return visibilityState_;
 }
 
 WSError Session::SetDrawingContentState(bool isRSDrawing)
@@ -949,31 +962,91 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
     terminateSessionFunc_ = func;
 }
 
+void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
+{
+    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    if (lifeCycleTaskQueue_.empty()) {
+        return;
+    }
+    sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+    if (currLifeCycleTask->type != taskType) {
+        WLOGFW("[WMSLife] current removed task type does not match. Current running taskName=%{public}s, "
+               "PersistentId=%{public}d",
+            currLifeCycleTask->name.c_str(), persistentId_);
+        return;
+    }
+    WLOGFI("[WMSLife] Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
+        currLifeCycleTask->name.c_str(), persistentId_);
+    lifeCycleTaskQueue_.pop_front();
+    if (lifeCycleTaskQueue_.empty()) {
+        return;
+    }
+    StartLifeCycleTask(lifeCycleTaskQueue_.front());
+}
+
+void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
+{
+    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
+        WLOGFE("[WMSLife] Failed to add task %{public}s to life cycle queue", name.c_str());
+        return;
+    }
+    sptr<SessionLifeCycleTask> lifeCycleTask = new SessionLifeCycleTask(std::move(task), name, taskType);
+    lifeCycleTaskQueue_.push_back(lifeCycleTask);
+    WLOGFI("[WMSLife] Add task %{public}s to life cycle queue, PersistentId=%{public}d", name.c_str(), persistentId_);
+    if (lifeCycleTaskQueue_.size() == 1) {
+        StartLifeCycleTask(lifeCycleTask);
+        return;
+    }
+
+    // remove current running task if expired
+    sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+    bool isCurrentTaskExpired =
+        std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
+        LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI;
+    if (isCurrentTaskExpired) {
+        WLOGFE(
+            "[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d", name.c_str(), persistentId_);
+        lifeCycleTaskQueue_.pop_front();
+        StartLifeCycleTask(lifeCycleTaskQueue_.front());
+    }
+}
+
+void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
+{
+    WLOGFI("[WMSLife] Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
+        lifeCycleTask->name.c_str(), persistentId_);
+    lifeCycleTask->running = true;
+    lifeCycleTask->startTime = std::chrono::steady_clock::now();
+    PostTask(std::move(lifeCycleTask->task), lifeCycleTask->name);
+}
+
 WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
 {
     if (abilitySessionInfo == nullptr) {
         WLOGFE("[WMSLife] abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isTerminating) {
-        WLOGFE("[WMSLife] TerminateSessionNew isTerminating, return!");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
-    isTerminating = true;
-    SessionInfo info;
-    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
-    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
-    info.callerToken_ = abilitySessionInfo->callerToken;
-    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    {
-        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-        sessionInfo_.resultCode = abilitySessionInfo->resultCode;
-    }
-    if (terminateSessionFuncNew_) {
-        terminateSessionFuncNew_(info, needStartCaller);
-    }
-    WLOGFE("[WMSLife] TerminateSessionNew, id: %{public}d", GetPersistentId());
+    auto task = [this, abilitySessionInfo, needStartCaller]() {
+        isTerminating = true;
+        SessionInfo info;
+        info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+        info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+        info.callerToken_ = abilitySessionInfo->callerToken;
+        info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
+        {
+            std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+            sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+        }
+        if (terminateSessionFuncNew_) {
+            terminateSessionFuncNew_(info, needStartCaller);
+        }
+        WLOGFI("[WMSLife] TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
+            GetPersistentId(), needStartCaller);
+    };
+    PostLifeCycleTask(task, "TerminateSessionNew", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
@@ -1051,15 +1124,14 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
 WSError Session::Clear()
 {
     WLOGFI("Clear, id: %{public}d", GetPersistentId());
-    if (isTerminating) {
-        WLOGFE("Clear isTerminating, return!");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
-    isTerminating = true;
-    SessionInfo info = GetSessionInfo();
-    if (terminateSessionFuncNew_) {
-        terminateSessionFuncNew_(info, false);
-    }
+    auto task = [this]() {
+        isTerminating = true;
+        SessionInfo info = GetSessionInfo();
+        if (terminateSessionFuncNew_) {
+            terminateSessionFuncNew_(info, false);
+        }
+    };
+    PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
@@ -2137,8 +2209,8 @@ void Session::SetOffset(float x, float y)
     WSRect newRect {
         .posX_ = std::round(bounds_.posX_ + x),
         .posY_ = std::round(bounds_.posY_ + y),
-        .width_ = std::round(winRect_.width_),
-        .height_ = std::round(winRect_.height_),
+        .width_ = std::round(bounds_.width_),
+        .height_ = std::round(bounds_.height_),
     };
     if (newRect != winRect_) {
         UpdateRect(newRect, SizeChangeReason::UNDEFINED);

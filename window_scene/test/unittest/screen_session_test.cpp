@@ -694,6 +694,25 @@ HWTEST_F(ScreenSessionTest, SetName, Function | SmallTest | Level2)
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetName end";
 }
+
+/**
+ * @tc.name: GetScreenSnapshot
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenSnapshot, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    auto pixelmap = session->GetScreenSnapshot(1.0, 1.0);
+    EXPECT_EQ(pixelmap, nullptr);
+
+    ScreenProperty newScreenProperty;
+    session = new(std::nothrow) ScreenSession(0, newScreenProperty, 0);
+    pixelmap = session->GetScreenSnapshot(1.0, 1.0);
+    EXPECT_EQ(pixelmap, nullptr);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -251,7 +251,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
     window_->NotifyPrepareClosePiPWindow();
     auto task = [weakThis = wptr(this), currentStopType = stopType, currentPipOption = pipOption_]() {
         auto session = weakThis.promote();
-        if (!session) {
+        if (!session || !session->window_) {
             WLOGFE("session is null");
             SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
                 currentPipOption->GetPipTemplate(), FAILED, "session is null");
@@ -412,6 +412,9 @@ void PictureInPictureController::RestorePictureInPictureWindow()
     }
     WLOGFI("restore pipWindow %{public}u to [%{public}u, %{public}u, %{public}u, %{public}u]", window_->GetWindowId(),
         windowRect_.posX_, windowRect_.posY_, windowRect_.width_, windowRect_.height_);
+    if (pipLifeCycleListener_) {
+        pipLifeCycleListener_->OnRestoreUserInterface();
+    }
     window_->RecoveryPullPiPMainWindow(windowRect_);
     std::string navId = pipOption_->GetNavigationId();
     if (navId != "") {
