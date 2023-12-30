@@ -186,7 +186,7 @@ public:
     bool IsDirtyWindow();
     void NotifyUILostFocus() override;
 
-    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void NotifyTouchOutside();

@@ -30,7 +30,6 @@
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
-#include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
