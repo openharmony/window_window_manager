@@ -1,0 +1,394 @@
+diff --git a/dm/include/display_manager_adapter.h b/dm/include/display_manager_adapter.h
+index 6e023c95e..8d11dcd6a 100644
+--- a/dm/include/display_manager_adapter.h
++++ b/dm/include/display_manager_adapter.h
+@@ -61,6 +61,7 @@ public:
+     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
+     virtual std::vector<DisplayId> GetAllDisplayIds();
+     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
++    virtual DMError DisableDisplaySnapshot(bool disableOrNot);
+     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
+     virtual bool WakeUpBegin(PowerStateChangeReason reason);
+     virtual bool WakeUpEnd();
+@@ -105,6 +106,7 @@ public:
+     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
+     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
+     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
++    virtual DMError DisableMirror(bool disableOrNot);
+     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
+     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
+     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
+diff --git a/dm/src/display_manager.cpp b/dm/src/display_manager.cpp
+index 7f8a852df..c37c462e0 100644
+--- a/dm/src/display_manager.cpp
++++ b/dm/src/display_manager.cpp
+@@ -521,6 +521,11 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
+     return dstScreenshot;
+ }
+ 
++DMError DisplayManager::DisableScreenshot(bool disableOrNot)
++{
++    return SingletonContainer::Get<DisplayManagerAdapter>().DisableDisplaySnapshot(disableOrNot);
++}
++
+ sptr<Display> DisplayManager::GetDefaultDisplay()
+ {
+     return pImpl_->GetDefaultDisplay();
+diff --git a/dm/src/display_manager_adapter.cpp b/dm/src/display_manager_adapter.cpp
+index dd58c6b09..cf6acfb24 100644
+--- a/dm/src/display_manager_adapter.cpp
++++ b/dm/src/display_manager_adapter.cpp
+@@ -68,6 +68,13 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
+     return displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode);
+ }
+ 
++DMError DisplayManagerAdapter::DisableDisplaySnapshot(bool disableOrNot)
++{
++    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
++
++    return displayManagerServiceProxy_->DisableDisplaySnapshot(disableOrNot);
++}
++
+ DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
+     std::vector<ScreenColorGamut>& colorGamuts)
+ {
+@@ -368,6 +375,13 @@ DMError ScreenManagerAdapter::StopMirror(const std::vector<ScreenId>& mirrorScre
+     return displayManagerServiceProxy_->StopMirror(mirrorScreenIds);
+ }
+ 
++DMError ScreenManagerAdapter::DisableMirror(bool disableOrNot)
++{
++    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
++
++    return displayManagerServiceProxy_->DisableMirror(disableOrNot);
++}
++
+ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
+ {
+     if (screenId == SCREEN_ID_INVALID) {
+diff --git a/dm/src/screen_manager.cpp b/dm/src/screen_manager.cpp
+index 013b6dcb0..1cc7f99a0 100644
+--- a/dm/src/screen_manager.cpp
++++ b/dm/src/screen_manager.cpp
+@@ -486,6 +486,12 @@ DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+     return SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+ }
+ 
++DMError ScreenManager::DisableMirror(bool disableOrNot)
++{
++    WLOGFI("Disable mirror %{public}d", disableOrNot);
++    return SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(disableOrNot);
++}
++
+ DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
+ {
+     WLOGFI("screens.size=%{public}llu", (unsigned long long)screens.size());
+diff --git a/dmserver/include/display_manager_interface.h b/dmserver/include/display_manager_interface.h
+index b6793d1b6..826071e19 100644
+--- a/dmserver/include/display_manager_interface.h
++++ b/dmserver/include/display_manager_interface.h
+@@ -39,6 +39,7 @@ public:
+         TRANS_ID_GET_DISPLAY_BY_ID,
+         TRANS_ID_GET_DISPLAY_BY_SCREEN,
+         TRANS_ID_GET_DISPLAY_SNAPSHOT,
++        TRANS_ID_DISABLE_DISPLAY_SNAPSHOT,
+         TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT,
+         TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT,
+         TRANS_ID_WAKE_UP_BEGIN,
+@@ -81,6 +82,7 @@ public:
+         TRANS_ID_REMOVE_SURFACE_NODE,
+         TRANS_ID_SCREEN_STOP_MIRROR,
+         TRANS_ID_SCREEN_STOP_EXPAND,
++        TRANS_ID_SCREEN_DISABLE_MIRROR,
+         TRANS_ID_SCENE_BOARD_SCREEN_BASE = 2000,
+         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
+         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
+@@ -103,6 +105,7 @@ public:
+     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
+     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
+         DmErrorCode* errorCode = nullptr) = 0;
++    virtual DMError DisableDisplaySnapshot(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
+     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
+ 
+@@ -139,6 +142,7 @@ public:
+         ScreenId& screenGroupId) = 0;
+     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
+     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) = 0;
++    virtual DMError DisableMirror(bool disableOrNot) { return DMError::DM_ERROR_INVALID_PERMISSION; }
+     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
+     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
+     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+diff --git a/interfaces/innerkits/dm/display_manager.h b/interfaces/innerkits/dm/display_manager.h
+index bf23bfb53..dfbe35b51 100644
+--- a/interfaces/innerkits/dm/display_manager.h
++++ b/interfaces/innerkits/dm/display_manager.h
+@@ -170,6 +170,14 @@ public:
+     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+         const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+ 
++    /**
++     * @brief Disable/enable global screenshot.
++     *
++     * @param disableOrNot disable screenshot or not.
++     * @return DM_OK means disable or enable screenshot success, others means failed.
++     */
++    DMError DisableScreenshot(bool disableOrNot);
++
+     /**
+      * @brief Begin to wake up screen.
+      *
+diff --git a/interfaces/innerkits/dm/screen_manager.h b/interfaces/innerkits/dm/screen_manager.h
+index ba2424dd8..ec16af4dc 100644
+--- a/interfaces/innerkits/dm/screen_manager.h
++++ b/interfaces/innerkits/dm/screen_manager.h
+@@ -66,7 +66,7 @@ public:
+          *
+          * @param info Change info of screen mirror.
+          */
+-        virtual void OnMirrorChange([[maybe_unused]]const ChangeInfo& info) {}
++        virtual void OnMirrorChange([[maybe_unused]]const ChangeInfo& info) {}
+     };
+ 
+     /**
+@@ -128,6 +128,14 @@ public:
+      */
+     DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
+ 
++    /**
++     * @brief Disable/enable global mirror screen.
++     *
++     * @param disableOrNot disable mirror screen or not.
++     * @return DM_OK means disable or enable mirror success, others means failed.
++     */
++    DMError DisableMirror(bool disableOrNot);
++
+     /**
+      * @brief Remove virtual screen from group.
+      *
+diff --git a/window_scene/session_manager/include/screen_session_manager.h b/window_scene/session_manager/include/screen_session_manager.h
+index 0b69c9e2d..2bfebf76d 100644
+--- a/window_scene/session_manager/include/screen_session_manager.h
++++ b/window_scene/session_manager/include/screen_session_manager.h
+@@ -91,12 +91,14 @@ public:
+     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+         ScreenId& screenGroupId) override;
+     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
++    DMError DisableMirror(bool disableOrNot) override;
+     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                                ScreenId& screenGroupId) override;
+     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) override;
+     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
+     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
+     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
++    DMError DisableDisplaySnapshot(bool disableOrNot) override;
+     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+     std::vector<DisplayId> GetAllDisplayIds() override;
+@@ -238,6 +240,9 @@ private:
+     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
+     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
+ 
++    std::atomic_bool disableDisplaySnapshotOrNot_ = false;
++    std::atomic_bool disableMirrorOrNot_ = false;
++
+     bool isAutoRotationOpen_ = false;
+     bool isExpandCombination_ = false;
+     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
+diff --git a/window_scene/session_manager/include/zidl/screen_session_manager_proxy.h b/window_scene/session_manager/include/zidl/screen_session_manager_proxy.h
+index 268b79d8c..093ff0fb2 100644
+--- a/window_scene/session_manager/include/zidl/screen_session_manager_proxy.h
++++ b/window_scene/session_manager/include/zidl/screen_session_manager_proxy.h
+@@ -64,6 +64,7 @@ public:
+     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+         ScreenId& screenGroupId) override;
+     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
++    DMError DisableMirror(bool disableOrNot) override;
+ 
+     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                                ScreenId& screenGroupId) override;
+@@ -74,6 +75,7 @@ public:
+     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
+ 
+     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
++    DMError DisableDisplaySnapshot(bool disableOrNot) override;
+ 
+     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+diff --git a/window_scene/session_manager/src/screen_session_manager.cpp b/window_scene/session_manager/src/screen_session_manager.cpp
+index dbba6bcf7..afb935b6e 100644
+--- a/window_scene/session_manager/src/screen_session_manager.cpp
++++ b/window_scene/session_manager/src/screen_session_manager.cpp
+@@ -1170,6 +1170,29 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
+     return DMError::DM_OK;
+ }
+ 
++DMError ScreenSessionManager::DisableMirror(bool disableOrNot)
++{
++    WLOGFI("SCB:ScreenSessionManager::DisableMirror %{public}d", disableOrNot);
++    if (!SessionPermission::IsSystemCalling()) {
++        WLOGFI("DisableMirror permission denied!");
++        return DMError::DM_ERROR_NOT_SYSTEM_APP;
++    }
++    WLOGFI("SCB:ScreenSessionManager::DisableMirror enter %{public}d", disableOrNot);
++    disableMirrorOrNot_ = disableOrNot;
++    if (disableOrNot) {
++        std::vector<ScreenId> screenIds;
++        auto allScreenIds = GetAllScreenIds();
++        for (auto screenId : allScreenIds) {
++            auto screen = GetScreenSession(screenId);
++            if (screen && screen->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
++                screenIds.push_back(screenId);
++            }
++        }
++        StopMirror(screenIds);
++    }
++    return DMError::DM_OK;
++}
++
+ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+                                          ScreenId& screenGroupId)
+ {
+@@ -1178,6 +1201,10 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
+         WLOGFE("SCB:ScreenSessionManager::MakeMirror permission denied!");
+         return DMError::DM_ERROR_NOT_SYSTEM_APP;
+     }
++    if (disableMirrorOrNot_) {
++        WLOGFW("SCB:ScreenSessionManager::MakeMirror was disabled!");
++        return DMError::DM_ERROR_INVALID_PERMISSION;
++    }
+     WLOGFI("SCB:ScreenSessionManager::MakeMirror mainScreenId :%{public}" PRIu64"", mainScreenId);
+     auto allMirrorScreenIds = GetAllValidScreenIds(mirrorScreenIds);
+     auto iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
+@@ -1834,6 +1861,10 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
+ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+ {
+     WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
++    if (disableDisplaySnapshotOrNot_) {
++        WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled!");
++        return nullptr;
++    }
+     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", displayId);
+     auto res = GetScreenSnapshot(displayId);
+     if (res != nullptr) {
+@@ -1842,6 +1873,18 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
+     return res;
+ }
+ 
++DMError ScreenSessionManager::DisableDisplaySnapshot(bool disableOrNot)
++{
++    WLOGFD("SCB: ScreenSessionManager::DisableDisplaySnapshot %{public}d", disableOrNot);
++    if (!SessionPermission::IsSystemCalling()) {
++        WLOGFE("DisableDisplaySnapshot permission denied!");
++        return DMError::DM_ERROR_NOT_SYSTEM_APP;
++    }
++    WLOGFI("SCB: ScreenSessionManager::DisableDisplaySnapshot enter %{public}d", disableOrNot);
++    disableDisplaySnapshotOrNot_ = disableOrNot;
++    return DMError::DM_OK;
++}
++
+ bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
+ {
+     if (agent == nullptr) {
+diff --git a/window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp b/window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp
+index 3aae36675..1da703aaa 100644
+--- a/window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp
++++ b/window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp
+@@ -702,6 +702,34 @@ DMError ScreenSessionManagerProxy::StopMirror(const std::vector<ScreenId>& mirro
+     return static_cast<DMError>(reply.ReadInt32());
+ }
+ 
++DMError ScreenSessionManagerProxy::DisableMirror(bool disableOrNot)
++{
++    WLOGFI("SCB: ScreenSessionManagerProxy::DisableMirror %{public}d", disableOrNot);
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        WLOGFW("DisableMirror fail: remote is null");
++        return DMError::DM_ERROR_NULLPTR;
++    }
++
++    MessageParcel data;
++    MessageParcel reply;
++    MessageOption option;
++    if (!data.WriteInterfaceToken(GetDescriptor())) {
++        WLOGFE("DisableMirror fail: WriteinterfaceToken failed");
++        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
++    }
++    if (!data.WriteBool(disableOrNot)) {
++        WLOGFE("DisableMirror fail: data write failed");
++        return DMError::DM_ERROR_IPC_FAILED;
++    }
++    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_DISABLE_MIRROR),
++        data, reply, option) != ERR_NONE) {
++        WLOGFW("DisableMirror fail: SendRequest failed");
++        return DMError::DM_ERROR_IPC_FAILED;
++    }
++    return static_cast<DMError>(reply.ReadInt32());
++}
++
+ DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                                               ScreenId& screenGroupId)
+ {
+@@ -866,6 +894,34 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
+     return pixelMap;
+ }
+ 
++DMError ScreenSessionManagerProxy::DisableDisplaySnapshot(bool disableOrNot)
++{
++    WLOGFI("SCB: ScreenSessionManagerProxy::DisableDisplaySnapshot %{public}d", disableOrNot);
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        WLOGFW("DisableDisplaySnapshot fail: remote is null");
++        return DMError::DM_ERROR_NULLPTR;
++    }
++
++    MessageParcel data;
++    MessageParcel reply;
++    MessageOption option;
++    if (!data.WriteInterfaceToken(GetDescriptor())) {
++        WLOGFE("DisableDisplaySnapshot fail: WriteinterfaceToken failed");
++        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
++    }
++    if (!data.WriteBool(disableOrNot)) {
++        WLOGFE("DisableDisplaySnapshot fail: data write failed");
++        return DMError::DM_ERROR_IPC_FAILED;
++    }
++    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT),
++        data, reply, option) != ERR_NONE) {
++        WLOGFW("DisableDisplaySnapshot fail: SendRequest failed");
++        return DMError::DM_ERROR_IPC_FAILED;
++    }
++    return static_cast<DMError>(reply.ReadInt32());
++}
++
+ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
+ {
+     sptr<IRemoteObject> remote = Remote();
+diff --git a/window_scene/session_manager/src/zidl/screen_session_manager_stub.cpp b/window_scene/session_manager/src/zidl/screen_session_manager_stub.cpp
+index 31839b6c7..c05280353 100644
+--- a/window_scene/session_manager/src/zidl/screen_session_manager_stub.cpp
++++ b/window_scene/session_manager/src/zidl/screen_session_manager_stub.cpp
+@@ -216,6 +216,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel&
+             reply.WriteInt32(static_cast<int32_t>(ret));
+             break;
+         }
++        case DisplayManagerMessage::TRANS_ID_SCREEN_DISABLE_MIRROR: {
++            DMError ret = DisableMirror(data.ReadBool());
++            reply.WriteInt32(static_cast<int32_t>(ret));
++            break;
++        }
+         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
+             std::vector<ScreenId> screenId;
+             if (!data.ReadUInt64Vector(&screenId)) {
+@@ -266,6 +271,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel&
+             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+             break;
+         }
++        case DisplayManagerMessage::TRANS_ID_DISABLE_DISPLAY_SNAPSHOT: {
++            DMError ret = DisableDisplaySnapshot(data.ReadBool());
++            reply.WriteInt32(static_cast<int32_t>(ret));
++            break;
++        }
+         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
+             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+             uint32_t modeId = data.ReadUint32();
