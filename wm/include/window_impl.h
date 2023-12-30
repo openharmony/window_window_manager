@@ -591,6 +591,7 @@ private:
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
     void ChangePropertyByApiVersion();
     void PerfLauncherHotAreaIfNeed(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetDefaultDisplayIdIfNeed();
 
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
