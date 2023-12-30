@@ -46,6 +46,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos) override;
     WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
