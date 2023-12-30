@@ -1317,12 +1317,6 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if ((state_ == WindowState::STATE_CREATED &&
-         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
-         state_ == WindowState::STATE_HIDDEN) {
-        WLOGFI("[WMSImms]NotifyWindowSessionProperty window state is created or hidden");
-        return WMError::WM_OK;
-    }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
 }
@@ -1395,7 +1389,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
