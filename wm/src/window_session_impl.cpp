@@ -1783,6 +1783,22 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
     return ret;
 }
 
+WMError WindowSessionImpl::RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    WLOGI("Start register extension avoidAreaChange listener, id:%{public}d", persistentId);
+    std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
+    return RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
+}
+
+WMError WindowSessionImpl::UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    WLOGI("Start unregister extension avoidAreaChange listener, id:%{public}d", persistentId);
+    std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
+    return UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
+}
+
 template<typename T>
 EnableIfSame<T, IAvoidAreaChangedListener,
     std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::GetListeners()
