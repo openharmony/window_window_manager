@@ -1148,6 +1148,17 @@ void WindowImpl::ChangePropertyByApiVersion()
     }
 }
 
+void WindowImpl::SetDefaultDisplayIdIfNeed()
+{
+    auto displayId = property_->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALID) {
+        auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
+            SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
+        property_->SetDisplayId(defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+    }
+}
+
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFD("Window[%{public}s] Create", name_.c_str());
@@ -1155,7 +1166,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
-
+    SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));

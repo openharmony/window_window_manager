@@ -292,6 +292,17 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
     return WMError::WM_OK;
 }
 
+void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
+{
+    auto displayId = property_->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALID) {
+        auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
+            SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
+        property_->SetDisplayId(defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+    }
+}
+
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
