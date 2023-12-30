@@ -1636,12 +1636,16 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
         backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
         isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
-    } else if (uiContent_) {
-        WLOGFD("Transfer back event to uiContent");
-        isConsumed = uiContent_->ProcessBackPressed();
     } else {
-        WLOGFE("There is no back event consumer");
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (uiContent_ != nullptr) {
+            WLOGFD("Transfer back event to uiContent");
+            isConsumed = uiContent_->ProcessBackPressed();
+        } else {
+            WLOGFE("There is no back event consumer");
+        }
     }
+
     if (isConsumed) {
         WLOGD("Back key event is consumed");
         return WSError::WS_OK;
