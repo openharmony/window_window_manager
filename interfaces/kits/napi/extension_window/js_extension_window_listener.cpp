@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "js_extension_window_listener.h"
+
 #include <hitrace_meter.h>
 
 #include "event_handler.h"
 #include "event_runner.h"
-#include "js_extension_window_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 
@@ -62,7 +63,7 @@ void JsExtensionWindowListener::CallJsMethod(const char* methodName, napi_value 
 void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
+    WLOGI("[NAPI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u", rect.width_, rect.height_, reason);
     if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
         WLOGFD("[NAPI]no need to change size");
         return;
@@ -110,37 +111,36 @@ void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 
 void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFD("[NAPI]OnAvoidAreaChanged");
+    WLOGFI("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-            [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
-                    NapiAsyncTask &task, int32_t status) {
-                auto thisListener = self.promote();
-                if (thisListener == nullptr || eng == nullptr) {
-                    WLOGFE("[NAPI]this listener or eng is nullptr");
-                    return;
-                }
-                napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
-                if (avoidAreaValue == nullptr) {
-                    return;
-                }
-                if (thisListener->isDeprecatedInterface_) {
-                    napi_value argv[] = { avoidAreaValue };
-                    thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
-                } else {
-                    napi_value objValue = nullptr;
-                    napi_create_object(env, &objValue);
-                    if (objValue == nullptr) {
-                        WLOGFE("Failed to get object");
-                        return;
-                    }
-                    napi_set_named_property(env, objValue, "type",
-                                            CreateJsValue(env, static_cast<uint32_t>(type)));
-                    napi_set_named_property(env, objValue, "area", avoidAreaValue);
-                    napi_value argv[] = { objValue };
-                    thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
-                }
+        [self = weakRef_, avoidArea, type, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or eng is nullptr");
+                return;
             }
+            napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
+            if (avoidAreaValue == nullptr) {
+                return;
+            }
+            if (thisListener->isDeprecatedInterface_) {
+                napi_value argv[] = { avoidAreaValue };
+                thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            } else {
+                napi_value objValue = nullptr;
+                napi_create_object(env, &objValue);
+                if (objValue == nullptr) {
+                    WLOGFE("Failed to get object");
+                    return;
+                }
+                napi_set_named_property(env, objValue, "type",
+                                        CreateJsValue(env, static_cast<uint32_t>(type)));
+                napi_set_named_property(env, objValue, "area", avoidAreaValue);
+                napi_value argv[] = { objValue };
+                thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            }
+        }
     );
 
     napi_ref callback = nullptr;
