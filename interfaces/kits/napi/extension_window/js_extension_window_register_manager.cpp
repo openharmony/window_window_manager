@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowRegisterManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowRegisterManager"};
 }
 
 JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
@@ -88,7 +88,7 @@ bool JsExtensionWindowRegisterManager::IsCallbackRegistered(napi_env env, std::s
     return false;
 }
 
-WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr <Window> window, std::string type,
+WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
     CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
