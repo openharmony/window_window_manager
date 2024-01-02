@@ -96,6 +96,60 @@ DMError ScreenSessionManagerLite::UnregisterDisplayManagerAgent(
     return DMError::DM_ERROR_NULLPTR;
 }
 
+FoldDisplayMode ScreenSessionManagerLite::GetFoldDisplayMode()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetFoldDisplayMode();
+    }
+    return FoldDisplayMode::UNKNOWN;
+}
+
+bool ScreenSessionManagerLite::IsFoldable()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->IsFoldable();
+    }
+    return false;
+}
+
+FoldStatus ScreenSessionManagerLite::GetFoldStatus()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetFoldStatus();
+    }
+    return FoldStatus::UNKNOWN;
+}
+
+sptr<DisplayInfo> ScreenSessionManagerLite::GetDefaultDisplayInfo()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetDefaultDisplayInfo();
+    }
+    return nullptr;
+}
+
+sptr<DisplayInfo> ScreenSessionManagerLite::GetDisplayInfoById(DisplayId displayId)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetDisplayInfoById(displayId);
+    }
+    return nullptr;
+}
+
+sptr<CutoutInfo> ScreenSessionManagerLite::GetCutoutInfo(DisplayId displayId)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetCutoutInfo(displayId);
+    }
+    return nullptr;
+}
+
 void ScreenSessionManagerLite::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

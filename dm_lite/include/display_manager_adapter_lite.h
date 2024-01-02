@@ -52,6 +52,12 @@ private:
 class DisplayManagerAdapterLite : public BaseAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapterLite);
 public:
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
+    virtual bool IsFoldable();
+    virtual FoldStatus GetFoldStatus();
+    virtual FoldDisplayMode GetFoldDisplayMode();
+    virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
 private:
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
 };

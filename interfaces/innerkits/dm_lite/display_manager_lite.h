@@ -47,6 +47,16 @@ public:
         virtual void OnChange(DisplayId) = 0;
     };
 
+    class IFoldStatusListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen fold status changed.
+         *
+         * @param foldStatus Screen foldStatus.
+         */
+        virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
+    };
+
     /**
      * @brief Resgister a display listener.
      *
@@ -62,6 +72,50 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
+
+    /**
+     * @brief Register a listener for the event of screen fold status changed.
+     *
+     * @param listener IFoldStatusListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen fold status changed.
+     *
+     * @param listener IFoldStatusListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Get the default display object.
+     *
+     * @return Default display object.
+     */
+    sptr<DisplayLite> GetDefaultDisplay();
+
+    /**
+     * @brief Check whether the device is foldable.
+     *
+     * @return true means the device is foldable.
+     */
+    bool IsFoldable();
+
+    /**
+     * @brief Get the current fold status of the foldable device.
+     *
+     * @return fold status of device.
+     */
+    FoldStatus GetFoldStatus();
+
+    /**
+     * @brief Get the display mode of the foldable device.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayMode();
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

@@ -50,6 +50,56 @@ DisplayLite::~DisplayLite()
 {
 }
 
+DisplayId DisplayLite::GetId() const
+{
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return DisplayId(0);
+    }
+    return pImpl_->GetDisplayInfo()->GetDisplayId();
+}
+
+sptr<DisplayInfo> DisplayLite::GetDisplayInfo() const
+{
+    UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return nullptr;
+    }
+    return pImpl_->GetDisplayInfo();
+}
+
+int32_t DisplayLite::GetWidth() const
+{
+    UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
+    return pImpl_->GetDisplayInfo()->GetWidth();
+}
+
+int32_t DisplayLite::GetHeight() const
+{
+    UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return 0;
+    }
+    return pImpl_->GetDisplayInfo()->GetHeight();
+}
+
+sptr<CutoutInfo> DisplayLite::GetCutoutInfo() const
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetCutoutInfo(GetId());
+}
+
+void DisplayLite::UpdateDisplayInfo() const
+{
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDisplayInfo(GetId());
+    UpdateDisplayInfo(displayInfo);
+}
+
 void DisplayLite::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {

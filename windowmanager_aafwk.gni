@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("scene_board_enable.gni")
+
 ability_runtime_path = "//foundation/ability/ability_runtime"
 ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
 ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
@@ -28,7 +30,6 @@ sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
 
 declare_args() {
-  scene_board_enabled = false
   efficiency_manager_enable = true
   window_manager_feature_subscribe_motion = false
   window_manager_feature_tp_enable = false
@@ -39,6 +40,5 @@ declare_args() {
   }
 }
 
-print("scene_board_enabled = ${scene_board_enabled}")
 print(
     "window_manager_feature_subscribe_motion = ${window_manager_feature_subscribe_motion}")
