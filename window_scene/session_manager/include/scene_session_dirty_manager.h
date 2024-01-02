@@ -68,6 +68,8 @@ private:
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
     void UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
+    void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+        std::vector<MMI::Rect>& pointerHotAreas) const;
 
     std::map<WindowUpdateType, WindowAction> windowType2Action_;
     std::map<uint64_t, std::vector<MMI::WindowInfo>> screen2windowInfo_;
