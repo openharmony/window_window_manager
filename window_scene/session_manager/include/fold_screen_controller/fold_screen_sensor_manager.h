@@ -48,9 +48,9 @@ private:
 
     FoldStatus mState_ = FoldStatus::UNKNOWN;
 
-    SensorUser postureuser;
+    SensorUser postureUser;
 
-    SensorUser halluser;
+    SensorUser hallUser;
 
     void RegisterPostureCallback();
 
@@ -65,6 +65,15 @@ private:
     FoldScreenSensorManager();
 
     ~FoldScreenSensorManager() = default;
+
+    float globalAngle = 0.0F;
+
+    uint16_t globalHall = 1;
+
+    typedef struct EXTHALLData {
+        float flag = 0.0;
+        float hall = 0.0;
+    } ExtHallData;
 };
 } // namespace Rosen
 } // namespace OHOS
