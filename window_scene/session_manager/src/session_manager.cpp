@@ -198,6 +198,7 @@ void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManage
 
 void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     sessionManagerServiceProxy_ = sessionManagerService;
 }
 
