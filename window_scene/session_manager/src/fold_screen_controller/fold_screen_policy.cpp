@@ -23,6 +23,7 @@ void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMode::UNKNOWN; }
 void FoldScreenPolicy::LockDisplayStatus(bool locked) { lockDisplayStatus_ = locked; }
 FoldStatus FoldScreenPolicy::GetFoldStatus() { return FoldStatus::UNKNOWN; }
+void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus) {}
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
 sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; }

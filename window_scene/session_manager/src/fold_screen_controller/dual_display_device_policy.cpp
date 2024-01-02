@@ -110,10 +110,15 @@ FoldStatus DualDisplayDevicePolicy::GetFoldStatus()
     return currentFoldStatus_;
 }
 
+void DualDisplayDevicePolicy::SetFoldStatus(FoldStatus foldStatus)
+{
+    WLOGI("SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    currentFoldStatus_ = foldStatus;
+}
+
 void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 {
     WLOGI("SendSensorResult FoldStatus: %{public}d", foldStatus);
-    currentFoldStatus_ = foldStatus;
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (displayMode != currentDisplayMode_) {
         ChangeScreenDisplayMode(displayMode);

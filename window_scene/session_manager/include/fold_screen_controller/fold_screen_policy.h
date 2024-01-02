@@ -30,6 +30,7 @@ public:
     virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
     virtual FoldDisplayMode GetScreenDisplayMode();
     virtual FoldStatus GetFoldStatus();
+    virtual void SetFoldStatus(FoldStatus foldStatus);
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
