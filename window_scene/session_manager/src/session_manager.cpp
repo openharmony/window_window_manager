@@ -29,7 +29,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sessi
 
 class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
-    SessionManagerServiceRecoverListener(SessionManager::WindowManagerRecoverCallbackFunc callbackFunc)
+    explicit SessionManagerServiceRecoverListener(SessionManager::WindowManagerRecoverCallbackFunc callbackFunc)
     {
         windowManagerRecoverFunc_ = callbackFunc;
     }

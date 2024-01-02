@@ -61,10 +61,7 @@ const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    ClientListenerDeathRecipient(int64_t pid)
-    {
-        pid_ = pid;
-    }
+    explicit ClientListenerDeathRecipient(int64_t pid) : pid_(pid) {}
 
     void OnRemoteDied(const wptr<IRemoteObject> &wptrDeath) override
     {
@@ -238,7 +235,7 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient()
         return;
     }
 
-    WLOGFI("[WMSRecover] Remote process count = %{public}" PRIu64, 
+    WLOGFI("[WMSRecover] Remote process count = %{public}" PRIu64,
         static_cast<uint64_t>(smsRecoverListenerMap_.size()));
 
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
