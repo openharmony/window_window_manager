@@ -34,8 +34,8 @@ public:
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
     void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnRegisterSessionManagerServiceRecoverListener() override;
-    void UnRegisterSessionManagerServiceRecoverListener(int64_t pid);
+    void UnregisterSessionManagerServiceRecoverListener() override;
+    void UnregisterSessionManagerServiceRecoverListener(int64_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void NotifyNotKillService()
