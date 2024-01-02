@@ -190,7 +190,7 @@ void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManage
 
     if (callbackFunc != nullptr) {
         smsRecoverListener_ = new SessionManagerServiceRecoverListener(callbackFunc);
-        mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(listener);
+        mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(smsRecoverListener_);
     } else {
         mockSessionManagerServiceProxy_->UnregisterSessionManagerServiceRecoverListener();
     }
