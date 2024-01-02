@@ -2279,7 +2279,7 @@ WSError WindowSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 }
 
 WMError WindowSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    int32_t uiExtensionIdLevel)
+    int64_t uiExtensionIdLevel)
 {
     return WMError::WM_OK;
 }
