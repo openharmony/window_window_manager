@@ -84,6 +84,46 @@ void SceneSessionDirtyManager::CalTramform(const sptr<SceneSession> sceneSession
     tranform = tranform.Inverse();
 }
 
+void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+    std::vector<MMI::Rect>& pointerHotAreas) const
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    WSRect windowRect = sceneSession->GetSessionRect();
+    uint32_t touchOffset = 0, pointerOffset = 0;
+    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
+        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) ||
+        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
+        float vpr = 1.5f; // 1.5: default vp
+        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (display) {
+            vpr = display->GetVirtualPixelRatio();
+        }
+        touchOffset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
+        pointerOffset = static_cast<uint32_t>(HOTZONE_POINTER * vpr);
+    }
+
+    MMI::Rect touchRect = {
+        .x = -touchOffset,
+        .y = -touchOffset,
+        .width = windowRect.width_ + touchOffset * 2,  // 2 : double touchOffset
+        .height = windowRect.height_ + touchOffset * 2 // 2 : double touchOffset
+    };
+
+    MMI::Rect pointerRect = {
+        .x = -pointerOffset,
+        .y = -pointerOffset,
+        .width = windowRect.width_ + pointerOffset * 2,  // 2 : double pointerOffset
+        .height = windowRect.height_ + pointerOffset * 2 // 2 : double pointerOffset
+    };
+
+    touchHotAreas.emplace_back(touchRect);
+    pointerHotAreas.emplace_back(pointerRect);
+}
+
+
 void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
     std::vector<MMI::Rect>& pointerHotAreas) const
 {
@@ -113,37 +153,9 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
             break;
         }
     }
-    uint32_t touchOffset = 0;
-    uint32_t pointerOffset = 0;
-    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
-            float vpr = 1.5f; // 1.5: default vp
-            auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-            if (display) {
-                vpr = display->GetVirtualPixelRatio();
-            }
-            touchOffset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
-            pointerOffset = static_cast<uint32_t>(HOTZONE_POINTER * vpr);
-    }
-
-    MMI::Rect touchRect = {
-        .x = -touchOffset,
-        .y = -touchOffset,
-        .width = windowRect.width_ + touchOffset * 2,  // 2 : double touchOffset
-        .height = windowRect.height_ + touchOffset * 2 // 2 : double touchOffset
-    };
-
-    MMI::Rect pointerRect = {
-        .x = -pointerOffset,
-        .y = -pointerOffset,
-        .width = windowRect.width_ + pointerOffset * 2,  // 2 : double pointerOffset
-        .height = windowRect.height_ + pointerOffset * 2 // 2 : double pointerOffset
-    };
 
     if (touchHotAreas.empty()) {
-        touchHotAreas.emplace_back(touchRect);
-        pointerHotAreas.emplace_back(pointerRect);
+        return UpdateDefaultHotAreas(sceneSession,touchHotAreas,pointerHotAreas);
     }
 }
 
