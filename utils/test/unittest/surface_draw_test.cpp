@@ -233,6 +233,134 @@ HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, Function | SmallTest | Level1)
     ASSERT_FALSE(SurfaceDraw::GetSurfaceSnapshot(surfaceNode, pixelMap, 0, 0, 0));
     window->Destroy();
 }
+
+/**
+ * @tc.name: DrawColor
+ * @tc.desc: SurfaceDraw::DrawColor test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawColor01, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(SurfaceDraw::DrawColor(nullptr, 0, 0, 0));
+    sptr<Window> window = CreateTestWindow("DrawColor");
+    if (window == nullptr) {
+        return;
+    }
+    ASSERT_NE(nullptr, window);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    auto surfaceNode = window->GetSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    uint32_t width = window->GetRect().width_;
+    uint32_t height = window->GetRect().height_;
+    uint32_t color = 0x00660000;
+    ASSERT_TRUE(SurfaceDraw::DrawColor(surfaceNode, width, height, color));
+    ASSERT_FALSE(SurfaceDraw::DrawColor(surfaceNode, -1, -1, color));
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DoDraw
+ * @tc.desc: SurfaceDraw::DoDraw test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DoDraw01, Function | SmallTest | Level1)
+{
+    sptr<Window> window = CreateTestWindow("DoDrawTest01");
+    if (window == nullptr) {
+        return;
+    }
+    ASSERT_NE(nullptr, window);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto surfaceNode = window->GetSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
+    ASSERT_NE(layer, nullptr);
+    sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
+    ASSERT_NE(buffer, nullptr);
+    ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, ""));
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DoDraw
+ * @tc.desc: SurfaceDraw::DoDraw02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DoDraw02, Function | SmallTest | Level1)
+{
+    sptr<Window> window = CreateTestWindow("DoDraw02");
+    if (window == nullptr) {
+        return;
+    }
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto surfaceNode = window->GetSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
+    ASSERT_NE(layer, nullptr);
+    sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
+    ASSERT_NE(buffer, nullptr);
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    ASSERT_NE(pixelMap, nullptr);
+    ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, pixelMap));
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DoDraw03
+ * @tc.desc: SurfaceDraw::DoDraw03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DoDraw03, Function | SmallTest | Level1)
+{
+    sptr<Window> window = CreateTestWindow("DoDrawTest03");
+    if (window == nullptr) {
+        return;
+    }
+    ASSERT_NE(nullptr, window);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    uint32_t color = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
+    ASSERT_NE(layer, nullptr);
+    sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
+    ASSERT_NE(buffer, nullptr);
+    ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, color));
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawImageRect
+ * @tc.desc: SurfaceDraw::DoDrawImageRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawImageRect01, Function | SmallTest | Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawImageRect");
+    if (window == nullptr) {
+        return;
+    }
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    uint32_t color = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    ASSERT_FALSE(SurfaceDraw::DrawImageRect(surfaceNode, rect, nullptr, color, false));
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    ASSERT_NE(pixelMap, nullptr);
+    ASSERT_TRUE(SurfaceDraw::DrawImageRect(surfaceNode, rect, pixelMap, color, false));
+    window->Destroy();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
