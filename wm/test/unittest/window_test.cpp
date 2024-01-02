@@ -2219,7 +2219,7 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     Accessibility::AccessibilityEventInfo info;
-    int32_t uiExtensionIdLevel = 0;
+    int64_t uiExtensionIdLevel = 0;
     ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
 

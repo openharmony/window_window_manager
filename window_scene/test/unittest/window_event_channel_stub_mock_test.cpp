@@ -73,11 +73,11 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferSearchElementInfo, Functi
     MessageParcel data;
     MessageParcel reply;
     
+    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint32(0);
-    data.WriteUint32(0);
+    data.WriteUint64(0);
     
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfo(data, reply));
     WLOGI("HandleTransferSearchElementInfo end");
@@ -95,11 +95,11 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferSearchElementInfosByText,
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint32(0);
+    data.WriteUint64(0);
     data.WriteString("action");
-    data.WriteUint32(0);
+    data.WriteUint64(0);
     
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfosByText(data, reply));
     WLOGI("HandleTransferSearchElementInfosByText end");
@@ -117,9 +117,9 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferFindFocusedElementInfo, F
     MessageParcel data;
     MessageParcel reply;
 
+    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint32(0);
-    data.WriteUint32(0);
+    data.WriteUint64(0);
 
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
@@ -139,9 +139,9 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferFocusMoveSearch, Function
     MessageParcel data;
     MessageParcel reply;
 
+    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint32(0);
-    data.WriteUint32(0);
+    data.WriteUint64(0);
 
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
