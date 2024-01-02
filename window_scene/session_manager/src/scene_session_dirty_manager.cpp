@@ -84,7 +84,8 @@ void SceneSessionDirtyManager::CalTramform(const sptr<SceneSession> sceneSession
     tranform = tranform.Inverse();
 }
 
-void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSession,
+    std::vector<MMI::Rect>& touchHotAreas,
     std::vector<MMI::Rect>& pointerHotAreas) const
 {
     if (sceneSession == nullptr) {
@@ -92,7 +93,8 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         return;
     }
     WSRect windowRect = sceneSession->GetSessionRect();
-    uint32_t touchOffset = 0, pointerOffset = 0;
+    uint32_t touchOffset = 0;
+    uint32_t pointerOffset = 0;
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) ||
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
@@ -155,7 +157,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
     }
 
     if (touchHotAreas.empty()) {
-        return UpdateDefaultHotAreas(sceneSession,touchHotAreas,pointerHotAreas);
+        return UpdateDefaultHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     }
 }
 
