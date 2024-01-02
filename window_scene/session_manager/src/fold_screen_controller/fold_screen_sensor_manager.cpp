@@ -43,13 +43,6 @@ namespace {
     constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD = 90.0F;
     constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
     constexpr float HALF_FOLDED_BUFFER = 10.0F;
-
-    float SWITCH_ANGLE = 0.0F;
-    uint16_t SWITCH_HALL = 1;
-    typedef struct EXTHALLData {
-        float flag = 0.0;
-        float hall = 0.0;
-    } ExtHallData;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -66,12 +59,12 @@ void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScr
 
 void FoldScreenSensorManager::RegisterPostureCallback()
 {
-    postureuser.callback = SensorPostureDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureuser);
+    postureUser.callback = SensorPostureDataCallback;
+    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     WLOGFI("RegisterPostureCallback, subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureuser, POSTURE_INTERVAL, POSTURE_INTERVAL);
+    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
     WLOGFI("RegisterPostureCallback, setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureuser);
+    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     WLOGFI("RegisterPostureCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterPostureCallback failed.");
@@ -80,8 +73,8 @@ void FoldScreenSensorManager::RegisterPostureCallback()
 
 void FoldScreenSensorManager::UnRegisterPostureCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureuser);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureuser);
+    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         WLOGFI("FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
@@ -89,12 +82,12 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
 
 void FoldScreenSensorManager::RegisterHallCallback()
 {
-    halluser.callback = SensorHallDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
+    hallUser.callback = SensorHallDataCallback;
+    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     WLOGFI("RegisterHallCallback, subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &halluser, POSTURE_INTERVAL, POSTURE_INTERVAL);
+    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
     WLOGFI("RegisterHallCallback, setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
+    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     WLOGFI("RegisterHallCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterHallCallback failed.");
@@ -103,8 +96,8 @@ void FoldScreenSensorManager::RegisterHallCallback()
 
 void FoldScreenSensorManager::UnRegisterHallCallback()
 {
-    int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
-    int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
+    int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
         WLOGFI("FoldScreenSensorManager.UnRegisterHallCallback success.");
     }
@@ -129,13 +122,13 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    SWITCH_ANGLE = (*postureData).angle;
-    if (std::isless(SWITCH_ANGLE, ANGLE_MIN_VAL) || std::isgreater(SWITCH_ANGLE, ANGLE_MAX_VAL)) {
-        WLOGFE("Invalid angle value, angle is %{public}f.", SWITCH_ANGLE);
+    globalAngle = (*postureData).angle;
+    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL)) {
+        WLOGFE("Invalid angle value, angle is %{public}f.", globalAngle);
         return;
     }
-    WLOGFD("angle value in PostureData is: %{public}f.", SWITCH_ANGLE);
-    HandleSensorData(SWITCH_ANGLE, SWITCH_HALL);
+    WLOGFD("angle value in PostureData is: %{public}f.", globalAngle);
+    HandleSensorData(globalAngle, globalHall);
 }
 
 void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
@@ -163,9 +156,9 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         WLOGFI("NOT Support Extend Hall.");
         return;
     }
-    SWITCH_HALL = (uint16_t)(*extHallData).hall;
-    WLOGFI("hall value in HallData is: %{public}u.", SWITCH_HALL);
-    HandleSensorData(SWITCH_ANGLE, SWITCH_HALL);
+    globalHall = (uint16_t)(*extHallData).hall;
+    WLOGFI("hall value in HallData is: %{public}u.", globalHall);
+    HandleSensorData(globalAngle, globalHall);
 }
 
 void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
@@ -198,7 +191,7 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     if (std::isgreaterequal(angle, HALF_FOLDED_MAX_THRESHOLD)) {
         return FoldStatus::EXPAND;
     }
-    if (hall == SWITCH_HALL) {
+    if (hall == globalHall) {
         if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD)) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
