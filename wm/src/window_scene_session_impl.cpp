@@ -220,8 +220,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
             return WMError::WM_ERROR_NULLPTR;
         }
         // recover sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(
-            iSessionStage, eventChannel, surfaceNode_, property_, persistentId, session, token);
+        SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
+            iSessionStage, eventChannel, surfaceNode_, property_, session, token);
+        Show(0, false);
     } else { // system window
         WLOGFD("[WMSRecover] Not SubWindow");
         SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
@@ -914,7 +915,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         WLOGFI("[WMSLife] session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
-    SingletonContainer::Get<WindowAdapter>().UnRegisterSessionRecoverCallbackFunc(property_->GetPersistentId());
+    SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
     if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first

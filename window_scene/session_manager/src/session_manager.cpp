@@ -18,7 +18,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
-#include "mock_session_manager_service_interface.h"
+#include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 
@@ -26,6 +26,53 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager" };
 }
+
+class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
+public:
+    SessionManagerServiceRecoverListener(SessionManager::WindowManagerRecoverCallbackFunc callbackFunc)
+    {
+        windowManagerRecoverFunc_ = callbackFunc;
+    }
+
+    virtual int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        if (data.ReadInterfaceToken() != GetDescriptor()) {
+        WLOGFE("InterfaceToken check failed");
+        return -1;
+        }
+        auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
+        switch (msgId) {
+            case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
+                auto sessionManagerService = data.ReadRemoteObject();
+                OnSessionManagerServiceRecover(sessionManagerService);
+                break;
+            }
+            default:
+                WLOGFW("unknown transaction code %{public}d", code);
+                return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
+        return 0;
+    }
+
+    void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override
+    {
+        SessionManager::GetInstance().Clear();
+        SessionManager::GetInstance().ClearSessionManagerProxy();
+
+        auto sms = iface_cast<ISessionManagerService>(sessionManagerService);
+        SessionManager::GetInstance().RecoverSessionManagerService(sms);
+
+        WLOGFI("[WMSRecover] Run recover");
+        if (windowManagerRecoverFunc_ != nullptr) {
+            WLOGFD("[WMSRecover] windowManagerRecover");
+            windowManagerRecoverFunc_();
+        }
+    }
+
+private:
+    SessionManager::WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_;
+};
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
@@ -35,44 +82,8 @@ SessionManager::~SessionManager()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
     if (mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_->UnRegisterSessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->UnregisterSessionManagerServiceRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
-    }
-}
-
-int32_t SessionManager::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
-{
-    if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("InterfaceToken check failed");
-        return -1;
-    }
-    auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
-    switch (msgId) {
-        case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
-            auto sessionManagerService = data.ReadRemoteObject();
-            OnSessionManagerServiceRecover(sessionManagerService);
-            break;
-        }
-        default:
-            WLOGFW("unknown transaction code %{public}d", code);
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-    return 0;
-}
-
-void SessionManager::OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService)
-{
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(sessionManagerService);
-        sceneSessionManagerProxy_ = nullptr;
-    }
-
-    WLOGFI("[WMSRecover] Run recover");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (windowManagerRecoverFunc_ != nullptr) {
-        WLOGFD("[WMSRecover] windowManagerRecover");
-        windowManagerRecoverFunc_();
     }
 }
 
@@ -124,13 +135,6 @@ void SessionManager::InitSessionManagerServiceProxy()
         return;
     }
 
-    if (!isRecoverListenerRegistered_) {
-        isRecoverListenerRegistered_ = true;
-        sptr<IRemoteObject> listener = this;
-        listener->IncStrongRef(nullptr);
-        mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(listener);
-    }
-
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
         WLOGFE("Remote object2 is nullptr");
@@ -177,7 +181,24 @@ void SessionManager::InitSceneSessionManagerProxy()
 
 void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc)
 {
-    windowManagerRecoverFunc_ = callbackFunc;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    InitSessionManagerServiceProxy();
+    if (mockSessionManagerServiceProxy_ == nullptr) {
+        WLOGFW("MockSessionManagerServiceProxy is nullptr");
+        return;
+    }
+
+    if (callbackFunc != nullptr) {
+        smsRecoverListener_ = new SessionManagerServiceRecoverListener(callbackFunc);
+        mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(listener);
+    } else {
+        mockSessionManagerServiceProxy_->UnregisterSessionManagerServiceRecoverListener();
+    }
+}
+
+void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
+{
+    sessionManagerServiceProxy_ = sessionManagerService;
 }
 
 void SessionManager::Clear()

@@ -49,7 +49,7 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             break;
         }
         case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER: {
-            UnRegisterSessionManagerServiceRecoverListener();
+            UnregisterSessionManagerServiceRecoverListener();
             break;
         }
         case MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER: {
