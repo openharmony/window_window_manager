@@ -97,6 +97,15 @@ FoldStatus FoldScreenController::GetFoldStatus()
     return foldScreenPolicy_->GetFoldStatus();
 }
 
+void FoldScreenController::SetFoldStatus(FoldStatus foldStatus)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        WLOGW("SetFoldStatus: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetFoldStatus(foldStatus);
+}
+
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 {
     if (foldScreenPolicy_ == nullptr) {

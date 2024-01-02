@@ -37,6 +37,7 @@ public:
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();
+    void SetFoldStatus(FoldStatus foldStatus);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
