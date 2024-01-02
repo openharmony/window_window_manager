@@ -34,6 +34,13 @@ public:
         DisplayManagerAgentType type) override;
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
+
+    FoldDisplayMode GetFoldDisplayMode() override;
+    bool IsFoldable() override;
+    FoldStatus GetFoldStatus() override;
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerLiteProxy> delegator_;
 };

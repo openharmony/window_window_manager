@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteStub"};
 }
 
 int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -47,6 +47,36 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = UnregisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
+            FoldDisplayMode displayMode = GetFoldDisplayMode();
+            reply.WriteUint32(static_cast<uint32_t>(displayMode));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE: {
+            reply.WriteBool(IsFoldable());
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS: {
+            reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus()));
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
+            auto info = GetDefaultDisplayInfo();
+            reply.WriteParcelable(info);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
+            DisplayId displayId = data.ReadUint64();
+            auto info = GetDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_GET_CUTOUT_INFO: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
+            reply.WriteParcelable(cutoutInfo);
             break;
         }
         default:
