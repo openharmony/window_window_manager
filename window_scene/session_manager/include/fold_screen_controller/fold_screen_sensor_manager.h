@@ -39,6 +39,8 @@ public:
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
 
     void HandlePostureData(const SensorEvent * const event);
+
+    void HandleHallData(const SensorEvent * const event);
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
 

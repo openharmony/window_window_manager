@@ -44,8 +44,8 @@ namespace {
     constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
     constexpr float HALF_FOLDED_BUFFER = 10.0F;
 
-    float GLOBAL_ANGLE = 0.0F;
-    uint16_t GLOBAL_HALL = 1;
+    float SWITCH_ANGLE = 0.0F;
+    uint16_t SWITCH_HALL = 1;
     typedef struct EXTHALLData {
         float flag = 0.0;
         float hall = 0.0;
@@ -91,11 +91,11 @@ void FoldScreenSensorManager::RegisterHallCallback()
 {
     halluser.callback = SensorHallDataCallback;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
-    WLOGFI("RegisterHallCallback, subscribeRet1: %{public}d", subscribeRet);
+    WLOGFI("RegisterHallCallback, subscribeRet: %{public}d", subscribeRet);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &halluser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    WLOGFI("RegisterHallCallback, setBatchRet1: %{public}d", setBatchRet);
+    WLOGFI("RegisterHallCallback, setBatchRet: %{public}d", setBatchRet);
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &halluser);
-    WLOGFI("RegisterHallCallback, activateRet1: %{public}d", activateRet);
+    WLOGFI("RegisterHallCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterHallCallback failed.");
     }
@@ -129,13 +129,13 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    GLOBAL_ANGLE = (*postureData).angle;
-    if (std::isless(GLOBAL_ANGLE, ANGLE_MIN_VAL) || std::isgreater(GLOBAL_ANGLE, ANGLE_MAX_VAL)) {
-        WLOGFE("Invalid angle value, angle is %{public}f.", GLOBAL_ANGLE);
+    SWITCH_ANGLE = (*postureData).angle;
+    if (std::isless(SWITCH_ANGLE, ANGLE_MIN_VAL) || std::isgreater(SWITCH_ANGLE, ANGLE_MAX_VAL)) {
+        WLOGFE("Invalid angle value, angle is %{public}f.", SWITCH_ANGLE);
         return;
     }
-    WLOGFD("angle value in PostureData is: %{public}f.", GLOBAL_ANGLE);
-    HandleSensorData(GLOBAL_ANGLE, GLOBAL_HALL);
+    WLOGFD("angle value in PostureData is: %{public}f.", SWITCH_ANGLE);
+    HandleSensorData(SWITCH_ANGLE, SWITCH_HALL);
 }
 
 void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
@@ -159,13 +159,13 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
 
     ExtHallData *extHallData = reinterpret_cast<ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     uint16_t flag = (uint16_t)(*extHallData).flag;
-    if(!(flag & (1<<1))) {
+    if (!(flag & (1 << 1))) {
         WLOGFI("NOT Support Extend Hall.");
         return;
     }
-    GLOBAL_HALL = (uint16_t)(*extHallData).hall;
-    WLOGFI("hall value in HallData is: %{public}u.", GLOBAL_HALL);
-    HandleSensorData(GLOBAL_ANGLE, GLOBAL_HALL);
+    SWITCH_HALL = (uint16_t)(*extHallData).hall;
+    WLOGFI("hall value in HallData is: %{public}u.", SWITCH_HALL);
+    HandleSensorData(SWITCH_ANGLE, SWITCH_HALL);
 }
 
 void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
@@ -198,7 +198,7 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     if (std::isgreaterequal(angle, HALF_FOLDED_MAX_THRESHOLD)) {
         return FoldStatus::EXPAND;
     }
-    if (hall == GLOBAL_HALL) {
+    if (hall == SWITCH_HALL) {
         if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD)) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
