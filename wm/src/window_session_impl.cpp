@@ -136,6 +136,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingWindow(option->GetCallingWindow());
+    isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
@@ -197,6 +198,11 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
             GetPersistentId(), state_);
     }
     return res;
+}
+
+bool WindowSessionImpl::IsMainHandlerAvailable() const
+{
+    return isMainHandlerAvailable_;
 }
 
 int32_t WindowSessionImpl::GetPersistentId() const
