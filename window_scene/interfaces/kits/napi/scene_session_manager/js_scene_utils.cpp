@@ -47,20 +47,6 @@ int32_t GetMMITouchType(int32_t aceType)
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
     }
 }
-
-int32_t GetMMISourceType(int32_t aceType)
-{
-    switch (aceType) {
-        case 1:
-            return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
-        case NUMBER_2:
-            return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
-        case NUMBER_3:
-            return MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD;
-        default:
-            return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-    }
-}
 } // namespace
 
 napi_value NapiGetUndefined(napi_env env)
@@ -436,7 +422,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("[NAPI]Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(GetMMISourceType(sourceType));
+    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("[NAPI]Failed to convert parameter to timestamp");
