@@ -2992,7 +2992,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         bool isReset = true;
         if (foldScreenController_ != nullptr) {
             FoldDisplayMode displayMode = GetFoldDisplayMode();
-            WLOGFI("fold screen with screenId = %{public}d", displayMode);
+            WLOGFI("fold screen with screenId = %{public}u", displayMode);
             if (displayMode == FoldDisplayMode::MAIN) {
                 auto phyBounds = GetPhyScreenProperty(5).GetPhyBounds();
                 phyWidth = phyBounds.rect_.width_;
