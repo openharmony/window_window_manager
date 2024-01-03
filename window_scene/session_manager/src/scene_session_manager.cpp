@@ -1596,6 +1596,12 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
+    // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
+        WLOGFE("The alarm window has been deprecated!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFI("[WMSLife] create specific start, name: %{public}s, type: %{public}d",
         property->GetWindowName().c_str(), property->GetWindowType());
 
@@ -1686,7 +1692,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
+    if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_PIP) {
         // some system types counld be created by normal app
