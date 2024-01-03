@@ -2986,15 +2986,39 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         if (!iter.second) {
             continue;
         }
+        float phyWidth = 0.0f;
+        float phyHeight = 0.0f;
+        Rotation initialRotation = Rotation::ROTATION_0;
+        bool isReset = true;
+        if (foldScreenController_ != nullptr) {
+            FoldDisplayMode displayMode = GetFoldDisplayMode();
+            WLOGFI("fold screen with screenId = %{public}d", displayMode);
+            if (displayMode == FoldDisplayMode::MAIN) {
+                auto phyBounds = GetPhyScreenProperty(5).GetPhyBounds();
+                phyWidth = phyBounds.rect_.width_;
+                phyHeight = phyBounds.rect_.height_;
+            } else if (displayMode == FoldDisplayMode::FULL) {
+                auto phyBounds = GetPhyScreenProperty(0).GetPhyBounds();
+                phyWidth = phyBounds.rect_.height_;
+                phyHeight = phyBounds.rect_.width_;
+                initialRotation = Rotation::ROTATION_270;
+            } else {
+                isReset = false;
+            }
+        } else {
+            auto remoteScreenMode = rsInterface_.GetScreenActiveMode(iter.first);
+            phyWidth = remoteScreenMode.GetScreenWidth();
+            phyHeight = remoteScreenMode.GetScreenHeight();
+        }
         auto localScreenBounds = iter.second->GetScreenProperty().GetBounds();
-        auto remoteScreenMode = rsInterface_.GetScreenActiveMode(iter.first);
-        bool isModeChanged = (localScreenBounds.rect_.width_ < localScreenBounds.rect_.height_) !=
-                             (remoteScreenMode.GetScreenWidth() < remoteScreenMode.GetScreenHeight());
-        if (isModeChanged) {
+        WLOGFI("phyWidth = :%{public}f, phyHeight = :%{public}f, local width = :%{public}f, local height = :%{public}f",
+            phyWidth, phyHeight, localScreenBounds.rect_.width_, localScreenBounds.rect_.height_);
+        bool isModeChanged =
+            (localScreenBounds.rect_.width_ < localScreenBounds.rect_.height_) != (phyWidth < phyHeight);
+        if (isModeChanged && isReset) {
             WLOGFI("[WMSRecover] screen(id:%{public}" PRIu64 ") current mode is not default mode, reset it", iter.first);
-            SetRotation(iter.first, Rotation::ROTATION_0, false);
-            iter.second->SetDisplayBoundary(
-                RectF(0, 0, remoteScreenMode.GetScreenWidth(), remoteScreenMode.GetScreenHeight()), 0);
+            SetRotation(iter.first, initialRotation, false);
+            iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
         }
         clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
             iter.second->GetRSScreenId(), iter.second->GetName());
