@@ -1598,6 +1598,12 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 
     WLOGFI("[WMSLife] create specific start, name: %{public}s, type: %{public}d",
         property->GetWindowName().c_str(), property->GetWindowType());
+
+    if (CheckParentIsBackground(property)) {
+        WLOGFE("Parent window is hidden.");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
@@ -1645,6 +1651,27 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
             break;
         }
     }
+}
+
+bool SceneSessionManager::CheckParentIsBackground(const sptr<WindowSessionProperty>& property)
+{
+    auto sceneSession = GetSceneSession(property->GetParentPersistentId());
+    if (sceneSession == nullptr) {
+        WLOGW("the scene session is nullptr");
+        return false;
+    }
+    WindowType type = property->GetWindowType();
+    WLOGFI("[WMSLife] CheckParentIsBackground, type: %{public}d, GetParentPersistentId: %{public}d,"
+           "sessionState: %{public}d", type, property->GetParentPersistentId(), sceneSession->GetSessionState());
+    if (type == WindowType::WINDOW_TYPE_FLOAT) {
+        if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
+            WLOGFD("The parent window is not displayed in the foreground.");
+            return true;
+        }
+    }
+    WLOGFD("check parent window hide failed.");
+    return false;
 }
 
 bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const
