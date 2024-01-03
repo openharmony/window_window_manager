@@ -2455,6 +2455,7 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
         WLOGFE("UpdateMaximizeMode uiContent_ is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    property_->SetMaximizeMode(mode);
     uiContent_->UpdateMaximizeMode(mode);
     return WSError::WS_OK;
 }
