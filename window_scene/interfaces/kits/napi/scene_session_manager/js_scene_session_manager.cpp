@@ -223,7 +223,7 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     WLOGFI("[NAPI]OnRecoverSceneSession post task");
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
@@ -743,7 +743,7 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     {
-        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
