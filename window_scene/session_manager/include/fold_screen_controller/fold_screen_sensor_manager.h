@@ -32,11 +32,15 @@ class FoldScreenSensorManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(FoldScreenSensorManager);
 
 public:
-    void UnRegisterSensorCallback();
+    void UnRegisterPostureCallback();
+
+    void UnRegisterHallCallback();
 
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
 
     void HandlePostureData(const SensorEvent * const event);
+
+    void HandleHallData(const SensorEvent * const event);
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
 
@@ -44,9 +48,13 @@ private:
 
     FoldStatus mState_ = FoldStatus::UNKNOWN;
 
-    SensorUser user;
+    SensorUser postureUser;
 
-    void RegisterSensorCallback();
+    SensorUser hallUser;
+
+    void RegisterPostureCallback();
+
+    void RegisterHallCallback();
 
     void HandleSensorData(float, int);
 
@@ -57,6 +65,15 @@ private:
     FoldScreenSensorManager();
 
     ~FoldScreenSensorManager() = default;
+
+    float globalAngle = 0.0F;
+
+    uint16_t globalHall = 1;
+
+    typedef struct EXTHALLData {
+        float flag = 0.0;
+        float hall = 0.0;
+    } ExtHallData;
 };
 } // namespace Rosen
 } // namespace OHOS
