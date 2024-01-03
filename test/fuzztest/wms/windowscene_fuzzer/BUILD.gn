@@ -25,7 +25,6 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "../../../../wmserver/include",
     "../../../../interfaces/innerkits/dm",
     "../../../../interfaces/innerkits/wm",
-    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
 
     # for abilityContext

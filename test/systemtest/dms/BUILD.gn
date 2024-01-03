@@ -160,7 +160,6 @@ config("dms_systemtest_common_public_config") {
     "../../../utils/include",
 
     # RSSurface
-    "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",
   ]
 }
@@ -195,6 +194,7 @@ ohos_static_library("dms_systemtest_common") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
+    "graphic_surface:surface",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]
