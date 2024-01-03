@@ -1498,7 +1498,7 @@ public:
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
      * @return WM_OK means set keep keyboard flag success, others means failed.
     */
-    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.
