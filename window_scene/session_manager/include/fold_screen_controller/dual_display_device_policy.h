@@ -30,6 +30,7 @@ public:
     void SendSensorResult(FoldStatus foldStatus) override;
     FoldDisplayMode GetScreenDisplayMode() override;
     FoldStatus GetFoldStatus() override;
+    void SetFoldStatus(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;

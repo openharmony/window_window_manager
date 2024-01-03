@@ -175,6 +175,9 @@ void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
         WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
         ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
         mState_ = nextState;
+        if (foldScreenPolicy_ != nullptr) {
+            foldScreenPolicy_->SetFoldStatus(mState_);
+        }
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
         if (foldScreenPolicy_ != nullptr) {
             foldScreenPolicy_->SendSensorResult(mState_);
