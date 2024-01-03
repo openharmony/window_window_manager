@@ -1006,8 +1006,29 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 
 WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    NotifyOutsideDownEvent(pointerEvent);
     TransferPointerEvent(pointerEvent, false);
     return WSError::WS_OK;
+}
+
+void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    // notify touchOutside and touchDown event
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
+        action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        return;
+    }
+
+    // notify outside down event
+    if (specificCallback_ != nullptr && specificCallback_->onOutsideDownEvent_) {
+        specificCallback_->onOutsideDownEvent_(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    }
 }
 
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
