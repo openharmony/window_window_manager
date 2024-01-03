@@ -25,6 +25,11 @@ static void SensorPostureDataCallback(SensorEvent *event)
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(event);
 }
 
+static void SensorHallDataCallback(SensorEvent *event)
+{
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(event);
+}
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -32,10 +37,8 @@ namespace {
     constexpr float ANGLE_MIN_VAL = 0.0F;
     constexpr float ANGLE_MAX_VAL = 180.0F;
     constexpr int32_t SENSOR_SUCCESS = 0;
-    constexpr uint16_t DEFAULT_HALL = 1;
     constexpr int32_t POSTURE_INTERVAL = 100000000;
     constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
-    constexpr uint16_t HALL_THRESHOLD = 1;
     constexpr float HALF_FOLDED_MAX_THRESHOLD = 140.0F;
     constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD = 90.0F;
     constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
@@ -45,7 +48,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
 FoldScreenSensorManager::FoldScreenSensorManager()
 {
-    RegisterSensorCallback();
+    RegisterPostureCallback();
+    RegisterHallCallback();
 }
 
 void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy)
@@ -53,26 +57,49 @@ void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScr
     foldScreenPolicy_ = foldScreenPolicy;
 }
 
-void FoldScreenSensorManager::RegisterSensorCallback()
+void FoldScreenSensorManager::RegisterPostureCallback()
 {
-    user.callback = SensorPostureDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &user);
-    WLOGFI("RegisterSensorCallback, subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &user, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    WLOGFI("RegisterSensorCallback, setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &user);
-    WLOGFI("RegisterSensorCallback, activateRet: %{public}d", activateRet);
+    postureUser.callback = SensorPostureDataCallback;
+    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    WLOGFI("RegisterPostureCallback, subscribeRet: %{public}d", subscribeRet);
+    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
+    WLOGFI("RegisterPostureCallback, setBatchRet: %{public}d", setBatchRet);
+    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    WLOGFI("RegisterPostureCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        WLOGFE("RegisterSensorCallback failed.");
+        WLOGFE("RegisterPostureCallback failed.");
     }
 }
 
-void FoldScreenSensorManager::UnRegisterSensorCallback()
+void FoldScreenSensorManager::UnRegisterPostureCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &user);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &user);
+    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        WLOGFI("FoldScreenSensorManager.UnRegisterSensorCallback success.");
+        WLOGFI("FoldScreenSensorManager.UnRegisterPostureCallback success.");
+    }
+}
+
+void FoldScreenSensorManager::RegisterHallCallback()
+{
+    hallUser.callback = SensorHallDataCallback;
+    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    WLOGFI("RegisterHallCallback, subscribeRet: %{public}d", subscribeRet);
+    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
+    WLOGFI("RegisterHallCallback, setBatchRet: %{public}d", setBatchRet);
+    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    WLOGFI("RegisterHallCallback, activateRet: %{public}d", activateRet);
+    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
+        WLOGFE("RegisterHallCallback failed.");
+    }
+}
+
+void FoldScreenSensorManager::UnRegisterHallCallback()
+{
+    int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
+        WLOGFI("FoldScreenSensorManager.UnRegisterHallCallback success.");
     }
 }
 
@@ -95,13 +122,43 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    float angle = (*postureData).angle;
-    if (std::isless(angle, ANGLE_MIN_VAL) || std::isgreater(angle, ANGLE_MAX_VAL)) {
-        WLOGFE("Invalid angle value, angle is %{public}f.", angle);
+    globalAngle = (*postureData).angle;
+    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL)) {
+        WLOGFE("Invalid angle value, angle is %{public}f.", globalAngle);
         return;
     }
-    WLOGFD("angle value in PostureData is: %{public}f.", angle);
-    HandleSensorData(angle, DEFAULT_HALL);
+    WLOGFD("angle value in PostureData is: %{public}f.", globalAngle);
+    HandleSensorData(globalAngle, globalHall);
+}
+
+void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
+{
+    if (event == nullptr) {
+        WLOGFI("SensorEvent is nullptr.");
+        return;
+    }
+    if (event[SENSOR_EVENT_FIRST_DATA].data == nullptr) {
+        WLOGFI("SensorEvent[0].data is nullptr.");
+        return;
+    }
+    if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(ExtHallData)) {
+        WLOGFI("SensorEvent dataLen less than hall data size.");
+        return;
+    }
+    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
+        WLOGFI("SensorEvent display status is locked.");
+        return;
+    }
+
+    ExtHallData *extHallData = reinterpret_cast<ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
+    uint16_t flag = (uint16_t)(*extHallData).flag;
+    if (!(flag & (1 << 1))) {
+        WLOGFI("NOT Support Extend Hall.");
+        return;
+    }
+    globalHall = (uint16_t)(*extHallData).hall;
+    WLOGFI("hall value in HallData is: %{public}u.", globalHall);
+    HandleSensorData(globalAngle, globalHall);
 }
 
 void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
@@ -134,7 +191,7 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     if (std::isgreaterequal(angle, HALF_FOLDED_MAX_THRESHOLD)) {
         return FoldStatus::EXPAND;
     }
-    if (hall == HALL_THRESHOLD) {
+    if (hall == globalHall) {
         if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD)) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
