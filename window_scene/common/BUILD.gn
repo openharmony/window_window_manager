@@ -50,6 +50,7 @@ ohos_shared_library("window_scene_common") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "imf:inputmethod_client",
     "input:libmmi-client",
     "ipc:ipc_single",

@@ -33,6 +33,7 @@
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include <hisysevent.h>
+#include "hitrace_meter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -70,9 +71,14 @@ void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& h
 void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
     if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    auto localTask = [task, name]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+        task();
+    };
+    handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 int32_t Session::GetPersistentId() const

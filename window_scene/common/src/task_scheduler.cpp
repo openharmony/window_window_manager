@@ -14,6 +14,7 @@
  */
 
 #include "common/include/task_scheduler.h"
+#include "hitrace_meter.h"
 
 namespace OHOS::Rosen {
 TaskScheduler::TaskScheduler(const std::string& threadName)
@@ -29,26 +30,38 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 
 void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime)
 {
+    auto localTask = [task, name] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+        task();
+    };
     if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
-        return task();
+        return localTask();
     }
-    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
 {
+    auto localTask = [task, name] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+        task();
+    };
     if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        return task();
+        return localTask();
     }
-    handler_->PostSyncTask(std::move(task), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostSyncTask(std::move(localTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
+    auto localTask = [task, name] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+        task();
+    };
     if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
-        return task();
+        return localTask();
     }
-    handler_->PostTask(std::move(task), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::RemoveTask(const std::string& name)
@@ -56,5 +69,14 @@ void TaskScheduler::RemoveTask(const std::string& name)
     if (handler_) {
         handler_->RemoveTask("wms:" + name);
     }
+}
+
+void StartTraceForSyncTask(std::string name)
+{
+    StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+}
+void FinishTraceForSyncTask()
+{
+    FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
 }
 } // namespace OHOS::Rosen
