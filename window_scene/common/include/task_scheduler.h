@@ -19,6 +19,10 @@
 #include <event_handler.h>
 
 namespace OHOS::Rosen {
+
+void StartTraceForSyncTask(std::string name);
+void FinishTraceForSyncTask();
+
 class TaskScheduler {
 public:
     explicit TaskScheduler(const std::string& threadName);
@@ -33,11 +37,18 @@ public:
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
-        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-            return task();
-        }
         Return ret;
-        auto syncTask = [&ret, &task]() { ret = task(); };
+        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+            StartTraceForSyncTask(name);
+            ret = task();
+            FinishTraceForSyncTask();
+            return ret;
+        }
+        auto syncTask = [&ret, &task, name]() {
+            StartTraceForSyncTask(name);
+            ret = task();
+            FinishTraceForSyncTask();
+        };
         handler_->PostSyncTask(std::move(syncTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }
