@@ -513,6 +513,7 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
+    bool CheckParentIsBackground(const sptr<WindowSessionProperty>& property);
     void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
