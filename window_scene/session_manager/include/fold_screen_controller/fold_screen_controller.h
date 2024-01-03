@@ -17,6 +17,7 @@
 
 #include <refbase.h>
 
+#include "common/include/task_scheduler.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/fold_screen_state_machine.h"
 #include "fold_screen_info.h"
@@ -30,7 +31,8 @@ enum class DisplayDeviceType :uint32_t {
 
 class FoldScreenController : public RefBase {
 public:
-    FoldScreenController(std::recursive_mutex& displayInfoMutex);
+    FoldScreenController(std::recursive_mutex& displayInfoMutex,
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     virtual ~FoldScreenController();
 
     void SetDisplayMode(const FoldDisplayMode displayMode);
@@ -46,6 +48,7 @@ private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     std::recursive_mutex& displayInfoMutex_;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H
