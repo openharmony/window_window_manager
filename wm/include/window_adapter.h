@@ -105,7 +105,7 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
     void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
-    void UnRegisterSessionRecoverCallbackFunc(int32_t persistentId);
+    void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
     virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
