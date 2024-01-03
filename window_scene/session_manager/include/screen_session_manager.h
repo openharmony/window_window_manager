@@ -281,6 +281,7 @@ private:
 
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 
