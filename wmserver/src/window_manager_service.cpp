@@ -724,6 +724,10 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 {
+    if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID())) {
+        WLOGI("Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     return PostSyncTask([this, windowId]() {
         WLOGFI("[WMS] Remove: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:RemoveWindow(%u)", windowId);
