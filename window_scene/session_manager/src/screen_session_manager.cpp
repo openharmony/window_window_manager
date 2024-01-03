@@ -93,7 +93,7 @@ ScreenSessionManager::ScreenSessionManager()
                 #ifdef TP_FEATURE_ENABLE
                 rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
                 #endif
-                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
                 std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
                 WLOGFI("ScreenSessionManager Fold Screen Power Full animation Init 2.");
@@ -107,7 +107,7 @@ ScreenSessionManager::ScreenSessionManager()
                 #ifdef TP_FEATURE_ENABLE
                 rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
                 #endif
-                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
                 std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
 
