@@ -21,7 +21,6 @@
 
 #include "session_manager_service_interface.h"
 #include "mock_session_manager_service_interface.h"
-#include "session_manager_service_recover_interface.h"
 #include "zidl/scene_session_manager_interface.h"
 #include "wm_single_instance.h"
 
@@ -31,19 +30,18 @@ public:
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
-class SessionManager : public IRemoteStub<ISessionManagerServiceRecoverListener> {
+class SessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
     using SessionRecoverCallbackFunc = std::function<void()>;
     using WindowManagerRecoverCallbackFunc = std::function<void()>;
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
+    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void ClearSessionManagerProxy();
     void Clear();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
 
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
 protected:
     SessionManager() = default;
     virtual ~SessionManager();
@@ -51,14 +49,12 @@ protected:
 private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerProxy();
-    void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
+    sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
-    WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
     std::recursive_mutex mutex_;
-    bool isRecoverListenerRegistered_ = false;
     bool destroyed_ = false;
 };
 } // namespace OHOS::Rosen

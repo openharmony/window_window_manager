@@ -29,7 +29,7 @@ public:
     sptr<IRemoteObject> GetSessionManagerService() override;
     void NotifySceneBoardAvailable() override;
     void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnRegisterSessionManagerServiceRecoverListener() override;
+    void UnregisterSessionManagerServiceRecoverListener() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;

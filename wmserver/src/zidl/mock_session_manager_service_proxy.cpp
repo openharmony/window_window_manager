@@ -103,7 +103,7 @@ void MockSessionManagerServiceProxy::RegisterSessionManagerServiceRecoverListene
     }
 }
 
-void MockSessionManagerServiceProxy::UnRegisterSessionManagerServiceRecoverListener()
+void MockSessionManagerServiceProxy::UnregisterSessionManagerServiceRecoverListener()
 {
     WLOGFD("[WMSRecover] UnRegister");
     MessageParcel data;

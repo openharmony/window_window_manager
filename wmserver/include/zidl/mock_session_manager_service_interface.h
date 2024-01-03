@@ -40,7 +40,7 @@ public:
     virtual void NotifySceneBoardAvailable() = 0;
 
     virtual void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) = 0;
-    virtual void UnRegisterSessionManagerServiceRecoverListener() = 0;
+    virtual void UnregisterSessionManagerServiceRecoverListener() = 0;
 };
 }
 }

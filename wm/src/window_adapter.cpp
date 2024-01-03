@@ -239,7 +239,7 @@ void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
 
-void WindowAdapter::UnRegisterSessionRecoverCallbackFunc(int32_t persistentId)
+void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto it = sessionRecoverCallbackFuncMap_.find(persistentId);
