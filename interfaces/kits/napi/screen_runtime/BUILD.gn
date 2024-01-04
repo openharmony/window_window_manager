@@ -47,7 +47,7 @@ ohos_shared_library("screen_napi") {
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
-    "graphic_2d:surface",  # use for SurfaceUtils
+    "graphic_surface:surface",  # use for SurfaceUtils
     "hilog:libhilog",
     "hiview:libxpower_event_js",
     "napi:ace_napi",

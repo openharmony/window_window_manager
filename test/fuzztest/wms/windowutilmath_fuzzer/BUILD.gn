@@ -26,7 +26,6 @@ ohos_fuzztest("WindowUtilMathFuzzTest") {
     "../../../../utils/include",
     "../../../../interfaces/innerkits/dm",
     "../../../../interfaces/innerkits/wm",
-    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
   ]
 
