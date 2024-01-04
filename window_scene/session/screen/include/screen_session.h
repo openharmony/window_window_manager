@@ -132,7 +132,7 @@ public:
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
-    ScreenId nodeId_ {};
+    NodeId nodeId_ {};
 
     int32_t activeIdx_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
