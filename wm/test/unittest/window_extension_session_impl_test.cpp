@@ -384,6 +384,32 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         windowExtensionSessionImpl.TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
+
+/**
+ * @tc.name: RegisterAvoidAreaChangeListener
+ * @tc.desc: RegisterAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    sptr<IAvoidAreaChangedListener> listener = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowExtensionSessionImpl.RegisterAvoidAreaChangeListener(listener));
+}
+
+/**
+ * @tc.name: UnregisterAvoidAreaChangeListener
+ * @tc.desc: UnregisterAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    sptr<IAvoidAreaChangedListener> listener = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowExtensionSessionImpl.UnregisterAvoidAreaChangeListener(listener));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

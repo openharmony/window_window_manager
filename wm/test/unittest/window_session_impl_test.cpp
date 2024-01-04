@@ -1621,6 +1621,44 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
 }
+
+/**
+ * @tc.name: RegisterExtensionAvoidAreaChangeListener
+ * @tc.desc: RegisterExtensionAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterExtensionAvoidAreaChangeListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterExtensionAvoidAreaChangeListener start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonArea");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<IAvoidAreaChangedListener> listener = nullptr;
+    WMError res = window->RegisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterExtensionAvoidAreaChangeListener end";
+}
+
+/**
+ * @tc.name: UnregisterExtensionAvoidAreaChangeListener
+ * @tc.desc: UnregisterExtensionAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UnregisterExtensionAvoidAreaChangeListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterExtensionAvoidAreaChangeListener start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonArea");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<IAvoidAreaChangedListener> listener = nullptr;
+    WMError res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterExtensionAvoidAreaChangeListener end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
