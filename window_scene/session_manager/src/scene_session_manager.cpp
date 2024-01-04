@@ -948,6 +948,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sessionInfo.bundleName_.find("hmsapp.samplemanagement") == std::string::npos) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
+            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             WLOGFD("[WMSLife] get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
