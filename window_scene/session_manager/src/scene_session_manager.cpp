@@ -1278,7 +1278,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
-    int32_t errCode = ERR_INVALID_VALUE;
+    int32_t errCode = ERR_OK;
     if (systemConfig_.backgroundswitch == false) {
         WLOGFI("[WMSMain]begin StartUIAbility: %{public}d isSystem:%{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
