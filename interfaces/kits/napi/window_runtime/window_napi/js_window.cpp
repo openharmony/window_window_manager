@@ -3302,7 +3302,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
                     "window is nullptr."));
                 return;
             }
-            if (!WindowHelper::IsSystemWindow(weakWindow->GetType()) || weakWindow->IsFloatingWindowAppType()) {
+            if (weakWindow->IsFloatingWindowAppType()) {
                 WLOGFE("HideNonSystemFloatingWindows is not allowed since window is app floating window");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING),
                     "HideNonSystemFloatingWindows is not allowed since window is app window"));
