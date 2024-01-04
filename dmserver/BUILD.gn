@@ -69,7 +69,7 @@ ohos_shared_library("libdms") {
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
-    "graphic_2d:surface",
+    "graphic_surface:surface",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",

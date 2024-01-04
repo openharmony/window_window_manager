@@ -33,6 +33,7 @@
           "sensor",
           "ability_base",
           "graphic_2d",
+          "graphic_surface",
           "hisysevent",
           "ability_runtime",
           "napi",
