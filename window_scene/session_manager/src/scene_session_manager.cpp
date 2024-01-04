@@ -1736,9 +1736,9 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
                                                                                       : SessionState::STATE_BACKGROUND;
 
         WLOGI("[WMSRecover] RecoverAndConnectSpecificSession windowName = %{public}s, windowMode = %{public}d, "
-              "windowType = %{public}u, persistentId = %{public}d, windowState = %{public}u",
-            property->GetWindowName().c_str(), info.windowMode, info.windowType_, info.persistentId_,
-            property->GetWindowState());
+              "windowType = %{public}u, persistentId = %{public}d, windowState = %{public}u, "
+              "callingWindowId = %{public}" PRIu32, property->GetWindowName().c_str(), info.windowMode,
+              info.windowType_, info.persistentId_, property->GetWindowState(), property->GetCallingWindow());
 
         ClosePipWindowIfExist(type);
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
@@ -1753,8 +1753,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
                 info.persistentId_, persistentId);
         }
 
-        auto errCode =
-            sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        auto errCode = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
         if (errCode != WSError::WS_OK) {
             WLOGFE("[WMSRecover] SceneSession reconnect failed");
             EraseSceneSessionMapById(persistentId);
@@ -1762,13 +1761,64 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         }
 
         NotifyCreateSpecificSession(sceneSession, property, type);
+        CacheSubSessionForRecovering(sceneSession, property);
         RecoverWindowSessionProperty(sceneSession, property);
         AddClientDeathRecipient(sessionStage, sceneSession);
         session = sceneSession;
         return errCode;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "RecoverAndConnectSpecificSession");
+}
+
+void SceneSessionManager::NotifyRecoverFinished()
+{
+    taskScheduler_->PostAsyncTask([this]() {
+        WLOGFI("[WMSRecover] RecoverFinished clear recoverSubSessionCacheMap");
+        recoverSubSessionCacheMap_.clear();
+    }, "NotifyRecoverFinished");
+}
+
+void SceneSessionManager::CacheSubSessionForRecovering(
+    sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
+{
+    if (sceneSession == nullptr || property == nullptr) {
+        WLOGFE("[WMSRecover] sceneSession or property is nullptr");
+        return;
+    }
+
+    auto windowType = property->GetWindowType();
+    if (SessionHelper::IsSystemWindow(windowType) || !SessionHelper::IsSubWindow(windowType)) {
+        return;
+    }
+
+    auto persistentId = property->GetParentPersistentId();
+    if (createSubSessionFuncMap_.find(persistentId) != createSubSessionFuncMap_.end()) {
+        return;
+    }
+
+    WLOGFI("[WMSRecover] Cache subsession persistentId = %{public}" PRId32 ", parent persistentId = %{public}" PRId32,
+        sceneSession->GetPersistentId(), persistentId);
+
+    if (recoverSubSessionCacheMap_.find(persistentId) == recoverSubSessionCacheMap_.end()) {
+        recoverSubSessionCacheMap_[persistentId] = std::vector{ sceneSession };
+    } else {
+        recoverSubSessionCacheMap_[persistentId].emplace_back(sceneSession);
+    }
+}
+
+void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
+{
+    auto iter = recoverSubSessionCacheMap_.find(persistentId);
+    if (iter == recoverSubSessionCacheMap_.end()) {
+        return;
+    }
+
+    WLOGFI("[WMSRecover] RecoverCachedSubSession persistentId = %{public}" PRId32, persistentId);
+    for (auto& sceneSession : iter->second) {
+        NotifyCreateSubSession(persistentId, sceneSession);
+    }
+    recoverSubSessionCacheMap_.erase(iter);
 }
 
 void SceneSessionManager::RecoverWindowSessionProperty(
@@ -1779,9 +1829,8 @@ void SceneSessionManager::RecoverWindowSessionProperty(
         return;
     }
 
-    WLOGFI("[WMSRecover] WindowType = %{public}u", property->GetWindowType());
-
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    auto windowType = property->GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         RelayoutKeyBoard(sceneSession);
     } else {
         const auto& rect = property->GetWindowRect();
@@ -1868,6 +1917,7 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
         auto iter = createSubSessionFuncMap_.find(persistentId);
         if (iter == createSubSessionFuncMap_.end()) {
             createSubSessionFuncMap_.insert(std::make_pair(persistentId, func));
+            RecoverCachedSubSession(persistentId);
         } else {
             WLOGFW("[WMSSub] CreateSubSessionListener is existed, id: %{public}d", persistentId);
         }
@@ -3005,7 +3055,7 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scn
 
 void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId)
 {
-    WLOGFD("NotifyWindowInfoChange, persistentId = %{publicd}d", persistentId);
+    WLOGFD("NotifyWindowInfoChange, persistentId = %{public}d", persistentId);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession nullptr");
@@ -5047,6 +5097,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         WLOGFI("[WMSInput] Calling session is nullptr");
         return;
     }
+    WLOGFD("[WMSInput] RestoreCallingSessionSizeIfNeed callingSession_ persistentId = %{public}" PRId32, callingSession_->GetPersistentId());
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);

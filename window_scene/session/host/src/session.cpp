@@ -759,9 +759,14 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     callingPid_ = pid;
     callingUid_ = uid;
     WindowState windowState = property->GetWindowState();
-    if (windowState == WindowState::STATE_SHOWN) {
+    auto type = property->GetWindowType();
+    if (windowState == WindowState::STATE_SHOWN || SessionHelper::IsSubWindow(type)) {
         isActive_ = true;
-        UpdateSessionState(SessionState::STATE_ACTIVE);
+        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            UpdateSessionState(SessionState::STATE_ACTIVE);
+        } else {
+            UpdateSessionState(SessionState::STATE_FOREGROUND);
+        }
     } else {
         isActive_ = false;
         UpdateSessionState(SessionState::STATE_BACKGROUND);
