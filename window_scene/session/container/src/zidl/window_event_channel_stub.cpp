@@ -138,8 +138,8 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
 
 int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t elementId = 0;
-    if (!data.ReadInt32(elementId)) {
+    int64_t elementId = 0;
+    if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -148,8 +148,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
         WLOGFE("Parameter mode is invalid!");
         return ERR_INVALID_DATA;
     }
-    int32_t baseParent = 0;
-    if (!data.ReadInt32(baseParent)) {
+    int64_t baseParent = 0;
+    if (!data.ReadInt64(baseParent)) {
         WLOGFE("Parameter baseParent is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -159,8 +159,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
         WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    int32_t count = static_cast<int32_t>(infos.size());
-    if (!reply.WriteInt32(count)) {
+    int64_t count = static_cast<int64_t>(infos.size());
+    if (!reply.WriteInt64(count)) {
         WLOGFE("Failed to write count!");
         return ERR_INVALID_DATA;
     }
@@ -176,8 +176,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
 
 int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t elementId = 0;
-    if (!data.ReadInt32(elementId)) {
+    int64_t elementId = 0;
+    if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -186,8 +186,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
         WLOGFE("Parameter text is invalid!");
         return ERR_INVALID_DATA;
     }
-    int32_t baseParent = 0;
-    if (!data.ReadInt32(baseParent)) {
+    int64_t baseParent = 0;
+    if (!data.ReadInt64(baseParent)) {
         WLOGFE("Parameter baseParent is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -197,8 +197,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
         WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<uint32_t>(errCode));
         return static_cast<uint32_t>(errCode);
     }
-    int32_t count = static_cast<int32_t>(infos.size());
-    if (!reply.WriteInt32(count)) {
+    int64_t count = static_cast<int64_t>(infos.size());
+    if (!reply.WriteInt64(count)) {
         WLOGFE("Failed to write count!");
         return ERR_INVALID_DATA;
     }
@@ -214,8 +214,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
 
 int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t elementId = 0;
-    if (!data.ReadInt32(elementId)) {
+    int64_t elementId = 0;
+    if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -224,8 +224,8 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
         WLOGFE("Parameter focusType is invalid!");
         return ERR_INVALID_DATA;
     }
-    int32_t baseParent = 0;
-    if (!data.ReadInt32(baseParent)) {
+    int64_t baseParent = 0;
+    if (!data.ReadInt64(baseParent)) {
         WLOGFE("Parameter baseParent is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -245,8 +245,8 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
 
 int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t elementId = 0;
-    if (!data.ReadInt32(elementId)) {
+    int64_t elementId = 0;
+    if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -255,8 +255,8 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
         WLOGFE("Parameter direction is invalid!");
         return ERR_INVALID_DATA;
     }
-    int32_t baseParent = 0;
-    if (!data.ReadInt32(baseParent)) {
+    int64_t baseParent = 0;
+    if (!data.ReadInt64(baseParent)) {
         WLOGFE("Parameter baseParent is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -276,8 +276,8 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
 
 int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t elementId = 0;
-    if (!data.ReadInt32(elementId)) {
+    int64_t elementId = 0;
+    if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
         return ERR_INVALID_DATA;
     }
@@ -308,8 +308,8 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
     for (size_t i = 0; i < actionArgumentsKey.size(); i++) {
         actionArguments.insert(make_pair(actionArgumentsKey[i], actionArgumentsValue[i]));
     }
-    int32_t baseParent = 0;
-    if (!data.ReadInt32(baseParent)) {
+    int64_t baseParent = 0;
+    if (!data.ReadInt64(baseParent)) {
         WLOGFE("Parameter baseParent is invalid!");
         return ERR_INVALID_DATA;
     }

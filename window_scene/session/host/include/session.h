@@ -85,7 +85,7 @@ public:
     virtual void OnDisconnect() = 0;
     virtual void OnExtensionDied() = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevel) = 0;
+        int64_t uiExtensionIdLevel) = 0;
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -124,27 +124,27 @@ public:
     void NotifyDisconnect();
     void NotifyExtensionDied() override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevel) override;
+        int64_t uiExtensionIdLevel) override;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    virtual WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+    virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    virtual WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    virtual WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& info);
-    virtual WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    virtual WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& info);
     virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusStateEvent(bool focusState);
-    virtual WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t baseParent);
+    virtual WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t baseParent);
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
