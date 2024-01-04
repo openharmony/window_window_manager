@@ -1774,9 +1774,9 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
 void SceneSessionManager::NotifyRecoverFinished()
 {
     taskScheduler_->PostAsyncTask([this]() {
-        WLOGFI("[WMSRecover] RecoverFinished clear recoverSubSessionCacheMap");
-        recoverSubSessionCacheMap_.clear();
-    }, "NotifyRecoverFinished");
+            WLOGFI("[WMSRecover] RecoverFinished clear recoverSubSessionCacheMap");
+            recoverSubSessionCacheMap_.clear();
+        }, "NotifyRecoverFinished");
 }
 
 void SceneSessionManager::CacheSubSessionForRecovering(
@@ -5097,7 +5097,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         WLOGFI("[WMSInput] Calling session is nullptr");
         return;
     }
-    WLOGFD("[WMSInput] RestoreCallingSessionSizeIfNeed callingSession_ persistentId = %{public}" PRId32, callingSession_->GetPersistentId());
+
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
