@@ -1794,7 +1794,7 @@ void SceneSessionManager::CacheSubSessionForRecovering(
     }
 
     auto windowType = property->GetWindowType();
-    if (SessionHelper::IsSystemWindow(windowType) || !SessionHelper::IsSubWindow(windowType)) {
+    if (!SessionHelper::IsSubWindow(windowType)) {
         return;
     }
 
