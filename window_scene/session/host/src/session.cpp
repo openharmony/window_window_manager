@@ -294,7 +294,7 @@ void Session::NotifyExtensionDied()
 }
 
 void Session::NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    int32_t uiExtensionIdLevel)
+    int64_t uiExtensionIdLevel)
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
@@ -2244,7 +2244,7 @@ WSRectF Session::GetBounds()
     return bounds_;
 }
 
-WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
+WSError Session::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (!windowEventChannel_) {
@@ -2254,7 +2254,7 @@ WSError Session::TransferSearchElementInfo(int32_t elementId, int32_t mode, int3
     return windowEventChannel_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
 }
 
-WSError Session::TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+WSError Session::TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (!windowEventChannel_) {
@@ -2264,7 +2264,7 @@ WSError Session::TransferSearchElementInfosByText(int32_t elementId, const std::
     return windowEventChannel_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
 }
 
-WSError Session::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+WSError Session::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     if (!windowEventChannel_) {
@@ -2274,7 +2274,7 @@ WSError Session::TransferFindFocusedElementInfo(int32_t elementId, int32_t focus
     return windowEventChannel_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
 }
 
-WSError Session::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+WSError Session::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     if (!windowEventChannel_) {
@@ -2284,8 +2284,8 @@ WSError Session::TransferFocusMoveSearch(int32_t elementId, int32_t direction, i
     return windowEventChannel_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
 }
 
-WSError Session::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t baseParent)
+WSError Session::TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t baseParent)
 {
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");

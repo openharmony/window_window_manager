@@ -832,7 +832,7 @@ WSError SessionProxy::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 }
 
 WSError SessionProxy::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    int32_t uiExtensionIdLevel)
+    int64_t uiExtensionIdLevel)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -846,7 +846,7 @@ WSError SessionProxy::TransferAccessibilityEvent(const Accessibility::Accessibil
         WLOGFE("infoParcel write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(uiExtensionIdLevel)) {
+    if (!data.WriteInt64(uiExtensionIdLevel)) {
         WLOGFE("idVec write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
