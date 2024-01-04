@@ -1988,6 +1988,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetVirtualPixelRatio(option.density_);
     screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
+    screenSession->RegisterScreenChangeListener(this);
     return screenSession;
 }
 
