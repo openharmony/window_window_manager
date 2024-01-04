@@ -762,7 +762,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     auto type = property->GetWindowType();
     if (windowState == WindowState::STATE_SHOWN || SessionHelper::IsSubWindow(type)) {
         isActive_ = true;
-        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (SessionHelper::IsMainWindow(type) || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             UpdateSessionState(SessionState::STATE_ACTIVE);
         } else {
             UpdateSessionState(SessionState::STATE_FOREGROUND);
