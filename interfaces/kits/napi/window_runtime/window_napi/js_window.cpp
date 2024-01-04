@@ -1300,51 +1300,40 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
 {
-    WMError errCode = WMError::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2 is max num of argc
         WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
-    if (errCode == WMError::WM_OK) {
-        napi_value nativeType = argv[0];
-        if (nativeType == nullptr) {
-            WLOGFE("Failed to convert parameter to windowType");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            uint32_t resultValue = 0;
-            napi_get_value_uint32(env, nativeType, &resultValue);
-            if (resultValue >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE) &&
-                resultValue <= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_END)) {
-                winType = static_cast<WindowType>(resultValue); // adapt to the old version
-            } else if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(resultValue)) != 0) {
-                winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(resultValue));
-            } else {
-                WLOGFE("Do not support this type: %{public}u", resultValue);
-                errCode = WMError::WM_ERROR_INVALID_PARAM;
-            }
-        }
+    uint32_t resultValue = 0;
+    if (!ConvertFromJsValue(env, argv[0], resultValue)) {
+        WLOGFE("Failed to convert parameter to windowType");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (resultValue >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE) &&
+        resultValue <= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_END)) {
+        winType = static_cast<WindowType>(resultValue); // adapt to the old version
+    } else if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(resultValue)) != 0) {
+        winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(resultValue));
+    } else {
+        WLOGFE("Do not support this type: %{public}u", resultValue);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, winType, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, winType](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
-                WLOGFE("get invalid param");
-                return;
-            }
-            WMError ret = weakWindow->SetWindowType(winType);
-            if (ret == WMError::WM_OK) {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowType(winType));
+            if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window set type failed"));
