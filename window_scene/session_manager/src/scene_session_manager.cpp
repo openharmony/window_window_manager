@@ -1771,17 +1771,23 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     return taskScheduler_->PostSyncTask(task, "RecoverAndConnectSpecificSession");
 }
 
-void SceneSessionManager::NotifyRecoverFinished()
+void SceneSessionManager::NotifyRecoveringFinished()
 {
     taskScheduler_->PostAsyncTask([this]() {
             WLOGFI("[WMSRecover] RecoverFinished clear recoverSubSessionCacheMap");
+            recoveringFinished_ = true;
             recoverSubSessionCacheMap_.clear();
-        }, "NotifyRecoverFinished");
+        }, "NotifyRecoveringFinished");
 }
 
 void SceneSessionManager::CacheSubSessionForRecovering(
     sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
 {
+    if (recoveringFinished_) {
+        WLOGFW("[WMSRecover] recovering is finished");
+        return;
+    }
+
     if (sceneSession == nullptr || property == nullptr) {
         WLOGFE("[WMSRecover] sceneSession or property is nullptr");
         return;
