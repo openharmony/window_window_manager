@@ -1664,8 +1664,15 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
     sessionStateChangeFunc_ = func;
-    NotifySessionStateChange(state_);
-    WLOGFD("SetSessionStateChangeListenser, id: %{public}d", GetPersistentId());
+    auto changedState = state_;
+    if (changedState == SessionState::STATE_ACTIVE) {
+        changedState = SessionState::STATE_FOREGROUND;
+    } else if (changedState == SessionState::STATE_INACTIVE) {
+        changedState = SessionState::STATE_BACKGROUND;
+    }
+    NotifySessionStateChange(changedState);
+    WLOGFD("SetSessionStateChangeListenser, id: %{public}d, state_: %{public}d, changedState: %{public}d",
+        GetPersistentId(), state_, changedState);
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
