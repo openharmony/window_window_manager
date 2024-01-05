@@ -279,6 +279,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::POWER_BUTTON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             WLOGFI("ChangeScreenDisplayMode screenIdFull OFF and screenIdMain ON");
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOn, "screenOnMainOnTask");
@@ -324,6 +325,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::POWER_BUTTON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             WLOGFI("ChangeScreenDisplayMode screenIdMain OFF and screenIdFull ON");
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
