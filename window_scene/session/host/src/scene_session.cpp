@@ -103,8 +103,7 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        auto ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
-        return ret;
+        return session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     });
 }
 

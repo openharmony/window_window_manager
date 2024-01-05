@@ -219,15 +219,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
             WLOGFE("[WMSRecover] parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }
-        // recover sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
-            iSessionStage, eventChannel, surfaceNode_, property_, session, token);
-        Show(0, false);
-    } else { // system window
-        WLOGFD("[WMSRecover] Not SubWindow");
-        SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
-            iSessionStage, eventChannel, surfaceNode_, property_, session, token);
     }
+    SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
+        iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
     if (session == nullptr) {
         WLOGFE("[WMSRecover] Recover failed, session is nullptr");
@@ -362,7 +356,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
     }
-    WLOGFD("[WMSLife] Window Create success [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
+    WLOGFD("[WMSLife] Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
