@@ -2131,7 +2131,7 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
     Rotation rotation = display->GetRotation();
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
-    if (rotation == Rotation::RATATION_90 || rotation == Rotation::RATATION_270) {
+    if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
         displayWidth = static_cast<uint32_t>(display->GetHeight());
         displayHeight = static_cast<uint32_t>(display->GetWidth());
     }
