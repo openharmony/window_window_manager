@@ -34,6 +34,8 @@ constexpr float DIRECTION270 = 270 ;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionDirtyManager"};
 constexpr int POINTER_CHANGE_AREA_SEXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
+constexpr int UPDATE_TASK_DURATION = 10;
+const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 } //namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -189,7 +191,7 @@ MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> s
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     MMI::WindowInfo windowInfo = {
         .id = windowId,
-        .pid = pid,
+        .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
         .uid = uid,
         .area = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ },
         .defaultHotAreas = touchHotAreas,
@@ -253,7 +255,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::FullSceneSessionInfoUpdat
         if (IsFilterSession(sceneSessionValue)) {
             continue;
         }
-        auto windowInfo = GetWindowInfo(sceneSessionValue, WindowAction::UNKNOWN);
+        auto windowInfo = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
 
         // all input event should trans to dialog window if dialog exists
         const auto& dialogMap = GetDialogSessionMap(sceneSessionMap);
@@ -288,37 +290,26 @@ bool SceneSessionDirtyManager::IsFilterSession(const sptr<SceneSession>& sceneSe
 }
 
 void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
-    const WindowUpdateType& type, int32_t sceneBoardPid)
+    const WindowUpdateType& type, const bool startMoving)
 {
-    MMI::WindowInfo windowinfo;
     if (sceneSession == nullptr) {
         WLOGFW("sceneSession is null");
         return;
     }
 
-    WindowAction action = GetSceneSessionAction(type);
-    if (action == WindowAction::UNKNOWN) {
-        WLOGFW("windowAction UNKNOW WindowUpdateType type = %{public}d", int(type));
-        return;
+    sessionDirty_.store(true);
+    if (!hasPostTask_.load()) {
+        hasPostTask_.store(true);
+        auto task = [this]() {
+            hasPostTask_.store(false);
+            if (!sessionDirty_.load() || flushWindowInfoCallback_ == nullptr) {
+                return;
+            }
+            flushWindowInfoCallback_();
+        };
+        SceneSessionManager::GetInstance().PostFlushWindowInfoTask(task,
+            UPDATE_WINDOW_INFO_TASK, UPDATE_TASK_DURATION);
     }
-
-    auto windowId = sceneSession->GetWindowId();
-    if (action == WindowAction::WINDOW_DELETE) {
-        windowinfo.action = static_cast<MMI::WINDOW_UPDATE_ACTION>(WindowAction::WINDOW_DELETE);
-        windowinfo.id = windowId;
-        windowinfo.displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-        windowinfo.pid = sceneSession->GetCallingPid();
-        windowinfo.uid = sceneSession->GetCallingUid();
-    } else {
-        if (action == WindowAction::WINDOW_CHANGE && IsFilterSession(sceneSession)) {
-            return;
-        }
-        windowinfo = GetWindowInfo(sceneSession, action);
-    }
-    if (sceneBoardPid > 0) {
-        windowinfo.pid = sceneBoardPid;
-    }
-    PushWindowInfoList(windowinfo.displayId, windowinfo);
 }
 
 std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
@@ -404,5 +395,15 @@ void SceneSessionDirtyManager::RegisterScreenInfoChangeListener()
     };
     ScreenSessionManagerClient::GetInstance().RegisterScreenInfoChangeListener(fun);
     WLOGFI("RegisterScreenInfoChangeListener");
+}
+
+void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback)
+{
+    flushWindowInfoCallback_ = std::move(callback);
+}
+
+void SceneSessionDirtyManager::ResetSessionDirty()
+{
+    sessionDirty_.store(false);
 }
 } //namespace OHOS::Rosen

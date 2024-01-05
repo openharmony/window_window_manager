@@ -5799,13 +5799,13 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
 
     wptr<SceneSession> weakSceneSession(sceneSession);
     WLOGFI("SceneSessionManager NotifyMMIWindowPidChange to notify window: %{public}d, pid: %{public}d", windowId, pid);
-    auto task = [weakSceneSession, pid]() -> WSError {
+    auto task = [weakSceneSession, startMoving]() -> WSError {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFW("session is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        SceneInputManager::GetInstance().NotifyMMIWindowPidChange(scnSession, pid);
+        SceneInputManager::GetInstance().NotifyMMIWindowPidChange(scnSession, startMoving);
         return WSError::WS_OK;
     };
     return taskScheduler_->PostAsyncTask(task);
@@ -6784,5 +6784,11 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
+    const std::string taskName, const int delayTime)
+{
+    taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
 } // namespace OHOS::Rosen
