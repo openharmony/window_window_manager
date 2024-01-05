@@ -17,6 +17,7 @@
 
 #include <refbase.h>
 
+#include "common/include/task_scheduler.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_info.h"
 #include "session/screen/include/screen_session.h"
@@ -24,7 +25,8 @@
 namespace OHOS::Rosen {
 class DualDisplayDevicePolicy : public FoldScreenPolicy {
 public:
-    DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex);
+    DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex,
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     ~DualDisplayDevicePolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
     void SendSensorResult(FoldStatus foldStatus) override;
@@ -45,7 +47,10 @@ private:
     FoldDisplayMode GetModeMatchStatus();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
+    void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
+        ScreenPropertyChangeReason reason);
     std::recursive_mutex& displayInfoMutex_;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_DUAL_DISPLAY_DEVICE_POLICY_H
