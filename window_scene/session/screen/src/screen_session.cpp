@@ -284,12 +284,12 @@ float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
     return rotation;
 }
 
-void ScreenSession::SetSensorRotation(Rotation sensorRotation)
+void ScreenSession::SetSensorRotation(DeviceRotation sensorRotation)
 {
     sensorRotation_ = sensorRotation;
 }
 
-Rotation ScreenSession::GetSensorRotation()
+DeviceRotation ScreenSession::GetSensorRotation()
 {
     return sensorRotation_;
 }
@@ -400,7 +400,7 @@ void ScreenSession::UpdateAfterFoldExpand(bool foldToExpand)
     if (foldToExpand) {
         SensorRotationChange(currentSensorRotation_);
     } else {
-        if (GetSensorRotation() == Rotation::ROTATION_INVALID) {
+        if (GetSensorRotation() == DeviceRotation::INVALID) {
             WLOGFI("ScreenSession::UpdateAfterFoldExpand fix rotation:%{public}f", property_.GetRotation());
             SensorRotationChange(property_.GetScreenRotation());
         }
