@@ -216,7 +216,7 @@ WSError WindowEventChannel::TransferFocusState(bool focusState)
     return WSError::WS_OK;
 }
 
-WSError WindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
+WSError WindowEventChannel::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (!sessionStage_) {
@@ -226,8 +226,8 @@ WSError WindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t
     return sessionStage_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
 }
 
-WSError WindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+WSError WindowEventChannel::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
@@ -236,7 +236,7 @@ WSError WindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, 
     return sessionStage_->NotifySearchElementInfosByText(elementId, text, baseParent, infos);
 }
 
-WSError WindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+WSError WindowEventChannel::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     if (!sessionStage_) {
@@ -246,7 +246,7 @@ WSError WindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, in
     return sessionStage_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info);
 }
 
-WSError WindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+WSError WindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     if (!sessionStage_) {
@@ -256,9 +256,9 @@ WSError WindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t d
     return sessionStage_->NotifyFocusMoveSearch(elementId, direction, baseParent, info);
 }
 
-WSError WindowEventChannel::TransferExecuteAction(int64_t elementId,
+WSError WindowEventChannel::TransferExecuteAction(int32_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action,
-    int64_t baseParent)
+    int32_t baseParent)
 {
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
