@@ -52,7 +52,10 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     std::unique_ptr<JsExtensionWindow> jsExtensionWindow = std::make_unique<JsExtensionWindow>(extensionWindow);
     napi_wrap(env, objValue, jsExtensionWindow.release(), JsExtensionWindow::Finalizer, nullptr, nullptr);
 
-    napi_set_named_property(env, objValue, "properties", CreateJsExtensionWindowPropertiesObject(env, window));
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_GETTER("properties", JsExtensionWindow::GetProperties)
+    };
+    NAPI_CALL(env, napi_define_properties(env, objValue, sizeof(desc) / sizeof(desc[0]), desc));
 
     const char *moduleName = "JsExtensionWindow";
     BindNativeFunction(env, objValue, "getWindowAvoidArea", moduleName, JsExtensionWindow::GetWindowAvoidArea);
@@ -216,6 +219,18 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     WLOGI("UnRegister end, window [%{public}u, %{public}s], type = %{public}s",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
+}
+
+napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info info)
+{
+    WLOGI("GetProperties is called");
+    napi_value jsThis;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &jsThis, nullptr));
+
+    JsExtensionWindow* jsExtensionWindow = nullptr;
+    NAPI_CALL(env, napi_unwrap(env, jsThis, reinterpret_cast<void**>(&jsExtensionWindow)));
+    sptr<Rosen::Window> window = jsExtensionWindow->extensionWindow_->GetWindow();
+    return CreateJsExtensionWindowPropertiesObject(env, window);
 }
 }  // namespace Rosen
 }  // namespace OHOS
