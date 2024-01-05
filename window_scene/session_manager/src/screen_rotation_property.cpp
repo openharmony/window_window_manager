@@ -92,14 +92,11 @@ void ScreenRotationProperty::SetDefaultDeviceRotationOffset(uint32_t defaultDevi
 
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
+    WLOGFI("ScreenRotationProperty::HandleSensorEventInput deviceRotation: %{public}d", deviceRotation);
     auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto isPad = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
     if (!isPhone && !isPad) {
         WLOGFW("device is not phone or pad, return.");
-        return;
-    }
-    if (deviceRotation == DeviceRotation::INVALID) {
-        WLOGFW("deviceRotation is invalid, return.");
         return;
     }
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
@@ -107,11 +104,17 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
         WLOGFW("screenSession is null.");
         return;
     }
+    if (deviceRotation == DeviceRotation::INVALID) {
+        screenSession->SetSensorRotation(Rotation::ROTATION_INVALID);
+        WLOGFW("deviceRotation is invalid, return.");
+        return;
+    }
+    Rotation targetSensorRotation = ConvertDeviceToDisplayRotation(deviceRotation);
+    screenSession->SetSensorRotation(targetSensorRotation);
     if (lastSensorRotationConverted_ == deviceRotation) {
         return;
     }
     lastSensorRotationConverted_ = deviceRotation;
-    Rotation targetSensorRotation = ConvertDeviceToDisplayRotation(deviceRotation);
     screenSession->SensorRotationChange(targetSensorRotation);
 }
 
