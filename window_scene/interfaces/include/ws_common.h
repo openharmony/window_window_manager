@@ -420,6 +420,8 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_APP_CENTER, // Enter the app center
     SCENE_EXIT_APP_CENTER, // Exit the app center
     SCENE_APPEAR_MISSION_CENTER, // A special case scenario that displays the mission center
+    SCENE_ENTER_WIND_CLEAR, // Enter win+D in clear screen mode
+    SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 } // namespace OHOS::Rosen
