@@ -31,7 +31,7 @@
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "event_handler.h"
-#include "screen_manager/include/screen_rotation_property.h"
+#include "session_manager/include/screen_rotation_property.h"
 
 namespace OHOS::Rosen {
 class IScreenChangeListener {
