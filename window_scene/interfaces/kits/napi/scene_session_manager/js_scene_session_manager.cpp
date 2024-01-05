@@ -1860,6 +1860,7 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
         }
 
         SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
+        SceneSessionManager::GetInstance().NotifyRecoveringFinished();
     }
     SceneSessionManager::GetInstance().SetEnableInputEvent(!isRecovering);
 
