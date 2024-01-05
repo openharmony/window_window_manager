@@ -127,7 +127,7 @@ constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
-constexpr int32_t CUBIC_CURVE_DIMENSION = 4;
+constexpr int32_t CURVE_PARAM_DIMENSION = 4;
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
 const std::string EMPTY_DEVICE_ID = "";
@@ -576,7 +576,7 @@ void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigI
     if (item.IsMap() && item.mapValue_->count("curve")) {
         const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
         config.curveType_ = curveType;
-        if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
+        if (curveParams.size() == CURVE_PARAM_DIMENSION) {
             config.ctrlX1_ = curveParams[0]; // 0: ctrl x1 index
             config.ctrlY1_ = curveParams[1]; // 1: ctrl y1 index
             config.ctrlX2_ = curveParams[2]; // 2: ctrl x2 index
@@ -620,7 +620,7 @@ void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigI
     if (item.IsMap() && item.mapValue_->count("curve")) {
         const auto& [curveType, curveParams] = CreateCurve(item["curve"]);
         appWindowSceneConfig_.windowAnimation_.curveType_ = curveType;
-        if (curveParams.size() == CUBIC_CURVE_DIMENSION) {
+        if (curveParams.size() == CURVE_PARAM_DIMENSION) {
             appWindowSceneConfig_.windowAnimation_.ctrlX1_ = curveParams[0]; // 0: ctrl x1 index
             appWindowSceneConfig_.windowAnimation_.ctrlY1_ = curveParams[1]; // 1: ctrl y1 index
             appWindowSceneConfig_.windowAnimation_.ctrlX2_ = curveParams[2]; // 2: ctrl x2 index
@@ -689,6 +689,8 @@ std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
         "linear", "spring", "interactiveSpring", "interpolatingSpring" };
+    static std::unordered_set<std::string> paramCurveSet = {
+        "spring", "interactiveSpring", "interpolatingSpring", "cubic" };
 
     std::string curveName = "easeOut";
     const auto& nameItem = curveConfig.GetProp("name");
@@ -699,9 +701,13 @@ std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
     std::string name = nameItem.stringValue_;
     std::vector<float> curveParams;
 
-    if (name == "cubic" && curveConfig.IsFloats() && curveConfig.floatsValue_->size() == CUBIC_CURVE_DIMENSION) {
+    if (paramCurveSet.find(name) != paramCurveSet.end()) {
         curveName = name;
-        curveParams = *curveConfig.floatsValue_;
+        curveParams = std::vector<float>(CURVE_PARAM_DIMENSION);
+        if (curveConfig.IsFloats() && curveConfig.floatsValue_->size() <= CURVE_PARAM_DIMENSION) {
+            std::copy(curveConfig.floatsValue_->begin(), curveConfig.floatsValue_->end(),
+                curveParams.begin());
+        }
     } else {
         auto iter = curveSet.find(name);
         if (iter != curveSet.end()) {
