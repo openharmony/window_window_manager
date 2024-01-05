@@ -69,7 +69,6 @@
           "imf",
           "frame_aware_sched",
           "previewer",
-          "hilog",
           "memmgr_plugin",
           "data_share",
           "accessibility",
