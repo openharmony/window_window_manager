@@ -216,6 +216,7 @@ enum class Rotation : uint32_t {
     ROTATION_90,
     ROTATION_180,
     ROTATION_270,
+    ROTATION_INVALID,
 };
 
 /**

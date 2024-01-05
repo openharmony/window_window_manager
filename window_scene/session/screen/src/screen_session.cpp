@@ -284,9 +284,20 @@ float ScreenSession::ConvertRotationToFloat(Rotation sensorRotation)
     return rotation;
 }
 
+void ScreenSession::SetSensorRotation(Rotation sensorRotation)
+{
+    sensorRotation_ = sensorRotation;
+}
+
+Rotation ScreenSession::GetSensorRotation()
+{
+    return sensorRotation_;
+}
+
 void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 {
     float rotation = ConvertRotationToFloat(sensorRotation);
+    currentSensorRotation_ = rotation;
     SensorRotationChange(rotation);
 }
 
@@ -382,6 +393,18 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdateAfterFoldExpand(bool foldToExpand)
+{
+    if (foldToExpand) {
+        SensorRotationChange(currentSensorRotation_);
+    } else {
+        if (GetSensorRotation() == Rotation::ROTATION_INVALID) {
+            WLOGFI("ScreenSession::UpdateAfterFoldExpand fix rotation:%{public}f", property_.GetRotation());
+            SensorRotationChange(property_.GetScreenRotation());
+        }
+    }
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
