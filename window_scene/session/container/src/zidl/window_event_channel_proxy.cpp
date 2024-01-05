@@ -30,7 +30,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
-constexpr int64_t MAX_COUNT = 210 * 9 * 9 * 100000000000;
+constexpr int32_t MAX_COUNT = 210 * 9 * 9 * 100000;
 }
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -174,8 +174,8 @@ WSError WindowEventChannelProxy::TransferFocusState(bool focusState)
 
 WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    int64_t count = 0;
-    if (!reply.ReadInt64(count)) {
+    int32_t count = 0;
+    if (!reply.ReadInt32(count)) {
         WLOGFE("GetElementInfos failed to read count");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -194,7 +194,7 @@ WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::Accessibi
     return WSError::WS_OK;
 }
 
-WSError WindowEventChannelProxy::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
+WSError WindowEventChannelProxy::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     MessageParcel data;
@@ -204,7 +204,7 @@ WSError WindowEventChannelProxy::TransferSearchElementInfo(int64_t elementId, in
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(elementId)) {
+    if (!data.WriteInt32(elementId)) {
         WLOGFE("Write elementId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -212,7 +212,7 @@ WSError WindowEventChannelProxy::TransferSearchElementInfo(int64_t elementId, in
         WLOGFE("Write mode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(baseParent)) {
+    if (!data.WriteInt32(baseParent)) {
         WLOGFE("Write baseParent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -225,8 +225,8 @@ WSError WindowEventChannelProxy::TransferSearchElementInfo(int64_t elementId, in
     return GetElementInfos(reply, infos);
 }
 
-WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -235,7 +235,7 @@ WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int64_t elemen
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(elementId)) {
+    if (!data.WriteInt32(elementId)) {
         WLOGFE("Write elementId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -243,7 +243,7 @@ WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int64_t elemen
         WLOGFE("Write text failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(baseParent)) {
+    if (!data.WriteInt32(baseParent)) {
         WLOGFE("Write baseParent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -267,8 +267,8 @@ WSError GetElementInfo(MessageParcel& reply, Accessibility::AccessibilityElement
     return WSError::WS_OK;
 }
 
-WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType,
-    int64_t baseParent, Accessibility::AccessibilityElementInfo& info)
+WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -277,7 +277,7 @@ WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int64_t elementI
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(elementId)) {
+    if (!data.WriteInt32(elementId)) {
         WLOGFE("Write elementId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -285,7 +285,7 @@ WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int64_t elementI
         WLOGFE("Write focusType failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(baseParent)) {
+    if (!data.WriteInt32(baseParent)) {
         WLOGFE("Write baseParent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -298,7 +298,7 @@ WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int64_t elementI
     return GetElementInfo(reply, info);
 }
 
-WSError WindowEventChannelProxy::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+WSError WindowEventChannelProxy::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     MessageParcel data;
@@ -308,7 +308,7 @@ WSError WindowEventChannelProxy::TransferFocusMoveSearch(int64_t elementId, int3
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(elementId)) {
+    if (!data.WriteInt32(elementId)) {
         WLOGFE("Write elementId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -316,7 +316,7 @@ WSError WindowEventChannelProxy::TransferFocusMoveSearch(int64_t elementId, int3
         WLOGFE("Write direction failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(baseParent)) {
+    if (!data.WriteInt32(baseParent)) {
         WLOGFE("Write baseParent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -329,9 +329,9 @@ WSError WindowEventChannelProxy::TransferFocusMoveSearch(int64_t elementId, int3
     return GetElementInfo(reply, info);
 }
 
-WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
+WSError WindowEventChannelProxy::TransferExecuteAction(int32_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action,
-    int64_t baseParent)
+    int32_t baseParent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -340,7 +340,7 @@ WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(elementId)) {
+    if (!data.WriteInt32(elementId)) {
         WLOGFE("Write elementId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -362,7 +362,7 @@ WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
         WLOGFE("actionArgumentsValue write error");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt64(baseParent)) {
+    if (!data.WriteInt32(baseParent)) {
         WLOGFE("Write baseParent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
