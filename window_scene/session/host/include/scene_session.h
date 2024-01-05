@@ -146,6 +146,7 @@ public:
     void RequestHideKeyboard();
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
