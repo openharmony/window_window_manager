@@ -229,6 +229,10 @@ napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info inf
 
     JsExtensionWindow* jsExtensionWindow = nullptr;
     NAPI_CALL(env, napi_unwrap(env, jsThis, reinterpret_cast<void**>(&jsExtensionWindow)));
+    if (!jsExtensionWindow || !jsExtensionWindow->extensionWindow_) {
+        WLOGFE("window is nullptr");
+        return nullptr;
+    }
     sptr<Rosen::Window> window = jsExtensionWindow->extensionWindow_->GetWindow();
     return CreateJsExtensionWindowPropertiesObject(env, window);
 }
