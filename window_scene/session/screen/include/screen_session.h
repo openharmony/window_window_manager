@@ -113,6 +113,9 @@ public:
     DMError GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace);
     DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
 
+    void SetSensorRotation(Rotation sensorRotation);
+    Rotation GetSensorRotation();
+
     bool HasPrivateSessionForeground() const;
     void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
@@ -122,6 +125,7 @@ public:
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateAfterFoldExpand(bool foldToExpand);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void SetName(std::string name);
@@ -169,6 +173,8 @@ private:
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
+    Rotation sensorRotation_ = Rotation::ROTATION_0;
+    float currentSensorRotation_ { 0.0f };
 };
 
 class ScreenSessionGroup : public ScreenSession {
