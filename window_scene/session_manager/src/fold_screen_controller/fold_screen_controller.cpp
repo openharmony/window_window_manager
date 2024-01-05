@@ -24,7 +24,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "FoldScreenController"};
 } // namespace
 
-FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMutex): displayInfoMutex_(displayInfoMutex)
+FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMutex,
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler)
+    : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::DOUBLE_DISPLAY_DEVICE);
     if (foldScreenPolicy_ == nullptr) {
@@ -44,7 +46,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
     sptr<FoldScreenPolicy> tempPolicy = nullptr;
     switch (productType) {
         case DisplayDeviceType::DOUBLE_DISPLAY_DEVICE: {
-            tempPolicy = new DualDisplayDevicePolicy(displayInfoMutex_);
+            tempPolicy = new DualDisplayDevicePolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         default: {
