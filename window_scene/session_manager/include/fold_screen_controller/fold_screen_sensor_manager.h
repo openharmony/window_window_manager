@@ -52,13 +52,17 @@ private:
 
     SensorUser hallUser;
 
+    int allowUseSensorForAlta = 0;
+
     void RegisterPostureCallback();
 
     void RegisterHallCallback();
 
     void HandleSensorData(float, int);
 
-    FoldStatus TransferAngleToScreenState(float, int) const;
+    void UpdateSwitchScreenBoundaryForAlta(float, int);
+
+    FoldStatus TransferAngleToScreenState(float, int);
 
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
