@@ -127,7 +127,7 @@ sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExten
 }
 
 WSError ExtensionSession::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    int64_t uiExtensionIdLevel)
+    int32_t uiExtensionIdLevel)
 {
     NotifyTransferAccessibilityEvent(info, uiExtensionIdLevel);
     return WSError::WS_OK;

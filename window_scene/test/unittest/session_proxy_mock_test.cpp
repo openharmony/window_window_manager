@@ -44,11 +44,10 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, Function | SmallTes
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
-    int64_t uiExtensionIdLevel = 0;
+    int32_t uiExtensionIdLevel = 0;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent01 end");
 }
 
@@ -64,12 +63,11 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, Function | SmallTes
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
-    int64_t uiExtensionIdLevel = 0;
+    int32_t uiExtensionIdLevel = 0;
 
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent02 end");
 }
 
@@ -85,13 +83,11 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
-    int64_t uiExtensionIdLevel = 0;
+    int32_t uiExtensionIdLevel = 0;
 
-    MockMessageParcel::SetWriteInt64ErrorFlag(true);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
     WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-
-    MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent03 end");
 }
 } // namespace

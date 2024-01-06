@@ -47,18 +47,18 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
-    WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+    WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError NotifySearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    WSError NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
-    WSError NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
-    WSError NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
-        int32_t action, int64_t baseParent) override;
+    WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionAguments,
+        int32_t action, int32_t baseParent) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevel) override;
+        int32_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
     WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
