@@ -500,8 +500,10 @@ bool Session::IsSessionValid() const
     }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
-        WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
-            GetPersistentId(), state_);
+        if (state_ == SessionState::STATE_DISCONNECT && sessionStage_) {
+            WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
+                GetPersistentId(), state_);
+        }
     }
     return res;
 }

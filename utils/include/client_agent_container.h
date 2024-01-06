@@ -107,7 +107,7 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& age
 {
     auto iter = std::find_if(agents.begin(), agents.end(), finder_t(agent));
     if (iter == agents.end()) {
-        WLOGFW("could not find this agent");
+        WLOGFD("could not find this agent");
         return false;
     }
     agents.erase(iter);

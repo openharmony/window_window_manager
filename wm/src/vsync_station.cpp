@@ -70,7 +70,7 @@ int64_t VsyncStation::GetVSyncPeriod()
 void VsyncStation::FlushFrameRate(uint32_t rate)
 {
     if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
-        WLOGI("VsyncStation::FlushFrameRate %{public}d", rate);
+        WLOGD("VsyncStation::FlushFrameRate %{public}d", rate);
         FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
         frameRateLinker_->UpdateFrameRateRange(range);
     }
