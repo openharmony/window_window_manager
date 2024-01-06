@@ -457,6 +457,7 @@ private:
     bool isScreenLocked_ {false};
     bool isPrepareTerminateEnable_ {false};
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
+    WSRect callingWindowNewRect_ = {0, 0, 0, 0};
     bool needUpdateSessionRect_ = false;
     int32_t currentUserId_;
     std::atomic<bool> enableInputEvent_ = true;
