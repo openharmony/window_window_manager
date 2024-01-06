@@ -393,11 +393,18 @@ protected:
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "sessionTask")
     {
-        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-            return task();
-        }
         Return ret;
-        auto syncTask = [&ret, &task]() { ret = task(); };
+        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+            StartTraceForSyncTask(name);
+            ret = task();
+            FinishTraceForSyncTask();
+            return ret;
+        }
+        auto syncTask = [&ret, &task, name]() {
+            StartTraceForSyncTask(name);
+            ret = task();
+            FinishTraceForSyncTask();
+        };
         handler_->PostSyncTask(std::move(syncTask), name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }

@@ -6848,6 +6848,6 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 } // namespace OHOS::Rosen
