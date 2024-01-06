@@ -378,7 +378,7 @@ void DisplayManager::Impl::ClearFoldStatusCallback()
     }
 }
 
-void DisplayManager::Impl::ClearDisplayStateCallback()
+void DisplayManager::Impl::ClearDisplayModeCallback()
 {
     DMError res = DMError::DM_OK;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -416,7 +416,7 @@ void DisplayManager::Impl::Clear()
     }
     ClearDisplayStateCallback();
     ClearFoldStatusCallback();
-    ClearDisplayStateCallback();
+    ClearDisplayModeCallback();
 }
 
 DisplayManager::Impl::~Impl()
