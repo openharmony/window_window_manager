@@ -335,7 +335,7 @@ napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsShowing");
+    WLOGD("IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowShowingSync(env, info) : nullptr;
 }
