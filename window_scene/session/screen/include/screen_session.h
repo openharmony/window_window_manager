@@ -31,6 +31,7 @@
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "event_handler.h"
+#include "session_manager/include/screen_rotation_property.h"
 
 namespace OHOS::Rosen {
 class IScreenChangeListener {
@@ -113,8 +114,8 @@ public:
     DMError GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace);
     DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
 
-    void SetSensorRotation(Rotation sensorRotation);
-    Rotation GetSensorRotation();
+    void SetSensorRotation(DeviceRotation sensorRotation);
+    DeviceRotation GetSensorRotation();
 
     bool HasPrivateSessionForeground() const;
     void SetPrivateSessionForeground(bool hasPrivate);
@@ -173,7 +174,7 @@ private:
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
-    Rotation sensorRotation_ = Rotation::ROTATION_0;
+    DeviceRotation sensorRotation_ = DeviceRotation::INVALID;
     float currentSensorRotation_ { 0.0f };
 };
 

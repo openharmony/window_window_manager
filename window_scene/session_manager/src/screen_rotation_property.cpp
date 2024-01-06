@@ -104,17 +104,16 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
         WLOGFW("screenSession is null.");
         return;
     }
+    screenSession->SetSensorRotation(deviceRotation);
     if (deviceRotation == DeviceRotation::INVALID) {
-        screenSession->SetSensorRotation(Rotation::ROTATION_INVALID);
         WLOGFW("deviceRotation is invalid, return.");
         return;
     }
-    Rotation targetSensorRotation = ConvertDeviceToDisplayRotation(deviceRotation);
-    screenSession->SetSensorRotation(targetSensorRotation);
     if (lastSensorRotationConverted_ == deviceRotation) {
         return;
     }
     lastSensorRotationConverted_ = deviceRotation;
+    Rotation targetSensorRotation = ConvertDeviceToDisplayRotation(deviceRotation);
     screenSession->SensorRotationChange(targetSensorRotation);
 }
 
