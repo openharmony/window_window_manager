@@ -121,6 +121,7 @@ private:
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
     void NotifyWindowInputPidChange(bool isServerPid);
+    void PerfRequest(int32_t cmdId, bool onOffTag);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
