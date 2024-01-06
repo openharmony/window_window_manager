@@ -32,6 +32,7 @@ group("unittest") {
     ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
     ":wm_window_input_channel_test",
+    ":wm_window_manager_agent_proxy_test",
     ":wm_window_manager_stub_proxy_test",
     ":wm_window_manager_test",
     ":wm_window_option_test",
@@ -41,7 +42,6 @@ group("unittest") {
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
-    ":wm_window_manager_agent_proxy_test",
   ]
   if (!scene_board_enabled) {
     deps += [ ":wm_window_proxy_test" ]
