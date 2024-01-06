@@ -412,7 +412,7 @@ class VideoControl extends ViewPU {
             Button.createWithChild({ type: ButtonType.Circle });
             Button.backgroundColor("#00FFFFFF");
             Button.size({ width: 24, height: 24 });
-            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
+            Button.margin({ top: 12, bottom: 12 });
             Button.alignRules({
                 center: { anchor: "__container__", align: VerticalAlign.Center },
                 middle: { anchor: "__container__", align: HorizontalAlign.Center }
@@ -454,7 +454,7 @@ class VideoControl extends ViewPU {
             Button.createWithChild({ type: ButtonType.Circle });
             Button.backgroundColor("#00FFFFFF");
             Button.size({ width: 24, height: 24 });
-            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
+            Button.margin({ left: this.horMargin, right: this.horMargin * 2, top: 12, bottom: 12 });
             Button.visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None);
             Button.alignRules({
                 center: { anchor: "__container__", align: VerticalAlign.Center },
@@ -490,7 +490,7 @@ class VideoControl extends ViewPU {
             Button.createWithChild({ type: ButtonType.Circle });
             Button.backgroundColor("#00FFFFFF");
             Button.size({ width: 24, height: 24 });
-            Button.margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 });
+            Button.margin({ left: this.horMargin * 2, right: this.horMargin, top: 12, bottom: 12 });
             Button.visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None);
             Button.alignRules({
                 center: { anchor: "__container__", align: VerticalAlign.Center },

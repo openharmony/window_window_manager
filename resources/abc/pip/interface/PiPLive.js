@@ -421,7 +421,8 @@ class LiveControl extends ViewPU {
             Progress.create({ value: 0, total: 100, type: ProgressType.Linear });
             Progress.size({ width: "100%", height: 4 });
             Progress.color("#33EEEEEE");
-            Progress.margin({ left: 16, right: 16, top: -4, bottom: 8 });
+            Progress.padding({ left: 16, right: 16 });
+            Progress.margin({ top: -4, bottom: 8 });
             Progress.alignRules({
                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom },
                 middle: { anchor: "__container__", align: HorizontalAlign.Center }

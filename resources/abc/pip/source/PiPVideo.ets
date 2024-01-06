@@ -206,7 +206,7 @@ struct VideoControl {
       }
       .backgroundColor('#00FFFFFF')
       .size({ width: 24, height: 24 })
-      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
+      .margin({ top: 12, bottom: 12 })
       .alignRules({
         center: { anchor: '__container__', align: VerticalAlign.Center },
         middle: { anchor: '__container__', align: HorizontalAlign.Center }
@@ -227,7 +227,7 @@ struct VideoControl {
       }
       .backgroundColor('#00FFFFFF')
       .size({ width: 24, height: 24 })
-      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
+      .margin({ left: this.horMargin, right: this.horMargin * 2, top: 12, bottom: 12 })
       .visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None)
       .alignRules({
         center: { anchor: '__container__', align: VerticalAlign.Center },
@@ -248,7 +248,7 @@ struct VideoControl {
       }
       .backgroundColor('#00FFFFFF')
       .size({ width: 24, height: 24 })
-      .margin({ left: this.horMargin, right: this.horMargin, top: 12, bottom: 12 })
+      .margin({ left: this.horMargin * 2, right: this.horMargin, top: 12, bottom: 12 })
       .visibility(this.shouldShowNextAndPrev ? Visibility.Visible : Visibility.None)
       .alignRules({
         center: { anchor: '__container__', align: VerticalAlign.Center },
