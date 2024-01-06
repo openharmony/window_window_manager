@@ -5081,6 +5081,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     if (isCallingSessionFloating) {
         needUpdateSessionRect_ = true;
         callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        callingWindowNewRect_ = callingSession_->GetSessionRect();
     }
 }
 
@@ -5111,7 +5112,8 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         return;
     }
 
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+    WSRect currRect = callingSession_->GetSessionRect();
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && currRect == callingWindowNewRect_) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
         if (needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
