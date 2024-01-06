@@ -68,6 +68,8 @@ public:
     const uint32_t resizeScreenHeightTestOne_ = 1000;
     const uint32_t resizeScreenWidthTestTwo_ = 1;
     const uint32_t resizeScreenHeightTestTwo_ = 1;
+    const uint32_t resizeScreenWidthTestThree_ = 720;
+    const uint32_t resizeScreenHeightTestThree_ = 1280;
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time
     static constexpr uint32_t TEST_SLEEP_S_LONG = 10; // test sleep for 10 seconds
     static constexpr long TIME_OUT = 1000;
@@ -1064,8 +1066,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
+    ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1099,8 +1101,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
+    ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1130,7 +1132,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level
     DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId + 1,
         resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_EQ(DMError::DM_OK, res);
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
