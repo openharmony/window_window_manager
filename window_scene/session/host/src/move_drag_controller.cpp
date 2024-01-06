@@ -29,9 +29,16 @@
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 
+#ifdef SOC_PERF_ENABLE
+#include "socperf_client.h"
+#endif
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
+
+constexpr int32_t PERF_RESIZE_WINDOW_CMDID = 10018;
+constexpr int32_t PERF_MOVE_WINDOW_CMDID = 10019;
 }
 
 MoveDragController::MoveDragController(int32_t persistentId)
@@ -61,6 +68,7 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     }
     NotifyWindowInputPidChange(flag);
     isStartMove_ = flag;
+    PerfRequest(PERF_MOVE_WINDOW_CMDID, flag);
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
@@ -236,6 +244,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
                 return false;
             }
             reason = SizeChangeReason::DRAG_START;
+            PerfRequest(PERF_RESIZE_WINDOW_CMDID, true);
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
@@ -249,6 +258,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             isStartDrag_ = false;
             hasPointDown_ = false;
             NotifyWindowInputPidChange(isStartDrag_);
+            PerfRequest(PERF_RESIZE_WINDOW_CMDID, false);
             break;
         }
         default:
@@ -832,5 +842,13 @@ void MoveDragController::OnLostFocus()
         }
         ProcessSessionRectChange(SizeChangeReason::DRAG_END);
     }
+}
+
+void MoveDragController::PerfRequest(int32_t cmdId, bool onOffTag)
+{
+#ifdef SOC_PERF_ENABLE
+    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, "");
+    WLOGFD("PerfRequestEx success cmdId: %{public}d onOffTag: %{public}d", cmdId, onOffTag);
+#endif
 }
 } // namespace OHOS::Rosen
