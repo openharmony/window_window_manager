@@ -212,7 +212,7 @@ struct MeetingControl {
       }
       .backgroundColor($r('sys.color.ohos_id_color_handup'))
       .size({ width: 24 * sizeArray[this.sizeIndex], height: 24 * sizeArray[this.sizeIndex] })
-      .margin({ left: 8 * sizeArray[this.sizeIndex], right: 8 * sizeArray[this.sizeIndex], top: 12, bottom: 12 })
+      .margin({ top: 12, bottom: 12 })
       .alignRules({
         bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
         middle: { anchor: '__container__', align: HorizontalAlign.Center }
@@ -232,6 +232,7 @@ struct MeetingControl {
       }
       .backgroundColor($r('sys.color.ohos_id_color_floating_button_icon'))
       .size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] })
+      .margin({ left: 8 * sizeArray[this.sizeIndex], right: 8 * sizeArray[this.sizeIndex] })
       .alignRules({
         center: { anchor: 'control_hangup', align: VerticalAlign.Center },
         right: { anchor: 'control_hangup', align: HorizontalAlign.Start }
@@ -252,6 +253,7 @@ struct MeetingControl {
       }
       .backgroundColor($r('sys.color.ohos_id_color_floating_button_icon'))
       .size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] })
+      .margin({ left: 8 * sizeArray[this.sizeIndex], right: 8 * sizeArray[this.sizeIndex] })
       .alignRules({
         center: { anchor: 'control_hangup', align: VerticalAlign.Center },
         left: { anchor: 'control_hangup', align: HorizontalAlign.End }
