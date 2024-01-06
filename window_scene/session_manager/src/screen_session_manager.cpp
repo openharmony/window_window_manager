@@ -2863,7 +2863,7 @@ bool ScreenSessionManager::IsMultiScreenCollaboration()
 FoldStatus ScreenSessionManager::GetFoldStatus()
 {
     if (foldScreenController_ == nullptr) {
-        WLOGFW("foldScreenController_ is null");
+        WLOGFD("foldScreenController_ is null");
         return FoldStatus::UNKNOWN;
     }
     return foldScreenController_->GetFoldStatus();
