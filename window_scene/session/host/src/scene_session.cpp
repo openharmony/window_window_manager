@@ -1088,8 +1088,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
                 WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
             }
-            auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-            if (!isPhone && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+            auto is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+            if (is2in1 && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 return WSError::WS_OK;
