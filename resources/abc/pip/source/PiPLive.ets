@@ -221,7 +221,8 @@ struct LiveControl {
       Progress({ value: 0, total: 100, type: ProgressType.Linear })
         .size({ width: '100%', height: 4 })
         .color('#33EEEEEE')
-        .margin({ left: 16, right: 16, top: -4, bottom: 8 })
+        .padding({ left: 16, right: 16 })
+        .margin({ top: -4, bottom: 8 })
         .alignRules({
           bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
           middle: { anchor: '__container__', align: HorizontalAlign.Center }

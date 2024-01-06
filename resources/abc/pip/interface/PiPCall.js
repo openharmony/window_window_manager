@@ -450,8 +450,6 @@ class CallControl extends ViewPU {
             });
             Button.size({ width: 24 * sizeArray[this.sizeIndex], height: 24 * sizeArray[this.sizeIndex] });
             Button.margin({
-                left: 8 * sizeArray[this.sizeIndex],
-                right: 8 * sizeArray[this.sizeIndex],
                 top: 12,
                 bottom: 12
             });
@@ -495,6 +493,10 @@ class CallControl extends ViewPU {
                 moduleName: ""
             });
             Button.size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] });
+            Button.margin({
+                left: 8 * sizeArray[this.sizeIndex],
+                right: 8 * sizeArray[this.sizeIndex]
+            });
             Button.alignRules({
                 center: { anchor: "control_hangup", align: VerticalAlign.Center },
                 right: { anchor: "control_hangup", align: HorizontalAlign.Start }
@@ -542,6 +544,10 @@ class CallControl extends ViewPU {
                 moduleName: ""
             });
             Button.size({ width: 16 * sizeArray[this.sizeIndex], height: 16 * sizeArray[this.sizeIndex] });
+            Button.margin({
+                left: 8 * sizeArray[this.sizeIndex],
+                right: 8 * sizeArray[this.sizeIndex]
+            });
             Button.alignRules({
                 center: { anchor: "control_hangup", align: VerticalAlign.Center },
                 left: { anchor: "control_hangup", align: HorizontalAlign.End }
