@@ -26,7 +26,6 @@
 #include "session_info.h"
 #include "key_event.h"
 #include "wm_common.h"
-#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +34,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest"};
 }
 
 class TestWindowEventChannel : public IWindowEventChannel {
@@ -46,16 +44,16 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
-    WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
+    WSError TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    WSError TransferSearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    WSError TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    WSError TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent) override;
+    WSError TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t baseParent) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -94,32 +92,32 @@ WSError TestWindowEventChannel::TransferBackpressedEventForConsumed(bool& isCons
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
+WSError TestWindowEventChannel::TransferSearchElementInfo(int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+WSError TestWindowEventChannel::TransferSearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+WSError TestWindowEventChannel::TransferFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+WSError TestWindowEventChannel::TransferFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t baseParent)
+WSError TestWindowEventChannel::TransferExecuteAction(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t baseParent)
 {
     return WSError::WS_OK;
 }
@@ -176,9 +174,9 @@ RSSurfaceNode::SharedPtr WindowSessionTest::CreateRSSurfaceNode()
 
 WSError WindowSessionTest::TransferSearchElementInfo(bool isChannelNull)
 {
-    int64_t elementId = 0;
+    int32_t elementId = 0;
     int32_t mode = 0;
-    int64_t baseParent = 0;
+    int32_t baseParent = 0;
     std::list<Accessibility::AccessibilityElementInfo> infos;
     if (isChannelNull) {
         return session_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
@@ -190,9 +188,9 @@ WSError WindowSessionTest::TransferSearchElementInfo(bool isChannelNull)
 
 WSError WindowSessionTest::TransferSearchElementInfosByText(bool isChannelNull)
 {
-    int64_t elementId = 0;
+    int32_t elementId = 0;
     std::string text;
-    int64_t baseParent = 0;
+    int32_t baseParent = 0;
     std::list<Accessibility::AccessibilityElementInfo> infos;
     if (isChannelNull) {
         return session_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
@@ -204,9 +202,9 @@ WSError WindowSessionTest::TransferSearchElementInfosByText(bool isChannelNull)
 
 WSError WindowSessionTest::TransferFindFocusedElementInfo(bool isChannelNull)
 {
-    int64_t elementId = 0;
+    int32_t elementId = 0;
     int32_t focusType = 0;
-    int64_t baseParent = 0;
+    int32_t baseParent = 0;
     Accessibility::AccessibilityElementInfo info;
     if (isChannelNull) {
         return session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
@@ -218,9 +216,9 @@ WSError WindowSessionTest::TransferFindFocusedElementInfo(bool isChannelNull)
 
 WSError WindowSessionTest::TransferFocusMoveSearch(bool isChannelNull)
 {
-    int64_t elementId = 0;
+    int32_t elementId = 0;
     int32_t direction = 0;
-    int64_t baseParent = 0;
+    int32_t baseParent = 0;
     Accessibility::AccessibilityElementInfo info;
     if (isChannelNull) {
         return session_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
@@ -232,10 +230,10 @@ WSError WindowSessionTest::TransferFocusMoveSearch(bool isChannelNull)
 
 WSError WindowSessionTest::TransferExecuteAction(bool isChannelNull)
 {
-    int64_t elementId = 0;
+    int32_t elementId = 0;
     std::map<std::string, std::string> actionArguments;
     int32_t action = 0;
-    int64_t baseParent = 0;
+    int32_t baseParent = 0;
     if (isChannelNull) {
         return session_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
     } else {
@@ -245,136 +243,6 @@ WSError WindowSessionTest::TransferExecuteAction(bool isChannelNull)
 }
 
 namespace {
-/**
- * @tc.name: TransferSearchElementInfo01
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferSearchElementInfo01 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfo(false));
-    WLOGFI("TransferSearchElementInfo01 end!");
-}
-
-/**
- * @tc.name: TransferSearchElementInfo02
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferSearchElementInfo02 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfo(true));
-    WLOGFI("TransferSearchElementInfo02 end!");
-}
-
-/**
- * @tc.name: TransferSearchElementInfosByText01
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferSearchElementInfosByText01 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfosByText(false));
-    WLOGFI("TransferSearchElementInfosByText01 end!");
-}
-
-/**
- * @tc.name: TransferSearchElementInfosByText02
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferSearchElementInfosByText02 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfosByText(true));
-    WLOGFI("TransferSearchElementInfosByText02 end!");
-}
-
-/**
- * @tc.name: TransferFindFocusedElementInfo01
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFindFocusedElementInfo01 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, TransferFindFocusedElementInfo(false));
-    WLOGFI("TransferFindFocusedElementInfo01 end!");
-}
-
-/**
- * @tc.name: TransferFindFocusedElementInfo02
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFindFocusedElementInfo02 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFindFocusedElementInfo(true));
-    WLOGFI("TransferFindFocusedElementInfo02 end!");
-}
-
-/**
- * @tc.name: TransferFocusMoveSearch01
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFocusMoveSearch01 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, TransferFocusMoveSearch(false));
-    WLOGFI("TransferFocusMoveSearch01 end!");
-}
-
-/**
- * @tc.name: TransferFocusMoveSearch02
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFocusMoveSearch02 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFocusMoveSearch(true));
-    WLOGFI("TransferFocusMoveSearch02 end!");
-}
-
-/**
- * @tc.name: TransferExecuteAction01
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferExecuteAction01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferExecuteAction01 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, TransferExecuteAction(false));
-    WLOGFI("TransferExecuteAction01 end!");
-}
-
-/**
- * @tc.name: TransferExecuteAction02
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferExecuteAction02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferExecuteAction02 begin!");
-    ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferExecuteAction(true));
-    WLOGFI("TransferExecuteAction02 end!");
-}
-
 /**
  * @tc.name: SetActive01
  * @tc.desc: set session active
@@ -2200,6 +2068,117 @@ HWTEST_F(WindowSessionTest, NotifyForegroundInteractiveStatus, Function | SmallT
 
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+
+/**
+ * @tc.name: TransferSearchElementInfo01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfo(false));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfo02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfo(true));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferSearchElementInfosByText(false));
+}
+
+/**
+ * @tc.name: TransferSearchElementInfosByText02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferSearchElementInfosByText(true));
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferFindFocusedElementInfo(false));
+}
+
+/**
+ * @tc.name: TransferFindFocusedElementInfo02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFindFocusedElementInfo(true));
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferFocusMoveSearch(false));
+}
+
+/**
+ * @tc.name: TransferFocusMoveSearch02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferFocusMoveSearch(true));
+}
+
+/**
+ * @tc.name: TransferExecuteAction01
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferExecuteAction01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_OK, TransferExecuteAction(false));
+}
+
+/**
+ * @tc.name: TransferExecuteAction02
+ * @tc.desc: windowEventChannel_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferExecuteAction02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, TransferExecuteAction(true));
 }
 }
 } // namespace Rosen

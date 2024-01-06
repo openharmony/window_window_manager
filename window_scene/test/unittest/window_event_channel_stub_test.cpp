@@ -191,9 +191,9 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfo01, Function
     MessageParcel data;
     MessageParcel reply;
     
-    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferSearchElementInfo(data, reply));
@@ -227,7 +227,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfo03, Function
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfo(data, reply));
     WLOGI("HandleTransferSearchElementInfo03 end");
@@ -244,7 +244,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfo04, Function
     MessageParcel data;
     MessageParcel reply;
     
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfo(data, reply));
@@ -262,9 +262,9 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfosByText01, F
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteString("action");
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferSearchElementInfosByText(data, reply));
@@ -298,7 +298,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfosByText03, F
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfosByText(data, reply));
     WLOGI("HandleTransferSearchElementInfosByText03 end");
@@ -315,7 +315,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferSearchElementInfosByText04, F
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteString("action");
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfosByText(data, reply));
@@ -333,9 +333,9 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFindFocusedElementInfo01, Fun
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferFindFocusedElementInfo(data, reply));
     WLOGI("HandleTransferFindFocusedElementInfo01 end");
@@ -368,7 +368,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFindFocusedElementInfo03, Fun
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFindFocusedElementInfo(data, reply));
     WLOGI("HandleTransferFindFocusedElementInfo03 end");
@@ -385,7 +385,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFindFocusedElementInfo04, Fun
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFindFocusedElementInfo(data, reply));
@@ -403,9 +403,9 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusMoveSearch01, Function |
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferFocusMoveSearch(data, reply));
     WLOGI("HandleTransferFocusMoveSearch01 end");
@@ -438,7 +438,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusMoveSearch03, Function |
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFocusMoveSearch(data, reply));
     WLOGI("HandleTransferFocusMoveSearch03 end");
@@ -455,7 +455,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusMoveSearch04, Function |
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFocusMoveSearch(data, reply));
@@ -477,11 +477,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction01, Function | S
     std::vector<std::string> actionArgumentsKey {};
     std::vector<std::string> actionArgumentsValue {};
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
@@ -517,7 +517,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction03, Function | S
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
     WLOGI("HandleTransferExecuteAction03 end");
@@ -535,7 +535,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction04, Function | S
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     std::vector<std::string> actionArgumentsKey {};
     std::vector<std::string> actionArgumentsValue {};
@@ -563,11 +563,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction05, Function | S
         actionArgumentsValue.push_back(std::to_string(i));
     }
     
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_VALUE, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
@@ -596,11 +596,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction06, Function | S
         actionArgumentsValue.push_back(std::to_string(i));
     }
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_VALUE, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
@@ -623,11 +623,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction07, Function | S
     actionArgumentsKey.push_back("action");
     std::vector<std::string> actionArgumentsValue;
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_VALUE, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
@@ -650,11 +650,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction08, Function | S
     std::vector<std::string> actionArgumentsValue;
     actionArgumentsValue.push_back("click");
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_VALUE, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
@@ -680,11 +680,11 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferExecuteAction09, Function | S
     std::vector<std::string> actionArgumentsValue;
     actionArgumentsValue.push_back("click");
 
-    data.WriteUint64(0);
+    data.WriteUint32(0);
     data.WriteUint32(0);
     data.WriteStringVector(actionArgumentsKey);
     data.WriteStringVector(actionArgumentsValue);
-    data.WriteUint64(0);
+    data.WriteUint32(0);
 
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_VALUE, windowEventChannelStub_->HandleTransferExecuteAction(data, reply));
