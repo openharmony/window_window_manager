@@ -80,6 +80,8 @@ public:
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
+    void ClearFoldStatusCallback();
+    void ClearDisplayModeCallback();
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
     void NotifyScreenshot(sptr<ScreenshotInfo> info);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
@@ -361,6 +363,36 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
     }
 }
 
+void DisplayManager::Impl::ClearFoldStatusCallback()
+{
+    DMError res = DMError::DM_OK;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (foldStatusListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(foldStatusListenerAgent_,
+            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+        foldStatusListenerAgent_ = nullptr;
+        WLOGI("ClearFoldStatusCallback foldStatusListenerAgent_ is nullptr !");
+    }
+    if (res != DMError::DM_OK) {
+        WLOGFW("UnregisterDisplayManagerAgent FOLD_STATUS_CHANGED_LISTENER failed !");
+    }
+}
+
+void DisplayManager::Impl::ClearDisplayStateCallback()
+{
+    DMError res = DMError::DM_OK;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (displayModeListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayModeListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+        displayModeListenerAgent_ = nullptr;
+        WLOGI("ClearDisplayStateCallback displayModeListenerAgent_ is nullptr !");
+    }
+    if (res != DMError::DM_OK) {
+        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_MODE_CHANGED_LISTENER failed !");
+    }
+}
+
 void DisplayManager::Impl::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -382,6 +414,8 @@ void DisplayManager::Impl::Clear()
     if (res != DMError::DM_OK) {
         WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
     }
+    ClearDisplayStateCallback();
+    ClearFoldStatusCallback();
     ClearDisplayStateCallback();
 }
 
