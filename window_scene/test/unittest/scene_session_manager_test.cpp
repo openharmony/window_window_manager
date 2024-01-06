@@ -129,7 +129,6 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     WSError result = SceneSessionManager::GetInstance().SetBrightness(sceneSession, 0.5);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-    delete sceneSession;
 }
 
 /**
@@ -229,6 +228,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSizeLimits01, Function | SmallTest
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfMainWindow_, static_cast<uint32_t>(20));
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfSubWindow_, static_cast<uint32_t>(30));
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfSubWindow_, static_cast<uint32_t>(40));
+    delete sceneSessionManager;
 }
 
 /**
@@ -1321,6 +1321,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale01, Function | SmallTest | 
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigSnapshotScale();
     ASSERT_EQ(sceneSessionManager->snapshotScale_, static_cast<float>(0.7));
+    delete sceneSessionManager;
 }
 
 /**
@@ -1338,6 +1339,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale02, Function | SmallTest | 
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigSnapshotScale();
     ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+    delete sceneSessionManager;
 }
 
 /**
@@ -1355,6 +1357,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale03, Function | SmallTest | 
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigSnapshotScale();
     ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+    delete sceneSessionManager;
 }
 
 /**
@@ -1372,6 +1375,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale04, Function | SmallTest | 
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigSnapshotScale();
     ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+    delete sceneSessionManager;
 }
 
 /**
@@ -1389,6 +1393,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale05, Function | SmallTest | 
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigSnapshotScale();
     ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+    delete sceneSessionManager;
 }
 
 /**
@@ -1401,8 +1406,9 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionAll, Function | SmallTest | Level3)
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest";
     sessionInfo.abilityName_ = "DumpSessionAll";
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
+    ASSERT_EQ(nullptr, sceneSession);
     std::vector<std::string> infos;
     WSError result = ssm_->DumpSessionAll(infos);
     ASSERT_EQ(WSError::WS_OK, result);
@@ -1419,10 +1425,11 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionWithId, Function | SmallTest | Leve
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest";
     sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
+    ASSERT_EQ(nullptr, sceneSession);
     std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionWithId(sceneSession->GetPersistentId(), infos);
+    WSError result = ssm_->DumpSessionWithId(windowSessionProperty->GetPersistentId(), infos);
     ASSERT_EQ(WSError::WS_OK, result);
     ASSERT_FALSE(infos.empty());
 }
@@ -1477,6 +1484,7 @@ HWTEST_F(SceneSessionManagerTest, SetSessionContinueState, Function | SmallTest 
     WSError result01 = ssm_->SetSessionContinueState(token, continueState);
     ASSERT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
     ASSERT_EQ(result01, WSError::WS_ERROR_INVALID_PARAM);
+    delete data;
 }
 
 /**
@@ -1490,6 +1498,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigDecor, Function | SmallTest | Level3)
     int ret = 0;
     ssm_->ConfigDecor(*item);
     ASSERT_EQ(ret, 0);
+    delete item;
 }
 
 /**
@@ -1503,6 +1512,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect, Function | SmallTest | Lev
     int ret = 0;
     ssm_->ConfigWindowEffect(*item);
     ASSERT_EQ(ret, 0);
+    delete item;
 }
 
 /**
@@ -1792,7 +1802,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterInputMethodShownFunc, Function | Small
     ASSERT_EQ(ret, 0);
     ssm_->RegisterInputMethodShownFunc(sceneSession);
     ASSERT_EQ(ret, 0);
-    delete sceneSession;
 }
 
 /**
@@ -1824,7 +1833,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterInputMethodHideFunc, Function | SmallT
     ASSERT_EQ(ret, 0);
     ssm_->RegisterInputMethodHideFunc(sceneSession);
     ASSERT_EQ(ret, 0);
-    delete sceneSession;
 }
 
 /**
@@ -1843,7 +1851,6 @@ HWTEST_F(SceneSessionManagerTest, SetAbilitySessionInfo, Function | SmallTest | 
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
     ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
-    delete scensession;
 }
 
 /**
@@ -1872,7 +1879,6 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionBackground, Function | Smal
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(scensession, isDelegator));
-    delete scensession;
 }
 
 /**
@@ -1888,7 +1894,6 @@ HWTEST_F(SceneSessionManagerTest, DestroyDialogWithMainWindow, Function | SmallT
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_EQ(WSError::WS_OK, ssm_->DestroyDialogWithMainWindow(scensession));
-    delete scensession;
 }
 
 /**
@@ -1905,7 +1910,6 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionDestruction, Function | Sma
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(scensession, needRemoveSession));
-    delete scensession;
 }
 
 /**
@@ -1924,7 +1928,6 @@ HWTEST_F(SceneSessionManagerTest, NotifyForegroundInteractiveStatus, Function | 
     int ret = 0;
     ssm_->NotifyForegroundInteractiveStatus(scensession, interactive);
     ASSERT_EQ(ret, 0);
-    delete scensession;
 }
 
 /**
@@ -1942,7 +1945,6 @@ HWTEST_F(SceneSessionManagerTest, AddClientDeathRecipient, Function | SmallTest 
     int ret = 0;
     ssm_->AddClientDeathRecipient(nullptr, scensession);
     ASSERT_EQ(ret, 0);
-    delete scensession;
 }
 
 /**
@@ -2004,7 +2006,7 @@ HWTEST_F(SceneSessionManagerTest, OnOutsideDownEvent, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest, NotifySessionTouchOutside, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->NotifySessionTouchOutside(INVALID_SESSION_ID);
+    SceneSessionManager::GetInstance().NotifySessionTouchOutside(0);
     ASSERT_EQ(ret, 0);
 }
 
@@ -2054,7 +2056,7 @@ HWTEST_F(SceneSessionManagerTest, GetWindowSceneConfig, Function | SmallTest | L
 */
 HWTEST_F(SceneSessionManagerTest, ProcessBackEvent, Function | SmallTest | Level3)
 {
-    WSError result = ssm_->ProcessBackEvent();
+    WSError result = SceneSessionManager::GetInstance().ProcessBackEvent();
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -2122,7 +2124,6 @@ HWTEST_F(SceneSessionManagerTest, PreHandleCollaborator, Function | SmallTest | 
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->PreHandleCollaborator(scensession);
     ASSERT_NE(scensession->GetSessionInfo().want, nullptr);
-    delete scensession;
 }
 
 /**
@@ -2159,7 +2160,6 @@ HWTEST_F(SceneSessionManagerTest, NotifyUpdateSessionInfo, Function | SmallTest 
     int32_t persistentId_ = 10086;
     ssm_->NotifyMoveSessionToForeground(collaboratorType_, persistentId_);
     ssm_->NotifyClearSession(collaboratorType_, persistentId_);
-    delete scensession;
 }
 
 /**
@@ -2187,7 +2187,6 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionCreate, Function | SmallTest | Le
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>(aInfo_);
     int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
     ssm_->NotifyLoadAbility(collaboratorType_, abilitySessionInfo_, abilityInfo_);
-    delete scensession;
 }
 
 /**
@@ -2204,14 +2203,16 @@ HWTEST_F(SceneSessionManagerTest, QueryAbilityInfoFromBMS, Function | SmallTest 
     sessionInfo_.moduleName_ = "ModuleName";
     AppExecFwk::AbilityInfo abilityInfo_;
     int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
-    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    SceneSessionManager::GetInstance().QueryAbilityInfoFromBMS(uId_,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
     EXPECT_EQ(sessionInfo_.want, nullptr);
-    ssm_->Init();
-    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
-    ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
+    SceneSessionManager::GetInstance().Init();
+    SceneSessionManager::GetInstance().QueryAbilityInfoFromBMS(uId_,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    SceneSessionManager::GetInstance().NotifyStartAbility(collaboratorType_, sessionInfo_);
     sessionInfo_.want = std::make_shared<AAFwk::Want>();
     collaboratorType_ = CollaboratorType::OTHERS_TYPE;
-    ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
+    SceneSessionManager::GetInstance().NotifyStartAbility(collaboratorType_, sessionInfo_);
     ASSERT_NE(sessionInfo_.want, nullptr);
 }
 
@@ -2246,7 +2247,7 @@ HWTEST_F(SceneSessionManagerTest, IsSessionClearable, Function | SmallTest | Lev
     info.lockedState = true;
     scensession = nullptr;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_TRUE(ssm_->IsSessionClearable(scensession));
+    EXPECT_FALSE(ssm_->IsSessionClearable(scensession));
     info.lockedState = false;
     info.isSystem_ = true;
     scensession = nullptr;
@@ -2256,7 +2257,6 @@ HWTEST_F(SceneSessionManagerTest, IsSessionClearable, Function | SmallTest | Lev
     scensession = nullptr;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_TRUE(ssm_->IsSessionClearable(scensession));
-    delete scensession;
 }
 
 /**
@@ -2269,15 +2269,13 @@ HWTEST_F(SceneSessionManagerTest, UpdateSessionProperty, Function | SmallTest | 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
     WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->UpdatePropertyRaiseEnabled(property, scensession);
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -2305,14 +2303,12 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty01, Function | SmallTest |
     action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
     ssm_->HandleUpdateProperty(property, action, scensession);
     WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -2350,11 +2346,9 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest |
     action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
     ssm_->HandleUpdateProperty(property, action, scensession);
     WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
     action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -2377,8 +2371,6 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty03, Function | SmallTest |
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -2401,9 +2393,7 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
     requireLock = false;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
     WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_OK);
-    delete scensession;
-    delete property;
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 }
 
 /**
@@ -2431,8 +2421,6 @@ HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function |
     ssm_->UpdateForceHideState(scensession, property, false);
     uint32_t result = property->GetModeSupportInfo();
     ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -2507,15 +2495,15 @@ HWTEST_F(SceneSessionManagerTest, SetFocusedSession, Function | SmallTest | Leve
 */
 HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Level3)
 {
-    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    int32_t focusedSession_ = SceneSessionManager::GetInstance().GetFocusedSession();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t persistentId_ = INVALID_SESSION_ID;
-    WMError result01 = ssm_->RequestFocusStatus(persistentId_, true);
+    WMError result01 = SceneSessionManager::GetInstance().RequestFocusStatus(persistentId_, true);
     EXPECT_EQ(result01, WMError::WM_OK);
     persistentId_ = 10000;
-    WMError result02 = ssm_->RequestFocusStatus(persistentId_, true);
+    WMError result02 = SceneSessionManager::GetInstance().RequestFocusStatus(persistentId_, true);
     EXPECT_EQ(result02, WMError::WM_OK);
-    WMError result03 = ssm_->RequestFocusStatus(persistentId_, false);
+    WMError result03 = SceneSessionManager::GetInstance().RequestFocusStatus(persistentId_, false);
     EXPECT_EQ(result03, WMError::WM_OK);
 }
 
@@ -2530,12 +2518,12 @@ HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t persistentId_ = INVALID_SESSION_ID;
     WSError result01 = ssm_->RaiseWindowToTop(persistentId_);
-    EXPECT_EQ(result01, WSError::WS_OK);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
     persistentId_ = 10000;
     WSError result02 = ssm_->RaiseWindowToTop(persistentId_);
-    EXPECT_EQ(result02, WSError::WS_OK);
+    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PERMISSION);
     WSError result03 = ssm_->RaiseWindowToTop(persistentId_);
-    EXPECT_EQ(result03, WSError::WS_OK);
+    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -2578,7 +2566,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionExceptionFunc, Function | Small
     scensession->UpdateNativeVisibility(true);
     bool result02 = ssm_->IsSessionVisible(scensession);
     ASSERT_TRUE(result02);
-    delete scensession;
 }
 
 /**
@@ -2594,10 +2581,13 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionInfo, Function | SmallTest | Level3
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
     info.isSystem_ = false;
-    sptr<SceneSession> scensession = nullptr;
-    ssm_->DumpSessionInfo(scensession, oss);
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    SceneSessionManager::GetInstance().DumpSessionInfo(scensession, oss);
     EXPECT_FALSE(scensession->IsVisible());
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
+
+    sptr<SceneSession::SpecificSessionCallback> specific = new SceneSession::SpecificSessionCallback();
+    EXPECT_NE(nullptr, specific);
+    scensession = new (std::nothrow) SceneSession(info, specific);
     ssm_->DumpSessionInfo(scensession, oss);
     EXPECT_FALSE(scensession->IsVisible());
     scensession = nullptr;
@@ -2605,7 +2595,7 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionInfo, Function | SmallTest | Level3
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->DumpSessionInfo(scensession, oss);
     scensession = nullptr;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    scensession = new (std::nothrow) SceneSession(info, specific);
     ssm_->DumpAllAppSessionInfo(oss);
 }
 
@@ -2625,7 +2615,7 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionElementInfo, Function | SmallTest |
     std::string strId = "10086";
     sptr<SceneSession> scensession = nullptr;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    std::vector<std::string> params_;
+    std::vector<std::string> params_(5, "");
     std::string dumpInfo_;
     ssm_->DumpSessionElementInfo(scensession, params_, dumpInfo_);
     scensession = nullptr;
@@ -2670,7 +2660,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateFocus, Function | SmallTest | Level3)
     SessionInfo info;
     info.bundleName_ = "bundleName_";
     bool isFocused = true;
-    WSError result = ssm_->UpdateFocus(persistentId, isFocused);
+    WSError result = SceneSessionManager::GetInstance().UpdateFocus(persistentId, isFocused);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -2683,10 +2673,12 @@ HWTEST_F(SceneSessionManagerTest, UpdateWindowMode, Function | SmallTest | Level
 {
     int32_t persistentId = 10086;
     int32_t windowMode = 3;
-    WSError result = ssm_->UpdateWindowMode(persistentId, windowMode);
+    WSError result = SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
-    std::function<void(int32_t persistentId, WindowUpdateType type)> func = WindowChangedFuncTest;
-    ssm_->RegisterWindowChanged(func);
+    WindowChangedFunc func = [](int32_t persistentId, WindowUpdateType type) {
+        OHOS::Rosen::WindowChangedFuncTest(persistentId, type);
+    };
+    SceneSessionManager::GetInstance().RegisterWindowChanged(func);
 }
 
 /**
@@ -2719,7 +2711,6 @@ HWTEST_F(SceneSessionManagerTest, UpdatePrivateStateAndNotify, Function | SmallT
     ssm_->UpdatePrivateStateAndNotify(persistentId);
     int result = ssm_->GetSceneSessionPrivacyModeCount();
     EXPECT_EQ(result, 0);
-    delete scensession;
 }
 
 /**
@@ -2743,7 +2734,6 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags, Function | SmallTest | Level3)
     property->SetSystemCalling(true);
     WSError result03 = ssm_->SetWindowFlags(scensession, property);
     ASSERT_EQ(result03, WSError::WS_OK);
-    delete scensession;
 }
 
 /**
@@ -2787,7 +2777,6 @@ HWTEST_F(SceneSessionManagerTest, UnRegisterSessionListener, Function | SmallTes
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     WSError result = ssm_->UnRegisterSessionListener(listener);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-    delete listener;
 }
 
 /**
@@ -2856,7 +2845,6 @@ HWTEST_F(SceneSessionManagerTest, TerminateSessionNew, Function | SmallTest | Le
     info = new (std::nothrow) AAFwk::SessionInfo();
     WSError result02 = ssm_->TerminateSessionNew(info, needStartCaller);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result02);
-    delete info;
 }
 
 /**
@@ -2870,7 +2858,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, Function | SmallTes
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     WSError result = ssm_->RegisterSessionListener(listener);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-    delete listener;
 }
 
 /**
@@ -2885,7 +2872,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener02, Function | SmallTes
     WSError result01 = ssm_->RegisterSessionListener(sessionListener);
     EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION_LISTENER);
     ssm_->UnregisterSessionListener();
-    delete sessionListener;
 }
 
 /**
@@ -2903,7 +2889,6 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTes
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     WSError result02 = ssm_->RequestSceneSessionByCall(scensession);
     ASSERT_EQ(result02, WSError::WS_OK);
-    delete scensession;
 }
 
 /**
@@ -3073,6 +3058,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTe
     pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
     EXPECT_EQ(pixelMap, nullptr);
 }
+
 }
 } // namespace Rosen
 } // namespace OHOS
