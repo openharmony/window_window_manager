@@ -151,7 +151,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     std::vector<ScreenHDRFormat> rsHDRFormat;
     std::vector<GraphicCM_ColorSpaceType> rsColorSpace;
     auto hdrStatus = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(screenId_, rsHDRFormat);
-    auto colorStatus = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(screenId_, rsColorSpace);
+    auto colorStatus = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(screenId_, rsColorSpace);
     if (static_cast<StatusCode>(hdrStatus) != StatusCode::SUCCESS) {
         WLOGFE("get hdr format failed! status code: %{public}d", hdrStatus);
     } else {
