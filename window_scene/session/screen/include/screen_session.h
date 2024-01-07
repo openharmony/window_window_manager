@@ -21,7 +21,6 @@
 
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
-#include <ui/rs_display_node.h>
 
 #include "screen_property.h"
 #include "dm_common.h"
@@ -165,6 +164,8 @@ public:
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
     Rotation ConvertIntToRotation(int rotation);
+    std::vector<uint32_t> ConvertHDRFormatToInt(std::vector<ScreenHDRFormat>& hdrFormat);
+    std::vector<uint32_t> ConvertColorSpaceToInt(std::vector<GraphicCM_ColorSpaceType>& colorSpace);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };

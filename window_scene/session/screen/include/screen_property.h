@@ -20,6 +20,7 @@
 #include "dm_common.h"
 #include "class_var_definition.h"
 #include "screen_info.h"
+#include "ui/rs_display_node.h"
 
 namespace OHOS::Rosen {
 

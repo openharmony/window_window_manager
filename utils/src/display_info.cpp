@@ -32,7 +32,8 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_) &&
         parcel.WriteUint32(static_cast<uint32_t>(displayState_)) &&
         parcel.WriteBool(waterfallDisplayCompressionStatus_) &&
-        parcel.WriteInt32(dpi_) && parcel.WriteUint32(static_cast<uint32_t>(displayOrientation_));
+        parcel.WriteInt32(dpi_) && parcel.WriteUint32(static_cast<uint32_t>(displayOrientation_)) &&
+        parcel.WriteUint32Vector(colorSpaces_) && parcel.WriteUint32Vector(hdrFormats_);
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -56,7 +57,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation) &&
         parcel.ReadInt32(displayInfo->offsetX_) && parcel.ReadInt32(displayInfo->offsetY_) &&
         parcel.ReadUint32(displayState) && parcel.ReadBool(displayInfo->waterfallDisplayCompressionStatus_) &&
-        parcel.ReadInt32(displayInfo->dpi_) && parcel.ReadUint32(displayOrientation);
+        parcel.ReadInt32(displayInfo->dpi_) && parcel.ReadUint32(displayOrientation) &&
+        parcel.ReadUint32Vector(&(displayInfo->colorSpaces_)) && parcel.ReadUint32Vector(&(displayInfo->hdrFormats_));
     if (!res) {
         delete displayInfo;
         return nullptr;
