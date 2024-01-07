@@ -190,6 +190,16 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
     hostSession_->NotifySyncOn();
 }
 
+void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
+{
+    WLOGFD("called");
+    if (hostSession_ == nullptr) {
+        WLOGFE("hostSession_ is nullptr");
+        return;
+    }
+    hostSession_->TriggerBindModalUIExtension();
+}
+
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
