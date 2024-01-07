@@ -40,6 +40,7 @@ public:
         const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) override;
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
+    void TriggerBindModalUIExtension() override;
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;

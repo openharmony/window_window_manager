@@ -64,6 +64,7 @@ public:
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     void NotifyExtensionDied() override;
+    void TriggerBindModalUIExtension() override;
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;

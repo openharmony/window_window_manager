@@ -1406,6 +1406,11 @@ public:
      */
     virtual void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) {}
     /**
+     * @brief Trigger BindUIExtensionModal callback.
+     *        It needs to be called when the UIExtension frame node is set to asynchronously bind to the modal window.
+     */
+    virtual void TriggerBindModalUIExtension() {}
+    /**
      * @brief Perform back event.
      *
      */

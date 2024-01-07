@@ -27,6 +27,7 @@ using NotifyRemoteReadyFunc = std::function<void()>;
 using NotifySyncOnFunc = std::function<void()>;
 using NotifyAsyncOnFunc = std::function<void()>;
 using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
+using NotifyBindModalFunc = std::function<void()>;
 class ExtensionSession : public Session {
 public:
     struct ExtensionSessionEventCallback : public RefBase {
@@ -36,6 +37,7 @@ public:
         NotifySyncOnFunc notifySyncOnFunc_;
         NotifyAsyncOnFunc notifyAsyncOnFunc_;
         NotifyGetAvoidAreaByTypeFunc notifyGetAvoidAreaByTypeFunc_;
+        NotifyBindModalFunc notifyBindModalFunc_;
     };
 
     explicit ExtensionSession(const SessionInfo& info);
@@ -58,11 +60,13 @@ public:
     void NotifyRemoteReady() override;
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
+    void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
+    bool isFirstTriggerBindModal_ = true;
 };
 } // namespace OHOS::Rosen
 
