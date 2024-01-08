@@ -52,28 +52,28 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+    virtual WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos)
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifySearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    virtual WSError NotifySearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos)
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    virtual WSError NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& info)
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    virtual WSError NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& info)
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t baseParent)
+    virtual WSError NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t baseParent)
     {
         return WSError::WS_OK;
     }

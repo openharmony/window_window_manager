@@ -290,8 +290,8 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     return WSError::WS_OK;
 }
 
-WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
-    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (uiContent_ == nullptr) {
         WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent_");
@@ -301,8 +301,8 @@ WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int
     return WSError::WS_OK;
 }
 
-WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int32_t elementId, const std::string& text,
-    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
+WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int64_t elementId, const std::string& text,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
     if (uiContent_ == nullptr) {
         WLOGFE("NotifySearchElementInfosByText error, no uiContent_");
@@ -312,8 +312,8 @@ WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int32_t eleme
     return WSError::WS_OK;
 }
 
-WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int32_t elementId, int32_t focusType,
-    int32_t baseParent, Accessibility::AccessibilityElementInfo& info)
+WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& info)
 {
     if (uiContent_ == nullptr) {
         WLOGFE("NotifyFindFocusedElementInfo error, no uiContent_");
@@ -323,7 +323,7 @@ WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int32_t element
     return WSError::WS_OK;
 }
 
-WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
     if (uiContent_ == nullptr) {
@@ -334,9 +334,9 @@ WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int32_t elementId, int
     return WSError::WS_OK;
 }
 
-WSError WindowExtensionSessionImpl::NotifyExecuteAction(int32_t elementId,
+WSError WindowExtensionSessionImpl::NotifyExecuteAction(int64_t elementId,
     const std::map<std::string, std::string>& actionAguments, int32_t action,
-    int32_t baseParent)
+    int64_t baseParent)
 {
     if (uiContent_ == nullptr) {
         WLOGFE("NotifyExecuteAction error, no uiContent_");
@@ -351,7 +351,7 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int32_t elementId,
 }
 
 WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-    int32_t uiExtensionIdLevel)
+    int64_t uiExtensionIdLevel)
 {
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");

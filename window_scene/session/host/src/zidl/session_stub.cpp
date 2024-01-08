@@ -494,9 +494,9 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
 {
     sptr<Accessibility::AccessibilityEventInfoParcel> infoPtr =
         data.ReadStrongParcelable<Accessibility::AccessibilityEventInfoParcel>();
-    int32_t uiExtensionIdLevel = 0;
-    if (!data.ReadInt32(uiExtensionIdLevel)) {
-        WLOGFE("read idVect error");
+    int64_t uiExtensionIdLevel = 0;
+    if (!data.ReadInt64(uiExtensionIdLevel)) {
+        WLOGFE("read uiExtensionIdLevel error");
         return ERR_INVALID_DATA;
     }
     NotifyTransferAccessibilityEvent(*infoPtr, uiExtensionIdLevel);

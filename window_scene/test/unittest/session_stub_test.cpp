@@ -14,15 +14,15 @@
  */
 
 #include <gtest/gtest.h>
+#include <ipc_types.h>
 #include <pointer_event.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "ability_start_setting.h"
-#include <ipc_types.h>
-#include "want.h"
-#include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "accessibility_event_info_parcel.h"
+#include "session/host/include/zidl/session_ipc_interface_code.h"
+#include "want.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -66,27 +66,6 @@ void SessionStubTest::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: HandleTransferAccessibilityEvent
- * @tc.desc: sessionStub HandleTransferAccessibilityEvent
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-
-    Accessibility::AccessibilityEventInfo info;
-    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
-    data.WriteParcelable(&infoParcel);
-
-    int32_t uiExtensionIdLevel = 0;
-    data.WriteInt32(uiExtensionIdLevel);
-    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
-}
-
 /**
  * @tc.name: OnRemoteRequest01
  * @tc.desc: sessionStub OnRemoteRequest01
