@@ -507,6 +507,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "scaledDensity", CreateJsValue(env, info->GetVirtualPixelRatio()));
     napi_set_named_property(env, objValue, "xDPI", CreateJsValue(env, info->GetXDpi()));
     napi_set_named_property(env, objValue, "yDPI", CreateJsValue(env, info->GetYDpi()));
+    napi_set_named_property(env, objValue, "colorSpaces", CreateJsColorSpaceArray(env, info->GetColorSpaces()));
+    napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
