@@ -2250,9 +2250,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
-            if ((property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-                 property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                 property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+            if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
                 system::GetParameter("const.product.devicetype", "unknown") == "phone") {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
