@@ -117,10 +117,6 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
         WLOGFI("SensorEvent dataLen less than posture data size.");
         return;
     }
-    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
-        WLOGFI("SensorEvent display status is locked.");
-        return;
-    }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     globalAngle = (*postureData).angle;
     if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL)) {
@@ -145,11 +141,6 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         WLOGFI("SensorEvent dataLen less than hall data size.");
         return;
     }
-    if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ == true) {
-        WLOGFI("SensorEvent display status is locked.");
-        return;
-    }
-
     ExtHallData *extHallData = reinterpret_cast<ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     uint16_t flag = (uint16_t)(*extHallData).flag;
     if (!(flag & (1 << 1))) {
@@ -179,7 +170,7 @@ void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
             foldScreenPolicy_->SetFoldStatus(mState_);
         }
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
-        if (foldScreenPolicy_ != nullptr) {
+        if (foldScreenPolicy_ != nullptr && foldScreenPolicy_->lockDisplayStatus_ != true) {
             foldScreenPolicy_->SendSensorResult(mState_);
         }
     }
