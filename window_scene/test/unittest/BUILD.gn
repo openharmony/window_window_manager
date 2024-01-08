@@ -624,7 +624,7 @@ ohos_unittest("ws_window_event_channel_proxy_mock_test") {
   defines = [
     "ENABLE_MOCK_WRITE_STRING",
     "ENABLE_MOCK_WRITE_STRING_VECTOR",
-    "ENABLE_MOCK_READ_INT32",
+    "ENABLE_MOCK_READ_INT64",
   ]
 
   deps = [ ":ws_unittest_common" ]
@@ -715,6 +715,8 @@ ohos_unittest("ws_session_stub_mock_test") {
     "../mock/mock_message_parcel.cpp",
     "session_stub_mock_test.cpp",
   ]
+
+  defines = [ "ENABLE_MOCK_READ_INT64" ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 

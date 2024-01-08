@@ -69,7 +69,7 @@ public:
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
     virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
     virtual WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevel)
+        int64_t uiExtensionIdLevel)
     {
         return WSError::WS_OK;
     }
@@ -78,7 +78,7 @@ public:
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevel) {}
+        int64_t uiExtensionIdLevel) {}
 
     // PictureInPicture
     virtual void NotifyPiPWindowPrepareClose() {}
