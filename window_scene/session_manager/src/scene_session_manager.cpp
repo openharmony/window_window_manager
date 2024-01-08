@@ -5274,7 +5274,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
         || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos
-        || sceneSession->GetSystemTouchable() == false) {
+        || sceneSession->GetSessionInfo().bundleName_.find("SCBScenePanel") != std::string::npos) {
         WLOGFD("filter gesture window.");
         return false;
     }
