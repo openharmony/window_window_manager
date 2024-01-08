@@ -1845,14 +1845,6 @@ void SceneSessionManager::RecoverWindowSessionProperty(
     auto windowType = property->GetWindowType();
     if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         RelayoutKeyBoard(sceneSession);
-        callingWindowId_ = property->GetCallingWindow();
-        const auto& callingSession = GetSceneSession(static_cast<int32_t>(callingWindowId_));
-        if (callingSession != nullptr) {
-            WLOGFI("[WMSRecover] NotifyOccupiedAreaChangeInfo after inputMethod session recovered,"
-                "persistentId = %{public}" PRId32, callingSession->GetPersistentId());
-            sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo();
-            callingSession->NotifyOccupiedAreaChangeInfo(info);
-        }
     } else {
         const auto& rect = property->GetWindowRect();
         const auto& requestRect = sceneSession->GetSessionProperty()->GetRequestRect();
@@ -1864,14 +1856,6 @@ void SceneSessionManager::RecoverWindowSessionProperty(
         sceneSession->GetSessionProperty()->SetRequestRect(rect);
         auto wsRectPos = SessionHelper::TransferToWSRect(rect);
         sceneSession->UpdateSessionRect(wsRectPos, SizeChangeReason::MOVE);
-
-        auto persistentId = sceneSession->GetPersistentId();
-        if (persistentId == callingWindowId_) {
-            WLOGFI("[WMSRecover] NotifyOccupiedAreaChangeInfo after calling session recovered,"
-                "persistentId = %{public}" PRId32, persistentId);
-            sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo();
-            sceneSession->NotifyOccupiedAreaChangeInfo(info);
-        }
     }
 }
 

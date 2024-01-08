@@ -47,6 +47,7 @@ public:
     void RegisterWindowChanged();
 
 private:
+    void KeyEventConsumedCallback(int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed);
     void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     void ProcessEnterLeaveEventAsync();
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
