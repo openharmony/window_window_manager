@@ -2020,50 +2020,62 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         return;
     }
 
-    bool inputMethodHasProcessed = false;
+    auto dispatchFunc = [this, &keyEvent] () {
+        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            inputEventConsumer = inputEventConsumer_;
+        }
+        int32_t keyCode = keyEvent->GetKeyCode();
+        int32_t keyAction = keyEvent->GetKeyAction();
+        if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+            WLOGFI("input event is consumed by back, return");
+            if (inputEventConsumer != nullptr) {
+                WLOGFD("Transfer key event to inputEventConsumer");
+                if (inputEventConsumer->OnInputEvent(keyEvent)) {
+                    return;
+                }
+                PerformBack();
+                return;
+            }
+            HandleBackEvent();
+            return;
+        }
+        if (inputEventConsumer != nullptr) {
+            WLOGD("Transfer key event to inputEventConsumer");
+            (void)inputEventConsumer->OnInputEvent(keyEvent);
+        } else if (uiContent_) {
+            auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+            if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+                property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+                Recover();
+            }
+        }
+    };
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
-        WLOGD("dispatch keyEvent to input method");
-        inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
-    }
-#endif // IMF_ENABLE
-    if (inputMethodHasProcessed) {
-        WLOGFD("input method has processed key event");
-        return;
-    }
-    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        inputEventConsumer = inputEventConsumer_;
-    }
-    int32_t keyCode = keyEvent->GetKeyCode();
-    int32_t keyAction = keyEvent->GetKeyAction();
-    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-        WLOGFI("input event is consumed by back, return");
-        if (inputEventConsumer != nullptr) {
-            WLOGFD("Transfer key event to inputEventConsumer");
-            if (inputEventConsumer->OnInputEvent(keyEvent)) {
+        WLOGD("Async dispatch keyEvent to input method");
+        auto callback = [this, &dispatchFunc] () {
+            if (keyEvent == nullptr) {
+                WLOGFW("keyEvent is null");
                 return;
             }
-            PerformBack();
-            return;
+
+            if (consumed) {
+                WLOGD("Input method has processed key event, id:%{public}" PRId32, keyEvent->GetId());
+                return;
+            }
+
+            dispatchFunc();
         }
-        HandleBackEvent();
+        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         return;
     }
-    if (inputEventConsumer != nullptr) {
-        WLOGD("Transfer key event to inputEventConsumer");
-        (void)inputEventConsumer->OnInputEvent(keyEvent);
-    } else if (uiContent_) {
-        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
-        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
-            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-            Recover();
-        }
-    }
+#endif // IMF_ENABLE
+    dispatchFunc();
 }
 
 bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const

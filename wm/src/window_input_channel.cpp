@@ -54,18 +54,38 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         }
     }
 
-    bool inputMethodHasProcessed = false;
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
-        WLOGD("dispatch keyEvent to input method");
-        inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
+        WLOGD("Async dispatch keyEvent to input method");
+        auto callback = [this] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
+            if (keyEvent == nullptr) {
+                WLOGFW("keyEvent is null");
+                return;
+            }
+
+            if (consumed) {
+                WLOGD("Input method has processed key event, id:%{public}d", keyEvent->GetId());
+                return;
+            }
+
+            auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
+            if (focusedSceneSession == nullptr) {
+                WLOGFE("focusedSceneSession is null");
+                return;
+            }
+
+            if (window_ != nullptr) {
+                WLOGD("dispatch keyEvent to ACE");
+                window_->ConsumeKeyEvent(keyEvent);
+            }
+        }
+        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        return;
     }
 #endif // IMF_ENABLE
-    if (!inputMethodHasProcessed) {
-        WLOGD("dispatch keyEvent to ACE");
-        window_->ConsumeKeyEvent(keyEvent);
-    }
+    WLOGD("dispatch keyEvent to ACE");
+    window_->ConsumeKeyEvent(keyEvent);
 }
 
 void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
