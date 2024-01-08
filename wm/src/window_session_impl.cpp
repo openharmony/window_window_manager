@@ -2081,7 +2081,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             }
 
             dispatchFunc();
-        }
+        };
         MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         return;
     }

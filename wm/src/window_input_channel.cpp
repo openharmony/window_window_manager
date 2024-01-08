@@ -79,7 +79,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
                 WLOGD("dispatch keyEvent to ACE");
                 window_->ConsumeKeyEvent(keyEvent);
             }
-        }
+        };
         MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         return;
     }
