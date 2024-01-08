@@ -1580,7 +1580,7 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent01, Function | SmallTest | Level
     session_->sessionInfo_.isSystem_ = false;
     session_->state_ = SessionState::STATE_DISCONNECT;
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->TransferPointerEvent(pointerEvent));
 }
 
@@ -1609,7 +1609,7 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent03, Function | SmallTest | Level
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
     session_->property_ = new WindowSessionProperty();
@@ -1624,7 +1624,7 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent03, Function | SmallTest | Level
     dialogSession->state_ = SessionState::STATE_ACTIVE;
     session_->dialogVec_.push_back(dialogSession);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferPointerEvent(pointerEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferPointerEvent(pointerEvent));
 }
 
 /**
@@ -1638,7 +1638,7 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent04, Function | SmallTest | Level
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
     session_->property_ = new WindowSessionProperty();
@@ -1668,7 +1668,7 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent05, Function | SmallTest | Level
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
