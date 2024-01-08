@@ -233,19 +233,38 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent",
         keyEvent->GetId());
     if (focusedSceneSession->GetSessionInfo().isSystem_) {
-        bool inputMethodHasProcessed = false;
 #ifdef IMF_ENABLE
         bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
         if (isKeyboardEvent) {
-            WLOGD("dispatch keyEvent to input method");
-            inputMethodHasProcessed =
-                MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
-        }
-#endif // IMF_ENABLE
-        if (inputMethodHasProcessed) {
-            WLOGD("Input method has processed key event");
+            WLOGD("Async dispatch keyEvent to input method");
+            auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
+                if (keyEvent == nullptr) {
+                    WLOGFW("keyEvent is null");
+                    return;
+                }
+
+                if (consumed) {
+                    WLOGD("Input method has processed key event, id:%{public}" PRId32, keyEvent->GetId());
+                    return;
+                }
+
+                auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
+                if (focusedSceneSession == nullptr) {
+                    WLOGFE("focusedSceneSession is null");
+                    return;
+                }
+
+                if (uiContent_ == nullptr) {
+                    WLOGFE("uiContent_ is null");
+                    return;
+                }
+
+                focusedSceneSession->SendKeyEventToUI(keyEvent);
+            }
+            MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
             return;
         }
+#endif // IMF_ENABLE
         WLOGFD("Syetem window scene, transfer key event to root scene");
         if (uiContent_ == nullptr) {
             WLOGFE("uiContent_ is null");
