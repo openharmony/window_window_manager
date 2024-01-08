@@ -26,6 +26,7 @@
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
+#include "shutdown/itakeover_shutdown_callback.h"
 #endif
 
 namespace OHOS::Rosen {
@@ -282,7 +283,8 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     shutdownCallback_ = callbackRef;
 #ifdef POWER_MANAGER_ENABLE
-    PowerMgr::ShutdownClient::GetInstance().RegisterShutdownCallback(this, PowerMgr::ShutdownPriority::LOW);
+    sptr<PowerMgr::ITakeOverShutdownCallback> callback(this);
+    PowerMgr::ShutdownClient::GetInstance().RegisterShutdownCallback(callback, PowerMgr::ShutdownPriority::LOW);
 #else
     WLOGFD("Can not find the sub system of PowerMgr");
 #endif
@@ -292,8 +294,14 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
 napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnUnRegisterShutdownCallback");
+    if (shutdownCallback_ == nullptr) {
+        WLOGFE("Failed to unregister callback, callback is not exits");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_NOT_REGISTER_SYNC_CALLBACK)));
+        return NapiGetUndefined(env);
+    }
 #ifdef POWER_MANAGER_ENABLE
-    PowerMgr::ShutdownClient::GetInstance().UnRegisterShutdownCallback(this);
+    sptr<PowerMgr::ITakeOverShutdownCallback> callback(this);
+    PowerMgr::ShutdownClient::GetInstance().UnRegisterShutdownCallback(callback);
 #else
     WLOGFD("Can not find the sub system of PowerMgr");
 #endif
