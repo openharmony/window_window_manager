@@ -30,7 +30,7 @@ export class PiPVideo extends ViewPU {
         this.__showControl = new ObservedPropertySimplePU(!1, this, "showControl");
         this.xComponentController = new XComponentController;
         this.surfaceId = "";
-        this.controlTransEffect = TransitionEffect.OPACITY.animation({ curve: curves.responsiveSpringMotion(.25, 1) });
+        this.controlTransEffect = TransitionEffect.OPACITY;
         this.__hideControlNow = new ObservedPropertySimplePU(!1, this, "hideControlNow");
         this.addProvidedVar("hideControlNow", this.__hideControlNow);
         this.__hideControlDelay = new ObservedPropertySimplePU(!1, this, "hideControlDelay");
@@ -94,7 +94,7 @@ export class PiPVideo extends ViewPU {
     }
 
     onHideControlNow() {
-        this.hideControlNow && this.switchToHide();
+        this.hideControlNow && this.switchToHideWithoutAnime();
         this.hideControlNow = !1
     }
 
@@ -104,11 +104,20 @@ export class PiPVideo extends ViewPU {
     }
 
     switchToShow() {
-        this.showControl = !0;
+        Context.animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, (() => {
+            this.showControl = !0
+        }));
         this.delayHide()
     }
 
     switchToHide() {
+        -1 !== this.hideEventId && clearTimeout(this.hideEventId);
+        Context.animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, (() => {
+            this.showControl = !1
+        }))
+    }
+
+    switchToHideWithoutAnime() {
         -1 !== this.hideEventId && clearTimeout(this.hideEventId);
         this.showControl = !1
     }
@@ -116,7 +125,9 @@ export class PiPVideo extends ViewPU {
     delayHide() {
         -1 !== this.hideEventId && clearTimeout(this.hideEventId);
         this.hideEventId = this.showControl ? setTimeout((() => {
-            this.showControl = !1
+            Context.animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, (() => {
+                this.showControl = !1
+            }))
         }), 3e3) : -1
     }
 
@@ -145,7 +156,7 @@ export class PiPVideo extends ViewPU {
             GestureGroup.create(GestureMode.Exclusive);
             TapGesture.create({ count: 2 });
             TapGesture.onAction((e => {
-                this.switchToHide();
+                this.switchToHideWithoutAnime();
                 pip.processScale()
             }));
             TapGesture.pop();
@@ -164,29 +175,43 @@ export class PiPVideo extends ViewPU {
             Gesture.pop()
         }), RelativeContainer);
         this.observeComponentCreation2(((e, t) => {
-            RelativeContainer.create();
-            RelativeContainer.size({ width: "100%", height: "100%" });
-            RelativeContainer.visibility(this.showControl ? Visibility.Visible : Visibility.None);
-            RelativeContainer.transition(this.controlTransEffect);
-            RelativeContainer.alignRules({
-                top: { anchor: "__container__", align: VerticalAlign.Top },
-                right: { anchor: "__container__", align: HorizontalAlign.End }
-            });
-            RelativeContainer.id("control_inner")
-        }), RelativeContainer);
+            Stack.create();
+            Stack.size({ width: "100%", height: "100%" });
+            Stack.id("fill_stack")
+        }), Stack);
+        Stack.pop();
         this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({});
-                ViewPU.create(new DefaultControl(this, {}, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {})
-        }), null);
-        this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({});
-                ViewPU.create(new VideoControl(this, {}, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {})
-        }), null);
-        RelativeContainer.pop();
+            If.create();
+            this.showControl ? this.ifElseBranchUpdateFunction(0, (() => {
+                if (!If.canRetake("control_inner")) {
+                    this.observeComponentCreation2(((e, t) => {
+                        RelativeContainer.create();
+                        RelativeContainer.size({ width: "100%", height: "100%" });
+                        RelativeContainer.transition(this.controlTransEffect);
+                        RelativeContainer.alignRules({
+                            top: { anchor: "__container__", align: VerticalAlign.Top },
+                            right: { anchor: "__container__", align: HorizontalAlign.End }
+                        });
+                        RelativeContainer.id("control_inner")
+                    }), RelativeContainer);
+                    this.observeComponentCreation2(((e, t) => {
+                        if (t) {
+                            let t = () => ({});
+                            ViewPU.create(new DefaultControl(this, {}, void 0, e, t))
+                        } else this.updateStateVarsOfChildByElmtId(e, {})
+                    }), null);
+                    this.observeComponentCreation2(((e, t) => {
+                        if (t) {
+                            let t = () => ({});
+                            ViewPU.create(new VideoControl(this, {}, void 0, e, t))
+                        } else this.updateStateVarsOfChildByElmtId(e, {})
+                    }), null);
+                    RelativeContainer.pop()
+                }
+            })) : this.ifElseBranchUpdateFunction(1, (() => {
+            }))
+        }), If);
+        If.pop();
         RelativeContainer.pop();
         Stack.pop()
     }
