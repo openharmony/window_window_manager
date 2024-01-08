@@ -166,7 +166,7 @@ public:
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevel) override;
+        int64_t uiExtensionIdLevel) override;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState requestState_ { WindowState::STATE_INITIAL };
     WSError UpdateMaximizeMode(MaximizeMode mode) override;

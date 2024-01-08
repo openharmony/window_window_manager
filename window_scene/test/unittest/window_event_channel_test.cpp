@@ -66,9 +66,9 @@ void WindowEventChannelTest::TearDown()
 
 WSError WindowEventChannelTest::TransferSearchElementInfo(bool isChannelNull)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     int32_t mode = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     list<AccessibilityElementInfo> infos;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
@@ -78,9 +78,9 @@ WSError WindowEventChannelTest::TransferSearchElementInfo(bool isChannelNull)
 
 WSError WindowEventChannelTest::TransferSearchElementInfosByText(bool isChannelNull)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     string text;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     list<AccessibilityElementInfo> infos;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
@@ -91,9 +91,9 @@ WSError WindowEventChannelTest::TransferSearchElementInfosByText(bool isChannelN
 
 WSError WindowEventChannelTest::TransferFindFocusedElementInfo(bool isChannelNull)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     int32_t focusType = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     AccessibilityElementInfo info;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
@@ -103,9 +103,9 @@ WSError WindowEventChannelTest::TransferFindFocusedElementInfo(bool isChannelNul
 
 WSError WindowEventChannelTest::TransferFocusMoveSearch(bool isChannelNull)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     int32_t direction = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     AccessibilityElementInfo info;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
@@ -115,10 +115,10 @@ WSError WindowEventChannelTest::TransferFocusMoveSearch(bool isChannelNull)
 
 WSError WindowEventChannelTest::TransferExecuteAction(bool isChannelNull)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     map<string, string> actionArguments;
     int32_t action = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
     }
