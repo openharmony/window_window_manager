@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"
+#include "mock/mock_message_parcel.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "accessibility_event_info_parcel.h"
 #include "window_manager_hilog.h"
@@ -76,10 +77,35 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, Function | Small
     Accessibility::AccessibilityEventInfo info;
     Accessibility::AccessibilityEventInfoParcel infoParcel(info);
     data.WriteParcelable(&infoParcel);
-    int32_t uiExtensionIdLevel = -1;
-    data.WriteInt32(uiExtensionIdLevel);
+    int64_t uiExtensionIdLevel = 0;
+    data.WriteInt64(uiExtensionIdLevel);
+    MockMessageParcel::SetReadInt64ErrorFlag(true);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleTransferAccessibilityEvent(data, reply));
+    MockMessageParcel::ClearAllErrorFlag();
     WLOGI("HandleTransferAccessibilityEvent end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityEvent
+ * @tc.desc: sessionStub HandleTransferAccessibilityEvent
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, Function | SmallTest | Level2)
+{
+    WLOGI("HandleTransferAccessibilityEvent01 begin");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+
+    int64_t uiExtensionIdLevel = 0;
+    data.WriteInt64(uiExtensionIdLevel);
+    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityEvent01 end");
 }
 }
 } // namespace Rosen

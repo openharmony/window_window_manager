@@ -147,9 +147,9 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest |
  */
 HWTEST_F(WindowEventChannelProxyTest, TransferFindFocusedElementInfo, Function | SmallTest | Level1)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     int32_t focusType = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     Accessibility::AccessibilityElementInfo info;
 
     WSError res = windowEventChannelProxy_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
@@ -163,9 +163,9 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFindFocusedElementInfo, Function |
  */
 HWTEST_F(WindowEventChannelProxyTest, TransferFocusMoveSearch, Function | SmallTest | Level1)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     int32_t direction = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
     Accessibility::AccessibilityElementInfo info;
 
     WSError res = windowEventChannelProxy_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
@@ -179,10 +179,10 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusMoveSearch, Function | SmallT
  */
 HWTEST_F(WindowEventChannelProxyTest, TransferExecuteAction, Function | SmallTest | Level1)
 {
-    int32_t elementId = 0;
+    int64_t elementId = 0;
     map<string, string> actionArguments;
     int32_t action = 0;
-    int32_t baseParent = 0;
+    int64_t baseParent = 0;
 
     WSError res = windowEventChannelProxy_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
     ASSERT_EQ(WSError::WS_OK, res);
