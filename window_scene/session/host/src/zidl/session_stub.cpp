@@ -248,7 +248,8 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 {
     WLOGFD("run HandleTerminateSession");
     sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
-    abilitySessionInfo->want = *(data.ReadParcelable<AAFwk::Want>());
+    std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -262,7 +263,8 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 {
     WLOGFD("run HandleSessionException");
     sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
-    abilitySessionInfo->want = *(data.ReadParcelable<AAFwk::Want>());
+    std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -279,7 +281,8 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 {
     WLOGFD("PendingSessionActivation!");
     sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
-    abilitySessionInfo->want = *(data.ReadParcelable<AAFwk::Want>());
+    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
