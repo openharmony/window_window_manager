@@ -4707,7 +4707,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        errCode == WmErrorCode::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
     if(errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
