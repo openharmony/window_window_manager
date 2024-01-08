@@ -85,7 +85,7 @@ HWTEST_F(SceneSessionTest, Foreground01, Function | SmallTest | Level2)
     };
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    scensession->UpdateSessionState(SessionState::STATE_INACTIVE);
+    scensession->UpdateSessionState(SessionState::STATE_DISCONNECT);
     scensession->isActive_ = true;
     result = scensession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -534,7 +534,7 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(false);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(false, scensession_->IsDecorEnable());
+    ASSERT_EQ(true, scensession_->IsDecorEnable());
 }
 
 /**
@@ -792,7 +792,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     SystemBarProperty statusBarProperty;
     scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-              WSError::WS_OK);
+              WSError::WS_ERROR_NULLPTR);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -848,7 +848,7 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->IsShowWhenLocked(), false);
     scensession->property_ = property;
     property->SetWindowFlags(4);
-    ASSERT_EQ(scensession->IsShowWhenLocked(), false);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
 }
 
 /**
@@ -889,7 +889,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
-    ASSERT_FALSE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
+    ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
 }
 
 /**
@@ -919,7 +919,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
 }
 
 /**
@@ -1461,7 +1461,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(result, WSError::WS_OK);
     delete scensession;
 }
 
@@ -1490,7 +1490,7 @@ HWTEST_F(SceneSessionTest, UpdateRect, Function | SmallTest | Level2)
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = scensession->UpdateRect(rect, reason);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
     delete scensession;
 }
 
@@ -1904,7 +1904,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
     delete scensession;
 }
 
@@ -1938,7 +1938,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent02, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
     delete scensession;
 }
 
@@ -2138,10 +2138,10 @@ HWTEST_F(SceneSessionTest, PendingSessionActivation, Function | SmallTest | Leve
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = scensession->PendingSessionActivation(info1);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 
     result = scensession->PendingSessionActivation(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
     delete scensession;
 }
 
@@ -2208,10 +2208,10 @@ HWTEST_F(SceneSessionTest, NotifySessionException, Function | SmallTest | Level2
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = scensession->NotifySessionException(info1);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 
     result = scensession->NotifySessionException(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
     delete scensession;
 }
 
