@@ -2013,6 +2013,42 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
+void WindowSessionImpl::DispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    int32_t keyCode = keyEvent->GetKeyCode();
+    int32_t keyAction = keyEvent->GetKeyAction();
+    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+        WLOGFI("input event is consumed by back, return");
+        if (inputEventConsumer != nullptr) {
+            WLOGFD("Transfer key event to inputEventConsumer");
+            if (inputEventConsumer->OnInputEvent(keyEvent)) {
+                return;
+            }
+            PerformBack();
+            return;
+        }
+        HandleBackEvent();
+        return;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGD("Transfer key event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (uiContent_) {
+        auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+            Recover();
+        }
+    }
+}
+
 void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     if (keyEvent == nullptr) {
@@ -2020,39 +2056,14 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         return;
     }
 
-    auto dispatchFunc = [this, &keyEvent] () {
-        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
-        {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            inputEventConsumer = inputEventConsumer_;
-        }
-        int32_t keyCode = keyEvent->GetKeyCode();
-        int32_t keyAction = keyEvent->GetKeyAction();
-        if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-            WLOGFI("input event is consumed by back, return");
-            if (inputEventConsumer != nullptr) {
-                WLOGFD("Transfer key event to inputEventConsumer");
-                if (inputEventConsumer->OnInputEvent(keyEvent)) {
-                    return;
-                }
-                PerformBack();
-                return;
-            }
-            HandleBackEvent();
+    wptr<WindowSessionImpl> weakThis = this;
+    auto dispatchFunc = [weakThis, &keyEvent] () {
+        auto promoteThis = weakThis.promote();
+        if (promoteThis == nullptr) {
+            WLOGFW("promoteThis is nullptr");
             return;
         }
-        if (inputEventConsumer != nullptr) {
-            WLOGD("Transfer key event to inputEventConsumer");
-            (void)inputEventConsumer->OnInputEvent(keyEvent);
-        } else if (uiContent_) {
-            auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
-            if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-                property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
-                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-                Recover();
-            }
-        }
+        promoteThis->DispatchKeyEvent(keyEvent);
     };
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
