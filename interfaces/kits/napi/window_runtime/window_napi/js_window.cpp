@@ -4710,7 +4710,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
-    if(errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (errCode == WmErrorCode::WM_OK && WindowHelper::IsSubWindow(windowToken_->GetType())) {
