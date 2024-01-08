@@ -2109,7 +2109,15 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
 
 void Session::SetZOrder(uint32_t zOrder)
 {
-    zOrder_ = zOrder;
+    auto task = [weakThis = wptr(this), zOrder]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        session->zOrder_ = zOrder;
+    };
+    PostTask(task, "SetZOrder");
     NotifySessionInfoChange();
 }
 
