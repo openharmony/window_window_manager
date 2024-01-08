@@ -267,7 +267,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         WLOGD("Async dispatch keyEvent to input method");
         auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
             this->KeyEventConsumedCallback(focusedSessionId, keyEvent, consumed);
-        }
+        };
         MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         return;
     }
