@@ -62,6 +62,8 @@ public:
         DisplayStateChangeType::UNKNOWN);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsDefaultVertical, isDefaultVertical, true);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, AliveStatus, alive, true);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::vector<uint32_t>, ColorSpaces, colorSpaces, std::vector<uint32_t>());
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::vector<uint32_t>, HdrFormats, hdrFormats, std::vector<uint32_t>());
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H
