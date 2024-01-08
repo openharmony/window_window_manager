@@ -1068,6 +1068,12 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
+    if (property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        auto ret = HandlePointerStyle(pointerEvent);
+        if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
+            WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
+        }
+    }
     auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
@@ -1082,10 +1088,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (property->GetDragEnabled()) {
-            auto ret = HandlePointerStyle(pointerEvent);
-            if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
-                WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
-            }
             auto is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
             if (is2in1 && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
