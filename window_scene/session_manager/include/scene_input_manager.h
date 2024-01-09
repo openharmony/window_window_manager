@@ -35,7 +35,7 @@ public:
     void FlushDisplayInfoToMMI();
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
-    void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, int32_t pid);
+    void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
 
 protected:
     SceneInputManager() = default;
@@ -43,8 +43,8 @@ protected:
 
 private:
     void Init();
-    void FlushFullInfoToMMI();
-    void FlushChangeInfoToMMI();
+    void FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& windowInfoList);
+    void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
 
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
 };

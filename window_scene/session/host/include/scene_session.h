@@ -208,6 +208,8 @@ public:
     void ClearSpecificSessionCbMap();
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
+    bool IsStartMoving() const;
+    void SetIsStartMoving(const bool startMoving);
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
@@ -273,6 +275,7 @@ private:
     bool needDefaultAnimationFlag_ = true;
     PiPRectInfo pipRectInfo_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
+    std::atomic_bool isStartMoving_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
