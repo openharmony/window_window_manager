@@ -58,7 +58,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
         WLOGD("Async dispatch keyEvent to input method");
-        auto callback = [this] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
+        auto callback = [this] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             if (keyEvent == nullptr) {
                 WLOGFW("keyEvent is null");
                 return;
@@ -66,12 +66,6 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 
             if (consumed) {
                 WLOGD("Input method has processed key event, id:%{public}d", keyEvent->GetId());
-                return;
-            }
-
-            auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
-            if (focusedSceneSession == nullptr) {
-                WLOGFE("focusedSceneSession is null");
                 return;
             }
 
