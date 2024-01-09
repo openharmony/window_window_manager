@@ -2285,4 +2285,14 @@ void SceneSession::RequestHideKeyboard()
     }
 #endif
 }
+
+bool SceneSession::IsStartMoving() const
+{
+    return isStartMoving_.load();
+}
+
+void SceneSession::SetIsStartMoving(const bool startMoving)
+{
+    isStartMoving_.store(startMoving);
+}
 } // namespace OHOS::Rosen

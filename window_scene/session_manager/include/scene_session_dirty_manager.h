@@ -40,6 +40,7 @@ private:
     };
 
 using ScreenInfoChangeListener = std::function<void(int32_t)>;
+using FlushWindowInfoCallback = std::function<void()>;
 public:
     SceneSessionDirtyManager() = default;
     virtual ~SceneSessionDirtyManager() = default;
@@ -50,9 +51,11 @@ public:
     void SetScreenChange(const uint64_t id);
     void SetScreenChange(const bool value);
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
-        const WindowUpdateType& type, int32_t sceneBoardPid = -1);
+        const WindowUpdateType& type, const bool startMoving = false);
     std::vector<MMI::WindowInfo> GetFullWindowInfoList();
     std::map<uint64_t, std::vector<MMI::WindowInfo>> GetIncrementWindowInfoList();
+    void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
+    void ResetSessionDirty();
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
@@ -76,6 +79,9 @@ private:
     bool isScreenSessionChange_ = true;
     std::vector<MMI::WindowInfo> windowInfoList_;
     std::mutex mutexlock_;
+    FlushWindowInfoCallback flushWindowInfoCallback_;
+    std::atomic_bool sessionDirty_ { false };
+    std::atomic_bool hasPostTask_ { false };
 };
 } //namespace OHOS::Rosen
 
