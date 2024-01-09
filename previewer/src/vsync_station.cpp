@@ -36,14 +36,10 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
         }
         vsyncCallbacks_.insert(vsyncCallback);
 
-        if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
-            if (!vsyncHandler_) {
-                vsyncHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>();
-            }
-
+        if (!hasInitVsyncReceiver_) {
             auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
             while (receiver_ == nullptr) {
-                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()), vsyncHandler_);
+                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()));
             }
             receiver_->Init();
             hasInitVsyncReceiver_ = true;
