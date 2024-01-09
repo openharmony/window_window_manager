@@ -481,6 +481,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
     std::vector<AAFwk::SessionInfo> abilitySessionInfos;
 
     for (auto i = 0; i < static_cast<int32_t>(recoveredPersistentIds.size()); i++) {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto search = sceneSessionMap_.find(recoveredPersistentIds.at(i));
         if (search == sceneSessionMap_.end() || search->second == nullptr) {
             continue;
@@ -1658,6 +1659,7 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     if (type != WindowType::WINDOW_TYPE_PIP) {
         return;
     }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& iter: sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
