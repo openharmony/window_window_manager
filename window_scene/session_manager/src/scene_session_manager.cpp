@@ -5296,7 +5296,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
     info->layer_ = sceneSession->GetZOrder();
-    info->scaleVal_ = sceneSession->GetScaleX();
+    info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
     auto property = sceneSession->GetSessionProperty();
