@@ -146,6 +146,12 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+    /**
+     * @brief Notify caller when the transform changed.
+     *
+     * @param transform transform of the current window.
+     */
+    virtual void OnTransformChange(const Transform& transform) {}
 };
 
 /**
