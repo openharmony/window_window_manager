@@ -212,7 +212,7 @@ protected:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyWindowStatusChange(WindowMode mode);
     static sptr<Window> FindWindowById(uint32_t winId);
-    void NotifyTransformChange(const Transform& transForm) override;
+    void NotifyTransformChange(const Transform& transForm);
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
