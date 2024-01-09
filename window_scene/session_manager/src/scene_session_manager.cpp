@@ -143,7 +143,6 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
-bool openDebugTrace = false;
 std::string GetCurrentTime()
 {
     struct timespec tn;
