@@ -59,6 +59,7 @@ public:
     MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD2(OnModeChange, void(WindowMode mode, bool hasDeco));
+    MOCK_METHOD2(OnTransformChange, void(const Transform& transform));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -2505,7 +2506,7 @@ HWTEST_F(WindowImplTest, CloseWindow, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    
+
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Close());
