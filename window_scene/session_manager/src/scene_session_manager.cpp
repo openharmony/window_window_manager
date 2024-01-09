@@ -6414,7 +6414,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
             sessionInfo.moduleName_);
     }
     auto collaborator = iter->second;
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    auto accessTokenIDEx = sessionInfo.callingTokenId_;
     if (collaborator != nullptr) {
         containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
@@ -6425,7 +6425,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
             return BrokerStates::BROKER_UNKOWN;
         }
         int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
-            currentUserId_, *(sessionInfo.want), accessTokenIDEx);
+            currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
         WLOGFI("NotifyStartAbility ret: %{public}d", ret);
         if (ret == 0) {
             return BrokerStates::BROKER_STARTED;
