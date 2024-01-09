@@ -143,6 +143,7 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+bool openDebugTrace = false;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -224,6 +225,7 @@ void SceneSessionManager::Init()
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
     RegisterAppListener();
+    openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
 }
 
 void SceneSessionManager::RegisterAppListener()
@@ -5299,6 +5301,9 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         }
         windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(session->GetWindowId(),
             session->GetCallingPid(), session->GetCallingUid(), drawingState, session->GetWindowType()));
+        if (openDebugTrace) {
+            
+        }
         WLOGFD("NotifyWindowDrawingContenInfoChange: drawing status changed pid:%{public}d,"
             "surfaceId:%{public}" PRIu64", drawingState:%{public}d", session->GetCallingPid(), surfaceId, drawingState);
     }
