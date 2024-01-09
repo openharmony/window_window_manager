@@ -1245,9 +1245,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
     OnPiPMoveCallback(rect, reason);
-    
-    UpdateSizeChangeReason(reason);
-    UpdateRect(rect, reason);
+    if (reason != SizeChangeReason::MOVE) {
+        UpdateSizeChangeReason(reason);
+        UpdateRect(rect, reason);
+    }
     if (reason == SizeChangeReason::DRAG_END) {
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
