@@ -214,7 +214,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 }
 
 void IntentionEventManager::InputEventListener::KeyEventConsumedCallback(
-    int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed)
+    int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
 {
     if (keyEvent == nullptr) {
         WLOGFW("keyEvent is null");
@@ -265,7 +265,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
         WLOGD("Async dispatch keyEvent to input method");
-        auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
+        auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             this->KeyEventConsumedCallback(focusedSessionId, keyEvent, consumed);
         };
         MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);

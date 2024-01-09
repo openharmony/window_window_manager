@@ -2063,13 +2063,13 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             WLOGFW("promoteThis is nullptr");
             return;
         }
-        promoteThis->DispatchKeyEvent(keyEvent);
+        promoteThis->DispatchKeyEvent(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent));
     };
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
         WLOGD("Async dispatch keyEvent to input method");
-        auto callback = [this, &dispatchFunc] (std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) {
+        auto callback = [this, &dispatchFunc] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             if (keyEvent == nullptr) {
                 WLOGFW("keyEvent is null");
                 return;
@@ -2082,7 +2082,8 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
 
             dispatchFunc();
         };
-        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(
+            const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), callback);
         return;
     }
 #endif // IMF_ENABLE
