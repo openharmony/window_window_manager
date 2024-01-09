@@ -5302,7 +5302,8 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(session->GetWindowId(),
             session->GetCallingPid(), session->GetCallingUid(), drawingState, session->GetWindowType()));
         if (openDebugTrace) {
-            
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Drawing status changed pid:(%d ), surfaceId:(%" PRIu64 ")",
+                "drawingState:(%d )", session->GetCallingPid(), surfaceId, drawingState);
         }
         WLOGFD("NotifyWindowDrawingContenInfoChange: drawing status changed pid:%{public}d,"
             "surfaceId:%{public}" PRIu64", drawingState:%{public}d", session->GetCallingPid(), surfaceId, drawingState);
