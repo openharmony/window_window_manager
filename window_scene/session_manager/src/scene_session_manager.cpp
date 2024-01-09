@@ -5129,12 +5129,12 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         return;
     }
 
-    WSRect currRect = callingSession_->GetSessionRect();
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && currRect == callingWindowNewRect_) {
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
         if (needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
-            callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            callingSession_->GetSessionRect() == callingWindowNewRect_) {
             callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
         }
     }
