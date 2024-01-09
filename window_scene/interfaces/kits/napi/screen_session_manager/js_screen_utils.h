@@ -33,6 +33,7 @@ public:
     static napi_value CreateJsRRect(napi_env env, const RRect& rrect);
     static napi_value CreateJsScreenConnectChangeType(napi_env env);
     static napi_value CreateJsScreenPropertyChangeReason(napi_env env);
+    static napi_value CreateJsFoldStatus(napi_env env);
 };
 } // namespace OHOS::Rosen
 
