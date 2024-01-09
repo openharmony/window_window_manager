@@ -6398,7 +6398,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
             sessionInfo.moduleName_);
     }
     auto collaborator = iter->second;
-    auto accessTokenIDEx = sessionInfo.callingTokenId;
+    auto accessTokenIDEx = sessionInfo.callingTokenId_;
     if (collaborator != nullptr) {
         containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
