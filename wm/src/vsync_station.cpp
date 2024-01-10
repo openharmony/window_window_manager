@@ -105,7 +105,7 @@ void VsyncStation::Init()
         auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
         frameRateLinker_ = OHOS::Rosen::RSFrameRateLinker::Create();
         while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), frameRateLinker_->GetId(),
+            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
                 vsyncHandler_);
         }
         receiver_->Init();
