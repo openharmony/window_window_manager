@@ -2082,8 +2082,11 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
 
             dispatchFunc();
         };
-        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(
             const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), callback);
+        if (ret != 0) {
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
+        }
         return;
     }
 #endif // IMF_ENABLE

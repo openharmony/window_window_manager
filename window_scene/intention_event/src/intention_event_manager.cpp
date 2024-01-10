@@ -268,7 +268,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             this->KeyEventConsumedCallback(focusedSessionId, keyEvent, consumed);
         };
-        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        if (ret != 0) {
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
+        }
         return;
     }
 #endif // IMF_ENABLE
