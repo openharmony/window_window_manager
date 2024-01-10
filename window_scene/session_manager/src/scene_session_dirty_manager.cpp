@@ -23,6 +23,7 @@
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "window_helper.h"
 #include "wm_common_inner.h"
 
 namespace OHOS::Rosen {
@@ -32,6 +33,7 @@ constexpr float DIRECTION90 = 90 ;
 constexpr float DIRECTION180 = 180 ;
 constexpr float DIRECTION270 = 270 ;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionDirtyManager"};
+constexpr unsigned int POINTER_CHANGE_AREA_COUNT = 8;
 constexpr int POINTER_CHANGE_AREA_SEXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr int UPDATE_TASK_DURATION = 10;
@@ -182,10 +184,14 @@ MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> s
 
     auto agentWindowId = sceneSession->GetWindowId();
     auto zOrder = sceneSession->GetZOrder();
-    const std::vector<int32_t> pointerChangeAreas{ POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE,
+    std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
+    auto windowMode = sceneSession->GetSessionProperty()->GetWindowMode();
+    if (windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
+        Rosen::WindowHelper::IsMainWindow(sceneSession->GetSessionProperty()->GetWindowType())) {
+        pointerChangeAreas = { POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE,
         POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN,
         POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE };
-
+    }
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
