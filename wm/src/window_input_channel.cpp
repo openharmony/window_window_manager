@@ -81,7 +81,10 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
                 promoteThis->window_->ConsumeKeyEvent(keyEvent);
             }
         };
-        MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        if (ret != 0) {
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
+        }
         return;
     }
 #endif // IMF_ENABLE
