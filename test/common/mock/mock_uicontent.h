@@ -94,6 +94,7 @@ public:
     MOCK_METHOD2(GetContainerModalButtonsRect, bool(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons));
     MOCK_METHOD1(SubscribeContainerModalButtonsRectChange,
         void(std::function<void(OHOS::Rosen::Rect& containerModal, OHOS::Rosen::Rect& buttons)>&& callback));
+    MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
 };
 } // namespace Ace
 } // namespace OHOS
