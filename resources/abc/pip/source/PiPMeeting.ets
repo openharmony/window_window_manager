@@ -34,14 +34,13 @@ export struct PiPMeeting {
   @State private showControl: boolean = false;
   private xComponentController: XComponentController = new XComponentController();
   private surfaceId: string = '';
-  private controlTransEffect: TransitionEffect = TransitionEffect.OPACITY
-    .animation({ curve: curves.responsiveSpringMotion(0.25, 1) });
+  private controlTransEffect: TransitionEffect = TransitionEffect.OPACITY;
   @Provide @Watch('onHideControlNow') hideControlNow: boolean = false;
   @Provide @Watch('onHideControlDelay') hideControlDelay: boolean = false;
 
   onHideControlNow() {
     if (this.hideControlNow) {
-      this.switchToHide();
+      this.switchToHideWithoutAnime();
     }
     this.hideControlNow = false;
   }
@@ -54,11 +53,22 @@ export struct PiPMeeting {
   }
 
   switchToShow() {
-    this.showControl = true;
+    animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, () => {
+      this.showControl = true;
+    });
     this.delayHide();
   }
 
   switchToHide() {
+    if (this.hideEventId !== -1) {
+      clearTimeout(this.hideEventId);
+    }
+    animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, () => {
+      this.showControl = false;
+    });
+  }
+
+  switchToHideWithoutAnime() {
     if (this.hideEventId !== -1) {
       clearTimeout(this.hideEventId);
     }
@@ -71,7 +81,9 @@ export struct PiPMeeting {
     }
     this.hideEventId = this.showControl ?
     setTimeout(() => {
-      this.showControl = false;
+      animateTo({ curve: curves.responsiveSpringMotion(0.25, 1) }, () => {
+        this.showControl = false;
+      });
     }, TIMEOUT) :
       -1;
   }
@@ -86,18 +98,22 @@ export struct PiPMeeting {
         .fillSize();
 
       RelativeContainer() {
-        RelativeContainer() {
-          DefaultControl();
-          MeetingControl();
+        Stack()
+          .fillSize()
+          .id('fill_stack')
+        if (this.showControl) {
+          RelativeContainer() {
+            DefaultControl();
+            MeetingControl();
+          }
+          .fillSize()
+          .transition(this.controlTransEffect)
+          .alignRules({
+            top: { anchor: '__container__', align: VerticalAlign.Top },
+            right: { anchor: '__container__', align: HorizontalAlign.End }
+          })
+          .id('control_inner')
         }
-        .fillSize()
-        .visibility(this.showControl ? Visibility.Visible : Visibility.None)
-        .transition(this.controlTransEffect)
-        .alignRules({
-          top: { anchor: '__container__', align: VerticalAlign.Top },
-          right: { anchor: '__container__', align: HorizontalAlign.End }
-        })
-        .id('control_inner')
       }
       .fillSize()
       .id('control')
@@ -105,7 +121,7 @@ export struct PiPMeeting {
         GestureGroup(GestureMode.Exclusive,
           TapGesture({ count: 2 })
             .onAction((event: GestureEvent) => {
-              this.switchToHide();
+              this.switchToHideWithoutAnime();
               pip.processScale();
             }),
           TapGesture({ count: 1 })
