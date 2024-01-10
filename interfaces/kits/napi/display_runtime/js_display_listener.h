@@ -55,8 +55,7 @@ const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";
 const std::string EVENT_CHANGE = "change";
 const std::string EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
-const std::string
-EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
+const std::string EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
 const std::string EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
 const std::string EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
 }  // namespace Rosen
