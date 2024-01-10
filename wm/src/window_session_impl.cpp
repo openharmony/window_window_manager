@@ -2337,8 +2337,8 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 {
     WLOGFI("NotifyWindowStatusChange");
-    if (uicontent_ != nullptr) {
-        uicontent_->UpdateTransform(transform);
+    if (uiContent_ != nullptr) {
+        uiContent_->UpdateTransform(transform);
     }
 }
 } // namespace Rosen
