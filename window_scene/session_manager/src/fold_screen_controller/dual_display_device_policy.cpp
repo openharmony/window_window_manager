@@ -73,7 +73,6 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             WLOGFW("ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
-        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
@@ -169,7 +168,6 @@ void DualDisplayDevicePolicy::TriggerScreenDisplayModeUpdate(FoldDisplayMode dis
         return;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
                 ChangeScreenDisplayModeToMain(screenSession);
@@ -350,6 +348,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
 void DualDisplayDevicePolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason)
 {
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
