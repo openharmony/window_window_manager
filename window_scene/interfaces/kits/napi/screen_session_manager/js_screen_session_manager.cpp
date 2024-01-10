@@ -55,6 +55,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsScreenConnectChangeType(env));
     napi_set_named_property(env, exportObj, "ScreenPropertyChangeReason",
         JsScreenUtils::CreateJsScreenPropertyChangeReason(env));
+    napi_set_named_property(env, exportObj, "FoldStatus",
+        JsScreenUtils::CreateJsFoldStatus(env));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);
