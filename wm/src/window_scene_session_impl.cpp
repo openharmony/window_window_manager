@@ -2541,13 +2541,14 @@ void WindowSceneSessionImpl::UpdateNewSize()
 
 WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
 {
-    WLOGFI("SetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+    WLOGFI("SetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
         "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
     WindowType windowType = GetType();
     if (!WindowHelper::IsMainWindow(windowType)
         && !WindowHelper::IsSubWindow(windowType)
@@ -2556,6 +2557,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
     }
+
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -2568,6 +2570,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
         WLOGFE("SetWindowLimits failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
     const auto& customizedLimits = property_->GetWindowLimits();
     uint32_t minWidth = windowLimits.minWidth_ ? windowLimits.minWidth_ : customizedLimits.minWidth_;
     uint32_t minHeight = windowLimits.minHeight_ ? windowLimits.minHeight_ : customizedLimits.minHeight_;
@@ -2590,15 +2593,20 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     }
     UpdateNewSize();
 
+    fillWindowLimits(windowLimits);
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::fillWindowLimits(WindowLimits& windowLimits)
+{
     const auto& newLimits = property_->GetWindowLimits();
     windowLimits.minWidth_ = newLimits.minWidth_;
     windowLimits.minHeight_ = newLimits.minHeight_;
     windowLimits.maxWidth_ = newLimits.maxWidth_;
     windowLimits.maxHeight_ = newLimits.maxHeight_;
-    WLOGFI("SetWindowLimits success! WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+    WLOGFI("SetWindowLimits success! WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
         "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
-    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
