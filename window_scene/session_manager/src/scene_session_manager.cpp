@@ -1924,6 +1924,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         sceneSessionMap_.erase(sessionInfo.persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
+    RecoverWindowSessionProperty(sceneSession, property);
     session = sceneSession;
     return WSError::WS_OK;
 }
