@@ -2596,7 +2596,7 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionInfo, Function | SmallTest | Level3
     ssm_->DumpSessionInfo(scensession, oss);
     scensession = nullptr;
     scensession = new (std::nothrow) SceneSession(info, specific);
-    ssm_->DumpAllAppSessionInfo(oss);
+    ssm_->DumpAllAppSessionInfo(oss, ssm_->sceneSessionMap_);
 }
 
 /**
