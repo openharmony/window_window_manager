@@ -59,7 +59,7 @@ public:
     MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD2(OnModeChange, void(WindowMode mode, bool hasDeco));
-    MOCK_METHOD2(NotifyTransformChange, void(const Transform& transform));
+    MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
