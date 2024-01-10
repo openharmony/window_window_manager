@@ -22,7 +22,7 @@ static napi_module g_winManagerModule = {
     .nm_modname = "pip",
 };
 
-extern "C" __attribute__((constructor)) void NAPI_application_pip_AutoRegister()
+extern "C" __attribute__((constructor)) void NapiApplicationPipAutoRegister()
 {
     napi_module_register(&g_winManagerModule);
 }
