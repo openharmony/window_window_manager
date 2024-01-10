@@ -1935,6 +1935,9 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    if (payloadPid == getpid()) {
+        payloadPid = getprocpid();
+    }
     std::unordered_map<std::string, std::string> mapPayload;
     mapPayload.emplace("srcPid", std::to_string(payloadPid));
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
