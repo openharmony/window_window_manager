@@ -23,7 +23,6 @@
 #include <unordered_set>
 
 #include <refbase.h>
-#include <EventHandler.h>
 #include <vsync_receiver.h>
 
 #include "wm_common.h"
@@ -62,7 +61,6 @@ private:
         .userData_ = this,
         .callback_ = OnVsync,
     };
-    std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

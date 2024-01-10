@@ -85,7 +85,6 @@ if (!ispreview) {
       "ace_engine:ace_uicontent",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
-      "previewer:ide_extension",
     ]
 
     cflags = [ "-std=c++11" ]
