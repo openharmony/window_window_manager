@@ -103,10 +103,14 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) ||
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
         float vpr = 1.5f; // 1.5: default vp
-        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (display) {
-            vpr = display->GetVirtualPixelRatio();
+        if (sceneSession->GetSessionProperty() != nullptr) {
+            auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+            if (screenSession != nullptr) {
+                vpr = screenSession->GetScreenProperty().GetDensity();
+            }
         }
+        WLOGFD("[WMSEvent] UpdateDefaultHotAreas, vpr: %{public}f", vpr);
         touchOffset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
         pointerOffset = static_cast<uint32_t>(HOTZONE_POINTER * vpr);
     }
