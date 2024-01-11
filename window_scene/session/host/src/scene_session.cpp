@@ -719,7 +719,8 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
     if (SessionHelper::IsEmptyRect(rect) || SessionHelper::IsEmptyRect(avoidRect)) {
         return;
     }
-    Rect avoidAreaRect = SessionHelper::TransferToRect(SessionHelper::GetOverlap(rect, avoidRect, 0, 0));
+    Rect avoidAreaRect = SessionHelper::TransferToRect(
+        SessionHelper::GetOverlap(rect, avoidRect, rect.posX_, rect.posY_));
     if (WindowHelper::IsEmptyRect(avoidAreaRect)) {
         return;
     }
