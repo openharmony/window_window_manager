@@ -37,8 +37,10 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "floatCornerRadius", CreateJsValue(env, config.floatCornerRadius_));
     napi_set_named_property(env, objValue, "focusedShadow", CreateShadowValue(env, config, true));
     napi_set_named_property(env, objValue, "unfocusedShadow", CreateShadowValue(env, config, false));
-    napi_set_named_property(env, objValue, "keyboardAnimationIn", CreateKeyboardAnimationValue(env, config.keyboardAnimationIn_));
-    napi_set_named_property(env, objValue, "keyboardAnimationOut", CreateKeyboardAnimationValue(env, config.keyboardAnimationOut_));
+    napi_set_named_property(env, objValue, "keyboardAnimationIn",
+        CreateKeyboardAnimationValue(env, config.keyboardAnimationIn_));
+    napi_set_named_property(env, objValue, "keyboardAnimationOut",
+        CreateKeyboardAnimationValue(env, config.keyboardAnimationOut_));
     napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
     return objValue;
 }
