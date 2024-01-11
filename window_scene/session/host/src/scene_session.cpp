@@ -2279,6 +2279,16 @@ void SceneSession::SetScale(float scaleX, float scaleY, float pivotX, float pivo
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
+        if (sessionStage_ != nullptr) {
+            Transform transform;
+            transform.scaleX_ = scaleX;
+            transform.scaleY_ = scaleY;
+            transform.pivotX_ = pivotX;
+            transform.pivotY_ = pivotY;
+            sessionStage_->NotifyTransformChange(transform);
+        } else {
+            WLOGFE("sessionStage_ is nullptr");
+        }
     }
 }
 

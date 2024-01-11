@@ -535,4 +535,25 @@ WSError SessionStageProxy::UpdateTitleInTargetPos(bool isShow, int32_t height)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+void SessionStageProxy::NotifyTransformChange(const Transform& transform)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!transform.Marshalling(data)) {
+        WLOGFE("Transform marshalling failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("Send NotifyTransformChange Requset failed");
+    }
+}
 } // namespace OHOS::Rosen

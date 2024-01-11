@@ -103,6 +103,7 @@ public:
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
+    virtual void NotifyTransformChange(const Transform& transform) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
