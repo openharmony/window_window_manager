@@ -36,47 +36,35 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
     ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
     switch (msgId) {
         case ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
-            auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
-            auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            DMError ret = RegisterDisplayManagerAgent(agent, type);
-            reply.WriteInt32(static_cast<int32_t>(ret));
+            HandleRegisterDisplayManagerAgent(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
-            auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
-            auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            DMError ret = UnregisterDisplayManagerAgent(agent, type);
-            reply.WriteInt32(static_cast<int32_t>(ret));
+            HandleUnRegisterDisplayManagerAgent(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
-            FoldDisplayMode displayMode = GetFoldDisplayMode();
-            reply.WriteUint32(static_cast<uint32_t>(displayMode));
+            HandleGetFoldDisplayMode(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE: {
-            reply.WriteBool(IsFoldable());
+            HandleIsFoldable(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS: {
-            reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus()));
+            HandleGetFoldStatus(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
-            auto info = GetDefaultDisplayInfo();
-            reply.WriteParcelable(info);
+            HandleGetDefaultDisplayInfo(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
-            DisplayId displayId = data.ReadUint64();
-            auto info = GetDisplayInfoById(displayId);
-            reply.WriteParcelable(info);
+            HandleGetDisplayById(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_GET_CUTOUT_INFO: {
-            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
-            reply.WriteParcelable(cutoutInfo);
+            HandleGetCutoutInfo(data, reply);
             break;
         }
         default:
@@ -84,5 +72,73 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return 0;
+}
+
+int ScreenSessionManagerLiteStub::HandleRegisterDisplayManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleRegisterDisplayManagerAgent!");
+    auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+    auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
+    DMError ret = RegisterDisplayManagerAgent(agent, type);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleUnRegisterDisplayManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleUnRegisterDisplayManagerAgent!");
+    auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+    auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
+    DMError ret = UnregisterDisplayManagerAgent(agent, type);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetFoldDisplayMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleGetFoldDisplayMode!");
+    FoldDisplayMode displayMode = GetFoldDisplayMode();
+    reply.WriteUint32(static_cast<uint32_t>(displayMode));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleIsFoldable(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleIsFoldable!");
+    reply.WriteBool(IsFoldable());
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetFoldStatus(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleGetFoldStatus!");
+    reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus()));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetDefaultDisplayInfo(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleGetDefaultDisplayInfo!");
+    auto info = GetDefaultDisplayInfo();
+    reply.WriteParcelable(info);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetDisplayById(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleGetDisplayById!");
+    DisplayId displayId = data.ReadUint64();
+    auto info = GetDisplayInfoById(displayId);
+    reply.WriteParcelable(info);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetCutoutInfo(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleGetCutoutInfo!");
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+    sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
+    reply.WriteParcelable(cutoutInfo);
+    return ERR_NONE;
 }
 } // namespace OHOS::Rosen
