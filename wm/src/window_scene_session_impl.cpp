@@ -384,17 +384,15 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             return;
         }
         uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
-        bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
-            pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
-            (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(titleBarHeight));
-        bool isExtMoveArea =
-            (0 <= pointerItem.GetWindowX() && pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
-            (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(rect.height_)) &&
-            (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP);
+        int32_t pointerX = pointerItem.GetWindowX();
+        int32_t pointerY = pointerItem.GetWindowY();
+        bool isMoveArea = (0 <= pointerX && pointerX <= static_cast<int32_t>(rect.width_)) &&
+            (0 <= pointerY && pointerY <= static_cast<int32_t>(titleBarHeight));
+        bool isExtMoveArea = (0 <= pointerX && pointerX <= rect.width_) &&
+            (0 <= pointerY && pointerY <= rect.height_) && (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP);
         int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
             static_cast<int>(HOTZONE_TOUCH * vpr);
-        auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
-            sourceType, outside, vpr, rect);
+        auto dragType = SessionHelper::GetAreaType(pointerX, pointerY, sourceType, outside, vpr, rect);
         if (dragType != AreaType::UNDEFINED) {
             hostSession_->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
@@ -406,8 +404,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-        action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
     if (isPointUp) {
         hostSession_->SendPointEventForMoveDrag(pointerEvent);
     }
