@@ -3179,7 +3179,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
 }
 
 void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss,
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMap)
+    const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap)
 {
     oss << std::endl << "Current mission lists:" << std::endl;
     oss << " MissionList Type #NORMAL" << std::endl;
