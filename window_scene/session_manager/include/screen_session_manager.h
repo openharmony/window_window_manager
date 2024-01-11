@@ -207,6 +207,9 @@ public:
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
 
+    void SetHDRFormats(ScreenId screenId, sptr<ScreenSession>& session);
+    void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
+
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
