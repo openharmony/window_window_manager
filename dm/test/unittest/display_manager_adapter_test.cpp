@@ -257,6 +257,243 @@ HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | L
     ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
+/**
+ * @tc.name: GetPixelFormat
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level2)
+{
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(0, pixelFormat);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: SetPixelFormat
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, Function | SmallTest | Level2)
+{
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(0, pixelFormat);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: GetSupportedHDRFormats
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
+{
+    std::vector<ScreenHDRFormat> hdrFormats;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(0, hdrFormats);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: GetScreenHDRFormat
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | Level2)
+{
+    ScreenHDRFormat hdrFormat = ScreenHDRFormat{NOT_SUPPORT_HDR};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(0, hdrFormat);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: SetScreenHDRFormat
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(0, 0);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: GetSupportedColorSpaces
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
+{
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(0, colorSpaces);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: GetScreenColorSpace
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, Function | SmallTest | Level2)
+{
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(0, colorSpace);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: SetScreenColorSpace
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | Level2)
+{
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(0, colorSpace);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: DestroyVirtualScreen
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(0);
+    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetVirtualScreenSurface
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenSurface, Function | SmallTest | Level2)
+{
+    sptr<Surface> surface;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(0, surface);
+    ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetVirtualMirrorScreenCanvasRotation
+ * @tc.desc: test SetVirtualMirrorScreenCanvasRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Function | SmallTest | Level2)
+{
+    bool canvasRotation = false;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenRotationLocked
+ * @tc.desc: test SetScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, Function | SmallTest | Level2)
+{
+    bool isLocked = false;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: IsScreenRotationLocked
+ * @tc.desc: test IsScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, Function | SmallTest | Level2)
+{
+    bool isLocked = false;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().IsScreenRotationLocked(isLocked);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetSpecifiedScreenPower
+ * @tc.desc: test SetSpecifiedScreenPower
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, Function | SmallTest | Level2)
+{
+    ScreenPowerState state = ScreenPowerState{0};
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    bool ret = SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(0, state, reason);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetOrientation
+ * @tc.desc: SetOrientation success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetOrientation, Function | SmallTest | Level2)
+{
+    Orientation orientation = Orientation{0};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: WakeUpBegin
+ * @tc.desc: test WakeUpBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
+{
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: WakeUpEnd
+ * @tc.desc: test WakeUpEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, Function | SmallTest | Level2)
+{
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SuspendBegin
+ * @tc.desc: test SuspendBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
+{
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SuspendEnd
+ * @tc.desc: test SuspendEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
+{
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetDisplayState
+ * @tc.desc: test SetDisplayState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Level2)
+{
+    DisplayState state = DisplayState{1};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
+    ASSERT_FALSE(ret);
+}
+
 }
 }
 }
