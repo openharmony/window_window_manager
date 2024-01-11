@@ -147,7 +147,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
     displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
-    displayInfo->SetHDRFormats(hdrFormats_);
+    displayInfo->SetHdrFormats(hdrFormats_);
     displayInfo->SetColorSpaces(colorSpaces_);
     return displayInfo;
 }
@@ -1087,7 +1087,7 @@ void ScreenSession::SetFoldScreen(bool isFold)
     isFold_ = isFold;
 }
 
-void ScreenSession::SetHDRFormats(std::vector<uint32_t>& hdrFormats);
+void ScreenSession::SetHdrFormats(std::vector<uint32_t>& hdrFormats);
 {
     hdrFormats_ = hdrFormats;
 }
