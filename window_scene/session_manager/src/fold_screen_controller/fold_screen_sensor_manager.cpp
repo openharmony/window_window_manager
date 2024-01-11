@@ -168,7 +168,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         return;
     }
     globalHall = (uint16_t)(*extHallData).hall;
-    WLOGFI("hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
+    WLOGFI("hall = %{public}u, angle = %{public}f", globalHall, globalAngle);
     HandleSensorData(globalAngle, globalHall);
 }
 
