@@ -116,9 +116,30 @@ private:
 
 class SessionListenerControllerTest : public testing::Test {
   public:
-    SessionListenerControllerTest() {}
-    ~SessionListenerControllerTest() {}
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+    std::shared_ptr<SessionListenerController> slController;
 };
+
+
+void SessionListenerControllerTest::SetUpTestCase()
+{
+}
+
+void SessionListenerControllerTest::TearDownTestCase()
+{
+}
+
+void SessionListenerControllerTest::SetUp()
+{
+    slController = std::make_shared<SessionListenerController>();
+}
+
+void SessionListenerControllerTest::TearDown()
+{
+}
 
 namespace {
 /**
@@ -128,8 +149,6 @@ namespace {
  */
 HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: AddSessionListener start";
-    std::shared_ptr<SessionListenerController> slController = std::make_shared<SessionListenerController>();
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
     WSError res = slController->AddSessionListener(listener);
@@ -144,7 +163,6 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest
     auto iSession = listener;
     WSError newRes = slController->AddSessionListener(iSession);
     EXPECT_EQ(WSError::WS_OK, newRes);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: AddSessionListener end";
 }
 
 /**
@@ -154,8 +172,6 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest
  */
 HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: DelSessionListener start";
-    std::shared_ptr<SessionListenerController> slController = std::make_shared<SessionListenerController>();
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
     slController->DelSessionListener(listener);
@@ -167,7 +183,6 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
     listener = new MyMissionListener();
     slController->DelSessionListener(listener);
     EXPECT_NE(nullptr, listener);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: DelSessionListener end";
 }
 
 /**
@@ -177,19 +192,16 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionCreated start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionCreated(persistentId);
+    slController->NotifySessionCreated(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionCreated(persistentId);
+    slController->NotifySessionCreated(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionCreated(persistentId);
+    slController->Init();
+    slController->NotifySessionCreated(persistentId);
     EXPECT_EQ(persistentId, 1);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionCreated end";
 }
 
 /**
@@ -199,19 +211,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTe
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionDestroyed start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionDestroyed(persistentId);
+    slController->NotifySessionDestroyed(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionDestroyed(persistentId);
+    slController->NotifySessionDestroyed(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionDestroyed(persistentId);
+    slController->Init();
+    slController->NotifySessionDestroyed(persistentId);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionDestroyed end";
 }
 
 /**
@@ -221,12 +230,9 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | Small
  */
 HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp1 start";
-    SessionListenerController slController;
     std::list<int32_t> sessions;
-    slController.HandleUnInstallApp(sessions);
+    slController->HandleUnInstallApp(sessions);
     EXPECT_EQ(0, sessions.size());
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp1 end";
 }
 
 /**
@@ -236,18 +242,15 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, Function | SmallTes
  */
 HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp2 start";
-    SessionListenerController slController;
     std::list<int32_t> sessions;
     sessions.push_front(1);
-    slController.HandleUnInstallApp(sessions);
-    slController.Init();
-    slController.HandleUnInstallApp(sessions);
+    slController->HandleUnInstallApp(sessions);
+    slController->Init();
+    slController->HandleUnInstallApp(sessions);
     EXPECT_NE(0, sessions.size());
     int32_t persistentId = 1;
-    slController.NotifySessionLabelUpdated(persistentId);
+    slController->NotifySessionLabelUpdated(persistentId);
     ASSERT_EQ(persistentId, 1);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp2 end";
 }
 
 /**
@@ -257,19 +260,16 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTes
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionSnapshotChanged start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->NotifySessionSnapshotChanged(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->NotifySessionSnapshotChanged(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(persistentId, 1);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionSnapshotChanged end";
 }
 
 /**
@@ -279,19 +279,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function |
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionMovedToFront start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionMovedToFront(persistentId);
+    slController->NotifySessionMovedToFront(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionMovedToFront(persistentId);
+    slController->NotifySessionMovedToFront(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionMovedToFront end";
 }
 
 /**
@@ -301,19 +298,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | Sm
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionFocused start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionFocused(persistentId);
+    slController->NotifySessionFocused(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionFocused(persistentId);
+    slController->NotifySessionFocused(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(persistentId, 1);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionFocused end";
 }
 
 /**
@@ -323,19 +317,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTe
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionUnfocused start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionUnfocused(persistentId);
+    slController->NotifySessionUnfocused(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionUnfocused(persistentId);
+    slController->NotifySessionUnfocused(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionUnfocused end";
 }
 
 /**
@@ -345,19 +336,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionClosed start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionClosed(persistentId);
+    slController->NotifySessionClosed(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionClosed(persistentId);
+    slController->NotifySessionClosed(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionClosed end";
 }
 
 /**
@@ -367,19 +355,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTes
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionLabelUpdated start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
-    slController.NotifySessionLabelUpdated(persistentId);
+    slController->NotifySessionLabelUpdated(persistentId);
 
     persistentId = 1;
-    slController.NotifySessionLabelUpdated(persistentId);
+    slController->NotifySessionLabelUpdated(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionSnapshotChanged(persistentId);
+    slController->Init();
+    slController->NotifySessionSnapshotChanged(persistentId);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionLabelUpdated end";
 }
 
 /**
@@ -389,8 +374,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | Sm
  */
 HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: OnListenerDied start";
-    std::shared_ptr<SessionListenerController> slController = std::make_shared<SessionListenerController>();
     sptr<IRemoteObject> remote;
     slController->OnListenerDied(remote);
     EXPECT_EQ(nullptr, remote);
@@ -399,7 +382,6 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | L
     remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     slController->OnListenerDied(remote);
     EXPECT_NE(nullptr, remote);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: OnListenerDied end";
 }
 
 /**
@@ -409,8 +391,6 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | L
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionIconChanged start";
-    SessionListenerController slController;
     int32_t persistentId = -1;
 
     int32_t pixelMapWidth = 4;
@@ -422,17 +402,16 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
     info.pixelFormat = OHOS::Media::PixelFormat::RGB_888;
     pixelMap->SetImageInfo(info);
     std::shared_ptr<OHOS::Media::PixelMap> icon = std::move(pixelMap);
-    slController.NotifySessionIconChanged(persistentId, icon);
+    slController->NotifySessionIconChanged(persistentId, icon);
 
     persistentId = 1;
-    slController.NotifySessionIconChanged(persistentId, icon);
+    slController->NotifySessionIconChanged(persistentId, icon);
     ASSERT_EQ(persistentId, 1);
 
-    slController.Init();
-    slController.NotifySessionIconChanged(persistentId, icon);
-    EXPECT_NE(nullptr, slController.taskScheduler_);
+    slController->Init();
+    slController->NotifySessionIconChanged(persistentId, icon);
+    EXPECT_NE(nullptr, slController->taskScheduler_);
     EXPECT_EQ(1, persistentId);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionIconChanged end";
 }
 
 /**
@@ -442,8 +421,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
  */
 HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: ListenerDeathRecipient start";
-    std::shared_ptr<SessionListenerController> slController = std::make_shared<SessionListenerController>();
+    GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 start";
     EXPECT_EQ(nullptr,  slController->listenerDeathRecipient_);
     slController->Init();
     sptr<ISessionListener> listener = new MyMissionListener();
@@ -455,7 +433,7 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | Small
     remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     slController->listenerDeathRecipient_->OnRemoteDied(remote);
     EXPECT_NE(nullptr, remote);
-    GTEST_LOG_(INFO) << "SessionListenerControllerTest: ListenerDeathRecipient end";
+    GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
 }
 } // namespace
 } // namespace Rosen
