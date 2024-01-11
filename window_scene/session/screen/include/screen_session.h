@@ -132,6 +132,9 @@ public:
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
 
+    void SetHDRFormats(std::vector<uint32_t>& hdrFormats);
+    void SetColorSpaces(std::vector<uint32_t>& colorSpaces);
+
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -165,8 +168,6 @@ public:
 private:
     float ConvertRotationToFloat(Rotation sensorRotation);
     Rotation ConvertIntToRotation(int rotation);
-    std::vector<uint32_t> ConvertHDRFormatToInt(std::vector<ScreenHDRFormat>& hdrFormat);
-    std::vector<uint32_t> ConvertColorSpaceToInt(std::vector<GraphicCM_ColorSpaceType>& colorSpace);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
@@ -176,6 +177,8 @@ private:
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
+    std::vector<uint32_t> hdrFormats_;
+    std::vector<uint32_t> colorSpaces_;
     DeviceRotation sensorRotation_ = DeviceRotation::INVALID;
     float currentSensorRotation_ { 0.0f };
 };

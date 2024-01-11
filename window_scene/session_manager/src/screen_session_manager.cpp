@@ -741,13 +741,46 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
             return nullptr;
         }
     }
-
     sptr<ScreenSession> session = GetScreenSessionInner(screenId, property);
     session->RegisterScreenChangeListener(this);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     screenSessionMap_[screenId] = session;
+    SetHDRFormats(screenId, session);
+    SetColorSpaces(screenId, session);
     return session;
+}
+
+void ScreenSessionManager::SetHDRFormats(ScreenId screenId, sptr<ScreenSession>& session)
+{
+    WLOGFI("SCB: ScreenSessionManager::SetHDRFormats %{public}d" PRIu64, screenId);
+    std::vector<ScreenHDRFormat> rsHdrFormat;
+    auto status = rsInterface_.GetScreenSupportedHDRFormats(screenId, rsHdrFormat);
+    if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
+        WLOGFE("get hdr format failed! status code: %{public}d", status);
+    } else {
+        std::vector<uint32_t> hdrFormat(rsHdrFormat.size());
+        std::transform(rsHdrFormat.begin(), rsHdrFormat.end(), hdrFormat.begin(), [](int val) {
+            return static_cast<uint32_t>(val);
+        });
+        session->SetHDRFormats(hdrFormat);
+    }
+}
+
+void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session)
+{
+    WLOGFI("SCB: ScreenSessionManager::SetColorSpaces %{public}d" PRIu64, screenId);
+    std::vector<GraphicCM_ColorSpaceType> rsColorSpace;
+    auto status = rsInterface_.GetScreenSupportedColorSpaces(screenId, rsColorSpace);
+    if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
+        WLOGFE("get color space failed! status code: %{public}d", status);
+    } else {
+        std::vector<uint32_t> colorSpace(rsColorSpace.size());
+        std::transform(rsColorSpace.begin(), rsColorSpace.end(), colorSpace.begin(), [](int val) {
+            return static_cast<uint32_t>(val);
+        });
+        session->SetColorSpaces(colorSpace);
+    }
 }
 
 ScreenId ScreenSessionManager::GetDefaultScreenId()
