@@ -132,7 +132,7 @@ public:
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
 
-    void SetHDRFormats(std::vector<uint32_t>& hdrFormats);
+    void SetHdrFormats(std::vector<uint32_t>& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>& colorSpaces);
 
     std::string name_ { "UNKNOW" };

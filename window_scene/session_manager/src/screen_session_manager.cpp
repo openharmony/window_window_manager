@@ -732,6 +732,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
         phyScreenPropMap_[screenId] = property;
     }
+
     if (foldScreenController_ != nullptr) {
         // sensor may earlier than screen connect, when physical screen property changed, update
         foldScreenController_->UpdateForPhyScreenPropertyChange();
@@ -740,19 +741,20 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
             return nullptr;
         }
     }
+
     sptr<ScreenSession> session = GetScreenSessionInner(screenId, property);
     session->RegisterScreenChangeListener(this);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     screenSessionMap_[screenId] = session;
-    SetHDRFormats(screenId, session);
+    SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
     return session;
 }
 
-void ScreenSessionManager::SetHDRFormats(ScreenId screenId, sptr<ScreenSession>& session)
+void ScreenSessionManager::SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session)
 {
-    WLOGFI("SCB: ScreenSessionManager::SetHDRFormats %{public}d" PRIu64, screenId);
+    WLOGFI("SCB: ScreenSessionManager::SetHdrFormats %{public}d" PRIu64, screenId);
     std::vector<ScreenHDRFormat> rsHdrFormat;
     auto status = rsInterface_.GetScreenSupportedHDRFormats(screenId, rsHdrFormat);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
@@ -762,7 +764,7 @@ void ScreenSessionManager::SetHDRFormats(ScreenId screenId, sptr<ScreenSession>&
         std::transform(rsHdrFormat.begin(), rsHdrFormat.end(), hdrFormat.begin(), [](int val) {
             return static_cast<uint32_t>(val);
         });
-        session->SetHDRFormats(hdrFormat);
+        session->SetHdrFormats(hdrFormat);
     }
 }
 
