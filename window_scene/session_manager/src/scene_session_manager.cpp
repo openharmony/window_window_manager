@@ -3181,12 +3181,12 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::endl;
 }
 
-void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss)
+void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss,
+    const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap)
 {
     oss << std::endl << "Current mission lists:" << std::endl;
     oss << " MissionList Type #NORMAL" << std::endl;
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& elem : sceneSessionMap_) {
+    for (const auto& elem : sceneSessionMap) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
             WLOGFW("curSession is nullptr");
@@ -3227,8 +3227,12 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& elem : sceneSessionMap_) {
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
             continue;
@@ -3239,7 +3243,6 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
             backgroundSession.push_back(curSession);
         }
     }
-    lock.unlock();
     allSession.insert(allSession.end(), backgroundSession.begin(), backgroundSession.end());
     uint32_t count = 0;
     for (const auto& session : allSession) {
@@ -3254,8 +3257,8 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         count++;
     }
     oss << "Focus window: " << GetFocusedSession() << std::endl;
-    oss << "Total window num: " << sceneSessionMap_.size() << std::endl;
-    DumpAllAppSessionInfo(oss);
+    oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
+    DumpAllAppSessionInfo(oss, sceneSessionMapCopy);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
