@@ -478,6 +478,37 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate, Function | SmallTest | 
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().SetVirtualScreenRefreshRate(testVirtualScreenId_,
         testVirtualScreenRefreshRate_));
 }
+
+/**
+ * @tc.name: RegisterScreenListener
+ * @tc.desc: RegisterScreenListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, RegisterScreenListener, Function | SmallTest | Level1)
+{
+    sptr<ScreenManager::IScreenListener> listener = nullptr;
+    auto ret = ScreenManager::GetInstance().RegisterScreenListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RegisterVirtualScreenGroupListener02
+ * @tc.desc: RegisterVirtualScreenGroupListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    auto& screenManager = ScreenManager::GetInstance();
+    auto result = screenManager.RegisterVirtualScreenGroupListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
+    sptr<ScreenManager::IVirtualScreenGroupListener> listener = new (std::nothrow)TestIVirtualScreenGroupListener();
+    if (screenManager.pImpl_->screenManagerListener_ == nullptr) {
+        EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    }
+    result = ScreenManager::GetInstance().RegisterVirtualScreenGroupListener(listener);
+    ASSERT_EQ(DMError::DM_OK, result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
