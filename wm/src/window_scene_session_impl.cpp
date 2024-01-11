@@ -414,7 +414,8 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
     if (isPointUp) {
         hostSession_->SendPointEventForMoveDrag(pointerEvent);
     }
