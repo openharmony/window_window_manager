@@ -342,8 +342,12 @@ PipWindowState PictureInPictureController::GetControllerState()
     return curState_;
 }
 
-void PictureInPictureController::UpdateContentSize(uint32_t width, uint32_t height)
+void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height)
 {
+    if (width <= 0 || height <= 0) {
+        WLOGFE("invalid size");
+        return;
+    }
     if (curState_ != PipWindowState::STATE_STARTED) {
         WLOGFD("UpdateContentSize is disabled when state: %{public}u", curState_);
         return;
