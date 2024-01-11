@@ -370,8 +370,8 @@ HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest |
  */
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenSurface, Function | SmallTest | Level2)
 {
-    sptr<Surface> surfa;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(0, surfa);
+    sptr<Surface> sur_face;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(0, sur_face);
     ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
 }
 
