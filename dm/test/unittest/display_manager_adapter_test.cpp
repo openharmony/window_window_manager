@@ -370,8 +370,8 @@ HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest |
  */
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenSurface, Function | SmallTest | Level2)
 {
-    sptr<Surface> surface;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(0, surface);
+    sptr<Surface> surfa;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(0, surfa);
     ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
 }
 
@@ -383,7 +383,8 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenSurface, Function | SmallTes
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Function | SmallTest | Level2)
 {
     bool canvasRotation = false;
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().
+                    SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
 
