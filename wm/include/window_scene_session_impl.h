@@ -169,7 +169,8 @@ private:
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
-
+    void HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, WSRect& rect);
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
 };
