@@ -368,6 +368,28 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
+void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+{
+    WLOGD("TextFieldPosY = %{public}lf, KeyBoardHeight = %{public}d", info->textFieldPositionY_, info->rect_.height_);
+    if (occupiedAreaChangeListener_) {
+        occupiedAreaChangeListener_->OnSizeChange(info);
+    }
+}
+
+WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(
+    const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    occupiedAreaChangeListener_ = listener;
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
+    const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    occupiedAreaChangeListener_ = nullptr;
+    return WMError::WM_OK;
+}
+
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     WLOGFI("Window Extension Session Get Avoid Area Type");
