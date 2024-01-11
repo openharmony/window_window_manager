@@ -169,7 +169,7 @@ private:
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
-
+    bool IsExpandMoveArea(const MMI::PointerEvent::PointerItem& pointerItem, const WSRect& rect, WindowType winType);
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
 };
