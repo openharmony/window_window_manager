@@ -2333,5 +2333,13 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
         }
     }
 }
+
+void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
+{
+    WLOGFI("NotifyWindowStatusChange");
+    if (uiContent_ != nullptr) {
+        uiContent_->UpdateTransform(transform);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
