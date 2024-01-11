@@ -1600,6 +1600,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         WLOGFE("property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+
     if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -1613,11 +1614,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 
     WLOGFI("[WMSLife] create specific start, name: %{public}s, type: %{public}d",
         property->GetWindowName().c_str(), property->GetWindowType());
-
-    if (CheckParentIsBackground(property)) {
-        WLOGFE("Parent window is hidden.");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
 
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
@@ -1669,28 +1665,24 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     }
 }
 
-bool SceneSessionManager::CheckParentIsBackground(const sptr<WindowSessionProperty>& property)
+bool SceneSessionManager::CheckParentIsForeground(const sptr<WindowSessionProperty>& property)
 {
-    auto sceneSession = GetSceneSession(property->GetParentPersistentId());
-    if (sceneSession == nullptr) {
-        WLOGW("the scene session is nullptr");
+    WLOGFI("CheckParentIsForeground, window(%{public}d) type: %{public}d, parent(%{public}d)",
+        property->GetPersistentId(), property->GetWindowType(), property->GetParentPersistentId());
+    auto parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession == nullptr) {
+        WLOGW("Cannot find parent window.");
         return false;
     }
-    WindowType type = property->GetWindowType();
-    WLOGFI("[WMSLife] CheckParentIsBackground, type: %{public}d, GetParentPersistentId: %{public}d,"
-           "sessionState: %{public}d", type, property->GetParentPersistentId(), sceneSession->GetSessionState());
-    if (type == WindowType::WINDOW_TYPE_FLOAT) {
-        if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
-            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
-            WLOGFD("The parent window is not displayed in the foreground.");
-            return true;
-        }
+    if (parentSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+        parentSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+        WLOGFD("The parent window is in the foreground.");
+        return true;
     }
-    WLOGFD("check parent window hide failed.");
     return false;
 }
 
-bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const
+bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property)
 {
     WindowType type = property->GetWindowType();
     if (!WindowHelper::IsSystemWindow(type)) {
@@ -1698,21 +1690,25 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && SessionPermission::IsStartedByInputMethod()) {
-        // WINDOW_TYPE_INPUT_METHOD_FLOAT counld be created by input method app
+        // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_PIP) {
-        // some system types counld be created by normal app
+        // some system types could be created by normal app
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-        // WINDOW_TYPE_FLOAT counld be created by normal app with the corresponding permission
-        WLOGFD("check create permission success, normal app create float window with request permission.");
-        return true;
+        // WINDOW_TYPE_FLOAT could be created by system app with the corresponding permission
+        WLOGFD("create float window with request permission.");
+        if (SessionPermission::IsSystemCalling()) {
+            return true;
+        }
+        WLOGFD("normal app create float window need parent is in foreground.");
+        return CheckParentIsForeground(property);
     }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
         WLOGFD("check create permission success, create with system calling.");
