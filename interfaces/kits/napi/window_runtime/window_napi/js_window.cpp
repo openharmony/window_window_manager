@@ -1310,7 +1310,7 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
     }
     WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
     uint32_t resultValue = 0;
-    if (!ConvertFromJsValue(env, argv[0], resultValue)) {
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(env, argv[0], resultValue)) {
         WLOGFE("Failed to convert parameter to windowType");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -1330,7 +1330,7 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 return;
             }
             if (errCode != WMError::WM_OK) {
