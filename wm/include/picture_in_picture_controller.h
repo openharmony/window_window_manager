@@ -60,7 +60,7 @@ public:
     void SetPipWindow(sptr<Window> window);
     void SetAutoStartEnabled(bool enable);
     void IsAutoStartEnabled(bool& enable) const;
-    void UpdateContentSize(uint32_t width, uint32_t height);
+    void UpdateContentSize(int32_t width, int32_t height);
     void StartMove();
     void DoScale();
     void DoActionEvent(std::string& actionName);
