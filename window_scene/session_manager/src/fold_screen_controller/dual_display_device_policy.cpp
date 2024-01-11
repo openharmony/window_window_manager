@@ -353,6 +353,8 @@ void DualDisplayDevicePolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
+    WLOGFI("ChangeScreenDisplayModeToMainOnBootAnimation screenBounds : width_= %{public}f, height_= %{public}f",
+    screenSession->GetScreenProperty().GetBounds().rect_.width_, screenSession->GetScreenProperty().GetBounds().rect_.height_);
     ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
         DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
