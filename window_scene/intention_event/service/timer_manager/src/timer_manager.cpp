@@ -110,6 +110,7 @@ void TimerManager::OnStop()
 
 int32_t TimerManager::TakeNextTimerId()
 {
+    WLOGFI("TimerManager::TakeNextTimerId enter");
     uint64_t timerSlot = 0;
     uint64_t one = 1;
 
@@ -122,11 +123,13 @@ int32_t TimerManager::TakeNextTimerId()
             return i;
         }
     }
+    WLOGFI("TimerManager::TakeNextTimerId finish");
     return NONEXISTENT_ID;
 }
 
 int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()> callback)
 {
+    WLOGFI("TimerManager::AddTimerInternal enter");
     if (intervalMs < MIN_INTERVAL) {
         intervalMs = MIN_INTERVAL;
     } else if (intervalMs > MAX_INTERVAL_MS) {
@@ -151,6 +154,7 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()>
     }
     timer->callback = callback;
     InsertTimerInternal(timer);
+    WLOGFI("TimerManager::AddTimerInternal finish");
     return timerId;
 }
 
@@ -167,6 +171,7 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
+    WLOGFI("TimerManager::InsertTimerInternal enter");
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
             timers_.insert(it, std::move(timer));
@@ -174,6 +179,7 @@ void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
         }
     }
     timers_.push_back(std::move(timer));
+    WLOGFI("TimerManager::InsertTimerInternal finish");
 }
 
 int32_t TimerManager::CalcNextDelayInternal()
