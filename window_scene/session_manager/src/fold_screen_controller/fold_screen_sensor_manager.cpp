@@ -217,38 +217,42 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     }
     FoldStatus state;
 
-    if(allowUseSensorForAlta == LARGER_BOUNDARY_FLAG) {
-        if(hall == HALL_THRESHOLD && angle == OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD) {
-            state = mState_;
-        } else if (std::islessequal(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD)) {
-            state = FoldStatus::FOLDED;
-        } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
-            return FoldStatus::EXPAND;
-        } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
-            std::isgreater(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD + ALTA_HALF_FOLDED_BUFFER)) {
-            state = FoldStatus::HALF_FOLD;
-        } else {
-            state = mState_;
-            if (state == FoldStatus::UNKNOWN) {
-                state = FoldStatus::HALF_FOLD;
-            }
-        }
-    } else {
-        if(hall == 0) {
-            state = FoldStatus::FOLDED;
-        } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
-            return FoldStatus::EXPAND;
-        } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER)) {
-            if(std::islessequal(angle, ALTA_AVOID_HALL_ERROR)) {
+    if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
+        return FoldStatus::EXPAND;
+    }
+
+    switch (allowUseSensorForAlta) {
+        case LARGER_BOUNDARY_FLAG: {
+            if(hall == HALL_THRESHOLD && angle == OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD) {
+                state = mState_;
+            } else if (std::islessequal(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD)) {
                 state = FoldStatus::FOLDED;
+            } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
+                std::isgreater(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD + ALTA_HALF_FOLDED_BUFFER)) {
+                state = FoldStatus::HALF_FOLD;
             } else {
-                state = FoldStatus::HALF_FOLD;
+                state = mState_;
+                if(state == FoldStatus::UNKNOWN) {
+                    state = FoldStatus::HALF_FOLD;
             }
-        } else {
-            state = mState_;
-            if (state == FoldStatus::UNKNOWN) {
-                state = FoldStatus::HALF_FOLD;
             }
+                }
+            }
+            break;
+        }
+        case SMALLER_BOUNDARY_FLAG: {
+            if(hall == HALL_FOLDED_THRESHOLD || std::islessequal(angle, ALTA_AVOID_HALL_ERROR)) {
+                state = FoldStatus::FOLDED;
+            } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
+                std::isgreater(angle, ALTA_AVOID_HALL_ERROR)) {
+                state = FoldStatus::HALF_FOLD;
+            } else {
+                state = mState_;
+                if(state == FoldStatus::UNKNOWN) {
+                    state = FoldStatus::HALF_FOLD;
+                }
+            }
+            break;
         }
     }
     return state;
