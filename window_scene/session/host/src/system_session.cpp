@@ -28,8 +28,13 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     WLOGFD("[WMSLife] Create SystemSession");
-    // moveDragController for WINDOW_TYPE_PIP
-    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    if (info != nullptr && info.windowType_ == static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP)) {
+        // moveDragController for WINDOW_TYPE_PIP
+        moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+        if (specificCallback != nullptr && specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
+            moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+        }
+    }
     SetMoveDragCallback();
 }
 
