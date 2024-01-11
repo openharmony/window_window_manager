@@ -364,9 +364,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, WSRect& rect)
 {
+    bool needNotifyEvent = true;
     uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
     bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
         pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
@@ -387,6 +388,7 @@ void WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
             hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
     }
+    return needNotifyEvent;
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -408,7 +410,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             WLOGFW("vpr is zero");
             return;
         }
-        HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
