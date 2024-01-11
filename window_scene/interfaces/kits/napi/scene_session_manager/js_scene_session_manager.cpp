@@ -1930,7 +1930,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     int32_t payloadPid;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], payloadPid)) { // third args int pid 
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], payloadPid)) { // third args int pid
         WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
