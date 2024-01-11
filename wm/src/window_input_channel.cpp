@@ -34,6 +34,24 @@ WindowInputChannel::~WindowInputChannel()
     window_->SetNeedRemoveWindowInputChannel(false);
 }
 
+void WindowInputChannel::DispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed)
+{
+    if (keyEvent == nullptr) {
+        WLOGFW("keyEvent is null");
+        return;
+    }
+
+    if (consumed) {
+        WLOGD("Input method has processed key event, id:%{public}d", keyEvent->GetId());
+        return;
+    }
+
+    if (window_ != nullptr) {
+        WLOGD("dispatch keyEvent to ACE");
+        window_->ConsumeKeyEvent(keyEvent);
+    }
+}
+
 void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {
@@ -65,21 +83,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
                 WLOGFW("promoteThis is nullptr");
                 return;
             }
-
-            if (keyEvent == nullptr) {
-                WLOGFW("keyEvent is null");
-                return;
-            }
-
-            if (consumed) {
-                WLOGD("Input method has processed key event, id:%{public}d", keyEvent->GetId());
-                return;
-            }
-
-            if (promoteThis->window_ != nullptr) {
-                WLOGD("dispatch keyEvent to ACE");
-                promoteThis->window_->ConsumeKeyEvent(keyEvent);
-            }
+            promoteThis->DispatchKeyEvent(keyEvent, consumed);
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {

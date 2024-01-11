@@ -32,6 +32,7 @@ public:
     void Destroy();
 private:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    void DispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed);
     std::mutex mtx_;
     sptr<Window> window_;
     bool isAvailable_;
