@@ -116,7 +116,7 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
-    void OnBufferAvailableChange(const bool isAvailable);
+    void OnBufferAvailableChange(const bool isBufferAvailable);
     void OnSessionEvent(uint32_t eventId);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
