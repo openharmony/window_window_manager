@@ -207,7 +207,7 @@ MMI::WindowInfo SceneSessionDirtyManager::PrepareWindowInfo(sptr<SceneSession> s
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
-        .flags = (!sceneSession->GetSystemTouchable()),
+        .flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus()),
         .displayId = displayId,
         .pointerChangeAreas = pointerChangeAreas,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),

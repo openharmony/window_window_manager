@@ -953,11 +953,27 @@ WSError Session::SetActive(bool active)
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
 {
+    SetForegroundInteractiveStatus(interactive);
     if (!IsSessionValid() || !sessionStage_) {
         return;
     }
-    WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
-    sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+    const auto& state = GetSessionState();
+    if (WindowHelper::IsMainWindow(GetWindowType()) &&
+        (isVisible_ || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
+        WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
+        sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+    }
+}
+
+void Session::SetForegroundInteractiveStatus(bool interactive)
+{
+    foregroundInteractiveStatus_.store(interactive);
+    NotifySessionInfoChange();
+}
+
+bool Session::GetForegroundInteractiveStatus() const
+{
+    return foregroundInteractiveStatus_.load();
 }
 
 void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
