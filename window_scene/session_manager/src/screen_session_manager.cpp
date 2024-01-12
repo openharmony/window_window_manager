@@ -754,7 +754,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
 
 void ScreenSessionManager::SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session)
 {
-    WLOGFI("SCB: ScreenSessionManager::SetHdrFormats %{public}d" PRIu64, screenId);
+    WLOGFI("SCB: ScreenSessionManager::SetHdrFormats %{public}" PRIu64, screenId);
     std::vector<ScreenHDRFormat> rsHdrFormat;
     auto status = rsInterface_.GetScreenSupportedHDRFormats(screenId, rsHdrFormat);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
@@ -764,13 +764,13 @@ void ScreenSessionManager::SetHdrFormats(ScreenId screenId, sptr<ScreenSession>&
         std::transform(rsHdrFormat.begin(), rsHdrFormat.end(), hdrFormat.begin(), [](int val) {
             return static_cast<uint32_t>(val);
         });
-        session->SetHdrFormats(hdrFormat);
+        session->SetHdrFormats(std::move(hdrFormat));
     }
 }
 
 void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session)
 {
-    WLOGFI("SCB: ScreenSessionManager::SetColorSpaces %{public}d" PRIu64, screenId);
+    WLOGFI("SCB: ScreenSessionManager::SetColorSpaces %{public}" PRIu64, screenId);
     std::vector<GraphicCM_ColorSpaceType> rsColorSpace;
     auto status = rsInterface_.GetScreenSupportedColorSpaces(screenId, rsColorSpace);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
@@ -780,7 +780,7 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
         std::transform(rsColorSpace.begin(), rsColorSpace.end(), colorSpace.begin(), [](int val) {
             return static_cast<uint32_t>(val);
         });
-        session->SetColorSpaces(colorSpace);
+        session->SetColorSpaces(std::move(colorSpace));
     }
 }
 
