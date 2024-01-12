@@ -71,6 +71,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyWindowVisibilityChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE),
         &SessionStageStub::HandleNotifyTransformChange),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE),
+        &SessionStageStub::HandleNotifyDialogStateChange),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -315,6 +317,14 @@ int SessionStageStub::HandleNotifyTransformChange(MessageParcel& data, MessagePa
     Transform transform;
     transform.Unmarshalling(data);
     NotifyTransformChange(transform);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleNotifyDialogStateChange!");
+    bool isForeground = data.ReadBool();
+    NotifyDialogStateChange(isForeground);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
