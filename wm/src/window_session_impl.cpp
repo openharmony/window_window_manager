@@ -2056,8 +2056,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         return;
     }
 
-    wptr<WindowSessionImpl> weakThis = this;
-    auto dispatchFunc = [weakThis, keyEvent] () {
+    auto dispatchFunc = [weakThis = wptr(this), keyEvent] () {
         auto promoteThis = weakThis.promote();
         if (promoteThis == nullptr) {
             WLOGFW("promoteThis is nullptr");
@@ -2071,7 +2070,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         WLOGD("Async dispatch keyEvent to input method");
         auto callback = [dispatchFunc] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             if (keyEvent == nullptr) {
-                WLOGFW("keyEvent is null");
+                WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
                 return;
             }
 

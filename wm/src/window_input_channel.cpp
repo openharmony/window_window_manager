@@ -76,8 +76,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
         WLOGD("Async dispatch keyEvent to input method");
-        wptr<WindowInputChannel> weakThis = this;
-        auto callback = [weakThis] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+        auto callback = [weakThis = wptr(this)] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             auto promoteThis = weakThis.promote();
             if (promoteThis == nullptr) {
                 WLOGFW("promoteThis is nullptr");
