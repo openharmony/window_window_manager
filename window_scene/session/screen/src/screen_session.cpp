@@ -147,41 +147,9 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
     displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
-
-    std::vector<ScreenHDRFormat> rsHDRFormat;
-    std::vector<GraphicCM_ColorSpaceType> rsColorSpace;
-    auto hdrStatus = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(screenId_, rsHDRFormat);
-    auto colorStatus = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(screenId_, rsColorSpace);
-    if (static_cast<StatusCode>(hdrStatus) != StatusCode::SUCCESS) {
-        WLOGFE("get hdr format failed! status code: %{public}d", hdrStatus);
-    } else {
-        displayInfo->SetHdrFormats(ConvertHDRFormatToInt(rsHDRFormat));
-    }
-    if (static_cast<StatusCode>(colorStatus) != StatusCode::SUCCESS) {
-        WLOGFE("get color space failed! status code: %{public}d", colorStatus);
-    } else {
-        displayInfo->SetColorSpaces(ConvertColorSpaceToInt(rsColorSpace));
-    }
-
+    displayInfo->SetHdrFormats(hdrFormats_);
+    displayInfo->SetColorSpaces(colorSpaces_);
     return displayInfo;
-}
-
-std::vector<uint32_t> ScreenSession::ConvertHDRFormatToInt(std::vector<ScreenHDRFormat>& hdrFormat)
-{
-    std::vector<uint32_t> res;
-    for (auto item : hdrFormat) {
-        res.emplace_back(static_cast<uint32_t>(item));
-    }
-    return res;
-}
-
-std::vector<uint32_t> ScreenSession::ConvertColorSpaceToInt(std::vector<GraphicCM_ColorSpaceType>& colorSpace)
-{
-    std::vector<uint32_t> res;
-    for (auto item : colorSpace) {
-        res.emplace_back(static_cast<uint32_t>(item));
-    }
-    return res;
 }
 
 DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
@@ -1117,6 +1085,16 @@ void ScreenSession::SetFoldScreen(bool isFold)
 {
     WLOGFI("SetFoldScreen %{public}u", isFold);
     isFold_ = isFold;
+}
+
+void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
+{
+    hdrFormats_ = std::move(hdrFormats);
+}
+
+void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
+{
+    colorSpaces_ = std::move(colorSpaces);
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
