@@ -275,7 +275,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
             WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d, focusedSessionId:%{public}d",
-                ret, keyEvent->GetId(), focusedSceneSession);
+                ret, keyEvent->GetId(), focusedSessionId);
         }
         return;
     }
