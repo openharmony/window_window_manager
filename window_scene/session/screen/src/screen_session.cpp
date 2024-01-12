@@ -1089,12 +1089,12 @@ void ScreenSession::SetFoldScreen(bool isFold)
 
 void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
 {
-    hdrFormats_ = hdrFormats;
+    hdrFormats_ = std::move(hdrFormats);
 }
 
 void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 {
-    colorSpaces_ = colorSpaces;
+    colorSpaces_ = std::move(colorSpaces);
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
