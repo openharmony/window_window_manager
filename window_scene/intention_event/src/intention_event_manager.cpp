@@ -217,12 +217,14 @@ void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
     int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
 {
     if (keyEvent == nullptr) {
-        WLOGFW("keyEvent is null");
+        WLOGFW("keyEvent is null, focusedSessionId:%{public}" PRId32
+            ", consumed:%{public}" PRId32, focusedSessionId, consumed);
         return;
     }
 
     if (consumed) {
-        WLOGD("Input method has processed key event, id:%{public}" PRId32, keyEvent->GetId());
+        WLOGD("Input method has processed key event, id:%{public}" PRId32 ", focusedSessionId:%{public}" PRId32,
+            keyEvent->GetId(), focusedSessionId);
         return;
     }
 
@@ -256,8 +258,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         WLOGFE("focusedSceneSession is null");
         return;
     }
-    WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent", keyEvent->GetId());
-    if (!focusedSceneSession->GetSessionInfo().isSystem_) {
+    auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
+    WLOGFI("EventListener OnInputEvent InputTracking id:%{public}d, focusedSessionId:%{public}d, isSystem:%{public}d",
+        keyEvent->GetId(), focusedSessionId, isSystem);
+    if (!isSystem) {
         focusedSceneSession->TransferKeyEvent(keyEvent);
         return;
     }
@@ -270,7 +274,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
-            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d, focusedSessionId:%{public}d",
+                ret, keyEvent->GetId(), focusedSceneSession);
         }
         return;
     }
