@@ -2013,25 +2013,8 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
-void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+void WindowSessionImpl::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (keyEvent == nullptr) {
-        WLOGFE("keyEvent is nullptr");
-        return;
-    }
-
-    bool inputMethodHasProcessed = false;
-#ifdef IMF_ENABLE
-    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
-    if (isKeyboardEvent) {
-        WLOGD("dispatch keyEvent to input method");
-        inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
-    }
-#endif // IMF_ENABLE
-    if (inputMethodHasProcessed) {
-        WLOGFD("input method has processed key event");
-        return;
-    }
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2056,7 +2039,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         WLOGD("Transfer key event to inputEventConsumer");
         (void)inputEventConsumer->OnInputEvent(keyEvent);
     } else if (uiContent_) {
-        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+        auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
@@ -2064,6 +2047,49 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             Recover();
         }
     }
+}
+
+void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return;
+    }
+
+    auto dispatchFunc = [weakThis = wptr(this), keyEvent] () {
+        auto promoteThis = weakThis.promote();
+        if (promoteThis == nullptr) {
+            WLOGFW("promoteThis is nullptr");
+            return;
+        }
+        promoteThis->DispatchKeyEventCallback(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent));
+    };
+#ifdef IMF_ENABLE
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    if (isKeyboardEvent) {
+        WLOGD("Async dispatch keyEvent to input method");
+        auto callback = [dispatchFunc] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+            if (keyEvent == nullptr) {
+                WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
+                return;
+            }
+
+            if (consumed) {
+                WLOGD("Input method has processed key event, id:%{public}" PRId32, keyEvent->GetId());
+                return;
+            }
+
+            dispatchFunc();
+        };
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(
+            const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), callback);
+        if (ret != 0) {
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
+        }
+        return;
+    }
+#endif // IMF_ENABLE
+    dispatchFunc();
 }
 
 bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
