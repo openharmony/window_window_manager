@@ -34,7 +34,7 @@ WindowInputChannel::~WindowInputChannel()
     window_->SetNeedRemoveWindowInputChannel(false);
 }
 
-void WindowInputChannel::DispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed)
+void WindowInputChannel::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed)
 {
     if (keyEvent == nullptr) {
         WLOGFW("keyEvent is null");
@@ -83,7 +83,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
                 WLOGFW("promoteThis is nullptr");
                 return;
             }
-            promoteThis->DispatchKeyEvent(keyEvent, consumed);
+            promoteThis->DispatchKeyEventCallback(keyEvent, consumed);
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {

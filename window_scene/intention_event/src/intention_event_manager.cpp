@@ -213,7 +213,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     UpdateLastMouseEvent(pointerEvent);
 }
 
-void IntentionEventManager::InputEventListener::KeyEventConsumedCallback(
+void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
     int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
 {
     if (keyEvent == nullptr) {
@@ -266,7 +266,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     if (isKeyboardEvent) {
         WLOGD("Async dispatch keyEvent to input method");
         auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
-            this->KeyEventConsumedCallback(focusedSessionId, keyEvent, consumed);
+            this->DispatchKeyEventCallback(focusedSessionId, keyEvent, consumed);
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
