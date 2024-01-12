@@ -361,6 +361,8 @@ public:
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
+    bool GetForegroundInteractiveStatus() const;
+    void SetForegroundInteractiveStatus(bool interactive);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -425,6 +427,7 @@ protected:
     WSRectF bounds_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
+    bool isVisible_ = false;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -529,6 +532,7 @@ private:
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };
     bool systemTouchable_ { true };
+    std::atomic_bool foregroundInteractiveStatus_ { true };
 };
 } // namespace OHOS::Rosen
 

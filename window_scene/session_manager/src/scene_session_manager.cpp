@@ -1221,6 +1221,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         }
 
         auto persistentId = scnSession->GetPersistentId();
+        scnSession->NotifyForegroundInteractiveStatus(true);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         WLOGFI("[WMSMain]active persistentId: %{public}d isSystem_:%{public}u",
             persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
@@ -1402,11 +1403,7 @@ void SceneSessionManager::NotifyForegroundInteractiveStatus(const sptr<SceneSess
             WLOGFE("session is invalid with %{public}d", persistentId);
             return;
         }
-        const auto& state = scnSession->GetSessionState();
-        if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) &&
-            (scnSession->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
-            scnSession->NotifyForegroundInteractiveStatus(interactive);
-        }
+        scnSession->NotifyForegroundInteractiveStatus(interactive);
     };
 
     taskScheduler_->PostAsyncTask(task, "NotifyForegroundInteractiveStatus");
