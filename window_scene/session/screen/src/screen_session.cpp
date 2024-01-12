@@ -1087,12 +1087,12 @@ void ScreenSession::SetFoldScreen(bool isFold)
     isFold_ = isFold;
 }
 
-void ScreenSession::SetHdrFormats(std::vector<uint32_t>& hdrFormats);
+void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
 {
     hdrFormats_ = hdrFormats;
 }
 
-void ScreenSession::SetColorSpaces(std::vector<uint32_t>& colorSpaces)
+void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 {
     colorSpaces_ = colorSpaces;
 }
