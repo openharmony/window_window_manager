@@ -2013,7 +2013,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
-void WindowSessionImpl::DispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowSessionImpl::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
@@ -2063,7 +2063,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             WLOGFW("promoteThis is nullptr");
             return;
         }
-        promoteThis->DispatchKeyEvent(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent));
+        promoteThis->DispatchKeyEventCallback(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent));
     };
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
