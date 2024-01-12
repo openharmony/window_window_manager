@@ -222,7 +222,7 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     }
 
     if (allowUseSensorForAlta == SMALLER_BOUNDARY_FLAG) {
-	    if (hall == HALL_FOLDED_THRESHOLD || std::islessequal(angle, ALTA_AVOID_HALL_ERROR)) {
+        if (hall == HALL_FOLDED_THRESHOLD || std::islessequal(angle, ALTA_AVOID_HALL_ERROR)) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
             std::isgreater(angle, ALTA_AVOID_HALL_ERROR)) {
