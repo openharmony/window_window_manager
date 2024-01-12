@@ -213,8 +213,36 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     UpdateLastMouseEvent(pointerEvent);
 }
 
-void IntentionEventManager::InputEventListener::OnInputEvent(
-    std::shared_ptr<MMI::KeyEvent> keyEvent) const
+void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
+    int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
+{
+    if (keyEvent == nullptr) {
+        WLOGFW("keyEvent is null, focusedSessionId:%{public}" PRId32
+            ", consumed:%{public}" PRId32, focusedSessionId, consumed);
+        return;
+    }
+
+    if (consumed) {
+        WLOGD("Input method has processed key event, id:%{public}" PRId32 ", focusedSessionId:%{public}" PRId32,
+            keyEvent->GetId(), focusedSessionId);
+        return;
+    }
+
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
+    if (focusedSceneSession == nullptr) {
+        WLOGFE("focusedSceneSession is null");
+        return;
+    }
+
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent_ is null");
+        return;
+    }
+
+    focusedSceneSession->SendKeyEventToUI(keyEvent);
+}
+
+void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         WLOGFD("OnInputEvent is disabled temporarily");
@@ -230,31 +258,34 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGFE("focusedSceneSession is null");
         return;
     }
-    WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent",
-        keyEvent->GetId());
-    if (focusedSceneSession->GetSessionInfo().isSystem_) {
-        bool inputMethodHasProcessed = false;
-#ifdef IMF_ENABLE
-        bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
-        if (isKeyboardEvent) {
-            WLOGD("dispatch keyEvent to input method");
-            inputMethodHasProcessed =
-                MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
-        }
-#endif // IMF_ENABLE
-        if (inputMethodHasProcessed) {
-            WLOGD("Input method has processed key event");
-            return;
-        }
-        WLOGFD("Syetem window scene, transfer key event to root scene");
-        if (uiContent_ == nullptr) {
-            WLOGFE("uiContent_ is null");
-            return;
-        }
-        focusedSceneSession->SendKeyEventToUI(keyEvent);
-    } else {
+    auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
+    WLOGFI("EventListener OnInputEvent InputTracking id:%{public}d, focusedSessionId:%{public}d, isSystem:%{public}d",
+        keyEvent->GetId(), focusedSessionId, isSystem);
+    if (!isSystem) {
         focusedSceneSession->TransferKeyEvent(keyEvent);
+        return;
     }
+#ifdef IMF_ENABLE
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    if (isKeyboardEvent) {
+        WLOGD("Async dispatch keyEvent to input method");
+        auto callback = [this, focusedSessionId] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+            this->DispatchKeyEventCallback(focusedSessionId, keyEvent, consumed);
+        };
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
+        if (ret != 0) {
+            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d, focusedSessionId:%{public}d",
+                ret, keyEvent->GetId(), focusedSessionId);
+        }
+        return;
+    }
+#endif // IMF_ENABLE
+    WLOGFD("Syetem window scene, transfer key event to root scene");
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent_ is null");
+        return;
+    }
+    focusedSceneSession->SendKeyEventToUI(keyEvent);
 }
 
 bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
