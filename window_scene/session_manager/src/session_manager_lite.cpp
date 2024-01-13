@@ -154,7 +154,6 @@ void SessionManagerLite::DeleteSessionListener(const sptr<ISessionListener>& lis
         [&listener](const sptr<ISessionListener>& item) {
             return (item && item->AsObject() == listener->AsObject());
         });
-
     if (it != sessionListeners_.end()) {
         sessionListeners_.erase(it);
     }
