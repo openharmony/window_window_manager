@@ -2201,6 +2201,36 @@ HWTEST_F(WindowSessionTest, NotifyForegroundInteractiveStatus, Function | SmallT
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
+
+/**
+ * @tc.name: SetEventHandler001
+ * @tc.desc: SetEventHandler Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetEventHandler001, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    session_->SetEventHandler(handler);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: PostTask002
+ * @tc.desc: PostTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, PostTask002, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property->SetPersistentId(persistentId);
+    int32_t res = session_->GetPersistentId();
+    ASSERT_EQ(res, 0);
+    delete(property);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
