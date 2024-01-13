@@ -30,8 +30,10 @@ public:
         TRANS_ID_GET_SESSION_MANAGER_SERVICE,
         TRANS_ID_GET_SCREEN_SESSION_MANAGER,
         TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE,
-        TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER,
-        TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER,
+        TRANS_ID_REGISTER_SMS_RECOVER_LISTENER,
+        TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER,
+        TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER,
+        TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER,
     };
 
     virtual sptr<IRemoteObject> GetSessionManagerService() = 0;
@@ -39,8 +41,10 @@ public:
 
     virtual void NotifySceneBoardAvailable() = 0;
 
-    virtual void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) = 0;
-    virtual void UnregisterSessionManagerServiceRecoverListener() = 0;
+    virtual void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) = 0;
+    virtual void UnregisterSMSRecoverListener() = 0;
+    virtual void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) = 0;
+    virtual void UnregisterSMSLiteRecoverListener() = 0;
 };
 }
 }
