@@ -61,8 +61,8 @@ const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit ClientListenerDeathRecipient(int64_t pid, bool isLite) :
-        pid_(pid), isLite_(isLite) {}
+    explicit ClientListenerDeathRecipient(int64_t pid, bool isLite)
+        : pid_(pid), isLite_(isLite) {}
  
     void OnRemoteDied(const wptr<IRemoteObject> &wptrDeath) override
     {
