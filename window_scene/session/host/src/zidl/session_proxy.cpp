@@ -809,6 +809,22 @@ void SessionProxy::NotifyExtensionDied()
     }
 }
 
+void SessionProxy::TriggerBindModalUIExtension()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 WSError SessionProxy::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     MessageParcel data;
