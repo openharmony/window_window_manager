@@ -111,6 +111,16 @@ void ExtensionSession::NotifyAsyncOn()
     }
 }
 
+void ExtensionSession::TriggerBindModalUIExtension()
+{
+    if (isFirstTriggerBindModal_ && extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->notifyBindModalFunc_ != nullptr) {
+        WLOGFD("Start calling bind modal func.");
+        extSessionEventCallback_->notifyBindModalFunc_();
+        isFirstTriggerBindModal_ = false;
+    }
+}
+
 void ExtensionSession::RegisterExtensionSessionEventCallback(
     const sptr<ExtensionSessionEventCallback>& extSessionEventCallback)
 {

@@ -103,6 +103,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
+        &SessionStub::HandleTriggerBindModalUIExtension),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
         &SessionStub::HandleTransferAccessibilityEvent),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
@@ -490,6 +492,13 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 {
     WLOGFD("called");
     NotifyExtensionDied();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTriggerBindModalUIExtension(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("called");
+    TriggerBindModalUIExtension();
     return ERR_NONE;
 }
 
