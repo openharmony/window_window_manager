@@ -27,10 +27,13 @@ public:
         IRemoteProxy<IMockSessionManagerInterface>(impl) {};
     ~MockSessionManagerServiceProxy() {};
     sptr<IRemoteObject> GetSessionManagerService() override;
-    void NotifySceneBoardAvailable() override;
-    void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnregisterSessionManagerServiceRecoverListener() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
+    void NotifySceneBoardAvailable() override;
+    void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
+    void UnregisterSMSRecoverListener() override;
+    void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
+    void UnregisterSMSLiteRecoverListener() override;
+
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
 };

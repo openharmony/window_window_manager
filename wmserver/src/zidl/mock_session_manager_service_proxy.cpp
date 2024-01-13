@@ -79,7 +79,7 @@ void MockSessionManagerServiceProxy::NotifySceneBoardAvailable()
     }
 }
 
-void MockSessionManagerServiceProxy::RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener)
+void MockSessionManagerServiceProxy::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
 {
     WLOGFD("[WMSRecover] Register");
     MessageParcel data;
@@ -96,14 +96,14 @@ void MockSessionManagerServiceProxy::RegisterSessionManagerServiceRecoverListene
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER),
+        MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }
 
-void MockSessionManagerServiceProxy::UnregisterSessionManagerServiceRecoverListener()
+void MockSessionManagerServiceProxy::UnregisterSMSRecoverListener()
 {
     WLOGFD("[WMSRecover] UnRegister");
     MessageParcel data;
@@ -113,11 +113,53 @@ void MockSessionManagerServiceProxy::UnregisterSessionManagerServiceRecoverListe
         WLOGFE("[WMSRecover] WriteInterfaceToken failed");
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER),
+        MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("[WMSRecover] SendRequest failed");
         return;
     }
 }
+
+void MockSessionManagerServiceProxy::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
+{
+    WLOGFD("[WMSRecover] Register");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[WMSRecover] WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(listener)) {
+        WLOGFE("[WMSRecover] WriteRemoteObject listener failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("[WMSRecover] SendRequest failed");
+        return;
+    }
+}
+
+void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
+{
+    WLOGFD("[WMSRecover] Unregister");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[WMSRecover] WriteInterfaceToken failed");
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("[WMSRecover] SendRequest failed");
+        return;
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS

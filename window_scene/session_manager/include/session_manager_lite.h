@@ -40,6 +40,10 @@ public:
     sptr<ISceneSessionManagerLite> GetSceneSessionManagerLiteProxy();
     sptr<IScreenSessionManagerLite> GetScreenSessionManagerLiteProxy();
 
+    void SaveSessionListener(const sptr<ISessionListener>& listener);
+    void DeleteSessionListener(const sptr<ISessionListener>& listener);
+    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
+
 protected:
     SessionManagerLite() = default;
     virtual ~SessionManagerLite();
@@ -49,11 +53,17 @@ private:
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
 
+    void DeleteAllSessionListeners();
+
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManagerLite> sceneSessionManagerLiteProxy_ = nullptr;
     sptr<IScreenSessionManagerLite> screenSessionManagerLiteProxy_ = nullptr;
     sptr<SSMDeathRecipientLite> ssmDeath_ = nullptr;
+    sptr<IRemoteObject> smsRecoverListener_ = nullptr;
+    bool recoverListenerRegistered_ = false;
+    std::recursive_mutex listenerLock_;
+    std::vector<sptr<ISessionListener>> sessionListeners_;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
 };

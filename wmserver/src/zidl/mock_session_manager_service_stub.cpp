@@ -39,22 +39,31 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             reply.WriteRemoteObject(remoteObject);
             break;
         }
+        case MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER: {
+            sptr<IRemoteObject> remoteObject = GetScreenSessionManagerLite();
+            reply.WriteRemoteObject(remoteObject);
+            break;
+        }
         case MockSessionManagerServiceMessage::TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE: {
             NotifySceneBoardAvailable();
             break;
         }
-        case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SESSION_MANAGER_RECOVER_LISTENER: {
+        case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_RECOVER_LISTENER: {
             sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
-            RegisterSessionManagerServiceRecoverListener(listenerObject);
+            RegisterSMSRecoverListener(listenerObject);
             break;
         }
-        case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SESSION_MANAGER_RECOVER_LISTENER: {
-            UnregisterSessionManagerServiceRecoverListener();
+        case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER: {
+            UnregisterSMSRecoverListener();
             break;
         }
-        case MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER: {
-            sptr<IRemoteObject> remoteObject = GetScreenSessionManagerLite();
-            reply.WriteRemoteObject(remoteObject);
+        case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER: {
+            sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+            RegisterSMSLiteRecoverListener(listenerObject);
+            break;
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER: {
+            UnregisterSMSLiteRecoverListener();
             break;
         }
         default:

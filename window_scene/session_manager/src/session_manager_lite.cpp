@@ -14,10 +14,13 @@
  */
 
 #include "session_manager_lite.h"
+#include <iremote_stub.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
 #include "mock_session_manager_service_interface.h"
+#include "session_manager_service_recover_interface.h"
+#include "scene_session_manager_lite_proxy.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -25,13 +28,79 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerLite" };
 }
 
+class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
+public:
+    explicit SessionManagerServiceRecoverListener() = default;
+
+    virtual int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        if (data.ReadInterfaceToken() != GetDescriptor()) {
+            WLOGFE("[WMSRecover] InterfaceToken check failed");
+            return -1;
+        }
+        auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
+        switch (msgId) {
+            case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
+                auto sessionManagerService = data.ReadRemoteObject();
+                OnSessionManagerServiceRecover(sessionManagerService);
+                break;
+            }
+            default:
+                WLOGFW("[WMSRecover] unknown transaction code %{public}d", code);
+                return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
+        return 0;
+    }
+
+    void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override
+    {
+        SessionManagerLite::GetInstance().Clear();
+        SessionManagerLite::GetInstance().ClearSessionManagerProxy();
+
+        auto sms = iface_cast<ISessionManagerService>(sessionManagerService);
+        SessionManagerLite::GetInstance().RecoverSessionManagerService(sms);
+    }
+};
+
+class SceneSessionManagerLiteProxyMock : public SceneSessionManagerLiteProxy {
+public:
+    explicit SceneSessionManagerLiteProxyMock(const sptr<IRemoteObject>& impl)
+        : SceneSessionManagerLiteProxy(impl) {}
+    virtual ~SceneSessionManagerLiteProxyMock() = default;
+
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    {
+        WLOGFI("[WMSRecover] RegisterSessionListener");
+        auto ret = SceneSessionManagerLiteProxy::RegisterSessionListener(listener);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        SessionManagerLite::GetInstance().SaveSessionListener(listener);
+        return WSError::WS_OK;
+    }
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override
+    {
+        WLOGFI("[WMSRecover] UnRegisterSessionListener");
+        auto ret = SceneSessionManagerLiteProxy::UnRegisterSessionListener(listener);
+        SessionManagerLite::GetInstance().DeleteSessionListener(listener);
+        return ret;
+    }
+private:
+    static inline BrokerDelegator<SceneSessionManagerLiteProxyMock> delegator_;
+};
+
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
     WLOGFD("SessionManagerLite destroy");
+    DeleteAllSessionListeners();
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
+    if (recoverListenerRegistered_ && mockSessionManagerServiceProxy_ != nullptr) {
+        mockSessionManagerServiceProxy_->UnregisterSMSLiteRecoverListener();
+    }
 }
 
 void SessionManagerLite::ClearSessionManagerProxy()
@@ -42,7 +111,7 @@ void SessionManagerLite::ClearSessionManagerProxy()
         WLOGFI("Already destroyed");
         return;
     }
-    mockSessionManagerServiceProxy_ = nullptr;
+
     sessionManagerServiceProxy_ = nullptr;
     sceneSessionManagerLiteProxy_ = nullptr;
     screenSessionManagerLiteProxy_ = nullptr;
@@ -62,6 +131,60 @@ sptr<IScreenSessionManagerLite> SessionManagerLite::GetScreenSessionManagerLiteP
     InitSessionManagerServiceProxy();
     InitScreenSessionManagerLiteProxy();
     return screenSessionManagerLiteProxy_;
+}
+
+void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> guard(listenerLock_);
+    auto it = std::find_if(sessionListeners_.begin(), sessionListeners_.end(),
+        [&listener](const sptr<ISessionListener>& item) {
+            return (item && item->AsObject() == listener->AsObject());
+        });
+    if (it != sessionListeners_.end()) {
+        WLOGFW("[WMSRecover] listener was already added, do not add again");
+        return;
+    }
+    sessionListeners_.emplace_back(listener);
+}
+
+void SessionManagerLite::DeleteSessionListener(const sptr<ISessionListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> guard(listenerLock_);
+    auto it = std::find_if(sessionListeners_.begin(), sessionListeners_.end(),
+        [&listener](const sptr<ISessionListener>& item) {
+            return (item && item->AsObject() == listener->AsObject());
+        });
+    if (it != sessionListeners_.end()) {
+        sessionListeners_.erase(it);
+    }
+}
+
+void SessionManagerLite::DeleteAllSessionListeners()
+{
+    std::lock_guard<std::recursive_mutex> guard(listenerLock_);
+    sessionListeners_.clear();
+}
+
+void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        sessionManagerServiceProxy_ = sessionManagerService;
+    }
+    GetSceneSessionManagerLiteProxy();
+    if (sceneSessionManagerLiteProxy_ == nullptr) {
+        WLOGFE("[WMSRecover] sceneSessionManagerLiteProxy_ is null");
+        return;
+    }
+
+    WLOGFI("[WMSRecover] RecoverSessionListeners, listener count = %{public}" PRIu64,
+        static_cast<int64_t>(sessionListeners_.size()));
+    for (const auto& listener: sessionListeners_) {
+        auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
+        if (ret != WSError::WS_OK) {
+            WLOGFW("[WMSRecover] RegisterSessionListener failed, ret = %{public}" PRId32, ret);
+        }
+    }
 }
 
 void SessionManagerLite::InitSessionManagerServiceProxy()
@@ -84,6 +207,11 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     if (!mockSessionManagerServiceProxy_) {
         WLOGFW("Get mock session manager service proxy failed, nullptr");
         return;
+    }
+    if (!recoverListenerRegistered_) {
+        recoverListenerRegistered_ = true;
+        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
     }
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
