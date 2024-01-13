@@ -61,16 +61,22 @@ const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit ClientListenerDeathRecipient(int64_t pid) : pid_(pid) {}
-
+    explicit ClientListenerDeathRecipient(int64_t pid, bool isLite)
+        : pid_(pid), isLite_(isLite) {}
+ 
     void OnRemoteDied(const wptr<IRemoteObject> &wptrDeath) override
     {
-        WLOGFD("[WMSRecover] OnRemoteDied, pid = %{public}" PRId64, pid_);
-        MockSessionManagerService::GetInstance().UnregisterSessionManagerServiceRecoverListener(pid_);
+        WLOGFD("[WMSRecover] OnRemoteDied, pid = %{public}" PRId64 ", isLite = %{public}" PRId32, pid_, isLite_);
+        if (isLite_) {
+            MockSessionManagerService::GetInstance().UnregisterSMSLiteRecoverListener(pid_);
+        } else {
+            MockSessionManagerService::GetInstance().UnregisterSMSRecoverListener(pid_);
+        }
     }
 
 private:
     int64_t pid_ = -1;
+    bool isLite_ = false;
 };
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
@@ -191,10 +197,11 @@ sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
 void MockSessionManagerService::NotifySceneBoardAvailable()
 {
     WLOGFI("[WMSRecover] scene board is available");
+    NotifySceneBoardAvailableToLiteClient();
     NotifySceneBoardAvailableToClient();
 }
 
-void MockSessionManagerService::RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener)
+void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("[WMSRecover] listener is nullptr");
@@ -206,19 +213,19 @@ void MockSessionManagerService::RegisterSessionManagerServiceRecoverListener(con
 
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
 
-    sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient(pid);
+    sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient(pid, false);
     listener->AddDeathRecipient(clientDeathLisntener);
     smsRecoverListenerMap_[pid] = iface_cast<ISessionManagerServiceRecoverListener>(listener);
 }
 
-void MockSessionManagerService::UnregisterSessionManagerServiceRecoverListener()
+void MockSessionManagerService::UnregisterSMSRecoverListener()
 {
     int64_t pid = IPCSkeleton::GetCallingPid();
     WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
-    UnregisterSessionManagerServiceRecoverListener(pid);
+    UnregisterSMSRecoverListener(pid);
 }
 
-void MockSessionManagerService::UnregisterSessionManagerServiceRecoverListener(int64_t pid)
+void MockSessionManagerService::UnregisterSMSRecoverListener(int64_t pid)
 {
     WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
@@ -245,6 +252,62 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient()
         }
         
         WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover pid = %{public}" PRId64
+            ", ref count = %{public}" PRId32, it.first, it.second->GetSptrRefCount());
+        it.second->OnSessionManagerServiceRecover(sessionManagerService_);
+    }
+}
+
+void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("[WMSRecover] listener is nullptr");
+        return;
+    }
+
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
+
+    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
+
+    sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient(pid, true);
+    listener->AddDeathRecipient(clientDeathLisntener);
+    smsLiteRecoverListenerMap_[pid] = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+}
+
+void MockSessionManagerService::UnregisterSMSLiteRecoverListener()
+{
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
+    UnregisterSMSLiteRecoverListener(pid);
+}
+
+void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int64_t pid)
+{
+    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
+    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
+    auto it = smsLiteRecoverListenerMap_.find(pid);
+    if (it != smsLiteRecoverListenerMap_.end()) {
+        smsLiteRecoverListenerMap_.erase(it);
+    }
+}
+
+void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient()
+{
+    if (sessionManagerService_ == nullptr) {
+        WLOGFE("[WMSRecover] SessionManagerService is null");
+        return;
+    }
+
+    WLOGFI("[WMSRecover] Remote lite process count = %{public}" PRIu64,
+        static_cast<uint64_t>(smsLiteRecoverListenerMap_.size()));
+
+    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
+    for (auto& it: smsLiteRecoverListenerMap_) {
+        if (it.second == nullptr) {
+            continue;
+        }
+
+        WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover Lite pid = %{public}" PRId64
             ", ref count = %{public}" PRId32, it.first, it.second->GetSptrRefCount());
         it.second->OnSessionManagerServiceRecover(sessionManagerService_);
     }

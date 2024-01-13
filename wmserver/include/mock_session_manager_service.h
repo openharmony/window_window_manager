@@ -33,9 +33,12 @@ public:
     sptr<IRemoteObject> GetSessionManagerService() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
-    void RegisterSessionManagerServiceRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnregisterSessionManagerServiceRecoverListener() override;
-    void UnregisterSessionManagerServiceRecoverListener(int64_t pid);
+    void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
+    void UnregisterSMSRecoverListener() override;
+    void UnregisterSMSRecoverListener(int64_t pid);
+    void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
+    void UnregisterSMSLiteRecoverListener() override;
+    void UnregisterSMSLiteRecoverListener(int64_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void NotifyNotKillService()
@@ -52,6 +55,7 @@ protected:
 private:
     bool RegisterMockSessionManagerService();
     void NotifySceneBoardAvailableToClient();
+    void NotifySceneBoardAvailableToLiteClient();
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
@@ -73,6 +77,9 @@ private:
 
     std::recursive_mutex smsRecoverListenerLock_;
     std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsRecoverListenerMap_;
+
+    std::recursive_mutex smsLiteRecoverListenerLock_;
+    std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsLiteRecoverListenerMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

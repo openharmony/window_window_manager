@@ -82,7 +82,7 @@ SessionManager::~SessionManager()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
     if (mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_->UnregisterSessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
     }
 }
@@ -190,9 +190,9 @@ void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManage
 
     if (callbackFunc != nullptr) {
         smsRecoverListener_ = new SessionManagerServiceRecoverListener(callbackFunc);
-        mockSessionManagerServiceProxy_->RegisterSessionManagerServiceRecoverListener(smsRecoverListener_);
+        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
     } else {
-        mockSessionManagerServiceProxy_->UnregisterSessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
     }
 }
 
