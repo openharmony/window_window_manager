@@ -72,6 +72,16 @@ public:
     MOCK_METHOD2(GetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap& gamutMap));
     MOCK_METHOD2(SetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap gamutMap));
     MOCK_METHOD1(SetScreenColorTransform, DMError(ScreenId screenId));
+    MOCK_METHOD2(SetOrientation, DMError(ScreenId screenId, Orientation orientation));
+    MOCK_METHOD2(GetPixelFormat, DMError(ScreenId screenId, GraphicPixelFormat& pixelFormat));
+    MOCK_METHOD2(SetPixelFormat, DMError(ScreenId screenId, GraphicPixelFormat pixelFormat));
+    MOCK_METHOD2(GetSupportedHDRFormats, DMError(ScreenId screenId, std::vector<ScreenHDRFormat>& hdrFormats));
+    MOCK_METHOD2(GetScreenHDRFormat, DMError(ScreenId screenId, ScreenHDRFormat& hdrFormat));
+    MOCK_METHOD2(SetScreenHDRFormat, DMError(ScreenId screenId, int32_t modeIdx));
+    MOCK_METHOD2(GetSupportedColorSpaces, DMError(ScreenId screenId,
+        std::vector<GraphicCM_ColorSpaceType>& colorSpaces));
+    MOCK_METHOD2(GetScreenColorSpace, DMError(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace));
+    MOCK_METHOD2(SetScreenColorSpace, DMError(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace));
 
     MOCK_METHOD1(RemoveVirtualScreenFromGroup, void(std::vector<ScreenId> screens));
     MOCK_METHOD1(SetScreenRotationLocked, DMError(bool isLocked));

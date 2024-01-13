@@ -241,6 +241,159 @@ HWTEST_F(ScreenTest, GetRotation, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
     ASSERT_EQ(Rotation::ROTATION_0, screen_->GetRotation());
 }
+
+/**
+ * @tc.name: SetOrientation
+ * @tc.desc: SetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetOrientation, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), SetOrientation(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    Orientation orientation = Orientation{0};
+    auto res = screen_->SetOrientation(orientation);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetPixelFormat
+ * @tc.desc: GetPixelFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetPixelFormat, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetPixelFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    auto res = screen_->GetPixelFormat(pixelFormat);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetPixelFormat
+ * @tc.desc: SetPixelFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetPixelFormat, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), SetPixelFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    auto res = screen_->SetPixelFormat(pixelFormat);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetSupportedHDRFormats
+ * @tc.desc: GetSupportedHDRFormats
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    std::vector<ScreenHDRFormat> hdrFormats;
+    auto res = screen_->GetSupportedHDRFormats(hdrFormats);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetScreenHDRFormat
+ * @tc.desc: GetScreenHDRFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetScreenHDRFormat, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetScreenHDRFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    ScreenHDRFormat hdrFormat = ScreenHDRFormat{0};
+    auto res = screen_->GetScreenHDRFormat(hdrFormat);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetScreenHDRFormat
+ * @tc.desc: SetScreenHDRFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetScreenHDRFormat, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), SetScreenHDRFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    auto res = screen_->SetScreenHDRFormat(0);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetSupportedColorSpaces
+ * @tc.desc: GetSupportedColorSpaces
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    auto res = screen_->GetSupportedColorSpaces(colorSpaces);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetScreenColorSpace
+ * @tc.desc: GetScreenColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetScGetScreenColorSpacereenHDRFormat, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetScreenColorSpace(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    auto res = screen_->GetScreenColorSpace(colorSpace);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetScreenColorSpace
+ * @tc.desc: SetScreenColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetScreenColorSpace, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), SetScreenColorSpace(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    auto res = screen_->SetScreenColorSpace(colorSpace);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetDensityDpi01
+ * @tc.desc: SetDensityDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
+{
+    auto res = screen_->SetDensityDpi(1000);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetDensityDpi(100);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: SetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
+{
+    auto res = screen_->SetResolution(0, 0, 1000);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetResolution(1, 1, 100);
+    ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
