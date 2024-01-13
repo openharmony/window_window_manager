@@ -28,7 +28,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerLite" };
 }
 
-class SessionManagerServiceRecoverListener: public IRemoteStub<ISessionManagerServiceRecoverListener> {
+class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
     explicit SessionManagerServiceRecoverListener() = default;
 
@@ -63,7 +63,7 @@ public:
     }
 };
 
-class SceneSessionManagerLiteProxyMock: public SceneSessionManagerLiteProxy {
+class SceneSessionManagerLiteProxyMock : public SceneSessionManagerLiteProxy {
 public:
     explicit SceneSessionManagerLiteProxyMock(const sptr<IRemoteObject>& impl)
         : SceneSessionManagerLiteProxy(impl) {}
