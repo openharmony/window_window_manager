@@ -264,7 +264,6 @@ private:
     void ProcessUpdatePiPRect(SizeChangeReason reason);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
-    bool isVisible_ = false;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     mutable std::mutex sessionChangeCbMutex_;
