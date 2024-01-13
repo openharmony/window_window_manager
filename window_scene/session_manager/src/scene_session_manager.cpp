@@ -1865,6 +1865,11 @@ void SceneSessionManager::RecoverWindowSessionProperty(
             sceneSession->NotifyOccupiedAreaChangeInfo(info);
         }
     }
+
+    if (listenerController_ != nullptr) {
+        WLOGFI("[WMSRecover] NotifySessionUnfocused");
+        listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
+    }
 }
 
 WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,

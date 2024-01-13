@@ -54,7 +54,6 @@ public:
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);
-    static inline BrokerDelegator<SceneSessionManagerLiteProxy> delegator_;
 };
 } // namespace OHOS::Rosen
 
