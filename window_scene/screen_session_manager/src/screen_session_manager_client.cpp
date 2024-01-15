@@ -78,8 +78,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
         screenId, static_cast<int>(screenEvent), rsId, name.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (rsId == SCREEN_ID_INVALID) {
-            WLOGFE("rsId is invalid");
+        if (rsId == SCREEN_ID_INVALID ||
+                screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
+            WLOGFE("rsId is invalid or screenType is virtual");
             return;
         }
         auto screenProperty = screenSessionManager_->GetScreenProperty(screenId);
