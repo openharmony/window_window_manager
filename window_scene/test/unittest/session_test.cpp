@@ -2231,6 +2231,116 @@ HWTEST_F(WindowSessionTest, PostTask002, Function | SmallTest | Level2)
     ASSERT_EQ(res, 0);
     delete(property);
 }
+
+/**
+ * @tc.name: GetSurfaceNode003
+ * @tc.desc: GetSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetSurfaceNode003, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->surfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNode();
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: GetLeashWinSurfaceNode004
+ * @tc.desc: GetLeashWinSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetLeashWinSurfaceNode004, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->leashWinSurfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetLeashWinSurfaceNode();
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: SetSessionInfoAncoSceneState005
+ * @tc.desc: SetSessionInfoAncoSceneState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoAncoSceneState005, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    int32_t ancoSceneState = 0;
+    session_->SetSessionInfoAncoSceneState(ancoSceneState);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoTime006
+ * @tc.desc: SetSessionInfoTime Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoTime006, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    std::string time = "";
+    session_->SetSessionInfoTime(time);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoAbilityInfo007
+ * @tc.desc: SetSessionInfoAbilityInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoAbilityInfo007, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
+    session_->SetSessionInfoAbilityInfo(abilityInfo);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoWant008
+ * @tc.desc: SetSessionInfoWant Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoWant008, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    session_->SetSessionInfoWant(want);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoPersistentId009
+ * @tc.desc: SetSessionInfoPersistentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoPersistentId009, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    int32_t persistentId = 0;
+    session_->SetSessionInfoPersistentId(persistentId);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoCallerPersistentId010
+ * @tc.desc: SetSessionInfoCallerPersistentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoCallerPersistentId010, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int res = 0;
+    int32_t callerPersistentId = 0;
+    session_->SetSessionInfoCallerPersistentId(callerPersistentId);
+    ASSERT_EQ(res, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
