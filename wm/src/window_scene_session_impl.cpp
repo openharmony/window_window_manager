@@ -280,7 +280,9 @@ void WindowSceneSessionImpl::UpdateWindowState()
     state_ = WindowState::STATE_CREATED;
     requestState_ = WindowState::STATE_CREATED;
     if (WindowHelper::IsMainWindow(GetType())) {
-        maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
+        if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
+            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
+        }
         if (property_->GetIsNeedUpdateWindowMode()) {
             WLOGFI("UpdateWindowMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
             UpdateWindowModeImmediately(property_->GetWindowMode());
