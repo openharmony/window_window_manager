@@ -174,7 +174,7 @@ void JsDisplay::Finalizer(napi_env env, void* data, void* hint)
 
 napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetCutoutInfo is called");
+    WLOGD("GetCutoutInfo is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
@@ -202,13 +202,13 @@ napi_valuetype GetType(napi_env env, napi_value value)
 
 napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnGetCutoutInfo is called");
+    WLOGD("OnGetCutoutInfo is called");
     NapiAsyncTask::CompleteCallback complete =
         [this](napi_env env, NapiAsyncTask& task, int32_t status) {
             sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
             if (cutoutInfo != nullptr) {
                 task.Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
-                WLOGI("JsDisplay::OnGetCutoutInfo success");
+                WLOGD("JsDisplay::OnGetCutoutInfo success");
             } else {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
@@ -417,7 +417,7 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
     WLOGD("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) == g_JsDisplayMap.end()) {
-        WLOGI("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+        WLOGD("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
         return nullptr;
     }
     return g_JsDisplayMap[displayId];
@@ -432,7 +432,7 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
 {
-    WLOGI("JsDisplay::CreateJsCutoutInfoObject is called");
+    WLOGD("JsDisplay::CreateJsCutoutInfoObject is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {

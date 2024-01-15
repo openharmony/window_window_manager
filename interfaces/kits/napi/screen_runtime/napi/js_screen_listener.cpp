@@ -72,7 +72,7 @@ void JsScreenListener::CallJsMethod(const std::string& methodName, napi_value co
         WLOGFE("empty method name str, call method failed");
         return;
     }
-    WLOGI("CallJsMethod methodName = %{public}s", methodName.c_str());
+    WLOGD("CallJsMethod methodName = %{public}s", methodName.c_str());
     if (env_ == nullptr) {
         WLOGFE("env_ nullptr");
         return;
