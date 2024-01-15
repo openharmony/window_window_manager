@@ -63,6 +63,7 @@ ohos_shared_library("window_native_kit") {
   ]
 
   deps = [
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "../../../../utils:libwmutil",
     "../../../../wm:libwm",
   ]

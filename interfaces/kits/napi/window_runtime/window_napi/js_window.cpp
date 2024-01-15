@@ -23,6 +23,7 @@
 #endif
 
 #include "js_window_utils.h"
+#include "scene_board_judgement.h"
 #include "window.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -792,6 +793,14 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
+            // intercept show main window if window is created
+            if (SceneBoardJudgement::IsSceneBoardEnabled() && WindowHelper::IsMainWindow(weakWindow->GetType()) &&
+                weakWindow->GetWindowState() == WindowState::STATE_CREATED) {
+                WLOGFI("MainWindow is created but not show, can not show by napi, [%{public}u, %{public}s]",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
+                return;
+            }
             WMError ret = weakWindow->Show(0, false);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
@@ -817,6 +826,14 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 WLOGFE("window is nullptr or get invalid param");
+                return;
+            }
+            // intercept show main window if window is created
+            if (SceneBoardJudgement::IsSceneBoardEnabled() && WindowHelper::IsMainWindow(weakWindow->GetType()) &&
+                weakWindow->GetWindowState() == WindowState::STATE_CREATED) {
+                WLOGFI("MainWindow is created but not show, can not show by napi, [%{public}u, %{public}s]",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
             WMError ret = weakWindow->Show(0, false);
