@@ -96,7 +96,6 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     auto listener =
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
-    listener->RegisterWindowChanged();
     return true;
 }
 
