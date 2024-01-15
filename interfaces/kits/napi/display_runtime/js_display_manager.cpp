@@ -184,7 +184,7 @@ napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
 
 napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetAllDisplay called");
+    WLOGD("GetAllDisplay called");
     DMError errCode = DMError::DM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -388,7 +388,7 @@ bool NapiIsCallable(napi_env env, napi_value value)
 
 napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnRegisterDisplayManagerCallback is called");
+    WLOGD("OnRegisterDisplayManagerCallback is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -539,7 +539,7 @@ napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     FoldStatus status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    WLOGD("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
@@ -553,7 +553,7 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
-    WLOGI("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
+    WLOGD("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
     return CreateJsValue(env, mode);
 }
 
@@ -645,7 +645,7 @@ napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> crea
 
 napi_value InitDisplayState(napi_env env)
 {
-    WLOGI("InitDisplayState called");
+    WLOGD("InitDisplayState called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -837,7 +837,7 @@ napi_value InitFoldDisplayMode(napi_env env)
 
 napi_value InitColorSpace(napi_env env)
 {
-    WLOGI("InitColorSpace called");
+    WLOGD("InitColorSpace called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -884,7 +884,7 @@ napi_value InitColorSpace(napi_env env)
 
 napi_value InitHDRFormat(napi_env env)
 {
-    WLOGI("InitHDRFormat called");
+    WLOGD("InitHDRFormat called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");

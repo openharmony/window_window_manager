@@ -894,7 +894,7 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 
 napi_value InitScreenOrientation(napi_env env)
 {
-    WLOGI("JsScreenManager::InitScreenOrientation called");
+    WLOGD("JsScreenManager::InitScreenOrientation called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -923,7 +923,7 @@ napi_value InitScreenOrientation(napi_env env)
 
 napi_value InitScreenSourceMode(napi_env env)
 {
-    WLOGI("JsScreenManager::InitScreenSourceMode called");
+    WLOGD("JsScreenManager::InitScreenSourceMode called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -950,7 +950,7 @@ napi_value InitScreenSourceMode(napi_env env)
 
 napi_value InitDisplayErrorCode(napi_env env)
 {
-    WLOGI("JsDisplayManager::InitDisplayErrorCode called");
+    WLOGD("JsDisplayManager::InitDisplayErrorCode called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -983,7 +983,7 @@ napi_value InitDisplayErrorCode(napi_env env)
 
 napi_value InitDisplayError(napi_env env)
 {
-    WLOGI("JsDisplayManager::InitDisplayError called");
+    WLOGD("JsDisplayManager::InitDisplayError called");
 
     if (env == nullptr) {
         WLOGFE("env is nullptr");
@@ -1028,7 +1028,7 @@ napi_value InitDisplayError(napi_env env)
 
 napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
 {
-    WLOGI("JsScreenManagerInit is called");
+    WLOGD("JsScreenManagerInit is called");
 
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("JsScreenManagerInit env or exportObj is nullptr");

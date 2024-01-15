@@ -249,7 +249,7 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 {
-    WLOGI("[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+    WLOGD("[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsScreenMap.find(screenId) == g_JsScreenMap.end()) {
         WLOGI("[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
@@ -260,7 +260,7 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 
 napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
 {
-    WLOGI("JsScreen::CreateJsScreen is called");
+    WLOGD("JsScreen::CreateJsScreen is called");
     napi_value objValue = nullptr;
     std::shared_ptr<NativeReference> jsScreenObj = FindJsDisplayObject(screen->GetId());
     if (jsScreenObj != nullptr && jsScreenObj->GetNapiValue() != nullptr) {
@@ -321,7 +321,7 @@ napi_value CreateJsScreenModeArrayObject(napi_env env, std::vector<sptr<Supporte
 
 napi_value CreateJsScreenModeObject(napi_env env, const sptr<SupportedScreenModes>& mode)
 {
-    WLOGI("JsScreen::CreateJsScreenMode is called");
+    WLOGD("JsScreen::CreateJsScreenMode is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
