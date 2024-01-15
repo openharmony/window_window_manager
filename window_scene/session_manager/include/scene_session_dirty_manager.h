@@ -45,15 +45,9 @@ public:
     SceneSessionDirtyManager() = default;
     virtual ~SceneSessionDirtyManager() = default;
 
-    void RegisterScreenInfoChangeListener();
-    void Init();
-    bool IsScreenChange();
-    void SetScreenChange(const uint64_t id);
-    void SetScreenChange(const bool value);
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
     std::vector<MMI::WindowInfo> GetFullWindowInfoList();
-    std::map<uint64_t, std::vector<MMI::WindowInfo>> GetIncrementWindowInfoList();
     void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
     void ResetSessionDirty();
 
@@ -61,23 +55,13 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
-    void PushWindowInfoList(uint64_t displayID, const MMI::WindowInfo& windowinfo);
-    WindowAction GetSceneSessionAction(const WindowUpdateType& type);
-    void PrintLogGetFullWindowInfoList(const std::vector<MMI::WindowInfo>& windowInfoList);
-    void PrintLogGetIncrementWindowInfoList(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screen2windowInfo);
     void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
-    MMI::WindowInfo PrepareWindowInfo(sptr<SceneSession> sceneSession, int action) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
     void UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
-
-    std::map<WindowUpdateType, WindowAction> windowType2Action_;
-    std::map<uint64_t, std::vector<MMI::WindowInfo>> screen2windowInfo_;
-    bool isScreenSessionChange_ = true;
-    std::vector<MMI::WindowInfo> windowInfoList_;
     std::mutex mutexlock_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };

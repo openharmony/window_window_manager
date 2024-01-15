@@ -63,14 +63,6 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     ConnectToServer();
 }
 
-void ScreenSessionManagerClient::RegisterScreenInfoChangeListener(const ScreenInfoChangeClientListener& listener)
-{
-    if (listener == nullptr) {
-        WLOGFE("Failed RegisterScreenInfoChangeListener while listener is nullptr");
-        return;
-    }
-    screenInfoChangeListener_  = listener;
-}
 
 void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
     ScreenId rsId, const std::string& name)
@@ -131,9 +123,6 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         return;
     }
     screenSession->PropertyChange(property, reason);
-    if (screenInfoChangeListener_) {
-        screenInfoChangeListener_(screenId);
-    }
 }
 
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -247,9 +236,6 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
     screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
-    if (screenInfoChangeListener_) {
-        screenInfoChangeListener_(screenId);
-    }
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)

@@ -124,7 +124,6 @@ void SceneInputManager::Init()
 {
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     if (sceneSessionDirty_) {
-        sceneSessionDirty_->Init();
         auto callback = [this]() {
             FlushDisplayInfoToMMI();
         };

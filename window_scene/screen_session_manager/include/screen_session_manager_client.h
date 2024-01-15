@@ -42,7 +42,6 @@ class ScreenSessionManagerClient : public ScreenSessionManagerClientStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManagerClient)
 
 public:
-    void RegisterScreenInfoChangeListener(const ScreenInfoChangeClientListener& listener);
     void RegisterScreenConnectionListener(IScreenConnectionListener* listener);
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
 
@@ -91,7 +90,6 @@ private:
 
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
-    ScreenInfoChangeClientListener screenInfoChangeListener_;
 };
 } // namespace OHOS::Rosen
 
