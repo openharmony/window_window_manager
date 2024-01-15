@@ -364,6 +364,33 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
+bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect)
+{
+    bool needNotifyEvent = true;
+    uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
+    bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
+        pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
+        (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(titleBarHeight));
+    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
+        static_cast<int>(HOTZONE_TOUCH * vpr);
+    auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
+        sourceType, outside, vpr, rect);
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        hostSession_->SendPointEventForMoveDrag(pointerEvent);
+    } else {
+        if (dragType != AreaType::UNDEFINED) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+            needNotifyEvent = false;
+        } else if (isMoveArea) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
+    }
+    return needNotifyEvent;
+}
+
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const MMI::PointerEvent::PointerItem& pointerItem)
 {
@@ -383,22 +410,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             WLOGFW("vpr is zero");
             return;
         }
-        uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
-        bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
-            pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
-            (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(titleBarHeight));
-        int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
-            static_cast<int>(HOTZONE_TOUCH * vpr);
-        auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
-            sourceType, outside, vpr, rect);
-        if (dragType != AreaType::UNDEFINED) {
-            hostSession_->SendPointEventForMoveDrag(pointerEvent);
-            needNotifyEvent = false;
-        } else if (isMoveArea) {
-            hostSession_->SendPointEventForMoveDrag(pointerEvent);
-        } else {
-            hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
+        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
