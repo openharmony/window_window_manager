@@ -969,6 +969,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFE("[WMSLife]sceneSession is nullptr!");
             return sceneSession;
         }
+        if (sceneSession->GetSessionProperty()) {
+            sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+            WLOGFD("[WMSLife] RequestSceneSession, synchronous screenId with displayid %{public}" PRIu64"",
+                sessionInfo.screenId_);
+        }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler());
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
@@ -1021,6 +1026,8 @@ void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, Ac
     info->toScreenId_ = sessionInfo.screenId_;
     info->fromScreenId_ = fromScreenId;
     ScreenSessionManagerClient::GetInstance().NotifyDisplayChangeInfoChanged(info);
+    WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64"",
+        info->abilityName_.c_str(), info->bundleName_.c_str(), info->toScreenId_);
 }
 
 void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession)
@@ -3138,10 +3145,11 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
     } else {
         sName = session->GetWindowName();
     }
-    uint32_t displayId = session->GetSessionInfo().screenId_;
     uint32_t flag = 0;
+    uint64_t displayId = INVALID_SCREEN_ID;
     if (session->GetSessionProperty()) {
         flag = session->GetSessionProperty()->GetWindowFlags();
+        displayId = session->GetSessionProperty()->GetDisplayId();
     }
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
@@ -6600,6 +6608,12 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     }
     auto fromScreenId = scnSession->GetSessionInfo().screenId_;
     scnSession->SetScreenId(screenId);
+    if (!scnSession->GetSessionProperty()) {
+        WLOGFE("Property is null, synchronous screenId failed");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    scnSession->GetSessionProperty()->SetDisplayId(screenId);
+    WLOGFD("Session move display %{public}" PRIu64" from %{public}" PRIu64"", screenId, fromScreenId);
     NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     return WSError::WS_OK;
 }
