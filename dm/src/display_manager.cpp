@@ -975,7 +975,7 @@ DMError DisplayManager::Impl::RegisterFoldStatusListener(sptr<IFoldStatusListene
         WLOGFW("RegisterFoldStatusListener failed !");
         foldStatusListenerAgent_ = nullptr;
     } else {
-        WLOGI("IFoldStatusListener register success");
+        WLOGD("IFoldStatusListener register success");
         foldStatusListeners_.insert(listener);
     }
     return ret;
@@ -1182,7 +1182,7 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
         WLOGFW("RegisterAvailableAreaListener failed !");
         availableAreaListenerAgent_ = nullptr;
     } else {
-        WLOGI("IAvailableAreaListener register success");
+        WLOGD("IAvailableAreaListener register success");
         availableAreaListeners_.insert(listener);
     }
     return ret;
