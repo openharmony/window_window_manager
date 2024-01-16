@@ -89,8 +89,8 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
                     int32_t widthTmp = (NUMBER_THREE * static_cast<int32_t>(width)
                         - NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
                     rect.width_ = static_cast<uint32_t>(widthTmp);
-                    rect.height_ = rect.wdth_ * winHeight / winWidth;
-                    if (rect.height_ > heightTmp) {
+                    rect.height_ = rect.width_ * winHeight / winWidth;
+                    if (rect.height_ > static_cast<uint32_t>(heightTmp)) {
                         rect.height_ = static_cast<uint32_t>(heightTmp);
                         rect.width_ = rect.height_ * winWidth / winHeight;
                     }
