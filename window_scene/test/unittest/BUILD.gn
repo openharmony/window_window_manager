@@ -55,6 +55,7 @@ group("unittest") {
     ":ws_session_stub_mock_test",
     ":ws_session_stub_test",
     ":ws_session_test",
+    ":ws_system_session_test",
     ":ws_task_scheduler_test",
     ":ws_timer_manager_test",
     ":ws_window_event_channel_proxy_mock_test",
@@ -64,6 +65,19 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_system_session_test") {
+  module_out_path = module_out_path
+
+  sources = [ "system_session_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
