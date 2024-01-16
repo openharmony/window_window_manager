@@ -59,7 +59,8 @@ void PiPUtil::GetRectByPivot(int32_t& start, const uint32_t oldLen, const uint32
     }
 }
 
-void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const PiPScaleLevel& scaleLevel, Rect& rect)
+void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const PiPScaleLevel& scaleLevel,
+    Rect& rect, bool isLandscape)
 {
     uint32_t winWidth = rect.width_;
     uint32_t winHeight = rect.height_;
@@ -81,15 +82,33 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
             break;
         }
         case PiPScaleLevel::PIP_SCALE_LEVEL_BIGGEST: {
-            int32_t widthTmp = 0;
-            if (winWidth < winHeight) {
-                widthTmp = (NUMBER_THREE * static_cast<int32_t>(width) -
-                    NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
+            if (isLandscape) {
+                int32_t heightTmp = static_cast<int32_t>(height) - SAFE_PADDING_VERTICAL_TOP -
+                    SAFE_PADDING_VERTICAL_BOTTOM;
+                if (winWidth <= winHeight) {
+                    int32_t widthTmp = (NUMBER_THREE * static_cast<int32_t>(width)
+                        - NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
+                    rect.width_ = static_cast<uint32_t>(widthTmp);
+                    rect.height_ = rect.wdth_ * winHeight / winWidth;
+                    if (rect.height_ > heightTmp) {
+                        rect.height_ = static_cast<uint32_t>(heightTmp);
+                        rect.width_ = rect.height_ * winWidth / winHeight;
+                    }
+                } else {
+                    rect.height_ = static_cast<uint32_t>(heightTmp);
+                    rect.width_ = rect.height_ * winWidth / winHeight;
+                }
             } else {
-                widthTmp = static_cast<int32_t>(width) - NUMBER_TWO * safePaddingHorizontal;
+                int32_t widthTmp = 0;
+                if (winWidth < winHeight) {
+                    widthTmp = (NUMBER_THREE * static_cast<int32_t>(width) -
+                        NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
+                } else {
+                    widthTmp = static_cast<int32_t>(width) - NUMBER_TWO * safePaddingHorizontal;
+                }
+                rect.width_ = static_cast<uint32_t>(widthTmp);
+                rect.height_ = rect.width_ * winHeight / winWidth;
             }
-            rect.width_ = static_cast<uint32_t>(widthTmp);
-            rect.height_ = rect.width_ * winHeight / winWidth;
             break;
         }
     }
