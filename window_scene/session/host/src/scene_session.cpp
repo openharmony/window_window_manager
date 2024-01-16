@@ -2138,7 +2138,6 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
         WLOGFE("can't find display info");
         return;
     }
-    Rotation rotation = display->GetRotation();
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
     float displayVpr = display->GetVirtualPixelRatio();
@@ -2156,9 +2155,8 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
     if (rect.posX_ == 0) {
         rect.posX_ = displayWidth;
     }
-    WLOGFD("window rect: (%{public}d, %{public}d, %{public}u, %{public}u), rotation: %{public}u),"
-        " dw: %{public}u), dh: %{public}u)", rect.posX_, rect.posY_, rect.width_, rect.height_,
-        static_cast<uint32_t>(rotation), displayWidth, displayHeight);
+    WLOGFD("window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
+       rect.posX_, rect.posY_, rect.width_, rect.height_);
 
     GetNewPiPRect(displayWidth, displayHeight, rect);
     WLOGFD("window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
