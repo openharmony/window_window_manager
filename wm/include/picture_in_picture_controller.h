@@ -92,8 +92,7 @@ public:
         PipDisplayListener(wptr<PictureInPictureController> pipController)
         {
             pipController_ = pipController;
-            DisplayId displayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetId();
-            preRotation_ = DisplayManager::GetInstance().GetDisplayById(dispalyId)->GetRotation();
+            preRotation_ = Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetRotation();
         }
         void OnCreate(DisplayId displayId) override;
         void OnDestroy(DisplayId displayId) override;
