@@ -169,7 +169,7 @@ bool SceneSessionDirtyManager::IsFilterSession(const sptr<SceneSession>& sceneSe
 
     if (sceneSession->IsSystemInput()) {
         return false;
-    } else if (sceneSession->IsSystemSession() && sceneSession->GetVisible() && sceneSession->IsSystemActive()) {
+    } else if (sceneSession->IsSystemSession() && sceneSession->IsVisible() && sceneSession->IsSystemActive()) {
         return false;
     }
     if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(sceneSession)) {
