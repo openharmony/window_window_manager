@@ -50,7 +50,8 @@ using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
-using NotifyRequestFocusStatusNotifyManagerFunc = std::function<void(int32_t persistentId, const bool isFocused)>;
+using NotifyRequestFocusStatusNotifyManagerFunc =
+    std::function<void(int32_t persistentId, const bool isFocused, const bool byForeground)>;
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
@@ -246,7 +247,7 @@ public:
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick();
-    void NotifyRequestFocusStatusNotifyManager(bool isFocused);
+    void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true);
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     bool GetStateFromManager(const ManagerState key);
