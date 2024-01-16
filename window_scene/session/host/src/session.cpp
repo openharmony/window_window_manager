@@ -1446,7 +1446,7 @@ void Session::PresentFocusIfPointDown()
 {
     WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
-        NotifyRequestFocusStatusNotifyManager(true);
+        NotifyRequestFocusStatusNotifyManager(true, false);
     }
     if (!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) {
         NotifyClick();
@@ -1823,11 +1823,11 @@ void Session::NotifyClick()
     }
 }
 
-void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused)
+void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground)
 {
     WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
     if (requestFocusStatusNotifyManagerFunc_) {
-        requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused);
+        requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused, byForeground);
     }
 }
 
@@ -1868,7 +1868,7 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         if (!isFocused_ && GetFocusable()) {
-            NotifyRequestFocusStatusNotifyManager(true);
+            NotifyRequestFocusStatusNotifyManager(true, false);
         }
         if (!sessionInfo_.isSystem_ || (!isFocused_ && GetFocusable())) {
             NotifyClick();

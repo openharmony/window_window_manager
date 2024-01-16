@@ -295,7 +295,7 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, Messa
     WLOGFI("run HandleRequestFocusStatus!");
     int32_t persistentId = data.ReadInt32();
     bool isFocused = data.ReadBool();
-    const WMError& ret = RequestFocusStatus(persistentId, isFocused);
+    const WMError& ret = RequestFocusStatus(persistentId, isFocused, true);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
