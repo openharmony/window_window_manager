@@ -606,7 +606,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetVirtualHeight(height / virtualPixelRatio);
     info->SetVirtualWidth(width / virtualPixelRatio);
     info->SetRotation(property_.GetScreenRotation());
-    info->SetOrientation(static_cast<Orientation>(property_.GetOrientation()));
+    info->SetOrientation(static_cast<Orientation>(property_.GetDisplayOrientation()));
     info->SetSourceMode(sourceMode);
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
