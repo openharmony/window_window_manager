@@ -1941,17 +1941,17 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
     auto persistentId = GetPersistentId();
     WLOGFD("Start to unregister window visibility change listener, persistentId=%{public}d.", persistentId);
     WMError ret = WMError::WM_OK;
-    bool isFirstUnregister = false;
+    bool isLastUnregister = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
         ret = UnregisterListener(windowVisibilityChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        isFirstUnregister = windowVisibilityChangeListeners_[persistentId].empty();
+        isLastUnregister = windowVisibilityChangeListeners_[persistentId].empty();
     }
 
-    if (isFirstUnregister) {
+    if (isLastUnregister) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, false);
     }
     return ret;
