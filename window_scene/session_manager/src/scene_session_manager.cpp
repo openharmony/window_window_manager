@@ -1665,23 +1665,6 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     }
 }
 
-bool SceneSessionManager::CheckParentIsForeground(const sptr<WindowSessionProperty>& property)
-{
-    WLOGFI("CheckParentIsForeground, window(%{public}d) type: %{public}d, parent(%{public}d)",
-        property->GetPersistentId(), property->GetWindowType(), property->GetParentPersistentId());
-    auto parentSession = GetSceneSession(property->GetParentPersistentId());
-    if (parentSession == nullptr) {
-        WLOGW("Cannot find parent window.");
-        return false;
-    }
-    if (parentSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
-        parentSession->GetSessionState() == SessionState::STATE_ACTIVE) {
-        WLOGFD("The parent window is in the foreground.");
-        return true;
-    }
-    return false;
-}
-
 bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property)
 {
     WindowType type = property->GetWindowType();
@@ -1702,13 +1685,8 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-        // WINDOW_TYPE_FLOAT could be created by system app with the corresponding permission
-        WLOGFD("create float window with request permission.");
-        if (SessionPermission::IsSystemCalling()) {
-            return true;
-        }
-        WLOGFD("normal app create float window need parent is in foreground.");
-        return CheckParentIsForeground(property);
+        // WINDOW_TYPE_FLOAT could be created with the corresponding permission
+        return true;
     }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
         WLOGFD("check create permission success, create with system calling.");
@@ -1972,6 +1950,12 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
         return;
     }
     if (SessionHelper::IsSystemWindow(type)) {
+        if ((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) {
+            auto parentSession = GetSceneSession(property->GetParentPersistentId());
+            if (parentSession != nullptr) {
+                newSession->SetParentSession(parentSession);
+            }
+        }
         if (createSystemSessionFunc_ && type != WindowType::WINDOW_TYPE_DIALOG) {
             createSystemSessionFunc_(newSession);
             WLOGFD("[WMSLife] Create system session, id:%{public}d, type: %{public}d",
