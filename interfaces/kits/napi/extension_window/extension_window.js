@@ -36,6 +36,10 @@ class ExtensionWindow {
   off(type, callback) {
     return this.__extension_window__.off(type, callback);
   }
+
+  hideNonSecureWindows(type, callback) {
+    return this.__extension_window__.hideNonSecureWindows(type, callback);
+  }
 }
 
 export default ExtensionWindow;

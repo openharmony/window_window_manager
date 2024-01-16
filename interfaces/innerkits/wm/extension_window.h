@@ -31,6 +31,8 @@ public:
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
 
     virtual sptr<Window> GetWindow() = 0;
+
+    virtual WMError HideNonSecureWindows(bool shouldHide) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

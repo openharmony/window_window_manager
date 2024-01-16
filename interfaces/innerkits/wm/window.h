@@ -1641,6 +1641,17 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Hide None Secure Windows.
+     *
+     * @param shouldHide bool.
+     * @return WMError
+     */
+    virtual WMError HideNonSecureWindows(bool shouldHide)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
