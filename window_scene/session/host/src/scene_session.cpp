@@ -2093,7 +2093,17 @@ void SceneSession::SavePiPRectInfo()
 
 void SceneSession::GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect)
 {
-    PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect);
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        WLOGFE("cannot find display");
+        return;
+    }
+    Rotation rotation = display->GetRotation();
+    if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
+        PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect, true);
+    } else {
+        PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect, false);
+    }
     WLOGFD("scale rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     auto sessionRect = GetSessionRect();
@@ -2131,10 +2141,6 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
     Rotation rotation = display->GetRotation();
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
-    if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
-        displayWidth = static_cast<uint32_t>(display->GetHeight());
-        displayHeight = static_cast<uint32_t>(display->GetWidth());
-    }
     float displayVpr = display->GetVirtualPixelRatio();
     if (displayVpr < 0.0f) {
         displayVpr = 1.5f;
@@ -2143,8 +2149,10 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
 
     // default pos of phone is the right top
     Rect rect = { 0, 0, pipRectInfo_.originWidth_, pipRectInfo_.originHeight_ };
-    ScenePersistentStorage::Get("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
-    ScenePersistentStorage::Get("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    if (reason != SizeChangeReason::ROTATION) {
+        ScenePersistentStorage::Get("pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
+        ScenePersistentStorage::Get("pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
+    }
     if (rect.posX_ == 0) {
         rect.posX_ = displayWidth;
     }
@@ -2170,7 +2178,6 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
 WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
-        WLOGFW("Session is not PiP type!");
         return WSError::WS_DO_NOTHING;
     }
     auto task = [weakThis = wptr(this), width, height, reason]() {
@@ -2207,6 +2214,10 @@ WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpda
                 }
                 session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
                 SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
+                break;
+            case PiPRectUpdateReason::REASON_DISPLAY_ROTATION_CHANGE:
+                session->ClearPiPRectPivotInfo();
+                session->ProcessUpdatePiPRect(SizeChangeReason::ROTATION);
                 break;
             default:
                 return WSError::WS_DO_NOTHING;
