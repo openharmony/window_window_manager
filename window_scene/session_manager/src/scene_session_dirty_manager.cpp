@@ -254,8 +254,10 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     auto zOrder = sceneSession->GetZOrder();
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
     auto windowMode = sceneSession->GetSessionProperty()->GetWindowMode();
+    auto maxMode = sceneSession->GetSessionProperty()->GetMaximizeMode();
     if (windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        Rosen::WindowHelper::IsMainWindow(sceneSession->GetSessionProperty()->GetWindowType())) {
+        Rosen::WindowHelper::IsMainWindow(sceneSession->GetSessionProperty()->GetWindowType()) &&
+        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         pointerChangeAreas = { POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE,
         POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN,
         POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE };
