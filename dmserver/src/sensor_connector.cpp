@@ -50,7 +50,7 @@ sptr<RotationMotionEventCallback> MotionSubscriber::motionEventCallback_ = nullp
 
 void SensorConnector::SubscribeRotationSensor()
 {
-    WLOGFI("dms: subscribe rotation-related sensor");
+    WLOGFD("dms: subscribe rotation-related sensor");
     ScreenRotationController::Init();
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
@@ -188,7 +188,7 @@ bool GravitySensorSubscriber::CheckCallbackTimeInterval()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    WLOGFI("dms: Subscribe motion Sensor");
+    WLOGFD("dms: Subscribe motion Sensor");
     if (isMotionSensorSubscribed_) {
         WLOGFE("dms: motion sensor's already subscribed");
         return;
