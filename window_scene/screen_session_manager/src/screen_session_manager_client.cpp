@@ -63,6 +63,23 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     ConnectToServer();
 }
 
+bool ScreenSessionManagerClient::CheckIfNeedCennectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
+{
+    if (rsId == SCREEN_ID_INVALID) {
+        WLOGFE("rsId is invalid");
+        return false;
+    }
+    if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
+        if (name == "HiCar" || name == "SuperLauncher") {
+            WLOGFI("HiCar or SuperLauncher, need to connect the screen");
+            return true;
+        } else {
+            WLOGFE("ScreenType is virtual, no need to connect the screen");
+            return false;
+        }
+    }
+    return true;
+}
 
 void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
     ScreenId rsId, const std::string& name)
@@ -70,9 +87,8 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
         screenId, static_cast<int>(screenEvent), rsId, name.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (rsId == SCREEN_ID_INVALID ||
-                screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
-            WLOGFE("rsId is invalid or screenType is virtual");
+        if (!CheckIfNeedCennectScreen(screenId, rsId, name)) {
+            WLOGFE("There is no need to connect the screen");
             return;
         }
         auto screenProperty = screenSessionManager_->GetScreenProperty(screenId);
