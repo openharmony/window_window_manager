@@ -109,7 +109,7 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
     data.WriteString16(u"bundleName");
     data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()));
