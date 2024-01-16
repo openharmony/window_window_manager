@@ -28,7 +28,7 @@ public:
         const PiPScalePivot& pivot);
     static void GetRectByScale(const uint32_t width, const uint32_t height, const PiPScaleLevel& scaleLevel,
         Rect& rect);
-    static bool GetValidRect(const uint32_t width, const uint32_t height, Rect& rect);
+    static bool GetValidRect(const int32_t width, const int32_t height, Rect& rect);
 
     static constexpr int32_t SAFE_PADDING_HORIZONTAL_VP = 12;
     static constexpr int32_t SAFE_PADDING_VERTICAL_TOP = 150;
