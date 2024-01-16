@@ -6891,4 +6891,22 @@ void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
 {
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
+
+WSError SceneSessionManager::HideNonSecureWindows(bool shouldHide)
+{
+    WLOGFI("HideNonSecureWindows, shouldHide %{public}u", shouldHide);
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("HideNonSecureWindows permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    for (const auto& item: nonSystemFloatSceneSessionMap_) {
+        auto session = item.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+            session->NotifyForceHideChange(shouldHide);
+            WLOGFI("HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
+                   session->GetWindowName().c_str(), item.first);
+        }
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

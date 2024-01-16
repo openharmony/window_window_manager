@@ -570,5 +570,12 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
     return static_cast<WMError>(
         windowManagerServiceProxy_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
+
+WMError WindowAdapter::HideNonSecureWindows(bool shouldHide)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->HideNonSecureWindows(shouldHide));
+}
+
 } // namespace Rosen
 } // namespace OHOS

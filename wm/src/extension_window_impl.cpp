@@ -39,5 +39,11 @@ sptr<Window> ExtensionWindowImpl::GetWindow()
 {
     return windowExtensionSessionImpl_;
 }
+
+WMError ExtensionWindowImpl::HideNonSecureWindows(bool shouldHide)
+{
+    WLOGI("HideNonSecureWindows is called");
+    return windowExtensionSessionImpl_->HideNonSecureWindows(shouldHide);
+}
 } // namespace Rosen
 } // namespace OHOS
