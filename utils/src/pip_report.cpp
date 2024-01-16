@@ -160,7 +160,7 @@ void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
 void PiPReporter::ReportPiPRestore()
 {
     WLOGI("Report pip widow restore");
-    std::string eventName = "RESTORE_PIP";
+    std::string eventName = "RESOTRE_PIP";
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
