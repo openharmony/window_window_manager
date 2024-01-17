@@ -227,6 +227,7 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             WLOGFE("[NAPI]this target session info is nullptr");
+            return;
         }
         napi_value argv[] = {jsSessionInfo};
         WLOGFI("[NAPI]PendingSessionActivationInner task success.");
