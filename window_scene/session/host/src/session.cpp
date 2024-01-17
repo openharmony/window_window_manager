@@ -841,6 +841,11 @@ void Session::HandleDialogBackground()
         WLOGFI("[WMSDialog] Background dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
         dialog->SetSessionState(SessionState::STATE_BACKGROUND);
+        if (!dialog->sessionStage_) {
+            WLOGD("[WMSDialog] dialog session stage is nullptr");
+            return;
+        }
+        dialog->sessionStage_->NotifyDialogStateChange(false);
     }
 }
 
@@ -865,6 +870,11 @@ void Session::HandleDialogForeground()
         WLOGFI("[WMSDialog] Foreground dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
         dialog->SetSessionState(SessionState::STATE_ACTIVE);
+        if (!dialog->sessionStage_) {
+            WLOGD("[WMSDialog] dialog session stage is nullptr");
+            return;
+        }
+        dialog->sessionStage_->NotifyDialogStateChange(true);
     }
 }
 

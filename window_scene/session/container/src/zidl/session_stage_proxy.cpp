@@ -556,4 +556,27 @@ void SessionStageProxy::NotifyTransformChange(const Transform& transform)
         WLOGFE("Send NotifyTransformChange Requset failed");
     }
 }
+
+WSError SessionStageProxy::NotifyDialogStateChange(bool isForeground)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isForeground)) {
+        WLOGFE("Write isForeground failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

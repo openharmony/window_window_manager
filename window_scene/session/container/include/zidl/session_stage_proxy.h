@@ -54,6 +54,7 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyTransformChange(const Transform& transform) override;
+    WSError NotifyDialogStateChange(bool isForeground) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
