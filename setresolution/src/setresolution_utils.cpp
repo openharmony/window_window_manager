@@ -39,15 +39,15 @@ bool SetResolutionUtils::ProcessArgs(int argc, char * const argv[], CmdArgments 
     while ((opt = getopt_long(argc, argv, "w:h:d:m", longOption, nullptr)) != -1) {
         switch (opt) {
             case 'w': // output width
-                cmdArgments.width = atoi(optarg);
+                cmdArgments.width = static_cast<uint32_t>(atoi(optarg));
                 cmdArgments.isWidthSet = true;
                 break;
             case 'h': // output height
-                cmdArgments.height = atoi(optarg);
+                cmdArgments.height = static_cast<uint32_t>(atoi(optarg));
                 cmdArgments.isHeightSet = true;
                 break;
             case 'd': // output dpi
-                cmdArgments.dpi = atoi(optarg);
+                cmdArgments.dpi = static_cast<uint32_t>(atoi(optarg));
                 cmdArgments.isDpiSet = true;
                 break;
             case 'm': // help

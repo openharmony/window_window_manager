@@ -275,10 +275,10 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .agentWindowId = agentWindowId,
         .flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus()),
         .displayId = displayId,
-        .pointerChangeAreas = pointerChangeAreas,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
-        .transform = transformData,
-        .zOrder = zOrder
+        .pointerChangeAreas = pointerChangeAreas,
+        .zOrder = zOrder,
+        .transform = transformData
     };
     return windowInfo;
 }
