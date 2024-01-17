@@ -2156,7 +2156,7 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
         rect.posX_ = displayWidth;
     }
     WLOGFD("window rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
-       rect.posX_, rect.posY_, rect.width_, rect.height_);
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
 
     GetNewPiPRect(displayWidth, displayHeight, rect);
     WLOGFD("window new rect: (%{public}d, %{public}d, %{public}u, %{public}u)",
@@ -2180,12 +2180,8 @@ WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpda
     }
     auto task = [weakThis = wptr(this), width, height, reason]() {
         auto session = weakThis.promote();
-        if (!session) {
-            WLOGE("SceneSession::UpdatePiPRect session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (session->isTerminating) {
-            WLOGE("SceneSession::UpdatePiPRect session is terminating");
+        if (!session || session->isTerminating) {
+            WLOGE("SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         switch (reason) {
