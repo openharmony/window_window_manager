@@ -59,6 +59,26 @@ void PiPUtil::GetRectByPivot(int32_t& start, const uint32_t oldLen, const uint32
     }
 }
 
+void PiPUtil::CalcWinRectLand(Rect& rect, const uint32_t width, const uint32_t height, const uint32_t winWidth,
+    const uint32_t winHeight)
+{
+    int32_t heightTmp = static_cast<int32_t>(height) - SAFE_PADDING_VERTICAL_TOP - SAFE_PADDING_VERTICAL_BOTTOM;
+    int32_t safePaddingHorizontal = static_cast<int32_t>(SAFE_PADDING_HORIZONTAL_VP * g_vpr);
+    if (winWidth <= winHeight) {
+        int32_t widthTmp = (NUMBER_THREE * static_cast<int32_t>(width)
+            - NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
+        rect.width_ = static_cast<uint32_t>(widthTmp);
+        rect.height_ = rect.width_ * winHeight / winWidth;
+        if (rect.height_ > static_cast<uint32_t>(heightTmp)) {
+            rect.height_ = static_cast<uint32_t>(heightTmp);
+            rect.width_ = rect.height_ * winWidth / winHeight;
+        }
+    } else {
+        rect.height_ = static_cast<uint32_t>(heightTmp);
+        rect.width_ = rect.height_ * winWidth / winHeight;
+    }
+}
+
 void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const PiPScaleLevel& scaleLevel,
     Rect& rect, bool isLandscape)
 {
@@ -83,21 +103,7 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
         }
         case PiPScaleLevel::PIP_SCALE_LEVEL_BIGGEST: {
             if (isLandscape) {
-                int32_t heightTmp = static_cast<int32_t>(height) - SAFE_PADDING_VERTICAL_TOP -
-                    SAFE_PADDING_VERTICAL_BOTTOM;
-                if (winWidth <= winHeight) {
-                    int32_t widthTmp = (NUMBER_THREE * static_cast<int32_t>(width)
-                        - NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
-                    rect.width_ = static_cast<uint32_t>(widthTmp);
-                    rect.height_ = rect.width_ * winHeight / winWidth;
-                    if (rect.height_ > static_cast<uint32_t>(heightTmp)) {
-                        rect.height_ = static_cast<uint32_t>(heightTmp);
-                        rect.width_ = rect.height_ * winWidth / winHeight;
-                    }
-                } else {
-                    rect.height_ = static_cast<uint32_t>(heightTmp);
-                    rect.width_ = rect.height_ * winWidth / winHeight;
-                }
+                CalcWinRectLand(rect, width, height, winWidth, winHeight);
             } else {
                 int32_t widthTmp = 0;
                 if (winWidth < winHeight) {
