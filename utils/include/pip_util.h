@@ -28,7 +28,7 @@ public:
         const PiPScalePivot& pivot);
     static void GetRectByScale(const uint32_t width, const uint32_t height, const PiPScaleLevel& scaleLevel,
         Rect& rect, bool isLandscape);
-    static bool GetValidRect(const uint32_t width, const uint32_t height, Rect& rect);
+    static bool GetValidRect(const int32_t width, const int32_t height, Rect& rect);
     static void CalcWinRectLand(Rect& rect, const uint32_t width, const uint32_t height, const uint32_t winWidth,
         const uint32_t winHeight);
     static constexpr int32_t SAFE_PADDING_HORIZONTAL_VP = 12;
