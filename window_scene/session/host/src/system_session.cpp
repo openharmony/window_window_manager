@@ -53,6 +53,19 @@ void SystemSession::UpdateCameraFloatWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
+    auto type = GetWindowType();
+    if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
+        !SessionPermission::IsSystemCalling()) {
+        auto parentSession = GetParentSession();
+        if (parentSession == nullptr) {
+            WLOGFW("parent session is null");
+            return WSError::WS_ERROR_INVALID_PARENT;
+        }
+        if (parentSession->IsSessionForeground()) {
+            WLOGFW("parent session is not in foreground");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
