@@ -44,6 +44,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS,
     TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE,
     TRANS_ID_NOTIFY_TRANSFORM_CHANGE,
+    TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE,
 };
 }   // namespace Rosen
 }   // namespace OHOS

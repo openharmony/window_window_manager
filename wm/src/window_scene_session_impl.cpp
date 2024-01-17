@@ -2622,5 +2622,45 @@ void WindowSceneSessionImpl::fillWindowLimits(WindowLimits& windowLimits)
         "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
 }
+
+WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
+{
+    if (property_ == nullptr) {
+        WLOGFE("[WMSDialog] property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    const auto& type = GetType();
+    WLOGFI("[WMSDialog] dialog state change [name:%{public}s, id:%{public}d, type:%{public}u], state:%{public}u,"
+        " requestState:%{public}u, isForeground:%{public}d", property_->GetWindowName().c_str(), GetPersistentId(),
+        type, state_, requestState_, static_cast<int32_t>(isForeground));
+    if (IsWindowSessionInvalid()) {
+        WLOGFI("[WMSDialog] session is invalid, id:%{public}d", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+
+    if (isForeground) {
+        if (state_ == WindowState::STATE_SHOWN) {
+            return WSError::WS_OK;
+        }
+        if (state_ == WindowState::STATE_HIDDEN) {
+            state_ = WindowState::STATE_SHOWN;
+            requestState_ = WindowState::STATE_SHOWN;
+            NotifyAfterForeground();
+        }
+    } else {
+        if (state_ == WindowState::STATE_HIDDEN) {
+            return WSError::WS_OK;
+        }
+        if (state_ == WindowState::STATE_SHOWN) {
+            state_ = WindowState::STATE_HIDDEN;
+            requestState_ = WindowState::STATE_HIDDEN;
+            NotifyAfterBackground();
+        }
+    }
+    WLOGFI("[WMSDialog] dialog state change success [name:%{public}s, id:%{public}d, type:%{public}u],"
+        " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(),
+        type, state_, requestState_);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
