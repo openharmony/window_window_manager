@@ -59,8 +59,8 @@ void PiPUtil::GetRectByPivot(int32_t& start, const uint32_t oldLen, const uint32
     }
 }
 
-void PiPUtil::CalcWinRectLand(Rect& rect, const uint32_t width, const uint32_t height, const uint32_t winWidth,
-    const uint32_t winHeight)
+void PiPUtil::CalcWinRectLand(const uint32_t width, const uint32_t height, const uint32_t winWidth,
+    const uint32_t winHeight, Rect& rect)
 {
     if (winWidth == 0 || winHeight == 0) {
         return;
@@ -106,7 +106,7 @@ void PiPUtil::GetRectByScale(const uint32_t width, const uint32_t height, const 
         }
         case PiPScaleLevel::PIP_SCALE_LEVEL_BIGGEST: {
             if (isLandscape) {
-                CalcWinRectLand(rect, width, height, winWidth, winHeight);
+                CalcWinRectLand(width, height, winWidth, winHeight, rect);
             } else {
                 int32_t widthTmp = 0;
                 if (winWidth < winHeight) {
