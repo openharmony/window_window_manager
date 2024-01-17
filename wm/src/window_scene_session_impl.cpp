@@ -159,7 +159,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type)) {
+        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
+            (type == WindowType::WINDOW_TYPE_TOAST)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
             WLOGFI("[WMSSystem] set parentId: %{public}d, type: %{public}d", property_->GetParentPersistentId(), type);
             auto mainWindow = FindMainWindowWithContext();
