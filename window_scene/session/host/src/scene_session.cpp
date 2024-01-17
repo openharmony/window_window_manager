@@ -405,12 +405,13 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->winRect_ == rect) {
-            WLOGFW("[WMSLayout] skip same rect update id:%{public}d!", session->GetPersistentId());
+            WLOGFI("[WMSLayout] skip same rect update id:%{public}d rect:%{public}s!",
+                session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
-            WLOGFE("[WMSLayout] id:%{public}d rect:[%{public}d, %{public}d, %{public}u, %{public}u] is invalid",
-                session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+            WLOGFE("[WMSLayout] id:%{public}d rect:%{public}s is invalid",
+                session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -418,18 +419,17 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_)) {
-            WLOGFI("[WMSLayout] position change no need notify client id:%{public}d, rect:[%{public}d, %{public}d, \
-                %{public}u, %{public}u], preRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-                session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_,
-                session->winRect_.posX_, session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
+            WLOGFI("[WMSLayout] position change no need notify client id:%{public}d, rect:%{public}s, \
+                preRect: %{public}s",
+                session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
             session->isDirty_ = true;
         } else {
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(rsTransaction);
         }
-        WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-            session->GetPersistentId(), session->reason_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:%{public}s",
+            session->GetPersistentId(), session->reason_, rect.ToString().c_str());
 
         return WSError::WS_OK;
     };
@@ -445,10 +445,8 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGD("[WMSLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:[%{public}d, "
-            "%{public}d, %{public}u, %{public}u]",
-            session->GetPersistentId(), session->reason_, session->winRect_.posX_,
-            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_);
+        WLOGD("[WMSLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:%{public}s",
+            session->GetPersistentId(), session->reason_, session->winRect_.ToString().c_str());
         bool isMoveOrDrag = session->moveDragController_ &&
             (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
         if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
