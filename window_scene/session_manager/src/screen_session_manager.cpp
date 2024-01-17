@@ -2986,22 +2986,21 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         if (!iter.second) {
             continue;
         }
+        // In the rotating state, after scb restarts, the screen information needs to be reset.
         float phyWidth = 0.0f;
         float phyHeight = 0.0f;
-        Rotation initialRotation = Rotation::ROTATION_0;
         bool isReset = true;
         if (foldScreenController_ != nullptr) {
             FoldDisplayMode displayMode = GetFoldDisplayMode();
             WLOGFI("fold screen with screenId = %{public}u", displayMode);
             if (displayMode == FoldDisplayMode::MAIN) {
-                auto phyBounds = GetPhyScreenProperty(5).GetPhyBounds();
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
                 phyWidth = phyBounds.rect_.width_;
                 phyHeight = phyBounds.rect_.height_;
             } else if (displayMode == FoldDisplayMode::FULL) {
-                auto phyBounds = GetPhyScreenProperty(0).GetPhyBounds();
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
                 phyWidth = phyBounds.rect_.height_;
                 phyHeight = phyBounds.rect_.width_;
-                initialRotation = Rotation::ROTATION_270;
             } else {
                 isReset = false;
             }
@@ -3016,8 +3015,8 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         bool isModeChanged =
             (localScreenBounds.rect_.width_ < localScreenBounds.rect_.height_) != (phyWidth < phyHeight);
         if (isModeChanged && isReset) {
-            WLOGFI("[WMSRecover] screen(id:%{public}" PRIu64 ") current mode is not default mode, reset it", iter.first);
-            SetRotation(iter.first, initialRotation, false);
+            WLOGFI("[WMSRecover]screen(id:%{public}" PRIu64 ") current mode is not default mode, reset it", iter.first);
+            SetRotation(iter.first, Rotation::ROTATION_0, false);
             iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
         }
         clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
