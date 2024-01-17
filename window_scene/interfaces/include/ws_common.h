@@ -223,6 +223,8 @@ enum class SizeChangeReason : uint32_t {
     CUSTOM_ANIMATION_SHOW,
     FULL_TO_SPLIT,
     SPLIT_TO_FULL,
+    FULL_TO_FLOATING,
+    FLOATING_TO_FULL,
     END,
 };
 
