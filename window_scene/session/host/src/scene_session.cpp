@@ -1069,12 +1069,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
-    if (property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        auto ret = HandlePointerStyle(pointerEvent);
-        if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
-            WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
-        }
-    }
+
     auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
