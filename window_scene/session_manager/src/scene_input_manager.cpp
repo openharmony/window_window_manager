@@ -176,10 +176,10 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& w
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
         for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
-            WLOG_D("[EventDispatch] —— %s", DumpDisplayInfo(displayInfo).c_str());
+            WLOG_D("[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
         }
         for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
-            WLOG_D("[EventDispatch] —— %s", DumpWindowInfo(windowInfo).c_str());
+            WLOG_D("[EventDispatch] - %s", DumpWindowInfo(windowInfo).c_str());
         }
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 } 
@@ -232,6 +232,11 @@ void SceneInputManager::FlushDisplayInfoToMMI() {
     sceneSessionDirty_->ResetSessionDirty();
 
     std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+    if (windowInfoList.size() == 0) {
+        return;
+    }
+    WLOG_D("[EventDispatch] - windowInfo:windowList = %{public}d", static_cast<int>(windowInfoList.size()));
+    windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
     if (windowInfoList.size() <= MAX_WINDOWINFO_NUM) {
         FlushFullInfoToMMI(windowInfoList);
     } else {
