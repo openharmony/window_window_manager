@@ -38,7 +38,7 @@ public:
         int32_t pid = -1, int32_t uid = -1) = 0;
     virtual WSError Foreground(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Background() = 0;
-    virtual WSError Disconnect() = 0;
+    virtual WSError Disconnect(bool isFromClient = false) = 0;
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
 

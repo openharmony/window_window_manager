@@ -156,6 +156,7 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
 
 private:
+    WMError DestroyInner(bool needNotifyServer);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
     static uint32_t maxFloatingWindowSize_;

@@ -209,15 +209,20 @@ void SceneSession::ClearSpecificSessionCbMap()
     PostTask(task, "ClearSpecificSessionCbMap");
 }
 
-WSError SceneSession::Disconnect()
+WSError SceneSession::Disconnect(bool isFromClient)
 {
-    PostTask([weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSLife] Disconnect session, id: %{public}d", session->GetPersistentId());
+        if (isFromClient) {
+            WLOGFI("[WMSLife] Client need notify destroy session, id: %{public}d", session->GetPersistentId());
+            session->SetSessionState(SessionState::STATE_DISCONNECT);
+            return WSError::WS_OK;
+        }
         if (session->needSnapshot_) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
@@ -228,7 +233,7 @@ WSError SceneSession::Disconnect()
         if (WindowHelper::IsPipWindow(session->GetWindowType())) {
             session->SavePiPRectInfo();
         }
-        session->Session::Disconnect();
+        session->Session::Disconnect(isFromClient);
         session->snapshot_.reset();
         session->isTerminating = false;
         return WSError::WS_OK;

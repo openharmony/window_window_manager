@@ -913,7 +913,7 @@ void Session::NotifyCallingSessionBackground()
     }
 }
 
-WSError Session::Disconnect()
+WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
     WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
