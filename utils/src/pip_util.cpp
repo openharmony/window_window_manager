@@ -59,14 +59,15 @@ void PiPUtil::GetRectByPivot(int32_t& start, const uint32_t oldLen, const uint32
     }
 }
 
-void PiPUtil::CalcWinRectLand(const uint32_t width, const uint32_t height, const uint32_t winWidth,
+void CalcWinRectLand(const uint32_t width, const uint32_t height, const uint32_t winWidth,
     const uint32_t winHeight, Rect& rect)
 {
     if (winWidth == 0 || winHeight == 0) {
         return;
     }
-    int32_t heightTmp = static_cast<int32_t>(height) - SAFE_PADDING_VERTICAL_TOP - SAFE_PADDING_VERTICAL_BOTTOM;
-    int32_t safePaddingHorizontal = static_cast<int32_t>(SAFE_PADDING_HORIZONTAL_VP * g_vpr);
+    int32_t heightTmp =
+        static_cast<int32_t>(height) - PiPUtil::SAFE_PADDING_VERTICAL_TOP - PiPUtil::SAFE_PADDING_VERTICAL_BOTTOM;
+    int32_t safePaddingHorizontal = static_cast<int32_t>(PiPUtil::SAFE_PADDING_HORIZONTAL_VP * g_vpr);
     if (winWidth <= winHeight) {
         int32_t widthTmp = (NUMBER_THREE * static_cast<int32_t>(width)
             - NUMBER_SEVEN * safePaddingHorizontal) / NUMBER_FOUR;
