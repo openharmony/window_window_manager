@@ -2099,11 +2099,8 @@ void SceneSession::GetNewPiPRect(const uint32_t displayWidth, const uint32_t dis
         return;
     }
     Rotation rotation = display->GetRotation();
-    if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
-        PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect, true);
-    } else {
-        PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect, false);
-    }
+    bool isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    PiPUtil::GetRectByScale(displayWidth, displayHeight, pipRectInfo_.level_, rect, isLandscape);
     WLOGFD("scale rect = (%{public}d, %{public}d, %{public}d, %{public}d)",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     auto sessionRect = GetSessionRect();
