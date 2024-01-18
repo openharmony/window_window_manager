@@ -5081,10 +5081,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     }
 
     WSRect newRect = callingSessionRect;
-    if (isCallingSessionFloating) {
+    int32_t statusHeight = GetStatusBarHeight();
+    if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         // calculate new rect of calling window
         newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
-        int32_t statusHeight = GetStatusBarHeight();
         newRect.posY_ = std::max(newRect.posY_, statusHeight);
     }
 
@@ -5092,7 +5092,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
         callingWindowRestoringRect_ = callingSessionRect;
     }
     NotifyOccupiedAreaChangeInfo(sceneSession, newRect, softInputSessionRect);
-    if (isCallingSessionFloating) {
+    if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         needUpdateSessionRect_ = true;
         callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
         callingWindowNewRect_ = callingSession_->GetSessionRect();
