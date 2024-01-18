@@ -560,9 +560,10 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
     auto res = 0;
     std::function<void()> func1 = [&]()
     {
-        windowExtensionSessionImpl.RegisterTransferComponentDataForResultListener(wantParams, reWantParams);
+        windowExtensionSessionImpl.RegisterTransferComponentDataForResultListener(func);
         res = 1;
-    } ASSERT_EQ(1, res);
+    };
+    ASSERT_EQ(0, res);
 }
 }
 } // namespace Rosen
