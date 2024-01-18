@@ -1626,6 +1626,10 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
 
     // virtual screen destroy callback to notify scb
+    auto screen = GetScreenSession(screenId);
+    if (CheckScreenInScreenGroup(screen)) {
+        NotifyDisplayDestroy(screenId);
+    }
     WLOGFI("destroy callback virtual screen");
     OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
 
