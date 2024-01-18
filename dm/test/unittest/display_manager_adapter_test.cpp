@@ -483,6 +483,182 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
     ASSERT_FALSE(ret);
 }
 
+/**
+ * @tc.name: MakeMirror
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> mirrorScreenId;
+    ScreenId screenGroupId;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
+        mirrorScreenId, screenGroupId);
+    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: StopMirror
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, StopMirror, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> mirrorScreenIds;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: HasPrivateWindow
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, Function | SmallTest | Level2)
+{
+    bool hasPrivateWindow = false;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(0,
+        hasPrivateWindow);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level2)
+{
+    std::shared_ptr<class RSSurfaceNode> surfaceNode;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(0,
+        surfaceNode);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: RemoveSurfaceNodeFromDisplay
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level2)
+{
+    std::shared_ptr<class RSSurfaceNode> surfaceNode;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(0,
+        surfaceNode);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: MakeExpand
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, MakeExpand, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> screenId;
+    std::vector<Point> startPoint;
+    ScreenId screenGroupId;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenId,
+        startPoint, screenGroupId);
+    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: StopExpand
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, StopExpand, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> expandScreenIds;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopExpand(expandScreenIds);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenFromGroup
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> screens;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenFromGroup(screens);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetScreenActiveMode
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(0, 100);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatio
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(0, 0);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(0, 70, 100, 50);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: ResizeVirtualScreen
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | Level2)
+{
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(0, 70, 100);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: MakeUniqueScreen
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, Function | SmallTest | Level2)
+{
+    std::vector<ScreenId> screenIds;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
+    ASSERT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetAvailableArea
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Level2)
+{
+    DMRect area;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(0, area);
+    ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+}
 }
 }
 }
