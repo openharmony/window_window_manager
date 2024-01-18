@@ -2207,8 +2207,8 @@ WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpda
                 SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
                 break;
             case PiPRectUpdateReason::REASON_DISPLAY_ROTATION_CHANGE:
-                session->ClearPiPRectPivotInfo();
                 session->ProcessUpdatePiPRect(SizeChangeReason::ROTATION);
+                session->ClearPiPRectPivotInfo();
                 break;
             default:
                 return WSError::WS_DO_NOTHING;
