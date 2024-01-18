@@ -1871,13 +1871,13 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
     if (!SessionPermission::VerifySessionPermission()) {
         WLOGFE("The interface permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -1908,7 +1908,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         if (!session->sessionExceptionFuncs_.empty()) {
             for (auto funcPtr : session->sessionExceptionFuncs_) {
                 auto sessionExceptionFunc = *funcPtr;
-                sessionExceptionFunc(info);
+                sessionExceptionFunc(info, needRemoveSession);
             }
         }
         return WSError::WS_OK;
