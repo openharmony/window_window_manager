@@ -3998,8 +3998,8 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     WLOGFD("RegisterGetStateFromManagerFunc success");
 }
 
-__attribute__((no_sanitize("cfi")))
-void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
+__attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(
+    int32_t persistentId, const SessionState& state)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnSessionStateChange%d", persistentId);
     WLOGFD("Session state change, id: %{public}d, state:%{public}u", persistentId, state);
