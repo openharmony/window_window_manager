@@ -1435,6 +1435,11 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
+
+            auto dialogSceneSession = GetSceneSession(dialog->GetPersistentId());
+            if (dialogSceneSession != nullptr) {
+                dialogSceneSession->ClearSpecificSessionCbMap();
+            }
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
                 sceneSessionMap_.erase(dialog->GetPersistentId());

@@ -287,7 +287,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         return;
     }
     auto task = [this, persistentId]() {
-        WLOGFI("clear callbackMap");
+        WLOGFI("[WMSLife] clear callbackMap with persistent id, %{public}d", persistentId);
         {
             std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
             jsCbMap_.clear();
@@ -296,6 +296,8 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         if (iter != jsSceneSessionMap_.end()) {
             napi_delete_reference(env_, iter->second);
             jsSceneSessionMap_.erase(iter);
+        } else {
+            WLOGFE("[WMSLife] deleteRef failed , %{public}d", persistentId);
         }
     };
     taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId));
