@@ -141,6 +141,11 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             return ret;
         }
         session->NotifyForeground();
+        auto sessionProperty = session->GetSessionProperty();
+        if (session->leashWinSurfaceNode_ && sessionProperty) {
+            bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
+            session->leashWinSurfaceNode_->SetSecurityLayer(lastPrivacyMode);
+        }
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(

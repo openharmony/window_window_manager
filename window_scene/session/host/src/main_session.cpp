@@ -46,14 +46,8 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         }
     }
 
-    auto name = sessionInfo_.bundleName_;
-    auto pos = name.find_last_of('.');
-    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
-        RSSurfaceNodeConfig config;
-        config.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
-        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
     }
     WLOGFD("Create MainSession");
 }
