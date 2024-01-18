@@ -135,6 +135,49 @@ HWTEST_F(PerformReporterTest, PrivateClear, Function | SmallTest | Level2)
     pr.clear();
     ASSERT_EQ(true, PerformDataCmp(pr, 0, {0, 0, 0, 0}));
 }
+
+/**
+ * @tc.name: GetMsgString001
+ * @tc.desc: GetMsgString test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, GetMsgString001, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    FullInfoMap infoMap;
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    ASSERT_EQ(res, "");
+}
+
+/**
+ * @tc.name: GetMsgString002
+ * @tc.desc: GetMsgString test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, GetMsgString002, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    std::string bundleName = "name";
+    windowInfoReporter.InsertCreateReportInfo(bundleName);
+    FullInfoMap infoMap = windowInfoReporter.windowRecentReportInfos_;
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    std::ostringstream oss;
+    oss << "{";
+    for (auto& bundleInfos : infoMap) {
+        if (bundleInfos.second.empty()) {
+            continue;
+        }
+        oss << "{";
+        for (auto& packageInfo : bundleInfos.second) {
+            oss << "BUNDLE_NAME:" << bundleInfos.first << ",";
+            oss << "ABILITY_NAME:" << packageInfo.first << ",";
+            oss << "COUNT:" << packageInfo.second;
+        }
+        oss << "},";
+    }
+    oss << "};";
+    ASSERT_EQ(res, oss.str());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
