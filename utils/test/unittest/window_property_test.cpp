@@ -194,6 +194,225 @@ HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, winPropDst.mode_);
 }
+
+/**
+ * @tc.name: HandleComputeTransform
+ * @tc.desc: HandleComputeTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, HandleComputeTransform, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.HandleComputeTransform(Transform::Identity());
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: ComputeTransform
+ * @tc.desc: ComputeTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, ComputeTransform, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.ComputeTransform();
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetZoomTransform
+ * @tc.desc: SetZoomTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetZoomTransform, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.SetZoomTransform(Transform::Identity());
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: ClearTransformZAxisOffset
+ * @tc.desc: ClearTransformZAxisOffset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, ClearTransformZAxisOffset, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    Transform trans;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.ClearTransformZAxisOffset(trans);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: UpdatePointerEvent
+ * @tc.desc: UpdatePointerEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, UpdatePointerEvent, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.UpdatePointerEvent(pointerEvent);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: isNeedComputerTransform
+ * @tc.desc: isNeedComputerTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, isNeedComputerTransform, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    bool ret = winPropSrc.isNeedComputerTransform();
+    ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: SetAnimateWindowFlag
+ * @tc.desc: SetAnimateWindowFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetAnimateWindowFlag, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    bool isAnimateWindow = false;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.SetAnimateWindowFlag(isAnimateWindow);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: IsDisplayZoomOn
+ * @tc.desc: IsDisplayZoomOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, IsDisplayZoomOn, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    bool ret = winPropSrc.IsDisplayZoomOn();
+    ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: IsAnimateWindow
+ * @tc.desc: IsAnimateWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, IsAnimateWindow, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    bool ret = winPropSrc.IsAnimateWindow();
+    ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: SetSizeLimits
+ * @tc.desc: SetSizeLimits test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetSizeLimits, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    WindowSizeLimits sizeLimits;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.SetSizeLimits(sizeLimits);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetUpdatedSizeLimits
+ * @tc.desc: SetUpdatedSizeLimits test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetUpdatedSizeLimits, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    WindowSizeLimits sizeLimits;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.SetUpdatedSizeLimits(sizeLimits);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetDecorEnable
+ * @tc.desc: SetDecorEnable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetDecorEnable, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+    bool decorEnable = false;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        winPropSrc.SetDecorEnable(decorEnable);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
