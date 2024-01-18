@@ -35,7 +35,7 @@ public:
 
     MOCK_METHOD1(Foreground, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Background, WSError(void));
-    MOCK_METHOD0(Disconnect, WSError(void));
+    MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
 
     MOCK_METHOD2(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason));
 

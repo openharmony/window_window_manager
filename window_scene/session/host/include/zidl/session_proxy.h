@@ -28,7 +28,7 @@ public:
 
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
-    WSError Disconnect() override;
+    WSError Disconnect(bool isFromClient = false) override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,

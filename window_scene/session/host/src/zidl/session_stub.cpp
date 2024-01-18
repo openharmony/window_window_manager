@@ -167,7 +167,8 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
-    const WSError& errCode = Disconnect();
+    bool isFromClient = data.ReadBool();
+    const WSError& errCode = Disconnect(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
