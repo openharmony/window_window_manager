@@ -1900,11 +1900,13 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
             session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }
-        if (!session->sessionExceptionFuncs_.empty()) {
-            for (auto funcPtr : session->sessionExceptionFuncs_) {
-                auto sessionExceptionFunc = *funcPtr;
-                sessionExceptionFunc(info);
-            }
+        if (session->sessionExceptionFunc_) {
+            auto exceptionFunc = *(session->sessionExceptionFunc_);
+            exceptionFunc(info);
+        }
+        if (session->jsSceneSessionExceptionFunc_) {
+            auto exceptionFunc = *(session->jsSceneSessionExceptionFunc_);
+            exceptionFunc(info);
         }
         return WSError::WS_OK;
     };

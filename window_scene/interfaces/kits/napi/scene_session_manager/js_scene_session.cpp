@@ -610,7 +610,7 @@ void JsSceneSession::ProcessSessionExceptionRegister()
         WLOGFE("session is nullptr");
         return;
     }
-    session->SetSessionExceptionListener(func);
+    session->SetSessionExceptionListener(func, true);
     WLOGFD("ProcessSessionExceptionRegister success");
 }
 
