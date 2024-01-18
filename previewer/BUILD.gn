@@ -130,8 +130,14 @@ if (!ispreview) {
     deps = [
       ":previewer_window",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:utils",
-      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     ]
+
+    defines = []
+    if (scene_board_enabled) {
+      deps +=
+          [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
+      defines += [ "SCENE_BOARD_ENABLE" ]
+    }
 
     external_deps = [
       "ace_engine:ace_uicontent",
