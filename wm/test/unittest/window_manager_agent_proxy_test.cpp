@@ -14,9 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+#include "display_manager_adapter.h"
+#include <functional>
 #include "window_manager_agent_proxy.h"
 #include "window_manager_agent.h"
-#include "display_manager_adapter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,7 +57,6 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo, Function | SmallTes
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ;
     sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
     bool focused = true;
 
@@ -105,7 +105,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, Function | 
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ;
     std::vector<sptr<AccessibilityWindowInfo>> infos = {};
     WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_REMOVED;
 
