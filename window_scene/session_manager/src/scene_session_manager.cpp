@@ -2994,7 +2994,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         };
         taskScheduler_->PostVoidSyncTask(task, "sessionException");
     };
-    sceneSession->SetSessionExceptionListener(sessionExceptionFunc);
+    sceneSession->SetSessionExceptionListener(sessionExceptionFunc, false);
     WLOGFD("[WMSLife]RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
 }
 

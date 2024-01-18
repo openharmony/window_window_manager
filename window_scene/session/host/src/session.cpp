@@ -1177,19 +1177,18 @@ WSError Session::Clear()
     return WSError::WS_OK;
 }
 
-void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func)
+void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func, bool fromJsScene)
 {
     if (func == nullptr) {
         WLOGFE("func is nullptr");
         return;
     }
     std::shared_ptr<NotifySessionExceptionFunc> funcSptr = std::make_shared<NotifySessionExceptionFunc>(func);
-    if (std::find(sessionExceptionFuncs_.begin(), sessionExceptionFuncs_.end(), funcSptr) !=
-        sessionExceptionFuncs_.end()) {
-        WLOGFW("func already regitered");
-        return;
+    if (fromJsScene) {
+        jsSceneSessionExceptionFunc_ = funcSptr;
+    } else {
+        sessionExceptionFunc_ = funcSptr;
     }
-    sessionExceptionFuncs_.emplace_back(funcSptr);
 }
 
 void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
@@ -1738,6 +1737,8 @@ void Session::UnregisterSessionChangeListeners()
         session->sessionFocusableChangeFunc_ = nullptr;
         session->sessionTouchableChangeFunc_ = nullptr;
         session->clickFunc_ = nullptr;
+        session->jsSceneSessionExceptionFunc_ = nullptr;
+        session->sessionExceptionFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
     };
     PostTask(task, "UnregisterSessionChangeListeners");
