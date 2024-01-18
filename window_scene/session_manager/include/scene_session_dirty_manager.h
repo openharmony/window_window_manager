@@ -37,6 +37,7 @@ private:
         WINDOW_ADD,
         WINDOW_DELETE,
         WINDOW_CHANGE,
+        WINDOW_ADD_END
     };
 
 using ScreenInfoChangeListener = std::function<void(int32_t)>;
