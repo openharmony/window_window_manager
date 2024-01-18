@@ -447,8 +447,8 @@ protected:
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
     NofitySessionIconUpdatedFunc updateSessionIconFunc_;
-    std::vector<std::shared_ptr<NotifySessionExceptionFunc>> sessionExceptionFunc_;
-    std::vector<std::shared_ptr<NotifySessionExceptionFunc>> jsSceneSessionExceptionFunc_;
+    std::shared_ptr<NotifySessionExceptionFunc> sessionExceptionFunc_;
+    std::shared_ptr<NotifySessionExceptionFunc> jsSceneSessionExceptionFunc_;
     NotifySessionSnapshotFunc notifySessionSnapshotFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
