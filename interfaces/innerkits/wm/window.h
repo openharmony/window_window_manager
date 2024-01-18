@@ -1442,7 +1442,7 @@ public:
      * @param shouldHide true means the non-system windows should be hidden, otherwise means the opposite.
      * @return Errorcode of window.
      */
-    virtual WMError HideNonSystemFloatingWindows(bool shouldHide) { return WMError::WM_OK; }
+    virtual WMError HideNonSystemFloatingWindows(bool shouldHide) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Is floating window of app type or not.
@@ -1529,7 +1529,7 @@ public:
      */
     virtual WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -1540,7 +1540,7 @@ public:
      */
     virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
