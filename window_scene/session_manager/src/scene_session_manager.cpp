@@ -5676,6 +5676,10 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
 
 sptr<SceneSession> SceneSessionManager::FindSessionByAffinity(std::string affinity)
 {
+    if (affinity.size() == 0) {
+        WLOGFI("AbilityInfo affinity is empty");
+        return nullptr;
+    }
     sptr<SceneSession> session = nullptr;
     auto cmpFunc = [this, affinity](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
         if (pair.second == nullptr || !CheckCollaboratorType(pair.second->GetCollaboratorType())) {
@@ -6397,6 +6401,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
         WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionInfo.sessionAffinity.c_str());
         sessionInfo.reuse = true;
+    } else {
+        sessionInfo.reuse = false;
     }
     WLOGFI("CheckIfReuseSession end");
     return resultValue;
