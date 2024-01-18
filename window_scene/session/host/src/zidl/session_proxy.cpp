@@ -321,7 +321,7 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
