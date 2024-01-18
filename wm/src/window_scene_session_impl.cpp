@@ -754,14 +754,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         return res;
     }
 
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
-        RSTransaction::FlushImplicitTransaction();
-    }
-
     /*
-     * delete after replace WSError with WMError
      * main window no need to notify host, since host knows hide first
      * main window notify host temporarily, since host background may failed
      * need to SetActive(false) for host session before background
@@ -784,6 +777,11 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         UpdateSubWindowState(type);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+    }
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        animationTransitionController_->AnimationForHidden();
+        RSTransaction::FlushImplicitTransaction();
     }
     NotifyWindowStatusChange(GetMode());
     WLOGFI("[WMSLife] Window hide success [id:%{public}d, type: %{public}d", property_->GetPersistentId(), type);

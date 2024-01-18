@@ -449,6 +449,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
+    WLOGFI("[WMSLayout] updateRect %{public}s, reason:%{public}u"
+        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.ToString().c_str(),
+        wmReason, GetWindowName().c_str(), GetPersistentId());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
+        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
@@ -460,12 +466,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
-        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
-    WLOGFI("[WMSLayout] updateRect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u"
-        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, wmReason, GetWindowName().c_str(), GetPersistentId());
     return WSError::WS_OK;
 }
 
