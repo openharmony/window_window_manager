@@ -209,15 +209,20 @@ void SceneSession::ClearSpecificSessionCbMap()
     PostTask(task, "ClearSpecificSessionCbMap");
 }
 
-WSError SceneSession::Disconnect()
+WSError SceneSession::Disconnect(bool isFromClient)
 {
-    PostTask([weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSLife] Disconnect session, id: %{public}d", session->GetPersistentId());
+        if (isFromClient) {
+            WLOGFI("[WMSLife] Client need notify destroy session, id: %{public}d", session->GetPersistentId());
+            session->SetSessionState(SessionState::STATE_DISCONNECT);
+            return WSError::WS_OK;
+        }
         if (session->needSnapshot_) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
@@ -228,7 +233,7 @@ WSError SceneSession::Disconnect()
         if (WindowHelper::IsPipWindow(session->GetWindowType())) {
             session->SavePiPRectInfo();
         }
-        session->Session::Disconnect();
+        session->Session::Disconnect(isFromClient);
         session->snapshot_.reset();
         session->isTerminating = false;
         return WSError::WS_OK;
@@ -1067,12 +1072,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
-    if (property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        auto ret = HandlePointerStyle(pointerEvent);
-        if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
-            WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
-        }
-    }
+
     auto windowType = property->GetWindowType();
     if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
@@ -1866,13 +1866,13 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
     if (!SessionPermission::VerifySessionPermission()) {
         WLOGFE("The interface permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -1907,6 +1907,12 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         if (session->jsSceneSessionExceptionFunc_) {
             auto exceptionFunc = *(session->jsSceneSessionExceptionFunc_);
             exceptionFunc(info);
+        }
+        if (!session->sessionExceptionFuncs_.empty()) {
+            for (auto funcPtr : session->sessionExceptionFuncs_) {
+                auto sessionExceptionFunc = *funcPtr;
+                sessionExceptionFunc(info, needRemoveSession);
+            }
         }
         return WSError::WS_OK;
     };

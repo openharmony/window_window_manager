@@ -916,7 +916,7 @@ void Session::NotifyCallingSessionBackground()
     }
 }
 
-WSError Session::Disconnect()
+WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
     WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
@@ -1710,6 +1710,8 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
         changedState = SessionState::STATE_FOREGROUND;
     } else if (changedState == SessionState::STATE_INACTIVE) {
         changedState = SessionState::STATE_BACKGROUND;
+    } else if (changedState == SessionState::STATE_DISCONNECT) {
+        return;
     }
     NotifySessionStateChange(changedState);
     WLOGFD("SetSessionStateChangeListenser, id: %{public}d, state_: %{public}d, changedState: %{public}d",
@@ -1747,6 +1749,9 @@ void Session::UnregisterSessionChangeListeners()
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
 {
     sessionStateChangeNotifyManagerFunc_ = func;
+    if (state_ == SessionState::STATE_DISCONNECT) {
+        return;
+    }
     NotifySessionStateChange(state_);
 }
 

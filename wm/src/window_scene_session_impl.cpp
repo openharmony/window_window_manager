@@ -907,6 +907,30 @@ void WindowSceneSessionImpl::DestroySubWindow()
     }
 }
 
+WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
+{
+    if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
+        if (WindowHelper::IsSystemWindow(GetType())) {
+            // main window no need to notify host, since host knows hide first
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        } else if (WindowHelper::IsSubWindow(GetType())) {
+            auto parentSession = FindParentSessionByParentId(GetParentId());
+            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+                return WMError::WM_ERROR_NULLPTR;
+            }
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        }
+    }
+
+    WMError ret = WMError::WM_OK;
+    if (WindowHelper::IsMainWindow(GetType()) && state_ == WindowState::STATE_HIDDEN) {
+        if (hostSession_ != nullptr) {
+            ret = static_cast<WMError>(hostSession_->Disconnect(true));
+        }
+    }
+    return ret;
+}
+
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
     if (property_ == nullptr) {
@@ -924,18 +948,13 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         return WMError::WM_OK;
     }
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
-    if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
-        if (WindowHelper::IsSystemWindow(GetType())) {
-            // main window no need to notify host, since host knows hide first
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType())) {
-            auto parentSession = FindParentSessionByParentId(GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-                return WMError::WM_ERROR_NULLPTR;
-            }
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        }
+
+    auto ret = DestroyInner(needNotifyServer);
+    if (ret != WMError::WM_OK) {
+        WLOGFW("[WMSLife] Destroy window failed, id: %{public}d", GetPersistentId());
+        return ret;
     }
+
     // delete after replace WSError with WMError
     NotifyBeforeDestroy(GetWindowName());
     {

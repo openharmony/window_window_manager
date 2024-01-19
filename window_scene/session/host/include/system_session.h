@@ -26,7 +26,7 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
-    WSError Disconnect() override;
+    WSError Disconnect(bool isFromClient = false) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
 private:

@@ -287,7 +287,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         return;
     }
     auto task = [this, persistentId]() {
-        WLOGFI("clear callbackMap");
+        WLOGFI("[WMSLife] clear callbackMap with persistent id, %{public}d", persistentId);
         {
             std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
             jsCbMap_.clear();
@@ -296,6 +296,8 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         if (iter != jsSceneSessionMap_.end()) {
             napi_delete_reference(env_, iter->second);
             jsSceneSessionMap_.erase(iter);
+        } else {
+            WLOGFE("[WMSLife] deleteRef failed , %{public}d", persistentId);
         }
     };
     taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId));
@@ -601,9 +603,9 @@ void JsSceneSession::ProcessSessionTouchableChangeRegister()
 void JsSceneSession::ProcessSessionExceptionRegister()
 {
     WLOGFD("begin to run ProcessSessionExceptionRegister");
-    NotifySessionExceptionFunc func = [weak = weak_from_this()](const SessionInfo& info) {
+    NotifySessionExceptionFunc func = [weak = weak_from_this()](const SessionInfo& info, bool needRemoveSession) {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnSessionException(info);
+        if (weakJsSceneSession) weakJsSceneSession->OnSessionException(info, needRemoveSession);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1777,7 +1779,7 @@ void JsSceneSession::UpdateSessionIcon(const std::string &iconPath)
     taskScheduler_->PostMainThreadTask(task, "UpdateSessionIcon");
 }
 
-void JsSceneSession::OnSessionException(const SessionInfo& info)
+void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession)
 {
     WLOGFI("[NAPI]run OnSessionException, bundleName = %{public}s, id = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
@@ -1791,7 +1793,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
         jsCallBack = iter->second;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, jsCallBack, env = env_]() {
+    auto task = [sessionInfo, needRemoveSession, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1801,11 +1803,12 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        napi_value jsNeedRemoveSession = CreateJsValue(env, needRemoveSession);
         if (jsSessionInfo == nullptr) {
             WLOGFE("[NAPI]this target session info is nullptr");
             return;
         }
-        napi_value argv[] = {jsSessionInfo};
+        napi_value argv[] = {[0] = jsSessionInfo, [1] = jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);

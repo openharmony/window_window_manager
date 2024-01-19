@@ -60,7 +60,7 @@ using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
-using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
+using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -110,7 +110,7 @@ public:
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
-    WSError Disconnect() override;
+    WSError Disconnect(bool isFromClient = false) override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
 
