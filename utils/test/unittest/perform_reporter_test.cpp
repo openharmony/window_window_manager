@@ -157,9 +157,8 @@ HWTEST_F(PerformReporterTest, GetMsgString001, Function | SmallTest | Level2)
 HWTEST_F(PerformReporterTest, GetMsgString002, Function | SmallTest | Level2)
 {
     WindowInfoReporter windowInfoReporter;
-    std::string bundleName = "name";
-    windowInfoReporter.InsertCreateReportInfo(bundleName);
-    FullInfoMap infoMap = windowInfoReporter.windowRecentReportInfos_;
+    FullInfoMap infoMap;
+    infoMap["bundleName"]["packageName"] = 0;
     std::string res = windowInfoReporter.GetMsgString(infoMap);
     std::ostringstream oss;
     oss << "{";
@@ -177,6 +176,176 @@ HWTEST_F(PerformReporterTest, GetMsgString002, Function | SmallTest | Level2)
     }
     oss << "};";
     ASSERT_EQ(res, oss.str());
+}
+
+/**
+ * @tc.name: GetMsgString003
+ * @tc.desc: GetMsgString test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, GetMsgString003, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    BundleNameMap infoMap;
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    ASSERT_EQ(res, "");
+}
+
+/**
+ * @tc.name: GetMsgString004
+ * @tc.desc: GetMsgString test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, GetMsgString004, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    BundleNameMap infoMap;
+    infoMap["bundleName"] = 0;
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    std::ostringstream oss;
+    oss << "{";
+    for (auto& bundleInfo : infoMap) {
+        oss << "{";
+        oss << "BUNDLE_NAME:" << bundleInfo.first << ",";
+        oss << "COUNT:" << bundleInfo.second;
+        oss << "},";
+    }
+    oss << "};";
+    ASSERT_EQ(res, oss.str());
+}
+
+/**
+ * @tc.name: InsertCreateReportInfo005
+ * @tc.desc: InsertCreateReportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    std::string bundleName = "bundleName";
+    std::string packageName = "packageName";
+    windowInfoReporter.InsertCreateReportInfo(bundleName);
+    windowInfoReporter.InsertShowReportInfo(bundleName);
+    windowInfoReporter.InsertHideReportInfo(bundleName);
+    windowInfoReporter.InsertDestroyReportInfo(bundleName);
+    windowInfoReporter.InsertNavigationBarReportInfo(bundleName, packageName);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: UpdateReportInfo006
+ * @tc.desc: UpdateReportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, UpdateReportInfo006, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    FullInfoMap infoMap;
+    std::string bundleName;
+    std::string packageName;
+    windowInfoReporter.UpdateReportInfo(infoMap, bundleName, packageName);
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    ASSERT_EQ(res, "");
+}
+
+/**
+ * @tc.name: UpdateReportInfo007
+ * @tc.desc: UpdateReportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, UpdateReportInfo007, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    FullInfoMap infoMap_1;
+    std::string bundleName = "bundleName";
+    std::string packageName = "packageName";
+    infoMap_1["bundleName"]["packageName"] = 0;
+    windowInfoReporter.UpdateReportInfo(infoMap_1, bundleName, packageName);
+    FullInfoMap infoMap_2;
+    infoMap_2["Name"]["packageName"] = 0;
+    windowInfoReporter.UpdateReportInfo(infoMap_2, bundleName, packageName);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: UpdateReportInfo008
+ * @tc.desc: UpdateReportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, UpdateReportInfo008, Function | SmallTest | Level2)
+{
+    WindowInfoReporter windowInfoReporter;
+    BundleNameMap infoMap;
+    std::string bundleName;
+    windowInfoReporter.UpdateReportInfo(infoMap, bundleName);
+    std::string res = windowInfoReporter.GetMsgString(infoMap);
+    ASSERT_EQ(res, "");
+}
+
+/**
+ * @tc.name: UpdateReportInfo009
+ * @tc.desc: UpdateReportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, UpdateReportInfo009, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    BundleNameMap infoMap_1;
+    std::string bundleName = "bundleName";
+    infoMap_1["bundleName"] = 0;
+    windowInfoReporter.UpdateReportInfo(infoMap_1, bundleName);
+    BundleNameMap infoMap_2;
+    infoMap_2["Name"] = 0;
+    windowInfoReporter.UpdateReportInfo(infoMap_2, bundleName);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportBackButtonInfoImmediately010
+ * @tc.desc: ReportBackButtonInfoImmediately test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportBackButtonInfoImmediately();
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportZeroOpacityInfoImmediately011
+ * @tc.desc: ReportZeroOpacityInfoImmediately test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, Function | SmallTest | Level2)
+{
+    int res = 0;
+    std::string bundleName;
+    std::string packageName = "packageName";
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportZeroOpacityInfoImmediately(bundleName, packageName);
+    bundleName = "bundleName";
+    windowInfoReporter.ReportZeroOpacityInfoImmediately(bundleName, packageName);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportStartWindow012
+ * @tc.desc: ReportStartWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportStartWindow012, Function | SmallTest | Level2)
+{
+    int res = 0;
+    std::string bundleName = "bundleName";
+    std::string windowName = "windowName";
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportStartWindow(bundleName, windowName);
+    ASSERT_EQ(res, 0);
 }
 }
 } // namespace Rosen
