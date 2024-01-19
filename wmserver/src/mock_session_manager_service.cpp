@@ -71,6 +71,7 @@ public:
             MockSessionManagerService::GetInstance().UnregisterSMSLiteRecoverListener(pid_);
         } else {
             MockSessionManagerService::GetInstance().UnregisterSMSRecoverListener(pid_);
+            MockSessionManagerService::GetInstance().UnregisterWMSConnectionChangedListener(pid_);
         }
     }
 
@@ -245,6 +246,45 @@ void MockSessionManagerService::UnregisterSMSRecoverListener(int64_t pid)
     auto it = smsRecoverListenerMap_.find(pid);
     if (it != smsRecoverListenerMap_.end()) {
         smsRecoverListenerMap_.erase(it);
+    }
+}
+
+int MockSessionManagerService::RegisterWMSConnectionChangedListener(const sptr<IRemoteObject>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return -1;
+    }
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFI("RegisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    std::lock_guard<std::recursive_mutex> lock(wmsConnectionListenerLock_);
+    if (wmsConnectionListenerMap_.find(pid) != wmsConnectionListenerMap_.end()) {
+        WLOGFI("listener already registered with pid = %{public}" PRId64, pid);
+        return 0;
+    }
+    auto wmsListener = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+    wmsConnectionListenerMap_[pid] = wmsListener;
+    if (wmsListener && isWMSConnected_) {
+        wmsListener->OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    }
+    return 0;
+}
+
+int MockSessionManagerService::UnregisterWMSConnectionChangedListener()
+{
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFI("UnregisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    UnregisterWMSConnectionChangedListener(pid);
+    return 0;
+}
+
+void MockSessionManagerService::UnregisterWMSConnectionChangedListener(int64_t pid)
+{
+    WLOGFI("UnregisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    std::lock_guard<std::recursive_mutex> lock(wmsConnectionListenerLock_);
+    auto it = wmsConnectionListenerMap_.find(pid);
+    if (it != wmsConnectionListenerMap_.end()) {
+        wmsConnectionListenerMap_.erase(it);
     }
 }
 
