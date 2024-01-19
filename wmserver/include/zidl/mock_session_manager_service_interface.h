@@ -34,6 +34,8 @@ public:
         TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER,
         TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER,
         TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER,
+        TRANS_ID_REGISTER_WMS_CONNECTION_CHANGED_LISTENER,
+        TRANS_ID_UNREGISTER_WMS_CONNECTION_CHANGED_LISTENER,
     };
 
     virtual sptr<IRemoteObject> GetSessionManagerService() = 0;
@@ -45,6 +47,8 @@ public:
     virtual void UnregisterSMSRecoverListener() = 0;
     virtual void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) = 0;
     virtual void UnregisterSMSLiteRecoverListener() = 0;
+    virtual int32_t RegisterWMSConnectionChangedListener(const sptr<IRemoteObject>& listener) = 0;
+    virtual int32_t UnregisterWMSConnectionChangedListener() = 0;
 };
 }
 }

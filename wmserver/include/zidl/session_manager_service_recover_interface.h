@@ -25,9 +25,11 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionManagerServiceRecoverListener");
     enum class SessionManagerServiceRecoverMessage : uint32_t {
         TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER,
+        TRANS_ID_ON_WMS_CONNECTION_CHANGED,
     };
 
     virtual void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) = 0;
+    virtual void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) = 0;
 };
 }
 }

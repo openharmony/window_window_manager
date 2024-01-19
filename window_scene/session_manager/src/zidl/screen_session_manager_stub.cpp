@@ -546,7 +546,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 WLOGFE("clientProxy is null");
                 break;
             }
-            SetClient(clientProxy);
+            int32_t userId = data.ReadInt32();
+            WLOGFI("SetClient stub userId %{public}d", userId);
+            SetClient(clientProxy, userId);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY: {
