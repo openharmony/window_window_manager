@@ -38,6 +38,7 @@ class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
     using SessionRecoverCallbackFunc = std::function<void()>;
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t userId, int32_t screenId, bool isConnected)>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
@@ -106,6 +107,8 @@ public:
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
     void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
     void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    WMError UnregisterWMSConnectionChangedListener();
     virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);

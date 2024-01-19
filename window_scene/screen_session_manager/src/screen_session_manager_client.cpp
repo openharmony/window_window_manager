@@ -17,7 +17,7 @@
 
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-
+#include "os_account_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -49,7 +49,17 @@ void ScreenSessionManagerClient::ConnectToServer()
         WLOGFE("Failed to get screen session manager proxy");
         return;
     }
-    screenSessionManager_->SetClient(this);
+    std::vector<int32_t> userIds;
+    int32_t userId = 0;
+    ErrCode errCode = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+    if (errCode != ERR_OK || userIds.empty()) {
+        WLOGFE("get userId failed");
+    } else {
+        userId = userIds[0];
+    }
+    WLOGFI("SetClient in userid: %{public}d", userId);
+
+    screenSessionManager_->SetClient(this, userId);
 }
 
 void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnectionListener* listener)

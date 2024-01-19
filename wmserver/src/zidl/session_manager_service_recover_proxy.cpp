@@ -46,5 +46,35 @@ void SessionManagerServiceRecoverProxy::OnSessionManagerServiceRecover(
     }
 }
 
+void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(
+    int32_t userId, int32_t screenId, bool isConnected)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        WLOGFE("Write userId failed");
+        return;
+    }
+    if (!data.WriteInt32(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isConnected)) {
+        WLOGFE("Write isConnected failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED), data, reply,
+        option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

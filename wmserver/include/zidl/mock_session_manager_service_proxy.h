@@ -33,6 +33,8 @@ public:
     void UnregisterSMSRecoverListener() override;
     void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSLiteRecoverListener() override;
+    int32_t RegisterWMSConnectionChangedListener(const sptr<IRemoteObject>& listener) override;
+    int32_t UnregisterWMSConnectionChangedListener() override;
 
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;

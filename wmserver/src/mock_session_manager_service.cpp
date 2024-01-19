@@ -71,6 +71,7 @@ public:
             MockSessionManagerService::GetInstance().UnregisterSMSLiteRecoverListener(pid_);
         } else {
             MockSessionManagerService::GetInstance().UnregisterSMSRecoverListener(pid_);
+            MockSessionManagerService::GetInstance().UnregisterWMSConnectionChangedListener(pid_);
         }
     }
 
@@ -83,6 +84,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
 
 void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 {
+    WLOGFI("OnRemoteDied with userId_=%{public}d, screenId_=%{public}d", userId_, screenId_);
+    MockSessionManagerService::GetInstance().OnWMSConnectionChanged(userId_, screenId_, false);
     auto sessionManagerService = object.promote();
     if (!sessionManagerService) {
         WLOGFE("sessionManagerService is null");
@@ -94,6 +97,13 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
         return;
     }
     WLOGFW("SessionManagerService died!");
+}
+
+void MockSessionManagerService::SMSDeathRecipient::SetSMSId(int32_t userId, int32_t screenId)
+{
+    WLOGFI("SetSMSId with userId=%{public}d, screenId=%{public}d", userId, screenId);
+    userId_ = userId;
+    screenId_ = screenId;
 }
 
 MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
@@ -235,6 +245,45 @@ void MockSessionManagerService::UnregisterSMSRecoverListener(int64_t pid)
     }
 }
 
+int MockSessionManagerService::RegisterWMSConnectionChangedListener(const sptr<IRemoteObject>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return -1;
+    }
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFI("RegisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    std::lock_guard<std::recursive_mutex> lock(wmsConnectionListenerLock_);
+    if (wmsConnectionListenerMap_.find(pid) != wmsConnectionListenerMap_.end()) {
+        WLOGFI("listener already registered with pid = %{public}" PRId64, pid);
+        return 0;
+    }
+    auto wmsListener = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+    wmsConnectionListenerMap_[pid] = wmsListener;
+    if (wmsListener && isWMSConnected_) {
+        wmsListener->OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    }
+    return 0;
+}
+
+int MockSessionManagerService::UnregisterWMSConnectionChangedListener()
+{
+    int64_t pid = IPCSkeleton::GetCallingPid();
+    WLOGFI("UnregisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    UnregisterWMSConnectionChangedListener(pid);
+    return 0;
+}
+
+void MockSessionManagerService::UnregisterWMSConnectionChangedListener(int64_t pid)
+{
+    WLOGFI("UnregisterWMSConnectionChangedListener with pid = %{public}" PRId64, pid);
+    std::lock_guard<std::recursive_mutex> lock(wmsConnectionListenerLock_);
+    auto it = wmsConnectionListenerMap_.find(pid);
+    if (it != wmsConnectionListenerMap_.end()) {
+        wmsConnectionListenerMap_.erase(it);
+    }
+}
+
 void MockSessionManagerService::NotifySceneBoardAvailableToClient()
 {
     if (sessionManagerService_ == nullptr) {
@@ -310,6 +359,32 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient()
         WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover Lite pid = %{public}" PRId64
             ", ref count = %{public}" PRId32, it.first, it.second->GetSptrRefCount());
         it.second->OnSessionManagerServiceRecover(sessionManagerService_);
+    }
+}
+
+void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t screenId)
+{
+    WLOGFI("NotifyWMSConnected with userId = %{public}d, screenId = %{public}d", userId, screenId);
+    if (smsDeathRecipient_ == nullptr) {
+        WLOGFE("smsDeathRecipient_ is null, do nothing");
+        return;
+    }
+    currentUserId_ = userId;
+    currentScreenId_ = screenId;
+    smsDeathRecipient_->SetSMSId(userId, screenId);
+    OnWMSConnectionChanged(userId, screenId, true);
+}
+
+void MockSessionManagerService::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+{
+    isWMSConnected_ = isConnected;
+    std::lock_guard<std::recursive_mutex> lock(wmsConnectionListenerLock_);
+    WLOGFI("Remote process count = %{public}" PRIu64, static_cast<uint64_t>(wmsConnectionListenerMap_.size()));
+    for (auto& it : wmsConnectionListenerMap_) {
+        if (it.second != nullptr) {
+            WLOGFI("Call OnWMSConnectionChanged pid = %{public}" PRId64, it.first);
+            it.second->OnWMSConnectionChanged(userId, screenId, isConnected);
+        }
     }
 }
 

@@ -41,6 +41,7 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
+#include "mock_session_manager_service.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -3013,12 +3014,14 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
 }
 
-void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
+void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client, int32_t userId)
 {
     if (!client) {
         WLOGFE("client is null");
         return;
     }
+    WLOGFI("SetClient userId= %{public}d", userId);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, 0);
     clientProxy_ = client;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {

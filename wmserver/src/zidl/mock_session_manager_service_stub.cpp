@@ -66,6 +66,15 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             UnregisterSMSLiteRecoverListener();
             break;
         }
+        case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_WMS_CONNECTION_CHANGED_LISTENER: {
+            sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+            RegisterWMSConnectionChangedListener(listenerObject);
+            break;
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_WMS_CONNECTION_CHANGED_LISTENER: {
+            UnregisterWMSConnectionChangedListener();
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
