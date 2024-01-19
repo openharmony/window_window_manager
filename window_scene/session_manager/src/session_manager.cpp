@@ -248,16 +248,9 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
 
 WMError SessionManager::UnregisterWMSConnectionChangedListener()
 {
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        wmsConnectionChangedFunc_ = nullptr;
-    }
-    if (mockSessionManagerServiceProxy_ == nullptr) {
-        WLOGFE("mockSessionManagerServiceProxy_ is null, unregister wms connection changed listener failed");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    WLOGFI("UnregisterWMSConnectionChangedListener in");
-    mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
+    WLOGFI("RegisterWMSConnectionChangedListener in");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    wmsConnectionChangedFunc_ = nullptr;
     return WMError::WM_OK;
 }
 
