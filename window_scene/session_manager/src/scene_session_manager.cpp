@@ -974,7 +974,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFD("[WMSLife] RequestSceneSession, synchronous screenId with displayid %{public}" PRIu64"",
                 sessionInfo.screenId_);
         }
-        sceneSession->SetEventHandler(taskScheduler_->GetEventHandler());
+        sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
@@ -1255,15 +1255,7 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
         return;
     }
     if (!sceneSession->IsSessionValid()) {
-#ifdef IMF_ENABLE
-        WLOGFI("[WMSInput] When the app is cold-started, Notify InputMethod framework close keyboard");
-        if (MiscServices::InputMethodController::GetInstance()) {
-            int32_t ret = MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            if (ret != 0) { // 0 - NO_ERROR
-                WLOGFE("[WMSInput] InputMethod framework close keyboard failed, ret: %{public}d", ret);
-            }
-        }
-#endif
+        sceneSession->RequestHideKeyboard(true);
     }
 }
 
@@ -5172,7 +5164,8 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         }
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task, "SetSessionGravity" + std::to_string(persistentId));
+    taskScheduler_->PostAsyncTask(task, "SetSessionGravity" + std::to_string(persistentId));
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)

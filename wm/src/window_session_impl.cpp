@@ -1446,9 +1446,10 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        WLOGFI("[WMSInput] Notify InputMethod framework close keyboard");
+        WLOGFI("[WMSInput] Notify InputMethod framework close keyboard start.");
         if (MiscServices::InputMethodController::GetInstance()) {
             int32_t ret = MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+            WLOGFI("[WMSInput] Notify InputMethod framework close keyboard end.");
             if (ret != 0) { // 0 - NO_ERROR
                 WLOGFE("[WMSInput] InputMethod framework close keyboard failed, ret: %{public}d", ret);
             }

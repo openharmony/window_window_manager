@@ -63,9 +63,11 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
-void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
+void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+    const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
     handler_ = handler;
+    exportHandler_ = exportHandler;
 }
 
 void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
@@ -79,6 +81,20 @@ void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
         task();
     };
     handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void Session::PostExportTask(Task&& task, const std::string& name, int64_t delayTime)
+{
+    if (!exportHandler_ || exportHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+        return task();
+    }
+    auto localTask = [task, name]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+        task();
+    };
+    exportHandler_->PostTask(std::move(localTask), "wms:" + name, delayTime,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 int32_t Session::GetPersistentId() const
