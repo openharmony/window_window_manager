@@ -52,7 +52,7 @@ protected:
 private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerProxy();
-    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override;
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
