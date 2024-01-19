@@ -248,7 +248,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
 
 WMError SessionManager::UnregisterWMSConnectionChangedListener()
 {
-    WLOGFI("RegisterWMSConnectionChangedListener in");
+    WLOGFI("UnregisterWMSConnectionChangedListener in");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     wmsConnectionChangedFunc_ = nullptr;
     return WMError::WM_OK;
