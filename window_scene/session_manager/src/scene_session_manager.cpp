@@ -1314,7 +1314,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     promise->set_value(static_cast<int32_t>(errCode));
 
     if (errCode != ERR_OK) {
-        scnSession->NotifySessionException(scnSessionInfo);
+        WLOGFE("session activate failed. errCode: %{public}d", errCode);
+        scnSession->NotifySessionException(scnSessionInfo, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -2973,7 +2974,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         WLOGFE("session is nullptr");
         return;
     }
-    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info) {
+    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info, bool needRemoveSession = false) {
         auto task = [this, info]() {
             auto scnSession = GetSceneSession(info.persistentId_);
             if (scnSession == nullptr) {

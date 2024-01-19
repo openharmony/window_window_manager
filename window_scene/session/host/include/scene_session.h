@@ -122,7 +122,8 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
-    WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
+    WSError NotifySessionException(
+        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
