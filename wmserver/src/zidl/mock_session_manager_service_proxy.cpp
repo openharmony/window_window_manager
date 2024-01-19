@@ -152,6 +152,7 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("[WMSRecover] WriteInterfaceToken failed");
+        return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER),

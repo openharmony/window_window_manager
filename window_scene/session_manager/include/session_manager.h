@@ -35,10 +35,13 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
     using SessionRecoverCallbackFunc = std::function<void()>;
     using WindowManagerRecoverCallbackFunc = std::function<void()>;
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t userId, int32_t screenId, bool isConnected)>;
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void ClearSessionManagerProxy();
     void Clear();
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    WMError UnregisterWMSConnectionChangedListener();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
 
@@ -49,13 +52,18 @@ protected:
 private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerProxy();
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
+    WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
+    int32_t currentUserId_ = 0;
+    int32_t currentScreenId_ = 0;
+    bool isWMSConnected_ = false;
 };
 } // namespace OHOS::Rosen
 

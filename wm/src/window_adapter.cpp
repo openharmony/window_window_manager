@@ -248,6 +248,20 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
     }
 }
 
+WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    WLOGFI("RegisterWMSConnectionChangedListener in");
+    return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
+}
+
+WMError WindowAdapter::UnregisterWMSConnectionChangedListener()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    WLOGFI("UnregisterWMSConnectionChangedListener in");
+    return SessionManager::GetInstance().UnregisterWMSConnectionChangedListener();
+}
+
 void WindowAdapter::WindowManagerAndSessionRecover()
 {
     ClearWindowAdapter();

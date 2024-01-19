@@ -128,7 +128,7 @@ public:
     // unique screen
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
 
-    void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
+    void SetClient(const sptr<IScreenSessionManagerClient>& client, int32_t userId) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) override;
