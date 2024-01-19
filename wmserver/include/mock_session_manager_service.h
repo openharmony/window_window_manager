@@ -39,6 +39,9 @@ public:
     void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSLiteRecoverListener() override;
     void UnregisterSMSLiteRecoverListener(int64_t pid);
+    int RegisterWMSConnectionChangedListener(const sptr<IRemoteObject>& listener) override;
+    int UnregisterWMSConnectionChangedListener() override;
+    void UnregisterWMSConnectionChangedListener(int64_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
