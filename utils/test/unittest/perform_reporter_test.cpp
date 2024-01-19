@@ -347,6 +347,65 @@ HWTEST_F(PerformReporterTest, ReportStartWindow012, Function | SmallTest | Level
     windowInfoReporter.ReportStartWindow(bundleName, windowName);
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: ReportRecordedInfos013
+ * @tc.desc: ReportRecordedInfos test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportRecordedInfos013, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportRecordedInfos();
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportContainerStartBegin014
+ * @tc.desc: ReportContainerStartBegin test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, Function | SmallTest | Level2)
+{
+    int res = 0;
+    int32_t missionId = 1;
+    std::string bundleName = "bundleName";
+    int64_t timestamp = 1;
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportContainerStartBegin(missionId, bundleName, timestamp);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: Report015
+ * @tc.desc: Report test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, Report015, Function | SmallTest | Level2)
+{
+    int res = 0;
+    std::string reportTag = "reportTag";
+    std::string msg;
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.Report(reportTag, msg);
+    msg = "msg";
+    windowInfoReporter.Report(reportTag, msg);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ClearRecordedInfos016
+ * @tc.desc: ClearRecordedInfos test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ClearRecordedInfos016, Function | SmallTest | Level2)
+{
+    int res = 0;
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ClearRecordedInfos();
+    ASSERT_EQ(res, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
