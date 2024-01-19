@@ -3550,7 +3550,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
     auto lastSession = GetSceneSession(lastFocusedSessionId_);
     if (focusedSession && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
         lastSession && lastSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP &&
-        RequestSessionFocus(lastFocusedSessionId_) == WSError::WS_OK) {
+        RequestSessionFocus(lastFocusedSessionId_, false) == WSError::WS_OK) {
             WLOGFD("[WMSFocus]focus is back to desktop");
             return WSError::WS_OK;
     }
@@ -3721,8 +3721,12 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
         return;
     }
     int32_t persistentId = sceneSession->GetPersistentId();
-    WLOGFI("[WMSFocus]NotifyFocusStatus, name: %{public}s, id: %{public}d, isFocused: %{public}d",
-        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused);
+
+    WLOGFI("[WMSFocus]NotifyFocusStatus, name: %{public}s/%{public}s/%{public}s, id: %{public}d, isFocused: %{public}d",
+        sceneSession->GetSessionInfo().bundleName_.c_str(),
+        sceneSession->GetSessionInfo().abilityName_.c_str(),
+        sceneSession->GetWindowNameAllType().c_str(),
+        sceneSession->GetPersistentId(), isFocused);
     if (isFocused) {
         if (IsSessionVisible(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
@@ -3972,8 +3976,9 @@ void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneS
 
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifyRequestFocusStatusNotifyManagerFunc func = [this](int32_t persistentId, const bool isFocused) {
-        this->RequestFocusStatus(persistentId, isFocused);
+    NotifyRequestFocusStatusNotifyManagerFunc func =
+    [this](int32_t persistentId, const bool isFocused, const bool byForeground) {
+        this->RequestFocusStatus(persistentId, isFocused, byForeground);
     };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
@@ -6722,7 +6727,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
             WLOGFD("session is not visible!");
             return WSError::WS_DO_NOTHING;
         }
-        RequestSessionFocus(persistentId);
+        RequestSessionFocus(persistentId, true);
         if (WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
             sceneSession->RaiseToAppTop();
         }
@@ -6777,7 +6782,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     targetSession->NotifyClick();
-    return RequestSessionFocus(targetPersistentId);
+    return RequestSessionFocus(targetPersistentId, true);
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)

@@ -165,7 +165,7 @@ public:
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
-    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false) override;
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true) override;
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -319,7 +319,7 @@ private:
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
-    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = false);
+    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId);
     WSError RequestFocusBasicCheck(int32_t persistentId);
