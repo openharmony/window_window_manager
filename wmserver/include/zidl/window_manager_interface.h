@@ -169,7 +169,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = false)
+    virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true)
     {
         return WMError::WM_OK;
     }

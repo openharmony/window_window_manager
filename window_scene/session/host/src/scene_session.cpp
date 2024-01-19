@@ -682,7 +682,7 @@ WSError SceneSession::RaiseAppMainWindowToTop()
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->NotifyRequestFocusStatusNotifyManager(true);
+        session->NotifyRequestFocusStatusNotifyManager(true, true);
         session->NotifyClick();
         return WSError::WS_OK;
     };
