@@ -57,7 +57,7 @@ public:
                 currentScreenId_ = screenId;
                 OnWMSConnectionChanged(userId, screenId, isConnected);
                 break;
-           }
+            }
             default:
                 WLOGFW("unknown transaction code %{public}d", code);
                 return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
