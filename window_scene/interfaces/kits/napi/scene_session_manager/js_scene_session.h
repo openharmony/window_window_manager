@@ -133,7 +133,7 @@ private:
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string &label);
     void UpdateSessionIcon(const std::string &iconPath);
-    void OnSessionException(const SessionInfo& info);
+    void OnSessionException(const SessionInfo& info, bool needRemoveSession);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
     void PendingSessionToForeground(const SessionInfo& info);
