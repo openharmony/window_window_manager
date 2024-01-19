@@ -1902,17 +1902,11 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         }
         if (session->sessionExceptionFunc_) {
             auto exceptionFunc = *(session->sessionExceptionFunc_);
-            exceptionFunc(info);
+            exceptionFunc(info, needRemoveSession);
         }
         if (session->jsSceneSessionExceptionFunc_) {
             auto exceptionFunc = *(session->jsSceneSessionExceptionFunc_);
-            exceptionFunc(info);
-        }
-        if (!session->sessionExceptionFuncs_.empty()) {
-            for (auto funcPtr : session->sessionExceptionFuncs_) {
-                auto sessionExceptionFunc = *funcPtr;
-                sessionExceptionFunc(info, needRemoveSession);
-            }
+            exceptionFunc(info, needRemoveSession);
         }
         return WSError::WS_OK;
     };
