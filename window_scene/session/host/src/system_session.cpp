@@ -123,16 +123,16 @@ WSError SystemSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError SystemSession::Disconnect()
+WSError SystemSession::Disconnect(bool isFromClient)
 {
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSLife] Disconnect session, id: %{public}d", session->GetPersistentId());
-        session->SceneSession::Disconnect();
+        session->SceneSession::Disconnect(isFromClient);
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->NotifyCallingSessionBackground();
         }

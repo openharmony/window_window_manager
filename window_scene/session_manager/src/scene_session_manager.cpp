@@ -1314,7 +1314,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     promise->set_value(static_cast<int32_t>(errCode));
 
     if (errCode != ERR_OK) {
-        scnSession->NotifySessionException(scnSessionInfo);
+        WLOGFE("session activate failed. errCode: %{public}d", errCode);
+        scnSession->NotifySessionException(scnSessionInfo, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -1435,6 +1436,11 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
+
+            auto dialogSceneSession = GetSceneSession(dialog->GetPersistentId());
+            if (dialogSceneSession != nullptr) {
+                dialogSceneSession->ClearSpecificSessionCbMap();
+            }
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
                 sceneSessionMap_.erase(dialog->GetPersistentId());
@@ -2968,7 +2974,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         WLOGFE("session is nullptr");
         return;
     }
-    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info) {
+    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info, bool needRemoveSession = false) {
         auto task = [this, info]() {
             auto scnSession = GetSceneSession(info.persistentId_);
             if (scnSession == nullptr) {
@@ -3998,7 +4004,8 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     WLOGFD("RegisterGetStateFromManagerFunc success");
 }
 
-void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
+__attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(
+    int32_t persistentId, const SessionState& state)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnSessionStateChange%d", persistentId);
     WLOGFD("Session state change, id: %{public}d, state:%{public}u", persistentId, state);
@@ -5076,10 +5083,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     }
 
     WSRect newRect = callingSessionRect;
-    if (isCallingSessionFloating) {
+    int32_t statusHeight = GetStatusBarHeight();
+    if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         // calculate new rect of calling window
         newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
-        int32_t statusHeight = GetStatusBarHeight();
         newRect.posY_ = std::max(newRect.posY_, statusHeight);
     }
 
@@ -5087,7 +5094,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
         callingWindowRestoringRect_ = callingSessionRect;
     }
     NotifyOccupiedAreaChangeInfo(sceneSession, newRect, softInputSessionRect);
-    if (isCallingSessionFloating) {
+    if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         needUpdateSessionRect_ = true;
         callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
         callingWindowNewRect_ = callingSession_->GetSessionRect();
@@ -5670,6 +5677,10 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
 
 sptr<SceneSession> SceneSessionManager::FindSessionByAffinity(std::string affinity)
 {
+    if (affinity.size() == 0) {
+        WLOGFI("AbilityInfo affinity is empty");
+        return nullptr;
+    }
     sptr<SceneSession> session = nullptr;
     auto cmpFunc = [this, affinity](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
         if (pair.second == nullptr || !CheckCollaboratorType(pair.second->GetCollaboratorType())) {
@@ -6391,6 +6402,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     if (FindSessionByAffinity(sessionInfo.sessionAffinity) != nullptr) {
         WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionInfo.sessionAffinity.c_str());
         sessionInfo.reuse = true;
+    } else {
+        sessionInfo.reuse = false;
     }
     WLOGFI("CheckIfReuseSession end");
     return resultValue;

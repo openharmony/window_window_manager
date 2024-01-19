@@ -196,8 +196,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 
     if (sceneSession->GetSessionInfo().isSystem_) {
-        WLOGD("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u",
-                pointerEvent->GetId(), windowId);
+        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s",
+            pointerEvent->GetId(), windowId, sceneSession->GetSessionInfo().abilityName_.c_str());
         sceneSession->SendPointerEventToUI(pointerEvent);
 
         // notify touchOutside and touchDown event
