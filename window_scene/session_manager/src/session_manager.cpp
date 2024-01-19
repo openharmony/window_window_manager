@@ -48,6 +48,16 @@ public:
                 OnSessionManagerServiceRecover(sessionManagerService);
                 break;
             }
+            case SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED: {
+                int32_t userId = data.ReadInt32();
+                int32_t screenId = data.ReadInt32();
+                bool isConnected = data.ReadBool();
+                isWMSConnected_ = isConnected;
+                currentUserId_ = userId;
+                currentScreenId_ = screenId;
+                OnWMSConnectionChanged(userId, screenId, isConnected);
+                break;
+           }
             default:
                 WLOGFW("unknown transaction code %{public}d", code);
                 return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -84,6 +94,17 @@ SessionManager::~SessionManager()
     if (mockSessionManagerServiceProxy_ != nullptr) {
         mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
+    }
+}
+
+void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+{
+    WLOGFD("OnWMSConnectionChanged");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (wmsConnectionChangedFunc_ != nullptr) {
+        WLOGFI("WMS connection changed with userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
+            screenId, isConnected);
+        wmsConnectionChangedFunc_(userId, screenId, isConnected);
     }
 }
 
@@ -208,6 +229,36 @@ void SessionManager::Clear()
     if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
         sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
     }
+}
+
+WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+{
+    WLOGFI("RegisterWMSConnectionChangedListener in");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (wmsConnectionChangedFunc_) {
+        WLOGFI("WMSConnectionChangedListener is already registered, do nothing");
+        return WMError::WM_OK;
+    }
+    wmsConnectionChangedFunc_ = callbackFunc;
+    if (isWMSConnected_) {
+        OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    }
+    return WMError::WM_OK;
+}
+
+WMError SessionManager::UnregisterWMSConnectionChangedListener()
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedFunc_ = nullptr;
+    }
+    if (mockSessionManagerServiceProxy_ == nullptr) {
+        WLOGFE("mockSessionManagerServiceProxy_ is null, unregister wms connection changed listener failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("UnregisterWMSConnectionChangedListener in");
+    mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
+    return WMError::WM_OK;
 }
 
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

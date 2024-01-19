@@ -61,6 +61,11 @@ public:
         auto sms = iface_cast<ISessionManagerService>(sessionManagerService);
         SessionManagerLite::GetInstance().RecoverSessionManagerService(sms);
     }
+
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override
+    {
+        WLOGFD("OnWMSConnectionChanged lite: %{public}d, %{public}d, %{public}d", userId, screenId, isConnected);
+    }
 };
 
 class SceneSessionManagerLiteProxyMock : public SceneSessionManagerLiteProxy {
