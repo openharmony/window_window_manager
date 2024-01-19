@@ -2420,6 +2420,8 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
             surfaceNode_->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
     return static_cast<WSError>(ret);
