@@ -91,6 +91,11 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
+{
+    leashWinSurfaceNode_ = leashWinSurfaceNode;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     return leashWinSurfaceNode_;

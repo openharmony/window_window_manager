@@ -149,6 +149,7 @@ public:
 
     int32_t GetPersistentId() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
