@@ -1217,7 +1217,8 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
         mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
         !(mode == WindowMode::WINDOW_MODE_FLOATING &&
-          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
+          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         WLOGI("[WMSImms]avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
@@ -1305,10 +1306,11 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
     WindowMode mode = GetMode();
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
-            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
-            WindowHelper::IsMainWindow(GetType()) &&
-          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
+           mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+          WindowHelper::IsMainWindow(GetType()) &&
+          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
@@ -1436,9 +1438,10 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     WindowMode mode = GetMode();
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)  &&
-            WindowHelper::IsMainWindow(GetType()) &&
-          system::GetParameter("const.product.devicetype", "unknown") == "phone")) {
+           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+          WindowHelper::IsMainWindow(GetType()) &&
+          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     };

@@ -763,7 +763,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetScaleX() <= miniScale) {
             return;
@@ -794,7 +795,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         return;
     }
     std::vector<sptr<SceneSession>> inputMethodVector =
