@@ -144,7 +144,7 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
-    void RequestHideKeyboard();
+    void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

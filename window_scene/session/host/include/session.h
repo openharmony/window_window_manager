@@ -100,7 +100,8 @@ public:
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
 
-    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler);
+    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+        const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -394,6 +395,7 @@ protected:
     void HandlePointDownDialog(int32_t pointAction);
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
+    void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "sessionTask")
     {
@@ -517,6 +519,7 @@ private:
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
 
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
