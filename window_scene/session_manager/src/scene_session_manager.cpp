@@ -5155,6 +5155,8 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
             WLOGFE("scene session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        WLOGFI("[WMSInput] SetSessionGravity persistentId: %{public}d, windowType: %{public}d, gravity: %{public}d",
+            persistentId, sceneSession->GetWindowType(), gravity);
         if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             WLOGFE("scene session is not input method");
             return WSError::WS_ERROR_INVALID_TYPE;
