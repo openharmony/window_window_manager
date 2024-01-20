@@ -35,14 +35,14 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
     using SessionRecoverCallbackFunc = std::function<void()>;
     using WindowManagerRecoverCallbackFunc = std::function<void()>;
-    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t userId, int32_t screenId, bool isConnected)>;
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
     void ClearSessionManagerProxy();
     void Clear();
-    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
-    WMError UnregisterWMSConnectionChangedListener();
+    void RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    void UnregisterWMSConnectionChangedListener();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
 
