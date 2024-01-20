@@ -85,18 +85,26 @@ public:
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 {
     WLOGFI("NotifyWMSConnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (wmsConnectionChangedListener_ != nullptr) {
-        wmsConnectionChangedListener_->OnConnected(userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }    
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnConnected(userId, screenId);
     }
 }
 
 void WindowManager::Impl::NotifyWMSDisconnected(int32_t userId, int32_t screenId)
 {
     WLOGFI("NotifyWMSDisconnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (wmsConnectionChangedListener_ != nullptr) {
-        wmsConnectionChangedListener_->OnDisconnected(userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }  
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnDisconnected(userId, screenId);
     }
 }
 
@@ -272,8 +280,14 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
         return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    pImpl_->wmsConnectionChangedListener_ = listener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        if (pImpl_->wmsConnectionChangedListener_) {
+            WLOGFI("wmsConnectionChangedListener is already registered, do nothing");
+            return WMError::WM_OK;
+        }
+        pImpl_->wmsConnectionChangedListener_ = listener;
+    }    
     return SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
         std::bind(&WindowManager::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));

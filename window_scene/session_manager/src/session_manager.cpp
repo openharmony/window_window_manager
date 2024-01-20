@@ -231,27 +231,23 @@ void SessionManager::Clear()
     }
 }
 
-WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (wmsConnectionChangedFunc_) {
-        WLOGFI("WMSConnectionChangedListener is already registered, do nothing");
-        return WMError::WM_OK;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedFunc_ = callbackFunc;
     }
-    wmsConnectionChangedFunc_ = callbackFunc;
     if (isWMSConnected_) {
         OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
     }
-    return WMError::WM_OK;
 }
 
-WMError SessionManager::UnregisterWMSConnectionChangedListener()
+void SessionManager::UnregisterWMSConnectionChangedListener()
 {
     WLOGFI("UnregisterWMSConnectionChangedListener in");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     wmsConnectionChangedFunc_ = nullptr;
-    return WMError::WM_OK;
 }
 
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
