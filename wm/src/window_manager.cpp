@@ -89,7 +89,7 @@ void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         wmsConnectionChangedListener = wmsConnectionChangedListener_;
-    }    
+    }
     if (wmsConnectionChangedListener != nullptr) {
         wmsConnectionChangedListener->OnConnected(userId, screenId);
     }
@@ -102,7 +102,7 @@ void WindowManager::Impl::NotifyWMSDisconnected(int32_t userId, int32_t screenId
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         wmsConnectionChangedListener = wmsConnectionChangedListener_;
-    }  
+    }
     if (wmsConnectionChangedListener != nullptr) {
         wmsConnectionChangedListener->OnDisconnected(userId, screenId);
     }
@@ -287,7 +287,7 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
             return WMError::WM_OK;
         }
         pImpl_->wmsConnectionChangedListener_ = listener;
-    }    
+    }
     return SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
         std::bind(&WindowManager::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));
