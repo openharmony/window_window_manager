@@ -130,8 +130,9 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     globalAngle = (*postureData).angle;
-    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL)) {
-        WLOGFE("Invalid angle value, angle is %{public}f.", globalAngle);
+    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL) ||
+        globalHall == USHRT_MAX) {
+        WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
         return;
     }
     WLOGFD("angle value in PostureData is: %{public}f.", globalAngle);
@@ -159,6 +160,11 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         return;
     }
     globalHall = (uint16_t)(*extHallData).hall;
+    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL) ||
+        globalHall == USHRT_MAX) {
+        WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
+        return;
+    }
     WLOGFI("hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
     HandleSensorData(globalAngle, globalHall);
 }
