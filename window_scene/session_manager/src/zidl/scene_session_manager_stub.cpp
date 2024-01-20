@@ -132,6 +132,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleShiftAppWindowFocus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
         &SceneSessionManagerStub::HandleGetVisibilityWindowInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_HIDE_NON_SECURE_WINDOWS),
+        &SceneSessionManagerStub::HandleHideNonSecureWindows),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -791,6 +793,15 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
         return -1;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleHideNonSecureWindows(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleHideNonSecureWindows!");
+    bool shouldHide = data.ReadBool();
+    WSError ret = HideNonSecureWindows(shouldHide);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

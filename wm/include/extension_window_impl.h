@@ -30,6 +30,7 @@ public:
     ~ExtensionWindowImpl();
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     sptr<Window> GetWindow() override;
+    WMError HideNonSecureWindows(bool shouldHide) override;
 private:
     sptr<Window> windowExtensionSessionImpl_;
 };
