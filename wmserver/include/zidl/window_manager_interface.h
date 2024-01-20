@@ -83,6 +83,7 @@ public:
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_GET_FOCUS_WINDOW_INFO,
+        TRANS_ID_HIDE_NON_SECURE_WINDOWS,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -185,6 +186,10 @@ public:
     virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WSError HideNonSecureWindows(bool shouldHide)
+    {
+        return WSError::WS_OK;
     }
 };
 }

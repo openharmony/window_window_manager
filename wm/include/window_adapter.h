@@ -112,6 +112,7 @@ public:
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+    virtual WMError HideNonSecureWindows(bool shouldHide);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
