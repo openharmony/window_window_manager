@@ -34,7 +34,7 @@ void PreviewerDisplay::SetFoldStatus(const FoldStatus foldStatus)
     foldStatus_ = foldStatus;
 }
 
-void SetCurrentFoldCreaseRegion(const DMRect foldCreaseRegion)
+void PreviewerDisplay::SetCurrentFoldCreaseRegion(const DMRect foldCreaseRegion)
 {
     foldCreaseRegion_ = foldCreaseRegion;
 }
@@ -57,7 +57,7 @@ FoldStatus PreviewerDisplay::GetFoldStatus() const
     return foldStatus_;
 }
 
-DMRect GetCurrentFoldCreaseRegion() const
+DMRect PreviewerDisplay::GetCurrentFoldCreaseRegion() const
 {
     return foldCreaseRegion_;
 }
