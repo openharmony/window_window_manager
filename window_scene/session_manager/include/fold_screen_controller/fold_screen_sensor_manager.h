@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <mutex>
+#include <climits>
 
 #include "fold_screen_controller.h"
 #include "refbase.h"
@@ -70,9 +71,9 @@ private:
 
     ~FoldScreenSensorManager() = default;
 
-    float globalAngle = 0.0F;
+    float globalAngle = -1.0F;
 
-    uint16_t globalHall = 1;
+    uint16_t globalHall = USHRT_MAX;
 
     typedef struct EXTHALLData {
         float flag = 0.0;
