@@ -2300,13 +2300,24 @@ void SceneSession::SetScale(float scaleX, float scaleY, float pivotX, float pivo
     }
 }
 
-void SceneSession::RequestHideKeyboard()
+void SceneSession::RequestHideKeyboard(bool isAppColdStart)
 {
 #ifdef IMF_ENABLE
-    WLOGFI("Notify InputMethod framework hide keyboard, id: %{public}d", Session::GetPersistentId());
-    if (MiscServices::InputMethodController::GetInstance()) {
-        MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-    }
+    auto task = [weakThis = wptr(this), isAppColdStart]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("[WMSInput] Session is null, notify inputMethod framework hide keyboard failed!");
+            return;
+        }
+        WLOGFI("[WMSInput] Notify inputMethod framework hide keyboard start, id: %{public}d,"
+            "isAppColdStart: %{public}d", session->GetPersistentId(), isAppColdStart);
+        if (MiscServices::InputMethodController::GetInstance()) {
+            MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+            WLOGFI("[WMSInput] Notify inputMethod framework hide keyboard end, id: %{public}d",
+                session->GetPersistentId());
+        }
+    };
+    PostExportTask(task, "RequestHideKeyboard");
 #endif
 }
 
