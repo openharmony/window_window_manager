@@ -2451,32 +2451,37 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
 
 void WindowImpl::PerformBack()
 {
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGD("it is not a main window");
-        return;
-    }
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (abilityContext == nullptr) {
-        WLOGFE("abilityContext is null");
-        return;
-    }
-    bool needMoveToBackground = false;
-    int ret = abilityContext->OnBackPressedCallBack(needMoveToBackground);
-    if (ret == ERR_OK && needMoveToBackground) {
-        abilityContext->MoveAbilityToBackground();
-        WLOGD("id: %{public}u closed, to move Ability: %{public}u",
-            property_->GetWindowId(), needMoveToBackground);
-        return;
-    }
-    // TerminateAbility will invoke last ability, CloseAbility will not.
-    bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
-    if (shouldTerminateAbility) {
-        abilityContext->TerminateSelf();
-    } else {
-        abilityContext->CloseAbility();
-    }
-    WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
-        property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
+    auto task = [this]()
+    {
+        if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            WLOGD("it is not a main window");
+            return;
+        }
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext == nullptr) {
+            WLOGFE("abilityContext is null");
+            return;
+        }
+        bool needMoveToBackground = false;
+        int ret = abilityContext->OnBackPressedCallBack(needMoveToBackground);
+        if (ret == ERR_OK && needMoveToBackground) {
+            abilityContext->MoveAbilityToBackground();
+            WLOGD("id: %{public}u closed, to move Ability: %{public}u",
+                  property_->GetWindowId(), needMoveToBackground);
+            return;
+        }
+        // TerminateAbility will invoke last ability, CloseAbility will not.
+        bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+        if (shouldTerminateAbility) {
+            abilityContext->TerminateSelf();
+        } else {
+            abilityContext->CloseAbility();
+        }
+        WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
+              property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
+    };
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    handler_->PostTask(task, "WindowImpl::PerformBack");
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
