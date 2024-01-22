@@ -2436,4 +2436,20 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
 
     property->SetTouchHotAreas(touchHotAreas);
 }
+
+void Session::ResetSnapshot()
+{
+    snapshot_.reset();
+}
+
+std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
+{
+    WLOGFI("GetSnapshotPixelMap id %{public}d", GetPersistentId());
+    if (scenePersistence_ != nullptr && scenePersistence_->IsSavingSnapshot()) {
+        return snapshot_;
+    } else if (scenePersistence_ != nullptr && !scenePersistence_->IsSavingSnapshot()) {
+        return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
+    }
+    return nullptr;
+}
 } // namespace OHOS::Rosen

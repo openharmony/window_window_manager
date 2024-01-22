@@ -328,6 +328,8 @@ public:
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
     void PresentFocusIfPointDown();
+    void ResetSnapshot();
+    std::shared_ptr<Media::PixelMap> GetSnapshotPixelMap(const float oriScale = 1.0f, const float newScale = 1.0f);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
         return std::vector<Rect>();
