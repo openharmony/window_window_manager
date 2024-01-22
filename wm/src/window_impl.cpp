@@ -552,6 +552,10 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
+    if (!IsWindowValid()) {
+        WLOGFD("interrupt set uicontent because window is invalid! window state: %{public}d", state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WLOGFD("NapiSetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
         uiContent_->Destroy();

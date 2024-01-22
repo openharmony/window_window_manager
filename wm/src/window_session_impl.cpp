@@ -671,6 +671,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
     WLOGFD("[WMSLife]NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("[WMSLife]interrupt set uicontent because window is invalid! window state: %{public}d", state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (uiContent_) {
         uiContent_->Destroy();
     }
