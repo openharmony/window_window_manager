@@ -817,6 +817,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionForeground();
     }
+    NotifyForeground();
     return WSError::WS_OK;
 }
 
@@ -909,6 +910,7 @@ WSError Session::Background()
             property_->SetCallingWindow(INVALID_WINDOW_ID);
         }
     }
+    NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
@@ -925,6 +927,8 @@ WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
     WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
+    isActive_ = false;
+    surfaceNode_.reset();
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
@@ -1686,7 +1690,6 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 {
     if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
-        WLOGFE("surfaceNode_ is null or buffer is not available");
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
@@ -1696,7 +1699,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
     }
-    auto pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
         if (notifySessionSnapshotFunc_) {
@@ -2163,13 +2166,6 @@ void Session::SetZOrder(uint32_t zOrder)
 uint32_t Session::GetZOrder() const
 {
     return zOrder_;
-}
-
-void Session::AttachToFrameNode(bool isAttach)
-{
-    WLOGFI("[WMSLife] Attach info: isAttach: %{public}d, persistentId: %{public}d, "
-           "windowType: %{public}d, name: %{public}s", isAttach, GetPersistentId(),
-           GetWindowType(), sessionInfo_.bundleName_.c_str());
 }
 
 void Session::SetUINodeId(uint32_t uiNodeId)
