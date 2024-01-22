@@ -41,6 +41,8 @@ public:
     void UnregisterSMSLiteRecoverListener(int64_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
+    void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyNotKillService()
     {
         if (smsDeathRecipient_ != nullptr) {
@@ -67,7 +69,12 @@ private:
     public:
         void OnRemoteDied(const wptr<IRemoteObject>& object) override;
         bool IsSceneBoardTestMode();
+        void SetId(int32_t userId, int32_t screenId);
         bool needKillService_ { true };
+
+    private:
+        int32_t userId_ = 0;
+        int32_t screenId_ = 0;
     };
 
     sptr<IRemoteObject> sessionManagerService_;
@@ -80,6 +87,10 @@ private:
 
     std::recursive_mutex smsLiteRecoverListenerLock_;
     std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsLiteRecoverListenerMap_;
+
+    int32_t currentUserId_ = 0;
+    int32_t currentScreenId_ = 0;
+    bool isWMSConnected_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -43,6 +43,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 class WindowManager::Impl {
 public:
     explicit Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
+    void NotifyWMSConnected(int32_t userId, int32_t screenId);
+    void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
@@ -61,6 +63,7 @@ public:
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex& mutex_;
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
@@ -78,6 +81,32 @@ public:
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
 };
+
+void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
+{
+    WLOGFI("NotifyWMSConnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnConnected(userId, screenId);
+    }
+}
+
+void WindowManager::Impl::NotifyWMSDisconnected(int32_t userId, int32_t screenId)
+{
+    WLOGFI("NotifyWMSDisconnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnDisconnected(userId, screenId);
+    }
+}
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
@@ -242,6 +271,36 @@ WindowManager::~WindowManager()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
+}
+
+WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("WMS connection changed listener registered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("RegisterWMSConnectionChangedListener in");
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        if (pImpl_->wmsConnectionChangedListener_) {
+            WLOGFI("wmsConnectionChangedListener is already registered, do nothing");
+            return WMError::WM_OK;
+        }
+        pImpl_->wmsConnectionChangedListener_ = listener;
+    }
+    return SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
+        std::bind(&WindowManager::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
+}
+
+WMError WindowManager::UnregisterWMSConnectionChangedListener()
+{
+    WLOGFI("UnregisterWMSConnectionChangedListener in");
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        pImpl_->wmsConnectionChangedListener_ = nullptr;
+    }
+    return SingletonContainer::Get<WindowAdapter>().UnregisterWMSConnectionChangedListener();
 }
 
 WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
@@ -669,6 +728,15 @@ WMError WindowManager::UnregisterGestureNavigationEnabledChangedListener(
 void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
+}
+
+void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
+{
+    if (isConnected) {
+        pImpl_->NotifyWMSConnected(userId, screenId);
+    } else {
+        pImpl_->NotifyWMSDisconnected(userId, screenId);
+    }
 }
 
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
