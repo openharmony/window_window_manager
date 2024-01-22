@@ -766,7 +766,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
          system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
-        if (Session::GetScaleX() <= miniScale) {
+        if (Session::GetFloatingScale() <= miniScale) {
             return;
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
@@ -1394,6 +1394,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
         Session::SetFloatingScale(floatingScale);
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
     }
 }
@@ -2285,7 +2286,6 @@ void SceneSession::SetScale(float scaleX, float scaleY, float pivotX, float pivo
         Session::SetScale(scaleX, scaleY, pivotX, pivotY);
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
         if (sessionStage_ != nullptr) {
             Transform transform;
