@@ -81,7 +81,6 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSLife] Connect session, id: %{public}d", session->GetPersistentId());
         auto ret = session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
@@ -132,7 +131,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
 
-        WLOGFI("[WMSLife] Foreground session, id: %{public}d", session->GetPersistentId());
         if (property) {
             weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
         }
@@ -140,7 +138,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        session->NotifyForeground();
         auto sessionProperty = session->GetSessionProperty();
         if (session->leashWinSurfaceNode_ && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
@@ -172,7 +169,6 @@ WSError SceneSession::Background()
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSLife] Background session, id: %{public}d", session->GetPersistentId());
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
@@ -183,7 +179,6 @@ WSError SceneSession::Background()
                 session->scenePersistence_->SaveSnapshot(session->snapshot_);
             }
         }
-        session->NotifyBackground();
         session->snapshot_.reset();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
@@ -222,7 +217,6 @@ WSError SceneSession::Disconnect(bool isFromClient)
             WLOGFE("[WMSLife] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSLife] Disconnect session, id: %{public}d", session->GetPersistentId());
         if (isFromClient) {
             WLOGFI("[WMSLife] Client need notify destroy session, id: %{public}d", session->GetPersistentId());
             session->SetSessionState(SessionState::STATE_DISCONNECT);
@@ -233,7 +227,6 @@ WSError SceneSession::Disconnect(bool isFromClient)
             if (session->scenePersistence_ && session->snapshot_) {
                 session->scenePersistence_->SaveSnapshot(session->snapshot_);
             }
-            session->isActive_ = false;
         }
         if (WindowHelper::IsPipWindow(session->GetWindowType())) {
             session->SavePiPRectInfo();
@@ -242,7 +235,8 @@ WSError SceneSession::Disconnect(bool isFromClient)
         session->snapshot_.reset();
         session->isTerminating = false;
         return WSError::WS_OK;
-        }, "Disconnect");
+    },
+        "Disconnect");
     return WSError::WS_OK;
 }
 
@@ -820,6 +814,10 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("Failed to get display manager");
+        return;
+    }
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         WLOGFI("GetCutoutAvoidArea There is no CutoutInfo");
