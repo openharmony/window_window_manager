@@ -64,9 +64,13 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
     }
 }
 
-void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)
+void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    const std::function<void()> resetSnapshotCallback)
 {
-    auto task = [weakThis = wptr(this), pixelMap]() {
+    savingSnapshotSum_.fetch_add(1);
+    isSavingSnapshot_.store(true);
+    auto task = [weakThis = wptr(this), pixelMap, resetSnapshotCallback,
+        savingSnapshotSum = savingSnapshotSum_.load()]() {
         auto scenePersistence = weakThis.promote();
         if (scenePersistence == nullptr || pixelMap == nullptr ||
             scenePersistence->snapshotPath_.find('/') == std::string::npos) {
@@ -76,7 +80,8 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         }
 
         WLOGFD("Save snapshot begin");
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ScenePersistence:SaveSnapshot");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ScenePersistence:SaveSnapshot %s",
+            scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
         option.format = "image/png";
@@ -96,9 +101,20 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         imagePacker.AddImage(*pixelMap);
         int64_t packedSize = 0;
         imagePacker.FinalizePacking(packedSize);
+        // If the current num is equals to the latest num, it is the last saveSnapshot task
+        if (savingSnapshotSum == scenePersistence->savingSnapshotSum_.load()) {
+            resetSnapshotCallback();
+            scenePersistence->isSavingSnapshot_.store(false);
+        }
         WLOGFD("Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotScheduler_->PostAsyncTask(task, "SaveSnapshot");
+    snapshotScheduler_->RemoveTask("SaveSnapshot" + snapshotPath_);
+    snapshotScheduler_->PostAsyncTask(task, "SaveSnapshot" + snapshotPath_);
+}
+
+bool ScenePersistence::IsSavingSnapshot()
+{
+    return isSavingSnapshot_.load();
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()
@@ -112,6 +128,11 @@ std::string ScenePersistence::GetSnapshotFilePath()
         return scenePersistence->snapshotPath_;
     };
     return snapshotScheduler_->PostSyncTask(task, "GetSnapshotFilePath");
+}
+
+std::string ScenePersistence::GetSnapshotFilePathFromAce()
+{
+    return snapshotPath_;
 }
 
 void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
