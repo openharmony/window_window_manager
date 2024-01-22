@@ -3130,9 +3130,15 @@ napi_value JsWindow::OnSetWindowPrivacyMode(napi_env env, napi_callback_info inf
                     "Invalidate params"));
                 return;
             }
-            weakWindow->SetPrivacyMode(isPrivacyMode);
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetPrivacyMode(isPrivacyMode));
+            if (ret == WmErrorCode::WM_ERROR_NO_PERMISSION) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
+                WLOGI("Window [%{public}u, %{public}s] set privacy mode failed, mode = %{public}u",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
+                return;
+            }
             task.Resolve(env, NapiGetUndefined(env));
-            WLOGI("Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
+            WLOGI("Window [%{public}u, %{public}s] set privacy mode succeed, mode = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
         };
 
