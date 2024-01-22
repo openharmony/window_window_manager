@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sessi
 
 class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
-    explicit SessionManagerServiceRecoverListener(SessionManager::WindowManagerRecoverCallbackFunc callbackFunc)
-    {
-        windowManagerRecoverFunc_ = callbackFunc;
-    }
+    explicit SessionManagerServiceRecoverListener() = default;
 
     virtual int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
@@ -46,6 +43,13 @@ public:
             case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
                 auto sessionManagerService = data.ReadRemoteObject();
                 OnSessionManagerServiceRecover(sessionManagerService);
+                break;
+            }
+            case SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED: {
+                int32_t userId = data.ReadInt32();
+                int32_t screenId = data.ReadInt32();
+                bool isConnected = data.ReadBool();
+                OnWMSConnectionChanged(userId, screenId, isConnected);
                 break;
             }
             default:
@@ -62,16 +66,12 @@ public:
 
         auto sms = iface_cast<ISessionManagerService>(sessionManagerService);
         SessionManager::GetInstance().RecoverSessionManagerService(sms);
-
-        WLOGFI("[WMSRecover] Run recover");
-        if (windowManagerRecoverFunc_ != nullptr) {
-            WLOGFD("[WMSRecover] windowManagerRecover");
-            windowManagerRecoverFunc_();
-        }
     }
 
-private:
-    SessionManager::WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_;
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override
+    {
+        SessionManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
+    }
 };
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
@@ -84,6 +84,20 @@ SessionManager::~SessionManager()
     if (mockSessionManagerServiceProxy_ != nullptr) {
         mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
+    }
+}
+
+void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+{
+    WLOGFD("OnWMSConnectionChanged");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isWMSConnected_ = isConnected;
+    currentUserId_ = userId;
+    currentScreenId_ = screenId;
+    if (wmsConnectionChangedFunc_ != nullptr) {
+        WLOGFI("WMS connection changed with userId=%{public}d, screenId=%{public}d, isConnected=%{public}d",
+            userId, screenId, isConnected);
+        wmsConnectionChangedFunc_(userId, screenId, isConnected);
     }
 }
 
@@ -135,6 +149,13 @@ void SessionManager::InitSessionManagerServiceProxy()
         return;
     }
 
+    if (!isRecoverListenerRegistered_) {
+        isRecoverListenerRegistered_ = true;
+        WLOGFI("[WMSRecover] Register recover listener");
+        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
+    }
+
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
         WLOGFE("Remote object2 is nullptr");
@@ -181,25 +202,25 @@ void SessionManager::InitSceneSessionManagerProxy()
 
 void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    InitSessionManagerServiceProxy();
-    if (mockSessionManagerServiceProxy_ == nullptr) {
-        WLOGFW("MockSessionManagerServiceProxy is nullptr");
-        return;
-    }
-
-    if (callbackFunc != nullptr) {
-        smsRecoverListener_ = new SessionManagerServiceRecoverListener(callbackFunc);
-        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
-    } else {
-        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
-    }
+    std::lock_guard<std::recursive_mutex> lock(recoverMutex_);
+    windowManagerRecoverFunc_ = callbackFunc;
 }
 
 void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    sessionManagerServiceProxy_ = sessionManagerService;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        sessionManagerServiceProxy_ = sessionManagerService;
+    }
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(recoverMutex_);
+        WLOGFI("[WMSRecover] Run recover");
+        if (windowManagerRecoverFunc_ != nullptr) {
+            WLOGFD("[WMSRecover] windowManagerRecover");
+            windowManagerRecoverFunc_();
+        }
+    }
 }
 
 void SessionManager::Clear()
@@ -208,6 +229,25 @@ void SessionManager::Clear()
     if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
         sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
     }
+}
+
+void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+{
+    WLOGFI("RegisterWMSConnectionChangedListener in");
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedFunc_ = callbackFunc;
+    }
+    if (isWMSConnected_) {
+        OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    }
+}
+
+void SessionManager::UnregisterWMSConnectionChangedListener()
+{
+    WLOGFI("UnregisterWMSConnectionChangedListener in");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    wmsConnectionChangedFunc_ = nullptr;
 }
 
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

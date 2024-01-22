@@ -41,6 +41,31 @@ struct SystemBarRegionTint {
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 
 /**
+ * @class IWMSConnectionChangedListener
+ *
+ * @brief Listener to observe WMS connection status.
+ */
+class IWMSConnectionChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when WMS connected
+     *
+     * @param userId ID of the user who has connected to the WMS.
+     *
+     * @param screenId ID of the screen that is connected to the WMS, screenId is currently always 0.
+     */
+    virtual void OnConnected(int32_t userId, int32_t screenId) = 0;
+    /**
+     * @brief Notify caller when WMS disconnected
+     *
+     * @param userId ID of the user who has disconnected to the WMS.
+     *
+     * @param screenId ID of the screen that is disconnected to the WMS, screenId is currently always 0.
+     */
+    virtual void OnDisconnected(int32_t userId, int32_t screenId) = 0;
+};
+
+/**
  * @class IFocusChangedListener
  *
  * @brief Listener to observe focus changed.
@@ -227,6 +252,19 @@ friend class WindowManagerAgent;
 friend class WMSDeathRecipient;
 friend class SSMDeathRecipient;
 public:
+    /**
+     * @brief Register WMS connection status changed listener.
+     *
+     * @param listener IWMSConnectionChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+    /**
+     * @brief Unregister WMS connection status changed listener.
+     *
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWMSConnectionChangedListener();
     /**
      * @brief Register focus changed listener.
      *
@@ -460,6 +498,7 @@ private:
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
 
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
