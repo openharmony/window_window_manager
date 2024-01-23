@@ -409,8 +409,7 @@ void ScreenSession::UpdateAfterFoldExpand(bool foldToExpand)
     } else {
         if (GetSensorRotation() == DeviceRotation::INVALID) {
             WLOGFI("ScreenSession::UpdateAfterFoldExpand fix rotation:%{public}f", property_.GetRotation());
-            currentSensorRotation_ = property_.GetScreenRotation();
-            SensorRotationChange(currentSensorRotation_);
+            SensorRotationChange(property_.GetScreenRotation());
         }
     }
 }
