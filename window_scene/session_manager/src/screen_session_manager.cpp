@@ -1627,10 +1627,6 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
 
     // virtual screen destroy callback to notify scb
-    auto screen = GetScreenSession(screenId);
-    if (CheckScreenInScreenGroup(screen)) {
-        NotifyDisplayDestroy(screenId);
-    }
     WLOGFI("destroy callback virtual screen");
     OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
 
@@ -1657,6 +1653,10 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     if (rsScreenId != SCREEN_ID_INVALID && GetScreenSession(screenId) != nullptr) {
+        auto screen = GetScreenSession(screenId);
+        if (CheckScreenInScreenGroup(screen)) {
+            NotifyDisplayDestroy(screenId);
+        }
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
         if (smsScreenMapIter != screenSessionMap_.end()) {
             auto screenGroup = RemoveFromGroupLocked(smsScreenMapIter->second);
