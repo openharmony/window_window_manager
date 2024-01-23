@@ -42,8 +42,7 @@ public:
     }
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
-    void FlushFrameRate(uint32_t rate);
-    void SetFrameRateLinkerEnable(bool enabled);
+    void FlushFrameRate(uint32_t rate, bool immediate);
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
     {

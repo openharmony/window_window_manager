@@ -67,24 +67,16 @@ int64_t VsyncStation::GetVSyncPeriod()
     return period;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate)
-{
-    if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
-        WLOGD("VsyncStation::FlushFrameRate %{public}d", rate);
-        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
-        frameRateLinker_->UpdateFrameRateRange(range);
-    }
-}
-
-void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
+void VsyncStation::FlushFrameRate(uint32_t rate, bool immediate)
 {
     if (frameRateLinker_) {
-        if (!enabled) {
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
-            WLOGI("VsyncStation::SetFrameRateLinkerEnable false");
+        WLOGD("VsyncStation::FlushFrameRate %{public}d", rate);
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
+        if (immediate) {
             frameRateLinker_->UpdateFrameRateRangeImme(range);
+        } else {
+            frameRateLinker_->UpdateFrameRateRange(range);
         }
-        frameRateLinker_->SetEnable(enabled);
     }
 }
 
