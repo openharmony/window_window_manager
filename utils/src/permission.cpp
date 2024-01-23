@@ -149,7 +149,6 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
         WLOGFE("Failed to get system display manager services");
         return false;
     }
-
     int uid = IPCSkeleton::GetCallingUid();
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
