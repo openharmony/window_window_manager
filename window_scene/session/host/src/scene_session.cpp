@@ -1815,7 +1815,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         info.startSetting = abilitySessionInfo->startSetting;
         info.callingTokenId_ = abilitySessionInfo->callingTokenId;
         info.reuse = abilitySessionInfo->reuse;
-        info.collaboratorType_ = session->collaboratorType_;
         if (info.want != nullptr) {
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
