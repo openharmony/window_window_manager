@@ -129,5 +129,37 @@ bool Permission::IsStartByInputMethod()
         return false;
     }
 }
+
+bool Permission::CheckIsCallingBundleName(const std::string name)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        WLOGFE("Failed to get system ability mgr.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObject
+        = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        WLOGFE("Failed to get display manager service.");
+        return false;
+    }
+    auto bundleManagerServiceProxy_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if ((!bundleManagerServiceProxy_) || (!bundleManagerServiceProxy_->AsObject())) {
+        WLOGFE("Failed to get system display manager services");
+        return false;
+    }
+    int uid = IPCSkeleton::GetCallingUid();
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string callingBundleName;
+    bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
+    WLOGFI("get the bundle name:%{public}s", callingBundleName.c_str());
+    std::string::size_type idx = callingBundleName.find(name);
+    if (idx != std::string::npos) {
+        return true;
+    }
+    return false;
+}
 } // namespace Rosen
 } // namespace OHOS
