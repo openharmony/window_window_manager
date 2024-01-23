@@ -303,6 +303,11 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
     SensorRotationChange(rotation);
 }
 
+float ScreenSession::GetCurrentSensorRotation()
+{
+    return currentSensorRotation_;
+}
+
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
     for (auto& listener : screenChangeListenerList_) {
@@ -404,7 +409,8 @@ void ScreenSession::UpdateAfterFoldExpand(bool foldToExpand)
     } else {
         if (GetSensorRotation() == DeviceRotation::INVALID) {
             WLOGFI("ScreenSession::UpdateAfterFoldExpand fix rotation:%{public}f", property_.GetRotation());
-            SensorRotationChange(property_.GetScreenRotation());
+            currentSensorRotation_ = property_.GetScreenRotation();
+            SensorRotationChange(currentSensorRotation_);
         }
     }
 }
