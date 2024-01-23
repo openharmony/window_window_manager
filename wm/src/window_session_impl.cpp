@@ -344,7 +344,7 @@ void WindowSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEv
 void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     bool isConsumed = false;
-    NotifyKeyEvent(keyEvent, isConsumed);
+    NotifyKeyEvent(keyEvent, isConsumed, false);
 }
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
@@ -2055,7 +2055,8 @@ void WindowSessionImpl::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>&
     }
 }
 
-void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool notifyInputMethod)
 {
     if (keyEvent == nullptr) {
         WLOGFE("keyEvent is nullptr");
@@ -2070,9 +2071,10 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         }
         promoteThis->DispatchKeyEventCallback(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent));
     };
+
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
-    if (isKeyboardEvent) {
+    if (isKeyboardEvent && notifyInputMethod) {
         WLOGD("Async dispatch keyEvent to input method");
         auto callback = [dispatchFunc] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             if (keyEvent == nullptr) {

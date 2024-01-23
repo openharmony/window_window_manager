@@ -73,7 +73,6 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) ||
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
         float vpr = 1.5f; // 1.5: default vp
         if (sceneSession->GetSessionProperty() != nullptr) {

@@ -41,7 +41,8 @@ public:
 
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
-    virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
+    virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool notifyInputMethod = true) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
     virtual void NotifyFocusStateEvent(bool focusState) {}
     virtual int32_t GetPersistentId() const

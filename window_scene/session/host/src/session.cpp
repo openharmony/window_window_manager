@@ -547,6 +547,7 @@ bool Session::IsSystemActive() const
 void Session::SetSystemActive(bool systemActive)
 {
     isSystemActive_ = systemActive;
+    NotifySessionInfoChange();
 }
 
 bool Session::IsTerminated() const
