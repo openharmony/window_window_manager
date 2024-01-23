@@ -2451,8 +2451,7 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
 
 void WindowImpl::PerformBack()
 {
-    auto task = [this]()
-    {
+    auto task = [this]() {
         if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
             WLOGD("it is not a main window");
             return;
