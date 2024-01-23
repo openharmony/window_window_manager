@@ -909,7 +909,8 @@ WSError Session::Background()
     SessionState state = GetSessionState();
     WLOGFI("[WMSLife] Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if ((state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) &&
+        GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         UpdateSessionState(SessionState::STATE_INACTIVE);
         state = SessionState::STATE_INACTIVE;
         isActive_ = false;
