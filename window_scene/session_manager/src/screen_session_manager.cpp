@@ -1496,13 +1496,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen ENTER");
 
-    int32_t eventRet = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        "CREATE_VIRTUAL_SCREEN",
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", getpid(),
-        "UID", getuid());
-    WLOGI("CreateVirtualScreen: Write HiSysEvent ret:%{public}d", eventRet);
+    CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "ohos.screenrecorder");
 
     if (clientProxy_ && option.missionIds_.size() > 0) {
         std::vector<uint64_t> surfaceNodeIds;
@@ -2444,7 +2438,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         auto res = GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
-            CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT");
+            CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
         }
         return res;
     } else if (errorCode) {
@@ -3292,19 +3286,19 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSession->UpdateAfterFoldExpand(foldToExpand);
 }
 
-void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName) const
+void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
-    if (Permission::CheckIsCallingBundleName("com.huawei.ohos.screenshot") == false) {
-        WLOGI("sswlog--GetDisplaySnapshot: BundleName not in whitelist!");
+    if (Permission::CheckIsCallingBundleName(bundleName) == false) {
+        WLOGI("BundleName not in whitelist!");
         return;
     }
     int32_t eventRet = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        eventName,
+        eventName, // CREATE_VIRTUAL_SCREEN, GET_DISPLAY_SNAPSHOT
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "PID", getpid(),
         "UID", getuid());
-    WLOGI("sswlog-- GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet); 
+    WLOGI("%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
 }
 } // namespace OHOS::Rosen
