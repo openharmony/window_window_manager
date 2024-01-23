@@ -2434,14 +2434,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
 {
     WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
 
-    int32_t eventRet = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        "GET_DISPLAY_SNAPSHOT",
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", getpid(),
-        "UID", getuid());
-    WLOGI("GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet);
-
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         WLOGFW("SCB: ScreenSessionManager::GetDisplaySnapshot was disabled by edm!");
         return nullptr;
@@ -2452,6 +2444,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         auto res = GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
+            CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT");
         }
         return res;
     } else if (errorCode) {
@@ -3299,4 +3292,19 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSession->UpdateAfterFoldExpand(foldToExpand);
 }
 
+void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
+    if (Permission::CheckIsCallingBundleName("com.huawei.ohos.screenshot") == false) {
+        WLOGI("sswlog--GetDisplaySnapshot: BundleName not in whitelist!");
+        return;
+    }
+    int32_t eventRet = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "PID", getpid(),
+        "UID", getuid());
+    WLOGI("sswlog-- GetDisplaySnapshot: Write HiSysEvent ret:%{public}d", eventRet); 
+}
 } // namespace OHOS::Rosen
