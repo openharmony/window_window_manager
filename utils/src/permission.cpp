@@ -155,7 +155,8 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
     std::string callingBundleName;
     bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
     WLOGFI("get the bundle name:%{public}s", callingBundleName.c_str());
-    if (callingBundleName == name) {
+    std::string::size_type idx = callingBundleName.find(name);
+    if (idx != std::string::npos) {
         return true;
     }
     return false;
