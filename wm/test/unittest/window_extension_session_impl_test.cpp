@@ -410,6 +410,161 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Func
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowExtensionSessionImpl.UnregisterAvoidAreaChangeListener(listener));
 }
+
+/**
+ * @tc.name: UpdateConfiguration
+ * @tc.desc: UpdateConfiguration Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
+
+    int res = 0;
+    std::function<void()> func = [&]()
+    {
+        windowExtensionSessionImpl.UpdateConfiguration(configuration);
+        res = 1;
+    };
+    func();
+    ASSERT_EQ(1, res);
+}
+
+/**
+ * @tc.name: Destroy
+ * @tc.desc: Destroy Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Destroy, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    bool needNotifyServer = true;
+    bool needClearListener = true;
+    ASSERT_NE(WMError::WM_OK, windowExtensionSessionImpl.Destroy(needNotifyServer, needClearListener));
+}
+
+/**
+ * @tc.name: Resize
+ * @tc.desc: Resize Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Resize, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    auto res = windowExtensionSessionImpl.Resize(width, height);
+    ASSERT_NE(WMError::WM_DO_NOTHING, static_cast<WMError>(res));
+}
+
+/**
+ * @tc.name: TransferAbilityResult
+ * @tc.desc: TransferAbilityResult Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    uint32_t resultCod = 0;
+    AAFwk::Want want;
+    sptr<ISession> hostSession_ = nullptr;
+
+    auto res = windowExtensionSessionImpl.TransferAbilityResult(resultCod, want);
+    ASSERT_NE(WMError::WM_DO_NOTHING, static_cast<WMError>(res));
+}
+
+/**
+ * @tc.name: TransferExtensionData
+ * @tc.desc: TransferExtensionData Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    AAFwk::WantParams wantParams;
+
+    auto res = windowExtensionSessionImpl.TransferExtensionData(wantParams);
+    ASSERT_NE(WMError::WM_DO_NOTHING, static_cast<WMError>(res));
+}
+
+/**
+ * @tc.name: RegisterTransferComponentDataListener1
+ * @tc.desc: RegisterTransferComponentDataListener1 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener1, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    NotifyTransferComponentDataFunc func;
+
+    auto res = 0;
+    std::function<void()> func1 = [&]()
+    {
+        windowExtensionSessionImpl.RegisterTransferComponentDataListener(func);
+        res = 1;
+    };
+    func1();
+    ASSERT_EQ(1, res);
+}
+
+/**
+ * @tc.name: NotifyTransferComponentData2
+ * @tc.desc: NotifyTransferComponentData2 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData2, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    AAFwk::WantParams wantParams;
+
+    auto res = windowExtensionSessionImpl.NotifyTransferComponentData(wantParams);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyTransferComponentDataSync
+ * @tc.desc: NotifyTransferComponentDataSync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    AAFwk::WantParams wantParams;
+    AAFwk::WantParams reWantParams;
+
+    auto res = windowExtensionSessionImpl.NotifyTransferComponentDataSync(wantParams, reWantParams);
+    ASSERT_EQ(WSErrorCode::WS_ERROR_NOT_REGISTER_SYNC_CALLBACK, res);
+}
+
+/**
+ * @tc.name: RegisterTransferComponentDataForResultListener
+ * @tc.desc: RegisterTransferComponentDataForResultListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    NotifyTransferComponentDataForResultFunc func;
+
+    auto res = 0;
+    std::function<void()> func1 = [&]()
+    {
+        windowExtensionSessionImpl.RegisterTransferComponentDataForResultListener(func);
+        res = 1;
+    };
+    ASSERT_EQ(0, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
