@@ -31,6 +31,7 @@
 #include "intention_event_manager.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
+#include "window_rate_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -187,7 +188,7 @@ int64_t RootScene::GetVSyncPeriod()
 void RootScene::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    VsyncStation::GetInstance().FlushFrameRate(rate);
+    WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)
