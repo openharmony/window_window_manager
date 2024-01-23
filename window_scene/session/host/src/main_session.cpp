@@ -29,6 +29,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSe
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
+    scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     if (moveDragController_  != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
@@ -44,10 +45,6 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
                 moveDragController_->SetAspectRatio(aspectRatio_);
             }
         }
-    }
-
-    if (SessionHelper::IsMainWindow(GetWindowType())) {
-        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
     }
     WLOGFD("Create MainSession");
 }

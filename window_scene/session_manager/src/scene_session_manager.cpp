@@ -4228,7 +4228,6 @@ void SceneSessionManager::ProcessPreload(const AppExecFwk::AbilityInfo &abilityI
 
 void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
 {
-    WLOGFI("[WMSMain] NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
         WLOGFE("[WMSMain] scnSession is nullptr.");
@@ -4236,14 +4235,13 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     }
 
     const auto& sessionInfo = scnSession->GetSessionInfo();
+    WLOGFI("[WMSMain] id: %{public}d, app info: [%{public}s %{public}s %{public}s]", scnSession->GetPersistentId(),
+        sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
     auto abilityInfoPtr = sessionInfo.abilityInfo;
     if (abilityInfoPtr == nullptr) {
         WLOGFE("[WMSMain] abilityInfoPtr is nullptr, persistentId: %{public}d", persistentId);
         return;
     }
-    WLOGFI("[WMSMain] NotifyCompleteFirstFrameDrawing, id: %{public}d, isSystem: %{public}d, appName: [%{public}s "
-        "%{public}s %{public}s]", scnSession->GetPersistentId(), sessionInfo.isSystem_,
-        sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
     if ((listenerController_ != nullptr) && !scnSession->GetSessionInfo().isSystem_ &&
         !(abilityInfoPtr->excludeFromMissions)) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
