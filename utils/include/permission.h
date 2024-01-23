@@ -27,6 +27,7 @@ public:
     static bool CheckCallingPermission(const std::string& permission);
     static bool IsStartByHdcd();
     static bool IsStartByInputMethod();
+    static bool CheckIsCallingBundleName(const std::string name);
 };
 } // Rosen
 } // OHOS
