@@ -83,7 +83,7 @@ HWTEST_F(SessionStageStubTest, OnRemoteRequest, Function | SmallTest | Level1)
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    ASSERT_EQ(22, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -326,6 +326,58 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | Sm
     data.WriteBool(true);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdateDensity
+ * @tc.desc: test function : HandleUpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyCloseExistPipWindow
+ * @tc.desc: test function : HandleNotifyCloseExistPipWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyCloseExistPipWindow(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdateMaximizeMode
+ * @tc.desc: test function : HandleUpdateMaximizeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateMaximizeMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateMaximizeMode(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdateTitleInTargetPos
+ * @tc.desc: test function : HandleUpdateTitleInTargetPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateTitleInTargetPos(data, reply));
 }
 
 }
