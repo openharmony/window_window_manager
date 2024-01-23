@@ -222,7 +222,9 @@ WSError SceneSession::Disconnect(bool isFromClient)
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
-        if (session->needSnapshot_) {
+        auto state = session->GetSessionState();
+        auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
+        if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
                 session->scenePersistence_->SaveSnapshot(session->snapshot_);
