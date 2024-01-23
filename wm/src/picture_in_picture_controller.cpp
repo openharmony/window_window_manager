@@ -45,6 +45,7 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PipWindowState::STATE_UNDEFINED;
+    pipDisplayListener_ = new PictureInPictureController::PipDisplayListener(weakRef_);
 }
 
 PictureInPictureController::~PictureInPictureController()
@@ -163,6 +164,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         WLOGFE("Navigation operate failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
+    Rosen::DisplayManager::GetInstance().RegisterDisplayListener(pipDisplayListener_);
     curState_ = PipWindowState::STATE_STARTING;
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
@@ -233,6 +235,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStop();
     }
+    (void)Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(pipDisplayListener_);
     if (!destroyWindow) {
         ResetExtController();
         curState_ = PipWindowState::STATE_STOPPED;
@@ -395,6 +398,36 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(int32_t type)
 {
     WLOGI("PipMainWindowLifeCycleImpl BackgroundFailed");
+}
+
+void PictureInPictureController::PipDisplayListener::OnCreate(DisplayId displayId)
+{
+    WLOGD("PipDisplayListener OnCreate");
+}
+
+void PictureInPictureController::PipDisplayListener::OnDestroy(DisplayId displayId)
+{
+    WLOGD("PipDisplayListener OnDestroy");
+}
+
+void PictureInPictureController::PipDisplayListener::OnChange(DisplayId displayId)
+{
+    if (displayId != DisplayManager::GetInstance().GetDefaultDisplay()->GetId()) {
+        return;
+    }
+    Rotation rotation = DisplayManager::GetInstance().GetDisplayById(displayId)->GetRotation();
+    if (((preRotation_ == Rotation::ROTATION_0 || preRotation_ == Rotation::ROTATION_180) &&
+        (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270)) ||
+        ((preRotation_ == Rotation::ROTATION_90 || preRotation_ == Rotation::ROTATION_270) &&
+        (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180))) {
+        WLOGFI("display rotation changed from %{public}d to %{public}d", static_cast<int32_t>(preRotation_),
+            static_cast<int32_t>(rotation));
+        preRotation_ = rotation;
+        if (pipController_ != nullptr && pipController_->GetPipWindow() != nullptr) {
+            pipController_->GetPipWindow()->UpdatePiPRect(pipController_->windowRect_.width_,
+                pipController_->windowRect_.height_, PiPRectUpdateReason::REASON_DISPLAY_ROTATION_CHANGE);
+        }
+    }
 }
 
 void PictureInPictureController::DoActionEvent(std::string& actionName)

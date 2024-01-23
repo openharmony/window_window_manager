@@ -98,13 +98,13 @@ HWTEST_F(PiPUtilTest, GetRectByScale, Function | SmallTest | Level2)
 {
     Rect rect1 = {0, 0, 100, 100};
     auto level1 = PiPScaleLevel::PIP_SCALE_LEVEL_SMALLEST;
-    PiPUtil::GetRectByScale(200, 200, level1, rect1);
+    PiPUtil::GetRectByScale(200, 200, level1, rect1, false);
     ASSERT_EQ(60, rect1.width_);
     ASSERT_EQ(60, rect1.height_);
 
     Rect rect2 = {0, 0, 100, 100};
     auto level2 = PiPScaleLevel::PIP_SCALE_LEVEL_SMALLEST;
-    PiPUtil::GetRectByScale(200, 200, level2, rect2);
+    PiPUtil::GetRectByScale(200, 200, level2, rect2, false);
     ASSERT_EQ(60, rect2.width_);
     ASSERT_EQ(60, rect2.height_);
 }
