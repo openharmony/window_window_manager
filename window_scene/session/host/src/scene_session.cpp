@@ -228,7 +228,8 @@ WSError SceneSession::Disconnect(bool isFromClient)
                 session->scenePersistence_->SaveSnapshot(session->snapshot_);
             }
         }
-        if (WindowHelper::IsPipWindow(session->GetWindowType())) {
+        if (WindowHelper::IsPipWindow(session->GetWindowType()) &&
+            session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
             session->SavePiPRectInfo();
         }
         session->Session::Disconnect(isFromClient);
