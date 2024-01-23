@@ -46,19 +46,11 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
-            WLOGFI("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
-                "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-                "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
-                windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
-                pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
-        } else {
-            WLOGFD("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
-                "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-                "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
-                windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
-                pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
-        }
+        WLOGFI("[WMSEvent] action point info : windowid: %{public}d, id:%{public}d, displayx:%{public}d, "
+            "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
+            "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
+            windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
+            pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
     }
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id :ids) {
@@ -196,8 +188,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 
     if (sceneSession->GetSessionInfo().isSystem_) {
-        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s",
-            pointerEvent->GetId(), windowId, sceneSession->GetSessionInfo().abilityName_.c_str());
+        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s"
+            "action = %{public}d", pointerEvent->GetId(), windowId, sceneSession->GetSessionInfo().abilityName_.c_str(),
+            action);
         sceneSession->SendPointerEventToUI(pointerEvent);
 
         // notify touchOutside and touchDown event

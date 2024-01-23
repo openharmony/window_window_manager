@@ -23,6 +23,7 @@ class SCBSystemSession : public SceneSession {
 public:
     SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SCBSystemSession();
+    WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H
