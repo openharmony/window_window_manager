@@ -23,9 +23,18 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClient" };
+std::mutex g_instanceMutex;
 } // namespace
 
-WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
+ScreenSessionManagerClient& ScreenSessionManagerClient::GetInstance()
+{
+    std::lock_guard<std::mutex> lock(g_instanceMutex);
+    static sptr<ScreenSessionManagerClient> instance = nullptr;
+    if (instance == nullptr) {
+        instance = new ScreenSessionManagerClient();
+    }
+    return *instance;
+}
 
 void ScreenSessionManagerClient::ConnectToServer()
 {
