@@ -2437,6 +2437,15 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
                 static_cast<int32_t>(ret), GetWindowId());
         }
     }
+    if (system::GetParameter("const.product.devicetype", "unknown") == "2in1") {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+        }
+    }
     return static_cast<WSError>(ret);
 }
 
