@@ -116,6 +116,8 @@ public:
 
     void SetSensorRotation(DeviceRotation sensorRotation);
     DeviceRotation GetSensorRotation();
+    float ConvertRotationToFloat(Rotation sensorRotation);
+    float GetCurrentSensorRotation();
 
     bool HasPrivateSessionForeground() const;
     void SetPrivateSessionForeground(bool hasPrivate);
@@ -166,7 +168,6 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
 
 private:
-    float ConvertRotationToFloat(Rotation sensorRotation);
     Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
