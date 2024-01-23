@@ -5435,7 +5435,9 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             j++;
         } else {
-            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+            if (lastVisibleData_[i].second != currVisibleData[j].second) {
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+            }
             i++;
             j++;
         }
