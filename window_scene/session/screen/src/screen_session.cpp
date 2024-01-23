@@ -303,6 +303,11 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
     SensorRotationChange(rotation);
 }
 
+float ScreenSession::GetCurrentSensorRotation()
+{
+    return currentSensorRotation_;
+}
+
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
     for (auto& listener : screenChangeListenerList_) {
