@@ -133,6 +133,8 @@ public:
     double GetTextFieldHeight() const;
 
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
+    bool IsLayoutFullScreen() const;
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen);
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -187,6 +189,7 @@ private:
     double textFieldHeight_ = 0.0;
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
+    bool isLayoutFullScreen_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
