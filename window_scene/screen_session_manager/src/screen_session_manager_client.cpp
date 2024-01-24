@@ -164,6 +164,7 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     for (auto screenSession:screenSessionMap_) {
         (screenSession.second)->PowerStatusChange(event, status, reason);
     }
