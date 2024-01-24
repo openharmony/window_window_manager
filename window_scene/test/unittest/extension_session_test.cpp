@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "session_info.h"
 #include "interfaces/include/ws_common.h"
+#include "accessibility_event_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,6 +44,18 @@ void TransferExtensionDataTest(const AAFwk::WantParams& wantParams)
 }
 
 void NotifyRemoteReadyTest()
+{
+}
+
+void NotifySyncOnTest()
+{
+}
+
+void NotifyAsyncOnTest()
+{
+}
+
+void NotifyBindModalTest()
 {
 }
 
@@ -163,6 +176,93 @@ HWTEST_F(ExtensionSessionTest, TransferComponentData, Function | SmallTest | Lev
     AAFwk::WantParams wantParams;
     WSError result = extensionSession_.TransferComponentData(wantParams);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: NotifySyncOn
+ * @tc.desc: test function : NotifySyncOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifySyncOn, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession_(info);
+    ASSERT_TRUE(extensionSession_ != nullptr);
+    extSessionEventCallback->notifyAsyncOnFunc_ = NotifySyncOnTest;
+    extensionSession_.RegisterExtensionSessionEventCallback(extSessionEventCallback);
+    extensionSession_.NotifySyncOn();
+}
+
+/**
+ * @tc.name: NotifyAsyncOn
+ * @tc.desc: test function : NotifyAsyncOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyAsyncOn, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession_(info);
+    ASSERT_TRUE(extensionSession_ != nullptr);
+    extSessionEventCallback->notifyAsyncOnFunc_ = NotifyAsyncOnTest;
+    extensionSession_.RegisterExtensionSessionEventCallback(extSessionEventCallback);
+    extensionSession_.NotifyAsyncOn();
+}
+
+/**
+ * @tc.name: TriggerBindModalUIExtension
+ * @tc.desc: test function : TriggerBindModalUIExtension
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TriggerBindModalUIExtension, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession_(info);
+    ASSERT_TRUE(extensionSession_ != nullptr);
+    extSessionEventCallback->notifyBindModalFunc_ = NotifyBindModalTest;
+    extensionSession_.RegisterExtensionSessionEventCallback(extSessionEventCallback);
+    extensionSession_.TriggerBindModalUIExtension();
+}
+
+/**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: test function : TransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession_(info);
+    ASSERT_TRUE(extensionSession_ != nullptr);
+    Accessibility::AccessibilityEventInfo info1;
+    int64_t uiExtensionIdLevel = 6;
+    WSError result = extensionSession_.TransferAccessibilityEvent(info1, uiExtensionIdLevel);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: test function : UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession_(info);
+    ASSERT_TRUE(extensionSession_ != nullptr);
+    sptr<AvoidArea> avoidArea = new AvoidArea();
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    WSError res = extensionSession_.UpdateAvoidArea(avoidArea, type);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, res);
 }
 
 }
