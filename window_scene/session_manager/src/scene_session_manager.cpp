@@ -6894,14 +6894,17 @@ WSError SceneSessionManager::HideNonSecureWindows(bool shouldHide)
         WLOGFE("HideNonSecureWindows permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    for (const auto& item: nonSystemFloatSceneSessionMap_) {
-        auto session = item.second;
-        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
-            session->NotifyForceHideChange(shouldHide);
-            WLOGFI("HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
-                   session->GetWindowName().c_str(), item.first);
+    auto task = [this, shouldHide]() {
+        for (const auto& item: nonSystemFloatSceneSessionMap_) {
+            auto session = item.second;
+            if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+                session->NotifyForceHideChange(shouldHide);
+                WLOGFI("HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
+                       session->GetWindowName().c_str(), item.first);
+            }
         }
-    }
-    return WSError::WS_OK;
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 } // namespace OHOS::Rosen
