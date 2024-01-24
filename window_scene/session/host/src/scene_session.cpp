@@ -392,9 +392,13 @@ WSError SceneSession::SetAspectRatio(float ratio)
             session->moveDragController_->SetAspectRatio(ratio);
         }
         session->SaveAspectRatio(session->aspectRatio_);
-        if (session->FixRectByAspectRatio(session->winRect_)) {
-            session->NotifySessionRectChange(session->winRect_, SizeChangeReason::RESIZE);
-            session->UpdateRect(session->winRect_, SizeChangeReason::RESIZE);
+        WSRect fixedRect = session->winRect_;
+        WLOGFI("[WMSLayout] Before fixing, the id:%{public}d, the current rect: %{public}s",
+            session->GetPersistentId(), fixedRect.ToString().c_str());
+        if (session->FixRectByAspectRatio(fixedRect)) {
+            WLOGFI("[WMSLayout] After fixing, the id:%{public}d, the fixed rect: %{public}s",
+                session->GetPersistentId(), fixedRect.ToString().c_str());
+            session->NotifySessionRectChange(fixedRect, SizeChangeReason::RESIZE);
         }
         return WSError::WS_OK;
     };
