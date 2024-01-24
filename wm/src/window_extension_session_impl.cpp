@@ -26,7 +26,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 }
 
-std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowExtensionSessionImpl::windowExtensionSessionMap_;
+std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
 std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
@@ -52,8 +52,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionMap_.insert(std::make_pair(property_->GetWindowName(),
-        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+        windowExtensionSessionSet_.insert(this);
     }
     state_ = WindowState::STATE_CREATED;
     return WMError::WM_OK;
@@ -71,8 +70,7 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr
 {
     WLOGD("notify scene ace update config");
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& winPair : windowExtensionSessionMap_) {
-        auto window = winPair.second.second;
+    for (const auto& window : windowExtensionSessionSet_) {
         window->UpdateConfiguration(configuration);
     }
 }
@@ -97,7 +95,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     hostSession_ = nullptr;
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionMap_.erase(property_->GetWindowName());
+        windowExtensionSessionSet_.erase(this);
     }
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
