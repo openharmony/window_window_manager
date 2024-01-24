@@ -776,8 +776,12 @@ std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std
 void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
 {
     if (uiContent_ != nullptr) {
-        uiContent_->UpdateWindowMode(GetMode(), isDecorEnable);
-        WLOGFD("Notify uiContent window mode change end");
+        WindowMode mode = GetMode();
+        bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
+                || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+        WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
+        uiContent_->UpdateDecorVisible(decorVisible, isDecorEnable);
     }
 }
 
@@ -788,8 +792,11 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
 	}
 	if (needNotify) {
         if (uiContent_ != nullptr) {
-            uiContent_->UpdateWindowMode(mode, IsDecorEnable());
-            WLOGFD("Notify uiContent window mode change end");
+            bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
+                || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+            WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
+            uiContent_->UpdateDecorVisible(decorVisible, IsDecorEnable());
         }
         NotifyModeChange(mode, IsDecorEnable());
     }
