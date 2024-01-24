@@ -545,7 +545,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
-        parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_);
+        parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_) &&
+        parcel.WriteBool(isLayoutFullScreen_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -635,6 +636,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     textFieldPositionY_ = property->textFieldPositionY_;
     textFieldHeight_ = property->textFieldHeight_;
     isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
+    isLayoutFullScreen_ = property->isLayoutFullScreen_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -670,6 +672,16 @@ double WindowSessionProperty::GetTextFieldHeight() const
 void WindowSessionProperty::SetSessionPropertyChangeCallback(std::function<void()>&& callback)
 {
     touchHotAreasChangeCallback_ = std::move(callback);
+}
+
+bool WindowSessionProperty::IsLayoutFullScreen() const
+{
+    return isLayoutFullScreen_;
+}
+
+void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
+{
+    isLayoutFullScreen_ = isLayoutFullScreen;
 }
 } // namespace Rosen
 } // namespace OHOS
