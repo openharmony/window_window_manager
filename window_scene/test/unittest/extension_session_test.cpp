@@ -15,9 +15,9 @@
 
 #include "extension_session.h"
 #include <gtest/gtest.h>
+#include "accessibility_event_info.h"
 #include "session_info.h"
 #include "interfaces/include/ws_common.h"
-#include "accessibility_event_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,6 +75,7 @@ void ExtensionSessionTest::SetUp()
 void ExtensionSessionTest::TearDown()
 {
     delete extSessionEventCallback;
+    extSessionEventCallback = nullptr;
 }
 
 namespace {
@@ -241,7 +242,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest 
     info.bundleName_ = "SetBrightness1";
     ExtensionSession extensionSession_(info);
     ASSERT_TRUE(extensionSession_ != nullptr);
-    Accessibility::AccessibilityEventInfo info1;
+    OHOS::Accessibility::AccessibilityEventInfo info1;
     int64_t uiExtensionIdLevel = 6;
     WSError result = extensionSession_.TransferAccessibilityEvent(info1, uiExtensionIdLevel);
     ASSERT_EQ(result, WSError::WS_OK);
