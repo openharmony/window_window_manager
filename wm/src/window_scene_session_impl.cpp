@@ -1304,6 +1304,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
+    bool preStatus = property_->IsLayoutFullScreen();
+    property_->SetIsLayoutFullScreen(status);
     WindowMode mode = GetMode();
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
@@ -1314,9 +1316,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
-
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
+        property_->SetIsLayoutFullScreen(preStatus);
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), GetWindowId());
     }
