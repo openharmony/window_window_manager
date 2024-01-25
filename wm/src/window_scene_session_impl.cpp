@@ -18,6 +18,7 @@
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
+#include <hitrace_meter.h>
 
 #include "anr_handler.h"
 #include "color_parser.h"
@@ -2155,6 +2156,7 @@ WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
         return WMError::WM_ERROR_NULLPTR;
     }
     // notify memory level
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ArkUI:NotifyMemoryLevel");
     uiContent_->NotifyMemoryLevel(level);
     WLOGFD("WindowSceneSessionImpl::NotifyMemoryLevel End!");
     return WMError::WM_OK;
