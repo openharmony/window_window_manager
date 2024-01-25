@@ -33,6 +33,7 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
+    virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
 
     virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
     virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) override;
