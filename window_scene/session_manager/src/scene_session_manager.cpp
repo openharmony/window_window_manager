@@ -942,6 +942,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     } else {
         WLOGFE("[WMSLife]Invalid window type");
     }
+    if (sceneSession != nullptr) {
+        sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+    }
     return sceneSession;
 }
 

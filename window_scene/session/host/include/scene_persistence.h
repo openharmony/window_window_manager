@@ -43,6 +43,7 @@ public:
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::function<void()> resetSnapshotCallback = [](){});
     bool IsSavingSnapshot();
+    void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
@@ -50,6 +51,7 @@ public:
 
 private:
     static std::string snapshotDirectory_;
+    std::string bundleName_;
     std::string snapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
 
