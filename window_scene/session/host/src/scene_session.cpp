@@ -1387,12 +1387,21 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
 
 void SceneSession::SetZOrder(uint32_t zOrder)
 {
-    if (zOrder_ != zOrder) {
-        Session::SetZOrder(zOrder);
-        if (specificCallback_ != nullptr) {
-            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    auto task = [weakThis = wptr(this), zOrder]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
         }
-    }
+        if (session->zOrder_ != zOrder) {
+            session->Session::SetZOrder(zOrder);
+            if (session->specificCallback_ != nullptr) {
+                session->specificCallback_->onWindowInfoUpdate_(session->GetPersistentId(),
+                    WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            }
+        }
+    };
+    PostTask(task, "SetZOrder");
 }
 
 void SceneSession::SetFloatingScale(float floatingScale)
