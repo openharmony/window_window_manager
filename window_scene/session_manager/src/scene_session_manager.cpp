@@ -1085,12 +1085,12 @@ void SceneSessionManager::RegisterInputMethodUpdateFunc(const sptr<SceneSession>
 
 void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
 {
-    WLOGFD("[WMSInput] Resize input method calling window");
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
         WLOGFE("[WMSInput] Input method is null");
         return;
     }
+    WLOGFD("[WMSInput] persistentId: %{public}d, windowType: %{public}d", persistentId, scnSession->GetWindowType());
     ResizeSoftInputCallingSessionIfNeed(scnSession, true);
 }
 
@@ -1109,24 +1109,18 @@ void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>&
 
 void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 {
-    WLOGFD("[WMSInput] Resize input method calling window");
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
-        WLOGFE("[WMSInput] Input method is null");
+        WLOGFE("[WMSInput] scnSession is null, persistentId: %{public}d", persistentId);
         return;
     }
 
-    uint32_t callingWindowId = INVALID_WINDOW_ID;
-    if (scnSession->GetSessionProperty() != nullptr) {
-        callingWindowId = scnSession->GetSessionProperty()->GetCallingWindow();
-    }
-    WLOGFI("[WMSInput] Calling window id: %{public}d", callingWindowId);
-    callingSession_ = GetSceneSession(callingWindowId);
+    WLOGFD("[WMSInput] persistentId: %{public}d, windowType: %{public}d", persistentId, scnSession->GetWindowType());
     if (callingSession_ == nullptr) {
-        WLOGFI("[WMSInput] Calling session obtained through callingWindowId is nullptr");
+        WLOGFI("[WMSInput] Calling session is null, using focusedSessionId_: %{public}d", focusedSessionId_);
         callingSession_ = GetSceneSession(focusedSessionId_);
         if (callingSession_ == nullptr) {
-            WLOGFE("[WMSInput] Calling session obtained through focusedSessionId_ is nullptr");
+            WLOGFE("[WMSInput] Calling session obtained through focusedSessionId_ is null");
             return;
         }
     }
@@ -1142,6 +1136,7 @@ void SceneSessionManager::RegisterInputMethodHideFunc(const sptr<SceneSession>& 
     }
     NotifyCallingSessionBackgroundFunc onInputMethodHide = [this]() {
         this->RestoreCallingSessionSizeIfNeed();
+        this->callingSession_ = nullptr;
     };
     sceneSession->SetNotifyCallingSessionBackgroundFunc(onInputMethodHide);
     WLOGFD("[WMSInput] RegisterInputMethodHideFunc success");
@@ -2528,6 +2523,21 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
     NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
+void SceneSessionManager::SetCallingSession(const sptr<SceneSession>& sceneSession, uint32_t newCallingWindowId)
+{
+    uint32_t oldCallingWindowId = INVALID_WINDOW_ID;
+    if (sceneSession && sceneSession->GetSessionProperty()) {
+        oldCallingWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
+    }
+    if (callingSession_ && oldCallingWindowId == newCallingWindowId) {
+        WLOGFI("[WMSInput] CallingWindowId not changed, not need to reset callingSession");
+        return;
+    }
+    WLOGFI("[WMSInput] Get callingSesstion by CallingWindowId: %{public}d", newCallingWindowId);
+    callingSession_ = GetSceneSession(newCallingWindowId);
+    return;
+}
+
 WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
@@ -2631,6 +2641,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         }
         case WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
             if (sceneSession->GetSessionProperty() != nullptr) {
+                SetCallingSession(sceneSession, property->GetCallingWindow());
                 sceneSession->GetSessionProperty()->SetCallingWindow(property->GetCallingWindow());
             }
             if (callingWindowIdChangeFunc_ != nullptr) {
@@ -5134,7 +5145,6 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
     }
     needUpdateSessionRect_ = false;
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
-    callingSession_ = nullptr;
 }
 
 WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
@@ -5148,17 +5158,17 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         WLOGFI("[WMSInput] SetSessionGravity persistentId: %{public}d, windowType: %{public}d, gravity: %{public}d",
             persistentId, sceneSession->GetWindowType(), gravity);
         if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            WLOGFE("scene session is not input method");
+            WLOGFE("[WMSInput] scene session is not input method");
             return WSError::WS_ERROR_INVALID_TYPE;
         }
         sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
         RelayoutKeyBoard(sceneSession);
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-            WLOGFD("input method is float mode");
+            WLOGFD("[WMSInput] input method is float mode");
             sceneSession->SetWindowAnimationFlag(false);
             RestoreCallingSessionSizeIfNeed();
         } else {
-            WLOGFD("input method is bottom mode");
+            WLOGFD("[WMSInput] input method is bottom mode");
             sceneSession->SetWindowAnimationFlag(true);
             ResizeSoftInputCallingSessionIfNeed(sceneSession);
         }
