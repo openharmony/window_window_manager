@@ -41,4 +41,13 @@ SCBSystemSession::~SCBSystemSession()
 {
     WLOGD("~SCBSystemSession, id: %{public}d", GetPersistentId());
 }
+
+WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
+{
+    const auto& id = GetPersistentId();
+    const auto& type = GetWindowType();
+    WLOGFI("id: %{public}d, type: %{public}d", id, type);
+    PresentFocusIfPointDown();
+    return SceneSession::ProcessPointDownSession(posX, posY);
+}
 } // namespace OHOS::Rosen
