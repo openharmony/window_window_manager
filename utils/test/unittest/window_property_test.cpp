@@ -413,6 +413,150 @@ HWTEST_F(WindowPropertyTest, SetDecorEnable, Function | SmallTest | Level2)
     func();
     ASSERT_EQ(resultValue, 1);
 }
+
+/**
+ * @tc.name: AddWindowFlag001
+ * @tc.desc: AddWindowFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, AddWindowFlag001, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    int resultValue = 0;
+    WindowFlag flag = WindowFlag::WINDOW_FLAG_NEED_AVOID;
+    std::function<void()> func = [&]() {
+        winPropSrc.AddWindowFlag(flag);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetRequestRect002
+ * @tc.desc: GetRequestRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetRequestRect001, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    Rect requestRect { 0, 0, 0, 0 };
+    winPropSrc.SetRequestRect(requestRect);
+    Rect res = winPropSrc.GetRequestRect();
+    ASSERT_EQ(res, requestRect);
+}
+
+/**
+ * @tc.name: GetWindowSizeChangeReason003
+ * @tc.desc: GetWindowSizeChangeReason test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetWindowSizeChangeReason003, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    winPropSrc.SetWindowSizeChangeReason(reason);
+    WindowSizeChangeReason res = winPropSrc.GetWindowSizeChangeReason();
+    ASSERT_EQ(res, reason);
+}
+
+/**
+ * @tc.name: GetFullScreen004
+ * @tc.desc: GetFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFullScreen004, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isFullScreen = true;
+    winPropSrc.SetFullScreen(isFullScreen);
+    bool res = winPropSrc.GetFullScreen();
+    ASSERT_EQ(res, isFullScreen);
+}
+
+/**
+ * @tc.name: GetFocusable005
+ * @tc.desc: GetFocusable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFocusable005, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isFocusable = true;
+    winPropSrc.SetFocusable(isFocusable);
+    bool res = winPropSrc.GetFocusable();
+    ASSERT_EQ(res, isFocusable);
+}
+
+/**
+ * @tc.name: GetTouchable006
+ * @tc.desc: GetTouchable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetTouchable006, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isTouchable = true;
+    winPropSrc.SetTouchable(isTouchable);
+    bool res = winPropSrc.GetFocusable();
+    ASSERT_EQ(res, isTouchable);
+}
+
+/**
+ * @tc.name: GetCallingWindow007
+ * @tc.desc: GetCallingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetCallingWindow007, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t windowId = 1;
+    winPropSrc.SetCallingWindow(windowId);
+    uint32_t res = winPropSrc.GetCallingWindow();
+    ASSERT_EQ(res, windowId);
+}
+
+/**
+ * @tc.name: GetPrivacyMode008
+ * @tc.desc: GetPrivacyMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetPrivacyMode008, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isPrivate = true;
+    winPropSrc.SetPrivacyMode(isPrivate);
+    bool res = winPropSrc.GetPrivacyMode();
+    ASSERT_EQ(res, isPrivate);
+}
+
+/**
+ * @tc.name: GetSystemPrivacyMode009
+ * @tc.desc: GetSystemPrivacyMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetSystemPrivacyMode009, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isSystemPrivate = true;
+    winPropSrc.SetSystemPrivacyMode(isSystemPrivate);
+    bool res = winPropSrc.GetSystemPrivacyMode();
+    ASSERT_EQ(res, isSystemPrivate);
+}
+
+/**
+ * @tc.name: GetSnapshotSkip010
+ * @tc.desc: GetSnapshotSkip test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetSnapshotSkip010, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isSkip = true;
+    winPropSrc.SetSnapshotSkip(isSkip);
+    bool res = winPropSrc.GetSnapshotSkip();
+    ASSERT_EQ(res, isSkip);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
