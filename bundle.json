@@ -70,8 +70,7 @@
           "memmgr_plugin",
           "data_share",
           "accessibility",
-          "security_component_manager",
-          "os_account"
+          "security_component_manager"
         ],
         "third_party": [
           "libjpeg-turbo",
