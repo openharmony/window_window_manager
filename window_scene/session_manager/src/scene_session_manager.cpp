@@ -6681,8 +6681,12 @@ WSError SceneSessionManager::UpdateTitleInTargetPos(int32_t persistentId, bool i
 
 const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSessionMap()
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    return sceneSessionMap_;
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        retSceneSessionMap = sceneSessionMap_;
+    }
+    return retSceneSessionMap;
 }
 
 void SceneSessionManager::NotifyUpdateRectAfterLayout()

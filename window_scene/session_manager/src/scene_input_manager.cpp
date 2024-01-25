@@ -232,10 +232,11 @@ void SceneInputManager::FlushDisplayInfoToMMI() {
     sceneSessionDirty_->ResetSessionDirty();
 
     std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+    WLOG_D("[EventDispatch] - windowInfo:windowList = %{public}d", static_cast<int>(windowInfoList.size()));
     if (windowInfoList.size() == 0) {
+        FlushFullInfoToMMI(windowInfoList);
         return;
     }
-    WLOG_D("[EventDispatch] - windowInfo:windowList = %{public}d", static_cast<int>(windowInfoList.size()));
     windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
     if (windowInfoList.size() <= MAX_WINDOWINFO_NUM) {
         FlushFullInfoToMMI(windowInfoList);
