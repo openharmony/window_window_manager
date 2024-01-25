@@ -176,7 +176,8 @@ WSError SceneSession::Background()
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
-                session->scenePersistence_->SaveSnapshot(session->snapshot_);
+                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
+                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
             }
         }
         session->snapshot_.reset();
@@ -227,7 +228,8 @@ WSError SceneSession::Disconnect(bool isFromClient)
         if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
-                session->scenePersistence_->SaveSnapshot(session->snapshot_);
+                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
+                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
             }
         }
         if (WindowHelper::IsPipWindow(session->GetWindowType()) &&

@@ -38,8 +38,11 @@ public:
 
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath();
+    std::string GetSnapshotFilePathFromAce();
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
-    void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const std::function<void()> resetSnapshotCallback = [](){});
+    bool IsSavingSnapshot();
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
@@ -52,6 +55,9 @@ private:
 
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
+
+    std::atomic<int> savingSnapshotSum_ { 0 };
+    std::atomic<bool> isSavingSnapshot_ { false };
 
     static std::shared_ptr<TaskScheduler> snapshotScheduler_;
 };
