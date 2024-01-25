@@ -30,6 +30,10 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
     : SceneSession(info, specificCallback)
 {
     scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
+    if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
+        // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
+        scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
+    }
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     if (moveDragController_  != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
@@ -46,6 +50,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
             }
         }
     }
+
     WLOGFD("Create MainSession");
 }
 

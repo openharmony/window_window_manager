@@ -56,6 +56,7 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
 
 ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t& persistentId)
 {
+    bundleName_ = bundleName;
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
     snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
@@ -115,6 +116,25 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
 bool ScenePersistence::IsSavingSnapshot()
 {
     return isSavingSnapshot_.load();
+}
+
+void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersistentId)
+{
+    auto task = [weakThis = wptr(this), oldPersistentId]() {
+        auto scenePersistence = weakThis.promote();
+        uint32_t oldfileID = static_cast<uint32_t>(oldPersistentId) & 0x3fffffff;
+        std::string oldSnapshotPath_ = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
+                                       std::to_string(oldfileID) + IMAGE_SUFFIX;
+        int ret = std::rename(oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+        if (ret == 0) {
+            WLOGFI("Rename snapshot from %{public}s to %{public}s.",
+                oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+        } else {
+            WLOGFW("Failed to rename snapshot from %{public}s to %{public}s.",
+                oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+        }
+    };
+    snapshotScheduler_->PostAsyncTask(task, "RenameSnapshotFromOldPersistentId");
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()
