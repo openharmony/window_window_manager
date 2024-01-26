@@ -466,6 +466,10 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
             WLOGFW("[WMSRecover] promoteThis is nullptr");
             return;
         }
+        if (promoteThis->state_ == WindowState::STATE_DESTROYED) {
+            WLOGFW("[WMSRecover] windowState is STATE_DESTROYED, no need to recover");
+            return;
+        }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
