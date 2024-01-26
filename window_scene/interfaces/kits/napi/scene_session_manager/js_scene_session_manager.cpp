@@ -1843,25 +1843,27 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
         return NapiGetUndefined(env);
     }
     WLOGFD("[NAPI]IsRecovering: %{public}u", isRecovering);
+    // Recovered sessions persistentId list as second argument
+    std::vector<int32_t> recoveredPersistentIds;
+    if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
+        WLOGFE("[NAPI]Failed to convert recovered persistentId array");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     if (!isRecovering) {
         // Sceneboard recover finished
         if (argc != ARGC_TWO) {
             WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                "Recovered persistentId List not received"));
+            napi_throw(env,
+                CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                    "Recovered persistentId List not received"));
             return NapiGetUndefined(env);
         }
-        // Recovered sessions persistentId list as second argument
-        std::vector<int32_t> recoveredPersistentIds;
-        if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
-            WLOGFE("[NAPI]Failed to convert recovered persistentId array");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-
         SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
         SceneSessionManager::GetInstance().NotifyRecoveringFinished();
+    } else {
+        SceneSessionManager::GetInstance().SetAlivePersistentIds(recoveredPersistentIds);
     }
     SceneSessionManager::GetInstance().SetEnableInputEvent(!isRecovering);
 

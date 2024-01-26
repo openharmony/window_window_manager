@@ -247,6 +247,7 @@ public:
     bool IsInputEventEnabled();
     void SetEnableInputEvent(bool enabled);
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
+    void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
     void NotifyRecoveringFinished();
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
@@ -465,6 +466,7 @@ private:
     int32_t currentUserId_;
     std::atomic<bool> enableInputEvent_ = true;
     bool gestureNavigationEnabled_ {true};
+    std::vector<int32_t> alivePersistentIds_ = {};
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
@@ -478,6 +480,7 @@ private:
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
     RSInterfaces& rsInterface_;
+    bool isNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);

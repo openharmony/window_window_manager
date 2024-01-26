@@ -923,7 +923,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     }
 
     WMError ret = WMError::WM_OK;
-    if (WindowHelper::IsMainWindow(GetType()) && state_ == WindowState::STATE_HIDDEN) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         if (hostSession_ != nullptr) {
             ret = static_cast<WMError>(hostSession_->Disconnect(true));
         }
