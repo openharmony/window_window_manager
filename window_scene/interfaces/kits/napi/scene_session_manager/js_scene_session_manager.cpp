@@ -1855,9 +1855,8 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
         // Sceneboard recover finished
         if (argc != ARGC_TWO) {
             WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-            napi_throw(env,
-                CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                    "Recovered persistentId List not received"));
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                "Recovered persistentId List not received"));
             return NapiGetUndefined(env);
         }
         SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
