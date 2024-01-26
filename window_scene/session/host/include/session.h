@@ -156,7 +156,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
     SessionState GetSessionState() const;
-    void SetSessionState(SessionState state);
+    virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -265,9 +265,9 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
-    void SetSystemTouchable(bool touchable);
+    virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
-    WSError SetVisible(bool isVisible);
+    virtual WSError SetVisible(bool isVisible);
     bool GetVisible() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
@@ -366,7 +366,7 @@ public:
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
-    void SetForegroundInteractiveStatus(bool interactive);
+    virtual void SetForegroundInteractiveStatus(bool interactive);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
