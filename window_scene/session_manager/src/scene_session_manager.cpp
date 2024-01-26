@@ -1726,7 +1726,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         WLOGFE("[WMSRecover] property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (parentPersistentId > 0 && !isNeedRecover(property->GetParentPersistentId())) {
+    if (property->GetParentPersistentId() > 0 && !isNeedRecover(property->GetParentPersistentId())) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto pid = IPCSkeleton::GetCallingPid();
