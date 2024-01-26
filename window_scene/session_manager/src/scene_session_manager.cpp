@@ -1913,9 +1913,8 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         WLOGFE("[WMSRecover] Request sceneSession failed");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+    auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
     if (ret != WSError::WS_OK) {
         WLOGFE("[WMSRecover] Reconnect failed");
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
