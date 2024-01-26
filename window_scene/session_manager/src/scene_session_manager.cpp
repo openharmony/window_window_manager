@@ -5250,8 +5250,8 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
             WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
                 "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
                 sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
-                sceneSession->GetSessionState(), sceneSession->IsVisible());
-            if (IsSessionVisible(sceneSession)) {
+                sceneSession->GetSessionState(), sceneSession->IsVisibleForAccessibility());
+            if (sceneSession->IsVisibleForAccessibility()) {
                 FillWindowInfo(infos, iter->second);
             }
         }
@@ -5300,8 +5300,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
-        || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos
-        || sceneSession->GetSessionInfo().bundleName_.find("SCBScenePanel") != std::string::npos) {
+        || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
         WLOGFD("filter gesture window.");
         return false;
     }
