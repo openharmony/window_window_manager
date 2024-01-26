@@ -2069,9 +2069,16 @@ void WindowSessionImpl::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>&
         auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+            keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
+        }
+        if (!isConsumed) {
+            keyEvent->MarkProcessed();
+        }
+        if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
+            escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
         }
     }
 }
