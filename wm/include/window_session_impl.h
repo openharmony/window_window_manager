@@ -242,6 +242,7 @@ protected:
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool needRemoveWindowInputChannel_ = false;
     float virtualPixelRatio_ { 1.0f };
+    bool escKeyEventTriggered_ = false;
 
 private:
     //Trans between colorGamut and colorSpace

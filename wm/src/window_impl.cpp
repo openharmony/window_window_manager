@@ -1576,6 +1576,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         animationTransitionController_->AnimationForHidden();
     }
     ResetMoveOrDragState();
+    escKeyEventTriggered_ = false;
     return ret;
 }
 
@@ -2484,6 +2485,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     WLOGFD("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    bool shouldMarkProcess = true;
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
         HandleBackKeyPressedEvent(keyEvent);
     } else {
@@ -2495,15 +2497,21 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         if (inputEventConsumer != nullptr) {
             WLOGD("Transfer key event to inputEventConsumer");
             (void)inputEventConsumer->OnInputEvent(keyEvent);
+            shouldMarkProcess = false;
         } else if (uiContent_ != nullptr) {
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
             if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
                 GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+                keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
                 WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
                 Recover();
             }
+            if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
+                escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
+            }
+            shouldMarkProcess = !handled;
         } else {
             WLOGFE("There is no key event consumer");
         }
@@ -2513,6 +2521,9 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         SingletonContainer::Get<WindowAdapter>().DispatchKeyEvent(GetWindowId(), keyEvent);
         keyEvent->MarkProcessed();
         return;
+    }
+    if (shouldMarkProcess) {
+        keyEvent->MarkProcessed();
     }
 }
 
