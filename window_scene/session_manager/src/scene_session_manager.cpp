@@ -2068,8 +2068,9 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             if (sceneSession == nullptr) {
                 continue;
             }
-            if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
-                sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
+            if (!(sceneSession->IsVisible() ||
+                sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                sceneSession->GetSessionState() == SessionState::STATE_ACTIVE)) {
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();

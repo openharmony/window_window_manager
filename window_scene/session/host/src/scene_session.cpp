@@ -1688,7 +1688,7 @@ void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params
 
 void SceneSession::NotifyTouchOutside()
 {
-    WLOGFD("id: %{public}d NotifyTouchOutside", GetPersistentId());
+    WLOGFI("id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (sessionStage_) {
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
