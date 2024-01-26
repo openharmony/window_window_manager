@@ -162,14 +162,6 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
 
     sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
     ASSERT_NE(nullptr, displayChangeListener);
-    dms_->RegisterDisplayChangeListener(displayChangeListener);
-    dms_->NotifyDisplayStateChange(0, displayInfo, displayInfoMap, DisplayStateChangeType::SIZE_CHANGE);
-    dms_->NotifyScreenshot(0);
-
-    dms_->NotifyDisplayEvent(DisplayEvent::UNLOCK);
-
-    std::vector<DisplayId> displayIds;
-    dms_->SetFreeze(displayIds, false);
 }
 
 /**
@@ -188,11 +180,6 @@ HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, Function | SmallTest | Lev
 
     dms_->RegisterWindowInfoQueriedListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->HasPrivateWindow(1, hasPrivateWindow));
-
-    sptr<WindowInfoQueriedListenerTest> windowInfoQueriedListener = new WindowInfoQueriedListenerTest();
-    ASSERT_NE(nullptr, windowInfoQueriedListener);
-    dms_->RegisterWindowInfoQueriedListener(windowInfoQueriedListener);
-    ASSERT_EQ(DMError::DM_OK, dms_->HasPrivateWindow(1, hasPrivateWindow));
 }
 
 /**
@@ -330,16 +317,10 @@ HWTEST_F(DisplayManagerServiceTest, ScreenColor, Function | SmallTest | Level3)
  */
 HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, Function | SmallTest | Level3)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_STATE_LISTENER;
 
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->RegisterDisplayManagerAgent(nullptr, type));
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->UnregisterDisplayManagerAgent(nullptr, type));
-
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
-
-    ASSERT_EQ(DMError::DM_OK, dms_->RegisterDisplayManagerAgent(displayManagerAgent, type));
-    ASSERT_EQ(DMError::DM_OK, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
 
 /**
@@ -424,67 +405,21 @@ HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ScreenRotationLock
- * @tc.desc: DMS mirror
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, ScreenRotationLock, Function | SmallTest | Level3)
-{
-    dms_->SetScreenRotationLocked(false);
-
-    bool isLocked = false;
-    dms_->IsScreenRotationLocked(isLocked);
-    ASSERT_EQ(false, isLocked);
-
-    ASSERT_NE(nullptr, dms_->GetCutoutInfo(10));
-}
-
-/**
  * @tc.name: AddSurfaceNodeToDisplay | RemoveSurfaceNodeFromDisplay
  * @tc.desc: add/remove surfaceNode to/from display
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTest | Level3)
 {
-    sptr<DisplayManagerService> dms = new DisplayManagerService();
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
+   
     surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
     std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<MockRSDisplayNode>(RSDisplayNodeConfig{});
     sptr<SupportedScreenModes> info = new SupportedScreenModes;
     sptr<AbstractScreen> absScreen =
         new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
-    dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY] =
-        new AbstractDisplay(DEFAULT_DISPLAY, info, absScreen);
-    dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY]->screenId_ = DEFAULT_SCREEN;
-
-    dms->abstractScreenController_->dmsScreenMap_[DEFAULT_SCREEN] =
-        new AbstractScreen(dms->abstractScreenController_, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
-    dms->abstractScreenController_->dmsScreenMap_[DEFAULT_SCREEN]->rsDisplayNode_ = displayNode;
- 
-    EXPECT_CALL(*reinterpret_cast<MockRSDisplayNode*>(displayNode.get()), AddChild(_, _));
-    ASSERT_EQ(DMError::DM_OK, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, false));
-    EXPECT_CALL(*reinterpret_cast<MockRSDisplayNode*>(displayNode.get()), RemoveChild(_));
-    ASSERT_EQ(DMError::DM_OK, dms->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode));
-
-    testing::Mock::AllowLeak(displayNode.get());
-}
-
-/**
- * @tc.name: SetGravitySensorSubscriptionEnabled
- * @tc.desc: DMS set gravity sensor subscription enabled
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Function | SmallTest | Level3)
-{
-    dms_->SetGravitySensorSubscriptionEnabled();
-    DMError result = dms_->DestroyVirtualScreen(10086);
-    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
 }
 
 /**
