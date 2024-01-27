@@ -61,7 +61,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             WLOGFW("parent session is null");
             return WSError::WS_ERROR_INVALID_PARENT;
         }
-        if (parentSession->IsSessionForeground()) {
+        if (!parentSession->IsSessionForeground()) {
             WLOGFW("parent session is not in foreground");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
