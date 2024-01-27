@@ -514,16 +514,17 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
 
-    BrokerStates NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
+    BrokerStates NotifyStartAbility(
+        int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId = 0);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
-    void PreHandleCollaborator(sptr<SceneSession>& sceneSession);
+    void PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId = 0);
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
-    void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
+    void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void NotifyStatusBarEnabledChange(bool enable);
