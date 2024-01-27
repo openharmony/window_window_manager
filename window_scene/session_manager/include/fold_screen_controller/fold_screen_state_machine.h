@@ -38,11 +38,10 @@ class TransitionCallback {
 public:
     ~TransitionCallback() = default;
 
-    virtual void OnTransitionEnter(FoldScreenState current, FoldScreenState next) { };
+    virtual void OnTransitionEnter(FoldScreenState current, FoldScreenState next) { }
 
-    virtual void OnTransitionExit(FoldScreenState previous, FoldScreenState current) { };
+    virtual void OnTransitionExit(FoldScreenState previous, FoldScreenState current) { }
 };
-
 
 class FoldScreenStateMachine : public RefBase {
 public:
