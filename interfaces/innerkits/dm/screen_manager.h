@@ -235,7 +235,7 @@ public:
     /**
      * @brief Set screen rotation lock status.
      *
-     * @param isLocked True means forbide to rotate screen, false means the opposite.
+     * @param isLocked True means forbid to rotate screen, false means the opposite.
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetScreenRotationLocked(bool isLocked);

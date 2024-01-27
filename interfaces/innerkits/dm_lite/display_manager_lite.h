@@ -58,7 +58,7 @@ public:
     };
 
     /**
-     * @brief Resgister a display listener.
+     * @brief Register a display listener.
      *
      * @param listener IDisplayListener.
      * @return DM_OK means register success, others means register failed.
