@@ -51,6 +51,9 @@ public:
     float GetDefaultDensity();
     void SetDefaultDensity(float defaultDensity);
 
+    float GetDensityInCurResolution() const;
+    void SetDensityInCurResolution(float densityInCurResolution);
+
     void SetPhyWidth(uint32_t phyWidth);
     int32_t GetPhyWidth() const;
 
@@ -116,6 +119,7 @@ private:
     uint32_t refreshRate_ { 0 };
     float virtualPixelRatio_ { 1.0f };
     float defaultDensity_ { 1.0f };
+    float densityInCurResolution_ { 1.0f };
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
