@@ -1052,19 +1052,19 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
                 session->SetSessionInfoWant(sessionInfo.want);
                 WLOGFI("RequestSceneSession update want, persistentId:%{public}d", sessionInfo.persistentId_);
             } else {
-                UpdateCollaboratorSessionWant(session);
+                UpdateCollaboratorSessionWant(session, sessionInfo.persistentId_);
             }
         }
     }
 }
 
-void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& session)
+void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId)
 {
     if (session != nullptr) {
         if (session->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
             FillSessionInfo(session);
             if (CheckCollaboratorType(session->GetCollaboratorType())) {
-                PreHandleCollaborator(session);
+                PreHandleCollaborator(session, persistentId);
             }
         }
     }
@@ -6420,7 +6420,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     return resultValue;
 }
 
-BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
+BrokerStates SceneSessionManager::NotifyStartAbility(
+    int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
     WLOGFI("run NotifyStartAbility");
     auto iter = collaboratorMap_.find(collaboratorType);
@@ -6445,6 +6446,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
             WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
+        sessionInfo.want->SetParam("oh_persistentId", persistentId);
         int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
         WLOGFI("NotifyStartAbility ret: %{public}d", ret);
@@ -6550,7 +6552,7 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession)
+void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     WLOGFI("run PreHandleCollaborator");
     if (sceneSession == nullptr) {
@@ -6564,7 +6566,8 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     }
     if (sessionAffinity.empty()) {
         WLOGFI("PreHandleCollaborator sessionAffinity: %{public}s", sessionAffinity.c_str());
-        BrokerStates notifyReturn = NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+        BrokerStates notifyReturn = NotifyStartAbility(
+            sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
             WLOGFI("PreHandleCollaborator cant notify");
             return;
