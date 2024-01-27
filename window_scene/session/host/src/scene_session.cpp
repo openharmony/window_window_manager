@@ -1800,6 +1800,59 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
     return selfToken_;
 }
 
+void SceneSession::SetSessionState(SessionState state)
+{
+    Session::SetSessionState(state);
+    NotifyAccessibilityVisibilityChange();
+}
+
+WSError SceneSession::SetVisible(bool isVisible)
+{
+    WSError err = Session::SetVisible(isVisible);
+    NotifyAccessibilityVisibilityChange();
+    return err;
+}
+
+
+bool SceneSession::IsVisibleForAccessibility() const
+{
+    return GetSystemTouchable() && GetForegroundInteractiveStatus() &&
+        (IsVisible() || GetSessionState() == SessionState::STATE_ACTIVE ||
+        GetSessionState() == SessionState::STATE_FOREGROUND);
+}
+
+void SceneSession::SetForegroundInteractiveStatus(bool interactive)
+{
+    Session::SetForegroundInteractiveStatus(interactive);
+    NotifyAccessibilityVisibilityChange();
+}
+
+void SceneSession::NotifyAccessibilityVisibilityChange()
+{
+    bool isVisibleForAccessibilityNew = IsVisibleForAccessibility();
+    if (isVisibleForAccessibilityNew == isVisibleForAccessibility_.load()) {
+        return;
+    }
+    WLOGFD("[WMSAccess] NotifyAccessibilityVisibilityChange id: %{public}d, visible: %{public}d",
+        GetPersistentId(), isVisibleForAccessibilityNew);
+    isVisibleForAccessibility_.store(isVisibleForAccessibilityNew);
+    if (specificCallback_ && specificCallback_->onWindowInfoUpdate_) {
+        if (isVisibleForAccessibilityNew) {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        } else {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        }
+    } else {
+        WLOGFD("specificCallback_->onWindowInfoUpdate_ not exist, persistent id: %{public}d", GetPersistentId());
+    }
+}
+
+void SceneSession::SetSystemTouchable(bool touchable)
+{
+    Session::SetSystemTouchable(touchable);
+    NotifyAccessibilityVisibilityChange();
+}
+
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (!SessionPermission::VerifySessionPermission()) {
