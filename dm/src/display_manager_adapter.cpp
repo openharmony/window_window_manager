@@ -623,6 +623,13 @@ DMError ScreenManagerAdapter::SetResolution(ScreenId screenId, uint32_t width, u
     return displayManagerServiceProxy_->SetResolution(screenId, width, height, virtualPixelRatio);
 }
 
+DMError ScreenManagerAdapter::GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetDensityInCurResolution(screenId, virtualPixelRatio);
+}
+
 DMError ScreenManagerAdapter::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

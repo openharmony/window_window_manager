@@ -82,6 +82,7 @@ using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbility
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingWindowIdChangeFunc = std::function<void(uint32_t callingWindowId)>;
 using FlushWindowInfoTask = std::function<void()>;
+using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -231,6 +232,7 @@ public:
         const WSRect& rect, const WSRect& occupiedArea);
     void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
+    void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -450,6 +452,7 @@ private:
     ProcessShowPiPMainWindowFunc showPiPMainWindowFunc_;
     ProcessCallingWindowIdChangeFunc callingWindowIdChangeFunc_;
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
+    ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
