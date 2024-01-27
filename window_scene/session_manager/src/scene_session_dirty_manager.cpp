@@ -212,8 +212,9 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             continue;
         }
         WLOGFD("[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
-            " windowId = %{public}d", sceneSessionValue->GetWindowName().c_str(),
-            sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId());
+            " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
+            sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
+            sceneSessionValue->GetForegroundInteractiveStatus());
         if (IsFilterSession(sceneSessionValue)) {
             continue;
         }
