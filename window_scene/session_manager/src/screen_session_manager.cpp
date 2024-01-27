@@ -606,15 +606,28 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
     if (ret != DMError::DM_OK) {
         WLOGFE("Failed to setVirtualPixelRatio when settingResolution");
+        return ret;
     }
     {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
             screenId, width, height, virtualPixelRatio);
-        screenSession->UpdatePropertyByResolution(width, height);
+        screenSession->UpdatePropertyByResolution(width, height, virtualPixelRatio);
         screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("GetDensityInCurResolution: Get ScreenSession failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    virtualPixelRatio = screenSession->GetScreenProperty().GetDensityInCurResolution();
     return DMError::DM_OK;
 }
 
@@ -734,6 +747,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
         property.SetDefaultDensity(densityDpi_);
+        property.SetDensityInCurResolution(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
     }

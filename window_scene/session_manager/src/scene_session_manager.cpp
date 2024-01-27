@@ -6052,6 +6052,12 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
     return taskScheduler_->PostSyncTask(task, "UpdateSessionWindowVisibilityListener");
 }
 
+void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
+{
+    processVirtualPixelRatioChangeFunc_ = func;
+    WLOGFI("SetVirtualPixelRatioChangeListener");
+}
+
 void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -6061,6 +6067,12 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     }
     auto task = [this, displayInfo]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        if (processVirtualPixelRatioChangeFunc_ != nullptr) {
+            Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+                displayInfo->GetWidth(), displayInfo->GetHeight()
+            };
+            processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
+        }
         for (const auto &item : sceneSessionMap_) {
             auto scnSession = item.second;
             if (scnSession == nullptr) {

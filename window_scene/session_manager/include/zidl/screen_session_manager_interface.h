@@ -100,6 +100,8 @@ public:
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio) override { return DMError::DM_OK; }
+    virtual DMError GetDensityInCurResolution(ScreenId screenId,
+        float& virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width,
         uint32_t height) override { return DMError::DM_OK; }
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
