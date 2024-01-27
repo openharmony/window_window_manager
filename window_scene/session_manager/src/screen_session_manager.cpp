@@ -1091,7 +1091,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
 {
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
-    WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, screenId);
+    WLOGFI("GetScreenPower:%{public}u, screenId:%{public}" PRIu64".", state, screenId);
     return state;
 }
 
@@ -1357,7 +1357,7 @@ DMError ScreenSessionManager::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& s
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     std::vector<ScreenId> screenIds = GetAllScreenIds();
-    for (auto screenId: screenIds) {
+    for (auto screenId : screenIds) {
         auto screenInfo = GetScreenInfoById(screenId);
         if (screenInfo == nullptr) {
             WLOGE("SCB: ScreenSessionManager::GetAllScreenInfos cannot find screenInfo: %{public}" PRIu64"", screenId);
@@ -1534,7 +1534,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         smsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
         auto screenSession = InitVirtualScreen(smsScreenId, rsId, option);
         if (screenSession == nullptr) {
-            WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen screensession is nullptr");
+            WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen screenSession is nullptr");
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
@@ -2929,7 +2929,7 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     if (agents.empty()) {
         return;
     }
-    for (auto& agent: agents) {
+    for (auto& agent : agents) {
         agent->NotifyFoldStatusChanged(foldStatus);
     }
 }
@@ -2940,7 +2940,7 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
     if (agents.empty()) {
         return;
     }
-    for (auto& agent: agents) {
+    for (auto& agent : agents) {
         agent->NotifyDisplayChangeInfoChanged(info);
     }
 }
@@ -2952,7 +2952,7 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     if (agents.empty()) {
         return;
     }
-    for (auto& agent: agents) {
+    for (auto& agent : agents) {
         agent->NotifyDisplayModeChanged(displayMode);
     }
 }
@@ -3257,7 +3257,7 @@ void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
     if (agents.empty()) {
         return;
     }
-    for (auto& agent: agents) {
+    for (auto& agent : agents) {
         agent->NotifyAvailableAreaChanged(area);
     }
 }
