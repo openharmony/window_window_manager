@@ -6733,6 +6733,21 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         retSceneSessionMap = sceneSessionMap_;
     }
+    EraseIf(retSceneSessionMap, [this](const auto& pair) {
+        if (pair.second == nullptr) {
+            return true;
+        }
+
+        if (pair.second->IsSystemInput()) {
+            return false;
+        } else if (pair.second->IsSystemSession() && pair.second->IsVisible() && pair.second->IsSystemActive()) {
+            return false;
+        }
+        if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(pair.second)) {
+            return true;
+        }
+        return false;
+    });
     return retSceneSessionMap;
 }
 
