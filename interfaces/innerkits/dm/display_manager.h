@@ -279,7 +279,7 @@ public:
     bool Unfreeze(std::vector<DisplayId> displayIds);
 
     /**
-     * @brief Resgister a display listener.
+     * @brief Register a display listener.
      *
      * @param listener IDisplayListener.
      * @return DM_OK means register success, others means register failed.
@@ -303,7 +303,7 @@ public:
     DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
 
     /**
-     * @brief Unregiste an existed listener for display power events.
+     * @brief Unregister an existed listener for display power events.
      *
      * @param listener IDisplayPowerEventListener.
      * @return DM_OK means unregister success, others means unregister failed.
@@ -375,7 +375,7 @@ public:
     DMError UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
 
     /**
-     * @brief Register a listener for the event of dispaly mode changed.
+     * @brief Register a listener for the event of display mode changed.
      *
      * @param listener IDisplayModeListener.
      * @return DM_OK means register success, others means register failed.
@@ -383,7 +383,7 @@ public:
     DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
 
     /**
-     * @brief Unregister an existed listener for the event of dispaly mode changed.
+     * @brief Unregister an existed listener for the event of display mode changed.
      *
      * @param listener IDisplayModeListener.
      * @return DM_OK means unregister success, others means unregister failed.

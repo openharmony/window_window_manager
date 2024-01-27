@@ -137,7 +137,7 @@ public:
     /**
      * @brief Set screen active mode.
      *
-     * @param moddId Mode id.
+     * @param modeId Mode id.
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetScreenActiveMode(uint32_t modeId);

@@ -621,7 +621,7 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
     WLOGFD("GetAllDisplays start");
     std::vector<sptr<Display>> res;
     auto displayIds = GetAllDisplayIds();
-    for (auto displayId: displayIds) {
+    for (auto displayId : displayIds) {
         const sptr<Display> display = GetDisplayById(displayId);
         if (display != nullptr) {
             res.emplace_back(display);
