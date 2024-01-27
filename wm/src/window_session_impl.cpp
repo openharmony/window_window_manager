@@ -496,6 +496,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             if (window->rotationAnimationCount_ == 0) {
                 RSSystemProperties::SetDrawTextAsBitmap(false);
                 RSInterfaces::GetInstance().DisableCacheForRotation();
+                window->NotifyRotationAnimationEnd();
             }
         });
         if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
@@ -511,6 +512,14 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         }
         window->postTaskDone_ = true;
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
+}
+
+void WindowSessionImpl::NotifyRotationAnimationEnd()
+{
+    if (uiContent_ == nullptr) {
+        return;
+    }
+    uiContent_->NotifyRotationAnimationEnd();
 }
 
 void WindowSessionImpl::UpdateDensity()
