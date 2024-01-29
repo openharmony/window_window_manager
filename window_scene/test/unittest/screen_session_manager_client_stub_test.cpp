@@ -224,7 +224,8 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPowerStatusChanged, Functio
  * @tc.desc: HandleOnGetSurfaceNodeIdsFromMissionIdsChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnGetSurfaceNodeIdsFromMissionIdsChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientStubTest,
+    HandleOnGetSurfaceNodeIdsFromMissionIdsChanged, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
