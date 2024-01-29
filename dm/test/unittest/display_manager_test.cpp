@@ -533,33 +533,11 @@ HWTEST_F(DisplayManagerTest, OnDisplayCreate02, Function | SmallTest | Level1)
     DisplayManager::GetInstance().RegisterDisplayListener(listener);
     auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
     ASSERT_NE(displayManagerListener, nullptr);
+
     sptr<DisplayInfo> displayInfo = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        displayManagerListener->OnDisplayCreate(displayInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    displayManagerListener->OnDisplayCreate(displayInfo);
+    ASSERT_NE(displayManagerListener->pImpl_, nullptr);
 }
-
-/**
- * @tc.name: NotifyPrivateWindowStateChanged
- * @tc.desc: NotifyPrivateWindowStateChanged
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level1)
-{
-    bool hasPrivate = true;
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        DisplayManager::GetInstance().pImpl_->NotifyPrivateWindowStateChanged(hasPrivate);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
 
 /**
  * @tc.name: RegisterDisplayListener
@@ -569,6 +547,8 @@ HWTEST_F(DisplayManagerTest, NotifyPrivateWindowStateChanged, Function | SmallTe
 HWTEST_F(DisplayManagerTest, RegisterDisplayListener, Function | SmallTest | Level1)
 {
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
+    bool hasPrivate = true;
+    DisplayManager::GetInstance().pImpl_->NotifyPrivateWindowStateChanged(hasPrivate);
     auto ret = DisplayManager::GetInstance().RegisterDisplayListener(listener);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
@@ -632,42 +612,12 @@ HWTEST_F(DisplayManagerTest, IsFoldable, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, IsFoldable01, Function | SmallTest | Level1)
 {
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
+    FoldDisplayMode mode = FoldDisplayMode{0};
+    DisplayManager::GetInstance().SetFoldDisplayMode(mode);
+    DisplayManager::GetInstance().SetFoldStatusLocked(false);
     sptr<DisplayManager::Impl> impl_;
     auto ret = DisplayManager::GetInstance().pImpl_->IsFoldable();
     ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: SetFoldDisplayMode
- * @tc.desc: SetFoldDisplayMode
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, SetFoldDisplayMode, Function | SmallTest | Level1)
-{
-    FoldDisplayMode mode = FoldDisplayMode{0};
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        DisplayManager::GetInstance().SetFoldDisplayMode(mode);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetFoldStatusLocked
- * @tc.desc: SetFoldStatusLocked
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, SetFoldStatusLocked, Function | SmallTest | Level1)
-{
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        DisplayManager::GetInstance().SetFoldStatusLocked(false);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -692,24 +642,9 @@ HWTEST_F(DisplayManagerTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest 
 {
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
+    DisplayManager::GetInstance().OnRemoteDied();
     auto ret = DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(0, surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
-}
-
-/**
- * @tc.name: OnRemoteDied
- * @tc.desc: OnRemoteDied
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, OnRemoteDied, Function | SmallTest | Level1)
-{
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        DisplayManager::GetInstance().OnRemoteDied();
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
 }
 }
 } // namespace Rosen
