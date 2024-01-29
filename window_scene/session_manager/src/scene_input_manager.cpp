@@ -143,7 +143,8 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& w
             auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
             MMI::Direction displayRotation;
             if (screenSession && screenSession->GetDisplayNode()) {
-                displayRotation = ConvertDegreeToMMIRotation(screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
+                displayRotation = ConvertDegreeToMMIRotation(
+                    screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
                     static_cast<MMI::DisplayMode>(displayMode));
             } else {
                 displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
