@@ -131,41 +131,43 @@ void SceneInputManager::Init()
     }
 }
 
-void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& windowInfoList)
+void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
 {
     std::unordered_map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    auto ConstructDisplayInfos = [&](std::vector<MMI::DisplayInfo>& displayInfos) {
-        for (auto& iter: screensProperties) {
-            auto screenId = iter.first;
-            auto& screenProperty = iter.second;
-            auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-            MMI::Direction displayRotation;
-            if (screenSession && screenSession->GetDisplayNode()) {
-                displayRotation = ConvertDegreeToMMIRotation(
-                    screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
-                    static_cast<MMI::DisplayMode>(displayMode));
-            } else {
-                displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                    static_cast<MMI::DisplayMode>(displayMode));
-            }
-            MMI::DisplayInfo displayInfo = {
-                .id = screenId,
-                .x = screenProperty.GetOffsetX(),
-                .y = screenProperty.GetOffsetY(),
-                .width = screenProperty.GetBounds().rect_.GetWidth(),
-                .height = screenProperty.GetBounds().rect_.GetHeight(),
-                .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
-                .name = "display" + std::to_string(screenId),
-                .uniq = "default" + std::to_string(screenId),
-                .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                    static_cast<MMI::DisplayMode>(displayMode)),
-                .displayDirection = displayRotation,
-                .displayMode = static_cast<MMI::DisplayMode>(displayMode)};
-            displayInfos.emplace_back(displayInfo);
+    for (auto& iter: screensProperties) {
+        auto screenId = iter.first;
+        auto& screenProperty = iter.second;
+        auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
+        MMI::Direction displayRotation;
+        if (screenSession && screenSession->GetDisplayNode()) {
+            displayRotation = ConvertDegreeToMMIRotation(
+                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
+                static_cast<MMI::DisplayMode>(displayMode));
+        } else {
+            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
+                static_cast<MMI::DisplayMode>(displayMode));
         }
-    };
+        MMI::DisplayInfo displayInfo = {
+            .id = screenId,
+            .x = screenProperty.GetOffsetX(),
+            .y = screenProperty.GetOffsetY(),
+            .width = screenProperty.GetBounds().rect_.GetWidth(),
+            .height = screenProperty.GetBounds().rect_.GetHeight(),
+            .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
+            .name = "display" + std::to_string(screenId),
+            .uniq = "default" + std::to_string(screenId),
+            .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
+                static_cast<MMI::DisplayMode>(displayMode)),
+            .displayDirection = displayRotation,
+            .displayMode = static_cast<MMI::DisplayMode>(displayMode)};
+        displayInfos.emplace_back(displayInfo);
+    }
+}
+
+void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& windowInfoList)
+{
     std::vector<MMI::DisplayInfo> displayInfos;
     ConstructDisplayInfos(displayInfos);
     int mainScreenWidth = 0; 

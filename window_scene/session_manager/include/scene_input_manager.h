@@ -45,6 +45,7 @@ private:
     void Init();
     void FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& windowInfoList);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
+    void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
 
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
 };
