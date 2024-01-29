@@ -21,7 +21,9 @@ bool SceneBoardJudgement::IsSceneBoardEnabled()
 {
     static bool isSceneBoardEnabled = false;
     static bool initialized = false;
+    static std::mutex scbEnabledMutex;
     if (!initialized) {
+        std::lock_guard<std::mutex> lock(scbEnabledMutex);
         InitWithConfigFile("/etc/sceneboard.config", isSceneBoardEnabled);
         initialized = true;
     }
