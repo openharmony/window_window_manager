@@ -27,6 +27,11 @@ group("unittest") {
 }
 
 ohos_unittest("dm_display_lite_test") {
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
+
   module_out_path = module_out_path
 
   sources = [ "display_lite_test.cpp" ]
