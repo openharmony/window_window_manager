@@ -202,5 +202,53 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnImmersiveStateChanged, Func
     int ret = screenSessionManagerClientStub_->HandleOnImmersiveStateChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleOnPowerStatusChanged
+ * @tc.desc: HandleOnPowerStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPowerStatusChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    int ret = screenSessionManagerClientStub_->HandleOnPowerStatusChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnGetSurfaceNodeIdsFromMissionIdsChanged
+ * @tc.desc: HandleOnGetSurfaceNodeIdsFromMissionIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnGetSurfaceNodeIdsFromMissionIdsChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    int ret = screenSessionManagerClientStub_->HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnSetDisplayNodeScreenId
+ * @tc.desc: HandleOnSetDisplayNodeScreenId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSetDisplayNodeScreenId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    int ret = screenSessionManagerClientStub_->HandleOnSetDisplayNodeScreenId(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS
