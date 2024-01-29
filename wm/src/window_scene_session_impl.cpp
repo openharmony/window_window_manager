@@ -788,6 +788,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         RSTransaction::FlushImplicitTransaction();
     }
     NotifyWindowStatusChange(GetMode());
+    escKeyEventTriggered_ = false;
     WLOGFI("[WMSLife] Window hide success [id:%{public}d, type: %{public}d", property_->GetPersistentId(), type);
     return res;
 }
