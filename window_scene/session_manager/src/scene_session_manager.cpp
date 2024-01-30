@@ -3517,7 +3517,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
-    if (!sceneSession->IsSessionValid()) {
+    if (!IsSessionVisible(sceneSession)) {
         needBlockNotifyFocusStatusUntilForeground_ = true;
     }
     ShiftFocus(sceneSession);
@@ -4117,6 +4117,11 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         auto dialogSession = GetSceneSession(dialog->GetPersistentId());
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        if (dialog->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground_) {
+            needBlockNotifyUnfocusStatus_ = false;
+            needBlockNotifyFocusStatusUntilForeground_ = false;
+            NotifyFocusStatus(dialogSession, true);
+        }
         HandleKeepScreenOn(dialogSession, dialogSession->IsKeepScreenOn());
     }
 }
