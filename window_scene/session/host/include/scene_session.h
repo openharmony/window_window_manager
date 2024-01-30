@@ -164,8 +164,6 @@ public:
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
-    void SetSessionState(SessionState state) override;
-    WSError SetVisible(bool isVisible) override;
 
     int32_t GetCollaboratorType() const;
     sptr<IRemoteObject> GetSelfToken() const;
