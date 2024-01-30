@@ -1280,8 +1280,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
-    WLOGFI("[WMSLife]RequestSceneSessionActivationInner: want info sent to AMS - deviceId: %{public}s", \
-        abilityName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, uri: %{public}s,
+    WLOGFI("[WMSLife]RequestSceneSessionActivationInner: want info sent to AMS - deviceId: %{public}s, \
+        abilityName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, uri: %{public}s",
         scnSessionInfo->want.GetElement().GetDeviceID().c_str(),
         scnSessionInfo->want.GetElement().GetAbilityName().c_str(),
         scnSessionInfo->want.GetElement().GetBundleName().c_str(),
