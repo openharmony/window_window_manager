@@ -2455,13 +2455,13 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     info.uiAbilityId_ = 1;
     info.startSetting = nullptr;
     session_->SetSessionInfo(info);
-    ASSERT_EQ(nullptr ,session_->sessionInfo_.want);
-    ASSERT_EQ(nullptr ,session_->sessionInfo_.callerToken_);
-    ASSERT_EQ(1 ,session_->sessionInfo_.requestCode);
-    ASSERT_EQ(1 ,session_->sessionInfo_.callerPersistentId_);
-    ASSERT_EQ(1 ,session_->sessionInfo_.callingTokenId_);
-    ASSERT_EQ(1 ,session_->sessionInfo_.uiAbilityId_);
-    ASSERT_EQ(nullptr ,session_->sessionInfo_.startSetting);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.want);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
+    ASSERT_EQ(1, session_->sessionInfo_.requestCode);
+    ASSERT_EQ(1, session_->sessionInfo_.callerPersistentId_);
+    ASSERT_EQ(1, session_->sessionInfo_.callingTokenId_);
+    ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
 }
 
 /**
