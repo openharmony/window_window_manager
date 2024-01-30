@@ -33,6 +33,16 @@ namespace OHOS {
 namespace Rosen {
 constexpr int32_t RGB_LENGTH = 6;
 constexpr int32_t RGBA_LENGTH = 8;
+
+#define CHECK_NAPI_RETCODE(errCode, code, call)                                           \
+    do {                                                                                  \
+        napi_status retCode = (call);                                                     \
+        if (retCode != napi_ok) {                                                         \
+            WLOGFE("napi call failed, return %{public}d", static_cast<int32_t>(retCode)); \
+            errCode = code;                                                               \
+        }                                                                                 \
+    } while (0)
+
 enum class ApiWindowType : uint32_t {
     TYPE_BASE,
     TYPE_APP = TYPE_BASE,
