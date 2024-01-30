@@ -2341,6 +2341,142 @@ HWTEST_F(WindowSessionTest, SetSessionInfoCallerPersistentId010, Function | Smal
     session_->SetSessionInfoCallerPersistentId(callerPersistentId);
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: PostExportTask011
+ * @tc.desc: PostExportTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, PostExportTask011, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property->SetPersistentId(persistentId);
+    int32_t ret = session_->GetPersistentId();
+    ASSERT_EQ(ret, 0);
+    delete(property);
+}
+
+/**
+ * @tc.name: GetPersistentId012
+ * @tc.desc: GetPersistentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetPersistentId012, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property->SetPersistentId(persistentId);
+    int32_t ret = session_->GetPersistentId();
+    ASSERT_EQ(ret, 0);
+    delete(property);
+}
+
+/**
+ * @tc.name: SetLeashWinSurfaceNode013
+ * @tc.desc: SetLeashWinSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode013, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    auto leashWinSurfaceNode = WindowSessionTest::CreateRSSurfaceNode();
+    session_->SetLeashWinSurfaceNode(leashWinSurfaceNode);
+    ASSERT_EQ(session_->leashWinSurfaceNode_, leashWinSurfaceNode);
+}
+
+/**
+ * @tc.name: SetSessionInfoContinueState014
+ * @tc.desc: SetSessionInfoContinueState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoContinueState014, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    enum ContinueState state;
+    state = CONTINUESTATE_UNKNOWN;
+    session_->SetSessionInfoContinueState(state);
+    ASSERT_EQ(session_->sessionInfo_.continueState, state);
+}
+
+/**
+ * @tc.name: SetSessionInfoIsClearSession015
+ * @tc.desc: SetSessionInfoIsClearSession return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoIsClearSession015, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSessionInfoIsClearSession(false);
+    ASSERT_EQ(false, session_->sessionInfo_.isClearSession);
+}
+
+/**
+ * @tc.name: SetSessionInfoIsClearSession016
+ * @tc.desc: SetSessionInfoIsClearSession return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoIsClearSession016, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSessionInfoIsClearSession(true);
+    ASSERT_EQ(true, session_->sessionInfo_.isClearSession);
+}
+
+/**
+ * @tc.name: SetSessionInfoAffinity017
+ * @tc.desc: SetSessionInfoAffinity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfoAffinity017, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string affinity = "setSessionIofoAffinity";
+    session_->SetSessionInfoAffinity(affinity);
+    ASSERT_EQ(affinity, session_->sessionInfo_.sessionAffinity);
+}
+
+/**
+ * @tc.name: SetSessionInfo018
+ * @tc.desc: SetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.want = nullptr;
+    info.callerToken_ = nullptr;
+    info.requestCode = 1;
+    info.callerPersistentId_ = 1;
+    info.callingTokenId_ = 1;
+    info.uiAbilityId_ = 1;
+    info.startSetting = nullptr;
+    session_->SetSessionInfo(info);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.want);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
+    ASSERT_EQ(1, session_->sessionInfo_.requestCode);
+    ASSERT_EQ(1, session_->sessionInfo_.callerPersistentId_);
+    ASSERT_EQ(1, session_->sessionInfo_.callingTokenId_);
+    ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
+    ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
+}
+
+/**
+ * @tc.name: SetScreenId019
+ * @tc.desc: SetScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetScreenId019, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
