@@ -48,6 +48,8 @@ private:
     void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
 
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 }//Rosen
 }//OHOS
