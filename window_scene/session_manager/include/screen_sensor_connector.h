@@ -24,7 +24,9 @@
 #include "motion_callback_stub.h"
 #endif
 #include "screen_rotation_property.h"
+#ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
+#endif
 #include "window_manager_hilog.h"
 
 namespace OHOS {
