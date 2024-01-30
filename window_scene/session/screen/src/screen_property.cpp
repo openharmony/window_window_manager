@@ -73,6 +73,16 @@ void ScreenProperty::SetDefaultDensity(float defaultDensity)
     defaultDensity_ = defaultDensity;
 }
 
+float ScreenProperty::GetDensityInCurResolution() const
+{
+    return densityInCurResolution_;
+}
+
+void ScreenProperty::SetDensityInCurResolution(float densityInCurResolution)
+{
+    densityInCurResolution_ = densityInCurResolution;
+}
+
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
 {
     phyWidth_ = phyWidth;

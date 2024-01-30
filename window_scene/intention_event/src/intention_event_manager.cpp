@@ -188,7 +188,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 
     if (sceneSession->GetSessionInfo().isSystem_) {
-        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s"
+        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s "
             "action = %{public}d", pointerEvent->GetId(), windowId, sceneSession->GetSessionInfo().abilityName_.c_str(),
             action);
         sceneSession->SendPointerEventToUI(pointerEvent);

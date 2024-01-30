@@ -212,8 +212,9 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             continue;
         }
         WLOGFD("[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
-            " windowId = %{public}d", sceneSessionValue->GetWindowName().c_str(),
-            sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId());
+            " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
+            sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
+            sceneSessionValue->GetForegroundInteractiveStatus());
         if (IsFilterSession(sceneSessionValue)) {
             continue;
         }
@@ -239,6 +240,11 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         return {};
     }
 
+    if (sceneSession->GetSessionProperty() == nullptr) {
+        WLOGFE("SceneSession` property is nullptr");
+        return {};
+    }
+    
     Matrix3f tranform;
     WSRect windowRect = sceneSession->GetSessionRect();
     auto pid = sceneSession->GetCallingPid();

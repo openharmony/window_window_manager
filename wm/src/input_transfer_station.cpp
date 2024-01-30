@@ -70,7 +70,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
     uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
-    WLOGFI("InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, windowId:%{public}u"
+    WLOGFI("InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, windowId:%{public}u "
         "action = %{public}d", pointerEvent->GetId(), windowId, pointerEvent->GetPointerAction());
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {

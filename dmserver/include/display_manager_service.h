@@ -108,6 +108,8 @@ public:
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio) override { return DMError::DM_OK; }
+    DMError GetDensityInCurResolution(ScreenId screenId,
+        float& virtualPixelRatio) override { return DMError::DM_OK; }
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);

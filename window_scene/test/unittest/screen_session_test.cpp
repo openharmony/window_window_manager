@@ -28,6 +28,26 @@ class ScreenSessionTest : public testing::Test {
 
 namespace {
 /**
+ * @tc.name: SetDisplayNodeScreenId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNodeScreenId start";
+    ScreenId screenId = 0;
+    ScreenId rsId = 1;
+    std::string name = "OpenHarmony";
+    ScreenProperty property;
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    EXPECT_NE(nullptr, displayNode);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, rsId, name, property, displayNode);
+    session->SetDisplayNodeScreenId(screenId);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNodeScreenId end";
+}
+
+/**
  * @tc.name: UnregisterScreenChangeListener
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -41,6 +61,25 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener, Function | SmallTest
     session->UnregisterScreenChangeListener(screenChangeListener);
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UnregisterScreenChangeListener end";
+}
+
+/**
+ * @tc.name: ConvertToDisplayInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo start";
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    EXPECT_NE(displayInfo, nullptr);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session->ConvertToDisplayInfo());
+
+    sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
+    EXPECT_NE(info, nullptr);
+    EXPECT_NE(nullptr, session->ConvertToScreenInfo());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo end";
 }
 
 /**
@@ -93,6 +132,26 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, Function | SmallTest | Level2)
     ScreenSourceMode mode = session->GetSourceMode();
     ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode end";
+}
+
+/**
+ * @tc.name: SetScreenCombination
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenCombination start";
+    ScreenId screenId = 2024;
+    ScreenProperty property;
+    NodeId nodeId = 0;
+    ScreenId defaultScreenId = 0;
+    ScreenCombination combination { ScreenCombination::SCREEN_ALONE };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, nodeId, defaultScreenId);
+    session->SetScreenCombination(combination);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(combination, session->GetScreenCombination());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenCombination end";
 }
 
 /**
@@ -394,6 +453,30 @@ HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, Function | SmallTest 
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation end";
 }
 
+/**
+ * @tc.name: SetUpdateToInputManagerCallback
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallback start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    auto func = [session](float x) {
+        session->SetVirtualPixelRatio(x);
+    };
+    session->SetUpdateToInputManagerCallback(func);
+    EXPECT_NE(nullptr, &func);
+
+    ScreenProperty screenPropert = session->GetScreenProperty();
+    EXPECT_NE(nullptr, &screenPropert);
+    session->SetVirtualPixelRatio(3.14);
+     
+    ScreenType screenType { ScreenType::REAL };
+    session->SetScreenType(screenType);
+
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallbackend";
+}
 /**
  * @tc.name: SetScreenRotationLocked
  * @tc.desc: normal function
@@ -712,6 +795,141 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshot, Function | SmallTest | Level2)
     pixelmap = session->GetScreenSnapshot(1.0, 1.0);
     EXPECT_EQ(pixelmap, nullptr);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot end";
+}
+
+/**
+ * @tc.name: GetRSScreenId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetRSScreenId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId start";
+    ScreenProperty property;
+    sptr<ScreenSession> session = new(std::nothrow)
+        ScreenSession("OpenHarmony", 1, 100, 0);
+    EXPECT_EQ(100, session->GetRSScreenId());
+
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    session = new ScreenSession(1, 100, "OpenHarmony",
+        property, displayNode);
+    EXPECT_NE(nullptr, session->GetDisplayNode());
+    session->ReleaseDisplayNode();
+    EXPECT_EQ(nullptr, session->GetDisplayNode());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId end";
+}
+
+/**
+ * @tc.name: CalcRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
+    Orientation orientation { Orientation::BEGIN };
+    FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->activeIdx_ = -1;
+    auto res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
+    supportedScreenModes->width_ = 40;
+    supportedScreenModes->height_ = 20;
+    session->modes_ = { supportedScreenModes };
+    session->activeIdx_ = 0;
+
+    orientation = Orientation::UNSPECIFIED;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    orientation = Orientation::VERTICAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    orientation = Orientation::HORIZONTAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_90, res);
+
+    orientation = Orientation::REVERSE_VERTICAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_180, res);
+
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_270, res);
+
+    orientation = Orientation::LOCKED;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation end";
+}
+
+/**
+ * @tc.name: CalcDisplayOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
+    Rotation rotation { Rotation::ROTATION_0 };
+    FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->activeIdx_ = -1;
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::UNKNOWN, res);
+
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
+    supportedScreenModes->width_ = 40;
+    supportedScreenModes->height_ = 20;
+    session->modes_ = { supportedScreenModes };
+    session->activeIdx_ = 0;
+
+    rotation = Rotation::ROTATION_0;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
+
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
+
+    rotation = Rotation::ROTATION_180;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
+
+    rotation = Rotation::ROTATION_270;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
+
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
+}
+
+/**
+ * @tc.name: FillScreenInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, FillScreenInfo, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: FillScreenInfo start";
+    ScreenProperty property;
+    property.SetVirtualPixelRatio(3.1415927);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(2024, property, 0);
+    sptr<ScreenInfo> info = nullptr;
+    session->FillScreenInfo(info);
+
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
+    session->modes_ = { supportedScreenModes };
+    supportedScreenModes->width_ = 40;
+    supportedScreenModes->height_ = 20;
+    info = new ScreenInfo;
+    session->FillScreenInfo(info);
+    EXPECT_NE(nullptr, info);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: FillScreenInfo end";
 }
 } // namespace
 } // namespace Rosen

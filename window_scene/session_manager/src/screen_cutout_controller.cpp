@@ -51,7 +51,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     std::vector<DMRect> finalVector;
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
-        WLOGFE("displayInfo invaild");
+        WLOGFE("displayInfo invalid");
         boundaryRects = finalVector;
         return;
     }
@@ -106,7 +106,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
 void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo)
 {
     if (!displayInfo) {
-        WLOGFE("displayInfo invaild");
+        WLOGFE("displayInfo invalid");
         return;
     }
 
@@ -156,7 +156,7 @@ void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId)
 
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
-        WLOGFE("displayInfo invaild");
+        WLOGFE("displayInfo invalid");
         return;
     }
 
