@@ -28,9 +28,9 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerLite" };
 }
 
-class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
+class SessionManagerServiceLiteRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
-    explicit SessionManagerServiceRecoverListener() = default;
+    explicit SessionManagerServiceLiteRecoverListener() = default;
 
     virtual int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
@@ -215,7 +215,7 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     }
     if (!recoverListenerRegistered_) {
         recoverListenerRegistered_ = true;
-        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        smsRecoverListener_ = new SessionManagerServiceLiteRecoverListener();
         mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
     }
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
