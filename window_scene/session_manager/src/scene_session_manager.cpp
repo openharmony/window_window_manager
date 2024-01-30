@@ -1055,19 +1055,19 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
                 session->SetSessionInfoWant(sessionInfo.want);
                 WLOGFI("RequestSceneSession update want, persistentId:%{public}d", sessionInfo.persistentId_);
             } else {
-                UpdateCollaboratorSessionWant(session);
+                UpdateCollaboratorSessionWant(session, sessionInfo.persistentId_);
             }
         }
     }
 }
 
-void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& session)
+void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId)
 {
     if (session != nullptr) {
         if (session->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
             FillSessionInfo(session);
             if (CheckCollaboratorType(session->GetCollaboratorType())) {
-                PreHandleCollaborator(session);
+                PreHandleCollaborator(session, persistentId);
             }
         }
     }
@@ -1692,6 +1692,23 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     return false;
 }
 
+void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
+{
+    WLOGFI("[WMSRecover] Number of persistentIds need to be recovered = %{public}zu. CurrentUserId = "
+           "%{public}d", alivePersistentIds.size(), currentUserId_);
+    alivePersistentIds_ = alivePersistentIds;
+}
+
+bool SceneSessionManager::isNeedRecover(const int32_t persistentId)
+{
+    auto it = std::find(alivePersistentIds_.begin(), alivePersistentIds_.end(), persistentId);
+    if (it == alivePersistentIds_.end()) {
+        WLOGFW("[WMSRecover] recovered persistentId=%{public}d is not in alivePersistentIds_", persistentId);
+        return false;
+    }
+    return true;
+}
+
 WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
@@ -1700,7 +1717,9 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         WLOGFE("[WMSRecover] property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-
+    if (property->GetParentPersistentId() > 0 && !isNeedRecover(property->GetParentPersistentId())) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     auto pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
@@ -1861,6 +1880,9 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         WLOGFE("[WMSRecover] property is nullptr!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (!isNeedRecover(property->GetPersistentId())) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     SessionInfo sessionInfo = property->GetSessionInfo();
     sessionInfo.persistentId_ = property->GetPersistentId();
     sessionInfo.windowMode = static_cast<int32_t>(property->GetWindowMode());
@@ -1882,9 +1904,8 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         WLOGFE("[WMSRecover] Request sceneSession failed");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+    auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
     if (ret != WSError::WS_OK) {
         WLOGFE("[WMSRecover] Reconnect failed");
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -1892,7 +1913,6 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         return ret;
     }
     sessionInfo.sessionState_ = sceneSession->GetSessionState();
-    WLOGFI("[WMSRecover] sessionState=%{public}d", sessionInfo.sessionState_);
     if (recoverSceneSessionFunc_) {
         recoverSceneSessionFunc_(sceneSession, sessionInfo);
     } else {
@@ -2068,8 +2088,9 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             if (sceneSession == nullptr) {
                 continue;
             }
-            if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
-                sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
+            if (!(sceneSession->IsVisible() ||
+                sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                sceneSession->GetSessionState() == SessionState::STATE_ACTIVE)) {
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();
@@ -5250,8 +5271,8 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
             WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
                 "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
                 sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
-                sceneSession->GetSessionState(), sceneSession->IsVisible());
-            if (IsSessionVisible(sceneSession)) {
+                sceneSession->GetSessionState(), sceneSession->IsVisibleForAccessibility());
+            if (sceneSession->IsVisibleForAccessibility()) {
                 FillWindowInfo(infos, iter->second);
             }
         }
@@ -5300,8 +5321,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
-        || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos
-        || sceneSession->GetSessionInfo().bundleName_.find("SCBScenePanel") != std::string::npos) {
+        || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
         WLOGFD("filter gesture window.");
         return false;
     }
@@ -6032,6 +6052,12 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
     return taskScheduler_->PostSyncTask(task, "UpdateSessionWindowVisibilityListener");
 }
 
+void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
+{
+    processVirtualPixelRatioChangeFunc_ = func;
+    WLOGFI("SetVirtualPixelRatioChangeListener");
+}
+
 void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -6041,6 +6067,12 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     }
     auto task = [this, displayInfo]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        if (processVirtualPixelRatioChangeFunc_ != nullptr) {
+            Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+                displayInfo->GetWidth(), displayInfo->GetHeight()
+            };
+            processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
+        }
         for (const auto &item : sceneSessionMap_) {
             auto scnSession = item.second;
             if (scnSession == nullptr) {
@@ -6423,7 +6455,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     return resultValue;
 }
 
-BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
+BrokerStates SceneSessionManager::NotifyStartAbility(
+    int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
     WLOGFI("run NotifyStartAbility");
     auto iter = collaboratorMap_.find(collaboratorType);
@@ -6448,6 +6481,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, c
             WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
+        sessionInfo.want->SetParam("oh_persistentId", persistentId);
         int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
         WLOGFI("NotifyStartAbility ret: %{public}d", ret);
@@ -6553,7 +6587,7 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession)
+void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     WLOGFI("run PreHandleCollaborator");
     if (sceneSession == nullptr) {
@@ -6567,7 +6601,8 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     }
     if (sessionAffinity.empty()) {
         WLOGFI("PreHandleCollaborator sessionAffinity: %{public}s", sessionAffinity.c_str());
-        BrokerStates notifyReturn = NotifyStartAbility(sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo());
+        BrokerStates notifyReturn = NotifyStartAbility(
+            sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
             WLOGFI("PreHandleCollaborator cant notify");
             return;

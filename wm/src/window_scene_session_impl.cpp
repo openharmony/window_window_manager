@@ -466,6 +466,10 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
             WLOGFW("[WMSRecover] promoteThis is nullptr");
             return;
         }
+        if (promoteThis->state_ == WindowState::STATE_DESTROYED) {
+            WLOGFW("[WMSRecover] windowState is STATE_DESTROYED, no need to recover");
+            return;
+        }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
@@ -784,6 +788,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         RSTransaction::FlushImplicitTransaction();
     }
     NotifyWindowStatusChange(GetMode());
+    escKeyEventTriggered_ = false;
     WLOGFI("[WMSLife] Window hide success [id:%{public}d, type: %{public}d", property_->GetPersistentId(), type);
     return res;
 }
@@ -923,7 +928,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     }
 
     WMError ret = WMError::WM_OK;
-    if (WindowHelper::IsMainWindow(GetType()) && state_ == WindowState::STATE_HIDDEN) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         if (hostSession_ != nullptr) {
             ret = static_cast<WMError>(hostSession_->Disconnect(true));
         }

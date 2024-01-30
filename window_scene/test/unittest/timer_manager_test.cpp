@@ -270,6 +270,83 @@ HWTEST_F(TimerManagerTest, ANRManagerGetBundleName, Function | SmallTest | Level
     delete anrManager;
     GTEST_LOG_(INFO) << "ANRManager::GetBundleName end";
 }
+
+/**
+ * @tc.name: AddTimer001
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, AddTimer001, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "AddTimer001::ProcessTimersInternal start";
+    TimerManager* timermanager = new TimerManager();
+    int32_t intervalMs = 1;
+    std::function<void()> callback;
+    int32_t res = timermanager->AddTimer(intervalMs, callback);
+    ASSERT_EQ(res, -1);
+    timermanager->state_ = TimerMgrState::STATE_RUNNING;
+    res = timermanager->AddTimer(intervalMs, callback);
+    ASSERT_EQ(res, timermanager->AddTimerInternal(intervalMs, callback));
+    delete(timermanager);
+    GTEST_LOG_(INFO) << "AddTimer001::ProcessTimersInternal start";
+}
+
+/**
+ * @tc.name: ProcessTimers002
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, ProcessTimers002, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ProcessTimers002::ProcessTimersInternal start";
+    TimerManager* timermanager = new TimerManager();
+    int res = 0;
+    std::function<void()> func = [&]() {
+        timermanager->ProcessTimers();
+        res = 1;
+    };
+    func();
+    ASSERT_EQ(res, 1);
+    delete(timermanager);
+    GTEST_LOG_(INFO) << "ProcessTimers002::ProcessTimersInternal start";
+}
+
+/**
+ * @tc.name: OnStop003
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, OnStop003, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "OnStop003::ProcessTimersInternal start";
+    TimerManager* timermanager = new TimerManager();
+    int res = 0;
+    std::function<void()> func = [&]() {
+        timermanager->OnStop();
+        res = 1;
+    };
+    func();
+    ASSERT_EQ(res, 1);
+    delete(timermanager);
+    GTEST_LOG_(INFO) << "OnStop003::ProcessTimersInternal start";
+}
+
+/**
+ * @tc.name: AddTimerInternal004
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, AddTimerInternal004, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "AddTimerInternal004::ProcessTimersInternal start";
+    TimerManager* timermanager = new TimerManager();
+    int32_t intervalMs = 1;
+    std::function<void()> callback;
+    int32_t res = timermanager->AddTimerInternal(intervalMs, callback);
+    ASSERT_EQ(res, -1);
+    delete(timermanager);
+    GTEST_LOG_(INFO) << "AddTimerInternal004::ProcessTimersInternal start";
+}
 }
 }
 }

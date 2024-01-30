@@ -112,6 +112,209 @@ HWTEST_F(WindowTransitionInfoTest, Marshalling01, Function | SmallTest | Level2)
     result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
 }
+
+/**
+ * @tc.name: GetBundleName
+ * @tc.desc: WindowTransitionInfo::GetBundleName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetBundleName, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    std::string name = "bundleNameValue";
+    winTransitionInfo->SetBundleName(name);
+    auto ret = winTransitionInfo->GetBundleName();
+    ASSERT_EQ(ret, name);
+}
+
+/**
+ * @tc.name: GetAbilityName
+ * @tc.desc: WindowTransitionInfo::GetAbilityName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetAbilityName, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    std::string name = "abilityNameValue";
+    winTransitionInfo->SetAbilityName(name);
+    auto ret = winTransitionInfo->GetAbilityName();
+    ASSERT_EQ(ret, name);
+}
+
+/**
+ * @tc.name: GetWindowMode
+ * @tc.desc: WindowTransitionInfo::GetWindowMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetWindowMode, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    WindowMode mode = WindowMode{1};
+    winTransitionInfo->SetWindowMode(mode);
+    auto ret = winTransitionInfo->GetWindowMode();
+    ASSERT_EQ(ret, mode);
+}
+
+/**
+ * @tc.name: GetWindowRect
+ * @tc.desc: WindowTransitionInfo::GetWindowRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetWindowRect, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    Rect rect = {0, 0, 50, 100};
+    winTransitionInfo->SetWindowRect(rect);
+    auto ret = winTransitionInfo->GetWindowRect();
+    ASSERT_EQ(ret, rect);
+}
+
+/**
+ * @tc.name: GetAbilityToken
+ * @tc.desc: WindowTransitionInfo::GetAbilityToken test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    sptr<IRemoteObject> abilityToken;
+    winTransitionInfo->SetAbilityToken(abilityToken);
+    auto ret = winTransitionInfo->GetAbilityToken();
+    ASSERT_EQ(ret, abilityToken);
+}
+
+/**
+ * @tc.name: GetDisplayId
+ * @tc.desc: WindowTransitionInfo::GetDisplayId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetDisplayId, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    winTransitionInfo->SetDisplayId(0);
+    auto ret = winTransitionInfo->GetDisplayId();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetWindowType
+ * @tc.desc: WindowTransitionInfo::GetWindowType test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetWindowType, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    WindowType windowType = WindowType{1};
+    winTransitionInfo->SetWindowType(windowType);
+    auto ret = winTransitionInfo->GetWindowType();
+    ASSERT_EQ(ret, windowType);
+}
+
+/**
+ * @tc.name: GetShowFlagWhenLocked
+ * @tc.desc: WindowTransitionInfo::GetShowFlagWhenLocked test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    winTransitionInfo->SetShowFlagWhenLocked(false);
+    auto ret = winTransitionInfo->GetShowFlagWhenLocked();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetIsRecent
+ * @tc.desc: WindowTransitionInfo::GetIsRecent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetIsRecent, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    winTransitionInfo->SetIsRecent(false);
+    auto ret = winTransitionInfo->GetIsRecent();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetApiCompatibleVersion
+ * @tc.desc: WindowTransitionInfo::GetApiCompatibleVersion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    auto ret = winTransitionInfo->GetApiCompatibleVersion();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetMissionId
+ * @tc.desc: WindowTransitionInfo::GetMissionId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetMissionId, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+
+    Parcel parcel;
+    sptr<WindowTransitionInfo> winTransitionInfo = new WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+    winTransitionInfo->SetMissionId(0);
+    auto ret = winTransitionInfo->GetMissionId();
+    ASSERT_EQ(ret, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

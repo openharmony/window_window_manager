@@ -49,7 +49,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         WLOGFE("Write IWindowEventChannel failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!surfaceNode->Marshalling(data)) {
+    if (!surfaceNode || !surfaceNode->Marshalling(data)) {
         WLOGFE("Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

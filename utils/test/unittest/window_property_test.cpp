@@ -413,6 +413,472 @@ HWTEST_F(WindowPropertyTest, SetDecorEnable, Function | SmallTest | Level2)
     func();
     ASSERT_EQ(resultValue, 1);
 }
+
+/**
+ * @tc.name: AddWindowFlag001
+ * @tc.desc: AddWindowFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, AddWindowFlag001, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    int resultValue = 0;
+    WindowFlag flag = WindowFlag::WINDOW_FLAG_NEED_AVOID;
+    std::function<void()> func = [&]() {
+        winPropSrc.AddWindowFlag(flag);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetRequestRect002
+ * @tc.desc: GetRequestRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetRequestRect001, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    Rect requestRect { 0, 0, 0, 0 };
+    winPropSrc.SetRequestRect(requestRect);
+    Rect res = winPropSrc.GetRequestRect();
+    ASSERT_EQ(res, requestRect);
+}
+
+/**
+ * @tc.name: GetWindowSizeChangeReason003
+ * @tc.desc: GetWindowSizeChangeReason test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetWindowSizeChangeReason003, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    winPropSrc.SetWindowSizeChangeReason(reason);
+    WindowSizeChangeReason res = winPropSrc.GetWindowSizeChangeReason();
+    ASSERT_EQ(res, reason);
+}
+
+/**
+ * @tc.name: GetFullScreen004
+ * @tc.desc: GetFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFullScreen004, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isFullScreen = true;
+    winPropSrc.SetFullScreen(isFullScreen);
+    bool res = winPropSrc.GetFullScreen();
+    ASSERT_EQ(res, isFullScreen);
+}
+
+/**
+ * @tc.name: GetFocusable005
+ * @tc.desc: GetFocusable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFocusable005, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isFocusable = true;
+    winPropSrc.SetFocusable(isFocusable);
+    bool res = winPropSrc.GetFocusable();
+    ASSERT_EQ(res, isFocusable);
+}
+
+/**
+ * @tc.name: GetTouchable006
+ * @tc.desc: GetTouchable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetTouchable006, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isTouchable = true;
+    winPropSrc.SetTouchable(isTouchable);
+    bool res = winPropSrc.GetFocusable();
+    ASSERT_EQ(res, isTouchable);
+}
+
+/**
+ * @tc.name: GetCallingWindow007
+ * @tc.desc: GetCallingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetCallingWindow007, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t windowId = 1;
+    winPropSrc.SetCallingWindow(windowId);
+    uint32_t res = winPropSrc.GetCallingWindow();
+    ASSERT_EQ(res, windowId);
+}
+
+/**
+ * @tc.name: GetPrivacyMode008
+ * @tc.desc: GetPrivacyMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetPrivacyMode008, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isPrivate = true;
+    winPropSrc.SetPrivacyMode(isPrivate);
+    bool res = winPropSrc.GetPrivacyMode();
+    ASSERT_EQ(res, isPrivate);
+}
+
+/**
+ * @tc.name: GetSystemPrivacyMode009
+ * @tc.desc: GetSystemPrivacyMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetSystemPrivacyMode009, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isSystemPrivate = true;
+    winPropSrc.SetSystemPrivacyMode(isSystemPrivate);
+    bool res = winPropSrc.GetSystemPrivacyMode();
+    ASSERT_EQ(res, isSystemPrivate);
+}
+
+/**
+ * @tc.name: GetSnapshotSkip010
+ * @tc.desc: GetSnapshotSkip test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetSnapshotSkip010, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool isSkip = true;
+    winPropSrc.SetSnapshotSkip(isSkip);
+    bool res = winPropSrc.GetSnapshotSkip();
+    ASSERT_EQ(res, isSkip);
+}
+
+/**
+ * @tc.name: GetAlpha011
+ * @tc.desc: GetAlpha test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetAlpha011, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    float alpha = 1;
+    winPropSrc.SetAlpha(alpha);
+    float res = winPropSrc.GetAlpha();
+    ASSERT_EQ(res, alpha);
+}
+
+/**
+ * @tc.name: GetBrightness012
+ * @tc.desc: GetBrightness test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetBrightness012, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    float brightness = 1;
+    winPropSrc.SetBrightness(brightness);
+    float res = winPropSrc.GetBrightness();
+    ASSERT_EQ(res, brightness);
+}
+
+/**
+ * @tc.name: IsTurnScreenOn013
+ * @tc.desc: IsTurnScreenOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, IsTurnScreenOn013, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool turnScreenOn = true;
+    winPropSrc.SetTurnScreenOn(turnScreenOn);
+    bool res = winPropSrc.IsTurnScreenOn();
+    ASSERT_EQ(res, turnScreenOn);
+}
+
+/**
+ * @tc.name: IsKeepScreenOn014
+ * @tc.desc: IsKeepScreenOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, IsKeepScreenOn014, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool keepScreenOn = true;
+    winPropSrc.SetKeepScreenOn(keepScreenOn);
+    bool res = winPropSrc.IsKeepScreenOn();
+    ASSERT_EQ(res, keepScreenOn);
+}
+
+/**
+ * @tc.name: GetWindowFlags015
+ * @tc.desc: GetWindowFlags test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetWindowFlags015, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t flags = 1;
+    winPropSrc.SetWindowFlags(flags);
+    uint32_t res = winPropSrc.GetWindowFlags();
+    ASSERT_EQ(res, flags);
+}
+
+/**
+ * @tc.name: GetSystemBarProperty016
+ * @tc.desc: GetSystemBarProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetSystemBarProperty016, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    SystemBarProperty property;
+    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    winPropSrc.SetSystemBarProperty(type, property);
+    std::unordered_map<WindowType, SystemBarProperty> res = winPropSrc.GetSystemBarProperty();
+    ASSERT_EQ(res[type], property);
+}
+
+/**
+ * @tc.name: GetStretchable017
+ * @tc.desc: GetHitOffset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetStretchable017, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool stretchable = true;
+    winPropSrc.SetStretchable(stretchable);
+    bool res = winPropSrc.GetStretchable();
+    ASSERT_EQ(res, stretchable);
+}
+
+/**
+ * @tc.name: GetAnimationFlag018
+ * @tc.desc: GetAnimationFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetAnimationFlag018, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t animationFlag = 1;
+    winPropSrc.SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc.GetAnimationFlag();
+    ASSERT_EQ(res, animationFlag);
+}
+
+/**
+ * @tc.name: GetModeSupportInfo019
+ * @tc.desc: GetModeSupportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetModeSupportInfo019, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t modeSupportInfo = 1;
+    winPropSrc.SetModeSupportInfo(modeSupportInfo);
+    uint32_t res = winPropSrc.GetModeSupportInfo();
+    ASSERT_EQ(res, modeSupportInfo);
+}
+
+/**
+ * @tc.name: GetRequestModeSupportInfo020
+ * @tc.desc: GetRequestModeSupportInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetRequestModeSupportInfo020, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t requestModeSupportInfo = 1;
+    winPropSrc.SetRequestModeSupportInfo(requestModeSupportInfo);
+    uint32_t res = winPropSrc.GetRequestModeSupportInfo();
+    ASSERT_EQ(res, requestModeSupportInfo);
+}
+
+/**
+ * @tc.name: GetTokenState021
+ * @tc.desc: GetTokenState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetTokenState021, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    bool hasToken = true;
+    winPropSrc.SetTokenState(hasToken);
+    bool res = winPropSrc.GetTokenState();
+    ASSERT_EQ(res, hasToken);
+}
+
+/**
+ * @tc.name: GetDragType022
+ * @tc.desc: GetDragType test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetDragType022, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    DragType dragType = DragType::DRAG_UNDEFINED;
+    winPropSrc.SetDragType(dragType);
+    DragType res = winPropSrc.GetDragType();
+    ASSERT_EQ(res, dragType);
+}
+
+/**
+ * @tc.name: GetOriginRect023
+ * @tc.desc: GetOriginRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetOriginRect023, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    Rect rect = { 0, 0, 0, 0 };
+    winPropSrc.SetOriginRect(rect);
+    Rect res = winPropSrc.GetOriginRect();
+    ASSERT_EQ(res, rect);
+}
+
+/**
+ * @tc.name: SetTouchHotAreas028
+ * @tc.desc: SetTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetTouchHotAreas028, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    std::vector<Rect> rects;
+    winPropSrc.SetTouchHotAreas(rects);
+    winPropSrc.GetTouchHotAreas(rects);
+    ASSERT_EQ(rects, winPropSrc.touchHotAreas_);
+}
+
+/**
+ * @tc.name: SetAspectRatio029
+ * @tc.desc: SetAspectRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetAspectRatio029, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    float ratio = 1;
+    winPropSrc.SetAspectRatio(ratio);
+    float res = winPropSrc.GetAspectRatio();
+    ASSERT_EQ(res, ratio);
+}
+
+/**
+ * @tc.name: SetMaximizeMode030
+ * @tc.desc: SetMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetMaximizeMode030, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    MaximizeMode maximizeMode = { MaximizeMode::MODE_RECOVER };
+    winPropSrc.SetMaximizeMode(maximizeMode);
+    MaximizeMode res = winPropSrc.GetMaximizeMode();
+    ASSERT_EQ(res, maximizeMode);
+}
+
+/**
+ * @tc.name: GetAccessTokenId031
+ * @tc.desc: GetAccessTokenId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetAccessTokenId031, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    uint32_t accessTokenId = 1;
+    winPropSrc.SetAccessTokenId(accessTokenId);
+    uint32_t res = winPropSrc.GetAccessTokenId();
+    ASSERT_EQ(res, accessTokenId);
+}
+
+/**
+ * @tc.name: SetWindowGravity032
+ * @tc.desc: SetWindowGravity test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetAccessTokenId032, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    uint32_t percent = 1;
+    winPropSrc.SetWindowGravity(gravity, percent);
+    winPropSrc.GetWindowGravity(gravity, percent);
+    ASSERT_EQ(gravity, winPropSrc.windowGravity_);
+    ASSERT_EQ(percent, winPropSrc.windowGravitySizePercent_);
+}
+
+/**
+ * @tc.name: Write033
+ * @tc.desc: Write test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, Write033, Function | SmallTest | Level2)
+{
+    WindowProperty winPropDst;
+    Parcel parcel;
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE));
+}
+
+/**
+ * @tc.name: Read034
+ * @tc.desc: Read test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, Read034, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    winPropSrc.SetPrivacyMode(true);
+    winPropSrc.SetTransparent(true);
+
+    Parcel parcel;
+    winPropSrc.Marshalling(parcel);
+
+    WindowProperty winPropDst;
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+
+    ASSERT_EQ(false, winPropDst.GetPrivacyMode());
+    ASSERT_EQ(false, winPropDst.GetTransparent());
+}
+
+/**
+ * @tc.name: GetTextFieldPositionY035
+ * @tc.desc: GetTextFieldPositionY test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetTextFieldPositionY035, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    double textFieldPositionY = 1;
+    winPropSrc.SetTextFieldPositionY(textFieldPositionY);
+    double res = winPropSrc.GetTextFieldPositionY();
+    ASSERT_EQ(res, textFieldPositionY);
+}
+
+/**
+ * @tc.name: GetTextFieldHeight036
+ * @tc.desc: GetTextFieldHeight test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetTextFieldHeight36, Function | SmallTest | Level2)
+{
+    WindowProperty winPropSrc;
+    double textFieldHeight = 1;
+    winPropSrc.SetTextFieldHeight(textFieldHeight);
+    double res = winPropSrc.GetTextFieldHeight();
+    ASSERT_EQ(res, textFieldHeight);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

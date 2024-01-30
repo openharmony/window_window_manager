@@ -652,6 +652,7 @@ private:
     }
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool needNotifyFocusLater_ = false;
+    bool escKeyEventTriggered_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

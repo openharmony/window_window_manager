@@ -960,6 +960,17 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
     SceneSessionManager::GetInstance().SetDumpRootSceneElementInfoListener(func);
 }
 
+void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
+{
+    ProcessVirtualPixelRatioChangeFunc func = [this](float density, const Rect& rect) {
+        WLOGFI("VirtualPixelRatioChangeListener %{public}d,%{public}d,%{public}d,%{public}d; %{public}f",
+            rect.posX_, rect.posY_, rect.width_, rect.height_, density);
+        RootScene::staticRootScene_->SetDisplayDensity(density);
+        RootScene::staticRootScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+    };
+    SceneSessionManager::GetInstance().SetVirtualPixelRatioChangeListener(func);
+}
+
 napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]OnGetRootSceneSession");
@@ -975,6 +986,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
+    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, env, storage, context);
@@ -1843,6 +1855,14 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
         return NapiGetUndefined(env);
     }
     WLOGFD("[NAPI]IsRecovering: %{public}u", isRecovering);
+    // Recovered sessions persistentId list as second argument
+    std::vector<int32_t> recoveredPersistentIds;
+    if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
+        WLOGFE("[NAPI]Failed to convert recovered persistentId array");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     if (!isRecovering) {
         // Sceneboard recover finished
         if (argc != ARGC_TWO) {
@@ -1851,17 +1871,10 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
                                 "Recovered persistentId List not received"));
             return NapiGetUndefined(env);
         }
-        // Recovered sessions persistentId list as second argument
-        std::vector<int32_t> recoveredPersistentIds;
-        if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
-            WLOGFE("[NAPI]Failed to convert recovered persistentId array");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-
         SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
         SceneSessionManager::GetInstance().NotifyRecoveringFinished();
+    } else {
+        SceneSessionManager::GetInstance().SetAlivePersistentIds(recoveredPersistentIds);
     }
     SceneSessionManager::GetInstance().SetEnableInputEvent(!isRecovering);
 

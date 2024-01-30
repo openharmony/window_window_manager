@@ -260,6 +260,11 @@ DMError Screen::SetResolution(uint32_t width, uint32_t height, uint32_t dpi) con
     return SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(GetId(), width, height, density);
 }
 
+DMError Screen::GetDensityInCurResolution(float& virtualPixelRatio) const
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetDensityInCurResolution(GetId(), virtualPixelRatio);
+}
+
 sptr<ScreenInfo> Screen::GetScreenInfo() const
 {
     UpdateScreenInfo();
