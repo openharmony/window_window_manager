@@ -3392,7 +3392,8 @@ napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback
                 WLOGFE("Invalid parameter, failed to convert parameter to enabled");
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
-                napi_get_value_bool(env, nativeVal, &enabled);
+                CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                    napi_get_value_bool(env, nativeVal, &enabled));
             }
         }
     }
