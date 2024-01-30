@@ -24,10 +24,13 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorConnector"};
+
+#ifdef SENSOR_ENABLE
     constexpr int64_t ORIENTATION_SENSOR_SAMPLING_RATE = 200000000; // 200ms
     constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 0;
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
+#endif
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     constexpr int32_t MOTION_ACTION_PORTRAIT = 0;
