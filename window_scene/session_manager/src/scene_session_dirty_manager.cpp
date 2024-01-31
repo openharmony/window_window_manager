@@ -236,7 +236,10 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         WLOGFE("sceneSession is nullptr");
         return {};
     }
-
+    if (sceneSession->GetSessionProperty() == nullptr) {
+        WLOGFE("SceneSession` property is nullptr");
+        return {};
+    }
     Matrix3f tranform;
     WSRect windowRect = sceneSession->GetSessionRect();
     auto pid = sceneSession->GetCallingPid();
