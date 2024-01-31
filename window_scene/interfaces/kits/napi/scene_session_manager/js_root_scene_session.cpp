@@ -253,18 +253,20 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         WLOGFI("[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
         if (isNeedBackToOther) {
             int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
-            WLOGFI("[NAPI]need to back to other session: %{public}d", realCallerSessionId);
-            if (sceneSession != nullptr) {
-                sceneSession->SetSessionInfoCallerPersistentId(realCallerSessionId);
+            if (realCallerSessionId == sceneSession->GetPersistentId()) {
+                WLOGFI("[NAPI]caller is self, need back to self caller.");
+                auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
+                if (scnSession != nullptr) {
+                    realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
+                }
             }
+            WLOGFI("[NAPI]need to back to other session: %{public}d.", realCallerSessionId);
             info.callerPersistentId_ = realCallerSessionId;
         } else {
             info.callerPersistentId_ = 0;
-            if (sceneSession != nullptr) {
-                sceneSession->SetSessionInfoCallerPersistentId(0);
-            }
         }
     }
+    sceneSession->SetSessionInfo(info);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
@@ -298,8 +300,6 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
                 WLOGFE("RequestSceneSession return nullptr");
                 return sceneSession;
             }
-        } else {
-            sceneSession->SetSessionInfo(info);
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
@@ -309,7 +309,6 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             WLOGFE("GetSceneSession return nullptr");
             return sceneSession;
         }
-        sceneSession->SetSessionInfo(info);
     }
     return sceneSession;
 }
