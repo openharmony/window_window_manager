@@ -2289,6 +2289,11 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
+    auto sessionGravity = static_cast<SessionGravity>(gravity);
+    WLOGFI("[WMSInput] Set window gravity: %{public}" PRIu32 ", percent: %{public}" PRIu32, sessionGravity, percent);
+    if (property_ != nullptr) {
+        property_->SetSessionGravity(sessionGravity, percent);
+    }
     return SingletonContainer::Get<WindowAdapter>().SetSessionGravity(GetPersistentId(),
         static_cast<SessionGravity>(gravity), percent);
 }
