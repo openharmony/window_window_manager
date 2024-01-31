@@ -1846,17 +1846,6 @@ void SceneSessionManager::RecoverWindowSessionProperty(
             callingSession->NotifyOccupiedAreaChangeInfo(info);
         }
     } else {
-        const auto& rect = property->GetWindowRect();
-        const auto& requestRect = sceneSession->GetSessionProperty()->GetRequestRect();
-        Rect newRect = { requestRect.posX_, requestRect.posY_, rect.width_, rect.height_ };
-        sceneSession->GetSessionProperty()->SetRequestRect(newRect);
-        auto wsRectSize = SessionHelper::TransferToWSRect(newRect);
-        sceneSession->UpdateSessionRect(wsRectSize, SizeChangeReason::RESIZE);
-
-        sceneSession->GetSessionProperty()->SetRequestRect(rect);
-        auto wsRectPos = SessionHelper::TransferToWSRect(rect);
-        sceneSession->UpdateSessionRect(wsRectPos, SizeChangeReason::MOVE);
-
         auto persistentId = sceneSession->GetPersistentId();
         if (persistentId == callingWindowId_) {
             WLOGFI("[WMSRecover] NotifyOccupiedAreaChangeInfo after calling session recovered,"
