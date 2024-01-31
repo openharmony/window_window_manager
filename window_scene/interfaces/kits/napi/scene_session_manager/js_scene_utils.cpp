@@ -769,9 +769,9 @@ void NapiAsyncWork(napi_env env, std::function<void()> task)
         AsyncInfo* info = (AsyncInfo*)data;
         info->func();
         napi_delete_async_work(env, info->work);
+        delete info;
     }, (void*)info, &info->work);
     napi_queue_async_work(env, info->work);
-    delete info;
 }
 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
