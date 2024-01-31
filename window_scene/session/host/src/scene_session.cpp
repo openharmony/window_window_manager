@@ -1800,25 +1800,9 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
     return selfToken_;
 }
 
-void SceneSession::SetSessionState(SessionState state)
-{
-    Session::SetSessionState(state);
-    NotifyAccessibilityVisibilityChange();
-}
-
-WSError SceneSession::SetVisible(bool isVisible)
-{
-    WSError err = Session::SetVisible(isVisible);
-    NotifyAccessibilityVisibilityChange();
-    return err;
-}
-
-
 bool SceneSession::IsVisibleForAccessibility() const
 {
-    return GetSystemTouchable() && GetForegroundInteractiveStatus() &&
-        (IsVisible() || GetSessionState() == SessionState::STATE_ACTIVE ||
-        GetSessionState() == SessionState::STATE_FOREGROUND);
+    return GetSystemTouchable() && GetForegroundInteractiveStatus();
 }
 
 void SceneSession::SetForegroundInteractiveStatus(bool interactive)
