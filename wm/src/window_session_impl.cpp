@@ -698,22 +698,31 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         WLOGFE("[WMSLife]fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    OHOS::Ace::UIContentErrorCode ret = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (type) {
         default:
         case WindowSetUIContentType::DEFAULT:
-            uiContent->Initialize(this, contentInfo, storage);
+            ret = uiContent->Initialize(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::DISTRIBUTE:
-            uiContent->Restore(this, contentInfo, storage);
+            ret = uiContent->Restore(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::BY_NAME:
-            uiContent->InitializeByName(this, contentInfo, storage);
+            ret = uiContent->InitializeByName(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
-            uiContent->Initialize(this, abcContent, storage);
+            ret = uiContent->Initialize(this, abcContent, storage);
             break;
     }
+    if (ret != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
+        WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
+            contentInfo.c_str(), static_cast<uint16_t>(ret));
+        uiContent->Destroy();
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     // make uiContent available after Initialize/Restore
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
