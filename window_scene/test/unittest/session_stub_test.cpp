@@ -173,6 +173,118 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: HandleTriggerBindModalUIExtension001
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleTriggerBindModalUIExtension001, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleTriggerBindModalUIExtension(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityEvent002
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent003, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleTransferAccessibilityEvent(data, reply);
+    ASSERT_EQ(5, res);
+}
+
+/**
+ * @tc.name: HandleNotifyPiPWindowPrepareClose003
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleNotifyPiPWindowPrepareClose(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleUpdatePiPRect004
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleUpdatePiPRect(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleRecoveryPullPiPMainWindow005
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleRecoveryPullPiPMainWindow005, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleRecoveryPullPiPMainWindow(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleProcessPointDownSession006
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleProcessPointDownSession(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleSendPointerEvenForMoveDrag007
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleSendPointerEvenForMoveDrag(data, reply);
+    ASSERT_EQ(-1, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
