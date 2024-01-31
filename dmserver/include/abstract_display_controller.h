@@ -65,7 +65,7 @@ private:
         sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
     DisplayId ProcessExpandScreenDisconnected(
         sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
-    bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
+    bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info, Point offset);
     void SetDisplayStateChangeListener(sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type);
     DisplayId GetDefaultDisplayId();
 

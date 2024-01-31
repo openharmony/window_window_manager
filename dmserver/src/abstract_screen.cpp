@@ -173,6 +173,7 @@ void AbstractScreen::SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNo
     const RSDisplayNodeConfig& config, const Point& startPoint)
 {
     rSDisplayNodeConfig_ = config;
+    startPoint_ = startPoint;
     WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
     rsDisplayNode->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
@@ -247,6 +248,14 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
         transactionProxy->FlushImplicitTransaction();
     }
     WLOGFD("InitRSDefaultDisplayNode success");
+}
+
+void AbstractScreen::UpdateRSDisplayNode(Point startPoint)
+{
+    WLOGD("update display offset from [%{public}d %{public}d] to [%{public}d %{public}d]",
+        startPoint_.posX_, startPoint_.posY_, startPoint.posX_, startPoint.posY_);
+    startPoint_ = startPoint;
+    rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
 }
 
 ScreenId AbstractScreen::GetScreenGroupId() const
@@ -486,7 +495,6 @@ AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenCo
 AbstractScreenGroup::~AbstractScreenGroup()
 {
     rsDisplayNode_ = nullptr;
-    abstractScreenMap_.clear();
 }
 
 sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
@@ -497,11 +505,10 @@ sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
     }
     FillScreenInfo(screenGroupInfo);
     screenGroupInfo->combination_ = combination_;
-    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
+    for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
         screenGroupInfo->children_.push_back(iter->first);
+        screenGroupInfo->position_.push_back(iter->second->startPoint_);
     }
-    auto positions = GetChildrenPosition();
-    screenGroupInfo->position_.insert(screenGroupInfo->position_.end(), positions.begin(), positions.end());
     return screenGroupInfo;
 }
 
@@ -556,13 +563,13 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     }
     ScreenId screenId = dmsScreen->dmsId_;
     WLOGFD("AbstractScreenGroup AddChild dmsScreenId: %{public}" PRIu64"", screenId);
-    auto iter = abstractScreenMap_.find(screenId);
-    if (iter != abstractScreenMap_.end()) {
+    auto iter = screenMap_.find(screenId);
+    if (iter != screenMap_.end()) {
         if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
             defaultScreenId_ == screenId) {
             WLOGFD("Add default screen, id: %{public}" PRIu64"", screenId);
         } else {
-            WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
+            WLOGE("AddChild, screenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
             return false;
         }
     }
@@ -578,7 +585,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         dmsScreen->InitRSDisplayNode(config, startPoint);
         dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
         dmsScreen->groupDmsId_ = dmsId_;
-        abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
+        screenMap_.insert(std::make_pair(screenId, dmsScreen));
     }
     return true;
 }
@@ -606,6 +613,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
+    dmsScreen->startPoint_ = Point();
     if (dmsScreen->rsDisplayNode_ != nullptr) {
         dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
         dmsScreen->rsDisplayNode_->RemoveFromTree();
@@ -617,7 +625,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
         dmsScreen->groupDmsId_, screenId);
-    return abstractScreenMap_.erase(screenId);
+    return screenMap_.erase(screenId);
 }
 
 bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScreen)
@@ -644,14 +652,14 @@ bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScr
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
 {
-    return abstractScreenMap_.find(childScreen) != abstractScreenMap_.end();
+    return screenMap_.find(childScreen) != screenMap_.end();
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
 {
     std::vector<sptr<AbstractScreen>> res;
-    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
-        res.push_back(iter->second.first);
+    for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
+        res.push_back(iter->second);
     }
     return res;
 }
@@ -659,8 +667,8 @@ std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
 std::vector<Point> AbstractScreenGroup::GetChildrenPosition() const
 {
     std::vector<Point> res;
-    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
-        res.push_back(iter->second.second);
+    for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
+        res.push_back(iter->second->startPoint_);
     }
     return res;
 }
@@ -668,16 +676,16 @@ std::vector<Point> AbstractScreenGroup::GetChildrenPosition() const
 Point AbstractScreenGroup::GetChildPosition(ScreenId screenId) const
 {
     Point point;
-    auto iter = abstractScreenMap_.find(screenId);
-    if (iter != abstractScreenMap_.end()) {
-        point = iter->second.second;
+    auto iter = screenMap_.find(screenId);
+    if (iter != screenMap_.end()) {
+        point = iter->second->startPoint_;
     }
     return point;
 }
 
 size_t AbstractScreenGroup::GetChildCount() const
 {
-    return abstractScreenMap_.size();
+    return screenMap_.size();
 }
 
 ScreenCombination AbstractScreenGroup::GetScreenCombination() const
