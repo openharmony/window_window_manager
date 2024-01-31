@@ -63,6 +63,7 @@ public:
     void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
+    WSError Background() override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
