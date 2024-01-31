@@ -355,8 +355,10 @@ bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHe
 void DisplayManager::Impl::ClearDisplayStateCallback()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WLOGFI("Clear displaystatecallback enter !");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
+        WLOGFI("UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared !");
         SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
@@ -1335,6 +1337,12 @@ bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallb
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
             WLOGFI("previous callback not called or callback invalid");
+            if (displayStateCallback_ != nullptr) {
+                WLOGFI("previous callback not called, the displayStateCallback_ is not null !");
+            }
+            if (callback == nullptr) {
+                WLOGFI("Invalid callback received !");
+            }
             return false;
         }
         displayStateCallback_ = callback;
