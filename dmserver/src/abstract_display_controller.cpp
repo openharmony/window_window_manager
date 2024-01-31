@@ -450,7 +450,7 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
             if (absDisplay == nullptr || absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
                 continue;
             }
-            if (UpdateDisplaySize(absDisplay, info)) {
+            if (UpdateDisplaySize(absDisplay, info, absScreen->startPoint_)) {
                 matchedDisplays.insert(std::make_pair(iter->first, iter->second));
             }
         }
@@ -466,22 +466,52 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
     }
 }
 
-bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info)
+bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info, Point offset)
 {
-    if (absDisplay == nullptr || info == nullptr) {
+    if (absDisplay == nullptr) {
         WLOGFE("invalid params.");
         return false;
     }
-    if (info->height_ == static_cast<uint32_t>(absDisplay->GetHeight()) &&
-        info->width_ == static_cast<uint32_t>(absDisplay->GetWidth())) {
-        WLOGFI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
-        return false;
+
+    bool changed = false;
+    if (info) {
+        auto rotation = absDisplay->GetRotation();
+        int32_t width = 0;
+        int32_t height = 0;
+        if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
+            width = absDisplay->GetHeight();
+            height = absDisplay->GetWidth();
+        } else {
+            width = absDisplay->GetWidth();
+            height = absDisplay->GetHeight();
+        }
+
+        if (info->width_ == static_cast<uint32_t>(width) &&
+            info->height_ == static_cast<uint32_t>(height)) {
+            WLOGFD("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
+        } else {
+            WLOGFD("Reset H&W. id %{public}" PRIu64", size: %{public}d %{public}d",
+                absDisplay->GetId(), info->width_, info->height_);
+            absDisplay->SetWidth(info->width_);
+            absDisplay->SetHeight(info->height_);
+            changed = true;
+        }
+    } else {
+        WLOGFE("mode info is null");
     }
-    absDisplay->SetHeight(info->height_);
-    absDisplay->SetWidth(info->width_);
-    WLOGFI("Reset H&W. id %{public}" PRIu64", size: %{public}d %{public}d",
-          absDisplay->GetId(), absDisplay->GetWidth(), absDisplay->GetHeight());
-    return true;
+
+    if (offset.posX_ == absDisplay->GetOffsetX() &&
+        offset.posY_ == absDisplay->GetOffsetY()) {
+        WLOGFD("keep display offset. display:%{public}" PRIu64"", absDisplay->GetId());
+    } else {
+        WLOGFD("Reset offset. id %{public}" PRIu64", size: %{public}d %{public}d",
+            absDisplay->GetId(), offset.posX_, offset.posY_);
+        absDisplay->SetOffsetX(offset.posX_);
+        absDisplay->SetOffsetY(offset.posY_);
+        changed = true;
+    }
+    
+    return changed;
 }
 
 void AbstractDisplayController::ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen)
