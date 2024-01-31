@@ -129,7 +129,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
-    uint32_t refreshRate = RSInterfaces::GetInstance().GetScreenCurrentRefreshRate(screenId_);
     displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
@@ -137,7 +136,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
-    displayInfo->SetRefreshRate(refreshRate);
+    displayInfo->SetRefreshRate(property_.GetRefreshRate());
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
@@ -206,6 +205,11 @@ void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
 {
     property_.SetBounds(bounds);
     property_.SetPhyBounds(phyBounds);
+}
+
+void ScreenSession::UpdateRefreshRate(uint32_t refreshRate)
+{
+    property_.SetRefreshRate(refreshRate);
 }
 
 void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height, float virtualPixelRatio)
