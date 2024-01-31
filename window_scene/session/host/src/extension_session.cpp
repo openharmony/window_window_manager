@@ -18,6 +18,7 @@
 #include "ipc_skeleton.h"
 
 #include "window_manager_hilog.h"
+#include "anr_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -158,5 +159,25 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
         avoidArea = extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_(type);
     }
     return avoidArea;
+}
+
+WSError ExtensionSession::Background()
+{
+    SessionState state = GetSessionState();
+    WLOGFI("[WMSLife] Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+            static_cast<uint32_t>(state));
+    if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        UpdateSessionState(SessionState::STATE_INACTIVE);
+        state = SessionState::STATE_INACTIVE;
+        isActive_ = false;
+    }
+    if (state != SessionState::STATE_INACTIVE) {
+        WLOGFW("[WMSLife] Background state invalid! state:%{public}u", state);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    UpdateSessionState(SessionState::STATE_BACKGROUND);
+    NotifyBackground();
+    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

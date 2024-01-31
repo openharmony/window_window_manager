@@ -418,5 +418,30 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
 
+WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    WLOGFI("[WMSLife]id:%{public}d WindowExtensionSessionImpl Hide, reason:%{public}u, state:%{public}u",
+           GetPersistentId(), reason, state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("[WMSLife]window extension session is already hidden [name:%{public}s,id:%{public}d,type: %{public}u]",
+               property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
+        NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
+        return WMError::WM_OK;
+    }
+    WSError ret = hostSession_->Background();
+    WMError res = static_cast<WMError>(ret);
+    if (res == WMError::WM_OK) {
+        state_ = WindowState::STATE_HIDDEN;
+        requestState_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
+    } else {
+        WLOGFD("[WMSLife]window extension session Hide to Background is error");
+    }
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
