@@ -132,14 +132,14 @@ bool PiPUtil::GetValidRect(const int32_t width, const int32_t height, Rect& rect
         rect.posX_ = safePaddingHorizontal;
         hasChanged = true;
     } else if ((rect.posX_ + static_cast<int32_t>(rect.width_)) > (width - safePaddingHorizontal)) {
-        rect.posX_ = width - safePaddingHorizontal - rect.width_;
+        rect.posX_ = width - safePaddingHorizontal - static_cast<int32_t>(rect.width_);
         hasChanged = true;
     }
     if (rect.posY_ < SAFE_PADDING_VERTICAL_TOP) {
         rect.posY_ = SAFE_PADDING_VERTICAL_TOP;
         hasChanged = true;
     } else if ((rect.posY_ + static_cast<int32_t>(rect.height_)) > (height - SAFE_PADDING_VERTICAL_BOTTOM)) {
-        rect.posY_ = height - SAFE_PADDING_VERTICAL_BOTTOM - rect.height_;
+        rect.posY_ = height - SAFE_PADDING_VERTICAL_BOTTOM - static_cast<int32_t>(rect.height_);
         hasChanged = true;
     }
     return hasChanged;
