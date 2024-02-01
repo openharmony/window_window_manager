@@ -60,7 +60,6 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
             pointerEvent->DumpPointerAction(), sessionStage_->GetPersistentId());
     } else {
         DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(pointerEvent->GetId(), sessionStage_);
-        pointerEvent->SetProcessedCallback(dispatchCallback_);
         WLOGFD("Dispatch normally, action:%{public}s, eventId:%{public}d, persistentId:%{public}d",
             pointerEvent->DumpPointerAction(), pointerEvent->GetId(), sessionStage_->GetPersistentId());
     }
@@ -92,9 +91,6 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         return WSError::WS_ERROR_NULLPTR;
     }
     DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
-    WLOGFD("SetProcessedCallback enter");
-    keyEvent->SetProcessedCallback(dispatchCallback_);
-    WLOGFD("SetProcessedCallback leave");
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
