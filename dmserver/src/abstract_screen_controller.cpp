@@ -772,50 +772,53 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
     }
     
     auto screenGroup = screen->GetGroup();
-    if (!screenGroup) {
-        WLOGE("no screen group");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-
-    if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-        // update display start point
-        auto screens = screenGroup->GetChildren();
-        if (screens.size() > 1) {
-            // from left to right
-            std::sort(screens.begin(), screens.end(), [](const auto &a, const auto &b) {
-                return a->startPoint_.posX_ < b->startPoint_.posX_;
-            });
-            
-            Point point;
-            int width = 0;
-            for (auto& screen : screens) {
-                WLOGD("screen: %{public}llu", screen->dmsId_);
-                auto mode = screen->GetActiveScreenMode();
-                if (!mode) {
-                    WLOGE("no active screen mode");
-                    continue;
-                }
-
-                if (screen->startPoint_.posX_ != point.posX_) {
-                    screen->UpdateRSDisplayNode(point);
-                    if (abstractScreenCallback_ != nullptr) {
-                        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-                    }
-                }
-
-                if (screen->rotation_ == Rotation::ROTATION_90 ||
-                    screen->rotation_ == Rotation::ROTATION_270) {
-                    width = mode->height_;
-                } else {
-                    width = mode->width_;
-                }
-
-                point.posX_ += width;
-            }
-        }
+    if (screenGroup) {
+        UpdateScreenGroupLayout(screenGroup);
     }
 
     return DMError::DM_OK;
+}
+
+void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup> screenGroup)
+{
+    if (screenGroup->combination_ != ScreenCombination::SCREEN_EXPAND) {
+        return;
+    }
+
+    // update display start point
+    auto screens = screenGroup->GetChildren();
+    if (screens.size() > 1) {
+        // from left to right
+        std::sort(screens.begin(), screens.end(), [](const auto &a, const auto &b) {
+            return a->startPoint_.posX_ < b->startPoint_.posX_;
+        });
+        
+        Point point;
+        int width = 0;
+        for (auto& screen : screens) {
+            auto mode = screen->GetActiveScreenMode();
+            if (!mode) {
+                WLOGE("no active screen mode");
+                continue;
+            }
+
+            if (screen->startPoint_.posX_ != point.posX_) {
+                screen->UpdateRSDisplayNode(point);
+                if (abstractScreenCallback_ != nullptr) {
+                    abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+                }
+            }
+
+            if (screen->rotation_ == Rotation::ROTATION_90 ||
+                screen->rotation_ == Rotation::ROTATION_270) {
+                width = mode->height_;
+            } else {
+                width = mode->width_;
+            }
+
+            point.posX_ += width;
+        }
+    }
 }
 
 void AbstractScreenController::SetScreenRotateAnimation(

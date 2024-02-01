@@ -88,7 +88,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupRect()
         newDisplayGroupRect.posX_ = std::min(displayGroupRect_.posX_, elem.second.posX_);
         newDisplayGroupRect.posY_ = std::min(displayGroupRect_.posY_, elem.second.posY_);
         int32_t right = std::max(newDisplayGroupRect.posX_ + static_cast<int32_t>(newDisplayGroupRect.width_),
-                                     elem.second.posX_+ static_cast<int32_t>(elem.second.width_));
+                                 elem.second.posX_+ static_cast<int32_t>(elem.second.width_));
         newDisplayGroupRect.width_ = right - newDisplayGroupRect.posX_;
         int32_t maxHeight = std::max(newDisplayGroupRect.posY_ + static_cast<int32_t>(newDisplayGroupRect.height_),
                                      elem.second.posY_+ static_cast<int32_t>(elem.second.height_));
