@@ -120,6 +120,7 @@ private:
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event) const;
     void OpenRotationSyncTransaction();
     void CloseRotationSyncTransaction();
+    void UpdateScreenGroupLayout(sptr<AbstractScreenGroup> screenGroup);
 
     class ScreenIdManager {
     public:

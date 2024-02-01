@@ -466,7 +466,8 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
     }
 }
 
-bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info, Point offset)
+bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info,
+    Point offset)
 {
     if (absDisplay == nullptr) {
         WLOGFE("invalid params.");
