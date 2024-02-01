@@ -785,39 +785,40 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
         return;
     }
 
-    // update display start point
     auto screens = screenGroup->GetChildren();
-    if (screens.size() > 1) {
-        // from left to right
-        std::sort(screens.begin(), screens.end(), [](const auto &a, const auto &b) {
-            return a->startPoint_.posX_ < b->startPoint_.posX_;
-        });
-        
-        Point point;
-        int width = 0;
-        for (auto& screen : screens) {
-            auto mode = screen->GetActiveScreenMode();
-            if (!mode) {
-                WLOGE("no active screen mode");
-                continue;
-            }
+    if (screens.size() <= 1) {
+        return;
+    }
 
-            if (screen->startPoint_.posX_ != point.posX_) {
-                screen->UpdateRSDisplayNode(point);
-                if (abstractScreenCallback_ != nullptr) {
-                    abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-                }
-            }
-
-            if (screen->rotation_ == Rotation::ROTATION_90 ||
-                screen->rotation_ == Rotation::ROTATION_270) {
-                width = mode->height_;
-            } else {
-                width = mode->width_;
-            }
-
-            point.posX_ += width;
+    // update display node's start point from left to right.
+    std::sort(screens.begin(), screens.end(), [](const auto &a, const auto &b) {
+        return a->startPoint_.posX_ < b->startPoint_.posX_;
+    });
+    
+    Point point;
+    int width = 0;
+    for (auto& screen : screens) {
+        auto mode = screen->GetActiveScreenMode();
+        if (!mode) {
+            WLOGE("no active screen mode");
+            continue;
         }
+
+        if (screen->startPoint_.posX_ != point.posX_) {
+            screen->UpdateRSDisplayNode(point);
+            if (abstractScreenCallback_ != nullptr) {
+                abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+            }
+        }
+
+        if (screen->rotation_ == Rotation::ROTATION_90 ||
+            screen->rotation_ == Rotation::ROTATION_270) {
+            width = mode->height_;
+        } else {
+            width = mode->width_;
+        }
+
+        point.posX_ += width;
     }
 }
 
