@@ -381,7 +381,7 @@ protected:
     };
     void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
-    void UpdateSessionState(SessionState state);
+    virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
     void UpdateSessionTouchable(bool touchable);
 
