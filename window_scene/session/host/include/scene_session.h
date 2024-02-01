@@ -215,6 +215,9 @@ public:
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
 
+    void SetSessionState(SessionState state) override;
+    void UpdateSessionState(SessionState state) override;
+
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
