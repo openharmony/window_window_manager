@@ -406,11 +406,14 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     if (isPointDown) {
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+            WLOGFE("The display or display info is nullptr");
+            pointerEvent->MarkProcessed();
             return;
         }
         float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
+            pointerEvent->MarkProcessed();
             return;
         }
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
@@ -425,6 +428,8 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
 
     if (needNotifyEvent) {
         NotifyPointerEvent(pointerEvent);
+    } else {
+        pointerEvent->MarkProcessed();
     }
     if (isPointDown || isPointUp) {
         WLOGFI("[WMSEvent]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
@@ -443,11 +448,13 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
 
     if (hostSession_ == nullptr) {
         WLOGFE("[WMSEvent] hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
         WLOGFW("[WMSEvent] invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
         return;
     }
 

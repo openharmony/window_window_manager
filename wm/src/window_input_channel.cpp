@@ -49,6 +49,8 @@ void WindowInputChannel::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>
     if (window_ != nullptr) {
         WLOGD("dispatch keyEvent to ACE");
         window_->ConsumeKeyEvent(keyEvent);
+    } else {
+        keyEvent->MarkProcessed();
     }
 }
 
@@ -79,6 +81,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         auto callback = [weakThis = wptr(this)] (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
             auto promoteThis = weakThis.promote();
             if (promoteThis == nullptr) {
+                keyEvent->MarkProcessed();
                 WLOGFW("promoteThis is nullptr");
                 return;
             }
@@ -87,6 +90,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
             WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
+            keyEvent->MarkProcessed();
         }
         return;
     }
