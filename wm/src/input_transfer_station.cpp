@@ -45,6 +45,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         keyEvent->GetId(), windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
+        keyEvent->MarkProcessed();
         WLOGFE("WindowInputChannel is nullptr");
         return;
     }
