@@ -111,6 +111,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetRootSceneUIContext);
     BindNativeFunction(env, exportObj, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
     BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
+    BindNativeFunction(env, exportObj, "requestAllAppSessionUnfocus", moduleName,
+        JsSceneSessionManager::RequestAllAppSessionUnfocus);
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
@@ -627,6 +629,13 @@ napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback
     WLOGD("[WMSFocus][NAPI]RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[WMSFocus][NAPI]RequestAllAppSessionUnfocus");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRequestAllAppSessionUnfocus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SetScreenLocked(napi_env env, napi_callback_info info)
@@ -1708,6 +1717,21 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().RequestAllAppSessionUnfocus();
     return NapiGetUndefined(env);
 }
 
