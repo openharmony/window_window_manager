@@ -1585,6 +1585,8 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
                 pointerEvent->GetId(), ret);
         }
         return ret;
+    } else {
+        pointerEvent->MarkProcessed();
     }
 
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
@@ -1654,7 +1656,8 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGD("TransferKeyEvent, id: %{public}d", persistentId_);
-    if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
+    WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent);
+    if (ret != WSError::WS_OK) {
         WLOGFE("TransferKeyEvent failed, ret:%{public}d", ret);
         return ret;
     }
