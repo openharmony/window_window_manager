@@ -1516,6 +1516,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     } else {
         specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
     }
+    NotifyAccessibilityVisibilityChange();
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
     if (!GetSessionProperty()) {
@@ -1800,9 +1801,22 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
     return selfToken_;
 }
 
+void SceneSession::SetSessionState(SessionState state)
+{
+    Session::SetSessionState(state);
+    NotifyAccessibilityVisibilityChange();
+}
+
+void SceneSession::UpdateSessionState(SessionState state)
+{
+    Session::UpdateSessionState(state);
+    NotifyAccessibilityVisibilityChange();
+}
+
 bool SceneSession::IsVisibleForAccessibility() const
 {
-    return GetSystemTouchable() && GetForegroundInteractiveStatus();
+    return GetSystemTouchable() && GetForegroundInteractiveStatus() &&
+        (IsVisible() || state_ == SessionState::STATE_ACTIVE || state_ == SessionState::STATE_FOREGROUND);
 }
 
 void SceneSession::SetForegroundInteractiveStatus(bool interactive)
