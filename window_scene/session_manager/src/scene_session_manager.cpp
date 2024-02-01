@@ -1847,7 +1847,7 @@ void SceneSessionManager::RecoverWindowSessionProperty(
         }
     } else {
         auto persistentId = sceneSession->GetPersistentId();
-        if (persistentId == callingWindowId_) {
+        if (persistentId == static_cast<int32_t>(callingWindowId_)) {
             WLOGFI("[WMSRecover] NotifyOccupiedAreaChangeInfo after calling session recovered,"
                 "persistentId = %{public}" PRId32, persistentId);
             sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo();
