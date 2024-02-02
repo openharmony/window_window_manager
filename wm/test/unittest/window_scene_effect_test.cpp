@@ -54,6 +54,7 @@ public:
     {
         sptr<WindowOption> option = new (std::nothrow) WindowOption();
         option->SetWindowName(name);
+        option->SetDisplayId(0);
         sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
         window->property_->SetPersistentId(1);
         SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
