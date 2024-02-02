@@ -263,6 +263,7 @@ private:
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
+    int NotifyFoldStatusChanged(const std::string& lockParam);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
