@@ -122,6 +122,10 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
 {
     auto task = [weakThis = wptr(this), oldPersistentId]() {
         auto scenePersistence = weakThis.promote();
+        if (scenePersistence == nullptr) {
+            WLOGFE("scenePersistence is nullptr");
+            return;
+        }
         uint32_t oldfileID = static_cast<uint32_t>(oldPersistentId) & 0x3fffffff;
         std::string oldSnapshotPath_ = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
                                        std::to_string(oldfileID) + IMAGE_SUFFIX;

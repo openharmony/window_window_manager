@@ -148,6 +148,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetForegroundInteractiveStatus(bool interactive) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -187,6 +188,8 @@ public:
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
     void NotifyUILostFocus() override;
+    void SetSystemTouchable(bool touchable) override;
+    bool IsVisibleForAccessibility() const;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -211,6 +214,9 @@ public:
     void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+
+    void SetSessionState(SessionState state) override;
+    void UpdateSessionState(SessionState state) override;
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
@@ -238,6 +244,7 @@ protected:
     sptr<MoveDragController> moveDragController_ = nullptr;
 
 private:
+    void NotifyAccessibilityVisibilityChange();
     void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea) const;
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
@@ -276,6 +283,7 @@ private:
     PiPRectInfo pipRectInfo_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     std::atomic_bool isStartMoving_ { false };
+    std::atomic_bool isVisibleForAccessibility_ { true };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

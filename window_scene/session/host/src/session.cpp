@@ -416,13 +416,15 @@ bool Session::GetTouchable() const
 
 void Session::SetSystemTouchable(bool touchable)
 {
+    WLOGFD("SetSystemTouchable id: %{public}d, systemtouchable: %{public}d, propertytouchable: %{public}d",
+        GetPersistentId(), touchable, GetTouchable());
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
 }
 
 bool Session::GetSystemTouchable() const
 {
-    return systemTouchable_;
+    return systemTouchable_ && GetTouchable();
 }
 
 WSError Session::SetVisible(bool isVisible)
@@ -1601,9 +1603,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
         WLOGFD("Action:%{public}s, eventId:%{public}d, report without timer",
             pointerEvent->DumpPointerAction(), pointerEvent->GetId());
-    } else {
-        DelayedSingleton<ANRManager>::GetInstance()->AddTimer(pointerEvent->GetId(), persistentId_);
-    }
+    } 
     return WSError::WS_OK;
 }
 
@@ -1658,7 +1658,6 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("TransferKeyEvent failed, ret:%{public}d", ret);
         return ret;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->AddTimer(keyEvent->GetId(), persistentId_);
     return WSError::WS_OK;
 }
 

@@ -196,7 +196,7 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;

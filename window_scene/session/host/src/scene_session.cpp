@@ -1516,6 +1516,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     } else {
         specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
     }
+    NotifyAccessibilityVisibilityChange();
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
     if (!GetSessionProperty()) {
@@ -1688,7 +1689,7 @@ void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params
 
 void SceneSession::NotifyTouchOutside()
 {
-    WLOGFD("id: %{public}d NotifyTouchOutside", GetPersistentId());
+    WLOGFI("id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (sessionStage_) {
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
@@ -1800,6 +1801,56 @@ sptr<IRemoteObject> SceneSession::GetSelfToken() const
     return selfToken_;
 }
 
+void SceneSession::SetSessionState(SessionState state)
+{
+    Session::SetSessionState(state);
+    NotifyAccessibilityVisibilityChange();
+}
+
+void SceneSession::UpdateSessionState(SessionState state)
+{
+    Session::UpdateSessionState(state);
+    NotifyAccessibilityVisibilityChange();
+}
+
+bool SceneSession::IsVisibleForAccessibility() const
+{
+    return GetSystemTouchable() && GetForegroundInteractiveStatus() &&
+        (IsVisible() || state_ == SessionState::STATE_ACTIVE || state_ == SessionState::STATE_FOREGROUND);
+}
+
+void SceneSession::SetForegroundInteractiveStatus(bool interactive)
+{
+    Session::SetForegroundInteractiveStatus(interactive);
+    NotifyAccessibilityVisibilityChange();
+}
+
+void SceneSession::NotifyAccessibilityVisibilityChange()
+{
+    bool isVisibleForAccessibilityNew = IsVisibleForAccessibility();
+    if (isVisibleForAccessibilityNew == isVisibleForAccessibility_.load()) {
+        return;
+    }
+    WLOGFD("[WMSAccess] NotifyAccessibilityVisibilityChange id: %{public}d, visible: %{public}d",
+        GetPersistentId(), isVisibleForAccessibilityNew);
+    isVisibleForAccessibility_.store(isVisibleForAccessibilityNew);
+    if (specificCallback_ && specificCallback_->onWindowInfoUpdate_) {
+        if (isVisibleForAccessibilityNew) {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        } else {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        }
+    } else {
+        WLOGFD("specificCallback_->onWindowInfoUpdate_ not exist, persistent id: %{public}d", GetPersistentId());
+    }
+}
+
+void SceneSession::SetSystemTouchable(bool touchable)
+{
+    Session::SetSystemTouchable(touchable);
+    NotifyAccessibilityVisibilityChange();
+}
+
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (!SessionPermission::VerifySessionPermission()) {
@@ -1837,13 +1888,18 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, 0);
+            WLOGFI("[WMSLife]PendingSessionActivation: want info - uri: %{public}s",
+                info.want->GetElement().GetURI().c_str());
         }
+
         WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
             appIndex:%{public}d, affinity:%{public}s", info.bundleName_.c_str(), info.moduleName_.c_str(),
             info.abilityName_.c_str(), info.appIndex_, info.sessionAffinity.c_str());
         WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, "
-            "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
-            info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
+            "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64
+            ", windowMode: %{public}d, caller persistentId: %{public}d",
+            info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+            info.windowMode, info.callerPersistentId_);
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
         }

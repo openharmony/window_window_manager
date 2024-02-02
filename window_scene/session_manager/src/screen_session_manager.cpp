@@ -159,6 +159,7 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
+    RegisterRefreshRateModeChangeListener();
 
     bool isPcDevice = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPcDevice) {
@@ -288,6 +289,18 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     }
 }
 
+void ScreenSessionManager::RegisterRefreshRateModeChangeListener()
+{
+    WLOGFI("Register refreshrate mode change listener.");
+    auto res = rsInterface_.RegisterHgmRefreshRateModeChangeCallback(
+        [this](int32_t refreshRateMode) { OnHgmRefreshRateModeChange(refreshRateMode); });
+    if (res != StatusCode::SUCCESS) {
+        WLOGFE("Register refreshrate mode change listener failed, retry after 50 ms.");
+        auto task = [this]() { RegisterRefreshRateModeChangeListener(); };
+        taskScheduler_->PostAsyncTask(task, "RegisterRefreshRateModeChangeListener", 50); // Retry after 50 ms.
+    }
+}
+
 void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
     WLOGFI("Notify scb virtual screen change, ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
@@ -376,6 +389,34 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
             phyScreenPropMap_.erase(screenId);
         }
     }
+}
+
+void ScreenSessionManager::OnHgmRefreshRateModeChange(int32_t refreshRateMode)
+{
+    GetDefaultScreenId();
+    WLOGFI("Set refreshRateMode: %{public}d, defaultscreenid: %{public}" PRIu64"", refreshRateMode, defaultScreenId_);
+    uint32_t refreshRate;
+    RefreshRateMode mode = static_cast<RefreshRateMode>(refreshRateMode);
+    switch (mode) {
+        case RefreshRateMode::NORMAL :
+            refreshRate = static_cast<uint32_t>(RefreshRate::NORMAL);
+            break;
+        case RefreshRateMode::MIDDLE :
+            refreshRate = static_cast<uint32_t>(RefreshRate::MIDDLE);
+            break;
+        case RefreshRateMode::HIGH :
+            refreshRate = static_cast<uint32_t>(RefreshRate::HIGH);
+            break;
+        default:
+            refreshRate = static_cast<uint32_t>(RefreshRate::HIGH);
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
+    if (screenSession) {
+        screenSession->UpdateRefreshRate(refreshRate);
+    } else {
+        WLOGFE("Get default screen session failed.");
+    }
+    return ;
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) const
@@ -606,15 +647,28 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
     if (ret != DMError::DM_OK) {
         WLOGFE("Failed to setVirtualPixelRatio when settingResolution");
+        return ret;
     }
     {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
             screenId, width, height, virtualPixelRatio);
-        screenSession->UpdatePropertyByResolution(width, height);
+        screenSession->UpdatePropertyByResolution(width, height, virtualPixelRatio);
         screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("GetDensityInCurResolution: Get ScreenSession failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    virtualPixelRatio = screenSession->GetScreenProperty().GetDensityInCurResolution();
     return DMError::DM_OK;
 }
 
@@ -734,6 +788,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
         property.SetDefaultDensity(densityDpi_);
+        property.SetDensityInCurResolution(densityDpi_);
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
     }
