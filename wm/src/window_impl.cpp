@@ -571,34 +571,29 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    OHOS::Ace::UIContentErrorCode ret = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
+    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (type) {
         default:
         case WindowSetUIContentType::DEFAULT:
-            ret = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::DISTRIBUTE:
-            ret = uiContent->Restore(this, contentInfo, storage);
+            aceRet = uiContent->Restore(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::BY_NAME:
-            ret = uiContent->InitializeByName(this, contentInfo, storage);
+            aceRet = uiContent->InitializeByName(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
-            ret = uiContent->Initialize(this, abcContent, storage);
+            aceRet = uiContent->Initialize(this, abcContent, storage);
             break;
-    }
-    if (ret != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
-        WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
-            contentInfo.c_str(), static_cast<uint16_t>(ret));
-        uiContent->Destroy();
-        return WMError::WM_ERROR_INVALID_PARAM;
     }
     // make uiContent available after Initialize/Restore
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         uiContent_ = std::move(uiContent);
     }
+
     if (isIgnoreSafeAreaNeedNotify_) {
         uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
@@ -624,6 +619,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
+    }
+    if (aceRet != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
+        WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
+            contentInfo.c_str(), static_cast<uint16_t>(aceRet));
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
 }
