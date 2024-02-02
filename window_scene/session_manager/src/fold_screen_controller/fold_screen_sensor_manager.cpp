@@ -52,7 +52,7 @@ namespace {
     constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-    constexpr float AACCURACY_ERROR_FOR_ALTA = 0.0001F;
+    constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -130,7 +130,7 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     globalAngle = (*postureData).angle;
     if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
-        std::isgreater(globalAngle, ANGLE_MAX_VAL + AACCURACY_ERROR_FOR_ALTA)) {
+        std::isgreater(globalAngle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
         WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
         return;
     }
@@ -160,7 +160,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
     }
     globalHall = (uint16_t)(*extHallData).hall;
     if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
-        std::isgreater(globalAngle, ANGLE_MAX_VAL + AACCURACY_ERROR_FOR_ALTA)) {
+        std::isgreater(globalAngle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
         WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
         return;
     }
