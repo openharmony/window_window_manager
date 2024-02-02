@@ -1460,13 +1460,7 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
         if (elem != nullptr) {
             const auto& persistentId = elem->GetPersistentId();
             WLOGFI("[WMSSub] DestroySubSession, id: %{public}d", persistentId);
-            DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId);
-            WindowDestroyNotifyVisibility(sceneSession);
-            NotifyWindowInfoChange(elem->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            {
-                std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-                sceneSessionMap_.erase(persistentId);
-            }
+            DestroyAndDisconnectSpecificSessionInner(elem);
         }
     }
 }
