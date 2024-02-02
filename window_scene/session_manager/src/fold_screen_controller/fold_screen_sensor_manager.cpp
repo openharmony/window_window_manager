@@ -48,12 +48,11 @@ namespace {
     constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
     constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
     constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
-    constexpr float SMALLER_BOUNDARY_FOR_ALTA_THRESHOLD = 5.0F;
-    constexpr float ALTA_AVOID_HALL_ERROR = 10.0F;
     constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
     constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+    constexpr float AACCURACY_ERROR_FOR_ALTA = 0.0001F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -130,8 +129,8 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     globalAngle = (*postureData).angle;
-    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL) ||
-        globalHall == USHRT_MAX) {
+    if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
+        std::isgreater(globalAngle, ANGLE_MAX_VAL + AACCURACY_ERROR_FOR_ALTA)) {
         WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
         return;
     }
@@ -160,8 +159,8 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         return;
     }
     globalHall = (uint16_t)(*extHallData).hall;
-    if (std::isless(globalAngle, ANGLE_MIN_VAL) || std::isgreater(globalAngle, ANGLE_MAX_VAL) ||
-        globalHall == USHRT_MAX) {
+    if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
+        std::isgreater(globalAngle, ANGLE_MAX_VAL + AACCURACY_ERROR_FOR_ALTA)) {
         WLOGFE("Invalid value, hall value is: %{public}u, angle value is: %{public}f.", globalHall, globalAngle);
         return;
     }
@@ -200,8 +199,7 @@ void FoldScreenSensorManager::UpdateSwitchScreenBoundaryForAlta(float angle, int
     }
     if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
         allowUseSensorForAlta = LARGER_BOUNDARY_FLAG;
-    } else if (hall == HALL_FOLDED_THRESHOLD
-        || angle <= SMALLER_BOUNDARY_FOR_ALTA_THRESHOLD) {
+    } else if (hall == HALL_FOLDED_THRESHOLD) {
         allowUseSensorForAlta = SMALLER_BOUNDARY_FLAG;
     }
 }
@@ -219,10 +217,10 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     }
 
     if (allowUseSensorForAlta == SMALLER_BOUNDARY_FLAG) {
-        if (hall == HALL_FOLDED_THRESHOLD || std::islessequal(angle, ALTA_AVOID_HALL_ERROR)) {
+        if (hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
-            std::isgreater(angle, ALTA_AVOID_HALL_ERROR)) {
+            hall == HALL_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
         } else {
             state = mState_;
