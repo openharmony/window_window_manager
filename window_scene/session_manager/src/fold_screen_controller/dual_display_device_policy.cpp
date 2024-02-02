@@ -14,6 +14,7 @@
  */
 
 #include <hisysevent.h>
+#include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/dual_display_device_policy.h"
 #include "session/screen/include/screen_session.h"
@@ -68,6 +69,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         return;
     }
     {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
             WLOGFW("ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
