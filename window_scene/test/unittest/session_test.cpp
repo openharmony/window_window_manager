@@ -2477,6 +2477,169 @@ HWTEST_F(WindowSessionTest, SetScreenId019, Function | SmallTest | Level2)
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
+/**
+ * @tc.name: RegisterLifecycleListener020
+ * @tc.desc: RegisterLifecycleListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterLifecycleListener020, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    const std::shared_ptr<ILifecycleListener>& listener = nullptr;
+    bool ret = session_->RegisterLifecycleListener(listener);
+    ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: UnregisterLifecycleListener021
+ * @tc.desc: UnregisterLifecycleListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UnregisterLifecycleListener021, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    const std::shared_ptr<ILifecycleListener>& listener = nullptr;
+    bool ret = session_->UnregisterLifecycleListener(listener);
+    ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: NotifyActivation022
+ * @tc.desc: NotifyActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyActivation022, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyActivation();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyConnect023
+ * @tc.desc: NotifyConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyConnect023, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyConnect();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyForeground024
+ * @tc.desc: NotifyForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyForeground024, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyForeground();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyBackground025
+ * @tc.desc: NotifyBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyBackground025, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyBackground();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyDisconnect026
+ * @tc.desc: NotifyDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyDisconnect026, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyDisconnect();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyExtensionDied027
+ * @tc.desc: NotifyExtensionDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyExtensionDied027, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->NotifyExtensionDied();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: GetAspectRatio028
+ * @tc.desc: GetAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAspectRatio028, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    float ret = session_->aspectRatio_;
+    float res = 0.0f;
+    ASSERT_EQ(ret, res);
+}
+
+/**
+ * @tc.name: SetAspectRatio029
+ * @tc.desc: SetAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetAspectRatio029, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    float radio = 2.0f;
+    WSError ERR = session_->SetAspectRatio(radio);
+    float ret = session_->aspectRatio_;
+    ASSERT_EQ(ret, radio);
+    ASSERT_EQ(ERR, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetSessionState030
+ * @tc.desc: GetSessionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetSessionState030, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionState state = session_->GetSessionState();
+    ASSERT_EQ(state, session_->state_);
+}
+
+/**
+ * @tc.name: SetSessionState031
+ * @tc.desc: SetSessionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionState031, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionState state = SessionState::STATE_CONNECT;
+    session_->SetSessionState(state);
+    ASSERT_EQ(state, session_->state_);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
