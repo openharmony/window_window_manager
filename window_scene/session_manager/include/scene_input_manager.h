@@ -47,6 +47,8 @@ private:
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
 
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 }//Rosen
 }//OHOS
