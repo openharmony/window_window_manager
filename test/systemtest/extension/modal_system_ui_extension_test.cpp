@@ -60,7 +60,7 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
         return;
     }
     OHOS::AAFwk::Want want;
-    ASSERT_TRUE(connection->CreateModalUIExtension(want) == ERR_OK);
+    ASSERT_TRUE(connection->CreateModalUIExtension(want));
     delete connection;
 }
 }
