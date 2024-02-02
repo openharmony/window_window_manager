@@ -69,7 +69,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         return;
     }
     {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")",displayMode);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
             WLOGFW("ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
