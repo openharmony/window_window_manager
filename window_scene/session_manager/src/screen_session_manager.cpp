@@ -3278,13 +3278,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     } else if (params.size() == 1 && (params[0] == STATUS_FOLD_HALF || params[0] == STATUS_EXPAND
                 || params[0] == STATUS_FOLD)) {
         int errCode = NotifyFoldStatusChanged(params[0]);
-        if (errCode != 0) {
-            ShowIllegalArgsInfo(dumpInfo);
-        } else {
-            std::ostringstream oss;
-            oss << "currentFoldStatus is:" << static_cast<uint32_t>(GetFoldStatus()) << std::endl;
-            dumpInfo.append(oss.str());
-        }
+        ShowFoldStatusChangedInfo(errCode, dumpInfo);
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -3363,6 +3357,17 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
     }
     NotifyFoldStatusChanged(foldStatus);
     return 0;
+}
+
+void ScreenSessionManager::ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo)
+{
+    if (errCode != 0) {
+        ShowIllegalArgsInfo(dumpInfo);
+    } else {
+        std::ostringstream oss;
+        oss << "currentFoldStatus is:" << static_cast<uint32_t>(GetFoldStatus()) << std::endl;
+        dumpInfo.append(oss.str());
+    }
 }
 
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
