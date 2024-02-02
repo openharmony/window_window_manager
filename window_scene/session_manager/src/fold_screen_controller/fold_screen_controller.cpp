@@ -33,7 +33,9 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         WLOGE("FoldScreenPolicy is null");
         return;
     }
+#ifdef SENSOR_ENABLE
     FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+#endif
 }
 
 FoldScreenController::~FoldScreenController()
