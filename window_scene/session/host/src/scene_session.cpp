@@ -1093,6 +1093,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
+            pointerEvent->MarkProcessed();
             WLOGFI("[WMSDialog] There is dialog window foreground");
             return WSError::WS_OK;
         }
@@ -1105,11 +1106,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             if (is2in1 && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+                pointerEvent->MarkProcessed();
                 return WSError::WS_OK;
             }
         }
         if (IsDecorEnable() && moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+            pointerEvent->MarkProcessed();
             return WSError::WS_OK;
         }
     }
@@ -1121,6 +1124,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
+            pointerEvent->MarkProcessed();
             return WSError::WS_OK;
         }
     }
