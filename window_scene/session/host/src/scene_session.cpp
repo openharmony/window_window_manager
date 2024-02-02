@@ -472,7 +472,7 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
         // once reason is undefined, not use rsTransaction
         // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
-        if (session->reason_ == SizeChangeReason::UNDEFINED) {
+        if (session->reason_ == SizeChangeReason::UNDEFINED || session->reason_ == SizeChangeReason::MOVE) {
             ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
         } else {
             ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
