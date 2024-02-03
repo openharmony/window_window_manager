@@ -3126,11 +3126,10 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
             phyWidth = remoteScreenMode.GetScreenWidth();
             phyHeight = remoteScreenMode.GetScreenHeight();
         }
-        auto localScreenBounds = iter.second->GetScreenProperty().GetBounds();
-        WLOGFI("phyWidth = :%{public}f, phyHeight = :%{public}f, local width = :%{public}f, local height = :%{public}f",
-            phyWidth, phyHeight, localScreenBounds.rect_.width_, localScreenBounds.rect_.height_);
-        bool isModeChanged =
-            (localScreenBounds.rect_.width_ < localScreenBounds.rect_.height_) != (phyWidth < phyHeight);
+        auto localRotation = iter.second->GetRotation();
+        WLOGFI("phyWidth = :%{public}f, phyHeight = :%{public}f, localRotation = :%{public}u",
+            phyWidth, phyHeight, localRotation);
+        bool isModeChanged = localRotation != Rotation::ROTATION_0;
         if (isModeChanged && isReset) {
             WLOGFI("[WMSRecover]screen(id:%{public}" PRIu64 ") current is not default mode, reset it", iter.first);
             SetRotation(iter.first, Rotation::ROTATION_0, false);
