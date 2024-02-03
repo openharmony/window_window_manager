@@ -5864,15 +5864,14 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
         !avoidArea.rightRect_.IsUninitializedRect()) {
         return false;
     }
-    if (isVisible) {
-        if (avoidArea.bottomRect_.IsUninitializedRect() ||
-            (avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) != sessionBottom)) {
-            return false;
-        }
-    } else if (!avoidArea.bottomRect_.IsUninitializedRect()) {
-        return false;
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
     }
-    return true;
+    if (isVisible &&
+        (avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) == sessionBottom)) {
+        return true;
+    }
+    return false;
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
@@ -5980,11 +5979,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                     continue;
                 }
                 AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-                if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-                    !avoidArea.rightRect_.IsUninitializedRect()) {
-                    continue;
-                }
-                if (isVisible && avoidArea.bottomRect_.IsUninitializedRect()) {
+                if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
+                    sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
                     continue;
                 }
                 WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
