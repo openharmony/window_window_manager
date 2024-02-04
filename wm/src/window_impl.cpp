@@ -2799,6 +2799,10 @@ bool WindowImpl::IsPointerEventConsumed()
 
 void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (pointerEvent == nullptr) {
+        WLOGFE("The pointer event is nullptr");
+        return;
+    }
     if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
@@ -2809,10 +2813,16 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
-        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+        if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
+            WLOGFI("The Input event consumer consumes pointer event failed.");
+            pointerEvent->MarkProcessed();
+        }
     } else if (uiContent_ != nullptr) {
         WLOGFD("Transfer pointer event to uiContent");
-        (void)uiContent_->ProcessPointerEvent(pointerEvent);
+        if (!(uiContent_->ProcessPointerEvent(pointerEvent))) {
+            WLOGFI("The UI content consumes pointer event failed.");
+            pointerEvent->MarkProcessed();
+        }
     } else {
         WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
