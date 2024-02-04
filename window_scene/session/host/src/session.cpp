@@ -22,6 +22,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 #include "../../proxy/include/window_info.h"
 
@@ -45,6 +46,7 @@ constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI = 200;
+static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -109,6 +111,18 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
+    if (g_enableForceUIFirst) {
+        auto rsTransaction = RSTransactionProxy::GetInstance();
+        if (rsTransaction) {
+            rsTransaction->Begin();
+        }
+        if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
+            leashWinSurfaceNode_->SetForceUIFirst(false);
+        }
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        }
+    }
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
