@@ -3478,6 +3478,15 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
     return WMError::WM_OK;
 }
 
+void SceneSessionManager::RequestAllAppSessionUnfocus()
+{
+    auto task = [this]() {
+        RequestAllAppSessionUnfocusInner();
+    };
+    taskScheduler_->PostAsyncTask(task, "RequestAllAppSessionUnfocus");
+    return;
+}
+
 /**
  * request focus and ignore its state
  * only used when app main window start before foreground
@@ -3577,6 +3586,25 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
     return ShiftFocus(nextSession);
 }
 
+WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
+{
+    WLOGFI("[WMSFocus]RequestAllAppSessionUnfocusInner");
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    if (!focusedSession) {
+        WLOGFE("[WMSFocus]focused session is null");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!focusedSession->IsAppSession()) {
+        WLOGW("[WMFocus]Focused session is non app session: %{public}d", focusedSessionId_);
+        return WSError::WS_DO_NOTHING;
+    }
+    auto nextSession = GetTopFocusableNonAppSession();
+
+    needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
+    needBlockNotifyFocusStatusUntilForeground_ = false;
+    return ShiftFocus(nextSession);
+}
+
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
 {
     // basic focus rule
@@ -3647,6 +3675,26 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
         return false;
     };
     TraverseSessionTree(func, true);
+    return ret;
+}
+
+sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
+{
+    WLOGFD("[WMSFocus]GetTopFocusableNonAppSession.");
+    sptr<SceneSession> ret = nullptr;
+    auto func = [this, &ret](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            return false;
+        }
+        if (session->IsAppSession()) {
+            return true;
+        }
+        if (session->GetFocusable() && IsSessionVisible(session)) {
+            ret = session;
+        }
+        return false;
+    };
+    TraverseSessionTree(func, false);
     return ret;
 }
 
