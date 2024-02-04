@@ -4681,7 +4681,8 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "SetAspectRatio failed."));
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "SetAspectRatio failed."));
             }
             WLOGI("[NAPI]Window [%{public}u, %{public}s] set aspect ratio end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
