@@ -300,7 +300,7 @@ WMError WindowManager::UnregisterWMSConnectionChangedListener()
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         pImpl_->wmsConnectionChangedListener_ = nullptr;
     }
-    return SingletonContainer::Get<WindowAdapter>().UnregisterWMSConnectionChangedListener();
+    return WMError::WM_OK;
 }
 
 WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
