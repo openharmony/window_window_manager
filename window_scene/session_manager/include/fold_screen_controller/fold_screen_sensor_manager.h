@@ -16,15 +16,16 @@
 #ifndef OHOS_ROSEN_FOLD_SCREEN_SENSOR_MANAGER_H
 #define OHOS_ROSEN_FOLD_SCREEN_SENSOR_MANAGER_H
 
+#ifdef SENSOR_ENABLE
 #include <functional>
 #include <mutex>
 #include <climits>
 
 #include "fold_screen_controller.h"
 #include "refbase.h"
+#include "wm_single_instance.h"
 #include "sensor_agent.h"
 #include "sensor_agent_type.h"
-#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -42,6 +43,7 @@ public:
     void HandlePostureData(const SensorEvent * const event);
 
     void HandleHallData(const SensorEvent * const event);
+
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
 
@@ -82,4 +84,5 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
+#endif
 #endif
