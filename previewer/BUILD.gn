@@ -43,6 +43,7 @@ if (!ispreview) {
 
     include_dirs = [
       "include",
+      "../utils/include",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform/utils",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform/ipc_core",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform/image_native",

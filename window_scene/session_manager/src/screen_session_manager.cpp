@@ -23,6 +23,7 @@
 #include <unique_fd.h>
 
 #include <hitrace_meter.h>
+#include <ipc_skeleton.h>
 #include <parameter.h>
 #include <parameters.h>
 #include <system_ability_definition.h>
@@ -62,7 +63,22 @@ const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_USERID = -1;
+constexpr int32_t BASE_USER_RANGE = 200000;
 } // namespace
+
+// based on the bundle_util
+inline int32_t GetUserIdByCallingUid()
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    WLOGFD("get calling uid(%{public}d)", uid);
+    if (uid <= INVALID_UID) {
+        WLOGFE("uid is illegal: %{public}d", uid);
+        return INVALID_USERID;
+    }
+    return uid / BASE_USER_RANGE;
+}
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
 
@@ -3060,12 +3076,13 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
 }
 
-void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client, int32_t userId)
+void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
 {
     if (!client) {
         WLOGFE("client is null");
         return;
     }
+    auto userId = GetUserIdByCallingUid();
     WLOGFI("SetClient userId= %{public}d", userId);
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, 0);
     clientProxy_ = client;

@@ -21,6 +21,7 @@
 #include <functional>
 
 #include "window.h"
+#include "fold_screen_info.h"
 
 namespace OHOS {
 namespace Previewer {
@@ -34,10 +35,12 @@ public:
 
     void SetFoldable(const bool foldable);
     void SetFoldStatus(const FoldStatus foldStatus);
+    void SetCurrentFoldCreaseRegion(const sptr<FoldCreaseRegion> currentFoldCreaseRegion);
     void ExecStatusChangedCallback();
 
     bool IsFoldable() const;
     FoldStatus GetFoldStatus() const;
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() const;
     void RegisterStatusChangedCallback(const DisplayCallback callback);
 
 private:
@@ -46,6 +49,7 @@ private:
 
     bool foldable_ = false;
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
+    sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     DisplayCallback displayCallback_;
 };
 } // namespace Previewer
