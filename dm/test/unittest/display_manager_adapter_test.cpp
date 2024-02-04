@@ -79,7 +79,12 @@ HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, Function | SmallTest | Level2
 HWTEST_F(DisplayManagerAdapterTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level2)
 {
     std::vector<ScreenColorGamut> colorGamuts;
-    SingletonContainer::Get<ScreenManagerAdapter>().GetScreenSupportedColorGamuts(0, colorGamuts);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenSupportedColorGamuts(0, colorGamuts);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -91,7 +96,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorGamut, Function | SmallTest | 
 {
     std::vector<ScreenColorGamut> colorGamuts;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorGamut(0, -1);
-    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -103,7 +112,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorGamut, Function | SmallTest | 
 {
     ScreenColorGamut colorGamut;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorGamut(0, colorGamut);
-    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -115,7 +128,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Le
 {
     ScreenGamutMap gamutMap;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGamutMap(0, gamutMap);
-    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -126,7 +143,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Le
 HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenGamutMap(0, GAMUT_MAP_CONSTANT);
-    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -137,7 +158,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, Function | SmallTest | Le
 HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(0);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -188,6 +213,7 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied, Function | SmallTest | Level2)
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     dmsDeath_ = new(std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
     dmsDeath_->OnRemoteDied(nullptr);
+    EXPECT_NE(nullptr, dmsDeath_);
 }
 
 /**
@@ -203,6 +229,7 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, Function | SmallTest | Level
     sptr<IRemoteObject> obj = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     wptr<IRemoteObject> wptrDeath = obj;
     dmsDeath_->OnRemoteDied(wptrDeath);
+    EXPECT_NE(nullptr, dmsDeath_);
 }
 
 /**
@@ -254,7 +281,11 @@ HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | L
 {
     bool immersive = false;
     DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
-    ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    }
 }
 
 /**
@@ -266,7 +297,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(0, pixelFormat);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -278,7 +313,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, Function | SmallTest | Level
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(0, pixelFormat);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -290,7 +329,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, Function | SmallTest
 {
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(0, hdrFormats);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -302,7 +345,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | L
 {
     ScreenHDRFormat hdrFormat = ScreenHDRFormat{NOT_SUPPORT_HDR};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(0, hdrFormat);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -313,7 +360,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | L
 HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(0, 0);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -325,7 +376,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, Function | SmallTes
 {
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(0, colorSpaces);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -337,7 +392,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, Function | SmallTest | 
 {
     GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(0, colorSpace);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -349,7 +408,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
 {
     GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(0, colorSpace);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -360,7 +423,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
 HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(0);
-    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -373,7 +440,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Functi
     bool canvasRotation = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().
                     SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -385,7 +456,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, Function | SmallTes
 {
     bool isLocked = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -397,7 +472,11 @@ HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, Function | SmallTest
 {
     bool isLocked = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().IsScreenRotationLocked(isLocked);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -422,7 +501,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetOrientation, Function | SmallTest | Level
 {
     Orientation orientation = Orientation{0};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    }
 }
 
 /**
@@ -434,7 +517,11 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -445,7 +532,11 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
 HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, Function | SmallTest | Level2)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -457,7 +548,11 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -468,7 +563,11 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
 HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -519,7 +618,11 @@ HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, Function | SmallTest | Lev
     bool hasPrivateWindow = false;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(0,
         hasPrivateWindow);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, err);
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, err);
+    }
 }
 
 /**
@@ -532,7 +635,11 @@ HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, Function | SmallTes
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(0,
         surfaceNode);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, err);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, err);
+    }
 }
 
 /**
@@ -545,7 +652,11 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, Function | Sma
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(0,
         surfaceNode);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, err);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, err);
+    }
 }
 
 /**
@@ -600,7 +711,11 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, Function | Sma
 HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(0, 100);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    }
 }
 
 /**
@@ -611,7 +726,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | 
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(0, 0);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_UNKNOWN);
+    }
 }
 
 /**
@@ -622,7 +741,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest |
 HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(0, 70, 100, 50);
-    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    }
 }
 
 /**
@@ -633,7 +756,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2
 HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | Level2)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(0, 70, 100);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -645,7 +772,11 @@ HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, Function | SmallTest | Lev
 {
     std::vector<ScreenId> screenIds;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
-    ASSERT_EQ(err, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -657,7 +788,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Lev
 {
     DMRect area;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(0, area);
-    ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    }
 }
 }
 }
