@@ -61,7 +61,6 @@ private:
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     std::recursive_mutex recoverMutex_;
-    std::recursive_mutex wmsRecoverMutex_;
     std::recursive_mutex mutex_;
     int32_t currentUserId_ = 0;
     int32_t currentScreenId_ = 0;
