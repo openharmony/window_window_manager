@@ -42,7 +42,6 @@ public:
     void ClearSessionManagerProxy();
     void Clear();
     void RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
-    void UnregisterWMSConnectionChangedListener();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
 
