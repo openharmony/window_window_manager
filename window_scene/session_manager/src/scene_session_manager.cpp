@@ -3611,6 +3611,12 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
                 persistentId, focusedSessionId_);
             return WSError::WS_DO_NOTHING;
         }
+        // temp check
+        if (isBlockingType && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
+            sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
+                WLOGFD("[WMSFocus]Lower session %{public}d cannot request focus from keyguard!", persistentId);
+                return WSError::WS_DO_NOTHING;
+        }
     }
     return WSError::WS_OK;
 }
