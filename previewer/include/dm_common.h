@@ -66,6 +66,7 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_KEYBOARD = 21,
     STATE_CHANGE_REASON_MOUSE = 22,
     STATE_CHANGE_REASON_DOUBLE_CLICK = 23,
+    STATE_CHANGE_REASON_SWITCH = 25,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -172,6 +173,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_ON,
     DISPLAY_OFF,
     DESKTOP_READY,
+    DOZE,
+    DOZE_SUSPEND,
 };
 
 /**
