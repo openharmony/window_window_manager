@@ -59,6 +59,9 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string STATUS_FOLD_HALF = "-z";
+const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_FOLD = "-p";
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
@@ -3176,7 +3179,13 @@ void ScreenSessionManager::ShowHelpInfo(std::string& dumpInfo)
         .append(" -l                             ")
         .append("|lock the screen display status\n")
         .append(" -u                             ")
-        .append("|unlock the screen display status\n");
+        .append("|unlock the screen display status\n")
+        .append(" -z                             ")
+        .append("|switch to fold half status\n")
+        .append(" -y                             ")
+        .append("|switch to expand status\n")
+        .append(" -p                             ")
+        .append("|switch to fold status\n");
 }
 
 void ScreenSessionManager::ShowIllegalArgsInfo(std::string& dumpInfo)
@@ -3265,6 +3274,10 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
+    } else if (params.size() == 1 && (params[0] == STATUS_FOLD_HALF || params[0] == STATUS_EXPAND
+                || params[0] == STATUS_FOLD)) {
+        int errCode = NotifyFoldStatusChanged(params[0]);
+        ShowFoldStatusChangedInfo(errCode, dumpInfo);
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -3314,6 +3327,46 @@ int ScreenSessionManager::SetFoldStatusLocked(const std::string& lockParam)
     }
     SetFoldStatusLocked(lockDisplayStatus);
     return 0;
+}
+
+int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam)
+{
+    WLOGI("NotifyFoldStatusChanged is dump log");
+    if (statusParam.empty()) {
+        return -1;
+    }
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    if (statusParam == STATUS_FOLD_HALF) {
+        foldStatus = FoldStatus::HALF_FOLD;
+        displayMode = FoldDisplayMode::FULL;
+    } else if (statusParam == STATUS_EXPAND) {
+        foldStatus = FoldStatus::EXPAND;
+        displayMode = FoldDisplayMode::FULL;
+    } else if (statusParam == STATUS_FOLD) {
+        foldStatus = FoldStatus::FOLDED;
+        displayMode = FoldDisplayMode::MAIN;
+    } else {
+        WLOGFW("NotifyFoldStatusChanged status not support");
+        return -1;
+    }
+    SetFoldDisplayMode(displayMode);
+    if (foldScreenController_ != nullptr) {
+        foldScreenController_->SetFoldStatus(foldStatus);
+    }
+    NotifyFoldStatusChanged(foldStatus);
+    return 0;
+}
+
+void ScreenSessionManager::ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo)
+{
+    if (errCode != 0) {
+        ShowIllegalArgsInfo(dumpInfo);
+    } else {
+        std::ostringstream oss;
+        oss << "currentFoldStatus is:" << static_cast<uint32_t>(GetFoldStatus()) << std::endl;
+        dumpInfo.append(oss.str());
+    }
 }
 
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
