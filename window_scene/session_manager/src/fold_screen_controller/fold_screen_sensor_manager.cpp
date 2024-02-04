@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef SENSOR_ENABLE
 #include <cmath>
 #include <hisysevent.h>
 
@@ -267,3 +268,4 @@ void FoldScreenSensorManager::ReportNotifyFoldStatusChange(int32_t currentStatus
 }
 } // Rosen
 } // OHOS
+#endif
