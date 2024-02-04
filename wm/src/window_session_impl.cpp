@@ -2029,7 +2029,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
-        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+        if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
+            pointerEvent->MarkProcessed();
+        }
         return;
     }
 
@@ -2040,7 +2042,10 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
                 WLOGFI("InputTracking id:%{public}d, WindowSessionImpl::NotifyPointerEvent",
                     pointerEvent->GetId());
             }
-            (void)uiContent_->ProcessPointerEvent(pointerEvent);
+            if (!(uiContent_->ProcessPointerEvent(pointerEvent))) {
+                WLOGFI("UI content dose not consume this pointer event");
+                pointerEvent->MarkProcessed();
+            }
         } else {
             WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
             pointerEvent->MarkProcessed();
@@ -2074,7 +2079,9 @@ void WindowSessionImpl::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>&
     }
     if (inputEventConsumer != nullptr) {
         WLOGD("Transfer key event to inputEventConsumer");
-        (void)inputEventConsumer->OnInputEvent(keyEvent);
+        if (!(inputEventConsumer->OnInputEvent(keyEvent))) {
+            keyEvent->MarkProcessed();
+        }
     } else if (uiContent_) {
         auto isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
