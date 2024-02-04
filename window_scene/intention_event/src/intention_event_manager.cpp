@@ -125,12 +125,19 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         g_lastLeaveWindowId = enterSession->GetPersistentId();
 
         auto enterPointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        if (enterPointerEvent == nullptr) {
+            WLOGFE("The enter pointer event is nullptr");
+            return;
+        }
         enterPointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
         if (uiContent_ == nullptr) {
             WLOGFE("ProcessEnterLeaveEventAsync uiContent_ is null");
             return;
         }
-        uiContent_->ProcessPointerEvent(enterPointerEvent);
+        if (!(uiContent_->ProcessPointerEvent(enterPointerEvent))) {
+            WLOGFE("The UI content consumes pointer event failed");
+            enterPointerEvent->MarkProcessed();
+        }
     };
     auto eventHandler = weakEventConsumer_.lock();
     if (eventHandler == nullptr) {
@@ -326,7 +333,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         axisEvent->MarkProcessed();
         return;
     }
-    uiContent_->ProcessAxisEvent(axisEvent);
+    if (!(uiContent_->ProcessAxisEvent(axisEvent))) {
+        WLOGFI("The UI content consumes the axis event failed.");
+        axisEvent->MarkProcessed();
+    }
 }
 }
 } // namespace OHOS::Rosen
