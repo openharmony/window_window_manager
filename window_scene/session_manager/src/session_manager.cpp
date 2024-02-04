@@ -90,7 +90,6 @@ SessionManager::~SessionManager()
 void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
 {
     WLOGFD("OnWMSConnectionChanged");
-    std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
     isWMSConnected_ = isConnected;
     currentUserId_ = userId;
     currentScreenId_ = screenId;
@@ -234,20 +233,10 @@ void SessionManager::Clear()
 void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    {
-        std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
-        wmsConnectionChangedFunc_ = callbackFunc;
-    }
+    wmsConnectionChangedFunc_ = callbackFunc;
     if (isWMSConnected_) {
         OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
     }
-}
-
-void SessionManager::UnregisterWMSConnectionChangedListener()
-{
-    WLOGFI("UnregisterWMSConnectionChangedListener in");
-    std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
-    wmsConnectionChangedFunc_ = nullptr;
 }
 
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
