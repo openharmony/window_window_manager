@@ -90,7 +90,7 @@ SessionManager::~SessionManager()
 void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
 {
     WLOGFD("OnWMSConnectionChanged");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
     isWMSConnected_ = isConnected;
     currentUserId_ = userId;
     currentScreenId_ = screenId;
@@ -235,7 +235,7 @@ void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionCha
 {
     WLOGFI("RegisterWMSConnectionChangedListener in");
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
     }
     if (isWMSConnected_) {
@@ -246,7 +246,7 @@ void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionCha
 void SessionManager::UnregisterWMSConnectionChangedListener()
 {
     WLOGFI("UnregisterWMSConnectionChangedListener in");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(wmsRecoverMutex_);
     wmsConnectionChangedFunc_ = nullptr;
 }
 
