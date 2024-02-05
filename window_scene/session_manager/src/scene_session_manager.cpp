@@ -1336,10 +1336,10 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
-    const bool isDelegator)
+    const bool isDelegator, const bool isToDesktop)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isDelegator]() {
+    auto task = [this, weakSceneSession, isDelegator, isToDesktop]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFE("[WMSMain]session is nullptr");
@@ -1349,6 +1349,14 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         WLOGFI("[WMSMain]background session persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
         scnSession->SetActive(false);
+
+        if (isToDesktop) {
+            auto info = scnSession->GetSessionInfo();
+            info.callerToken_ = nullptr;
+            info.callingTokenId_ = 0;
+            scnSession->SetSessionInfo(info);
+        }
+
         scnSession->Background();
         if (!GetSceneSession(persistentId)) {
             WLOGFE("[WMSMain]session is invalid with %{public}d", persistentId);
