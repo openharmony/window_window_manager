@@ -130,6 +130,8 @@ HWTEST_F(ExtensionSessionManagerTest, SetAbilitySessionInfo, Function | MediumTe
     sptr<AAFwk::SessionInfo> result = instance->SetAbilitySessionInfo(extSession);
     int32_t persistentId = extSession->GetPersistentId();
     ASSERT_EQ(result->persistentId, persistentId);
+    delete extSession;
+    delete result;
 }
 
 /**

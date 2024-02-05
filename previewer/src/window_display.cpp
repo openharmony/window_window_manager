@@ -34,11 +34,6 @@ void PreviewerDisplay::SetFoldStatus(const FoldStatus foldStatus)
     foldStatus_ = foldStatus;
 }
 
-void PreviewerDisplay::SetCurrentFoldCreaseRegion(const sptr<FoldCreaseRegion> currentFoldCreaseRegion)
-{
-    currentFoldCreaseRegion_ = currentFoldCreaseRegion;
-}
-
 void PreviewerDisplay::ExecStatusChangedCallback()
 {
     if (!displayCallback_) {
@@ -55,11 +50,6 @@ bool PreviewerDisplay::IsFoldable() const
 FoldStatus PreviewerDisplay::GetFoldStatus() const
 {
     return foldStatus_;
-}
-
-sptr<FoldCreaseRegion> PreviewerDisplay::GetCurrentFoldCreaseRegion() const
-{
-    return currentFoldCreaseRegion_;
 }
 
 void PreviewerDisplay::RegisterStatusChangedCallback(const DisplayCallback callback)
