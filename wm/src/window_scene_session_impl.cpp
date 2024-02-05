@@ -1564,6 +1564,32 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
+        if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            WLOGFW("Recover fail, already MODE_RECOVER");
+            return WMError::WM_ERROR_REPEAT_OPERATION;
+        }
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
+        SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        UpdateDecorEnable(true);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+        NotifyWindowStatusChange(GetMode());
+    } else {
+        WLOGFE("recovery is invalid on sub window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::Recover(uint32_t reason)
+{
+    WLOGFI("WindowSceneSessionImpl::Recover id: %{public}d, reason:%{public}u", GetPersistentId(), reason);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (system::GetParameter("const.product.devicetype", "unknown") == "2in1") {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -1576,7 +1602,7 @@ WMError WindowSceneSessionImpl::Recover()
         }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         // need notify arkui maximize mode change
-        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (reason == 1 && property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
