@@ -1290,7 +1290,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Recover() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError Recover() { return WMError::WM_OK; }
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -1652,6 +1652,14 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief recovery the main window by function overloading. It is called by JsWindow.
+     *
+     * @param reason reason of update.
+     * @return WMError
+     */
+    virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
