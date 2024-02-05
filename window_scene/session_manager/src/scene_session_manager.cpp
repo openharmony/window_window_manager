@@ -1252,7 +1252,8 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
         WLOGFE("[WMSInput] session is nullptr");
         return;
     }
-    if (!sceneSession->IsSessionValid()) {
+    // When input method is shown and another app is cold started, the input method is hidden.
+    if (!sceneSession->IsSessionValid() && callingSession_ != nullptr) {
         sceneSession->RequestHideKeyboard(true);
     }
 }
