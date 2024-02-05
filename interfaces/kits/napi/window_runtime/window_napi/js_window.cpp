@@ -1087,7 +1087,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
                     CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Recover());
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Recover(1));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
