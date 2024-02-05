@@ -313,10 +313,10 @@ bool WindowAdapter::InitSSMProxy()
 
 void WindowAdapter::ClearWindowAdapter()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((windowManagerServiceProxy_ != nullptr) && (windowManagerServiceProxy_->AsObject() != nullptr)) {
         windowManagerServiceProxy_->AsObject()->RemoveDeathRecipient(wmsDeath_);
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     isProxyValid_ = false;
 }
 
