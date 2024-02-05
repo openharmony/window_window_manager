@@ -1195,7 +1195,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
     }
 
     bool isToDesktop = false;
-    if (argc == ARGC_THREE && GetType(end, argv[2]) == napi_boolean) {
+    if (argc == ARGC_THREE && GetType(env, argv[2]) == napi_boolean) {
         ConvertFromJsValue(env, argv[2], isToDesktop);
         WLOGFI("[NAPI]isToDesktop: %{public}u", isToDesktop);
     }
