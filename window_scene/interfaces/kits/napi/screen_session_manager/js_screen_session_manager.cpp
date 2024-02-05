@@ -412,16 +412,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [event](napi_env env, NapiAsyncTask& task, int32_t status) {
-            DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
-        }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenSessionManager::OnTakeOverShutdown", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
 }
 

@@ -1879,7 +1879,7 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient>& client)
+void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient>& client, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1890,6 +1890,10 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
     }
     if (!client || !data.WriteRemoteObject(client->AsObject())) {
         WLOGFE("WriteRemoteObject failed");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        WLOGFE("Write userId failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CLIENT),

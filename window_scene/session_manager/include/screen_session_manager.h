@@ -211,7 +211,7 @@ public:
     void SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session);
     void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
 
-    void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
+    void SetClient(const sptr<IScreenSessionManagerClient>& client, int32_t userId) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation) override;
