@@ -2149,7 +2149,7 @@ HWTEST_F(WindowTest, HideNonSystemFloatingWindows, Function | SmallTest | Level2
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_OK, window->HideNonSystemFloatingWindows(false));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->HideNonSystemFloatingWindows(false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2192,7 +2192,7 @@ HWTEST_F(WindowTest, RegisterWindowVisibilityChangeListener, Function | SmallTes
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_OK, window->RegisterWindowVisibilityChangeListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->RegisterWindowVisibilityChangeListener(nullptr));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2205,7 +2205,7 @@ HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, Function | SmallT
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowVisibilityChangeListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->UnregisterWindowVisibilityChangeListener(nullptr));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
