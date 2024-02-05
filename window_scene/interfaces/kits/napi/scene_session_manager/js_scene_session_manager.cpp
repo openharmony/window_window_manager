@@ -1198,12 +1198,18 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
     }
 
     bool isDelegator = false;
-    if (argc == ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
+    if (argc >= ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
         ConvertFromJsValue(env, argv[1], isDelegator);
-        WLOGFD("[NAPI]isDelegator: %{public}u", isDelegator);
+        WLOGFI("[NAPI]isDelegator: %{public}u", isDelegator);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator);
+    bool isToDesktop = false;
+    if (argc == ARGC_THREE && GetType(end, argv[2]) == napi_boolean) {
+        ConvertFromJsValue(env, argv[2], isToDesktop);
+        WLOGFI("[NAPI]isToDesktop: %{public}u", isToDesktop);
+    }
+
+    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop);
     return NapiGetUndefined(env);
 }
 
