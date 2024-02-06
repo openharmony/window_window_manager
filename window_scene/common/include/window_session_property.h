@@ -75,6 +75,7 @@ public:
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingWindow(uint32_t windowId);
+    void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -115,11 +116,14 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingWindow() const;
+    PiPTemplateInfo GetPiPTemplateInfo() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSystemBarMap(Parcel& parcel) const;
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingPiPTemplateInfo(Parcel& parcel) const;
+    static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 
@@ -166,6 +170,7 @@ private:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
+    PiPTemplateInfo pipTemplateInfo_;
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};

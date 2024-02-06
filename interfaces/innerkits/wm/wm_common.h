@@ -633,6 +633,7 @@ enum class PipTemplateType : uint32_t {
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
     VIDEO_LIVE = 3,
+    END,
 };
 
 /**
@@ -687,6 +688,12 @@ struct PiPRectInfo {
     uint32_t originWidth_;
     uint32_t originHeight_;
     PiPScaleLevel level_;
+};
+
+struct PiPTemplateInfo {
+    uint32_t pipTemplateType;
+    uint32_t priority;
+    std::vector<uint32_t> controlGroup;
 };
 
 using OnCallback = std::function<void(int64_t)>;

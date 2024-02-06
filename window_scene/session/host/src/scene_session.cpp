@@ -1561,6 +1561,11 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
+{
+    pipTemplateInfo_ = pipTemplateInfo;
+}
+
 void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
 {
     if (alpha < 0 || alpha > 1.0) {
@@ -1676,6 +1681,11 @@ std::vector<Rect> SceneSession::GetTouchHotAreas() const
         property->GetTouchHotAreas(touchHotAreas);
     }
     return touchHotAreas;
+}
+
+PiPTemplateInfo SceneSession::GetPiPTemplateInfo() const
+{
+    return pipTemplateInfo_;
 }
 
 void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params)

@@ -529,6 +529,7 @@ private:
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
+    bool CheckPipPriorityHighEnough(const PiPTemplateInfo& pipTemplateInfo);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);

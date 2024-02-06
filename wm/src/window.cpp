@@ -139,6 +139,36 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
     return CreateWindowWithSession(option, context, errCode, iface_cast<Rosen::ISession>(iSession));
 }
 
+sptr<Window> Window::CreatePip(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return nullptr;
+    }
+    if (!option || option->GetWindowName().empty()) {
+        WLOGE("host window session is nullptr:%{public}u or option is null: %{public}u",
+            option->GetWindowName().empty(), option == nullptr);
+        return nullptr;
+    }
+    if (!WindowHelper::IsPipWindow(option->GetWindowType())) {
+        WLOGE("window type is not pip window.");
+        return nullptr;
+    }
+    sptr<WindowSessionImpl> windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
+    if (windowSessionImpl == nullptr) {
+        WLOGFE("malloc windowSessionImpl failed.");
+        return nullptr;
+    }
+    windowSessionImpl->SetPiPTemplateInfo(pipTemplateInfo);
+    WMError error = windowSessionImpl->Create(context, nullptr);
+    if (error != WMError::WM_OK) {
+        errCode = error;
+        WLOGFD("Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
+        return nullptr;
+    }
+    return windowSessionImpl;
+}
+
 sptr<Window> Window::Find(const std::string& windowName)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {

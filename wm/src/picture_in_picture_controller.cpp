@@ -33,6 +33,8 @@ namespace {
     constexpr int32_t DELAY_ANIM = 500;
     constexpr int32_t SUCCESS = 1;
     constexpr int32_t FAILED = 0;
+    constexpr uint32_t PIP_LOW_PRIORITY = 0;
+    constexpr uint32_t PIP_HIGH_PRIORITY = 1;
     const std::string VIDEO_PAGE_PATH = "/system/etc/window/resources/pip_video.abc";
     const std::string CALL_PAGE_PATH = "/system/etc/window/resources/pip_call.abc";
     const std::string MEETING_PAGE_PATH = "/system/etc/window/resources/pip_meeting.abc";
@@ -80,7 +82,11 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     windowOption->SetWindowRect(windowRect_);
     WMError errCode;
-    sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption, context->lock(), errCode);
+    PiPTemplateInfo pipTemplateInfo;
+    pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
+    pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
+    pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
+    sptr<Window> window = Window::CreatePip(windowOption, pipTemplateInfo, context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         WLOGFE("Window create failed, reason: %{public}d", errCode);
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -605,6 +611,20 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
 std::string PictureInPictureController::GetPiPNavigationId()
 {
     return pipOption_? pipOption_->GetNavigationId() : "";
+}
+
+uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
+{
+    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PipTemplateType::END)) {
+        WLOGFE("param invalid, pipTemplateType is %{public}d", pipTemplateType);
+        return PIP_LOW_PRIORITY;
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY) ||
+        pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_LIVE)) {
+        return PIP_LOW_PRIORITY;
+    } else {
+        return PIP_HIGH_PRIORITY;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
