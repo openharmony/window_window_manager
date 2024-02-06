@@ -56,6 +56,7 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
+    void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
     void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
