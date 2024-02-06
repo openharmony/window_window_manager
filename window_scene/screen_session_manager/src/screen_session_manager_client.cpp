@@ -359,4 +359,14 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
     }
     return screenSession->GetScreenSnapshot(scaleX, scaleY);
 }
+
+sptr<ScreenSession>ScreenSessionManagerClient::GetScreenSessionById(const ScreenId id)
+{
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    auto iter = screenSessionMap_.find(id);
+    if (iter == screenSessionMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
 } // namespace OHOS::Rosen
