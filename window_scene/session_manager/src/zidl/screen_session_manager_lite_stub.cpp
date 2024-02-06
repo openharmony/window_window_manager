@@ -22,7 +22,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
+                                          "ScreenSessionManagerLiteStub"} ;
 }
 
 int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,

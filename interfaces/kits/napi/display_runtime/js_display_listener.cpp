@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DISPLAY_RUNTIME, "JsDisplayListener"};
 }
 
 void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListenerObject)

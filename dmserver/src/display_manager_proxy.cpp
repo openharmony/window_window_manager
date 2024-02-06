@@ -24,7 +24,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerProxy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM_SERVER, "DisplayManagerProxy"};
 }
 
 sptr<DisplayInfo> DisplayManagerProxy::GetDefaultDisplayInfo()
