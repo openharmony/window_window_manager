@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM_SERVER, "AbstractDisplay"};
     constexpr int32_t PAD_SCREEN_WIDTH = 2560;
     constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
     constexpr float INCH_2_MM = 25.4f;
