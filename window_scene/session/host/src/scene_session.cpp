@@ -53,6 +53,7 @@ MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
 std::map<int32_t, WSRect> SceneSession::windowDragHotAreaMap_;
+static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -1148,6 +1149,21 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
         if (!session->backPressedFunc_) {
             WLOGFW("Session didn't register back event consumer!");
             return WSError::WS_DO_NOTHING;
+        }
+        if (g_enableForceUIFirst) {
+            auto rsTransaction = RSTransactionProxy::GetInstance();
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+            if (session->leashWinSurfaceNode_) {
+                session->leashWinSurfaceNode_->SetForceUIFirst(true);
+                WLOGFI("leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!", session->GetPersistentId());
+            } else {
+                WLOGFI("failed, leashWinSurfaceNode_ null id:%{public}u", session->GetPersistentId());
+            }
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
         }
         session->backPressedFunc_(needMoveToBackground);
         return WSError::WS_OK;
