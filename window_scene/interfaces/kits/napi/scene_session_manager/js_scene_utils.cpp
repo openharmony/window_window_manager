@@ -265,7 +265,7 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_value jsIsPersistentRecover = nullptr;
     napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
     napi_value jsIsRotable = nullptr;
-    napi_get_named_property(env, jsObject, "isRotable", &jsIsRotable);
+    napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
     napi_value jsIsSystemInput = nullptr;
     napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
 
