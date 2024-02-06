@@ -24,6 +24,7 @@
 #include "display_info.h"
 #include "singleton_container.h"
 #include "display_manager.h"
+#include "display_manager_adapter.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_helper.h"
@@ -404,13 +405,13 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool needNotifyEvent = true;
     if (isPointDown) {
-        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
+        if (displayInfo == nullptr) {
             WLOGFE("The display or display info is nullptr");
             pointerEvent->MarkProcessed();
             return;
         }
-        float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+        float vpr = displayInfo->GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
             pointerEvent->MarkProcessed();
