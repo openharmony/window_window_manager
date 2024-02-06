@@ -173,7 +173,7 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
 bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sessionInfo)
 {
     if (GetType(env, JsScreenId) != napi_undefined) {
-        int32_t screenId = 0;
+        int32_t screenId = -1;
         if (!ConvertFromJsValue(env, JsScreenId, screenId)) {
             WLOGFE("[NAPI]Failed to convert parameter to screenId");
             return false;
