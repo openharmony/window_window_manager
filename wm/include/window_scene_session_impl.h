@@ -57,6 +57,7 @@ public:
     WMError MaximizeFloating() override;
     WMError Maximize() override;
     WMError Recover() override;
+    WMError Recover(uint32_t reason) override;
     void StartMove() override;
     WMError Close() override;
     WindowMode GetMode() const override;
