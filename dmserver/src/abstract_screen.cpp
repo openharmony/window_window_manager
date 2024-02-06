@@ -254,6 +254,11 @@ void AbstractScreen::UpdateRSDisplayNode(Point startPoint)
 {
     WLOGD("update display offset from [%{public}d %{public}d] to [%{public}d %{public}d]",
         startPoint_.posX_, startPoint_.posY_, startPoint.posX_, startPoint.posY_);
+    if (rsDisplayNode_ == nullptr) {
+        WLOGFD("rsDisplayNode_ is nullptr");
+        return;
+    }
+    
     startPoint_ = startPoint;
     rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
 }
