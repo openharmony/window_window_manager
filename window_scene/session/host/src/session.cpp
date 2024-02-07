@@ -51,6 +51,8 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+    auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
+    mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
@@ -948,7 +950,11 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    surfaceNode_.reset();
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+            surfaceNode.reset();
+        });
+    }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
