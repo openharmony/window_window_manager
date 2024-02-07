@@ -215,6 +215,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     } else {
         // transfer pointer event for move and drag
         WSError ret = sceneSession->TransferPointerEvent(pointerEvent);
+        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT) {
+            sceneSession->NotifyOutsideDownEvent(pointerEvent);
+        }
         if (ret != WSError::WS_OK && pointerEvent != nullptr) {
             pointerEvent->MarkProcessed();
         }
