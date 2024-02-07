@@ -28,7 +28,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayChangeUnitTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "DisplayChangeUnitTest"};
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {

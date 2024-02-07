@@ -19,7 +19,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientStub" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_CLIENT,
+                                          "ScreenSessionManagerClientStub" };
 } // namespace
 
 const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSessionManagerClientStub::stubFuncMap_ {

@@ -36,7 +36,7 @@ constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
 constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_RUNTIME, "JsScreenManager"};
 }
 
 class JsScreenManager {

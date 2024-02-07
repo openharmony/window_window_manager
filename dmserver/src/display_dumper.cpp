@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayDumper"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM_SERVER, "DisplayDumper"};
 
     constexpr int SCREEN_NAME_MAX_LENGTH = 20;
     const std::string ARG_DUMP_HELP = "-h";

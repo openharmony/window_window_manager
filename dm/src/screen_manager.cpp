@@ -28,8 +28,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
-const static uint32_t MAX_SCREEN_SIZE = 32;
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "ScreenManager"};
+    const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
 public:

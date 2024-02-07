@@ -20,7 +20,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionDisplayPowerController"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
+                                          "SessionDisplayPowerController" };
 }
 
 bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)

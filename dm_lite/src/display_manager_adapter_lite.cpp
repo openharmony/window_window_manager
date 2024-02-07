@@ -26,7 +26,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapterLite"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM_LITE, "DisplayManagerAdapterLite"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapterLite)
 

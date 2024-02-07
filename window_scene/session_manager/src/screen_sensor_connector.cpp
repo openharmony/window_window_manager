@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSensorConnector"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER, "ScreenSensorConnector"};
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     constexpr int32_t MOTION_ACTION_PORTRAIT = 0;
     constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
