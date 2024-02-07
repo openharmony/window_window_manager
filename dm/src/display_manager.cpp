@@ -29,7 +29,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "DisplayManager"};
     const static uint32_t MAX_RETRY_NUM = 6;
     const static uint32_t RETRY_WAIT_MS = 500;
     const static uint32_t MAX_DISPLAY_SIZE = 32;

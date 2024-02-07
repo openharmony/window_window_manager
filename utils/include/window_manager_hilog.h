@@ -21,6 +21,17 @@ namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
 static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
+static constexpr unsigned int HILOG_DOMAIN_DMS_DM = 0xD004280;
+static constexpr unsigned int HILOG_DOMAIN_DMS_DM_LITE = 0xD004281;
+static constexpr unsigned int HILOG_DOMAIN_DMS_DM_SERVER = 0xD004282;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_KITS = 0xD004283;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_CLIENT = 0xD004284;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_SESSION = 0xD004285;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER = 0xD004286;
+static constexpr unsigned int HILOG_DOMAIN_DMS_DISPLAY_RUNTIME = 0xD004287;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_RUNTIME = 0xD004288;
+static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_SHOT = 0xD004289;
+
 static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
 
 #define WLOG_F(...)  (void)OHOS::HiviewDFX::HiLog::Fatal(LOG_LABEL, __VA_ARGS__)

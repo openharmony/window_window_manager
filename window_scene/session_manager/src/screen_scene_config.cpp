@@ -33,7 +33,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSceneConfig"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER, "ScreenSceneConfig"};
 constexpr char IS_WATERFALL_DISPLAY[] = "isWaterfallDisplay";
 constexpr char CURVED_SCREEN_BOUNDARY[] = "curvedScreenBoundary";
 constexpr char CURVED_AREA_IN_LANDSCAPE[] = "waterfallAreaCompressionSizeWhenHorzontal";
