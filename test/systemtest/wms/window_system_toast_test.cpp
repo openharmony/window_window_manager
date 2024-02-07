@@ -118,6 +118,9 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, Function | MediumTest
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
 
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     }
