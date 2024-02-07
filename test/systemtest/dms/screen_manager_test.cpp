@@ -1066,8 +1066,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
+    ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1101,8 +1101,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
+    ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1132,7 +1132,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level
     DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId + 1,
         resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_OK, res);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
