@@ -110,7 +110,6 @@ private:
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
-    uint32_t GetPipPriority(uint32_t pipTemplateType);
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
     sptr<IPiPLifeCycle> pipLifeCycleListener_;

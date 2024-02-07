@@ -139,7 +139,7 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
     return CreateWindowWithSession(option, context, errCode, iface_cast<Rosen::ISession>(iSession));
 }
 
-sptr<Window> Window::CreatePip(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
+sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -159,7 +159,9 @@ sptr<Window> Window::CreatePip(sptr<WindowOption>& option, const PiPTemplateInfo
         WLOGFE("malloc windowSessionImpl failed.");
         return nullptr;
     }
-    windowSessionImpl->SetPiPTemplateInfo(pipTemplateInfo);
+    if (windowSessionImpl->GetProperty() != nullptr) {
+        windowSessionImpl->GetProperty()->SetPiPTemplateInfo(pipTemplateInfo);
+    }
     WMError error = windowSessionImpl->Create(context, nullptr);
     if (error != WMError::WM_OK) {
         errCode = error;

@@ -40,6 +40,19 @@ namespace {
     const std::string MEETING_PAGE_PATH = "/system/etc/window/resources/pip_meeting.abc";
     const std::string LIVE_PAGE_PATH = "/system/etc/window/resources/pip_live.abc";
 }
+static uint32_t GetPipPriority(uint32_t pipTemplateType)
+{
+    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PipTemplateType::END)) {
+        WLOGFE("param invalid, pipTemplateType is %{public}d", pipTemplateType);
+        return PIP_LOW_PRIORITY;
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY) ||
+        pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_LIVE)) {
+        return PIP_LOW_PRIORITY;
+    } else {
+        return PIP_HIGH_PRIORITY;
+    }
+}
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
     uint32_t windowId, napi_env env)
@@ -86,7 +99,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
     pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
     pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
-    sptr<Window> window = Window::CreatePip(windowOption, pipTemplateInfo, context->lock(), errCode);
+    sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         WLOGFE("Window create failed, reason: %{public}d", errCode);
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -611,20 +624,6 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
 std::string PictureInPictureController::GetPiPNavigationId()
 {
     return pipOption_? pipOption_->GetNavigationId() : "";
-}
-
-uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
-{
-    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PipTemplateType::END)) {
-        WLOGFE("param invalid, pipTemplateType is %{public}d", pipTemplateType);
-        return PIP_LOW_PRIORITY;
-    }
-    if (pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY) ||
-        pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_LIVE)) {
-        return PIP_LOW_PRIORITY;
-    } else {
-        return PIP_HIGH_PRIORITY;
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

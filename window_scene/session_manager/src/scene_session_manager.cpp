@@ -1618,7 +1618,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP &&
-        !CheckPipPriorityHighEnough(property->GetPiPTemplateInfo())) {
+        !CheckPiPPriority(property->GetPiPTemplateInfo())) {
         return WSError::WS_DO_NOTHING;
     }
     WLOGFI("[WMSLife] create specific start, name: %{public}s, type: %{public}d",
@@ -1674,7 +1674,7 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     }
 }
 
-bool SceneSessionManager::CheckPipPriorityHighEnough(const PiPTemplateInfo& pipTemplateInfo)
+bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& iter: sceneSessionMap_) {
