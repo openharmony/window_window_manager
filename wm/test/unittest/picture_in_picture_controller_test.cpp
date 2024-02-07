@@ -82,30 +82,6 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
  * @tc.desc: StopPictureInPicture
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | Level2)
-{
-    sptr<MockWindow> mw = new MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    uint32_t pipTemplateType;
-    pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
-    ASSERT_EQ(pipControl->GetPipPriority(pipTemplateType), 1);
-    pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY);
-    ASSERT_EQ(pipControl->GetPipPriority(pipTemplateType), 0);
-    pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_MEETING);
-    ASSERT_EQ(pipControl->GetPipPriority(pipTemplateType), 1);
-    pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_LIVE);
-    ASSERT_EQ(pipControl->GetPipPriority(pipTemplateType), 0);
-    pipTemplateType = static_cast<uint32_t>(PipTemplateType::END);
-    ASSERT_NE(pipControl->GetPipPriority(pipTemplateType), 1);
-}
-
-/**
- * @tc.name: StopPictureInPicture01
- * @tc.desc: StopPictureInPicture
- * @tc.type: FUNC
- */
 HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | SmallTest | Level2)
 {
     sptr<MockWindow> mw = new MockWindow();

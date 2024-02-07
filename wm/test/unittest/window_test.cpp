@@ -112,17 +112,17 @@ HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Create04
- * @tc.desc: Create window with WindowName and no option
+ * @tc.name: CreatePiP
+ * @tc.desc: Create PiP window with option
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, CreatePip, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = nullptr;
     PiPTemplateInfo pipTemplateInfo;
-    ASSERT_EQ(nullptr, Window::CreatePip(option, pipTemplateInfo, abilityContext_));
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option = new WindowOption();
-    ASSERT_NE(nullptr, Window::CreatePip(option, pipTemplateInfo, abilityContext_));
+    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
 }
 
 /**

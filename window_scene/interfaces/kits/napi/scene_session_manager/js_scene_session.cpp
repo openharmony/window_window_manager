@@ -85,6 +85,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     napi_set_named_property(env, objValue, "type",
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     napi_set_named_property(env, objValue, "isAppType", CreateJsValue(env, session->IsFloatingWindowAppType()));
+    napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env));
 
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsSceneSession::RegisterCallback);
@@ -917,6 +918,21 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info) {
     WLOGI("[NAPI]SetOffset");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
+}
+
+napi_value CreatePipTemplateInfo(napi_env env)
+{
+    napi_value pipTemplateInfoValue = nullptr;
+    napi_set_named_property(env, pipTemplateInfoValue, "pipTemplateType", CreateJsValue(env, session->GetPiPTemplateInfo().pipTemplateType));
+    napi_set_named_property(env, pipTemplateInfoValue, "priority", CreateJsValue(env, session->GetPiPTemplateInfo().priority));
+    napi_value controlArrayValue = nullptr;
+    std::vector<std::string> controlGroups = session->GetPiPTemplateInfo().controlGroup;
+    auto index = 0;
+    for (const auto& controlGroup : controlGroups) {
+        napi_set_element(env, controlArrayValue, index++, CreateJsValue(env, controlGroup));
+    }
+    napi_set_named_property(env, pipTemplateInfoValue, "controlGroup", controlArrayValue);
+    return pipTemplateInfoValue;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)

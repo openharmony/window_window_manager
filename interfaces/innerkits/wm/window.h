@@ -431,12 +431,12 @@ public:
      * @brief create pip window with session
      *
      * @param option window propertion
-     * @param context ability context
      * @param pipTemplateInfo pipTemplateInfo
+     * @param pcontext ability context
      * @param errCode error code of create pip window
      * @return sptr<Window> If create pip window success, return window instance; Otherwise, return nullptr
      */
-    static sptr<Window> CreatePip(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
+    static sptr<Window> CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
         const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode = DefaultCreateErrCode);
 
     /**
