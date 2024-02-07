@@ -432,7 +432,7 @@ public:
      *
      * @param option window propertion
      * @param pipTemplateInfo pipTemplateInfo
-     * @param pcontext ability context
+     * @param context ability context
      * @param errCode error code of create pip window
      * @return sptr<Window> If create pip window success, return window instance; Otherwise, return nullptr
      */
