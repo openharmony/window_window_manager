@@ -308,7 +308,9 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
         WLOGFE("screenSessionManager_ is null");
         return;
     }
+    WLOGFI("Begin calling the SetScreenPrivacyState() of screenSessionManager_, hasPrivate: %{public}d", hasPrivate);
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
+    WLOGFI("End calling the SetScreenPrivacyState() of screenSessionManager_");
 }
 
 void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
