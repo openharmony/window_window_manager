@@ -2651,6 +2651,7 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
 
 void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
 {
+    WLOGFI("SetScreenPrivacyState enter, hasPrivate: %{public}d", hasPrivate);
     ScreenId id = GetDefaultScreenId();
     auto screenSession = GetScreenSession(id);
     if (screenSession == nullptr) {
