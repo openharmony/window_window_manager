@@ -764,7 +764,8 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
         property->SetIsNeedUpdateWindowMode(true);
         property->SetWindowMode(property_->GetWindowMode());
     }
-    if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
+    if (SessionHelper::IsMainWindow(GetWindowType()) &&
+        static_cast<int>(GetSessionInfo().screenId_) != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
