@@ -24,7 +24,6 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "../../interfaces/innerkits/dm/dm_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -167,7 +166,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
-    uint64_t screenId_ = SCREEN_ID_INVALID;
+    uint64_t screenId_ = -1ULL; // -1ULL：SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
