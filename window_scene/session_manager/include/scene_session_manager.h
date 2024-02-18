@@ -507,7 +507,6 @@ private:
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
     sptr<SceneSession> callingSession_ = nullptr;
-    uint32_t callingWindowId_ = 0;
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
