@@ -282,7 +282,7 @@ napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetLayoutFullScreen");
+    WLOGI("SetWindowLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(env, info) : nullptr;
 }
@@ -2012,7 +2012,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
-            WLOGI("Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
+            WLOGI("Window [%{public}u, %{public}s] set window layout full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
