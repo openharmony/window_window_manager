@@ -6362,7 +6362,7 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
         return WSError::WS_ERROR_INVALID_TYPE;
     }
     {
-        std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
+        std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_[type] = impl;
     }
     return WSError::WS_OK;
@@ -6382,7 +6382,7 @@ WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
         return WSError::WS_ERROR_INVALID_TYPE;
     }
     {
-        std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
+        std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_.erase(type);
     }
     return WSError::WS_OK;
