@@ -35,6 +35,7 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
+#include "wm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -765,7 +766,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
         property->SetWindowMode(property_->GetWindowMode());
     }
     if (SessionHelper::IsMainWindow(GetWindowType()) &&
-        static_cast<int>(GetSessionInfo().screenId_) != -1 && property) {
+        GetSessionInfo().screenId_ != SCREEN_ID_INVALID && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
