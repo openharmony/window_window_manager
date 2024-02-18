@@ -24,7 +24,7 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "dm_common.h"
+#include "../../interfaces/innerkits/dm/dm_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
