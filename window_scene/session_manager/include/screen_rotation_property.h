@@ -71,6 +71,7 @@ private:
         DeviceRotation sensorRotationConverted);
     static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
     static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
+    static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
 
     static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
     static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);
@@ -96,6 +97,7 @@ private:
     static uint32_t defaultDeviceRotation_;
     static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
     static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
+    static std::map<DeviceRotation, float> deviceToFloatMap_;
     static std::map<Rotation, DisplayOrientation> displayToDisplayOrientationMap_;
     static Orientation lastOrientationType_;
     static Rotation currentDisplayRotation_;
