@@ -325,7 +325,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayByScreen, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplaySync, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(6).WillRepeatedly(Return(nullptr));
     sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
     ASSERT_EQ(display, nullptr);
 }

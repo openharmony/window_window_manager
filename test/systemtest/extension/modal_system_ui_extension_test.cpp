@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "modal_system_ui_extension.h"
+#include "scene_board_judgement.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -60,7 +61,11 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
         return;
     }
     OHOS::AAFwk::Want want;
-    ASSERT_TRUE(connection->CreateModalUIExtension(want));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_FALSE(connection->CreateModalUIExtension(want));
+    } else {
+        ASSERT_TRUE(connection->CreateModalUIExtension(want));
+    }
     delete connection;
 }
 }
