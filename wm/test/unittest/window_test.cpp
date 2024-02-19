@@ -112,6 +112,20 @@ HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CreatePiP
+ * @tc.desc: Create PiP window with option
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = nullptr;
+    PiPTemplateInfo pipTemplateInfo;
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    option = new WindowOption();
+    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+}
+
+/**
  * @tc.name: Find01
  * @tc.desc: Find with no name
  * @tc.type: FUNC

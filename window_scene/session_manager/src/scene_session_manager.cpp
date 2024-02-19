@@ -996,6 +996,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
         }
+        if (property != nullptr && WindowHelper::IsPipWindow(property->GetWindowType())) {
+            sceneSession->SetPiPTemplateInfo(property->GetPiPTemplateInfo());
+        }
         sceneSession->SetSystemConfig(systemConfig_);
         sceneSession->SetSnapshotScale(snapshotScale_);
         UpdateParentSessionForDialog(sceneSession, property);
@@ -1617,6 +1620,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
 
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP &&
+        !CheckPiPPriority(property->GetPiPTemplateInfo())) {
+        return WSError::WS_DO_NOTHING;
+    }
     WLOGFI("[WMSLife] create specific start, name: %{public}s, type: %{public}d",
         property->GetWindowName().c_str(), property->GetWindowType());
 
@@ -1668,6 +1675,21 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
             break;
         }
     }
+}
+
+bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter: sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
+            pipTemplateInfo.priority < session->GetPiPTemplateInfo().priority &&
+            IsSessionVisible(session)) {
+            WLOGFE("create pip window failed, reason: low priority.");
+            return false;
+        }
+    }
+    return true;
 }
 
 bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property)

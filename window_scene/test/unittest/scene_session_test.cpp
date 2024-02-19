@@ -176,6 +176,32 @@ HWTEST_F(SceneSessionTest, GetGlobalMaximizeMode01, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetAndGetPipTemplateInfo
+ * @tc.desc: SetAndGetPipTemplateInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->isActive_ = true;
+    PiPTemplateInfo pipTemplateInfo;
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    scensession->SetPiPTemplateInfo(pipTemplateInfo);
+    ASSERT_EQ(scensession->GetPiPTemplateInfo().pipTemplateType,
+        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+}
+
+/**
  * @tc.name: UpdateWindowSceneAfterCustomAnimation01
  * @tc.desc: UpdateWindowSceneAfterCustomAnimation
  * @tc.type: FUNC
