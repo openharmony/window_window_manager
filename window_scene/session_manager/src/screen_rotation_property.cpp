@@ -36,6 +36,7 @@ Rotation ScreenRotationProperty::lastSensorDecidedRotation_;
 Rotation ScreenRotationProperty::rotationLockedRotation_;
 uint32_t ScreenRotationProperty::defaultDeviceRotation_ = 0;
 std::map<SensorRotation, DeviceRotation> ScreenRotationProperty::sensorToDeviceRotationMap_;
+std::map<DeviceRotation, float> ScreenRotationProperty::deviceToFloatMap_;
 std::map<DeviceRotation, Rotation> ScreenRotationProperty::deviceToDisplayRotationMap_;
 std::map<Rotation, DisplayOrientation> ScreenRotationProperty::displayToDisplayOrientationMap_;
 DeviceRotation ScreenRotationProperty::lastSensorRotationConverted_ = DeviceRotation::INVALID;
@@ -99,23 +100,15 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
         WLOGFW("device is not phone or pad, return.");
         return;
     }
+    if (deviceRotation != DeviceRotation::INVALID && lastSensorRotationConverted_ != deviceRotation) {
+        lastSensorRotationConverted_ = deviceRotation;
+    }
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (!screenSession) {
         WLOGFW("screenSession is null.");
         return;
     }
-    screenSession->SetSensorRotation(deviceRotation);
-    if (deviceRotation == DeviceRotation::INVALID) {
-        WLOGFW("deviceRotation is invalid, return.");
-        return;
-    }
-    Rotation targetSensorRotation = ConvertDeviceToDisplayRotation(deviceRotation);
-    if (lastSensorRotationConverted_ == deviceRotation &&
-        screenSession->ConvertRotationToFloat(targetSensorRotation) == screenSession->GetCurrentSensorRotation()) {
-        return;
-    }
-    lastSensorRotationConverted_ = deviceRotation;
-    screenSession->SensorRotationChange(targetSensorRotation);
+    screenSession->HandleSensorRotation(ConvertDeviceToFloat(deviceRotation));
 }
 
 Rotation ScreenRotationProperty::GetCurrentDisplayRotation()
@@ -352,6 +345,14 @@ Rotation ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation d
     return deviceToDisplayRotationMap_.at(deviceRotation);
 }
 
+float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation)
+{
+    if (deviceToFloatMap_.empty()) {
+        ProcessRotationMapping();
+    }
+    return deviceToFloatMap_.at(deviceRotation);
+}
+
 void ScreenRotationProperty::ProcessRotationMapping()
 {
     sptr<SupportedScreenModes> modes =
@@ -369,6 +370,17 @@ void ScreenRotationProperty::ProcessRotationMapping()
                 defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
             {DeviceRotation::ROTATION_LANDSCAPE_INVERTED,
                 defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
+        };
+    }
+    if (deviceToFloatMap_.empty()) {
+        deviceToFloatMap_ = {
+            {DeviceRotation::ROTATION_PORTRAIT, defaultDeviceRotation_ == 0 ? 0.0f : 90.0f}, // degree 0 or 90
+            {DeviceRotation::ROTATION_LANDSCAPE, defaultDeviceRotation_ == 1 ? 0.0f : 90.0f}, // degree 0 or 90
+            {DeviceRotation::ROTATION_PORTRAIT_INVERTED,
+                defaultDeviceRotation_ == 0 ? 180.0f : 270.0f}, // degree 180 or 270
+            {DeviceRotation::ROTATION_LANDSCAPE_INVERTED,
+                defaultDeviceRotation_ == 1 ? 180.0f : 270.0f}, // degree 180 or 270
+            {DeviceRotation::INVALID, -1.0f}, // keep degree
         };
     }
     if (displayToDisplayOrientationMap_.empty()) {

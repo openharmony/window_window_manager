@@ -3333,12 +3333,6 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     WLOGFI("ScreenSessionManager::NotifyFoldToExpandCompletion");
     SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
-    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
-    if (screenSession == nullptr) {
-        WLOGFE("fail to get default screenSession");
-        return;
-    }
-    screenSession->UpdateAfterFoldExpand(foldToExpand);
 }
 
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
