@@ -2072,7 +2072,7 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return ;
+        return;
     }
     if (!data.WriteUint64(screenId)) {
         WLOGFE("Write screenId failed");

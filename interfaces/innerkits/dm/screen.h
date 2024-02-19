@@ -238,7 +238,7 @@ public:
     DMError GetPixelFormat(GraphicPixelFormat& pixelFormat) const;
 
     /**
-     * @brief Set the color gamut of the screen.
+     * @brief Set the pixel format of the screen.
      *
      * @return DM_OK means set success, others means set failed.
      */

@@ -69,6 +69,7 @@ const ScreenId SCREEN_ID_MAIN = 5;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
+static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
 } // namespace
 
 // based on the bundle_util
@@ -98,8 +99,7 @@ ScreenSessionManager::ScreenSessionManager()
     sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
-    if (foldScreenFlag) {
+    if (g_foldScreenFlag) {
         foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
         foldScreenController_->SetOnBootAnimation(true);
         rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
@@ -174,15 +174,15 @@ void ScreenSessionManager::Init()
 
 void ScreenSessionManager::OnStart()
 {
-    WLOGFI("begin");
+    WLOGFI("DMS SA OnStart");
     Init();
     sptr<ScreenSessionManager> dms(this);
     dms->IncStrongRef(nullptr);
     if (!Publish(dms)) {
-        WLOGFE("Publish failed");
+        WLOGFE("Publish DMS failed");
         return;
     }
-    WLOGFI("end");
+    WLOGFI("DMS SA OnStart end");
 }
 
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
@@ -237,7 +237,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
-        WLOGFD("densityDpi = %u", densityDpi);
+        WLOGFI("densityDpi = %u", densityDpi);
         if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
             isDensityDpiLoad_ = true;
             defaultDpi = densityDpi;
@@ -419,7 +419,7 @@ void ScreenSessionManager::OnHgmRefreshRateModeChange(int32_t refreshRateMode)
     } else {
         WLOGFE("Get default screen session failed.");
     }
-    return ;
+    return;
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) const
@@ -2920,6 +2920,9 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
 
 void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 {
+    if (!g_foldScreenFlag) {
+        return;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("SetFoldDisplayMode foldScreenController_ is null");
         return;
@@ -2933,6 +2936,9 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 {
+    if (!g_foldScreenFlag) {
+        return;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("SetFoldStatusLocked foldScreenController_ is null");
         return;
@@ -2946,6 +2952,9 @@ void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
+    if (!g_foldScreenFlag) {
+        return FoldDisplayMode::UNKNOWN;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("GetFoldDisplayMode foldScreenController_ is null");
         return FoldDisplayMode::UNKNOWN;
@@ -2955,6 +2964,9 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 
 bool ScreenSessionManager::IsFoldable()
 {
+    if (!g_foldScreenFlag) {
+        return false;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("foldScreenController_ is null");
         return false;
@@ -2969,6 +2981,9 @@ bool ScreenSessionManager::IsMultiScreenCollaboration()
 
 FoldStatus ScreenSessionManager::GetFoldStatus()
 {
+    if (!g_foldScreenFlag) {
+        return FoldStatus::UNKNOWN;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("foldScreenController_ is null");
         return FoldStatus::UNKNOWN;
@@ -2978,6 +2993,9 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
 
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
+    if (!g_foldScreenFlag) {
+        return nullptr;
+    }
     if (foldScreenController_ == nullptr) {
         WLOGFI("foldScreenController_ is null");
         return nullptr;
