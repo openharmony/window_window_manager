@@ -1729,7 +1729,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     if (property->GetParentPersistentId() > 0 && !isNeedRecover(property->GetParentPersistentId())) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto pid = IPCSkeleton::GetCallingPid();
+    auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
         // recover specific session
@@ -1903,7 +1903,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         return WSError::WS_ERROR_NULLPTR;
     }
     auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token,
-        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+        IPCSkeleton::GetCallingRealPid(), IPCSkeleton::GetCallingUid());
     if (ret != WSError::WS_OK) {
         WLOGFE("[WMSRecover] Reconnect failed");
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
