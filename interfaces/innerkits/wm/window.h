@@ -428,6 +428,18 @@ public:
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode);
 
     /**
+     * @brief create pip window with session
+     *
+     * @param option window propertion
+     * @param pipTemplateInfo pipTemplateInfo
+     * @param context ability context
+     * @param errCode error code of create pip window
+     * @return sptr<Window> If create pip window success, return window instance; Otherwise, return nullptr
+     */
+    static sptr<Window> CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode = DefaultCreateErrCode);
+
+    /**
      * @brief find window by windowName
      *
      * @param windowName

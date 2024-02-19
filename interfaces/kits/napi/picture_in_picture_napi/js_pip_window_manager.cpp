@@ -32,6 +32,26 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
+static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
+{
+    if (controlGroup == nullptr) {
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, controlGroup, &size);
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t controlType;
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, controlGroup, i, &getElementValue);
+        if (!ConvertFromJsValue(env, getElementValue, controlType)) {
+            WLOGE("Failed to convert parameter to controlType");
+            return false;
+        }
+        controls.push_back(controlType);
+    }
+    return true;
+}
+
 static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionObject, PipOption& option)
 {
     napi_value contextPtrValue = nullptr;
@@ -40,11 +60,13 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value widthValue = nullptr;
     napi_value heightValue = nullptr;
     napi_value xComponentControllerValue = nullptr;
+    napi_value controlGroup = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = 0;
     uint32_t width = 0;
     uint32_t height = 0;
+    std::vector<std::uint32_t> controls;
 
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
@@ -52,17 +74,20 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
+    napi_get_named_property(env, optionObject, "controlGroup", &controlGroup);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
     ConvertFromJsValue(env, widthValue, width);
     ConvertFromJsValue(env, heightValue, height);
+    GetControlGroupFromJs(env, controlGroup, controls);
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);
     option.SetContentSize(width, height);
+    option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
     return 0;
 }

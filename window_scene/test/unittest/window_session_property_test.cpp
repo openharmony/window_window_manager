@@ -161,6 +161,21 @@ HWTEST_F(WindowSessionPropertyTest, SetWindowFlags, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetAndGetPipTemplateInfo
+ * @tc.desc: SetAndGetPipTemplateInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new WindowSessionProperty();
+    PiPTemplateInfo pipTemplateInfo;
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    property->SetPiPTemplateInfo(pipTemplateInfo);
+    ASSERT_EQ(property->GetPiPTemplateInfo().pipTemplateType,
+        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+}
+
+/**
  * @tc.name: AddWindowFlag
  * @tc.desc: AddWindowFlag test
  * @tc.type: FUNC
@@ -357,6 +372,20 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingTouchHotAreas(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), false);
+}
+
+/**
+ * @tc.name: UnmarshallingPiPTemplateInfo
+ * @tc.desc: UnmarshallingPiPTemplateInfo test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
     ASSERT_EQ(property->GetTokenState(), false);
 }
 

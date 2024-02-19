@@ -16,6 +16,7 @@
 #include "common/include/window_session_property.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -422,6 +423,16 @@ uint32_t WindowSessionProperty::GetCallingWindow() const
     return callingWindowId_;
 }
 
+void WindowSessionProperty::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
+{
+    pipTemplateInfo_ = pipTemplateInfo;
+}
+
+PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
+{
+    return pipTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -518,6 +529,44 @@ void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSes
     }
 }
 
+bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsPipWindow(type_)) {
+        return true;
+    }
+    if (!parcel.WriteUint32(pipTemplateInfo_.pipTemplateType)) {
+        return false;
+    }
+    if (!parcel.WriteUint32(pipTemplateInfo_.priority)) {
+        return false;
+    }
+    auto size = pipTemplateInfo_.controlGroup.size();
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!parcel.WriteUint32(pipTemplateInfo_.controlGroup[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsPipWindow(property->GetWindowType())) {
+        return;
+    }
+    PiPTemplateInfo pipTemplateInfo;
+    pipTemplateInfo.pipTemplateType = parcel.ReadUint32();
+    pipTemplateInfo.priority = parcel.ReadUint32();
+    auto size = parcel.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        pipTemplateInfo.controlGroup.push_back(parcel.ReadUint32());
+    }
+    property->SetPiPTemplateInfo(pipTemplateInfo);
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -541,6 +590,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
+        MarshallingPiPTemplateInfo(parcel) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteUint32(static_cast<uint32_t>(sessionGravity_)) && parcel.WriteUint32(sessionGravitySizePercent_) &&
@@ -588,6 +638,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetBrightness(parcel.ReadFloat());
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
+    UnmarshallingPiPTemplateInfo(parcel, property);
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetSystemCalling(parcel.ReadBool());
