@@ -159,7 +159,7 @@ private:
     {
         // check for invalid scene
         if (pImpl_->virtualScreenGroupListeners_.size() <= 0) {
-            WLOGFW("no virtual screnn group listeners");
+            WLOGFW("no virtual screen group listeners");
             return;
         }
         if (screenInfo->GetType() != ScreenType::VIRTUAL) {
