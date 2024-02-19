@@ -6076,7 +6076,8 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     }
     auto task = [this, displayInfo]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        if (processVirtualPixelRatioChangeFunc_ != nullptr) {
+        if (processVirtualPixelRatioChangeFunc_ != nullptr &&
+            displayInfo->GetVirtualPixelRatio() == displayInfo->GetDensityInCurResolution()) {
             Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
                 displayInfo->GetWidth(), displayInfo->GetHeight()
             };
