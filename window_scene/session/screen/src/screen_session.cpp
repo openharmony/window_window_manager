@@ -141,6 +141,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
+    displayInfo->SetDensityInCurResolution(property_.GetDensityInCurResolution());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
@@ -215,13 +216,12 @@ void ScreenSession::UpdateRefreshRate(uint32_t refreshRate)
     property_.SetRefreshRate(refreshRate);
 }
 
-void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height, float virtualPixelRatio)
+void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 {
     auto screenBounds = property_.GetBounds();
     screenBounds.rect_.width_ = width;
     screenBounds.rect_.height_ = height;
     property_.SetBounds(screenBounds);
-    property_.SetDensityInCurResolution(virtualPixelRatio);
 }
 
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
@@ -467,6 +467,11 @@ Orientation ScreenSession::GetScreenRequestedOrientation() const
 void ScreenSession::SetVirtualPixelRatio(float virtualPixelRatio)
 {
     property_.SetVirtualPixelRatio(virtualPixelRatio);
+}
+
+void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
+{
+    property_.SetDensityInCurResolution(densityInCurResolution);
 }
 
 void ScreenSession::SetScreenType(ScreenType type)
