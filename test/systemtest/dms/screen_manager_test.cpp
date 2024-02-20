@@ -20,6 +20,7 @@
 #include "display_manager_proxy.h"
 #include "future.h"
 #include "screen.h"
+#include "scene_board_judgement.h"
 #include "surface_draw.h"
 #include "virtual_screen_group_change_listener_future.h"
 #include "window.h"
@@ -1066,9 +1067,13 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
+        ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
+    } else {
+        ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
+        ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
+    }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1101,9 +1106,13 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
-    ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
+        ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
+    } else {
+        ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
+        ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
+    }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1132,8 +1141,11 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level
     DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId + 1,
         resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, res);
+    }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 }
