@@ -484,6 +484,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(hasPrivateWindow);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId rsId = SCREEN_ID_INVALID;
+            bool ret = ConvertScreenIdToRsScreenId(screenId, rsId);
+            reply.WriteBool(ret);
+            reply.WriteUint64(rsId);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
             bool immersive = false;
             DMError ret = HasImmersiveWindow(immersive);
