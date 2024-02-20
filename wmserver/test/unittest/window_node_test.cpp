@@ -170,7 +170,6 @@ namespace {
  */
 HWTEST_F(WindowNodeTest, NewWindowNode01, Function | SmallTest | Level3)
 {
-
     std::string windowName = "WindowNode01";
     auto property = CreateWindowProperty(1, windowName);
     ASSERT_NE(nullptr, property);
