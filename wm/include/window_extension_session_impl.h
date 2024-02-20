@@ -82,10 +82,14 @@ protected:
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
+    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS
