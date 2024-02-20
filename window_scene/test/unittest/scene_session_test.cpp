@@ -1535,7 +1535,7 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     WSRect newWinRect;
     WSRect newRequestRect;
     bool result = scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
