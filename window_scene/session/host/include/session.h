@@ -182,6 +182,8 @@ public:
     WSRect GetSessionRequestRect() const;
 
     virtual WSError SetActive(bool active);
+    virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
+    SizeChangeReason GetSizeChangeReason() const;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
@@ -433,6 +435,7 @@ protected:
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     bool isVisible_ = false;
+    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
