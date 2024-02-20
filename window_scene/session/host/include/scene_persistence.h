@@ -31,11 +31,12 @@ namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
     ScenePersistence(const std::string& bundleName, const int32_t& persistentId);
-    ~ScenePersistence() = default;
+    virtual ~ScenePersistence();
 
     static bool CreateSnapshotDir(const std::string& directory);
     static bool CreateUpdatedIconDir(const std::string& directory);
 
+    static bool IsAstcEnabled();
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath();
     std::string GetSnapshotFilePathFromAce();
@@ -50,9 +51,12 @@ public:
     std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale) const;
 
 private:
+    bool IsSnapshotExisted(const std::string& path) const;
+
     static std::string snapshotDirectory_;
     std::string bundleName_;
     std::string snapshotPath_;
+    std::string oldSnapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
 
     static std::string updatedIconDirectory_;
