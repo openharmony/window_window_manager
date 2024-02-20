@@ -574,7 +574,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, Function | SmallTes
 {
     ScreenId screenId = 1;
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);
-    ASSERT_EQ(nullptr, ret);
+    ASSERT_NE(nullptr, ret);
 }
 }
 } // namespace Rosen

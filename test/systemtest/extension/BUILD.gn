@@ -45,6 +45,7 @@ ohos_systemtest("modal_system_ui_extension_test") {
 
   public_deps = [
     "../../../extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
+    "../../../window_scene/interfaces/innerkits:libwsutils",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
