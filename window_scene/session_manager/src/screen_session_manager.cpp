@@ -990,9 +990,8 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                 break;
             } else {
                 needScreenOnWhenKeyguardNotify_ = true;
-                auto task = [this]() {
-                    SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                        PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+                auto task = [this, reason]() {
+                    SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, reason);
                     needScreenOnWhenKeyguardNotify_ = false;
                     keyguardDrawnDone_ = true;
                     WLOGFI("SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
