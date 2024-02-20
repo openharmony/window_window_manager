@@ -1659,6 +1659,9 @@ HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | Sm
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
+    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
+    ssm_->SetAlivePersistentIds(recoveredPersistentIds);
+    property->SetPersistentId(1);
     result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
