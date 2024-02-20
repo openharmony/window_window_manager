@@ -3955,6 +3955,63 @@ HWTEST_F(WindowImplTest, MaximizeFloating, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetTopWindowWithId03
+ * @tc.desc: GetTopWindowWithId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetTopWindowWithId03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetTopWindowWithId03");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    uint32_t mainWinId = 0;
+
+    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+    ret = WMError::WM_OK;
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithId(mainWinId));
+}
+
+/**
+ * @tc.name: GetTopWindowWithContext02
+ * @tc.desc: GetTopWindowWithContext test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetTopWindowWithContext02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetTopWindowWithContext02");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::shared_ptr<AbilityRuntime::Context> context;
+    uint32_t mainWinId = INVALID_WINDOW_ID;
+
+    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(INVALID_WINDOW_ID, mainWinId);
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(context));
+    ret = WMError::WM_OK;
+    uint32_t topWinId = INVALID_WINDOW_ID;
+    ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithContext(context));
+}
+
+/**
+ * @tc.name: GetSubWindow03
+ * @tc.desc: GetSubWindowtest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetSubWindow03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetSubWindow03");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    uint32_t parentId = 0;
+
+    ASSERT_EQ(std::vector<sptr<Window>>(), window->GetSubWindow(parentId));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
