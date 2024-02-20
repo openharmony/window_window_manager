@@ -83,6 +83,7 @@ public:
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
+    void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
 
     std::string GetName();
@@ -128,7 +129,7 @@ public:
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void UpdateRefreshRate(uint32_t refreshRate);
-    void UpdatePropertyByResolution(uint32_t width, uint32_t height, float virtualPixelRatio);
+    void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
 
