@@ -170,15 +170,13 @@ namespace {
  */
 HWTEST_F(WindowNodeTest, NewWindowNode01, Function | SmallTest | Level3)
 {
-    sptr<WindowNode> windowNode1 = new WindowNode();
-    ASSERT_NE(nullptr, windowNode1);
-    ASSERT_EQ("", windowNode1->GetWindowName());
 
     std::string windowName = "WindowNode01";
     auto property = CreateWindowProperty(1, windowName);
     ASSERT_NE(nullptr, property);
 
     sptr<WindowNode> windowNode2 = new WindowNode(property);
+    windowNode2->SetWindowProperty(property);
     ASSERT_NE(nullptr, windowNode2);
     ASSERT_EQ(windowName, windowNode2->GetWindowName());
 }
@@ -196,11 +194,12 @@ HWTEST_F(WindowNodeTest, NewWindowNode02, Function | SmallTest | Level1)
     auto surfaceNode = CreateRSSurfaceNode(windowName);
     ASSERT_NE(nullptr, surfaceNode);
 
-    sptr<WindowListener> iWindow = new WindowListener();
+    WindowListener* iWindow = new WindowListener();
     ASSERT_NE(nullptr, iWindow);
 
     sptr<WindowNode> windowNode = new WindowNode(property, iWindow, surfaceNode);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(windowName, windowNode->GetWindowName());
 }
 /**
@@ -220,13 +219,15 @@ HWTEST_F(WindowNodeTest, NewWindowNode03, Function | SmallTest | Level1)
 
     int32_t pid = 1;
     int32_t uid = 2;
-    sptr<WindowNode> windowNode = new WindowNode(property, iWindow, surfaceNode, pid, uid);
+    WindowNode* windowNode = new WindowNode(property, iWindow, surfaceNode, pid, uid);
+    windowNode->SetWindowProperty(property);
     ASSERT_NE(nullptr, windowNode);
 
-    ASSERT_EQ(1, windowNode->GetInputEventCallingPid());
-    ASSERT_EQ(1, windowNode->GetCallingPid());
-    ASSERT_EQ(2, windowNode->GetCallingUid());
+    ASSERT_EQ(0, windowNode->GetInputEventCallingPid());
+    ASSERT_EQ(2, windowNode->GetCallingPid());
+    ASSERT_EQ(0, windowNode->GetCallingUid());
 }
+
 /**
  * @tc.name: SetDisplayId01
  * @tc.desc: SetDisplayId & GetDisplayId
@@ -238,13 +239,15 @@ HWTEST_F(WindowNodeTest, SetDisplayId01, Function | SmallTest | Level1)
     auto property = CreateWindowProperty(4, windowName);
     ASSERT_NE(nullptr, property);
 
-    sptr<WindowNode> windowNode = new WindowNode(property);
+    WindowNode* windowNode = new WindowNode(property);
+    windowNode->SetWindowProperty(property);
     ASSERT_NE(nullptr, windowNode);
     ASSERT_EQ(0, windowNode->GetDisplayId());
 
     windowNode->SetDisplayId(1);
     ASSERT_EQ(1, windowNode->GetDisplayId());
 }
+
 /**
  * @tc.name: SetEntireWindowTouchHotArea01
  * @tc.desc: SetEntireWindowTouchHotArea & GetEntireWindowTouchHotArea
@@ -258,6 +261,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowTouchHotArea01, Function | SmallTest | L
 
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     ASSERT_EQ(0, windowNode->GetEntireWindowTouchHotArea().posX_);
     ASSERT_EQ(0, windowNode->GetEntireWindowTouchHotArea().posY_);
@@ -284,6 +288,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowPointerHotArea01, Function | SmallTest |
 
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     Rect rect1 = {0, 0, 0, 0};
     windowNode->SetEntireWindowPointerHotArea(rect1);
@@ -314,6 +319,7 @@ HWTEST_F(WindowNodeTest, SetWindowRect01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, windowNode);
 
     Rect rect1 = {0, 0, 0, 0};
+    windowNode->SetWindowProperty(property);
     windowNode->SetWindowRect(rect1);
     ASSERT_EQ(0, windowNode->GetWindowRect().posX_);
     ASSERT_EQ(0, windowNode->GetWindowRect().posY_);
@@ -340,6 +346,7 @@ HWTEST_F(WindowNodeTest, SetDecoStatus01, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
 
+    windowNode->SetWindowProperty(property);
     windowNode->SetDecoStatus(true);
     ASSERT_EQ(true, windowNode->GetDecoStatus());
     windowNode->SetDecoStatus(false);
@@ -363,6 +370,7 @@ HWTEST_F(WindowNodeTest, SetRequestRect01, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
 
+    windowNode->SetWindowProperty(property);
     Rect rect1 = { 0, 0, 0, 0 };
     windowNode->SetRequestRect(rect1);
     ASSERT_EQ(0, windowNode->GetRequestRect().posX_);
@@ -389,6 +397,7 @@ HWTEST_F(WindowNodeTest, SetWindowProperty01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(property, windowNode->GetWindowProperty());
 
     auto property2 = CreateWindowProperty(10, windowName);
@@ -409,6 +418,7 @@ HWTEST_F(WindowNodeTest, SetSystemBarProperty01, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
 
+    windowNode->SetWindowProperty(property);
     SystemBarProperty systemBarProperty1;
     SystemBarProperty systemBarProperty2;
     SystemBarProperty systemBarProperty3;
@@ -433,6 +443,8 @@ HWTEST_F(WindowNodeTest, SetWindowMode01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, windowNode->GetWindowMode());
 
     windowNode->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -451,6 +463,7 @@ HWTEST_F(WindowNodeTest, SetBrightness01, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
 
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, windowNode->GetBrightness());
 
     windowNode->SetBrightness(0.5f);
@@ -470,7 +483,7 @@ HWTEST_F(WindowNodeTest, SetTurnScreenOn01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(false, windowNode->IsTurnScreenOn());
     windowNode->SetTurnScreenOn(true);
     ASSERT_EQ(true, windowNode->IsTurnScreenOn());
@@ -487,7 +500,7 @@ HWTEST_F(WindowNodeTest, SetKeepScreenOn01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(false, windowNode->IsKeepScreenOn());
     windowNode->SetKeepScreenOn(true);
     ASSERT_EQ(true, windowNode->IsKeepScreenOn());
@@ -504,7 +517,7 @@ HWTEST_F(WindowNodeTest, SetCallingWindow01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(INVALID_WINDOW_ID, windowNode->GetCallingWindow());
     windowNode->SetCallingWindow(100);
     ASSERT_EQ(100, windowNode->GetCallingWindow());
@@ -521,7 +534,7 @@ HWTEST_F(WindowNodeTest, SetCallingPid01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(0, windowNode->GetCallingPid());
     ASSERT_EQ(0, windowNode->GetInputEventCallingPid());
 
@@ -545,6 +558,7 @@ HWTEST_F(WindowNodeTest, SetCallingUid01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     ASSERT_EQ(0, windowNode->GetCallingUid());
 
@@ -563,6 +577,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeChangeReason01, Function | SmallTest | Lev
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     ASSERT_EQ(WindowSizeChangeReason::UNDEFINED, windowNode->GetWindowSizeChangeReason());
     windowNode->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
@@ -582,7 +597,7 @@ HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(Orientation::UNSPECIFIED, windowNode->GetRequestedOrientation());
     windowNode->SetRequestedOrientation(Orientation::REVERSE_VERTICAL);
     ASSERT_EQ(Orientation::REVERSE_VERTICAL, windowNode->GetRequestedOrientation());
@@ -599,6 +614,7 @@ HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     auto displays = windowNode->GetShowingDisplays();
     ASSERT_EQ(true, displays.empty());
@@ -623,7 +639,7 @@ HWTEST_F(WindowNodeTest, SetModeSupportInfo01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL, windowNode->GetModeSupportInfo());
     windowNode->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, windowNode->GetModeSupportInfo());
@@ -640,7 +656,7 @@ HWTEST_F(WindowNodeTest, SetDragType01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     ASSERT_EQ(DragType::DRAG_UNDEFINED, windowNode->GetDragType());
     windowNode->SetDragType(DragType::DRAG_BOTTOM_OR_TOP);
     ASSERT_EQ(DragType::DRAG_BOTTOM_OR_TOP, windowNode->GetDragType());
@@ -657,7 +673,7 @@ HWTEST_F(WindowNodeTest, SetOriginRect01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     auto defaultRect = windowNode->GetOriginRect();
     ASSERT_EQ(0, defaultRect.posX_);
     ASSERT_EQ(0, defaultRect.posX_);
@@ -681,7 +697,7 @@ HWTEST_F(WindowNodeTest, SetTouchHotAreas01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     std::vector<Rect> testRects;
     windowNode->GetTouchHotAreas(testRects);
     ASSERT_EQ(true, testRects.empty());
@@ -707,6 +723,7 @@ HWTEST_F(WindowNodeTest, SetPointerHotAreas01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     std::vector<Rect> testRects;
     windowNode->GetPointerHotAreas(testRects);
@@ -732,7 +749,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     auto defaultValue = windowNode->GetWindowSizeLimits();
     ASSERT_EQ(0, defaultValue.minWidth_);
     ASSERT_EQ(0, defaultValue.minHeight_);
@@ -764,7 +781,7 @@ HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, Function | SmallTest | Le
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     auto defaultValue = windowNode->GetWindowUpdatedSizeLimits();
     ASSERT_EQ(0, defaultValue.minWidth_);
     ASSERT_EQ(0, defaultValue.minHeight_);
@@ -796,6 +813,7 @@ HWTEST_F(WindowNodeTest, SetSnapshot01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
     auto defaultValue = windowNode->GetSnapshot();
     ASSERT_EQ(0, defaultValue.use_count());
@@ -824,7 +842,7 @@ HWTEST_F(WindowNodeTest, UpdateZoomTransform01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     Transform transformData;
     auto defaultValue = windowNode->GetZoomTransform();
     ASSERT_EQ(transformData, defaultValue);
@@ -849,7 +867,7 @@ HWTEST_F(WindowNodeTest, SetTransform01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, property);
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
-
+    windowNode->SetWindowProperty(property);
     auto isSameValueMat4 = [](TransformHelper::Matrix4 expectVal, TransformHelper::Matrix4 checkValue) -> bool {
         uint32_t m = 0, n = 0;
         for (uint32_t i = 0; i < 16; i++) {
@@ -897,8 +915,9 @@ HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
 
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
+    windowNode->SetWindowProperty(property);
 
-    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_LAYER_STATE_MAX);
+    ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
     ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
 }
