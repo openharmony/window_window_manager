@@ -47,6 +47,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenGroupId, screenGroupId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, DensityInCurResolution, densityInCurResolution, 1.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, XDpi, xDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, YDpi, yDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, Dpi, dpi, 320);
