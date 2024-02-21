@@ -5504,7 +5504,7 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
             DealwithDrawingContentChange(drawingContentChangeInfos);
         }
     };
-    taskScheduler_->PostAsyncTask(task, "WindowLayerInfoChangeCallback");
+    taskScheduler_->PostVoidSyncTask(task, "WindowLayerInfoChangeCallback");
 }
 
 void SceneSessionManager::GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusiontionData,
