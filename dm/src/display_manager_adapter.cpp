@@ -476,7 +476,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    WLOGFI("DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
+    WLOGFD("DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFW("screen id is invalid");
         return nullptr;
