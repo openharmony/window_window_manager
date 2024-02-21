@@ -504,7 +504,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
-    WLOGFI("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
+    WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
