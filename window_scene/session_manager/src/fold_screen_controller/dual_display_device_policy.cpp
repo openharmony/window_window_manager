@@ -339,7 +339,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
     } else { //AOD scene
         WLOGFI("IsScreenOn is false, begin.");
         // off main screen
-        auto taskScreenOnFullOff = [=] {
+        auto taskScreenOffFullOff = [=] {
             WLOGFI("ChangeScreenDisplayModeToFull: IsScreenOn is false, screenIdMain OFF.");
             screenId_ = SCREEN_ID_MAIN;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
