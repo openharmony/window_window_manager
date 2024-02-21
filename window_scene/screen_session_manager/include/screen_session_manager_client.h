@@ -72,7 +72,7 @@ protected:
 
 private:
     void ConnectToServer();
-    bool CheckIfNeedCennectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
+    bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
         ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,
