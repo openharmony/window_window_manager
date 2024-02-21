@@ -1591,7 +1591,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (system::GetParameter("const.product.devicetype", "unknown") == "2in1") {
+    if (system::GetParameter("const.product.devicetype", "unknown") != "2in1") {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
