@@ -5504,7 +5504,7 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
             DealwithDrawingContentChange(drawingContentChangeInfos);
         }
     };
-    taskScheduler_->PostVoidSyncTask(task, "WindowLayerInfoChangeCallback");
+    taskScheduler_->PostAsyncTask(task, "WindowLayerInfoChangeCallback");
 }
 
 void SceneSessionManager::GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusiontionData,
@@ -5572,6 +5572,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
     std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
 #endif
 
+    std::string visibilityInfo = "WindowVisibilityInfos [name, winId, visibleState]: ";
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         WindowVisibilityState visibleState = elem.second;
@@ -5599,12 +5600,13 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
     memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible));
 #endif
-        WLOGFD("Notify window visibility Change, window: name=%{public}s, id=%{public}u, visibleState:%{public}d",
-            session->GetWindowName().c_str(), windowId, visibleState);
+        visibilityInfo += "[" + session->GetWindowName() + ", " + std::to_string(windowId) + ", " +
+            std::to_string(visibleState) + "], ";
         CheckAndNotifyWaterMarkChangedResult();
     }
     if (windowVisibilityInfos.size() != 0) {
-        WLOGFD("Notify windowvisibilityinfo changed start");
+        WLOGI("Notify windowvisibilityinfo changed start, size: %{public}zu, %{public}s", windowVisibilityInfos.size(),
+            visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 #ifdef MEMMGR_WINDOW_ENABLE
