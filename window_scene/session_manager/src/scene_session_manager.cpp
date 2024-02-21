@@ -192,17 +192,7 @@ void SceneSessionManager::Init()
         WLOGFW("Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
     }
 
-#ifdef RES_SCHED_ENABLE
-    std::unordered_map<std::string, std::string> payload {
-        { "pid", std::to_string(getprocpid()) },
-        { "tid", std::to_string(getproctid()) },
-        { "uid", std::to_string(getuid()) },
-        { "bundleName", SCENE_BOARD_BUNDLE_NAME },
-    };
-    uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
-    int64_t value = 0;
-    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
-#endif
+    InitScheduleUtils();
 
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
@@ -230,6 +220,34 @@ void SceneSessionManager::Init()
     WLOGI("SceneSessionManager init success.");
     RegisterAppListener();
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
+}
+
+void SceneSessionManager::InitScheduleUtils()
+{
+#ifdef RES_SCHED_ENABLE
+    std::unordered_map<std::string, std::string> payload {
+        { "pid", std::to_string(getprocpid()) },
+        { "tid", std::to_string(getproctid()) },
+        { "uid", std::to_string(getuid()) },
+        { "bundleName", SCENE_BOARD_BUNDLE_NAME },
+    };
+    uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
+    int64_t value = 0;
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
+    auto task = []() {
+        std::unordered_map<std::string, std::string> payload{
+            {"pid", std::to_string(getpid())},
+            {"tid", std::to_string(gettid())},
+            {"uid", std::to_string(getuid())},
+            {"bundleName", SCENE_BOARD_BUNDLE_NAME},
+        };
+        uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
+        int64_t value = 0;
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
+        WLOGFI("[WMSLife] set qos success");
+    };
+    taskScheduler_->PostAsyncTask(task, "changeQosTask");
+#endif
 }
 
 void SceneSessionManager::RegisterAppListener()
