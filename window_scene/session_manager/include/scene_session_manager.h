@@ -297,6 +297,7 @@ protected:
 
 private:
     void Init();
+    void InitScheduleUtils();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
