@@ -295,7 +295,7 @@ napi_value JsDisplay::GetSupportedColorSpaces(napi_env env, napi_callback_info i
 
 static napi_value CreateJsColorSpaceArray(napi_env env, const std::vector<uint32_t>& colorSpaces)
 {
-    WLOGI("JsDisplay::CreateJsColorSpaceArray is called");
+    WLOGD("JsDisplay::CreateJsColorSpaceArray is called");
     std::set<uint32_t> nativeColorSpaces;
     for (const auto colorSpace : colorSpaces) {
         GraphicCM_ColorSpaceType colorSpaceValue = static_cast<GraphicCM_ColorSpaceType>(colorSpace);
@@ -358,7 +358,7 @@ napi_value JsDisplay::GetSupportedHDRFormats(napi_env env, napi_callback_info in
 
 static napi_value CreateJsHDRFormatArray(napi_env env, const std::vector<uint32_t>& hdrFormats)
 {
-    WLOGI("JsDisplay::CreateJsHDRFormatArray is called");
+    WLOGD("JsDisplay::CreateJsHDRFormatArray is called");
     std::set<uint32_t> nativeHDRFormats;
     for (const auto hdrFormat : hdrFormats) {
         ScreenHDRFormat hdrFormatValue = static_cast<ScreenHDRFormat>(hdrFormat);
