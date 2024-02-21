@@ -288,7 +288,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         WLOGFI("IsScreenOn is false, begin.");
         // off full screen
         auto taskScreenOffMainOff = [=] {
-            WLOGFI("ChangeScreenDisplayModeToMain: IsScreenOn is false, screenIdMain OFF.");
+            WLOGFI("ChangeScreenDisplayModeToMain: IsScreenOn is false, screenIdFull OFF.");
             screenId_ = SCREEN_ID_FULL;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
@@ -296,7 +296,11 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOffMainOff, "screenOffMainOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_MAIN, ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
-        screenId_ = SCREEN_ID_MAIN;
+        auto taskScreenOnMainChangeScreenId = [=] {
+            WLOGFI("ChangeScreenDisplayModeToMain: IsScreenOn is false, Change ScreenId to Main.");
+            screenId_ = SCREEN_ID_MAIN;
+        };
+        screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainChangeScreenId, "taskScreenOnMainChangeScreenId");
     }
 }
 
@@ -345,9 +349,12 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOffFullOff, "screenOffFullOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
         // on full screen
-        screenId_ = SCREEN_ID_FULL;
-        WLOGFI("IsScreenOn is false, screenIdFull ON (WakeupDevice).");
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        auto taskScreenOnFullOn = [=] {
+            WLOGFI("ChangeScreenDisplayModeToFull: IsScreenOn is false, screenIdFull ON (WakeupDevice).");
+            screenId_ = SCREEN_ID_FULL;
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        };
+        screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
     }
 }
 
