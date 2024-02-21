@@ -6529,14 +6529,15 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     } else {
         sessionInfo.reuse = false;
     }
-    WLOGFI("CheckIfReuseSession end");
+    WLOGFI("CheckIfReuseSession end, affinity %{public}s type %{public}d reuse %{public}d",
+        sessionInfo.sessionAffinity.c_str(), collaboratorType, sessionInfo.reuse);
     return resultValue;
 }
 
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
-    WLOGFI("run NotifyStartAbility");
+    WLOGFI("run NotifyStartAbility type %{public}d param id %{public}d", collaboratorType, persistentId);
     auto iter = collaboratorMap_.find(collaboratorType);
     if (iter == collaboratorMap_.end()) {
         WLOGFI("Fail to found collaborator with type: %{public}d", collaboratorType);
@@ -6556,7 +6557,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
 
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
-            WLOGFI("NotifyStartAbility affinity exit %{public}s", affinity.c_str());
+            WLOGFI("NotifyStartAbility affinity exit %{public}s.", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
