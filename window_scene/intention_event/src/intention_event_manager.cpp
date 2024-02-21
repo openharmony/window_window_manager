@@ -218,7 +218,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT) {
             sceneSession->NotifyOutsideDownEvent(pointerEvent);
         }
-        if ((ret != WSError::WS_OK || static_cast<int32_t>(getpid()) != sceneSession->GetCallingPid()) &&
+        if ((ret != WSError::WS_OK || static_cast<int32_t>(getprocpid()) != sceneSession->GetCallingPid()) &&
             pointerEvent != nullptr) {
             pointerEvent->MarkProcessed();
         }
@@ -285,7 +285,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->GetId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
-        if ((ret != WSError::WS_OK || static_cast<int32_t>(getpid()) != focusedSceneSession->GetCallingPid()) &&
+        if ((ret != WSError::WS_OK || static_cast<int32_t>(getprocpid()) != focusedSceneSession->GetCallingPid()) &&
             keyEvent != nullptr) {
             keyEvent->MarkProcessed();
         }
