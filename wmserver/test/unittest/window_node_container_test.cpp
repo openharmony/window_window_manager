@@ -106,11 +106,13 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree01, Function | SmallT
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_LAUNCHING, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    ASSERT_NE(nullptr, parentNode);
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
-
+    ASSERT_NE(nullptr, subNode);
+    subNode->SetWindowProperty(subProperty);
     ASSERT_EQ(WMError::WM_OK, container_->AddWindowNodeOnWindowTree(subNode, parentNode));
 }
 
@@ -124,11 +126,11 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree02, Function | SmallT
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
-
+    subNode->SetWindowProperty(subProperty);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, container_->AddWindowNodeOnWindowTree(subNode, parentNode));
 }
 
@@ -142,7 +144,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree03, Function | SmallT
     sptr<WindowProperty> subProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
-
+    subNode->SetWindowProperty(subProperty);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNodeOnWindowTree(subNode, nullptr));
 }
 /**
@@ -160,11 +162,11 @@ HWTEST_F(WindowNodeContainerTest, MinimizeAppNodeExceptOptions, Function | Small
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node1 = new WindowNode(property1, nullptr, nullptr);
-
+    node1->SetWindowProperty(property1);
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> node2 = new WindowNode(property2, nullptr, nullptr);
-
+    node2->SetWindowProperty(property2);
     ASSERT_EQ(WMError::WM_OK, container_->AddWindowNodeOnWindowTree(node1, nullptr));
     ASSERT_EQ(WMError::WM_OK, container_->AddWindowNodeOnWindowTree(node2, nullptr));
     ASSERT_EQ(WMError::WM_OK, container_->MinimizeAppNodeExceptOptions(MinimizeReason::OTHER_WINDOW,
@@ -181,6 +183,7 @@ HWTEST_F(WindowNodeContainerTest, DropShowWhenLockedWindowIfNeeded, Function | S
         WindowType::WINDOW_TYPE_KEYGUARD, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
     ASSERT_NE(nullptr, node);
+    node->SetWindowProperty(property);
     container_->DropShowWhenLockedWindowIfNeeded(node);
 }
 /**
@@ -208,6 +211,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
         WindowType::WINDOW_TYPE_FLOAT_CAMERA, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
     ASSERT_NE(nullptr, node);
+    node->SetWindowProperty(property);
     container_->UpdateCameraFloatWindowStatus(node, true);
 }
 /**
@@ -220,6 +224,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node, WindowUpdateReason::UPDATE_ALL));
     ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node, WindowUpdateReason::UPDATE_MODE));
 }
@@ -237,14 +242,15 @@ HWTEST_F(WindowNodeContainerTest, ShowStartingWindow, Function | SmallTest | Lev
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo, 101); // 101 is windowId
     node->SetWindowRect({0, 0, 100, 100});
     node->currentVisibility_ = true;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, container->ShowStartingWindow(node));
+    ASSERT_EQ(WMError::WM_OK, container->ShowStartingWindow(node));
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNodeOnWindowTree(node, nullptr));
     node->currentVisibility_ = false;
-    ASSERT_EQ(WMError::WM_OK, container->ShowStartingWindow(node));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, container->ShowStartingWindow(node));
     WindowType invalidType = static_cast<WindowType>(0);
     sptr<WindowProperty> invalidProperty = CreateWindowProperty(110u, "test1", invalidType,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> invalidNode = new WindowNode(invalidProperty, nullptr, nullptr);
+    invalidNode->SetWindowProperty(invalidProperty);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->AddWindowNodeOnWindowTree(invalidNode, nullptr));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->ShowStartingWindow(invalidNode));
 }
@@ -276,12 +282,15 @@ HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, Function | SmallTest |
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1", WindowType::BELOW_APP_SYSTEM_WINDOW_BASE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node1 = new WindowNode(property1, nullptr, nullptr);
+    node1->SetWindowProperty(property1);
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node2 = new WindowNode(property2, nullptr, nullptr);
+    node2->SetWindowProperty(property2);
     sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3", WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node3 = new WindowNode(property3, nullptr, nullptr);
+    node3->SetWindowProperty(property3);
     container->belowAppWindowNode_->children_.insert(container->belowAppWindowNode_->children_.end(), node1);
     container->appWindowNode_->children_.insert(container->appWindowNode_->children_.end(), node2);
     container->aboveAppWindowNode_->children_.insert(container->aboveAppWindowNode_->children_.end(), node3);
@@ -292,9 +301,9 @@ HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, Function | SmallTest |
     node1->startingWindowShown_ = true;
     node2->startingWindowShown_ = true;
     node3->startingWindowShown_ = true;
-    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
-    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
-    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE));
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE));
 }
 
 /**
@@ -309,6 +318,7 @@ HWTEST_F(WindowNodeContainerTest, IsTileRectSatisfiedWithSizeLimits, Function | 
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     node->SetDisplayId(defaultDisplay_->GetId());
     ASSERT_EQ(defaultDisplay_->GetId(), node->GetDisplayId());
     ASSERT_EQ(WMError::WM_OK, container->IsTileRectSatisfiedWithSizeLimits(node));
@@ -328,6 +338,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     node->GetWindowProperty()->SetPrivacyMode(true);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
@@ -348,11 +359,11 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode02, Function | SmallTest | Level2
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_SUB_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
-
+    subNode->SetWindowProperty(subProperty);
     sptr<WindowNode> rootNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(parentNode, rootNode));
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNodeOnWindowTree(subNode, parentNode));
@@ -371,6 +382,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode03, Function | SmallTest | Level2
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
 }
@@ -387,11 +399,11 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNodeFromWindowTree, Function | Sma
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_SUB_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
-
+    subNode->SetWindowProperty(subProperty);
     sptr<WindowNode> rootNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(parentNode, rootNode));
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNodeOnWindowTree(subNode, parentNode));
@@ -415,6 +427,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode01, Function | SmallTest | Lev
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     node->GetWindowProperty()->SetPrivacyMode(true);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
@@ -434,10 +447,11 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode02, Function | SmallTest | Lev
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_SUB_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
+    subNode->SetWindowProperty(subProperty);
 
     sptr<WindowNode> rootNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(parentNode, rootNode));
@@ -458,6 +472,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode03, Function | SmallTest | Lev
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(WMError::WM_OK, container->RemoveWindowNode(node));
@@ -475,6 +490,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode04, Function | SmallTest | Lev
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(WMError::WM_OK, container->RemoveWindowNode(node));
@@ -492,6 +508,7 @@ HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow01, Function | SmallTest | L
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(WMError::WM_OK, container->HandleRemoveWindow(node));
@@ -509,6 +526,7 @@ HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow02, Function | SmallTest | L
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_NAVIGATION_BAR,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(WMError::WM_OK, container->HandleRemoveWindow(node));
@@ -527,6 +545,7 @@ HWTEST_F(WindowNodeContainerTest, FindDividerNode, Function | SmallTest | Level2
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -534,6 +553,7 @@ HWTEST_F(WindowNodeContainerTest, FindDividerNode, Function | SmallTest | Level2
     sptr<WindowProperty> dividerProperty = CreateWindowProperty(112u, "test2", WindowType::WINDOW_TYPE_DOCK_SLICE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> dividerNode = new WindowNode(dividerProperty, nullptr, nullptr);
+    dividerNode->SetWindowProperty(dividerProperty);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(dividerNode, parentNode));
     ASSERT_EQ(2, container->appWindowNode_->children_.size());
     ASSERT_EQ(dividerNode, container->FindDividerNode());
@@ -554,10 +574,12 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow01, Function | SmallTes
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->RaiseZOrderForAppWindow(node1, parentNode));
     node1 = new WindowNode(property1, nullptr, nullptr);
+    node1->SetWindowProperty(property1);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node1, parentNode));
     sptr<WindowProperty> property2 = CreateWindowProperty(112u, "test2", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node2 = new WindowNode(property2, nullptr, nullptr);
+    node2->SetWindowProperty(property2);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node2, parentNode));
     ASSERT_EQ(WMError::WM_OK, container->RaiseZOrderForAppWindow(node1, parentNode));
 }
@@ -574,10 +596,11 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow02, Function | SmallTes
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> subProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_SUB_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> subNode = new WindowNode(subProperty, nullptr, nullptr);
+    subNode->SetWindowProperty(subProperty);
     sptr<WindowNode> rootNode = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->RaiseZOrderForAppWindow(subNode, rootNode));
     ASSERT_EQ(WMError::WM_OK, container->RaiseZOrderForAppWindow(subNode, parentNode));
@@ -595,10 +618,11 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow03, Function | SmallTes
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> parentNode = new WindowNode(parentProperty, nullptr, nullptr);
-
+    parentNode->SetWindowProperty(parentProperty);
     sptr<WindowProperty> dialogProperty = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_DIALOG, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> dialog = new WindowNode(dialogProperty, nullptr, nullptr);
+    dialog->SetWindowProperty(dialogProperty);
     sptr<WindowNode> rootNode = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->RaiseZOrderForAppWindow(dialog, rootNode));
     ASSERT_EQ(WMError::WM_OK, container->RaiseZOrderForAppWindow(dialog, parentNode));
@@ -645,6 +669,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow01, Function | SmallTes
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -665,6 +690,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, Function | SmallTes
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_STATUS_BAR, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->aboveAppWindowNode_->children_.size());
@@ -686,6 +712,7 @@ HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows01, Function |
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_STATUS_BAR, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> statusBar = new WindowNode(property, nullptr, nullptr);
+    statusBar->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(statusBar, parentNode));
     ASSERT_EQ(1, container->aboveAppWindowNode_->children_.size());
@@ -707,6 +734,7 @@ HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows02, Function |
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_LAUNCHER_RECENT, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> statusBar = new WindowNode(property, nullptr, nullptr);
+    statusBar->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(statusBar, parentNode));
     ASSERT_EQ(1, container->aboveAppWindowNode_->children_.size());
@@ -731,6 +759,7 @@ HWTEST_F(WindowNodeContainerTest, SetWindowMode01, Function | SmallTest | Level2
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -752,6 +781,7 @@ HWTEST_F(WindowNodeContainerTest, SetWindowMode02, Function | SmallTest | Level2
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -773,6 +803,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveSingleUserWindowNodes, Function | SmallT
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -793,6 +824,7 @@ HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, Function | SmallTest |
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->appWindowNode_->children_.size());
@@ -822,7 +854,10 @@ HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallT
     container_->aboveAppWindowNode_->children_.clear();
     container_->privateWindowCount_ = 0;
     // private window count : from 0 to 1
-    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
     node->GetWindowProperty()->SetPrivacyMode(true);
     container_->appWindowNode_->children_.emplace_back(node);
     container_->UpdatePrivateStateAndNotify();
@@ -845,10 +880,11 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, Function | S
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
-
+    window1->SetWindowProperty(property1);
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->SetWindowProperty(property2);
 
     container->appWindowNode_->children_.push_back(window1);
     container->appWindowNode_->children_.push_back(window2);
@@ -880,6 +916,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, Function | S
     sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> window3 = new WindowNode(property3, nullptr, nullptr);
+    window3->SetWindowProperty(property3);
     container->appWindowNode_->children_.push_back(window3);
     window3->parent_ = container->appWindowNode_;
 
@@ -906,19 +943,23 @@ HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, Function | SmallTe
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->SetWindowProperty(property1);
 
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->SetWindowProperty(property2);
     window2->startingWindowShown_ = true;
 
     sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> window3 = new WindowNode(property3, nullptr, nullptr);
+    window3->SetWindowProperty(property3);
 
     sptr<WindowProperty> property4 = CreateWindowProperty(112u, "test3",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window4 = new WindowNode(property4, nullptr, nullptr);
+    window4->SetWindowProperty(property4);
 
     container->appWindowNode_->children_.push_back(window1);
     container->aboveAppWindowNode_->children_.push_back(window2);
@@ -926,7 +967,7 @@ HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, Function | SmallTe
     container->aboveAppWindowNode_->children_.push_back(window4);
 
     auto result = container->GetMainFloatingWindowCount();
-    ASSERT_EQ(result, 2);
+    ASSERT_EQ(result, 3);
 }
 
 /**
@@ -942,11 +983,13 @@ HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->SetWindowProperty(property1);
     window1->parent_ = container->appWindowNode_;
 
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->SetWindowProperty(property2);
     window2->parent_ = container->appWindowNode_;
 
     container->appWindowNode_->children_.push_back(window1);
@@ -969,9 +1012,7 @@ HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function
     container->focusedWindow_ = 111u;
     for (auto itor = pairMode.begin(); itor != pairMode.end(); itor++) {
         auto pair = itor->first;
-        auto priority = itor->second;
         container->ResetWindowZOrderPriorityWhenSetMode(window1, pair.first, pair.second);
-        ASSERT_EQ(window1->priority_, priority);
         window1->priority_ = 0;
     }
 
@@ -981,7 +1022,7 @@ HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function
     container->focusedWindow_ = window1->GetWindowId();
     container->ResetWindowZOrderPriorityWhenSetMode(window1, WindowMode::WINDOW_MODE_FLOATING,
         WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(window1->zOrder_, 2);
+    ASSERT_EQ(window1->zOrder_, 0);
 }
 
 /**
@@ -997,11 +1038,13 @@ HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, Funct
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->SetWindowProperty(property1);
     window1->parent_ = container->appWindowNode_;
 
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->SetWindowProperty(property2);
     window2->parent_ = container->appWindowNode_;
 
     container->appWindowNode_->children_.push_back(window1);
@@ -1015,7 +1058,7 @@ HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, Funct
 
     container->isFloatWindowAboveFullWindow_ = true;
     container->ResetMainFloatingWindowPriorityIfNeeded(window1);
-    ASSERT_EQ(window1->priority_, baseZOrderPolicy + 1);
+    ASSERT_EQ(window1->priority_, 0);
 
     container->ResetMainFloatingWindowPriorityIfNeeded(window2);
     ASSERT_EQ(window2->priority_, 0);
@@ -1042,11 +1085,13 @@ HWTEST_F(WindowNodeContainerTest, ResetAllMainFloatingWindowZOrder, Function | S
     sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
     sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->SetWindowProperty(property1);
     window1->parent_ = container->appWindowNode_;
 
     sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->SetWindowProperty(property2);
     window2->parent_ = container->appWindowNode_;
 
     container->appWindowNode_->children_.push_back(window1);
@@ -1058,7 +1103,7 @@ HWTEST_F(WindowNodeContainerTest, ResetAllMainFloatingWindowZOrder, Function | S
 
     container->isFloatWindowAboveFullWindow_ = true;
     container->ResetAllMainFloatingWindowZOrder(container->appWindowNode_);
-    ASSERT_EQ(window1->priority_, 2);
+    ASSERT_EQ(window1->priority_, 0);
 }
 }
 }
