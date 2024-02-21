@@ -71,7 +71,7 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     ConnectToServer();
 }
 
-bool ScreenSessionManagerClient::CheckIfNeedCennectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
+bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
 {
     if (rsId == SCREEN_ID_INVALID) {
         WLOGFE("rsId is invalid");
@@ -95,7 +95,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
         screenId, static_cast<int>(screenEvent), rsId, name.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (!CheckIfNeedCennectScreen(screenId, rsId, name)) {
+        if (!CheckIfNeedConnectScreen(screenId, rsId, name)) {
             WLOGFE("There is no need to connect the screen");
             return;
         }
