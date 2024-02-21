@@ -1921,8 +1921,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
-            WLOGFI("[WMSLife]PendingSessionActivation: want info - uri: %{public}s",
-                info.want->GetElement().GetURI().c_str());
+            WLOGFI("[WMSLife]PendingSessionActivation: want screenId %{public}" PRIu64 " uri: %{public}s",
+                info.screenId_, info.want->GetElement().GetURI().c_str());
         }
 
         WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
