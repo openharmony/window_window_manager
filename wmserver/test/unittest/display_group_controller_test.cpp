@@ -135,7 +135,6 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType02, Fun
  */
 HWTEST_F(DisplayGroupControllerTest, AddWindowNodeOnWindowTree01, Function | SmallTest | Level2)
 {
-
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
