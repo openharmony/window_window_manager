@@ -135,7 +135,9 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType02, Fun
  */
 HWTEST_F(DisplayGroupControllerTest, AddWindowNodeOnWindowTree01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     WindowRootNodeType rootType = static_cast<WindowRootNodeType>(100);
     displayGroupController_->AddWindowNodeOnWindowTree(node1, rootType);
@@ -157,24 +159,6 @@ HWTEST_F(DisplayGroupControllerTest, UpdateDisplayGroupWindowTree01, Function | 
     displayGroupController_->UpdateDisplayGroupWindowTree();
 }
 
-/**
- * @tc.name: ProcessCrossNodes01
- * @tc.desc: IsShowingOnMultiDisplays_ is true
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
-    ASSERT_NE(nullptr, child);
-    node1->children_.push_back(child);
-    node1->isShowingOnMultiDisplays_ = true;
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        0, WindowRootNodeType::APP_WINDOW_NODE);
-    rootApp->push_back(node1);
-    displayGroupController_->ProcessCrossNodes(1, DisplayStateChangeType::CREATE);
-}
 
 /**
  * @tc.name: ProcessCrossNodes02
@@ -183,9 +167,11 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes01, Function | SmallTest |
  */
 HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes02, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->isShowingOnMultiDisplays_ = true;
@@ -202,9 +188,11 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes02, Function | SmallTest |
  */
 HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes03, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->isShowingOnMultiDisplays_ = true;
@@ -221,9 +209,11 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes03, Function | SmallTest |
  */
 HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes04, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->isShowingOnMultiDisplays_ = true;
@@ -241,9 +231,11 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes04, Function | SmallTest |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->SetWindowRect({0, 0, 50, 50});
@@ -258,9 +250,11 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays01, Function | S
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays02, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->SetWindowRect({0, 0, 0, 0});
@@ -277,9 +271,11 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays02, Function | S
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays03, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->SetWindowRect({100, 100, 50, 50});
@@ -297,9 +293,11 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays03, Function | S
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays04, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     node1->SetWindowRect({50, 50, 60, 60}); // 110 > 0 && 50 < 100
@@ -318,7 +316,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays04, Function | S
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetWindowRect({50, 50, 60, 60});
     displayGroupController_->InitNewDisplay(0);
@@ -336,7 +335,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded01, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded02, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetShowingDisplays({0});
     node1->SetWindowRect({50, 50, 60, 60});
@@ -355,7 +355,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded02, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded03, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetShowingDisplays({0, 1});
     node1->SetWindowRect({-50, -50, 200, 200});
@@ -374,7 +375,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded03, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded04, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetShowingDisplays({0, 1});
     node1->SetWindowRect({50, 50, 100, 100});
@@ -393,7 +395,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded04, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded05, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetShowingDisplays({0, 1});
     node1->SetWindowRect({60, 60, 100, 100});
@@ -411,7 +414,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded05, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded06, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetShowingDisplays({0, 1});
     node1->SetWindowRect({60, 60, 120, 120});
@@ -429,7 +433,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded06, Function |
  */
 HWTEST_F(DisplayGroupControllerTest, ChangeToRectInDisplayGroup01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     displayGroupController_->ChangeToRectInDisplayGroup(node1, 0);
     Rect actualRect = node1->GetRequestRect();
@@ -444,9 +449,11 @@ HWTEST_F(DisplayGroupControllerTest, ChangeToRectInDisplayGroup01, Function | Sm
  */
 HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     displayGroupController_->PreProcessWindowNode(node1, WindowUpdateType::WINDOW_UPDATE_ADDED);
@@ -462,7 +469,8 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode01, Function | SmallTes
  */
 HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode02, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     container_->GetLayoutPolicy()->isMultiDisplay_ = true;
     displayGroupController_->PreProcessWindowNode(node1, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
@@ -478,7 +486,8 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode02, Function | SmallTes
  */
 HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->isShowingOnMultiDisplays_ = true;
     displayGroupController_->PreProcessWindowNode(node1, WindowUpdateType::WINDOW_UPDATE_ADDED);
@@ -487,24 +496,6 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, Function | SmallTes
     ASSERT_EQ(expectRect, actualRect);
 }
 
-/**
- * @tc.name: PreProcessWindowNode04
- * @tc.desc: PreProcessWindowNode with WINDOW_UPDATE_ACTIVE, and size change reason MOVE
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode04, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
-    ASSERT_NE(nullptr, child);
-    node1->children_.push_back(child);
-    node1->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
-    displayGroupController_->PreProcessWindowNode(node1, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
-    Rect actualRect = node1->GetRequestRect();
-    Rect expectRect = {DEFAULT_RECT.posX_, DEFAULT_RECT.posY_, 0, 0};
-    ASSERT_EQ(expectRect, actualRect);
-}
 
 /**
  * @tc.name: PostProcessWindowNode01
@@ -513,7 +504,8 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode04, Function | SmallTes
  */
 HWTEST_F(DisplayGroupControllerTest, PostProcessWindowNode01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     container_->GetLayoutPolicy()->isMultiDisplay_ = true;
     ASSERT_EQ(true, container_->GetLayoutPolicy()->IsMultiDisplay());
@@ -529,7 +521,8 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTe
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
     ASSERT_NE(nullptr, iWindow);
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     node1->SetWindowToken(iWindow);
     ASSERT_NE(nullptr, node1->GetWindowToken());
@@ -544,81 +537,17 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTe
  */
 HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
+    sptr<WindowNode> child = new WindowNode();
+    child->SetWindowProperty(CreateWindowProperty(101));
     ASSERT_NE(nullptr, child);
     node1->children_.push_back(child);
     displayGroupController_->MoveCrossNodeToTargetDisplay(node1, 0);
     auto showingDisplays = child->GetShowingDisplays();
     ASSERT_NE(0, showingDisplays.size());
     ASSERT_EQ(0, showingDisplays[0]);
-}
-
-/**
- * @tc.name: MoveCrossNodeToTargetDisplay02
- * @tc.desc: No child and targetDisplayId not equals to default displayId
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay02, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->MoveCrossNodeToTargetDisplay(node1, 1);
-    ASSERT_EQ(1, node1->GetDisplayId());
-}
-
-/**
- * @tc.name: MoveCrossNodeToTargetDisplay03
- * @tc.desc: TargetDisplayId not equals to default displayId
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay03, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
-    ASSERT_NE(nullptr, child);
-    node1->children_.push_back(child);
-    displayGroupController_->MoveCrossNodeToTargetDisplay(node1, 1);
-    ASSERT_EQ(1, node1->GetDisplayId());
-    ASSERT_EQ(1, child->GetDisplayId());
-}
-
-/**
- * @tc.name: MoveNotCrossNodeToDefaultDisplay01
- * @tc.desc: MoveNotCrossNodeToDefaultDisplay with window type pointer without child
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, MoveNotCrossNodeToDefaultDisplay01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100, WindowType::WINDOW_TYPE_POINTER));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->MoveNotCrossNodeToDefaultDisplay(node1, 1);
-    Rect actualRect = node1->GetRequestRect();
-    Rect expectRect = {100, 100, 0, 0};
-    ASSERT_EQ(expectRect, actualRect);
-}
-
-/**
- * @tc.name: MoveNotCrossNodeToDefaultDisplay02
- * @tc.desc: MoveNotCrossNodeToDefaultDisplay with window type app with child
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, MoveNotCrossNodeToDefaultDisplay02, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    sptr<WindowNode> child = new WindowNode(CreateWindowProperty(101));
-    ASSERT_NE(nullptr, child);
-    node1->children_.push_back(child);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    displayGroupController_->MoveNotCrossNodeToDefaultDisplay(node1, 1);
-    Rect actualRect = node1->GetRequestRect();
-    Rect expectRect = {-200, -200, 0, 0};
-    ASSERT_EQ(expectRect, actualRect);
-    ASSERT_EQ(expectRect, child->GetRequestRect());
 }
 
 /**
@@ -634,50 +563,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay01, F
 }
 
 /**
- * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay02
- * @tc.desc: DisplayId not equals to defaultDisplayId or node displayId
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay02, Function | SmallTest | Level2)
-{
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        1, WindowRootNodeType::APP_WINDOW_NODE);
-    rootApp->push_back(node1);
-    std::vector<uint32_t> windowIds;
-    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(0, node1->GetDisplayId());
-}
-
-/**
- * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay03
- * @tc.desc: DisplayId not equals to defaultDisplayId but equals to node displayId, isShowingOnMultiDisplays_ is true
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay03, Function | SmallTest | Level2)
-{
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        1, WindowRootNodeType::APP_WINDOW_NODE);
-    rootApp->push_back(node1);
-    node1->SetDisplayId(1);
-    node1->isShowingOnMultiDisplays_ = true;
-    std::vector<uint32_t> windowIds;
-    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(1, node1->GetDisplayId());
-}
-
-/**
  * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay04
  * @tc.desc: Node with WINDOW_TYPE_STATUS_BAR
  * @tc.type: FUNC
@@ -686,30 +571,8 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay04, F
 {
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100, WindowType::WINDOW_TYPE_STATUS_BAR));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        1, WindowRootNodeType::ABOVE_WINDOW_NODE);
-    rootApp->push_back(node1);
-    node1->SetDisplayId(1);
-    std::vector<uint32_t> windowIds;
-    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(1, windowIds.size());
-    ASSERT_EQ(1, node1->GetDisplayId());
-}
-
-/**
- * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay05
- * @tc.desc: Node with WINDOW_TYPE_NAVIGATION_BAR
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay05, Function | SmallTest | Level2)
-{
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100, WindowType::WINDOW_TYPE_NAVIGATION_BAR));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100, WindowType::WINDOW_TYPE_STATUS_BAR));
     ASSERT_NE(nullptr, node1);
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
@@ -732,7 +595,8 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, F
 {
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
     ASSERT_NE(nullptr, node1);
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
@@ -761,29 +625,14 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay07, F
 }
 
 /**
- * @tc.name: UpdateNodeSizeChangeReasonWithRotation01
- * @tc.desc: UpdateNodeSizeChangeReasonWithRotation Success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        0, WindowRootNodeType::APP_WINDOW_NODE);
-    rootApp->push_back(node1);
-    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_.GetAllDisplayRects());
-    ASSERT_EQ(WindowSizeChangeReason::ROTATION, node1->GetWindowSizeChangeReason());
-}
-
-/**
  * @tc.name: UpdateNodeSizeChangeReasonWithRotation02
  * @tc.desc: UpdateNodeSizeChangeReasonWithRotation failed
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100, WindowType::WINDOW_TYPE_DOCK_SLICE));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100, WindowType::WINDOW_TYPE_DOCK_SLICE));
     ASSERT_NE(nullptr, node1);
     std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
         0, WindowRootNodeType::ABOVE_WINDOW_NODE);
@@ -894,6 +743,8 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, Function | SmallTest
 HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = new WindowNode();
+    node->SetWindowProperty(CreateWindowProperty(100));
+    ASSERT_NE(nullptr, node);
     std::map<DisplayId, Rect> displayRectMap = {};
     displayGroupController_->ProcessSystemBarRotation(node, displayRectMap);
     auto layoutPolicy = container_->GetLayoutPolicy();
@@ -1009,7 +860,9 @@ HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, Function | SmallT
 HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, Function | SmallTest | Level2)
 {
     WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
-    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(100));
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
+    ASSERT_NE(nullptr, node1);
     displayGroupController_->PreProcessWindowNode(node1, type);
     if (type != WindowUpdateType::WINDOW_UPDATE_ADDED)
     {
