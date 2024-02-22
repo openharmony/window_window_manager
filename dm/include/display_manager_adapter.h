@@ -76,7 +76,7 @@ public:
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
-
+    virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     virtual bool IsFoldable();
 
     virtual FoldStatus GetFoldStatus();
