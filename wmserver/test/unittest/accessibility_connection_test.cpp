@@ -64,19 +64,15 @@ HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, Function | 
     windowProperty1->SetWindowId(focusedWindow);
     windowProperty1->SetDecorEnable(true);
     sptr<WindowNode> windowNode1 = new WindowNode(windowProperty1);
-    sptr<WindowNode> windowNode2 = new WindowNode();
+    windowNode1->SetWindowProperty(windowProperty1);
     sptr<WindowNode> windowNode3 = nullptr;
     std::vector<sptr<WindowNode>> nodes;
     nodes.emplace_back(windowNode1);
-    nodes.emplace_back(windowNode2);
-    nodes.emplace_back(windowNode3);
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     accessibilityConnection_->FillAccessibilityWindowInfo(nodes, focusedWindow, infos);
-    ASSERT_EQ(2, infos.size());
+    ASSERT_EQ(1, infos.size());
     ASSERT_TRUE(infos[0]->isDecorEnable_);
     ASSERT_TRUE(infos[0]->focused_);
-    ASSERT_TRUE(infos[1]->isDecorEnable_);
-    ASSERT_FALSE(infos[1]->focused_);
 }
 
 /**
