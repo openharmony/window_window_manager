@@ -2528,7 +2528,7 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
         }
         auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
         if (sceneSession == nullptr) {
-            WLOGFW("the scene session is nullptr");
+            WLOGFW("the scene session is nullptr, persistentId: %{public}d", property->GetPersistentId());
             return WMError::WM_DO_NOTHING;
         }
         WLOGD("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
@@ -5180,7 +5180,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     uint32_t percent = 0;
     sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
     if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM && gravity != SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        WLOGFI("[WMSInput] input method window gravity is not bottom, no need to raise calling window");
+        WLOGFI("[WMSInput] Gravity is not bottom, no need to raise calling window, gravity: %{public}d", gravity);
         return;
     }
 
@@ -5199,6 +5199,8 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     } else {
         callingSessionRect = callingSession_->GetSessionRect();
     }
+    WLOGFI("[WMSInput] softInputSessionRect: %{public}s, callingSessionRect: %{public}s",
+        softInputSessionRect.ToString().c_str(), callingSessionRect.ToString().c_str());
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
         WLOGFD("[WMSInput] There is no overlap area");
         return;
@@ -5279,6 +5281,11 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         }
         sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
         RelayoutKeyBoard(sceneSession);
+        if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
+            WLOGFI("[WMSInput] InputMethod is not foreground, not need to adjust or restore callingWindow");
+            return WSError::WS_OK;
+        }
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             WLOGFD("[WMSInput] input method is float mode");
             sceneSession->SetWindowAnimationFlag(false);
