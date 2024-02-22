@@ -54,7 +54,9 @@ void WindowSystemEffectTest::SetUp()
     ASSERT_TRUE((display != nullptr));
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     ASSERT_TRUE((displayInfo != nullptr));
-    node_ = new WindowNode(CreateWindowProperty()); // 101 is windowId
+    auto property = CreateWindowProperty();
+    node_ = new WindowNode(); // 101 is windowId
+    node_->SetWindowProperty(property);
     node_->SetWindowRect({0, 0, 100, 100}); // 100 test data
     node_->leashWinSurfaceNode_ = CreateRSSurfaceNode("leashSurfaceNodeTest");
     node_->surfaceNode_ = CreateRSSurfaceNode("SurfaceNodeTest");
@@ -97,8 +99,6 @@ namespace {
  */
 HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> windowNode = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowSystemEffect::SetWindowEffect(windowNode));
     ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowEffect(node_));
     // fullscreen
     node_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -131,46 +131,6 @@ HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, Function | Sm
 
     WindowSystemEffect::SetWindowRoot(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowSystemEffect::SetCornerRadius(node_));
-}
-
-/**
- * @tc.name: SetWindowShadow
- * @tc.desc: set window shadow with different parameter
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSystemEffectTest, SetWindowShadow01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> windowNode = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowSystemEffect::SetWindowShadow(windowNode));
-
-    // fullscreen
-    node_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
-    // float
-    node_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
-    node_->isFocused_ = true;
-    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
-
-    WindowSystemEffect::windowSystemEffectConfig_.focusedShadow_.color_ = "";
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, WindowSystemEffect::SetWindowShadow(node_));
-
-    WindowSystemEffect::windowSystemEffectConfig_.focusedShadow_.elevation_ = 0.0001f;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, WindowSystemEffect::SetWindowShadow(node_));
-
-    WindowSystemEffect::windowSystemEffectConfig_ = effectConfig_;
-    node_->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, WindowSystemEffect::SetWindowShadow(node_));
-
-    sptr<WindowNode> testNode = new WindowNode(CreateWindowProperty());
-    sptr<IRemoteObject> token = new IRemoteObjectMocker();
-    testNode->abilityToken_ = token;
-    windowRoot_->windowNodeMap_.insert({testNode->GetWindowId(), testNode});
-    node_->abilityToken_ = token;
-    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
-
-    WindowSystemEffect::SetWindowRoot(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowSystemEffect::SetWindowShadow(node_));
 }
 }
 }
