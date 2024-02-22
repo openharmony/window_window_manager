@@ -1592,7 +1592,11 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_OK, ret);
+    }
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
