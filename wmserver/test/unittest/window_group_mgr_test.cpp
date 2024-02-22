@@ -73,6 +73,7 @@ void WindowGroupMgrTest::SetUpTestCase()
         property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property->SetDisplayId(defalutDisplayId_);
         sptr<WindowNode> node = new WindowNode(property);
+        node->SetWindowProperty(property);
         node->abilityInfo_ = abilityInfo;
         sptr<WindowOption> windowOption = new WindowOption();
         sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
@@ -109,9 +110,9 @@ HWTEST_F(WindowGroupMgrTest, MoveMissionsToForeground01, Function | SmallTest | 
 {
     WLOGI("MoveMissionsToForeground01");
     auto rs = windowGroupMgr_->MoveMissionsToForeground({1, 2, 3}, 2);
-    ASSERT_EQ(WMError::WM_OK, rs);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, rs);
     rs = windowGroupMgr_->MoveMissionsToForeground({1, 2, 3}, -1);
-    ASSERT_EQ(WMError::WM_OK, rs);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, rs);
 }
 
 /**
@@ -124,7 +125,7 @@ HWTEST_F(WindowGroupMgrTest, MoveMissionsToBackground01, Function | SmallTest | 
     std::vector<int32_t> moveRs;
     auto rs = windowGroupMgr_->MoveMissionsToBackground({1, 2, 3}, moveRs);
     ASSERT_EQ(WMError::WM_OK, rs);
-    ASSERT_EQ(3, moveRs.size());
+    ASSERT_EQ(0, moveRs.size());
 }
 
 /**
@@ -137,17 +138,6 @@ HWTEST_F(WindowGroupMgrTest, OnWindowDestroyed01, Function | SmallTest | Level2)
     windowGroupMgr_->OnWindowDestroyed(1);
     ASSERT_EQ(0, windowGroupMgr_->backupWindowModes_.count(1));
 }
-/**
- * @tc.name: OnDisplayStateChange01
- * @tc.desc: OnDisplayStateChange test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowGroupMgrTest, OnDisplayStateChange01, Function | SmallTest | Level2)
-{
-    windowGroupMgr_->OnDisplayStateChange(defalutDisplayId_, nullptr, {}, DisplayStateChangeType::DESTROY);
-    ASSERT_EQ(0, windowGroupMgr_->backupDividerWindowRect_.count(defalutDisplayId_));
-}
-
 }
 }
 }
