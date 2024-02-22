@@ -1625,6 +1625,36 @@ DMError ScreenSessionManagerProxy::HasImmersiveWindow(bool& immersive)
     return ret;
 }
 
+bool OHOS::Rosen::ScreenSessionManagerProxy::ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteUint64(screenId)) {
+        return false;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    bool ret = reply.ReadBool();
+    rsScreenId = static_cast<ScreenId>(reply.ReadUint64());
+    return ret;
+}
+
 DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     sptr<IRemoteObject> remote = Remote();

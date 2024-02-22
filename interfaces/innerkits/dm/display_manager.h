@@ -466,6 +466,16 @@ public:
      */
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
+    /**
+     * @brief convert screenId to RsScreenId.
+     *
+     * @param screenId screenId used in DisplayManager.
+     * @param rsScreenId screenId used in RenderService.
+     *
+     * @return convert success or not.
+     */
+    bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

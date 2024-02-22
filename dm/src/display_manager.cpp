@@ -48,6 +48,7 @@ public:
     sptr<Display> GetDefaultDisplaySync();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
+    bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
 
     bool IsFoldable();
 
@@ -1461,5 +1462,17 @@ void DisplayManager::Impl::OnRemoteDied()
 void DisplayManager::OnRemoteDied()
 {
     pImpl_->OnRemoteDied();
+}
+
+bool DisplayManager::ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId)
+{
+    return pImpl_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+}
+
+bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId)
+{
+    bool res = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    WLOGFD("Convert ScreenId %{public}" PRIu64" To RsScreenId %{public}" PRIu64"", screenId, rsScreenId);
+    return res;
 }
 } // namespace OHOS::Rosen

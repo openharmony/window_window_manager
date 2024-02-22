@@ -162,6 +162,7 @@ public:
 
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
+    bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId screenId);
