@@ -118,12 +118,14 @@ public:
         TRANS_ID_RESIZE_VIRTUAL_SCREEN,
         TRANS_ID_GET_AVAILABLE_AREA,
         TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION,
+        TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
+    virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
