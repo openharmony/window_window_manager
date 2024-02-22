@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "display_info.h"
+#include "display_manager.h"
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
@@ -1989,11 +1991,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetWindowLimits01");
-    option->SetDisplayId(0);
 
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-
+    window->property_->SetDisplayId(0);
     window->property_->SetPersistentId(888);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_FROZEN;
@@ -2001,6 +2002,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(nullptr, display);
+    display->GetDisplayInfo()->SetVirtualPixelRatio(1.0f);
 
     WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
     ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits));
