@@ -501,7 +501,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
         auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplayInfo == nullptr) {
-            WLOGFE("defaultDisplayInfo is nullptr");
+            WLOGFE("[WMSInput] defaultDisplayInfo is nullptr");
             return false;
         }
 
@@ -569,7 +569,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             bool needUpdateInputMethod = session->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
             if (needUpdateInputMethod) {
                 newReason = SizeChangeReason::UNDEFINED;
-                WLOGFD("Input rect has totally changed, need to modify reason, id: %{public}d",
+                WLOGFD("[WMSInput] Input rect has totally changed, need to modify reason, id: %{public}d",
                     session->GetPersistentId());
             } else if (rect.width_ > 0 && rect.height_ > 0) {
                 newWinRect.width_ = rect.width_;
