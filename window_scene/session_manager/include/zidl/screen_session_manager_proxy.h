@@ -110,6 +110,7 @@ public:
     virtual DMError HasImmersiveWindow(bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
+    virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
