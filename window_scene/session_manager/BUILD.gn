@@ -162,8 +162,7 @@ ohos_shared_library("scene_session_manager") {
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.security_security_component_manager)) {
-    external_deps +=
-        [ "security_component_manager:libsecurity_component_enhance_sdk" ]
+    external_deps += [ "security_component_manager:libsecurity_component_sdk" ]
     defines += [ "SECURITY_COMPONENT_MANAGER_ENABLE" ]
   }
 
