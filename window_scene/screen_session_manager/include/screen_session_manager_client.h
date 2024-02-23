@@ -60,6 +60,7 @@ public:
     void OnImmersiveStateChanged(bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
@@ -92,6 +93,7 @@ private:
 
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
+    FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
 };
 } // namespace OHOS::Rosen
 

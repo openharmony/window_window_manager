@@ -195,9 +195,11 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& w
         for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
             WLOG_D("[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
         }
+        std::string windowinfolst = "windowinfo  ";
         for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
-            WLOG_D("[EventDispatch] - %s", DumpWindowInfo(windowInfo).c_str());
+            windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
+        WLOG_D("[EventDispatch] - %s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 } 
 
@@ -232,10 +234,11 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
     for (auto& iter : screenId2Windows) {
         auto displayId = iter.first;
         auto& windowInfos = iter.second;
+        std::string windowinfolst = "windowinfo  ";
         for (auto& windowInfo : windowInfos) {
-            WLOG_D("[EventDispatch] --- %s", DumpWindowInfo(windowInfo).c_str());
+            windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-
+        WLOG_D("[EventDispatch] --- %s", windowinfolst.c_str());
         int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSession();
         MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);

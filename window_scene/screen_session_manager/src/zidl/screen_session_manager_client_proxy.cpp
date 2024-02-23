@@ -264,6 +264,27 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
     reply.ReadUInt64Vector(&surfaceNodeIds);
 }
 
+void ScreenSessionManagerClientProxy::OnUpdateFoldDisplayMode(FoldDisplayMode displayMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        WLOGFE("Write displayMode failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)
 {
     MessageParcel data;

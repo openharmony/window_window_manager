@@ -46,6 +46,8 @@ const std::map<uint32_t, ScreenSessionManagerClientStub::StubFunc> ScreenSession
         &ScreenSessionManagerClientStub::HandleOnSetDisplayNodeScreenId },
     { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID),
         &ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChanged },
+    { static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE),
+        &ScreenSessionManagerClientStub::HandleOnUpdateFoldDisplayMode },
 };
 
 int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -141,6 +143,14 @@ int ScreenSessionManagerClientStub::HandleOnDisplayStateChanged(MessageParcel& d
     }
     auto type = static_cast<DisplayStateChangeType>(data.ReadUint32());
     OnDisplayStateChanged(defaultDisplayId, displayInfo, displayInfoMap, type);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnUpdateFoldDisplayMode");
+    auto foldDisplayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+    OnUpdateFoldDisplayMode(foldDisplayMode);
     return ERR_NONE;
 }
 
