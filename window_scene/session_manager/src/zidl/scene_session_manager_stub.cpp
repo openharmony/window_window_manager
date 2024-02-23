@@ -183,8 +183,10 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
 
     auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
+    SystemSessionConfig systemConfig;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession, token);
+        property, persistentId, sceneSession, systemConfig, token);
+    reply.WriteParcelable(&systemConfig);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
