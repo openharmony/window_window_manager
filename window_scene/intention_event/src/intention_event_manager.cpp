@@ -117,7 +117,9 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         WLOGFD("Reissue enter leave, enter persistentId:%{public}d",
             enterSession->GetPersistentId());
         auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        if (leavePointerEvent != nullptr) {
+            leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        }
         WSError ret = enterSession->TransferPointerEvent(leavePointerEvent);
         if (ret != WSError::WS_OK && leavePointerEvent != nullptr) {
             leavePointerEvent->MarkProcessed();
