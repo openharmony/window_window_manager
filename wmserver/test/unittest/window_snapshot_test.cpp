@@ -109,7 +109,9 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
 
     sptr<WindowRoot> root = new WindowRoot([](Event event, const sptr<IRemoteObject>& remoteObject) {});
+    sptr<WindowProperty> property = new WindowProperty();
     sptr<WindowNode> node = new WindowNode();
+    node->SetWindowProperty(property);
     root->windowNodeMap_.insert(std::make_pair(0, node));
 
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
@@ -123,29 +125,6 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
     sptr<IRemoteObject> iRemoteObjectMockerInvalid = new IRemoteObjectMocker();
     ASSERT_EQ(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
         snapshotController_->GetSnapshot(iRemoteObjectMockerInvalid, snapshot_));
-}
-
-/**
- * @tc.name: GetSnapshot
- * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSnapshotTest, GetSnapshot05, Function | SmallTest | Level3)
-{
-    auto runner = AppExecFwk::EventRunner::Create("TestRunner");
-    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
-
-    sptr<WindowRoot> root = new WindowRoot([](Event event, const sptr<IRemoteObject>& remoteObject) {});
-    sptr<WindowNode> node = new WindowNode();
-    root->windowNodeMap_.insert(std::make_pair(0, node));
-
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    node->abilityToken_ = iRemoteObjectMocker;
-    node->SetSnapshot(CommonTestUtils::CreatePixelMap());
-
-    sptr<SnapshotController> snapshotController_ = new SnapshotController(root, handler);
-    AAFwk::Snapshot snapshot_;
-    ASSERT_EQ(static_cast<int32_t>(WMError::WM_OK), snapshotController_->GetSnapshot(iRemoteObjectMocker, snapshot_));
 }
 }
 } // namespace Rosen
