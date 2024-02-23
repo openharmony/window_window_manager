@@ -32,7 +32,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-    sptr<IRemoteObject> token)
+    SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -82,6 +82,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         return WSError::WS_ERROR_IPC_FAILED;
     }
     session = iface_cast<ISession>(sessionObject);
+    sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }

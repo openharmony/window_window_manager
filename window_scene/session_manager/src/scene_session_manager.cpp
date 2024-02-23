@@ -1615,7 +1615,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-    sptr<IRemoteObject> token)
+    SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
     if (property == nullptr) {
         WLOGFE("property is nullptr");
@@ -1644,7 +1644,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property,
-                    &persistentId, &session, token, pid, uid]() {
+                    &persistentId, &session, &systemConfig, token, pid, uid]() {
         if (property == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -1660,6 +1660,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         auto errCode = newSession->Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
+        systemConfig = systemConfig_;
         if (property) {
             persistentId = property->GetPersistentId();
         }

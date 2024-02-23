@@ -490,11 +490,12 @@ WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, 
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+    SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, persistentId, session, token);
+        surfaceNode, property, persistentId, session, systemConfig, token);
 }
 
 void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
