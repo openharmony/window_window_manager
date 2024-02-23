@@ -454,6 +454,258 @@ HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, Function | SmallTest | Level1)
     bool result01 = proxy1.WakeUpEnd();
     EXPECT_EQ(result01, false);
 }
+
+/**
+ * @tc.name: GetPixelFormat
+ * @tc.desc: test DisplayManagerProxy::GetPixelFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetPixelFormat, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT1};
+    auto result = proxy.GetPixelFormat(0, pixelFormat);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetPixelFormat
+ * @tc.desc: test DisplayManagerProxy::SetPixelFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetPixelFormat, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT1};
+    auto result = proxy.SetPixelFormat(0, pixelFormat);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetSupportedHDRFormats
+ * @tc.desc: test DisplayManagerProxy::GetSupportedHDRFormats
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<ScreenHDRFormat> hdrFormats;
+    auto result = proxy.GetSupportedHDRFormats(0, hdrFormats);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetScreenHDRFormat
+ * @tc.desc: test DisplayManagerProxy::SetScreenHDRFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenHDRFormat, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    auto result = proxy.SetScreenHDRFormat(0, 0);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetScreenHDRFormat
+ * @tc.desc: test DisplayManagerProxy::GetScreenHDRFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetScreenHDRFormat, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenHDRFormat hdrFormats = ScreenHDRFormat{VIDEO_HLG};
+    auto result = proxy.GetScreenHDRFormat(0, hdrFormats);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetSupportedColorSpaces
+ * @tc.desc: test DisplayManagerProxy::GetSupportedColorSpaces
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    auto result = proxy.GetSupportedColorSpaces(0, colorSpaces);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetScreenColorSpace
+ * @tc.desc: test DisplayManagerProxy::GetScreenColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetScreenColorSpace, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    GraphicCM_ColorSpaceType colorSpaces;
+    auto result = proxy.GetScreenColorSpace(0, colorSpaces);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetScreenColorSpace
+ * @tc.desc: test DisplayManagerProxy::SetScreenColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorSpace, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    GraphicCM_ColorSpaceType colorSpaces = GraphicCM_ColorSpaceType{GRAPHIC_CM_BT601_EBU_FULL};
+    auto result = proxy.SetScreenColorSpace(0, colorSpaces);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SuspendBegin
+ * @tc.desc: test DisplayManagerProxy::SuspendBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SuspendBegin, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    auto result = proxy.SuspendBegin(reason);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SuspendEnd
+ * @tc.desc: test DisplayManagerProxy::SuspendEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SuspendEnd, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    auto result = proxy.SuspendEnd();
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetScreenPowerForAll
+ * @tc.desc: test DisplayManagerProxy::SetScreenPowerForAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenPowerForAll, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    ScreenPowerState state = ScreenPowerState{0};
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    auto result = proxy.SetScreenPowerForAll(state, reason);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetSpecifiedScreenPower
+ * @tc.desc: test DisplayManagerProxy::SetSpecifiedScreenPower
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetSpecifiedScreenPower, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    ScreenPowerState state = ScreenPowerState{0};
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    auto result = proxy.SetSpecifiedScreenPower(0, state, reason);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetDisplayState
+ * @tc.desc: test DisplayManagerProxy::SetDisplayState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetDisplayState, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    DisplayState state = DisplayState{0};
+    auto result = proxy.SetDisplayState(state);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay
+ * @tc.desc: test DisplayManagerProxy::AddSurfaceNodeToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::shared_ptr<class RSSurfaceNode> surfaceNode;
+    auto result = proxy.AddSurfaceNodeToDisplay(0, surfaceNode, true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result);
+}
+
+/**
+ * @tc.name: RemoveSurfaceNodeFromDisplay
+ * @tc.desc: test DisplayManagerProxy::RemoveSurfaceNodeFromDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::shared_ptr<class RSSurfaceNode> surfaceNode;
+    auto result = proxy.RemoveSurfaceNodeFromDisplay(0, surfaceNode);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result);
+}
+
+/**
+ * @tc.name: HasPrivateWindow
+ * @tc.desc: test DisplayManagerProxy::HasPrivateWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, HasPrivateWindow, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    bool hasPrivateWindow = true;
+    auto result = proxy.HasPrivateWindow(0, hasPrivateWindow);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetFreeze
+ * @tc.desc: test DisplayManagerProxy::SetFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetFreeze, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    DisplayEvent event = DisplayEvent{0};
+    proxy.NotifyDisplayEvent(event);
+
+    std::vector<DisplayId> displayIds;
+    auto result = proxy.SetFreeze(displayIds, true);
+    ASSERT_TRUE(result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
