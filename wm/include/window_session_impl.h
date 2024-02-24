@@ -197,6 +197,8 @@ public:
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
+    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
@@ -277,9 +279,7 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     void DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
-    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 

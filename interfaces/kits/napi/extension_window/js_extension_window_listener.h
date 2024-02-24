@@ -49,6 +49,7 @@ const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 class JsExtensionWindowListener : public IWindowChangeListener,
                                   public IAvoidAreaChangedListener,
+                                  public IWindowLifeCycle,
                                   public IOccupiedAreaChangeListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
@@ -59,6 +60,13 @@ public:
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnModeChange(WindowMode mode, bool hasDeco) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
+    void AfterForeground() override;
+    void AfterBackground() override;
+    void AfterFocused() override;
+    void AfterUnfocused() override;
+    void AfterResumed() override;
+    void AfterPaused() override;
+    void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
@@ -68,6 +76,7 @@ private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
     napi_env env_ = nullptr;
+    WindowState state_ {WindowState::STATE_INITIAL};
     std::shared_ptr<NativeReference> jsCallBack_;
     wptr<JsExtensionWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
