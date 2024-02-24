@@ -2132,6 +2132,10 @@ DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect&
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
