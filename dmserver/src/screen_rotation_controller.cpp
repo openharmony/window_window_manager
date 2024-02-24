@@ -349,7 +349,7 @@ void ScreenRotationController::ProcessRotationMapping()
 
     // 0 means PORTRAIT, 1 means LANDSCAPE.
     if (modes == nullptr) {
-        defaultDeviceRotation_ = 1;
+        defaultDeviceRotation_ = 0;
         WLOGFE("Get screen modes is nullptr.");
     } else {
         defaultDeviceRotation_ = (modes->width_ < modes->height_) ? 0 : 1;
