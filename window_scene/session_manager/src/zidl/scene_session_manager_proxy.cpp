@@ -70,8 +70,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
-        data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION), data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
