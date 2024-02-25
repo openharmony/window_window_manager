@@ -72,6 +72,7 @@ private:
     static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
     static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
+    static void UpdateDefaultDeviceRotation();
 
     static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
     static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);

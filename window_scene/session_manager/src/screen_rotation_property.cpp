@@ -353,13 +353,30 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
     return deviceToFloatMap_.at(deviceRotation);
 }
 
-void ScreenRotationProperty::ProcessRotationMapping()
+void ScreenRotationProperty::UpdateDefaultDeviceRotation()
 {
     sptr<SupportedScreenModes> modes =
         ScreenSessionManager::GetInstance().GetScreenModesByDisplayId(defaultDisplayId_);
 
     // 0 means PORTRAIT, 1 means LANDSCAPE.
-    defaultDeviceRotation_ = (modes == nullptr || modes->width_ < modes->height_) ? 0 : 1;
+    if (modes == nullptr) {
+        defaultDeviceRotation_ = 0;
+        WLOGFE("Get screen modes is nullptr.");
+    } else {
+        defaultDeviceRotation_ = (modes->width_ < modes->height_) ? 0 : 1;
+        WLOGFI("Get screen modes width: %{public}d, height: %{public}d", modes->width_, modes->height_);
+    }
+    if (OHOS::system::GetParameter("const.product.devicetype", "unknown") == "phone") {
+        WLOGFI("Current device type is phone, set defaultDeviceRotation is portrait");
+        defaultDeviceRotation_ = 0;
+    }
+    WLOGFI("defaultDeviceRotation: %{public}u, defaultDisplayId: %{public}u",
+        defaultDeviceRotation_, static_cast<uint32_t>(defaultDisplayId_));
+}
+
+void ScreenRotationProperty::ProcessRotationMapping()
+{
+    UpdateDefaultDeviceRotation();
     if (deviceToDisplayRotationMap_.empty()) {
         deviceToDisplayRotationMap_ = {
             {DeviceRotation::ROTATION_PORTRAIT,
