@@ -36,6 +36,7 @@ public:
 
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
+    ScreenId VIRTUAL_SCREEN_RS_ID {100};
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -919,6 +920,24 @@ HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Leve
     vector<ScreenId> screenIds;
     screenIds.clear();
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
+}
+
+/**
+ * @tc.name: ConvertScreenIdToRsScreenId
+ * @tc.desc: convert screen id to RS screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId, Function | SmallTest | Level3)
+{
+    ScreenId rsScreenId = VIRTUAL_SCREEN_RS_ID;
+    ssm_->screenIdManager_.rs2SmsScreenIdMap_.erase(rsScreenId);
+    ScreenId screenId = ssm_->screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
+    ASSERT_EQ(true, ssm_->screenIdManager_.HasRsScreenId(rsScreenId));
+    ScreenId tmpRsScreenId = SCREEN_ID_INVALID;
+    ASSERT_EQ(true, ssm_->ConvertScreenIdToRsScreenId(screenId, tmpRsScreenId));
+    ASSERT_EQ(tmpRsScreenId, rsScreenId);
+    ssm_->screenIdManager_.DeleteScreenId(screenId);
+    ASSERT_EQ(false, ssm_->ConvertScreenIdToRsScreenId(screenId, tmpRsScreenId));
 }
 
 
