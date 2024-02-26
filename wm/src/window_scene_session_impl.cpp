@@ -154,10 +154,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
-        windowSystemConfig_ = parentSession->GetSystemSessionConfig();
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, token);
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
@@ -176,7 +175,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, token);
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+        if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
+            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
+        }
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
