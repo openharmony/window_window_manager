@@ -304,6 +304,8 @@ void ScreenCutoutController::ProcessRotationMapping()
     // 0 means PORTRAIT, 1 means LANDSCAPE.
     defaultDeviceRotation_ =
         (!displayInfo || (displayInfo && (displayInfo->GetWidth() < displayInfo->GetHeight()))) ? 0 : 1;
+    WLOGFI("defaultDeviceRotation: %{public}u", defaultDeviceRotation_);
+
     if (deviceToDisplayRotationMap_.empty()) {
         deviceToDisplayRotationMap_ = {
             { DeviceRotationValue::ROTATION_PORTRAIT,
