@@ -17,6 +17,7 @@
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 
 #include "hilog/log.h"
+#include <unordered_map>
 namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
@@ -58,6 +59,56 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN
 #define WLOGFI(fmt, ...) WLOGI("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 #define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 #define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
+
+enum class WmsLogTag : uint8_t {
+    DEFAULT = 0,               // C04200
+    DMS,                       // C04201
+    WMS_MAIN,                  // C04202
+    WMS_SUB,                   // C04203
+    WMS_SCB,                   // C04204
+    WMS_DIALOG,                // C04205
+    WMS_SYSTEM,                // C04206
+    WMS_FOCUS,                 // C04207
+    WMS_LAYOUT,                // C04208
+    WMS_IMMS,                  // C04209
+    WMS_LIFE,                  // C0420A
+    WMS_INPUT,                 // C0420B
+    WMS_EVENT,                 // C0420C
+
+    END = 256,                 // Last one, do not use
+};
+
+const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
+    { WmsLogTag::DEFAULT, "WMS" },
+    { WmsLogTag::DMS, "DMS" },
+    { WmsLogTag::WMS_MAIN, "WMSMain" },
+    { WmsLogTag::WMS_SUB, "WMSSub" },
+    { WmsLogTag::WMS_SCB, "WMSScb" },
+    { WmsLogTag::WMS_DIALOG, "WMSDialog" },
+    { WmsLogTag::WMS_SYSTEM, "WMSSystem" },
+    { WmsLogTag::WMS_FOCUS, "WMSFocus" },
+    { WmsLogTag::WMS_LAYOUT, "WMSLayout" },
+    { WmsLogTag::WMS_IMMS, "WMSImms" },
+    { WmsLogTag::WMS_LIFE, "WMSLife" },
+    { WmsLogTag::WMS_INPUT, "WMSInput" },
+    { WmsLogTag::WMS_EVENT, "WMSEvent" },
+};
+
+#define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define FMT_PREFIX "[%{public}s] %{public}s<%{public}d>: "
+
+#define PRINT_TLOG(level, tag, ...)                                                                     \
+    do {                                                                                                \
+        uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                        \
+        const char *domainContent = DOMAIN_CONTENTS_MAP.count(tag) ? DOMAIN_CONTENTS_MAP.at(tag) : "";  \
+        HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
+    } while (0)
+
+#define TLOGD(tag, fmt, ...) PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGI(tag, fmt, ...) PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGW(tag, fmt, ...) PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGE(tag, fmt, ...) PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
+
 } // namespace OHOS
 }
 #endif // FRAMEWORKS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
