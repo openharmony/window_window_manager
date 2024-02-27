@@ -237,7 +237,8 @@ HWTEST_F(PictureInPictureControllerTest, StartMove, Function | SmallTest | Level
     pipControl->StartMove();
     pipControl->DoScale();
 
-    sptr<PictureInPictureController::PipMainWindowLifeCycleImpl> pipMainWindowLifeCycleImpl = new PictureInPictureController::PipMainWindowLifeCycleImpl(navigationId);
+    sptr<PictureInPictureController::PipMainWindowLifeCycleImpl> pipMainWindowLifeCycleImpl =
+        new PictureInPictureController::PipMainWindowLifeCycleImpl(navigationId);
     GTEST_LOG_(INFO) << "TearDownCasecccccc3";
 
     pipMainWindowLifeCycleImpl->AfterBackground();
@@ -259,7 +260,8 @@ HWTEST_F(PictureInPictureControllerTest, OnCreate, Function | SmallTest | Level2
     wptr<PictureInPictureController> pipController = nullptr;
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
 
-    sptr<PictureInPictureController::PipDisplayListener> pipDisplayListener = new PictureInPictureController::PipDisplayListener(pipController);
+    sptr<PictureInPictureController::PipDisplayListener> pipDisplayListener =
+        new PictureInPictureController::PipDisplayListener(pipController);
     pipDisplayListener->OnCreate(displayId);
     pipDisplayListener->OnDestroy(displayId);
     pipDisplayListener->OnChange(displayId);
