@@ -109,15 +109,15 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
             return;
         }
         if (g_lastLeaveWindowId == enterSession->GetPersistentId()) {
-            WLOGFI("g_lastLeaveWindowId:%{public}d equal enterSession id",
-                g_lastLeaveWindowId);
+            WLOGFI("g_lastLeaveWindowId:%{public}d equal enterSession id", g_lastLeaveWindowId);
             return;
         }
 
-        WLOGFD("Reissue enter leave, enter persistentId:%{public}d",
-            enterSession->GetPersistentId());
+        WLOGFD("Reissue enter leave, persistentId:%{public}d", enterSession->GetPersistentId());
         auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        if (leavePointerEvent != nullptr) {
+            leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        }
         WSError ret = enterSession->TransferPointerEvent(leavePointerEvent);
         if (ret != WSError::WS_OK && leavePointerEvent != nullptr) {
             leavePointerEvent->MarkProcessed();
