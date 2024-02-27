@@ -332,6 +332,7 @@ private:
     std::function<void()> foldScreenPowerInit_ = nullptr;
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
+    void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
 };
 } // namespace OHOS::Rosen
 

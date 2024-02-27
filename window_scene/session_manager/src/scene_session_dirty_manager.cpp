@@ -282,6 +282,11 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
         return;
     }
 
+    if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
+        type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
+            WLOGFI("[EventDispatch] NotifyWindowInfoChange wid = %{public}d, WindowUpdateType = %{public}d",
+                sceneSession->GetWindowId(), static_cast<int>(type));
+    }
     sessionDirty_.store(true);
     if (!hasPostTask_.load()) {
         hasPostTask_.store(true);
@@ -318,6 +323,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             dialogMap.find(sceneSessionValue->GetParentPersistentId());
         if (iter != dialogMap.end() && iter->second != nullptr) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
+            windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
             WLOGFI("Change agentId, dialogId: %{public}d, parentId: %{public}d",
                 iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId());
         }

@@ -385,6 +385,8 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         sourceType, outside, vpr, rect);
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         hostSession_->SendPointEventForMoveDrag(pointerEvent);
+    } else if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
             hostSession_->SendPointEventForMoveDrag(pointerEvent);
