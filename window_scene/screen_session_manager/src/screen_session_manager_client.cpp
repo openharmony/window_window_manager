@@ -202,6 +202,11 @@ void ScreenSessionManagerClient::OnDisplayStateChanged(DisplayId defaultDisplayI
     }
 }
 
+void ScreenSessionManagerClient::OnUpdateFoldDisplayMode(FoldDisplayMode displayMode)
+{
+    displayMode_ = displayMode;
+}
+
 void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
     std::vector<uint64_t>& surfaceNodeIds)
 {
@@ -240,11 +245,7 @@ std::unordered_map<ScreenId, ScreenProperty> ScreenSessionManagerClient::GetAllS
 
 FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
 {
-    if (screenSessionManager_ == nullptr) {
-        WLOGFE("screenSessionManager_ is null while get displayMode");
-        return FoldDisplayMode::UNKNOWN;
-    }
-    return screenSessionManager_->GetFoldDisplayMode();
+    return displayMode_;
 }
 
 void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)

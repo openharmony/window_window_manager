@@ -2942,6 +2942,7 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         return;
     }
     foldScreenController_->SetDisplayMode(displayMode);
+    NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
@@ -3046,6 +3047,7 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     WLOGI("NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
+    NotifyClientProxyUpdateFoldDisplayMode(displayMode);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
     if (agents.empty()) {
         WLOGI("NotifyDisplayModeChanged agents is empty");
@@ -3120,6 +3122,14 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
 }
 
+void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode)
+{
+    if (clientProxy_) {
+        WLOGFI("NotifyClientProxyUpdateFoldDisplayMode displayMode = %{public}d", static_cast<int>(displayMode));
+        clientProxy_->OnUpdateFoldDisplayMode(displayMode);
+    }
+}
+
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
 {
     if (!client) {
@@ -3130,6 +3140,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     WLOGFI("SetClient userId= %{public}d", userId);
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, 0);
     clientProxy_ = client;
+    NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         if (!iter.second) {
