@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 #include <image_packer.h>
+#include <parameters.h>
 
 #include "window_manager_hilog.h"
 
@@ -24,8 +25,14 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScenePersistence" };
 constexpr const char* UNDERLINE_SEPARATOR = "_";
+constexpr const char* ASTC_IMAGE_FORMAT = "image/astc/4*4";
+constexpr const char* ASTC_IMAGE_SUFFIX = ".astc";
+constexpr uint8_t ASTC_IMAGE_QUALITY = 20;
+
+constexpr const char* IMAGE_FORMAT = "image/png";
 constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
+
 constexpr uint8_t SUCCESS = 0;
 const std::string SNAPSHOT_THREAD = "OS_SnapshotThread";
 } // namespace
@@ -57,12 +64,33 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
 ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t& persistentId)
 {
     bundleName_ = bundleName;
-    uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
-    snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
+    if (IsAstcEnabled()) {
+        oldSnapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+            std::to_string(persistentId) + IMAGE_SUFFIX;
+        snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+            std::to_string(persistentId) + ASTC_IMAGE_SUFFIX;
+    } else {
+        snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+            std::to_string(persistentId) + IMAGE_SUFFIX;
+    }
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
     if (snapshotScheduler_ == nullptr) {
         snapshotScheduler_ = std::make_shared<TaskScheduler>(SNAPSHOT_THREAD);
     }
+}
+
+ScenePersistence::~ScenePersistence()
+{
+    remove(snapshotPath_.c_str());
+    if (IsAstcEnabled()) {
+        remove(oldSnapshotPath_.c_str());
+    }
+}
+
+bool ScenePersistence::IsAstcEnabled()
+{
+    static bool isAstcEnabled = system::GetBoolParameter("persist.multimedia.image.astc.enabled", true);
+    return isAstcEnabled;
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
@@ -85,8 +113,13 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
-        option.format = "image/png";
-        option.quality = IMAGE_QUALITY;
+        if (IsAstcEnabled()) {
+            option.format = ASTC_IMAGE_FORMAT;
+            option.quality = ASTC_IMAGE_QUALITY;
+        } else {
+            option.format = IMAGE_FORMAT;
+            option.quality = IMAGE_QUALITY;
+        }
         option.numberHint = 1;
         std::set<std::string> formats;
         if (imagePacker.GetSupportedFormats(formats)) {
@@ -94,8 +127,9 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             return;
         }
 
-        if (remove(scenePersistence->snapshotPath_.c_str())) {
-            WLOGFE("Failed to delete old file");
+        remove(scenePersistence->snapshotPath_.c_str());
+        if (IsAstcEnabled()) {
+            remove(scenePersistence->oldSnapshotPath_.c_str());
         }
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
         imagePacker.StartPacking(scenePersistence->snapshotPath_, option);
@@ -126,16 +160,21 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
             WLOGFE("scenePersistence is nullptr");
             return;
         }
-        uint32_t oldfileID = static_cast<uint32_t>(oldPersistentId) & 0x3fffffff;
-        std::string oldSnapshotPath_ = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
-                                       std::to_string(oldfileID) + IMAGE_SUFFIX;
-        int ret = std::rename(oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+        std::string oldSnapshotPath;
+        if (IsAstcEnabled()) {
+            oldSnapshotPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
+                std::to_string(oldPersistentId) + ASTC_IMAGE_SUFFIX;
+        } else {
+            oldSnapshotPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
+                std::to_string(oldPersistentId) + IMAGE_SUFFIX;
+        }
+        int ret = std::rename(oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         if (ret == 0) {
             WLOGFI("Rename snapshot from %{public}s to %{public}s.",
-                oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+                oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         } else {
             WLOGFW("Failed to rename snapshot from %{public}s to %{public}s.",
-                oldSnapshotPath_.c_str(), scenePersistence->snapshotPath_.c_str());
+                oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         }
     };
     snapshotScheduler_->PostAsyncTask(task, "RenameSnapshotFromOldPersistentId");
@@ -156,6 +195,9 @@ std::string ScenePersistence::GetSnapshotFilePath()
 
 std::string ScenePersistence::GetSnapshotFilePathFromAce()
 {
+    if (IsAstcEnabled() && IsSnapshotExisted(oldSnapshotPath_)) {
+        return oldSnapshotPath_;
+    }
     return snapshotPath_;
 }
 
@@ -167,7 +209,7 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
 
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
-    option.format = "image/png";
+    option.format = IMAGE_FORMAT;
     option.quality = IMAGE_QUALITY;
     option.numberHint = 1;
     std::set<std::string> formats;
@@ -198,9 +240,18 @@ std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize() const
 
 bool ScenePersistence::IsSnapshotExisted() const
 {
+    if (IsAstcEnabled()) {
+        return IsSnapshotExisted(snapshotPath_) || IsSnapshotExisted(oldSnapshotPath_);
+    } else {
+        return IsSnapshotExisted(snapshotPath_);
+    }
+}
+
+bool ScenePersistence::IsSnapshotExisted(const std::string& path) const
+{
     struct stat buf;
-    if (stat(snapshotPath_.c_str(), &buf)) {
-        WLOGFD("Snapshot file %{public}s does not exist", snapshotPath_.c_str());
+    if (stat(path.c_str(), &buf)) {
+        WLOGFD("Snapshot file %{public}s does not exist", path.c_str());
         return false;
     }
     return S_ISREG(buf.st_mode);
@@ -216,7 +267,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
 
     uint32_t errorCode = 0;
     Media::SourceOptions sourceOpts;
-    sourceOpts.formatHint = "image/png";
+    sourceOpts.formatHint = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
     auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
     if (!imageSource) {
         WLOGE("create image source fail, errCode : %{public}d", errorCode);
