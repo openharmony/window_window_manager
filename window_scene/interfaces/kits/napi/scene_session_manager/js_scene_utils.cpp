@@ -471,7 +471,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     return true;
 }
 
-bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_map<std::string,std::string> &stringMap)
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string,std::string> &stringMap)
 {
     if (value == nullptr) {
         WLOGFE("value is nullptr");
@@ -485,7 +485,7 @@ bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_ma
 
     std::vector<std::string> propNames;
     napi_value array = nullptr;
-    napi_get_property_names(env, array, propNames);
+    napi_get_property_names(env, value, &array);
     if (!ParseArrayStringValue(env, array, propNames)) {
         WLOGFE("Failed to property names");
         return false;
@@ -503,7 +503,7 @@ bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_ma
             continue;
         }
         std::string valName;
-        if (!ConvertFromJsValue(env, prop, valueName)) {
+        if (!ConvertFromJsValue(env, prop, valName)) {
             WLOGFW("Failed to ConvertFromJsValue: %{public}s", propName.c_str());
             continue;
         }
@@ -515,12 +515,12 @@ bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_ma
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
 {
     if (array == nullptr) {
-        WLOGFE("array is nullptr");
+        WLOGFE("array is nullptr!");
         return false;
     }
     bool isArray = false;
     if (napi_is_array(env, array, &isArray) != napi_ok || isArray == false) {
-        WLOGFE("not array");
+        WLOGFE("not array!");
         return false;
     }
 
