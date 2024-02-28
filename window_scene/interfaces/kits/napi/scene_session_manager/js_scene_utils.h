@@ -167,7 +167,7 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
 bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
-bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_map<std::string,std::string> &stringMap);
+bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_map<std::string, std::string> &stringMap);
 bool ParseArrayStringValue(napi_env env, napi_env array, std::vector<std::string> &vector);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value GetWindowRectIntValue(napi_env env, int val);
