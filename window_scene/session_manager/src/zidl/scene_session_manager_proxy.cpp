@@ -82,6 +82,9 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     }
     session = iface_cast<ISession>(sessionObject);
     sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
+    if (config) {
+        systemConfig = *config;
+    }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
