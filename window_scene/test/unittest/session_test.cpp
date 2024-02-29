@@ -2640,6 +2640,247 @@ HWTEST_F(WindowSessionTest, SetSessionState031, Function | SmallTest | Level2)
     ASSERT_EQ(state, session_->state_);
 }
 
+/**
+ * @tc.name: UpdateSessionState32
+ * @tc.desc: UpdateSessionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateSessionState32, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionState state = SessionState::STATE_CONNECT;
+    session_->UpdateSessionState(state);
+    ASSERT_EQ(session_->state_, SessionState::STATE_CONNECT);
+}
+
+/**
+ * @tc.name: GetTouchable33
+ * @tc.desc: GetTouchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetTouchable33, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->GetTouchable();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: SetSystemTouchable34
+ * @tc.desc: SetSystemTouchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSystemTouchable34, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool touchable = false;
+    session_->SetSystemTouchable(touchable);
+    ASSERT_EQ(session_->systemTouchable_, touchable);
+}
+
+/**
+ * @tc.name: GetSystemTouchable35
+ * @tc.desc: GetSystemTouchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetSystemTouchable35, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->GetSystemTouchable();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: SetVisible36
+ * @tc.desc: SetVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetVisible36, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isVisible = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetVisible(isVisible));
+}
+
+/**
+ * @tc.name: GetVisible37
+ * @tc.desc: GetVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetVisible37, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    if (!session_->GetVisible()) {
+        ASSERT_EQ(false, session_->GetVisible());
+    }
+}
+
+/**
+ * @tc.name: SetVisibilityState38
+ * @tc.desc: SetVisibilityState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetVisibilityState38, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WindowVisibilityState state { WINDOW_VISIBILITY_STATE_NO_OCCLUSION};
+    ASSERT_EQ(WSError::WS_OK, session_->SetVisibilityState(state));
+    ASSERT_EQ(state, session_->visibilityState_);
+}
+
+/**
+ * @tc.name: GetVisibilityState39
+ * @tc.desc: GetVisibilityState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetVisibilityState39, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WindowVisibilityState state { WINDOW_LAYER_STATE_MAX};
+    ASSERT_EQ(state, session_->GetVisibilityState());
+}
+
+/**
+ * @tc.name: SetDrawingContentState40
+ * @tc.desc: SetDrawingContentState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetDrawingContentState40, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isRSDrawing = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetDrawingContentState(isRSDrawing));
+    ASSERT_EQ(false, session_->isRSDrawing_);
+}
+
+/**
+ * @tc.name: GetDrawingContentState41
+ * @tc.desc: GetDrawingContentState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetDrawingContentState41, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->GetDrawingContentState();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: GetBrightness42
+ * @tc.desc: GetBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetBrightness42, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->property_ = nullptr;
+    ASSERT_EQ(UNDEFINED_BRIGHTNESS, session_->GetBrightness());
+}
+
+/**
+ * @tc.name: IsActive43
+ * @tc.desc: IsActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsActive43, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->IsActive();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: IsSystemSession44
+ * @tc.desc: IsSystemSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSystemSession44, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->IsSystemSession();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: Hide45
+ * @tc.desc: Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Hide45, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    auto result = session_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Show46
+ * @tc.desc: Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Show46, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Show(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: IsSystemActive47
+ * @tc.desc: IsSystemActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSystemActive47, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->IsSystemActive();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: SetSystemActive48
+ * @tc.desc: SetSystemActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSystemActive48, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool systemActive = false;
+    session_->SetSystemActive(systemActive);
+    ASSERT_EQ(systemActive, session_->isSystemActive_);
+}
+
+/**
+ * @tc.name: IsTerminated49
+ * @tc.desc: IsTerminated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsTerminated49, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    bool res = session_->IsTerminated();
+    ASSERT_EQ(true, res);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    res = session_->IsTerminated();
+    ASSERT_EQ(false, res);
+    session_->state_ = SessionState::STATE_ACTIVE;
+    res = session_->IsTerminated();
+    ASSERT_EQ(false, res);
+    session_->state_ = SessionState::STATE_INACTIVE;
+    res = session_->IsTerminated();
+    ASSERT_EQ(false, res);
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    res = session_->IsTerminated();
+    ASSERT_EQ(false, res);
+    session_->state_ = SessionState::STATE_CONNECT;
+    res = session_->IsTerminated();
+    ASSERT_EQ(false, res);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
