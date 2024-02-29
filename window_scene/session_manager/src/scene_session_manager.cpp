@@ -1388,7 +1388,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         }
 
         if (systemConfig_.backgroundswitch) {
-            WLOGFD("[WMSMain]RequestSceneSessionBackground: %{public}d", systemConfig_.backgroundswitch);
+            WLOGFI("[WMSMain]RequestSceneSessionBackground: %{public}d", systemConfig_.backgroundswitch);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
             WLOGFI("[WMSMain]begin MinimzeUIAbility: %{public}d isSystem:%{public}u",
