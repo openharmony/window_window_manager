@@ -284,6 +284,7 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
                 return;
             }
 
+            auto id = keyEvent->GetId();
             auto promoteThis = weakThis.promote();
             if (promoteThis == nullptr) {
                 WLOGFW("promoteThis is nullptr， id:%{public}" PRId32, id);
@@ -292,7 +293,6 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
                 return;
             }
 
-            auto id = keyEvent->GetId();
             if (*isTimeout) {
                 WLOGFW("DispatchKeyEvent timeout id:%{public}" PRId32, id);
                 keyEvent->MarkProcessed();
