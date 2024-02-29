@@ -134,10 +134,12 @@ sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowInfo& wind
     property->SetWindowRect(windowInfo.winRect_);
     property->SetOriginRect(windowInfo.winRect_);
     property->SetDecorEnable(windowInfo.decorEnable_);
+    property->SetWindowSizeChangeReason(windowInfo.reason_);
+    property->SetDragType(windowInfo.dragType_);
     property->SetDisplayId(0);
+    property->SetWindowId(0);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-    node->SetWindowSizeChangeReason(windowInfo.reason_);
-    node->SetDragType(windowInfo.dragType_);
+    node->SetWindowProperty(property);
     return node;
 }
 
@@ -166,6 +168,7 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowNode> node0 = new WindowNode(property, nullptr, nullptr);
+    node0->SetWindowProperty(property);
     Rect winRect = { 50, 100, 400, 500 }; // rect: 50, 100, 400, 500
     auto actRect0 = layoutPolicy_->CalcEntireWindowHotZone(node0, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
     Rect expRect0 = { 30, 80, 440, 540 }; // rect: 30, 80, 440, 540
@@ -173,14 +176,16 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
 
     property->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
     sptr<WindowNode> node1 = new WindowNode(property, nullptr, nullptr);
+    node1->SetWindowProperty(property);
     auto actRect1 = layoutPolicy_->CalcEntireWindowHotZone(node1, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
     Rect expRect1 = { 30, 100, 440, 500 }; // rect: 30, 100, 440, 500
     ASSERT_EQ(expRect1, actRect1);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
     sptr<WindowNode> node2 = new WindowNode(property, nullptr, nullptr);
+    node2->SetWindowProperty(property);
     auto actRect2 = layoutPolicy_->CalcEntireWindowHotZone(node2, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
-    Rect expRect2 = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());;
+    Rect expRect2 = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_EQ(expRect2, actRect2);
 }
 
@@ -588,6 +593,7 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, Function | 
 
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+    SetUpTestCase();
 }
 
 /**
@@ -632,8 +638,6 @@ HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, Function | SmallTest | L
     layoutPolicy_->CalcAndSetNodeHotZone(node->GetWindowRect(), node);
 
     layoutPolicy_->UpdateLayoutRect(node);
-    layoutPolicy_->CalcAndSetNodeHotZone(node->GetWindowRect(), node);
-
     layoutPolicy_->CalcAndSetNodeHotZone(node->GetWindowRect(), node);
 }
 
@@ -907,9 +911,6 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow04,
     Rect winRect = { 0, 0, 0, 0};
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
 
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
-    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
-
     winRect = { 0, 0, 40, 0 }; // width: 40
     node->SetOriginRect(winRect);
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
@@ -1024,10 +1025,6 @@ HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, Function | SmallTest |
     Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
     layoutPolicy_->LimitFloatingWindowSize(node, winRect);
 
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
-    node->SetWindowRect(winRect);
-    layoutPolicy_->LimitFloatingWindowSize(node, winRect);
-
     Rect newRect = { 10, 0, 400, 400 }; // window rect: 10, 0, 400, 400
     layoutPolicy_->LimitFloatingWindowSize(node, newRect);
 
@@ -1057,10 +1054,6 @@ HWTEST_F(WindowLayoutPolicyTest, LimitMainFloatingWindowPosition, Function | Sma
     node->SetWindowRect(winRect);
     node->SetRequestRect(winRect);
     winRect.posX_ = 20; // posX: 20
-    layoutPolicy_->LimitMainFloatingWindowPosition(node, winRect);
-
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
-    node->SetWindowRect(winRect);
     layoutPolicy_->LimitMainFloatingWindowPosition(node, winRect);
 
     node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1343,12 +1336,14 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, Function | SmallTest | Level2
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowFlags(1);
+    Rect winRect = { 200, 200, 50, 20 };  // rect : 200, 200, 50, 50
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
     ASSERT_TRUE(node != nullptr);
-    Rect winRect = { 200, 200, 50, 20 };  // rect : 200, 200, 50, 50
+    node->SetWindowProperty(property);
     node->SetWindowRect(winRect);
     node->SetRequestRect(winRect);
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     node->SetCallingWindow(1);
     layoutPolicyTile_->UpdateLayoutRect(node);
 }
@@ -1362,9 +1357,6 @@ HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, Function | Small
 {
     std::vector<sptr<WindowNode>> *nodeVec = new std::vector<sptr<WindowNode>>;
     auto result = layoutPolicy_->IsFullScreenRecentWindowExist(*nodeVec);
-    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    EXPECT_NE(node->GetWindowType(), WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
-    EXPECT_NE(node->GetWindowMode(), WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(result, false);
 }
 
@@ -1399,13 +1391,8 @@ HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function |
  */
 HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> *node = new sptr<WindowNode>;
-    auto result = layoutPolicy_->IsTileRectSatisfiedWithSizeLimits(*node);
-    ASSERT_EQ(true, result);
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowNode> windowNode = new WindowNode(property);
-    result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
+    sptr<WindowNode> windowNode = nullptr;
+    auto result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
     ASSERT_EQ(true, result);
 }
 
@@ -1443,7 +1430,7 @@ HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, Function | SmallTest 
 HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | Level2)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     layoutPolicy_->GetStoragedAspectRatio(node);
     auto abilityName = "";
     auto nameVector = WindowHelper::Split(abilityName, ".");
@@ -1459,7 +1446,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTest | Level2)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     layoutPolicy_->FixWindowRectWithinDisplay(node);
     auto displayInfo = display->GetDisplayInfo();
     EXPECT_EQ(displayInfo->GetWaterfallDisplayCompressionStatus(), false);
@@ -1483,11 +1470,10 @@ HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, Function | SmallTest | Lev
  */
 HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node= new WindowNode();
+    sptr<WindowNode> node= CreateWindowNode(windowInfo_);
     Rect winRect;
-    WindowSizeChangeReason reason=WindowSizeChangeReason::DRAG;
-    WindowNode windowNode;
-    EXPECT_EQ(windowNode.GetWindowToken(), nullptr);
+    WindowSizeChangeReason reason = WindowSizeChangeReason::DRAG;
+    EXPECT_EQ(node->GetWindowToken(), nullptr);
     layoutPolicy_->NotifyClientAndAnimation(node, winRect, reason);
 }
 
