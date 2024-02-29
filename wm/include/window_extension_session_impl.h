@@ -88,6 +88,10 @@ private:
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
+
+    void WaitForDispatchKeyEventResult(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        std::shared_future<bool> isConsumedFuture,
+        std::function<void(std::shared_ptr<MMI::KeyEvent>&, bool)> callback, std::shared_ptr<bool> isTimeout);
 };
 } // namespace Rosen
 } // namespace OHOS
