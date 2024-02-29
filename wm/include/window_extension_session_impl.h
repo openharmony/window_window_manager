@@ -84,14 +84,18 @@ protected:
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
+    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    
+    void WaitForDispatchKeyEventResult(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        std::shared_future<bool> isConsumedFuture,
+        std::function<void(std::shared_ptr<MMI::KeyEvent>&, bool)> callback, std::shared_ptr<bool> isTimeout);
+
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
-
-    void WaitForDispatchKeyEventResult(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
-        std::shared_future<bool> isConsumedFuture,
-        std::function<void(std::shared_ptr<MMI::KeyEvent>&, bool)> callback, std::shared_ptr<bool> isTimeout);
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS
