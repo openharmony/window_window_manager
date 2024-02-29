@@ -2355,10 +2355,6 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->sessionInfo_.isSystem_) {
-            // system scene no need to update reason
-            return WSError::WS_DO_NOTHING;
-        }
         session->reason_ = reason;
         if (reason != SizeChangeReason::UNDEFINED) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
