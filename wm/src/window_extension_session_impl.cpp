@@ -15,6 +15,7 @@
 
 #include "window_extension_session_impl.h"
 
+#include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "parameters.h"
@@ -24,6 +25,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
+constexpr int32_t ANIMATION_TIME = 400;
 }
 
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
@@ -293,9 +295,62 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
     property_->SetWindowRect(wmRect);
-    NotifySizeChange(wmRect, wmReason);
-    UpdateViewportConfig(wmRect, wmReason);
+    if (wmReason == WindowSizeChangeReason::ROTATION) {
+        auto preRect = GetRect();
+        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else {
+        NotifySizeChange(wmRect, wmReason);
+        UpdateViewportConfig(wmRect, wmReason);
+    }
     return WSError::WS_OK;
+}
+
+void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (!handler_) {
+        return;
+    }
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        int32_t duration = ANIMATION_TIME;
+        if (rsTransaction) {
+            duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        RSSystemProperties::SetDrawTextAsBitmap(true);
+        RSInterfaces::GetInstance().EnableCacheForRotation();
+        window->rotationAnimationCount_++;
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(duration);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
+            auto window = weak.promote();
+            if (!window) {
+                return;
+            }
+            window->rotationAnimationCount_--;
+            if (window->rotationAnimationCount_ == 0) {
+                RSSystemProperties::SetDrawTextAsBitmap(false);
+                RSInterfaces::GetInstance().DisableCacheForRotation();
+            }
+        });
+        if (wmRect != preRect) {
+            window->NotifySizeChange(wmRect, wmReason);
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        RSNode::CloseImplicitAnimation();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransaction::FlushImplicitTransaction();
+        }
+    };
+    handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
 WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,

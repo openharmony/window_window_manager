@@ -695,6 +695,20 @@ void Session::UpdatePointerArea(const WSRect& rect)
     preRect_ = rect;
 }
 
+WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
+{
+    if (reason_ == reason) {
+        return WSError::WS_DO_NOTHING;
+    }
+    reason_ = reason;
+    return WSError::WS_OK;
+}
+
+SizeChangeReason Session::GetSizeChangeReason() const
+{
+    return reason_;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {

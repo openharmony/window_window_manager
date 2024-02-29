@@ -117,6 +117,7 @@ public:
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
+    WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
@@ -210,7 +211,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    WSError UpdateSizeChangeReason(SizeChangeReason reason);
     void ClearSpecificSessionCbMap();
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
@@ -284,7 +284,6 @@ private:
     bool needDefaultAnimationFlag_ = true;
     PiPRectInfo pipRectInfo_;
     PiPTemplateInfo pipTemplateInfo_;
-    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
 };
