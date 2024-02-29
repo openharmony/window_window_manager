@@ -16,6 +16,9 @@
 #include "window_extension_session_impl.h"
 
 #include <transaction/rs_transaction.h>
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include "anr_handler.h"
@@ -232,6 +235,72 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
         isConsumed = uiContent_->ProcessBackPressed();
     }
     WLOGFD("Backpressed event is not cosumed");
+}
+
+void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool notifyInputMethod)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return;
+    }
+
+#ifdef IMF_ENABLE
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    if (isKeyboardEvent && notifyInputMethod) {
+        WLOGD("Async dispatch keyEvent to input method, id:%{public}" PRId32, keyEvent->GetId());
+        auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+        auto isConsumedFuture = isConsumedPromise->get_future().share();
+        auto isTimeout = std::make_shared<bool>(false);
+        auto callback = [weakThis = wptr(this), isConsumedPromise, isTimeout]
+            (std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+            if (keyEvent == nullptr) {
+                WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
+                return;
+            }
+
+            auto promoteThis = weakThis.promote();
+            if (promoteThis == nullptr) {
+                WLOGFW("promoteThis is nullptr");
+                keyEvent->MarkProcessed();
+                return;
+            }
+
+            auto id = keyEvent->GetId();
+            if (isTimeout) {
+                WLOGFW("DispatchKeyEvent timeout id:%{public}" PRId32, id);
+                keyEvent->MarkProcessed();
+                return;
+            }
+
+            if (consumed) {
+                isConsumedPromise->set_value(consumed);
+                WLOGD("Input method has processed key event, id:%{public}" PRId32, id);
+                return;
+            }
+            bool isConsumed = false;
+            promoteThis->DispatchKeyEventCallback(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), isConsumed);
+            isConsumedPromise->set_value(isConsumed);
+        };
+
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(
+            const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), std::move(callback));
+        if (ret != 0) {
+            WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
+            DispatchKeyEventCallback(keyEvent, isConsumed);
+            return;
+        }
+        if (isConsumedFuture.wait_for(std::chrono::seconds(1)) == std::future_status::timeout) {
+            isTimeout.reset(new bool(true));
+            isConsumed = true;
+            WLOGFE("DispatchKeyEvent timeout, id:%{public}" PRId32, keyEvent->GetId());
+        } else {
+            isConsumed = isConsumedFuture.get();
+        }
+        return;
+    }
+#endif // IMF_ENABLE
+    DispatchKeyEventCallback(keyEvent, isConsumed);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
