@@ -31,6 +31,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowE
 constexpr int32_t ANIMATION_TIME = 400;
 }
 
+constexpr int64_t DispatchKeyEventTimeoutTime = 1;
+
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
 std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
@@ -249,7 +251,7 @@ void WindowExtensionSessionImpl::WaitForDispatchKeyEventResult(const std::shared
         DispatchKeyEventCallback(keyEvent, isConsumed);
         return;
     }
-    if (isConsumedFuture.wait_for(std::chrono::seconds(1)) == std::future_status::timeout) {
+    if (isConsumedFuture.wait_for(std::chrono::seconds(DispatchKeyEventTimeoutTime)) == std::future_status::timeout) {
         *isTimeout = true;
         isConsumed = true;
         WLOGFE("DispatchKeyEvent timeout, id:%{public}" PRId32, keyEvent->GetId());
