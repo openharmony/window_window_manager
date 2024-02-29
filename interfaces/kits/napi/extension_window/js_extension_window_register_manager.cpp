@@ -29,6 +29,11 @@ JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
     listenerProcess_[CaseType::CASE_WINDOW] = {
             { WINDOW_SIZE_CHANGE_CB, &JsExtensionWindowRegisterManager::ProcessWindowChangeRegister },
             { AVOID_AREA_CHANGE_CB, &JsExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister },
+            { WINDOW_EVENT_CB, &JsExtensionWindowRegisterManager::ProcessLifeCycleEventRegister },
+    };
+    // white register list for window stage
+    listenerProcess_[CaseType::CASE_STAGE] = {
+            {WINDOW_STAGE_EVENT_CB, &JsExtensionWindowRegisterManager::ProcessLifeCycleEventRegister }
     };
 }
 
@@ -66,6 +71,23 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(spt
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAvoidAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        WLOGFE("Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowLifeCycle> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
     }
     return ret;
 }
