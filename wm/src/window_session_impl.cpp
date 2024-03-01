@@ -2136,7 +2136,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), callback);
         if (ret != 0) {
             WLOGFE("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
-            keyEvent->MarkProcessed();
+            DispatchKeyEventCallback(keyEvent, isConsumed);
         }
         return;
     }
