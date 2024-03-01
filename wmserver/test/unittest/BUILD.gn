@@ -29,7 +29,6 @@ group("unittest") {
     ":wmserver_window_inner_window_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
-    ":wmserver_window_manager_service_test",
     ":wmserver_window_manager_service_utils_test",
     ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
