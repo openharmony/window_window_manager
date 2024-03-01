@@ -21,6 +21,7 @@
 #include "event_runner.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
+#include "js_window_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -172,6 +173,76 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsExtensionWindowListener::OnSizeChange", env_,
                             std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWindowListener> weakRef,
+    napi_env env, std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
+{
+    WLOGI("LifeCycleCallBack, envent type: %{public}u", eventType);
+    auto task = [self = weakRef, eventType, eng = env] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::LifeCycleCallBack");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("this listener or eng is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
+        napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
+        thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
+    };
+    if (!eventHandler) {
+        WLOGFE("get main event handler failed!");
+        return;
+    }
+    eventHandler->PostTask(task, "wms:JsExtensionWindowListener::LifeCycleCallBack", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void JsExtensionWindowListener::AfterForeground()
+{
+    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+        LifeCycleCallBack(LifeCycleEventType::FOREGROUND, weakRef_, env_, eventHandler_);
+        state_ = WindowState::STATE_SHOWN;
+    } else {
+        WLOGFD("window is already shown");
+    }
+}
+
+void JsExtensionWindowListener::AfterBackground()
+{
+    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+        LifeCycleCallBack(LifeCycleEventType::BACKGROUND, weakRef_, env_, eventHandler_);
+        state_ = WindowState::STATE_HIDDEN;
+    } else {
+        WLOGFD("window is already hide");
+    }
+}
+
+void JsExtensionWindowListener::AfterFocused()
+{
+    LifeCycleCallBack(LifeCycleEventType::ACTIVE, weakRef_, env_, eventHandler_);
+}
+
+void JsExtensionWindowListener::AfterUnfocused()
+{
+    LifeCycleCallBack(LifeCycleEventType::INACTIVE, weakRef_, env_, eventHandler_);
+}
+
+void JsExtensionWindowListener::AfterResumed()
+{
+    LifeCycleCallBack(LifeCycleEventType::RESUMED, weakRef_, env_, eventHandler_);
+}
+
+void JsExtensionWindowListener::AfterPaused()
+{
+    LifeCycleCallBack(LifeCycleEventType::PAUSED, weakRef_, env_, eventHandler_);
+}
+
+void JsExtensionWindowListener::AfterDestroyed()
+{
+    LifeCycleCallBack(LifeCycleEventType::DESTROYED, weakRef_, env_, eventHandler_);
 }
 } // namespace Rosen
 } // namespace OHOS

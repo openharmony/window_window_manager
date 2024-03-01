@@ -197,6 +197,8 @@ public:
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
+    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
@@ -278,9 +280,9 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
+
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
-    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
