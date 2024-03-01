@@ -295,7 +295,7 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
             DispatchKeyEventCallback(keyEvent, isConsumed);
             return;
         }
-        if (isConsumedFuture.wait_for(std::chrono::seconds(DISPATCH_KEY_EVENT_TIMEOUT_TIME)) == 
+        if (isConsumedFuture.wait_for(std::chrono::seconds(DISPATCH_KEY_EVENT_TIMEOUT_TIME)) ==
             std::future_status::timeout) {
             *isTimeout = true;
             isConsumed = true;
