@@ -6501,11 +6501,11 @@ WSError SceneSessionManager::RecoveryPullPiPMainWindow(const int32_t& persistent
         WLOGFE("not pip window");
         return WSError::WS_DO_NOTHING;
     }
-    if (!showPiPMainWindowFunc_) {
-        WLOGFE("showPiPMainWindowFunc_ init error, persistentId: %{public}d", persistentId);
-        return WSError::WS_DO_NOTHING;
-    }
-    auto task = [this, scnSession, rect]() {
+    auto task = [this, scnSession, rect, persistentId]() {
+        if (!showPiPMainWindowFunc_) {
+            WLOGFE("showPiPMainWindowFunc_ init error, persistentId: %{public}d", persistentId);
+            return WSError::WS_DO_NOTHING;
+        }
         showPiPMainWindowFunc_(scnSession->GetParentPersistentId());
         WSRect rectPos = SessionHelper::TransferToWSRect(rect);
         scnSession->UpdateSessionRect(rectPos, SizeChangeReason::RECOVER);
