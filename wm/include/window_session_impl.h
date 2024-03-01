@@ -281,7 +281,6 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
 
-    void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterResumed();
     void NotifyAfterPaused();
