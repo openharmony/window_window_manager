@@ -337,6 +337,12 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
 {
     bool dragEnabled = sceneSession->GetSessionProperty()->GetDragEnabled();
     if (dragEnabled) {
+        if (sceneSession->GetSessionInfo().isSetPointerAreas_) {
+            pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+                POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN,
+                POINTER_CHANGE_AREA_FIVE, POINTER_CHANGE_AREA_SEXTEEN, POINTER_CHANGE_AREA_FIVE};
+            return;
+        }
         auto limits = sceneSession->GetSessionProperty()->GetWindowLimits();
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_FIVE,
@@ -384,9 +390,9 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
     auto windowMode = sceneSession->GetSessionProperty()->GetWindowMode();
     auto maxMode = sceneSession->GetSessionProperty()->GetMaximizeMode();
-    if (windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
+    if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
         Rosen::WindowHelper::IsMainWindow(sceneSession->GetSessionProperty()->GetWindowType()) &&
-        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) || (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
     std::vector<MMI::Rect> touchHotAreas;

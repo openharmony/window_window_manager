@@ -197,6 +197,7 @@ struct SessionInfo {
     bool isRotable_ = false;
     bool isSystemInput_ = false;
     bool isAsyncModalBinding_ = false;
+    bool isSetPointerAreas_ = false;
 };
 
 enum class SessionFlag : uint32_t {

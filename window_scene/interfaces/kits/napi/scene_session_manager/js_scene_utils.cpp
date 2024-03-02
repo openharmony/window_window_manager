@@ -222,6 +222,19 @@ bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, Sessio
     return true;
 }
 
+bool IsJsIsSetPointerAreasUndefined(napi_env env, napi_value jsIsSetPointerAreas, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsSetPointerAreas) != napi_undefined) {
+        bool isSetPointerAreas = false;
+        if (!ConvertFromJsValue(env, jsIsSetPointerAreas, isSetPointerAreas)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isSetPointerAreas");
+            return false;
+        }
+        sessionInfo.isSetPointerAreas_ = isSetPointerAreas;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -268,6 +281,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
     napi_value jsIsSystemInput = nullptr;
     napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
+    napi_value jsIsSetPointerAreas = nullptr;
+    napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -288,6 +303,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsSetPointerAreasUndefined(env, jsIsSetPointerAreas, sessionInfo)) {
         return false;
     }
     return true;
