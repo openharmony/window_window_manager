@@ -250,7 +250,9 @@ void WindowExtensionSessionImpl::InputMethodKeyEventResultCallback(const std::sh
 {
     if (keyEvent == nullptr) {
         WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
-        isConsumedPromise->set_value(consumed);
+        if (isConsumedPromise != nullptr) {
+            isConsumedPromise->set_value(consumed);
+        }
         return;
     }
 
