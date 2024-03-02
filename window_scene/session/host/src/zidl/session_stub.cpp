@@ -23,6 +23,7 @@
 #include "key_event.h"
 
 #include "accessibility_event_info_parcel.h"
+#include "process_options.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 
@@ -292,6 +293,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     abilitySessionInfo->callingTokenId = data.ReadUint32();
     abilitySessionInfo->reuse = data.ReadBool();
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
