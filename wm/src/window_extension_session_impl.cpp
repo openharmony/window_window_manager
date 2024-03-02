@@ -255,6 +255,12 @@ void WindowExtensionSessionImpl::InputMethodKeyEventResultCallback(const std::sh
     }
 
     auto id = keyEvent->GetId();
+    if (isConsumedPromise == nullptr || isTimeout == nullptr) {
+        WLOGFW("Shared point isConsumedPromise or isTimeout is null, id:%{public}" PRId32, id);
+        keyEvent->MarkProcessed();
+        return;
+    }
+
     if (*isTimeout) {
         WLOGFW("DispatchKeyEvent timeout id:%{public}" PRId32, id);
         keyEvent->MarkProcessed();
@@ -289,7 +295,7 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
             std::bind(&WindowExtensionSessionImpl::InputMethodKeyEventResultCallback, this,
-            std::placeholder_1, std::placeholder_2, isConsumedPromise, isTimeout));
+                std::placeholder_1, std::placeholder_2, isConsumedPromise, isTimeout));
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
             DispatchKeyEventCallback(keyEvent, isConsumed);
