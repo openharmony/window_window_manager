@@ -246,7 +246,7 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
 }
 
 void WindowExtensionSessionImpl::InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
-    bool& isConsumed, std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout)
+    bool consumed, std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout)
 {
     if (keyEvent == nullptr) {
         WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
