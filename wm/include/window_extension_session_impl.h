@@ -68,6 +68,8 @@ public:
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
     void NotifyBackpressedEvent(bool& isConsumed) override;
+    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool notifyInputMethod = true) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
@@ -84,6 +86,9 @@ protected:
 private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+
+    void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
+        std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
 
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;

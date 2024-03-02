@@ -17,6 +17,9 @@
 
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include "anr_handler.h"
@@ -26,6 +29,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int32_t ANIMATION_TIME = 400;
+constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 }
 
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
@@ -239,6 +243,79 @@ void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
         isConsumed = uiContent_->ProcessBackPressed();
     }
     WLOGFD("Backpressed event is not cosumed");
+}
+
+void WindowExtensionSessionImpl::InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+    bool consumed, std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout)
+{
+    if (keyEvent == nullptr) {
+        WLOGFW("keyEvent is null, consumed:%{public}" PRId32, consumed);
+        if (isConsumedPromise != nullptr) {
+            isConsumedPromise->set_value(consumed);
+        }
+        return;
+    }
+
+    auto id = keyEvent->GetId();
+    if (isConsumedPromise == nullptr || isTimeout == nullptr) {
+        WLOGFW("Shared point isConsumedPromise or isTimeout is null, id:%{public}" PRId32, id);
+        keyEvent->MarkProcessed();
+        return;
+    }
+
+    if (*isTimeout) {
+        WLOGFW("DispatchKeyEvent timeout id:%{public}" PRId32, id);
+        keyEvent->MarkProcessed();
+        return;
+    }
+
+    if (consumed) {
+        isConsumedPromise->set_value(consumed);
+        WLOGD("Input method has processed key event, id:%{public}" PRId32, id);
+        return;
+    }
+
+    bool isConsumed = false;
+    DispatchKeyEventCallback(const_cast<std::shared_ptr<MMI::KeyEvent>&>(keyEvent), isConsumed);
+    isConsumedPromise->set_value(isConsumed);
+}
+
+void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool notifyInputMethod)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return;
+    }
+
+#ifdef IMF_ENABLE
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    if (isKeyboardEvent && notifyInputMethod) {
+        WLOGD("Async dispatch keyEvent to input method, id:%{public}" PRId32, keyEvent->GetId());
+        auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+        auto isConsumedFuture = isConsumedPromise->get_future().share();
+        auto isTimeout = std::make_shared<bool>(false);
+        auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
+            std::bind(&WindowExtensionSessionImpl::InputMethodKeyEventResultCallback, this,
+                std::placeholders::_1, std::placeholders::_2, isConsumedPromise, isTimeout));
+        if (ret != 0) {
+            WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
+            DispatchKeyEventCallback(keyEvent, isConsumed);
+            return;
+        }
+        if (isConsumedFuture.wait_for(std::chrono::milliseconds(DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS)) ==
+            std::future_status::timeout) {
+            *isTimeout = true;
+            isConsumed = true;
+            WLOGFE("DispatchKeyEvent timeout, id:%{public}" PRId32, keyEvent->GetId());
+        } else {
+            isConsumed = isConsumedFuture.get();
+        }
+        WLOGFD("Input Method DispatchKeyEvent isConsumed:%{public}" PRId32, isConsumed);
+        return;
+    }
+#endif // IMF_ENABLE
+    DispatchKeyEventCallback(keyEvent, isConsumed);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,

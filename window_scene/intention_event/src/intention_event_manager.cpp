@@ -302,7 +302,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         if (ret != 0) {
             WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d, focusedSessionId:%{public}d",
                 ret, keyEvent->GetId(), focusedSessionId);
-            keyEvent->MarkProcessed();
+            DispatchKeyEventCallback(focusedSessionId, keyEvent, false);
         }
         return;
     }
