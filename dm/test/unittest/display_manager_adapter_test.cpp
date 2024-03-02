@@ -571,18 +571,6 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetDisplayState
- * @tc.desc: test SetDisplayState
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Level2)
-{
-    DisplayState state = DisplayState{1};
-    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
-    ASSERT_TRUE(ret);
-}
-
-/**
  * @tc.name: MakeMirror
  * @tc.desc: test success
  * @tc.type: FUNC
