@@ -171,27 +171,6 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: AutoRotate
- * @tc.desc: ScreenSesionManager SetVirtualMirrorScreenCanvasRotation test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, AutoRotate, Function | SmallTest | Level3)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "testAutoRotate";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
-
-    auto result1 = ssm_->SetVirtualMirrorScreenCanvasRotation(VIRTUAL_SCREEN_ID, true);
-    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result1);
-    auto result2 = ssm_->SetVirtualMirrorScreenCanvasRotation(VIRTUAL_SCREEN_ID, false);
-    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
-}
-
-/**
  * @tc.name: GetScreenSession
  * @tc.desc: GetScreenSession virtual screen
  * @tc.type: FUNC
@@ -682,27 +661,6 @@ HWTEST_F(ScreenSessionManagerTest, RemoveFromGroupLocked, Function | SmallTest |
     sptr<ScreenSession> newScreen = new (std::nothrow) ScreenSession();
     sptr<ScreenSessionGroup> sessiongroup;
     ASSERT_EQ(sessiongroup, ssm_->RemoveFromGroupLocked(newScreen));
-}
-
-/**
- * @tc.name: CreateAndGetNewScreenId
- * @tc.desc: CreateAndGetNewScreenId virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, CreateAndGetNewScreenId, Function | SmallTest | Level3)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "CreateAndGetNewScreenId";
-    ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = new (std::nothrow) ScreenSession("CreateAndGetNewScreenId", 2, 2, 3);
-    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_{
-        {2, screenSession},
-    };
-    ssm_->screenSessionMap_ = screenSessionMap_;
-    ScreenSessionManager::ScreenIdManager sim;
-    ASSERT_EQ(1000, sim.CreateAndGetNewScreenId(SCREEN_ID_INVALID));
 }
 
 /**

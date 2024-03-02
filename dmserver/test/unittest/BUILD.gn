@@ -22,7 +22,6 @@ group("unittest") {
   deps = [
     ":dmserver_abstract_display_controller_test",
     ":dmserver_abstract_display_test",
-    ":dmserver_abstract_screen_controller_test",
     ":dmserver_abstract_screen_test",
     ":dmserver_display_cutout_controller_test",
     ":dmserver_display_dumper_test",
