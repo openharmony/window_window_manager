@@ -90,7 +90,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
             WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
-            keyEvent->MarkProcessed();
+            DispatchKeyEventCallback(keyEvent, false);
         }
         return;
     }
