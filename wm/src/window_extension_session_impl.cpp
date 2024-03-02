@@ -29,7 +29,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int32_t ANIMATION_TIME = 400;
-constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME = 1;
+constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 }
 
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
@@ -301,7 +301,7 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
             DispatchKeyEventCallback(keyEvent, isConsumed);
             return;
         }
-        if (isConsumedFuture.wait_for(std::chrono::seconds(DISPATCH_KEY_EVENT_TIMEOUT_TIME)) ==
+        if (isConsumedFuture.wait_for(std::chrono::milliseconds(DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS)) ==
             std::future_status::timeout) {
             *isTimeout = true;
             isConsumed = true;
