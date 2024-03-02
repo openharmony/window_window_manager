@@ -1875,36 +1875,37 @@ DMError ScreenSessionManager::StopScreens(const std::vector<ScreenId>& screenIds
 
 DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("MakeUniqueScreen permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFI("MakeUniqueScreen enter!");
     if (screenIds.empty()) {
         WLOGFE("MakeUniqueScreen screen is empty");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    ScreenId mainScreenId = GetDefaultScreenId();
-    ScreenId uniqueScreenId = screenIds[0];
-    WLOGFI("MainScreenId %{public}" PRIu64" unique screenId %{public}" PRIu64".", mainScreenId, uniqueScreenId);
-
-    auto defaultScreen = GetDefaultScreenSession();
-    if (!defaultScreen) {
-        WLOGFE("Default screen is nullptr");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    auto group = GetAbstractScreenGroup(defaultScreen->groupSmsId_);
-    if (group == nullptr) {
-        group = AddToGroupLocked(defaultScreen);
-        if (group == nullptr) {
-            WLOGFE("group is nullptr");
-            return DMError::DM_ERROR_NULLPTR;
+    for (auto screenId : screenIds) {
+        ScreenId rsScreenId = SCREEN_ID_INVALID;
+        bool res = ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+        WLOGFI("unique screenId: %{public}" PRIu64" rsScreenId: %{public}" PRIu64"", screenId, rsScreenId);
+        if (!res) {
+            WLOGFE("convert screenid to rsScreenId failed");
+            continue;
         }
-        NotifyScreenGroupChanged(defaultScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+        auto screenSession = GetScreenSession(screenId);
+        if (!screenSession) {
+            WLOGFE("screen session is nullptr");
+            continue;
+        }
+        screenSession->SetDisplayNodeScreenId(rsScreenId);
+        // notify scb to build Screen widget
+        OnVirtualScreenChange(screenId, ScreenEvent::CONNECTED);
     }
-    Point point;
-    std::vector<Point> startPoints;
-    startPoints.insert(startPoints.begin(), screenIds.size(), point);
-    ChangeScreenGroup(group, screenIds, startPoints, true, ScreenCombination::SCREEN_UNIQUE);
-
-    // virtual screen create callback to notify scb
-    OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        WLOGFD("MakeUniqueScreen flush data");
+        transactionProxy->FlushImplicitTransaction();
+    }
     return DMError::DM_OK;
 }
 
