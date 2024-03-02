@@ -1182,6 +1182,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->callingTokenId = sessionInfo.callingTokenId_;
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
+    abilitySessionInfo->processOptions = sessionInfo.processOptions;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {

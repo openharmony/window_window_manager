@@ -27,6 +27,7 @@
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
+class ProcessOptions;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
@@ -172,6 +173,7 @@ struct SessionInfo {
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
     std::shared_ptr<AAFwk::Want> closeAbilityWant;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode = -1;
     int32_t requestCode;
