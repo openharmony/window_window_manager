@@ -89,10 +89,6 @@ private:
 
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
-    
-    void WaitForDispatchKeyEventResult(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
-        std::shared_future<bool> isConsumedFuture,
-        std::function<void(std::shared_ptr<MMI::KeyEvent>&, bool)> callback, std::shared_ptr<bool> isTimeout);
 
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
