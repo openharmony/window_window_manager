@@ -435,7 +435,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
-    WLOGFI("GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
+    WLOGFD("GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
@@ -449,7 +449,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             continue;
         }
         if (displayId == displayInfo->GetDisplayId()) {
-            WLOGFI("GetDisplayInfoById success");
+            WLOGFD("GetDisplayInfoById success");
             return displayInfo;
         }
     }
@@ -2930,7 +2930,7 @@ void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
     if (foldScreenController_ == nullptr) {
-        WLOGFW("GetFoldDisplayMode foldScreenController_ is null");
+        WLOGFD("GetFoldDisplayMode foldScreenController_ is null");
         return FoldDisplayMode::UNKNOWN;
     }
     return foldScreenController_->GetDisplayMode();
