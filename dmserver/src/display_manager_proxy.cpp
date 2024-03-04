@@ -804,16 +804,16 @@ bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write PowerStateChangeReason failed");
+        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -825,12 +825,12 @@ bool DisplayManagerProxy::WakeUpEnd()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -842,16 +842,16 @@ bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write PowerStateChangeReason failed");
+        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -863,12 +863,12 @@ bool DisplayManagerProxy::SuspendEnd()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -880,20 +880,20 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("Write ScreenPowerState failed");
+        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write PowerStateChangeReason failed");
+        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -905,24 +905,24 @@ bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPower
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
-        WLOGFE("Write ScreenId failed");
+        WLOGFE("[UL_POWER]Write ScreenId failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("Write ScreenPowerState failed");
+        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write PowerStateChangeReason failed");
+        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -955,16 +955,16 @@ bool DisplayManagerProxy::SetDisplayState(DisplayState state)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("Write DisplayState failed");
+        WLOGFE("[UL_POWER]Write DisplayState failed");
         return false;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -1119,16 +1119,16 @@ void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(event))) {
-        WLOGFE("Write DisplayEvent failed");
+        WLOGFE("[UL_POWER]Write DisplayEvent failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        WLOGFW("[UL_POWER]SendRequest failed");
         return;
     }
 }
