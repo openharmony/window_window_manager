@@ -391,9 +391,9 @@ DMError DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplay
 
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:WakeUpBegin(%u)", reason);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:WakeUpBegin(%u)", reason);
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("wake up begin permission denied!");
+        WLOGFE("[UL_POWER]wake up begin permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -402,9 +402,9 @@ bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::WakeUpEnd()
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:WakeUpEnd");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:WakeUpEnd");
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("wake up end permission denied!");
+        WLOGFE("[UL_POWER]wake up end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -413,9 +413,9 @@ bool DisplayManagerService::WakeUpEnd()
 
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SuspendBegin(%u)", reason);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:SuspendBegin(%u)", reason);
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("suspend begin permission denied!");
+        WLOGFE("[UL_POWER]suspend begin permission denied!");
         return false;
     }
     displayPowerController_->SuspendBegin(reason);
@@ -425,9 +425,9 @@ bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::SuspendEnd()
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SuspendEnd");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:SuspendEnd");
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("suspend end permission denied!");
+        WLOGFE("[UL_POWER]suspend end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
@@ -436,16 +436,16 @@ bool DisplayManagerService::SuspendEnd()
 
 bool DisplayManagerService::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFE("DMS not support SetSpecifiedScreenPower: screen:%{public}" PRIu64 ", state:%{public}u",
+    WLOGFE("[UL_POWER]DMS not support SetSpecifiedScreenPower: screen:%{public}" PRIu64 ", state:%{public}u",
         screenId, state);
     return false;
 }
 
 bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFI("SetScreenPowerForAll");
+    WLOGFI("[UL_POWER]SetScreenPowerForAll");
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("set screen power for all permission denied!");
+        WLOGFE("[UL_POWER]set screen power for all permission denied!");
         return false;
     }
     return abstractScreenController_->SetScreenPowerForAll(state, reason);
@@ -459,7 +459,7 @@ ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("set display state permission denied!");
+        WLOGFE("[UL_POWER]set display state permission denied!");
         return false;
     }
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
@@ -489,7 +489,7 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        WLOGFE("notify display event permission denied!");
+        WLOGFE("[UL_POWER]notify display event permission denied!");
         return;
     }
     displayPowerController_->NotifyDisplayEvent(event);
