@@ -1829,11 +1829,13 @@ void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocu
 
 void Session::SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func)
 {
+    std::unique_lock<std::shared_mutex> lock(uiRequestFocusMutex_);
     requestFocusFunc_ = func;
 }
 
 void Session::SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func)
 {
+    std::unique_lock<std::shared_mutex> lock(uiLostFocusMutex_);
     lostFocusFunc_ = func;
 }
 
@@ -1930,6 +1932,7 @@ bool Session::GetStateFromManager(const ManagerState key)
 void Session::NotifyUIRequestFocus()
 {
     WLOGFD("NotifyUIRequestFocus id: %{public}d", GetPersistentId());
+    std::shared_lock<std::shared_mutex> lock(uiRequestFocusMutex_);
     if (requestFocusFunc_) {
         requestFocusFunc_();
     }
@@ -1938,6 +1941,7 @@ void Session::NotifyUIRequestFocus()
 void Session::NotifyUILostFocus()
 {
     WLOGFD("NotifyUILostFocus id: %{public}d", GetPersistentId());
+    std::shared_lock<std::shared_mutex> lock(uiLostFocusMutex_);
     if (lostFocusFunc_) {
         lostFocusFunc_();
     }
