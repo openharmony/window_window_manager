@@ -529,6 +529,9 @@ private:
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
+    mutable std::shared_mutex uiRequestFocusMutex_;
+    mutable std::shared_mutex uiLostFocusMutex_;
+
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
     WSRect preRect_;
