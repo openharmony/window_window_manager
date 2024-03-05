@@ -1526,11 +1526,7 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
 
 void WindowSessionImpl::NotifyAfterFocused()
 {
-    {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
-    }
+    NotifyWindowAfterFocused();
     if (uiContent_ != nullptr) {
         NotifyUIContentFocusStatus();
     } else {
@@ -1540,18 +1536,28 @@ void WindowSessionImpl::NotifyAfterFocused()
 
 void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 {
-    {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        // use needNotifyUinContent to separate ui content callbacks
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
-    }
+    NotifyWindowAfterUnfocused();
     if (needNotifyUiContent) {
         if (uiContent_ == nullptr) {
             shouldReNotifyFocus_ = true;
         }
         CALL_UI_CONTENT(UnFocus);
     }
+}
+
+void WindowSessionImpl::NotifyWindowAfterFocused()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyWindowAfterUnfocused()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    // use needNotifyUinContent to separate ui content callbacks
+    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
 }
 
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)

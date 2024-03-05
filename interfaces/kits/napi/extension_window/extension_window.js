@@ -41,21 +41,6 @@ class ExtensionWindow {
     return this.__extension_window__.hideNonSecureWindows(type, callback);
   }
 
-  loadContent(url, storage, asyncCallback) {
-    return this.__extension_window__.loadContent(url, storage, asyncCallback);
-  }
-
-  loadContentByName(name, storage, asyncCallback) {
-    return this.__extension_window__.loadContentByName(name, storage, asyncCallback);
-  }
-
-  getMainWindow(asyncCallback) {
-    return this.__extension_window__.getMainWindow(asyncCallback);
-  }
-
-  getMainWindowSync() {
-    return this.__extension_window__.getMainWindowSync();
-  }
 }
 
 export default ExtensionWindow;

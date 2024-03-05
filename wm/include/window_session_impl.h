@@ -197,8 +197,8 @@ public:
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
-    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-    void NotifyAfterFocused();
+    void NotifyWindowAfterUnfocused();
+    void NotifyWindowAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
@@ -282,6 +282,8 @@ private:
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
 
     void NotifyUIContentFocusStatus();
+    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterFocused();
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
