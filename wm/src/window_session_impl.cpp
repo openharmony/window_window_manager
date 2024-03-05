@@ -1479,13 +1479,10 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        WLOGFI("[WMSInput] Notify InputMethod framework close keyboard start.");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start.");
         if (MiscServices::InputMethodController::GetInstance()) {
-            int32_t ret = MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            WLOGFI("[WMSInput] Notify InputMethod framework close keyboard end.");
-            if (ret != 0) { // 0 - NO_ERROR
-                WLOGFE("[WMSInput] InputMethod framework close keyboard failed, ret: %{public}d", ret);
-            }
+            MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
     }
@@ -1513,14 +1510,14 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = (window->property_) ? window->property_->GetKeepKeyboardFlag() : false;
-        WLOGFI("[WMSInput] isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
             isNeedKeyboard, keepKeyboardFlag);
         RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ != nullptr) {
         uiContent_->SetOnWindowFocused(task);
-        WLOGFI("[WMSInput] set need soft keyboard callback success!");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "set need soft keyboard callback success!");
     }
 }
 
@@ -2297,7 +2294,7 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
     auto sessionGravity = static_cast<SessionGravity>(gravity);
-    WLOGFI("[WMSInput] Set window gravity: %{public}" PRIu32 ", percent: %{public}" PRIu32, sessionGravity, percent);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set window gravity: %{public}u, percent: %{public}u", sessionGravity, percent);
     if (property_ != nullptr) {
         property_->SetSessionGravity(sessionGravity, percent);
     }

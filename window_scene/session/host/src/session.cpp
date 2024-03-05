@@ -873,7 +873,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 void Session::NotifyCallingSessionForeground()
 {
     if (notifyCallingSessionForegroundFunc_) {
-        WLOGFI("[WMSInput] Notify calling window that input method shown");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method shown");
         notifyCallingSessionForegroundFunc_(persistentId_);
     }
 }
@@ -956,7 +956,7 @@ WSError Session::Background()
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionBackground();
         if (property_) {
-            WLOGFI("[WMSInput] When the soft keyboard is hidden, set the callingWindowId to 0.");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "When the soft keyboard is hidden, set the callingWindowId to 0.");
             property_->SetCallingWindow(INVALID_WINDOW_ID);
         }
     }
@@ -968,7 +968,7 @@ WSError Session::Background()
 void Session::NotifyCallingSessionBackground()
 {
     if (notifyCallingSessionBackgroundFunc_) {
-        WLOGFI("[WMSInput] Notify calling window that input method hide");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method hide");
         notifyCallingSessionBackgroundFunc_();
     }
 }
