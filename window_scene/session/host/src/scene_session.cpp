@@ -501,7 +501,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
         auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplayInfo == nullptr) {
-            WLOGFE("[WMSInput] defaultDisplayInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is nullptr");
             return false;
         }
 
@@ -515,8 +515,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
         newRequestRect.posX_ = newWinRect.posX_;
         newWinRect.posY_ = defaultDisplayInfo->GetHeight() - static_cast<int32_t>(newWinRect.height_);
         newRequestRect.posY_ = newWinRect.posY_;
-        WLOGFI("[WMSInput] rect: %{public}s, newRequestRect: %{public}s, "
-            "newWinRect: %{public}s",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "rect: %{public}s, newRequestRect: %{public}s, newWinRect: %{public}s",
             rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return true;
     }
@@ -569,7 +568,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             bool needUpdateInputMethod = session->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
             if (needUpdateInputMethod) {
                 newReason = SizeChangeReason::UNDEFINED;
-                WLOGFD("[WMSInput] Input rect has totally changed, need to modify reason, id: %{public}d",
+                TLOGD(WmsLogTag::WMS_KEYBOARD, "Input rect has totally changed, need to modify reason, id: %{public}d",
                     session->GetPersistentId());
             } else if (rect.width_ > 0 && rect.height_ > 0) {
                 newWinRect.width_ = rect.width_;
@@ -2408,14 +2407,14 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
     auto task = [weakThis = wptr(this), isAppColdStart]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSInput] Session is null, notify inputMethod framework hide keyboard failed!");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, notify inputMethod framework hide keyboard failed!");
             return;
         }
-        WLOGFI("[WMSInput] Notify inputMethod framework hide keyboard start, id: %{public}d,"
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify inputMethod framework hide keyboard start, id: %{public}d,"
             "isAppColdStart: %{public}d", session->GetPersistentId(), isAppColdStart);
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            WLOGFI("[WMSInput] Notify inputMethod framework hide keyboard end, id: %{public}d",
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify inputMethod framework hide keyboard end, id: %{public}d",
                 session->GetPersistentId());
         }
     };

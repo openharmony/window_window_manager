@@ -1092,54 +1092,56 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
 void SceneSessionManager::RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSInput] session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
     NotifyCallingSessionForegroundFunc onInputMethodUpdate = [this](int32_t persistentId) {
         this->OnInputMethodUpdate(persistentId);
     };
     sceneSession->SetNotifyCallingSessionUpdateRectFunc(onInputMethodUpdate);
-    WLOGFD("[WMSInput] RegisterInputMethodUpdateFunc success");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "RegisterInputMethodUpdateFunc success");
 }
 
 void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
 {
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
-        WLOGFE("[WMSInput] Input method is null");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Input method is null");
         return;
     }
-    WLOGFD("[WMSInput] persistentId: %{public}d, windowType: %{public}d", persistentId, scnSession->GetWindowType());
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
+        persistentId, scnSession->GetWindowType());
     ResizeSoftInputCallingSessionIfNeed(scnSession, true);
 }
 
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSInput] session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
     NotifyCallingSessionForegroundFunc onInputMethodShown = [this](int32_t persistentId) {
         this->OnInputMethodShown(persistentId);
     };
     sceneSession->SetNotifyCallingSessionForegroundFunc(onInputMethodShown);
-    WLOGFD("[WMSInput] RegisterInputMethodShownFunc success");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "RegisterInputMethodShownFunc success");
 }
 
 void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 {
     auto scnSession = GetSceneSession(persistentId);
     if (scnSession == nullptr) {
-        WLOGFE("[WMSInput] scnSession is null, persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "scnSession is null, persistentId: %{public}d", persistentId);
         return;
     }
 
-    WLOGFD("[WMSInput] persistentId: %{public}d, windowType: %{public}d", persistentId, scnSession->GetWindowType());
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
+        persistentId, scnSession->GetWindowType());
     if (callingSession_ == nullptr) {
-        WLOGFI("[WMSInput] Calling session is null, using focusedSessionId_: %{public}d", focusedSessionId_);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingSession is null, using focusedSession: %{public}d", focusedSessionId_);
         callingSession_ = GetSceneSession(focusedSessionId_);
         if (callingSession_ == nullptr) {
-            WLOGFE("[WMSInput] Calling session obtained through focusedSessionId_ is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Calling session obtained through focusedSessionId_ is null");
             return;
         }
     }
@@ -1150,7 +1152,7 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 void SceneSessionManager::RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSInput] session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
     NotifyCallingSessionBackgroundFunc onInputMethodHide = [this]() {
@@ -1158,7 +1160,7 @@ void SceneSessionManager::RegisterInputMethodHideFunc(const sptr<SceneSession>& 
         this->callingSession_ = nullptr;
     };
     sceneSession->SetNotifyCallingSessionBackgroundFunc(onInputMethodHide);
-    WLOGFD("[WMSInput] RegisterInputMethodHideFunc success");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "RegisterInputMethodHideFunc success");
 }
 
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
@@ -1265,7 +1267,7 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSInput] session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
     // When input method is shown and another app is cold started, the input method is hidden.
@@ -2588,10 +2590,10 @@ void SceneSessionManager::SetCallingSession(const sptr<SceneSession>& sceneSessi
         oldCallingWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
     }
     if (callingSession_ && oldCallingWindowId == newCallingWindowId) {
-        WLOGFI("[WMSInput] CallingWindowId not changed, not need to reset callingSession");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId not changed, not need to reset callingSession");
         return;
     }
-    WLOGFI("[WMSInput] Get callingSesstion by CallingWindowId: %{public}d", newCallingWindowId);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get callingSesstion by CallingWindowId: %{public}d", newCallingWindowId);
     callingSession_ = GetSceneSession(newCallingWindowId);
     return;
 }
@@ -5176,14 +5178,14 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
     if (callingSession_ == nullptr) {
-        WLOGFI("[WMSInput] calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "calling session is nullptr");
         return;
     }
     SessionGravity gravity;
     uint32_t percent = 0;
     sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
     if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM && gravity != SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        WLOGFI("[WMSInput] Gravity is not bottom, no need to raise calling window, gravity: %{public}d", gravity);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling window, gravity: %{public}d", gravity);
         return;
     }
 
@@ -5202,10 +5204,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     } else {
         callingSessionRect = callingSession_->GetSessionRect();
     }
-    WLOGFI("[WMSInput] softInputSessionRect: %{public}s, callingSessionRect: %{public}s",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "softInputSessionRect: %{public}s, callingSessionRect: %{public}s",
         softInputSessionRect.ToString().c_str(), callingSessionRect.ToString().c_str());
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
-        WLOGFD("[WMSInput] There is no overlap area");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "There is no overlap area");
         return;
     }
 
@@ -5235,23 +5237,23 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
     const WSRect& lastSafeRect = callingSession_->GetLastSafeRect();
     if (lastSafeRect == safeRect) {
-        WLOGFI("[WMSInput] NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
         return;
     }
     callingSession_->SetLastSafeRect(safeRect);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_,
         sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
-    WLOGFD("[WMSInput] OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
     callingSession_->NotifyOccupiedAreaChangeInfo(info);
 }
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
-    WLOGFD("[WMSInput] RestoreCallingSessionSizeIfNeed");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "RestoreCallingSessionSizeIfNeed");
     if (callingSession_ == nullptr) {
-        WLOGFI("[WMSInput] Calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
         return;
     }
 
@@ -5276,25 +5278,25 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
             WLOGFE("scene session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        WLOGFI("[WMSInput] SetSessionGravity persistentId: %{public}d, windowType: %{public}d, gravity: %{public}d",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d, gravity: %{public}d",
             persistentId, sceneSession->GetWindowType(), gravity);
         if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            WLOGFE("[WMSInput] scene session is not input method");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "scene session is not input method");
             return WSError::WS_ERROR_INVALID_TYPE;
         }
         sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
         RelayoutKeyBoard(sceneSession);
         if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
             sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
-            WLOGFI("[WMSInput] InputMethod is not foreground, not need to adjust or restore callingWindow");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, not need to adjust or restore callingWindow");
             return WSError::WS_OK;
         }
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-            WLOGFD("[WMSInput] input method is float mode");
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "input method is float mode");
             sceneSession->SetWindowAnimationFlag(false);
             RestoreCallingSessionSizeIfNeed();
         } else {
-            WLOGFD("[WMSInput] input method is bottom mode");
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "input method is bottom mode");
             sceneSession->SetWindowAnimationFlag(true);
             ResizeSoftInputCallingSessionIfNeed(sceneSession);
         }
@@ -5307,7 +5309,7 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
 void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSInput] sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr");
         return;
     }
     SessionGravity gravity;
@@ -5320,7 +5322,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
 
     auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("[WMSInput] screenSession is null");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "screenSession is null");
         return;
     }
 
@@ -5336,7 +5338,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
     requestRect.posY_ = defaultDisplayInfo->GetHeight() -
         static_cast<int32_t>(requestRect.height_);
     sceneSession->GetSessionProperty()->SetRequestRect(requestRect);
-    WLOGFD("[WMSInput] Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
     sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }

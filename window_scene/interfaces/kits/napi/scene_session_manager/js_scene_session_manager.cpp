@@ -336,7 +336,7 @@ void JsSceneSessionManager::OnShowPiPMainWindow(int32_t persistentId)
 
 void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
 {
-    WLOGFD("[WMSInput][NAPI]OnCallingWindowIdChange");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingWindowIdChange");
     auto iter = jsCbMap_.find(CALLING_WINDOW_ID_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
