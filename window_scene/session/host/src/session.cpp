@@ -1972,6 +1972,13 @@ WSError Session::UpdateFocus(bool isFocused)
     // notify scb arkui focus
     if (isFocused) {
         if (sessionInfo_.isSystem_) {
+            HiSysEventWrite(
+                OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+                "FOCUS_WINDOW",
+                OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+                "PID", getpid(),
+                "UID", getuid(),
+                "BUNDLE_NAME", sessionInfo_.bundleName_);
             NotifyUIRequestFocus();
         }
     } else {
