@@ -221,6 +221,11 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
     if (uiContent_) {
         focusState ? uiContent_->Focus() : uiContent_->UnFocus();
     }
+    if (focusState) {
+        NotifyWindowAfterFocused();
+    } else {
+        NotifyWindowAfterUnfocused();
+    }
     focusState_ = focusState;
 }
 

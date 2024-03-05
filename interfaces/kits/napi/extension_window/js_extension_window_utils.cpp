@@ -15,6 +15,7 @@
 
 #include "js_extension_window_utils.h"
 
+#include "js_window_utils.h"
 #include "js_extension_window.h"
 #include "window_manager_hilog.h"
 
@@ -73,6 +74,44 @@ napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& w
         WLOGFE("GetWindowRect Failed");
     }
     napi_set_named_property(env, objValue, "uiExtensionHostWindowProxyRect", windowRectObj);
+    return objValue;
+}
+
+napi_value CreateJsExtensionWindowProperties(napi_env env, sptr<Window>& window)
+{
+    WLOGI("CreateJsWindowPropertiesObject is called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert windowProperties to jsObject");
+        return nullptr;
+    }
+
+    Rect windowRect = window->GetRect();
+    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
+    if (windowRectObj == nullptr) {
+        WLOGFE("GetWindowRect failed!");
+    }
+    napi_set_named_property(env, objValue, "windowRect", windowRectObj);
+    
+    WindowType type = window->GetType();
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+        napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
+    } else {
+        napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
+    }
+    napi_set_named_property(env, objValue, "isLayoutFullScreen", CreateJsValue(env, window->IsLayoutFullScreen()));
+    napi_set_named_property(env, objValue, "isFullScreen", CreateJsValue(env, window->IsFullScreen()));
+    napi_set_named_property(env, objValue, "touchable", CreateJsValue(env, window->GetTouchable()));
+    napi_set_named_property(env, objValue, "focusable", CreateJsValue(env, window->GetFocusable()));
+    napi_set_named_property(env, objValue, "name", CreateJsValue(env, window->GetWindowName()));
+    napi_set_named_property(env, objValue, "isPrivacyMode", CreateJsValue(env, window->IsPrivacyMode()));
+    napi_set_named_property(env, objValue, "isKeepScreenOn", CreateJsValue(env, window->IsKeepScreenOn()));
+    napi_set_named_property(env, objValue, "brightness", CreateJsValue(env, window->GetBrightness()));
+    napi_set_named_property(env, objValue, "isTransparent", CreateJsValue(env, window->IsTransparent()));
+    napi_set_named_property(env, objValue, "isRoundCorner", CreateJsValue(env, false)); // empty method
+    napi_set_named_property(env, objValue, "dimBehindValue", CreateJsValue(env, 0));
+    napi_set_named_property(env, objValue, "id", CreateJsValue(env, window->GetWindowId()));
     return objValue;
 }
 
