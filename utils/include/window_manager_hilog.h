@@ -72,7 +72,7 @@ enum class WmsLogTag : uint8_t {
     WMS_LAYOUT,                // C04208
     WMS_IMMS,                  // C04209
     WMS_LIFE,                  // C0420A
-    WMS_INPUT,                 // C0420B
+    WMS_KEYBOARD,              // C0420B
     WMS_EVENT,                 // C0420C
 
     END = 256,                 // Last one, do not use
@@ -90,7 +90,7 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_LAYOUT, "WMSLayout" },
     { WmsLogTag::WMS_IMMS, "WMSImms" },
     { WmsLogTag::WMS_LIFE, "WMSLife" },
-    { WmsLogTag::WMS_INPUT, "WMSInput" },
+    { WmsLogTag::WMS_KEYBOARD, "WMSKeyboard" },
     { WmsLogTag::WMS_EVENT, "WMSEvent" },
 };
 
