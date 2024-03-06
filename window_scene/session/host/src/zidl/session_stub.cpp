@@ -81,6 +81,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleRaiseAboveTarget),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
         &SessionStub::HandleRaiseAppMainWindowToTop),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
+        &SessionStub::HandleChangeSessionVisibilityWithStatusBar),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         &SessionStub::HandlePendingSessionActivation),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE),
@@ -277,6 +279,32 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->errorCode = data.ReadInt32();
     abilitySessionInfo->errorReason = data.ReadString();
     const WSError& errCode = NotifySessionException(abilitySessionInfo);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleChangeSessionVisibilityWithStatusBar");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    abilitySessionInfo->want = *localWant;
+    abilitySessionInfo->requestCode = data.ReadInt32();
+    abilitySessionInfo->persistentId = data.ReadInt32();
+    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
+    abilitySessionInfo->uiAbilityId = data.ReadInt64();
+    abilitySessionInfo->callingTokenId = data.ReadUint32();
+    abilitySessionInfo->reuse = data.ReadBool();
+    abilitySessionInfo->processOptions = 
+        std::shared_ptr<AAFwk::ProcessOptions>(data.ReadParcelable<AAFwk::ProcessOptions>());
+    if (data.ReadBool()) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+    if (data.ReadBool()) {
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
+    bool visible = data.ReadBool();
+    const WSError& errCode = ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

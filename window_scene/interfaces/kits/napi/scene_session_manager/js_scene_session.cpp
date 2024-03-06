@@ -25,6 +25,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
+const std::string CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR = "changeSessionVisibilityWithStatusBar";
 const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
 const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
@@ -119,6 +120,8 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 {
     listenerFunc_ = {
         { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
+        { CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,                      
+            &JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister },
         { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
         { BUFFER_AVAILABLE_CHANGE_CB,            &JsSceneSession::ProcessBufferAvailableChangeRegister},
         { SESSION_EVENT_CB,                      &JsSceneSession::ProcessSessionEventRegister },
@@ -341,6 +344,20 @@ void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFla
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnDefaultAnimationFlagChange, flag:" + std::to_string(isNeedDefaultAnimationFlag));
+}
+
+void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
+{
+    NotifyChangeSessionVisibilityWithStatusBarFunc func = [this](SessionInfo& info, bool visible) {
+        this.ChangeSessionVisibilityWithStatusBar(info, visible);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetChangeSessionVisibilityWithStatusBarEventListener(func);
+    WLOGFD("ProcessChangeSessionVisibilityWithStatusBarRegister success");
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
@@ -1491,6 +1508,49 @@ void JsSceneSession::OnClick()
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnClick");
+}
+
+void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
+{
+    WLOGI("[NAPI]ChangeSessionVisibilityWithStatusBar: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
+        appIndex %{public}d, reuse %{public}d, visible %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse, visible);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    napi_env& env_ref = env_;
+    auto task = [sessionInfo, visible, jsCallBack, env_ref]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        if (sessionInfo == nullptr) {
+            WLOGFE("[NAPI]sessionInfo is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            WLOGFE("[NAPI]this target session info is nullptr");
+            return;
+        }
+        napi_value visible_napiV = CreateJsValue(env_ref, visible);
+        napi_value argv[] = {jsSessionInfo, visible_napiV};
+        napi_call_function(env_ref, NapiGetUndefined(env_ref),
+            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" + std::to_string(visible));
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)

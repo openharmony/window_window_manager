@@ -47,6 +47,7 @@ class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
+using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
@@ -72,6 +73,7 @@ using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
+using StartUIAbilityBySCBFunc = std::function<int32_t(sptr<AAFwk::SessionInfo> info)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
@@ -201,6 +203,8 @@ public:
     void SetNeedSnapshot(bool needSnapshot);
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
+    void SetChangeSessionVisibilityWithStatusBarEventListener(
+        const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
@@ -222,6 +226,7 @@ public:
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
+    void SetStartUIAbilityBySCBFunc(const StartUIAbilityBySCBFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -438,6 +443,7 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
+    NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
@@ -446,6 +452,7 @@ protected:
     NotifyUIRequestFocusFunc requestFocusFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
     GetStateFromManagerFunc getStateFromManagerFunc_;
+    StartUIAbilityBySCBFunc startUIAbilityBySCBFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;

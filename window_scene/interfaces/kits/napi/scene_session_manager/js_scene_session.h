@@ -77,6 +77,7 @@ private:
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
+    void ProcessChangeSessionVisibilityWithStatusBarRegister();
     bool IsCallbackTypeSupported(const std::string& type);
 
     void ProcessPendingSceneSessionActivationRegister();
@@ -113,6 +114,7 @@ private:
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
 
+    void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
