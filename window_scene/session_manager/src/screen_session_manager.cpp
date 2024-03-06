@@ -1265,49 +1265,6 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::SetOrientationFromWindow(DisplayId displayId, Orientation orientation)
-{
-    sptr<DisplayInfo> displayInfo = GetDisplayInfoById(displayId);
-    if (displayInfo == nullptr) {
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetOrientationFromWindow");
-    return SetOrientationController(displayInfo->GetScreenId(), orientation, true);
-}
-
-DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orientation newOrientation,
-    bool isFromWindow)
-{
-    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    if (screenSession == nullptr) {
-        WLOGFE("fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
-        return DMError::DM_ERROR_NULLPTR;
-    }
-
-    if (isFromWindow) {
-        if (newOrientation == Orientation::UNSPECIFIED) {
-            newOrientation = screenSession->GetScreenRequestedOrientation();
-        }
-    } else {
-        screenSession->SetScreenRequestedOrientation(newOrientation);
-    }
-
-    if (screenSession->GetOrientation() == newOrientation) {
-        return DMError::DM_OK;
-    }
-    if (isFromWindow) {
-        ScreenRotationProperty::ProcessOrientationSwitch(newOrientation);
-    } else {
-        Rotation rotationAfter = screenSession->CalcRotation(newOrientation, GetFoldDisplayMode());
-        SetRotation(screenId, rotationAfter, false);
-    }
-    screenSession->SetOrientation(newOrientation);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
-    // Notify rotation event to ScreenManager
-    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
-    return DMError::DM_OK;
-}
-
 bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
 {
     WLOGFI("Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u,",
@@ -1335,10 +1292,8 @@ void ScreenSessionManager::SetSensorSubscriptionEnabled()
     isAutoRotationOpen_ = system::GetParameter("persist.display.ar.enabled", "1") == "1";
     if (!isAutoRotationOpen_) {
         WLOGFE("autoRotation is not open");
-        ScreenRotationProperty::Init();
         return;
     }
-    ScreenRotationProperty::Init();
     ScreenSensorConnector::SubscribeRotationSensor();
     WLOGFI("subscribe rotation sensor successful");
 }
