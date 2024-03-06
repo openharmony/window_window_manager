@@ -94,6 +94,8 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo, 
+        bool visible) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 
