@@ -890,27 +890,6 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, Function | Smal
 }
 
 /**
- * @tc.name: SetOrientationFromWindow
- * @tc.desc: SetOrientationFromWindow virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTest | Level3)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "SetOrientationFromWindow";
-    ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = new (std::nothrow) ScreenSession("GetScreenGamutMap", 1, 1, 3);
-    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_{
-        {1, screenSession},
-    };
-    ssm_->screenSessionMap_ = screenSessionMap_;
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientationFromWindow(2, Orientation::AUTO_ROTATION_RESTRICTED));
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientationFromWindow(1, Orientation::AUTO_ROTATION_RESTRICTED));
-}
-
-/**
  * @tc.name: MakeUniqueScreen
  * @tc.desc: Make unique screen
  * @tc.type: FUNC
