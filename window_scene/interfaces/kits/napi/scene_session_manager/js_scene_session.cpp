@@ -348,8 +348,9 @@ void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFla
 
 void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
 {
-    NotifyChangeSessionVisibilityWithStatusBarFunc func = [this](SessionInfo& info, bool visible) {
-        this.ChangeSessionVisibilityWithStatusBar(info, visible);
+    NotifyChangeSessionVisibilityWithStatusBarFunc func = [weak = weak_from_this()](SessionInfo& info, bool visible) {
+        auto weakJsSceneSession = weak.lock();
+        if (weakJsSceneSession) weakJsSceneSession->ChangeSessionVisibilityWithStatusBar(info, visible);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
