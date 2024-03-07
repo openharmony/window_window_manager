@@ -378,7 +378,6 @@ private:
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
         bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);

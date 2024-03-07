@@ -1282,7 +1282,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& scnSession)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
     if (abilitySessionInfo == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
+        return ERR_NULL_OBJECT;
     }
     
     if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
@@ -1301,7 +1301,7 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& 
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
     if (abilitySessionInfo == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
+        return ERR_NULL_OBJECT;
     }
     if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
         abilitySessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, abilitySessionInfo->persistentId);
@@ -4113,7 +4113,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
 
 void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    wptr<SceneSessionManager> weakSessionManager = this;
+    wptr<SceneSessionManager> weakSessionManager = this; 
     NotifySessionInfoChangeNotifyManagerFunc func = [weakSessionManager](int32_t persistentId) {
         auto sceneSessionManager = weakSessionManager.promote();
         if (sceneSessionManager == nullptr) {
@@ -4169,8 +4169,13 @@ void SceneSessionManager::RegisterStartUIAbilityBySCBFunc(sptr<SceneSession>& sc
         WLOGFE("session is nullptr");
         return;
     }
-    StartUIAbilityBySCBFunc func = [this](sptr<AAFwk::SessionInfo>& abilitySessionInfo) {
-        return this->StartUIAbilityBySCB(abilitySessionInfo);
+    wptr<SceneSessionManager> weakSessionManager = this; 
+    StartUIAbilityBySCBFunc func = [weakSessionManager](sptr<AAFwk::SessionInfo> abilitySessionInfo) {
+        auto sceneSessionManager = weakSessionManager.promote();
+        if (sceneSessionManager == nullptr) {
+            return;
+        }
+        sceneSessionManager->StartUIAbilityBySCB(abilitySessionInfo);
     };
     sceneSession->SetStartUIAbilityBySCBFunc(func);
     WLOGFD("RegisterStartUIAbilityBySCBFunc success");
