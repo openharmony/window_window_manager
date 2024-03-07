@@ -118,7 +118,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session)
 {
-    initListenerFuncs();
+    InitListenerFuncs();
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
         SceneSession::SessionChangeCallback();
     if (sessionchangeCallback != nullptr) {
@@ -147,7 +147,7 @@ JsSceneSession::~JsSceneSession()
     SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
 }
 
-JsSceneSession::initListenerFuncs()
+JsSceneSession::InitListenerFuncs()
 {
     listenerFunc_ = {
         { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
@@ -1518,13 +1518,24 @@ void JsSceneSession::OnClick()
 void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
 {
     WLOGI("[NAPI]ChangeSessionVisibilityWithStatusBar: bundleName %{public}s, moduleName %{public}s, \
-        abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d", 
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, visible);
+        abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
+        info.appIndex_, info.reuse, visible);
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr");
         return;
     }
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    auto task = [sessionInfo, visible]() {
+        ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
+    };
+    taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" +
+        std::to_string(visible));
+}
+
+void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible)
+{
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1534,29 +1545,24 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
         }
         jsCallBack = iter->second;
     }
-    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     napi_env& env_ref = env_;
-    auto task = [sessionInfo, visible, jsCallBack, env_ref]() {
-        if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
-            return;
-        }
-        napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
-        if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
-            return;
-        }
-        napi_value visible_napiV = CreateJsValue(env_ref, visible);
-        napi_value argv[] = {jsSessionInfo, visible_napiV};
-        napi_call_function(env_ref, NapiGetUndefined(env_ref),
-            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" + 
-        std::to_string(visible));
+    if (!jsCallBack) {
+        WLOGFE("[NAPI]jsCallBack is nullptr");
+        return;
+    }
+    if (sessionInfo == nullptr) {
+        WLOGFE("[NAPI]sessionInfo is nullptr");
+        return;
+    }
+    napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
+    if (jsSessionInfo == nullptr) {
+        WLOGFE("[NAPI]this target session info is nullptr");
+        return;
+    }
+    napi_value visible_napiV = CreateJsValue(env_ref, visible);
+    napi_value argv[] = {jsSessionInfo, visible_napiV};
+    napi_call_function(env_ref, NapiGetUndefined(env_ref),
+        jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)

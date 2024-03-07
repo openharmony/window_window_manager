@@ -80,7 +80,7 @@ private:
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
     bool IsCallbackTypeSupported(const std::string& type);
 
-    void initListenerFuncs();
+    void InitListenerFuncs();
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessBufferAvailableChangeRegister();
@@ -116,6 +116,7 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
+    void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);

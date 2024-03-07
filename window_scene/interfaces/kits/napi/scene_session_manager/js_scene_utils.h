@@ -172,6 +172,7 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
 bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_map<std::string, std::string> &stringMap);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);
 napi_value CreateJsSessionProcessMode(napi_env env);
