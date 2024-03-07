@@ -994,9 +994,13 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                 status = ScreenPowerStatus::POWER_STATUS_ON;
                 break;
             } else {
+                if (reason ==  PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH) {
+                    isReasonScreenOnSwitch_ = true;
+                }
                 needScreenOnWhenKeyguardNotify_ = true;
                 auto task = [this, reason]() {
                     SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, reason);
+                    isReasonScreenOnSwitch_ = false;
                     needScreenOnWhenKeyguardNotify_ = false;
                     keyguardDrawnDone_ = true;
                     WLOGFI("SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
@@ -1137,7 +1141,12 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         if (needScreenOnWhenKeyguardNotify_) {
             taskScheduler_->RemoveTask("screenOnTask");
             usleep(SLEEP_US);
-            SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+            if (isReasonScreenOnSwitch_ == true) {
+                SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+                isReasonScreenOnSwitch_ = false;
+            } else {
+                SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+            }
             needScreenOnWhenKeyguardNotify_ = false;
         }
     }
