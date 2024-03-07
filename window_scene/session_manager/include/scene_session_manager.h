@@ -540,7 +540,7 @@ private:
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session);
     void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
-    void RecoverWindowSessionProperty(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
+    void RecoverWindowSessionProperty(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
