@@ -80,6 +80,7 @@ private:
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
     bool IsCallbackTypeSupported(const std::string& type);
 
+    void initListenerFuncs();
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessBufferAvailableChangeRegister();
