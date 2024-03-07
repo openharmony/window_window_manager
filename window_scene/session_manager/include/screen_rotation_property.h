@@ -28,14 +28,6 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class SensorRotation: int32_t {
-    INVALID = -1,
-    ROTATION_0 = 0,
-    ROTATION_90,
-    ROTATION_180,
-    ROTATION_270,
-};
-
 enum class DeviceRotation: int32_t {
     INVALID = -1,
     ROTATION_PORTRAIT = 0,
@@ -48,64 +40,9 @@ class ScreenRotationProperty : public RefBase {
 public:
     ScreenRotationProperty() = delete;
     ~ScreenRotationProperty() = default;
-    static void Init();
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
-    static bool IsScreenRotationLocked();
-    static DMError SetScreenRotationLocked(bool isLocked);
-    static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
-    static void ProcessOrientationSwitch(Orientation orientation);
-
-    static bool IsDefaultDisplayRotationPortrait();
-    static bool IsDisplayRotationVertical(Rotation rotation);
-    static bool IsDisplayRotationHorizontal(Rotation rotation);
-    static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
-    static DisplayOrientation ConvertRotationToDisplayOrientation(Rotation rotation);
 private:
-#ifdef SENSOR_ENABLE
-    static void HandleGravitySensorEventCallback(SensorEvent *event);
-#endif
-    static Rotation GetCurrentDisplayRotation();
-    static Orientation GetPreferredOrientation();
-    static void SetScreenRotation(Rotation targetRotation);
-    static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation,
-        DeviceRotation sensorRotationConverted);
-    static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
-    static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
-    static void UpdateDefaultDeviceRotation();
-
-    static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
-    static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);
-    static bool IsCurrentDisplayVertical();
-    static bool IsCurrentDisplayHorizontal();
-    static bool IsSensorRelatedOrientation(Orientation orientation);
-
-    static void ProcessRotationMapping();
-    static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
-    static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
-    static void ProcessSwitchToAutoRotation(DeviceRotation rotation);
-    static void ProcessSwitchToAutoRotationPortraitRestricted();
-    static void ProcessSwitchToAutoRotationLandscapeRestricted();
-    static void ProcessSwitchToSensorRelatedOrientation(Orientation orientation, DeviceRotation deviceRotation);
-    static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation);
-    static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
-    static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
-
-    static DisplayId GetDefaultDisplayId();
-
-    static DisplayId defaultDisplayId_;
-    static uint32_t defaultDeviceRotationOffset_;
-    static uint32_t defaultDeviceRotation_;
-    static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
-    static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
-    static std::map<DeviceRotation, float> deviceToFloatMap_;
-    static std::map<Rotation, DisplayOrientation> displayToDisplayOrientationMap_;
-    static Orientation lastOrientationType_;
-    static Rotation currentDisplayRotation_;
-    static Rotation lastSensorDecidedRotation_;
-    static Rotation rotationLockedRotation_;
-    static bool isScreenRotationLocked_;
-    static DeviceRotation lastSensorRotationConverted_;
 };
 } // Rosen
 } // OHOS
