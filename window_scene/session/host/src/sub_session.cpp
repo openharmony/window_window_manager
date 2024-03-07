@@ -40,7 +40,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSSub] session is null");
+            TLOGE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSLife] Show session, id: %{public}d", session->GetPersistentId());
@@ -62,7 +62,7 @@ WSError SubSession::Hide()
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSSub] session is null");
+            TLOGE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSLife] Hide session, id: %{public}d", session->GetPersistentId());

@@ -407,14 +407,14 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        WLOGFE("[WMSDialog] sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_DIALOG, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->onBindDialogTarget_ = [weak = weak_from_this()](const sptr<SceneSession>& sceneSession) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnBindDialogTarget(sceneSession);
     };
-    WLOGFD("[WMSDialog] ProcessBindDialogTargetRegister success");
+    TLOGD(WmsLogTag::WMS_DIALOG, "ProcessBindDialogTargetRegister success");
 }
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
@@ -441,7 +441,7 @@ void JsSceneSession::ProcessRaiseToTopRegister()
     }
     sessionchangeCallback->onRaiseToTop_ = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTop(); 
+        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTop();
     };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
@@ -450,7 +450,7 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 {
     NotifyRaiseToTopForPointDownFunc func = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTopForPointDown(); 
+        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTopForPointDown();
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -471,7 +471,7 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
     sessionchangeCallback->onRaiseAboveTarget_ = [weak = weak_from_this()](int32_t subWindowId){
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnRaiseAboveTarget(subWindowId);
-    };  
+    };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
 
@@ -1194,7 +1194,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(CREATE_SUB_SESSION_CB);
         if (iter == jsCbMap_.end()) {
-            WLOGFE("[WMSSub][NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
+            TLOGE(WmsLogTag::WMS_SUB, "Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
             return;
         }
         jsCallBack = iter->second;
@@ -1229,7 +1229,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
         return;
     }
 
-    WLOGFI("[NAPI][WMSDialog] OnBindDialogTarget, id: %{public}d", sceneSession->GetPersistentId());
+    TLOGI(WmsLogTag::WMS_DIALOG, "OnBindDialogTarget, id: %{public}d", sceneSession->GetPersistentId());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1251,7 +1251,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
             WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("[WMSDialog] CreateJsSceneSessionObject success, id: %{public}d", specificSession->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_DIALOG, "CreateJsObject success, id: %{public}d", specificSession->GetPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -2023,21 +2023,21 @@ napi_value JsSceneSession::OnSetSystemActive(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
        WLOGFE("[NAPI]argc is invalid : %{public}zu", argc);
-       napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), 
+       napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
        "Input parameter is missing or invalid"));
        return NapiGetUndefined(env);
     }
     bool scbSystemActive = false;
     if (!ConvertFromJsValue(env, argv[0], scbSystemActive)){
         WLOGFE("[NAPI] Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), 
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
         "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI] session_ is null");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), 
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
         "session is null"));
         return NapiGetUndefined(env);
     }
