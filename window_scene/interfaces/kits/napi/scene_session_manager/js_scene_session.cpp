@@ -118,9 +118,40 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session)
 {
+    initListenerFuncs();
+    sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
+        SceneSession::SessionChangeCallback();
+    if (sessionchangeCallback != nullptr) {
+        if (session != nullptr) {
+            session->RegisterSessionChangeCallback(sessionchangeCallback);
+        }
+        sessionchangeCallback->clearCallbackFunc_ = [weak = weak_from_this()](bool needRemove, int32_t persistentId) {
+            auto weakJsSceneSession = weak.lock();
+            if (weakJsSceneSession) weakJsSceneSession->ClearCbMap(needRemove, persistentId);
+        };
+        sessionchangeCallback_ = sessionchangeCallback;
+        WLOGFD("RegisterSessionChangeCallback success");
+    }
+    taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
+}
+
+JsSceneSession::~JsSceneSession()
+{
+    WLOGD("~JsSceneSession");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFD("session is nullptr");
+        return;
+    }
+    session->UnregisterSessionChangeListeners();
+    SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
+}
+
+JsSceneSession::initListenerFuncs()
+{
     listenerFunc_ = {
         { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
-        { CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,                      
+        { CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
             &JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister },
         { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
         { BUFFER_AVAILABLE_CHANGE_CB,            &JsSceneSession::ProcessBufferAvailableChangeRegister},
@@ -156,33 +187,6 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         { SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     &JsSceneSession::ProcessSessionInfoLockedStateChangeRegister },
         { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
     };
-
-    sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
-        SceneSession::SessionChangeCallback();
-    if (sessionchangeCallback != nullptr) {
-        if (session != nullptr) {
-            session->RegisterSessionChangeCallback(sessionchangeCallback);
-        }
-        sessionchangeCallback->clearCallbackFunc_ = [weak = weak_from_this()](bool needRemove, int32_t persistentId) {
-            auto weakJsSceneSession = weak.lock();
-            if (weakJsSceneSession) weakJsSceneSession->ClearCbMap(needRemove, persistentId);
-        };
-        sessionchangeCallback_ = sessionchangeCallback;
-        WLOGFD("RegisterSessionChangeCallback success");
-    }
-    taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
-}
-
-JsSceneSession::~JsSceneSession()
-{
-    WLOGD("~JsSceneSession");
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFD("session is nullptr");
-        return;
-    }
-    session->UnregisterSessionChangeListeners();
-    SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
@@ -1513,9 +1517,9 @@ void JsSceneSession::OnClick()
 
 void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
 {
-    WLOGI("[NAPI]ChangeSessionVisibilityWithStatusBar: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
-        appIndex %{public}d, reuse %{public}d, visible %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse, visible);
+    WLOGI("[NAPI]ChangeSessionVisibilityWithStatusBar: bundleName %{public}s, moduleName %{public}s, \
+        abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d", 
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, visible);
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr");
@@ -1551,7 +1555,8 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" + std::to_string(visible));
+    taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" + 
+        std::to_string(visible));
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)

@@ -3199,7 +3199,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
         }
         const auto& parentState = parentSceneSession->GetSessionState();
         if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
-            if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND || 
+            if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND ||
                 parentState == SessionState::STATE_HIDE) {
                 WLOGFD("Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
                 return false;
@@ -4112,7 +4112,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
 
 void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    wptr<SceneSessionManager> weakSessionManager = this; 
+    wptr<SceneSessionManager> weakSessionManager = this;
     NotifySessionInfoChangeNotifyManagerFunc func = [weakSessionManager](int32_t persistentId) {
         auto sceneSessionManager = weakSessionManager.promote();
         if (sceneSessionManager == nullptr) {
@@ -4162,6 +4162,18 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     WLOGFD("RegisterGetStateFromManagerFunc success");
 }
 
+void SceneSessionManager::OnSessionStateChangeBackground(int32_t persistentId, auto sceneSession)
+{
+    RequestSessionUnfocus(persistentId);
+    UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
+    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    HandleKeepScreenOn(sceneSession, false);
+    UpdatePrivateStateAndNotify(persistentId);
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        ProcessSubSessionBackground(sceneSession);
+    }
+}
+
 __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(
     int32_t persistentId, const SessionState& state)
 {
@@ -4196,24 +4208,10 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_BACKGROUND:
-            RequestSessionUnfocus(persistentId);
-            UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            HandleKeepScreenOn(sceneSession, false);
-            UpdatePrivateStateAndNotify(persistentId);
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                ProcessSubSessionBackground(sceneSession);
-            }
+            OnSessionStateChangeBackground(persistentId, sceneSession);
             break;
         case SessionState::STATE_HIDE:
-            RequestSessionUnfocus(persistentId);
-            UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            HandleKeepScreenOn(sceneSession, false);
-            UpdatePrivateStateAndNotify(persistentId);
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                ProcessSubSessionBackground(sceneSession);
-            }
+            OnSessionStateChangeBackground(persistentId, sceneSession);
             break;
         default:
             break;

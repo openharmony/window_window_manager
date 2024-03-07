@@ -1883,7 +1883,8 @@ void SceneSession::SetSystemTouchable(bool touchable)
     NotifyAccessibilityVisibilityChange();
 }
 
-WSError SceneSession::ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
+WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
+    const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
 {
     if (!SessionPermission::VerifySessionPermission()) {
         WLOGFE("The interface permission failed.");

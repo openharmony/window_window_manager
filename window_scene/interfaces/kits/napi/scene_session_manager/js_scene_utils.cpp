@@ -279,7 +279,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     return true;
 }
 
-bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject, std::shared_ptr<AAFwk::ProcessOptions> processOptions)
+bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions)
 {
     napi_value jsProcessMode = nullptr;
     napi_get_named_property(env, jsObject, "processMode", &jsProcessMode);
@@ -663,7 +664,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "requestOrientation",
         CreateJsValue(env, static_cast<uint32_t>(requestOrientation)));
     if (sessionInfo.processOptions != nullptr) {
-        napi_set_named_property(env, objValue, "processOptions", CreateJsProcessOption(env, sessionInfo.processOptions));
+        napi_set_named_property(env, objValue, "processOptions",
+            CreateJsProcessOption(env, sessionInfo.processOptions));
     }
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "windowTop",
@@ -678,11 +680,9 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         napi_set_named_property(env, objValue, "windowHeight",
             GetWindowRectIntValue(env,
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_HEIGHT, INVALID_VAL)));
-
         napi_set_named_property(env, objValue, "withAnimation",
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
     }
-
     return objValue;
 }
 
