@@ -296,7 +296,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         return;
     }
     auto task = [this, persistentId]() {
-        WLOGFI("[WMSLife] clear callbackMap with persistent id, %{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_LIFE, "clear callbackMap with persistent id, %{public}d", persistentId);
         {
             std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
             jsCbMap_.clear();
@@ -306,7 +306,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
             napi_delete_reference(env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
-            WLOGFE("[WMSLife] deleteRef failed , %{public}d", persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "deleteRef failed , %{public}d", persistentId);
         }
     };
     taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId));
@@ -465,7 +465,9 @@ void JsSceneSession::ProcessRaiseToTopRegister()
     }
     sessionchangeCallback->onRaiseToTop_ = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTop();
+        if (weakJsSceneSession) {
+            weakJsSceneSession->OnRaiseToTop();
+        }
     };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
@@ -474,7 +476,9 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 {
     NotifyRaiseToTopForPointDownFunc func = [weak = weak_from_this()]() {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnRaiseToTopForPointDown();
+        if (weakJsSceneSession) {
+            weakJsSceneSession->OnRaiseToTopForPointDown();
+        }
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -494,7 +498,9 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
     }
     sessionchangeCallback->onRaiseAboveTarget_ = [weak = weak_from_this()](int32_t subWindowId){
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnRaiseAboveTarget(subWindowId);
+        if (weakJsSceneSession) {
+            weakJsSceneSession->OnRaiseAboveTarget(subWindowId);
+        }
     };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
@@ -1224,21 +1230,21 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
         jsCallBack = iter->second;
     }
 
-    WLOGFI("[WMSLife][NAPI]OnCreateSubSession, id: %{public}d, parentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]OnCreateSubSession, id: %{public}d, parentId: %{public}d",
         sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            WLOGFE("[WMSLife][NAPI]root session or target session or env is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]root session or target session or env is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
         if (jsSceneSessionObj == nullptr || !jsCallBack) {
-            WLOGFE("[WMSLife][NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        WLOGFI("[WMSLife]CreateJsSceneSessionObject success, id: %{public}d, parentId: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "CreateJsSceneSessionObject success, id: %{public}d, parentId: %{public}d",
             specificSession->GetPersistentId(), specificSession->GetParentPersistentId());
         napi_value argv[] = {jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -1302,7 +1308,7 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         jsCallBack = iter->second;
     }
 
-    WLOGFI("[WMSLife] id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
     auto task = [state, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");

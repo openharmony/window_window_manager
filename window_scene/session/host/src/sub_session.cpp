@@ -27,12 +27,12 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     SetMoveDragCallback();
-    WLOGFD("[WMSLife] Create SubSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
 }
 
 SubSession::~SubSession()
 {
-    WLOGD("[WMSLife] ~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
@@ -43,7 +43,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
             TLOGE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSLife] Show session, id: %{public}d", session->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -65,7 +65,7 @@ WSError SubSession::Hide()
             TLOGE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSLife] Hide session, id: %{public}d", session->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
