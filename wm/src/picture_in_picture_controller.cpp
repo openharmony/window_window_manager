@@ -94,6 +94,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     windowOption->SetWindowRect(windowRect_);
+    windowOption->SetKeepScreenOn(true);
     WMError errCode;
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
