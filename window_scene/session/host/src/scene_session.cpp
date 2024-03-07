@@ -110,9 +110,8 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
     // return when screen is locked and show without ShowWhenLocked flag
-    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
-        !IsShowWhenLocked() &&
+    if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
         sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
         sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
         WLOGFW("[WMSLife] Foreground failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
