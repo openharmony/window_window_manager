@@ -667,6 +667,12 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
     }
+    SetJsSessionInfoByWant(env, sessionInfo, objValue);
+    return objValue;
+}
+
+void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
+{
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "windowTop",
             GetWindowRectIntValue(env,
@@ -683,7 +689,6 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         napi_set_named_property(env, objValue, "withAnimation",
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
     }
-    return objValue;
 }
 
 napi_value GetWindowRectIntValue(napi_env env, int val)
