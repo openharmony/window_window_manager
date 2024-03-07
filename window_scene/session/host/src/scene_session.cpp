@@ -198,14 +198,14 @@ void SceneSession::ClearSpecificSessionCbMap()
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSSystem] session is null");
+            TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
             return;
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
             session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
-            WLOGFD("[WMSSystem] ClearCallbackMap, id: %{public}d", session->GetPersistentId());
+            TLOGD(WmsLogTag::WMS_SYSTEM, "ClearCallbackMap, id: %{public}d", session->GetPersistentId());
         } else {
-            WLOGFE("[WMSSystem] get callback failed, id: %{public}d", session->GetPersistentId());
+            TLOGE(WmsLogTag::WMS_SYSTEM, "get callback failed, id: %{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "ClearSpecificSessionCbMap");
@@ -606,7 +606,7 @@ WSError SceneSession::RaiseToAppTop()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTop_) {
-            WLOGFI("[WMSSub] id: %{public}d", session->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", session->GetPersistentId());
             session->sessionChangeCallback_->onRaiseToTop_();
         }
         return WSError::WS_OK;
@@ -637,11 +637,11 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSDialog] dialog session is null");
+        TLOGE(WmsLogTag::WMS_DIALOG, "dialog session is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
-        WLOGFI("[WMSDialog] id: %{public}d", sceneSession->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_DIALOG, "id: %{public}d", sceneSession->GetPersistentId());
         sessionChangeCallback_->onBindDialogTarget_(sceneSession);
     }
     return WSError::WS_OK;
@@ -1097,7 +1097,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             pointerEvent->MarkProcessed();
-            WLOGFI("[WMSDialog] There is dialog window foreground");
+            TLOGI(WmsLogTag::WMS_DIALOG, "There is dialog window foreground");
             return WSError::WS_OK;
         }
         if (!moveDragController_) {
@@ -1661,7 +1661,7 @@ void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("[WMSSystem]failed to update with id:%{public}u!", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "failed to update with id:%{public}u!", GetPersistentId());
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [weakThis = wptr(this), isAdd]() {
@@ -2043,7 +2043,7 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
 {
     if (subSession == nullptr) {
-        WLOGFE("[WMSSub] subSession is nullptr");
+        TLOGE(WmsLogTag::WMS_SUB, "subSession is nullptr");
         return false;
     }
     const auto& persistentId = subSession->GetPersistentId();
@@ -2053,11 +2053,12 @@ bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
             return res;
         });
     if (iter != subSession_.end()) {
-        WLOGFE("[WMSSub] Sub ession is already exists, id: %{public}d, parentId: %{public}d",
+        TLOGE(WmsLogTag::WMS_SUB, "Sub ession is already exists, id: %{public}d, parentId: %{public}d",
             subSession->GetPersistentId(), GetPersistentId());
         return false;
     }
-    WLOGFD("[WMSSub] Success, id: %{public}d, parentId: %{public}d", subSession->GetPersistentId(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "Success, id: %{public}d, parentId: %{public}d",
+        subSession->GetPersistentId(), GetPersistentId());
     subSession_.push_back(subSession);
     return true;
 }
@@ -2070,11 +2071,11 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
             return res;
         });
     if (iter == subSession_.end()) {
-        WLOGFE("[WMSSub] Could not find subsession, id: %{public}d, parentId: %{public}d",
+        TLOGE(WmsLogTag::WMS_SUB, "Could not find subsession, id: %{public}d, parentId: %{public}d",
             persistentId, GetPersistentId());
         return false;
     }
-    WLOGFD("[WMSSub] Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
     subSession_.erase(iter);
     return true;
 }
