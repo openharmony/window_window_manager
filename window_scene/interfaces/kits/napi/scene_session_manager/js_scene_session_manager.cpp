@@ -304,7 +304,7 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 {
-    WLOGFI("[WMSFocus][NAPI]OnShiftFocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnShiftFocus");
     auto iter = jsCbMap_.find(SHIFT_FOCUS_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -406,11 +406,11 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 void JsSceneSessionManager::ProcessShiftFocus()
 {
     ProcessShiftFocusFunc func = [this](int32_t persistentId) {
-        WLOGFD("[WMSFocus]ProcessShiftFocus called");
+        TLOGD(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
         this->OnShiftFocus(persistentId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
-        WLOGFD("[WMSFocus]WMSFocus, scb uicontent focus");
+        TLOGD(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
             WLOGFE("[WMSComm]uiContent is nullptr");
@@ -419,7 +419,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
         uiContent->Focus();
     };
     NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
-        WLOGFD("[WMSFocus]WMSFocus, scb uicontent unfocus");
+        TLOGD(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
             WLOGFE("[WMSComm]uiContent is nullptr");
@@ -459,7 +459,7 @@ napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::UpdateFocus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[WMSFocus][NAPI]UpdateFocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "UpdateFocus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateFocus(env, info) : nullptr;
 }
@@ -626,14 +626,14 @@ napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_inf
 
 napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[WMSFocus][NAPI]RequestFocusStatus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[WMSFocus][NAPI]RequestAllAppSessionUnfocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]RequestAllAppSessionUnfocus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestAllAppSessionUnfocus(env, info) : nullptr;
 }
