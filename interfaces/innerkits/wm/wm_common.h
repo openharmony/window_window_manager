@@ -637,6 +637,20 @@ enum class PipTemplateType : uint32_t {
 };
 
 /**
+ * @brief Enumerates picture in picture control group.
+ */
+enum class PipControlGroup : uint32_t {
+    START = 0,
+    VIDEO_PREVIOUS_NEXT = 1,
+    FAST_FORWARD_BACKWARD = 2,
+    MICROPHONE_SWITCH = 3,
+    HANG_UP_BUTTON = 4,
+    CAMERA_SWITCH = 5,
+    MUTE_SWITCH = 6,
+    END,
+};
+
+/**
  * @brief Enumerates picture in picture state.
  */
 enum class PipState : int32_t {
