@@ -4162,7 +4162,7 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     WLOGFD("RegisterGetStateFromManagerFunc success");
 }
 
-void SceneSessionManager::OnSessionStateChangeBackground(int32_t persistentId, auto sceneSession)
+void SceneSessionManager::OnSessionStateChangeBackground(int32_t persistentId, sptr<SceneSession>& sceneSession)
 {
     RequestSessionUnfocus(persistentId);
     UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
