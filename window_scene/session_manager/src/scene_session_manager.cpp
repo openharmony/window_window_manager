@@ -5899,11 +5899,12 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
 {
     auto task = [this, persistentId, haveListener]() {
-        WLOGFI("UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
+        TLOGI(WmsLogTag::WMS_IMMS,
+            "UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFD("sceneSession is nullptr.");
+            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
         }
         if (haveListener) {
@@ -5996,7 +5997,8 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-        WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+        TLOGD(WmsLogTag::WMS_IMMS,
+            "id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
         needUpdate = false;
         return;
     }
@@ -6046,7 +6048,7 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFD("sceneSession is nullptr.");
+            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
             return;
         }
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
