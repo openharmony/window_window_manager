@@ -1851,11 +1851,6 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
     getStateFromManagerFunc_ = func;
 }
 
-void Session::SetStartUIAbilityBySCBFunc(const StartUIAbilityBySCBFunc& func)
-{
-    startUIAbilityBySCBFunc_ = func;
-}
-
 void Session::NotifySessionStateChange(const SessionState& state)
 {
     auto task = [weakThis = wptr(this), state]() {

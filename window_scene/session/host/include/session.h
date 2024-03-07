@@ -73,7 +73,6 @@ using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
-using StartUIAbilityBySCBFunc = std::function<int32_t(sptr<AAFwk::SessionInfo> info)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
@@ -226,7 +225,6 @@ public:
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
-    void SetStartUIAbilityBySCBFunc(const StartUIAbilityBySCBFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -452,7 +450,6 @@ protected:
     NotifyUIRequestFocusFunc requestFocusFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
     GetStateFromManagerFunc getStateFromManagerFunc_;
-    StartUIAbilityBySCBFunc startUIAbilityBySCBFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;

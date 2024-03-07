@@ -1056,7 +1056,6 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionInfoChangeNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
-    RegisterStartUIAbilityBySCBFunc(sceneSession);
     RegisterInputMethodUpdateFunc(sceneSession);
     RegisterInputMethodShownFunc(sceneSession);
     RegisterInputMethodHideFunc(sceneSession);
@@ -4161,24 +4160,6 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     }
     sceneSession->SetGetStateFromManagerListener(func);
     WLOGFD("RegisterGetStateFromManagerFunc success");
-}
-
-void SceneSessionManager::RegisterStartUIAbilityBySCBFunc(sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
-        return;
-    }
-    wptr<SceneSessionManager> weakSessionManager = this; 
-    StartUIAbilityBySCBFunc func = [weakSessionManager](sptr<AAFwk::SessionInfo> abilitySessionInfo) {
-        auto sceneSessionManager = weakSessionManager.promote();
-        if (sceneSessionManager == nullptr) {
-            return;
-        }
-        return sceneSessionManager->StartUIAbilityBySCB(abilitySessionInfo);
-    };
-    sceneSession->SetStartUIAbilityBySCBFunc(func);
-    WLOGFD("RegisterStartUIAbilityBySCBFunc success");
 }
 
 __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(
