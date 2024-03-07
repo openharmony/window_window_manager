@@ -147,7 +147,7 @@ JsSceneSession::~JsSceneSession()
     SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
 }
 
-JsSceneSession::InitListenerFuncs()
+void JsSceneSession::InitListenerFuncs()
 {
     listenerFunc_ = {
         { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
@@ -1527,7 +1527,7 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
         return;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, visible]() {
+    auto task = [this, sessionInfo, visible]() {
         ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
     };
     taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" +
