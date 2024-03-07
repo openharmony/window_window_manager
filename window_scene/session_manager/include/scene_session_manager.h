@@ -497,7 +497,7 @@ private:
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
-    void OnSessionStateChangeBackground(int32_t persistentId, auto sceneSession);
+    void OnSessionStateChangeBackground(int32_t persistentId, sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
