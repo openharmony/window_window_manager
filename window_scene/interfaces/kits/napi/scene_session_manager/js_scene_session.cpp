@@ -670,7 +670,7 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->OnSystemBarPropertyChange_ = [weak = weak_from_this()]
@@ -678,21 +678,21 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
             auto weakJsSceneSession = weak.lock();
             if (weakJsSceneSession) weakJsSceneSession->OnSystemBarPropertyChange(propertyMap);
     };
-    WLOGFD("ProcessSystemBarPropertyChangeRegister success");
+    TLOGD(WmsLogTag::WMS_IMMS, "ProcessSystemBarPropertyChangeRegister success");
 }
 
 void JsSceneSession::ProcessNeedAvoidRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->OnNeedAvoid_ = [weak = weak_from_this()](bool status) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnNeedAvoid(status);
     };
-    WLOGFD("ProcessNeedAvoidRegister success");
+    TLOGD(WmsLogTag::WMS_IMMS, "ProcessNeedAvoidRegister success");
 }
 
 void JsSceneSession::ProcessIsCustomAnimationPlaying()
@@ -1886,7 +1886,7 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
-    WLOGFI("[NAPI][WMSImms]OnSystemBarPropertyChange");
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]OnSystemBarPropertyChange");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1899,7 +1899,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
     auto task = [jsCallBack, propertyMap, env = env_]() {
         napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
         if (jsSessionStateObj == nullptr) {
-            WLOGFE("[NAPI]jsSessionStateObj is nullptr");
+            TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]jsSessionStateObj is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionStateObj};
@@ -1910,7 +1910,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
 
 void JsSceneSession::OnNeedAvoid(bool status)
 {
-    WLOGFI("[NAPI][WMSImms]OnNeedAvoid %{public}d", status);
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
