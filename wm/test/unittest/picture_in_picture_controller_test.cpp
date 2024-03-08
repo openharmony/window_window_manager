@@ -248,27 +248,6 @@ HWTEST_F(PictureInPictureControllerTest, StartMove, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: PipDisplayListener::OnCreate
- * @tc.desc: PipDisplayListener::OnCreate
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, OnCreate, Function | SmallTest | Level2)
-{
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    DisplayId displayId = 0;
-    wptr<PictureInPictureController> pipController = nullptr;
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-
-    sptr<PictureInPictureController::PipDisplayListener> pipDisplayListener =
-        new PictureInPictureController::PipDisplayListener(pipController);
-    pipDisplayListener->OnCreate(displayId);
-    pipDisplayListener->OnDestroy(displayId);
-    pipDisplayListener->OnChange(displayId);
-    ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
-}
-
-/**
  * @tc.name: DoActionEvent
  * @tc.desc: DoActionEvent
  * @tc.type: FUNC
@@ -276,11 +255,12 @@ HWTEST_F(PictureInPictureControllerTest, OnCreate, Function | SmallTest | Level2
 HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | Level2)
 {
     std::string actionName = " ";
+    int32_t status = 0;
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
 
-    pipControl->DoActionEvent(actionName);
+    pipControl->DoActionEvent(actionName, status);
     pipControl->RestorePictureInPictureWindow();
     GTEST_LOG_(INFO) << "TearDownCasecccccc5";
     pipControl->ResetExtController();
