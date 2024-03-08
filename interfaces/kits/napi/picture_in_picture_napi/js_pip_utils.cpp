@@ -87,11 +87,26 @@ static napi_value ExportPictureInPictureState(napi_env env)
     return result;
 }
 
+static napi_value ExportPictureInPictureControlGroup(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT", static_cast<int32_t>(PipControlGroup::VIDEO_PREVIOUS_NEXT));
+    (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD", static_cast<int32_t>(PipControlGroup::FAST_FORWARD_BACKWARD));
+    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH", static_cast<int32_t>(PipControlGroup::MICROPHONE_SWITCH));
+    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON", static_cast<int32_t>(PipControlGroup::HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "CAMERA_SWITCH", static_cast<int32_t>(PipControlGroup::CAMERA_SWITCH));
+    (void)SetNamedProperty(env, result, "MUTE_SWITCH", static_cast<int32_t>(PipControlGroup::MUTE_SWITCH));
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
         DECLARE_NAPI_PROPERTY("PiPTemplateType", ExportPictureInPictureTemplateType(env)),
         DECLARE_NAPI_PROPERTY("PiPState", ExportPictureInPictureState(env)),
+        DECLARE_NAPI_PROPERTY("PipControlGroup", ExportPictureInPictureControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
