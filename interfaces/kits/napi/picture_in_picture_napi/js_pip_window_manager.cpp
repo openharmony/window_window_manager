@@ -20,6 +20,7 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
+#include "window_scene_session_impl.h"
 #include "xcomponent_controller.h"
 
 namespace OHOS {
@@ -28,25 +29,25 @@ using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
-    constexpr std::set<PipControlGroup> VIDEO_PLAY_CONTROLS {
-        PipControlGroup::VIDEO_PREVIOUS_NEXT,PipControlGroup::FAST_FORWARD_BACKWARD
-    };
-    constexpr std::set<PipControlGroup> VIDEO_CALL_CONTROLS {
-        PipControlGroup::MICROPHONE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
-        PipControlGroup::CAMERA_SWITCH
-    };
-    constexpr std::set<PipControlGroup> VIDEO_MEETING_CONTROLS {
-        PipControlGroup::MUTE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
-        PipControlGroup::CAMERA_SWITCH
-    };
-    constexpr std::map<PipTemplateType, std::set<PipControlGroup>> TEMPLATE_CONTROL_MAP {
-        {PipTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
-        {PipTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
-        {PipTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
-        {PipTemplateType::VIDEO_LIVE, {}}
-    };
 }
 
+const std::set<PipControlGroup> VIDEO_PLAY_CONTROLS {
+    PipControlGroup::VIDEO_PREVIOUS_NEXT,PipControlGroup::FAST_FORWARD_BACKWARD
+};
+const std::set<PipControlGroup> VIDEO_CALL_CONTROLS {
+    PipControlGroup::MICROPHONE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
+    PipControlGroup::CAMERA_SWITCH
+};
+const std::set<PipControlGroup> VIDEO_MEETING_CONTROLS {
+    PipControlGroup::MUTE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
+    PipControlGroup::CAMERA_SWITCH
+};
+const std::map<PipTemplateType, std::set<PipControlGroup>> TEMPLATE_CONTROL_MAP {
+    {PipTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
+    {PipTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
+    {PipTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
+    {PipTemplateType::VIDEO_LIVE, {}}
+};
 std::mutex JsPipWindowManager::mutex_;
 
 static bool checkOptionParams(PipOption& option)
@@ -62,14 +63,14 @@ static bool checkOptionParams(PipOption& option)
     uint32_t pipTemplateType = option.GetPipTemplate();
     if (TEMPLATE_CONTROL_MAP.find(static_cast<PipTemplateType>(pipTemplateType))
         == TEMPLATE_CONTROL_MAP.end()) {
-        WLOGE("check pipoption param error, pipTemplateType is not exist.");
+        WLOGE("check pipoption param error, pipTemplateType not exists.");
         return false;
     }
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PipTemplateType>(pipTemplateType));
     auto controls = iter->second;
     for (auto control : option.GetControlGroup()) {
         if (controls.find(static_cast<PipControlGroup>(control)) == controls.end()) {
-            WLOGE("check pipoption param error, controlGroup not matches.");
+            WLOGE("check pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
             return false;
         }
     }
