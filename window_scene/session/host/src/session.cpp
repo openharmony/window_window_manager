@@ -1963,9 +1963,8 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
 
 WSError Session::UpdateFocus(bool isFocused)
 {
-    WLOGFD("[WMSFocus]Update focus id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (isFocused_ == isFocused) {
-        WLOGFD("[WMSFocus]Session focus do not change");
+        TLOGD(WmsLogTag::WMS_FOCUS, "Session focus do not change");
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
@@ -1989,7 +1988,6 @@ WSError Session::UpdateFocus(bool isFocused)
 
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
-    WLOGFD("[WMSFocus]Notify focus, id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -2032,10 +2030,10 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)
 {
-    WLOGFD("[WMSFocus]Session set blocking focus of lower session, id: %{public}d, mode: %{public}d", GetPersistentId(),
-        blocking);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Session set blocking focus, id: %{public}d, mode: %{public}d",
+        GetPersistentId(), blocking);
     if (!sessionInfo_.isSystem_) {
-        WLOGFW("[WMSFocus]Session is not system.");
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is not system.");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     blockingFocus_ = blocking;
