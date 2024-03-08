@@ -1014,6 +1014,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         sceneSession->SetSystemConfig(systemConfig_);
         sceneSession->SetSnapshotScale(snapshotScale_);
+        UpdateParentSessionForSubWindow(sceneSession, property);
         UpdateParentSessionForDialog(sceneSession, property);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             WLOGFD("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
@@ -7079,5 +7080,30 @@ WSError SceneSessionManager::HideNonSecureWindows(bool shouldHide)
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
+}
+
+WSError SceneSessionManager::UpdateParentSessionForSubWindow(const sptr<SceneSession>& sceneSession,
+    sptr<WindowSessionProperty> property)
+{
+    if (property == nullptr) {
+        WLOGFD("[WMSDialog] Property is null, no need to update parent info");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sceneSession == nullptr) {
+        WLOGFE("[WMSDialog] Session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto parentPersistentId = property->GetParentPersistentId();
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW && parentPersistentId != INVALID_SESSION_ID) {
+        auto parentSession = GetSceneSession(parentPersistentId);
+        if (parentSession == nullptr) {
+            WLOGFE("[WMSDialog] Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        parentSession->BindSubWindowToParentSession(sceneSession);
+        sceneSession->SetParentSession(parentSession);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
 }
 } // namespace OHOS::Rosen

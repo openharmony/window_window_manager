@@ -1099,6 +1099,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGFI("[WMSDialog] There is dialog window foreground");
             return WSError::WS_OK;
         }
+
+        bool modalForeground = CheckModalSubWindowOnForeground();
+        if (CheckModalSubWindowOnForeground() && isPointDown) {
+            HandlePointDownModalSubWindow();
+            pointerEvent->MarkProcessed();
+            return WSError::WS_OK;
+        }
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);

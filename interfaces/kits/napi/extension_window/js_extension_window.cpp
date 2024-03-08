@@ -18,6 +18,7 @@
 #include "js_extension_window_utils.h"
 #include "js_runtime_utils.h"
 #include "js_window_utils.h"
+#include "js_window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "extension_window.h"
@@ -31,8 +32,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExten
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
 } // namespace
 
-JsExtensionWindow::JsExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow)
-    : extensionWindow_(extensionWindow),
+JsExtensionWindow::JsExtensionWindow(
+ const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
+ int32_t hostWindowId)
+    : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
 
@@ -56,7 +59,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     }
 
     std::shared_ptr<ExtensionWindow> extensionWindow = std::make_shared<ExtensionWindowImpl>(window);
-    std::unique_ptr<JsExtensionWindow> jsExtensionWindow = std::make_unique<JsExtensionWindow>(extensionWindow);
+    std::unique_ptr<JsExtensionWindow> jsExtensionWindow = std::make_unique<JsExtensionWindow>(extensionWindow, hostWindowId);
     napi_wrap(env, objValue, jsExtensionWindow.release(), JsExtensionWindow::Finalizer, nullptr, nullptr);
 
     napi_property_descriptor desc[] = {
@@ -69,6 +72,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     BindNativeFunction(env, objValue, "on", moduleName, JsExtensionWindow::RegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "off", moduleName, JsExtensionWindow::UnRegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "hideNonSecureWindows", moduleName, JsExtensionWindow::HideNonSecureWindows);
+    BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName, JsExtensionWindow::CreateSubWindowWithOptions);
 
     return objValue;
 }
@@ -137,6 +141,13 @@ napi_value JsExtensionWindow::HideNonSecureWindows(napi_env env, napi_callback_i
     WLOGI("HideNonSecureWindows is called");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnHideNonSecureWindows(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    WLOGI("CreateSubWindowWithOptions is called");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::LoadContent(napi_env env, napi_callback_info info)
@@ -616,6 +627,70 @@ napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info inf
     }
     sptr<Rosen::Window> window = jsExtensionWindow->extensionWindow_->GetWindow();
     return CreateJsExtensionWindowPropertiesObject(env, window);
+}
+
+napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string windowName;
+    if (!ConvertFromJsValue(env, argv[0], windowName)) {
+        WLOGFE("[NAPI]Failed to convert parameter to windowName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+
+    WindowOption option;
+    std::string title; 
+    if (!ParseJsValue(argv[1], env, "title", title)) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    option.SetSubWindowTitle(title);
+
+    bool decorEnabled;
+    if (!ParseJsValue(argv[1], env, "decorEnabled", decorEnabled)) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    option.SetSubWindowDecorEnable(decorEnable);
+    option.SetParentId(hostWindowId_);
+
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (weak == nullptr) {
+                WLOGFE("[NAPI]Window scene is null");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),"extensionWindow_ is null"));
+            }
+            sptr<Rosen::WindowOption> windowOption = new WindowOption(option);
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
+            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            windowOption->SetOnlySupportSceneBoard(true);
+            windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+            auto extwindow = weak->GetWindow();
+            if (extwindow == nullptr) {
+                WLOGFE("[NAPI]Get window failed");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ 's window is null"));
+            }
+
+            auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
+            if (window == nullptr) {
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
+                return;                
+            }
+            task.Resolve(env, CreateJsWindowObject(env, window));
+            WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
+        };
+    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
+    napi_value result = nullptr;
+
+    NapiAsyncTask::Schedule("JsExtensionWindow::OnCreateSubWindowWithOptions",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
 }
 }  // namespace Rosen
 }  // namespace OHOS

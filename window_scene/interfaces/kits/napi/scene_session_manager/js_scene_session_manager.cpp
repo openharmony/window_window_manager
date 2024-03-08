@@ -52,7 +52,6 @@ constexpr int ARG_INDEX_3 = 3;
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
-const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";

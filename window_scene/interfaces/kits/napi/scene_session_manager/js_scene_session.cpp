@@ -53,7 +53,6 @@ const std::string SHOW_WHEN_LOCKED_CB = "sessionShowWhenLockedChange";
 const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientationChange";
 const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
 const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
-const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateChange";
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";

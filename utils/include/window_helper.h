@@ -167,6 +167,11 @@ public:
         return flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
 
+    static inline bool IsExtensionSubWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
+    }
+
     static Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
     {
         int32_t x_begin = std::max(rect1.posX_, rect2.posX_);

@@ -1562,6 +1562,11 @@ WSError Session::HandleSubWindowClick(int32_t action)
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
+    if (parentSession_ && parentSession_->CheckModalSubWindowOnForeground()) {
+        WLOGFD("[WMSDialog] Its main window has subwindow on foreground, id: %{public}d", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
     bool raiseEnabled = property_->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
@@ -1587,6 +1592,12 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+
+        bool modalOnForeground = CheckModalSubWindowOnForeground();
+        if (modalOnForeground && isPointDown) {
+            HandlePointDownModalSubWindow();
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
@@ -2492,5 +2503,63 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
     }
     return nullptr;
+}
+
+void Session::BindSubWindowToParentSession(const sptr<Session>& session)
+{
+    std::unique_lock<std::mutex> lock(modalSubWindowVecMutex_);
+    auto iter = std::find(modalSubWindowVec_.begin(), modalSubWindowVec_.end(), session);
+    if (iter != modalSubWindowVec_.end()) {
+        WLOGFW("[WMSDialog] Subwindow is existed in parentVec, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
+        return;
+    }
+    modalSubWindowVec_.push_back(session);
+    WLOGFD("[WMSDialog] Bind dialog success, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
+}
+
+void Session::RemoveSubWindowToParentSession(const sptr<Session>& session)
+{
+    std::unique_lock<std::mutex> lock(modalSubWindowVecMutex_);
+    auto iter = std::find(modalSubWindowVec_.begin(), modalSubWindowVec_.end(), session);
+    if (iter != modalSubWindowVec_.end()) {
+        WLOGFD("[WMSDialog] Remove modal subwindow success, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
+        modalSubWindowVec_.erase(iter);
+    }
+    WLOGFW("[WMSDialog] Remove modal subwindow failed, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
+}
+
+bool Session::CheckModalSubWindowOnForeground(WindowType type)
+{
+    std::unique_lock<std::mutex> lock(modalSubWindowVecMutex_);
+    if (modalSubWindowVecMutex_.empty()) {
+        WLOGFD("[WMSDialog] Modal subwindow is empty, id: %{public}d", GetPersistentId());
+        return false;
+    }
+    for (auto iter = modalSubWindowVec_.rbegin(); iter != modalSubWindowVec_.rend(); iter++) {
+        auto modalSession = *iter;
+        if (modalSession && (modalSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+            modalSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
+            WLOGFD("[WMSDialog] Notify touch modal sub window, id: %{public}d", GetPersistentId());
+            return true;
+        }
+    }
+    return false;
+}
+
+void Session::HandlePointDownModalSubWindow()
+{
+    for (auto modalSubWindow : modalSubWindowVec_) {
+        if (modalSubWindow && (modalSubWindow->GetSessionState() == SessionState::STATE_FOREGROUND ||
+            modalSubWindow->GetSessionState() == SessionState::STATE_ACTIVE)) {
+            modalSubWindow->RaiseToAppTopForPointDown();
+            modalSubWindow->PresentFocusIfPointDown();
+            WLOGFD("[WMSDialog] Point main window, raise to top and subwindow need focus, "
+                "id: %{public}d, dialogId: %{public}d", GetPersistentId(), modalSubWindow->GetPersistentId());
+        }
+    }
 }
 } // namespace OHOS::Rosen
