@@ -23,12 +23,14 @@ export class PiPContent extends ViewPU {
         "function" === typeof i && (this.paramsGenerator_ = i);
         this.xComponentController = new XComponentController;
         this.xComponentId = 'pipContent';
+        this.xComponentType = 'surface';
         this.setInitiallyProvidedValue(o);
     }
 
     setInitiallyProvidedValue(e) {
         void 0 !== e.xComponentController && (this.xComponentController = e.xComponentController);
         void 0 !== e.xComponentId && (this.xComponentId = e.xComponentId);
+        void 0 !== e.xComponentType && (this.xComponentType = e.xComponentType);
     }
 
     updateStateVars(e) {
@@ -50,7 +52,7 @@ export class PiPContent extends ViewPU {
         this.observeComponentCreation2(((e, o) => {
             XComponent.create({
                 id: this.xComponentId,
-                type: 'surface',
+                type: this.xComponentType,
                 controller: this.xComponentController
             }, "pipContent_XComponent");
             XComponent.onLoad((() => {
@@ -67,6 +69,6 @@ export class PiPContent extends ViewPU {
     }
 }
 
-ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmtIdForNextComponent());
+ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
 loadDocument(new PiPContent(void 0, {}));
 ViewStackProcessor.StopGetAccessRecording();
