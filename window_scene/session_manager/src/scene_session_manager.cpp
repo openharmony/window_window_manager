@@ -1137,6 +1137,12 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
 
     TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
         persistentId, scnSession->GetWindowType());
+    uint32_t callingWindowId = INVALID_WINDOW_ID;
+    if (scnSession->GetSessionProperty() != nullptr) {
+        callingWindowId = scnSession->GetSessionProperty()->GetCallingWindow();
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling window id: %{public}d", callingWindowId);
+        callingSession_ = GetSceneSession(callingWindowId);
+    }
     if (callingSession_ == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingSession is null, using focusedSession: %{public}d", focusedSessionId_);
         callingSession_ = GetSceneSession(focusedSessionId_);
@@ -1271,8 +1277,9 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
-    // When input method is shown and another app is cold started, the input method is hidden.
-    if (!sceneSession->IsSessionValid() && callingSession_ != nullptr) {
+    // Hide keyboard when app is cold started, if keyboard is showing and screen is unlocked.
+    if (!sceneSession->IsSessionValid() && callingSession_ != nullptr &&
+        !sceneSession->GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
         sceneSession->RequestHideKeyboard(true);
     }
 }
@@ -2584,21 +2591,6 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
     NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
-void SceneSessionManager::SetCallingSession(const sptr<SceneSession>& sceneSession, uint32_t newCallingWindowId)
-{
-    uint32_t oldCallingWindowId = INVALID_WINDOW_ID;
-    if (sceneSession && sceneSession->GetSessionProperty()) {
-        oldCallingWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
-    }
-    if (callingSession_ && oldCallingWindowId == newCallingWindowId) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId not changed, not need to reset callingSession");
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get callingSesstion by CallingWindowId: %{public}d", newCallingWindowId);
-    callingSession_ = GetSceneSession(newCallingWindowId);
-    return;
-}
-
 WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
@@ -2702,7 +2694,6 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         }
         case WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
             if (sceneSession->GetSessionProperty() != nullptr) {
-                SetCallingSession(sceneSession, property->GetCallingWindow());
                 sceneSession->GetSessionProperty()->SetCallingWindow(property->GetCallingWindow());
             }
             if (callingWindowIdChangeFunc_ != nullptr) {
