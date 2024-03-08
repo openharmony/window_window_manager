@@ -31,7 +31,5 @@ ohos_prebuilt_etc("file_pip_content_abc") {
 }
 
 group("window_resources_abc_pip") {
-  deps = [
-    ":file_pip_content_abc",
-  ]
+  deps = [ ":file_pip_content_abc" ]
 }
