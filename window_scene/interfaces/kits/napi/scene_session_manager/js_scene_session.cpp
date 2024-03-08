@@ -70,8 +70,10 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
 {
     napi_value pipTemplateInfoValue = nullptr;
     napi_create_object(env, &pipTemplateInfoValue);
-    napi_set_named_property(env, pipTemplateInfoValue, "pipTemplateType", CreateJsValue(env, session->GetPiPTemplateInfo().pipTemplateType));
-    napi_set_named_property(env, pipTemplateInfoValue, "priority", CreateJsValue(env, session->GetPiPTemplateInfo().priority));
+    napi_set_named_property(env, pipTemplateInfoValue, "pipTemplateType",
+        CreateJsValue(env, session->GetPiPTemplateInfo().pipTemplateType));
+    napi_set_named_property(env, pipTemplateInfoValue, "priority",
+        CreateJsValue(env, session->GetPiPTemplateInfo().priority));
     napi_value controlArrayValue = nullptr;
     std::vector<std::uint32_t> controlGroups = session->GetPiPTemplateInfo().controlGroup;
     napi_create_array_with_length(env, controlGroups.size(), &controlArrayValue);
@@ -938,7 +940,8 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info) {
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info info) {
+napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info info)
+{
     WLOGI("[NAPI]SetPipActionEvent");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPipActionEvent(env, info) : nullptr;

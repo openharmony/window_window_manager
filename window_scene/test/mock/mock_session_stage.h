@@ -50,6 +50,7 @@ public:
     MOCK_METHOD1(UpdateWindowDrawingContentInfo, void(const WindowDrawingContentInfo& info));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
+    MOCK_METHOD2(SetPipActionEvent, WSError(const std::string& action, int32_t status));
 };
 } // namespace Rosen
 } // namespace OHOS

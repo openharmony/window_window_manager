@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-const pip = requireNapi("pip");
+const pip = requireNapi('pip');
 
-const TAG = "PiPContent";
+const TAG = 'PiPContent';
 
 export class PiPContent extends ViewPU {
     constructor(e, o, t, n = -1, i = void 0) {
         super(e, t, n);
-        "function" == typeof i && (this.paramsGenerator_ = i);
+        "function" === typeof i && (this.paramsGenerator_ = i);
         this.xComponentController = new XComponentController;
-        this.xComponentId = "pipContent";
+        this.xComponentId = 'pipContent';
         this.setInitiallyProvidedValue(o);
     }
 
@@ -45,19 +45,19 @@ export class PiPContent extends ViewPU {
     initialRender() {
         this.observeComponentCreation2(((e, o) => {
             Stack.create();
-            Stack.size({ width: "100%", height: "100%" });
+            Stack.size({ width: '100%', height: '100%' });
         }), Stack);
         this.observeComponentCreation2(((e, o) => {
             XComponent.create({
                 id: this.xComponentId,
-                type: "surface",
+                type: 'surface',
                 controller: this.xComponentController
             }, "pipContent_XComponent");
             XComponent.onLoad((() => {
                 pip.initXComponentController(this.xComponentController);
-                console.debug(TAG, "XComponent onLoad done");
+                console.debug(TAG, 'XComponent onLoad done');
             }));
-            XComponent.size({ width: "100%", height: "100%" });
+            XComponent.size({ width: '100%', height: '100%' });
         }), XComponent);
         Stack.pop();
     }
