@@ -107,7 +107,7 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
 };
 
 enum class SessionState : uint32_t {
-    STATE_DISCONNECT,
+    STATE_DISCONNECT = 0,
     STATE_CONNECT,
     STATE_FOREGROUND,
     STATE_ACTIVE,
