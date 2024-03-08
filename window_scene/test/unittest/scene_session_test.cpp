@@ -2392,10 +2392,9 @@ HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     scenesession->SetSessionProperty(property);
 
-    uint32_t width = 800;
-    uint32_t height = 600;
-    PiPRectUpdateReason reason = PiPRectUpdateReason::REASON_PIP_START_WINDOW;
-    WSError result = scenesession->UpdatePiPRect(width, height, reason);
+    Rect rect = {0, 0, 800, 600};
+    SizeChangeReason reason = SizeChangeReason::PIP_START;
+    WSError result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

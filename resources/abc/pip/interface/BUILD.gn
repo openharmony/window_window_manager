@@ -14,65 +14,17 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 
-es2abc_gen_abc("gen_pip_video_abc") {
-  src_js = rebase_path("PiPVideo.js")
-  dst_file = rebase_path(target_out_dir + "/pip_video.abc")
-  in_puts = [ "PiPVideo.js" ]
-  out_puts = [ target_out_dir + "/pip_video.abc" ]
+es2abc_gen_abc("gen_pip_content_abc") {
+  src_js = rebase_path("PiPContent.js")
+  dst_file = rebase_path(target_out_dir + "/pip_content.abc")
+  in_puts = [ "PiPContent.js" ]
+  out_puts = [ target_out_dir + "/pip_content.abc" ]
   extra_args = [ "--module" ]
 }
 
-ohos_prebuilt_etc("file_pip_video_abc") {
-  source = rebase_path(target_out_dir + "/pip_video.abc")
-  deps = [ ":gen_pip_video_abc" ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
-es2abc_gen_abc("gen_pip_call_abc") {
-  src_js = rebase_path("PiPCall.js")
-  dst_file = rebase_path(target_out_dir + "/pip_call.abc")
-  in_puts = [ "PiPCall.js" ]
-  out_puts = [ target_out_dir + "/pip_call.abc" ]
-  extra_args = [ "--module" ]
-}
-
-ohos_prebuilt_etc("file_pip_call_abc") {
-  source = rebase_path(target_out_dir + "/pip_call.abc")
-  deps = [ ":gen_pip_call_abc" ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
-es2abc_gen_abc("gen_pip_meeting_abc") {
-  src_js = rebase_path("PiPMeeting.js")
-  dst_file = rebase_path(target_out_dir + "/pip_meeting.abc")
-  in_puts = [ "PiPMeeting.js" ]
-  out_puts = [ target_out_dir + "/pip_meeting.abc" ]
-  extra_args = [ "--module" ]
-}
-
-ohos_prebuilt_etc("file_pip_meeting_abc") {
-  source = rebase_path(target_out_dir + "/pip_meeting.abc")
-  deps = [ ":gen_pip_meeting_abc" ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
-es2abc_gen_abc("gen_pip_live_abc") {
-  src_js = rebase_path("PiPLive.js")
-  dst_file = rebase_path(target_out_dir + "/pip_live.abc")
-  in_puts = [ "PiPLive.js" ]
-  out_puts = [ target_out_dir + "/pip_live.abc" ]
-  extra_args = [ "--module" ]
-}
-
-ohos_prebuilt_etc("file_pip_live_abc") {
-  source = rebase_path(target_out_dir + "/pip_live.abc")
-  deps = [ ":gen_pip_live_abc" ]
+ohos_prebuilt_etc("file_pip_content_abc") {
+  source = rebase_path(target_out_dir + "/pip_content.abc")
+  deps = [ ":gen_pip_content_abc" ]
   part_name = "window_manager"
   subsystem_name = "window"
   relative_install_dir = "window/resources"
@@ -80,9 +32,6 @@ ohos_prebuilt_etc("file_pip_live_abc") {
 
 group("window_resources_abc_pip") {
   deps = [
-    ":file_pip_call_abc",
-    ":file_pip_live_abc",
-    ":file_pip_meeting_abc",
-    ":file_pip_video_abc",
+    ":file_pip_content_abc",
   ]
 }
