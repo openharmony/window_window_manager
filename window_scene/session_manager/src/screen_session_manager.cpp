@@ -877,8 +877,8 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
 
 bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:WakeUpBegin(%u)", reason);
-    WLOGFI("WakeUpBegin remove suspend begin task");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpBegin(%u)", reason);
+    WLOGFI("[UL_POWER]WakeUpBegin remove suspend begin task");
     blockScreenPowerChange_ = false;
     taskScheduler_->RemoveTask("suspendBeginTask");
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
@@ -890,7 +890,7 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::WakeUpEnd()
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:WakeUpEnd");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpEnd");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
         return true;
@@ -901,11 +901,11 @@ bool ScreenSessionManager::WakeUpEnd()
 
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendBegin(%u)", reason);
-    WLOGFI("SuspendBegin block screen power change is true");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendBegin(%u)", reason);
+    WLOGFI("[UL_POWER]SuspendBegin block screen power change is true");
     blockScreenPowerChange_ = true;
     auto suspendBeginTask = [this]() {
-        WLOGFI("SuspendBegin delay task start");
+        WLOGFI("[UL_POWER]SuspendBegin delay task start");
         blockScreenPowerChange_ = false;
         SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
     };
@@ -920,8 +920,8 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::SuspendEnd()
 {
-    WLOGFI("SuspendEnd enter");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SuspendEnd");
+    WLOGFI("[UL_POWER]SuspendEnd enter");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
@@ -933,7 +933,7 @@ bool ScreenSessionManager::SuspendEnd()
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
 {
-    WLOGFI("SetDisplayState enter");
+    WLOGFI("[UL_POWER]SetDisplayState enter");
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
@@ -954,7 +954,7 @@ void ScreenSessionManager::NotifyScreenshot(DisplayId displayId)
 
 bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFI("SetSpecifiedScreenPower: screen id:%{public}" PRIu64 ", state:%{public}u", screenId, state);
+    WLOGFI("[UL_POWER]SetSpecifiedScreenPower: screen id:%{public}" PRIu64 ", state:%{public}u", screenId, state);
 
     ScreenPowerStatus status;
     switch (state) {
@@ -967,7 +967,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
             break;
         }
         default: {
-            WLOGFW("SetScreenPowerStatus state not support");
+            WLOGFW("[UL_POWER]SetScreenPowerStatus state not support");
             return false;
         }
     }
@@ -984,13 +984,13 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 {
     ScreenPowerStatus status;
     if (blockScreenPowerChange_) {
-        WLOGFI("SetScreenPowerForAll block screen power change");
+        WLOGFI("[UL_POWER]SetScreenPowerForAll block screen power change");
         return true;
     }
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             if (keyguardDrawnDone_) {
-                WLOGFI("SetScreenPowerForAll keyguardDrawnDone_ is true step 1");
+                WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is true step 1");
                 status = ScreenPowerStatus::POWER_STATUS_ON;
                 break;
             } else {
@@ -1003,7 +1003,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                     isReasonScreenOnSwitch_ = false;
                     needScreenOnWhenKeyguardNotify_ = false;
                     keyguardDrawnDone_ = true;
-                    WLOGFI("SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
+                    WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
                 };
                 taskScheduler_->PostTask(task, "screenOnTask", 300); // Retry after 300 ms.
                 return true;
@@ -1011,12 +1011,12 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
         }
         case ScreenPowerState::POWER_OFF: {
             keyguardDrawnDone_ = false;
-            WLOGFI("SetScreenPowerForAll keyguardDrawnDone_ is false");
+            WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
             status = ScreenPowerStatus::POWER_STATUS_OFF;
             break;
         }
         default: {
-            WLOGFW("SetScreenPowerStatus state not support");
+            WLOGFW("[UL_POWER]SetScreenPowerStatus state not support");
             return false;
         }
     }
@@ -1025,10 +1025,10 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    WLOGFI("SetScreenPower enter status:%{public}u", status);
+    WLOGFI("[UL_POWER]SetScreenPower enter status:%{public}u", status);
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
-        WLOGFI("SetScreenPower screenIds empty");
+        WLOGFI("[UL_POWER]SetScreenPower screenIds empty");
         return false;
     }
 
@@ -1133,11 +1133,11 @@ DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 
 void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 {
-    WLOGFI("NotifyDisplayEvent receive keyguardDrawnDone");
+    WLOGFI("[UL_POWER]NotifyDisplayEvent receive keyguardDrawnDone");
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         keyguardDrawnDone_ = true;
-        WLOGFI("NotifyDisplayEvent keyguardDrawnDone_ is true");
+        WLOGFI("[UL_POWER]NotifyDisplayEvent keyguardDrawnDone_ is true");
         if (needScreenOnWhenKeyguardNotify_) {
             taskScheduler_->RemoveTask("screenOnTask");
             usleep(SLEEP_US);
@@ -1152,14 +1152,14 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
-        WLOGFI("NotifyDisplayEvent screen lock suspend");
+        WLOGFI("[UL_POWER]NotifyDisplayEvent screen lock suspend");
         taskScheduler_->RemoveTask("suspendBeginTask");
         blockScreenPowerChange_ = false;
         SetScreenPower(ScreenPowerStatus::POWER_STATUS_SUSPEND, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
-        WLOGFI("NotifyDisplayEvent screen lock off");
+        WLOGFI("[UL_POWER]NotifyDisplayEvent screen lock off");
         taskScheduler_->RemoveTask("suspendBeginTask");
         blockScreenPowerChange_ = false;
         SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
@@ -1352,17 +1352,17 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     if (agents.empty()) {
-        WLOGFI("NotifyDisplayPowerEvent agents is empty");
+        WLOGFI("[UL_POWER]NotifyDisplayPowerEvent agents is empty");
         return false;
     }
-    WLOGFD("NotifyDisplayPowerEvent");
+    WLOGFD("[UL_POWER]NotifyDisplayPowerEvent");
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
     }
 
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
-        WLOGFI("NotifyDisplayPowerEvent no screen info");
+        WLOGFI("[UL_POWER]NotifyDisplayPowerEvent no screen info");
         return false;
     }
 
