@@ -45,7 +45,7 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
-constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI = 200;
+constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 } // namespace
 
@@ -1092,6 +1092,20 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    if (!lifeCycleTaskQueue_.empty()) {
+        // remove current running task if expired
+        sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+        bool isCurrentTaskExpired =
+            std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
+            LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
+        if (isCurrentTaskExpired) {
+            WLOGFE("[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
+                name.c_str(), persistentId_);
+            lifeCycleTaskQueue_.pop_front();
+        }
+    }
+
     if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
         WLOGFE("[WMSLife] Failed to add task %{public}s to life cycle queue", name.c_str());
         return;
@@ -1104,22 +1118,14 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         return;
     }
 
-    // remove current running task if expired
-    sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
-    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    bool isCurrentTaskExpired =
-        std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
-        LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI;
-    if (isCurrentTaskExpired) {
-        WLOGFE(
-            "[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d", name.c_str(), persistentId_);
-        lifeCycleTaskQueue_.pop_front();
-        StartLifeCycleTask(lifeCycleTaskQueue_.front());
-    }
+    StartLifeCycleTask(lifeCycleTaskQueue_.front());
 }
 
 void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
 {
+    if (lifeCycleTask->running) {
+        return;
+    }
     WLOGFI("[WMSLife] Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
         lifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTask->running = true;
