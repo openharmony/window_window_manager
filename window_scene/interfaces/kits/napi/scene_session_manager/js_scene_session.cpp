@@ -127,7 +127,9 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         }
         sessionchangeCallback->clearCallbackFunc_ = [weak = weak_from_this()](bool needRemove, int32_t persistentId) {
             auto weakJsSceneSession = weak.lock();
-            if (weakJsSceneSession) weakJsSceneSession->ClearCbMap(needRemove, persistentId);
+            if (weakJsSceneSession) {
+                weakJsSceneSession->ClearCbMap(needRemove, persistentId);
+            }
         };
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
@@ -1527,8 +1529,11 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
         return;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [this, sessionInfo, visible]() {
-        ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
+    auto task = [weak = weak_from_this(), sessionInfo, visible]() {
+        auto weakJsSceneSession = weak.lock();
+        if (weakJsSceneSession) {
+            weakJsSceneSession->ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
+        }
     };
     taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" +
         std::to_string(visible));
@@ -1545,6 +1550,7 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
         }
         jsCallBack = iter->second;
     }
+    HandleScope handleScope(env_);
     napi_env& env_ref = env_;
     if (!jsCallBack) {
         WLOGFE("[NAPI]jsCallBack is nullptr");
@@ -1559,8 +1565,8 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
         WLOGFE("[NAPI]this target session info is nullptr");
         return;
     }
-    napi_value visible_napiV = CreateJsValue(env_ref, visible);
-    napi_value argv[] = {jsSessionInfo, visible_napiV};
+    napi_value visibleNapiV = CreateJsValue(env_ref, visible);
+    napi_value argv[] = {jsSessionInfo, visibleNapiV};
     napi_call_function(env_ref, NapiGetUndefined(env_ref),
         jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
 }

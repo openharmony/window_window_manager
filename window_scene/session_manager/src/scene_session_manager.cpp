@@ -4208,8 +4208,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_BACKGROUND:
-            OnSessionStateChangeBackground(persistentId, sceneSession);
-            break;
         case SessionState::STATE_HIDE:
             OnSessionStateChangeBackground(persistentId, sceneSession);
             break;
