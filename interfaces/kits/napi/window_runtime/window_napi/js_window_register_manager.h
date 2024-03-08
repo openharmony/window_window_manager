@@ -24,11 +24,6 @@
 #include "window.h"
 namespace OHOS {
 namespace Rosen {
-enum class CaseType {
-    CASE_WINDOW_MANAGER = 0,
-    CASE_WINDOW,
-    CASE_STAGE
-};
 class JsWindowRegisterManager {
 public:
     JsWindowRegisterManager();

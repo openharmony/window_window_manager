@@ -67,6 +67,12 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         HandlePointDownDialog();
         return WSError::WS_OK;
     }
+
+    if (CheckModalSubWindowOnForeground()) {
+        HandlePointDownModalSubWindow();
+        return WSError::WS_OK;
+    }
+    
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
