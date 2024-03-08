@@ -451,14 +451,14 @@ void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PipState state, in
         engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent)
+void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGI("OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [jsCallback, actionEvent] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env, actionEvent)};
+        [jsCallback, actionEvent, statusCode] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[2] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
             CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
         }
     );

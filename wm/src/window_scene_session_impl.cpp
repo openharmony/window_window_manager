@@ -383,19 +383,15 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
         sourceType, outside, vpr, rect);
-    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+    if (dragType != AreaType::UNDEFINED) {
+        hostSession_->SendPointEventForMoveDrag(pointerEvent);
+        needNotifyEvent = false;
+    } else if (isMoveArea) {
         hostSession_->SendPointEventForMoveDrag(pointerEvent);
     } else if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
-        if (dragType != AreaType::UNDEFINED) {
-            hostSession_->SendPointEventForMoveDrag(pointerEvent);
-            needNotifyEvent = false;
-        } else if (isMoveArea) {
-            hostSession_->SendPointEventForMoveDrag(pointerEvent);
-        } else {
-            hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
+        hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     return needNotifyEvent;
 }
@@ -1630,8 +1626,7 @@ void WindowSceneSessionImpl::StartMove()
         return;
     }
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if ((WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsPipWindow(GetType())
-            || (isPC && WindowHelper::IsSubWindow(GetType()))) && hostSession_) {
+    if ((WindowHelper::IsMainWindow(GetType()) || (isPC && WindowHelper::IsSubWindow(GetType()))) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;

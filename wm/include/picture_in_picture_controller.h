@@ -64,7 +64,7 @@ public:
     void UpdateContentSize(int32_t width, int32_t height);
     void StartMove();
     void DoScale();
-    void DoActionEvent(std::string& actionName);
+    void DoActionEvent(const std::string& actionName, int32_t status);
     void RestorePictureInPictureWindow();
     void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
     void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);
@@ -85,21 +85,6 @@ public:
         void BackgroundFailed(int32_t type) override;
     private:
         std::string navigationId_ = "";
-    };
-
-    class PipDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
-    public:
-        PipDisplayListener(wptr<PictureInPictureController> pipController)
-        {
-            pipController_ = pipController;
-            preRotation_ = Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetRotation();
-        }
-        void OnCreate(DisplayId displayId) override;
-        void OnDestroy(DisplayId displayId) override;
-        void OnChange(DisplayId displayId) override;
-    private:
-        wptr<PictureInPictureController> pipController_;
-        Rotation preRotation_;
     };
 
 private:
@@ -126,7 +111,6 @@ private:
     napi_env env_;
     std::mutex mutex_;
     int32_t handleId_ = -1;
-    sptr<PictureInPictureController::PipDisplayListener> pipDisplayListener_;
 };
 } // namespace Rosen
 } // namespace OHOS

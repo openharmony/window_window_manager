@@ -897,7 +897,7 @@ void SessionProxy::NotifyPiPWindowPrepareClose()
     }
 }
 
-WSError SessionProxy::UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason)
+WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -906,12 +906,20 @@ WSError SessionProxy::UpdatePiPRect(const uint32_t width, const uint32_t height,
         WLOGFE("writeInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(width)) {
-        WLOGFE("width write failed.");
+    if (!data.WriteInt32(rect.posX_)) {
+        WLOGFE("write posX_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(height)) {
-        WLOGFE("height write failed.");
+    if (!data.WriteInt32(rect.posY_)) {
+        WLOGFE("write posY_ failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.width_)) {
+        WLOGFE("write width_ failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.height_)) {
+        WLOGFE("write height_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(static_cast<int32_t>(reason))) {
