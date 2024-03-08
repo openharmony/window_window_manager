@@ -190,7 +190,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        WLOGFI("InputTracking id:%{public}d, EventListener OnInputEvent", pointerEvent->GetId());
+        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d, EventListener OnInputEvent", pointerEvent->GetId());
     }
 
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
@@ -202,9 +202,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 
     if (sceneSession->GetSessionInfo().isSystem_) {
-        WLOGI("[WMSEvent] InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u windowName:%{public}s "
-            "action = %{public}d", pointerEvent->GetId(), windowId, sceneSession->GetSessionInfo().abilityName_.c_str(),
-            action);
+        TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u "
+            "windowName:%{public}s action = %{public}d", pointerEvent->GetId(), windowId,
+            sceneSession->GetSessionInfo().abilityName_.c_str(), action);
         sceneSession->SendPointerEventToUI(pointerEvent);
 
         // notify touchOutside and touchDown event
@@ -281,8 +281,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         return;
     }
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
-    WLOGFI("EventListener OnInputEvent InputTracking id:%{public}d, focusedSessionId:%{public}d, isSystem:%{public}d",
-        keyEvent->GetId(), focusedSessionId, isSystem);
+    TLOGI(WmsLogTag::WMS_EVENT, "EventListener OnInputEvent InputTracking id:%{public}d, focusedSessionId:%{public}d,"
+        " isSystem:%{public}d", keyEvent->GetId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
         if ((ret != WSError::WS_OK || static_cast<int32_t>(getprocpid()) != focusedSceneSession->GetCallingPid()) &&
@@ -323,7 +323,7 @@ bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
-    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    TLOGI(WmsLogTag::WMS_EVENT, "isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard || isKeyBack);
 }
 
