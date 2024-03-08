@@ -1550,8 +1550,6 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
         }
         jsCallBack = iter->second;
     }
-    HandleScope handleScope(env_);
-    napi_env& env_ref = env_;
     if (!jsCallBack) {
         WLOGFE("[NAPI]jsCallBack is nullptr");
         return;
@@ -1560,14 +1558,14 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
         WLOGFE("[NAPI]sessionInfo is nullptr");
         return;
     }
-    napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
+    napi_value jsSessionInfo = CreateJsSessionInfo(env_, *sessionInfo);
     if (jsSessionInfo == nullptr) {
         WLOGFE("[NAPI]this target session info is nullptr");
         return;
     }
-    napi_value visibleNapiV = CreateJsValue(env_ref, visible);
+    napi_value visibleNapiV = CreateJsValue(env_, visible);
     napi_value argv[] = {jsSessionInfo, visibleNapiV};
-    napi_call_function(env_ref, NapiGetUndefined(env_ref),
+    napi_call_function(env_, NapiGetUndefined(env_),
         jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
 }
 
