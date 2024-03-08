@@ -22,10 +22,11 @@ const TAG: string = 'PiPContent';
 export struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
   xComponentId: string = 'pipContent';
+  xComponentType: string = 'surface';
 
   build() {
     Stack() {
-      XComponent({ id: this.xComponentId, type: 'surface', controller: this.xComponentController })
+      XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
         .onLoad(() => {
           pip.initXComponentController(this.xComponentController);
           console.debug(TAG, 'XComponent onLoad done');
