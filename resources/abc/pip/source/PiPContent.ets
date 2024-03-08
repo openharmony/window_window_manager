@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-import pip from "@ohos.pip";
+import pip from '@ohos.pip';
 
-const TAG: string = "PiPContent";
+const TAG: string = 'PiPContent';
 
 @Entry
 @Component
 export struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
-  xComponentId: string = "pipContent";
+  xComponentId: string = 'pipContent';
 
   build() {
     Stack() {
-      XComponent({ id: this.xComponentId, type: "surface", controller: this.xComponentController })
+      XComponent({ id: this.xComponentId, type: 'surface', controller: this.xComponentController })
         .onLoad(() => {
           pip.initXComponentController(this.xComponentController);
-          console.debug(TAG, "XComponent onLoad done");
+          console.debug(TAG, 'XComponent onLoad done');
         })
-        .size({ width: "100%", height: "100%" });
+        .size({ width: '100%', height: '100%' });
     }
-    .size({ width: "100%", height: "100%" });
+    .size({ width: '100%', height: '100%' });
   }
 }
