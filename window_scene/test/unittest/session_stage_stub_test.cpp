@@ -389,6 +389,8 @@ HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, Function | SmallTest | L
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteString("str");
+    data.WriteInt32(1);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleSetPipActionEvent(data, reply));
 }
