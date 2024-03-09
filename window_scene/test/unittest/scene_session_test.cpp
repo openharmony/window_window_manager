@@ -2441,6 +2441,29 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
     scensession->RequestHideKeyboard();
     ASSERT_EQ(0, resultValue);
 }
+
+/**
+ * @tc.name: SetPipActionEvent
+ * @tc.desc:  * @tc.name: SetPipActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPipActionEvent";
+    info.bundleName_ = "SetPipActionEvent";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    scensession->SetSessionProperty(property);
+    WSError res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_TYPE);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
 }
 }
 }
