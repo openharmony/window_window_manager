@@ -2460,7 +2460,11 @@ HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSError res = scensession->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
+
+    property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowType(WindowMode::WINDOW_MODE_PIP);
+    scensession->SetSessionProperty(property);
     res = scensession->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
