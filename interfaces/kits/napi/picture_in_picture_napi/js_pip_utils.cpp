@@ -91,8 +91,10 @@ static napi_value ExportPictureInPictureControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT", static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
-    (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD", static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+    (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
+    (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD",
+        static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
     (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH", static_cast<uint32_t>(PiPControlGroup::MICROPHONE_SWITCH));
     (void)SetNamedProperty(env, result, "HANG_UP_BUTTON", static_cast<uint32_t>(PiPControlGroup::HANG_UP_BUTTON));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH", static_cast<uint32_t>(PiPControlGroup::CAMERA_SWITCH));
