@@ -68,6 +68,7 @@ private:
     int32_t hostWindowId_;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
+    static void SetWindowOption(sptr<Rosen::WindowOption> windowOption);
 };
 }  // namespace Rosen
 }  // namespace OHOS
