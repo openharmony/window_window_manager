@@ -7094,7 +7094,8 @@ WSError SceneSessionManager::UpdateParentSessionForSubWindow(const sptr<SceneSes
         return WSError::WS_ERROR_NULLPTR;
     }
     auto parentPersistentId = property->GetParentPersistentId();
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW && parentPersistentId != INVALID_SESSION_ID) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW
+        && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
             WLOGFE("[WMSDialog] Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
