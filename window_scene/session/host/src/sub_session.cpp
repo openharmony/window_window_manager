@@ -92,7 +92,6 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
     }
-
     if (GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }

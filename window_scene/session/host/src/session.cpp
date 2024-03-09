@@ -35,7 +35,6 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
-#include "session.h"
 
 namespace OHOS::Rosen {
 namespace {
