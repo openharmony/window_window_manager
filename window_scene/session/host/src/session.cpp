@@ -1052,6 +1052,12 @@ bool Session::GetForegroundInteractiveStatus() const
     return foregroundInteractiveStatus_.load();
 }
 
+void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
+    const NotifyChangeSessionVisibilityWithStatusBarFunc& func)
+{
+    changeSessionVisibilityWithStatusBarFunc_ = func;
+}
+
 void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
 {
     pendingSessionActivationFunc_ = func;

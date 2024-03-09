@@ -1284,6 +1284,29 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
     }
 }
 
+int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& scnSession)
+{
+    auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
+    if (abilitySessionInfo == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    return StartUIAbilityBySCB(abilitySessionInfo);
+}
+
+int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo)
+{
+    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo);
+}
+
+int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& scnSession, bool visibility)
+{
+    auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
+    if (abilitySessionInfo == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    return AAFwk::AbilityManagerClient::GetInstance()->ChangeUIAbilityVisibilityBySCB(abilitySessionInfo, visibility);
+}
+
 WSError SceneSessionManager::RequestSceneSessionActivationInner(
     sptr<SceneSession>& scnSession, bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise)
 {

@@ -36,6 +36,8 @@ public:
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
     WSError UpdateActiveStatus(bool isActive) override;
+    WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+        bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     bool WriteAbilitySessionInfoBasic(MessageParcel& data, const sptr<AAFwk::SessionInfo> abilitySessionInfo);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
