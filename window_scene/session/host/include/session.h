@@ -369,7 +369,7 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-    
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
