@@ -161,7 +161,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else if (WindowHelper::IsExtensionSubWindow(type)) { //extension sub window
         // set parent persistentId
-        property_->SetParentPersistentId(property_->GetPatentId());
+        property_->SetParentPersistentId(property_->GetParentId());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
