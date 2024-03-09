@@ -134,8 +134,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetVisibilityWindowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_HIDE_NON_SECURE_WINDOWS),
         &SceneSessionManagerStub::HandleHideNonSecureWindows),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_MODAL),
-        &SceneSessionManagerStub::HandleHideNonSecureWindows),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,

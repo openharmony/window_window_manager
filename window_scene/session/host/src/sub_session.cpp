@@ -93,10 +93,6 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         return WSError::WS_OK;
     }
 
-    if (parentSession_ && parentSession_->CheckModalSubWindowOnForeground()) {
-        return WSError::WS_OK;
-    }
-
     if (GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
