@@ -33,8 +33,8 @@ constexpr Rect g_emptyRect = {0, 0, 0, 0};
 } // namespace
 
 JsExtensionWindow::JsExtensionWindow(
- const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
- int32_t hostWindowId)
+     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
+     int32_t hostWindowId)
     : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
@@ -47,7 +47,7 @@ JsExtensionWindow::JsExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindo
 
 JsExtensionWindow::~JsExtensionWindow() {}
 
-napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::Window> window)
+napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::Window> window, int32_t hostWindowId)
 {
     WLOGI("JsExtensionWindow CreateJsExtensionWindow");
     napi_value objValue = nullptr;
@@ -59,7 +59,8 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     }
 
     std::shared_ptr<ExtensionWindow> extensionWindow = std::make_shared<ExtensionWindowImpl>(window);
-    std::unique_ptr<JsExtensionWindow> jsExtensionWindow = std::make_unique<JsExtensionWindow>(extensionWindow, hostWindowId);
+    std::unique_ptr<JsExtensionWindow> jsExtensionWindow =
+        std::make_unique<JsExtensionWindow>(extensionWindow, hostWindowId);
     napi_wrap(env, objValue, jsExtensionWindow.release(), JsExtensionWindow::Finalizer, nullptr, nullptr);
 
     napi_property_descriptor desc[] = {
@@ -640,54 +641,47 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-
     WindowOption option;
-    std::string title; 
+    std::string title;
     if (!ParseJsValue(argv[1], env, "title", title)) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     option.SetSubWindowTitle(title);
-
     bool decorEnabled;
     if (!ParseJsValue(argv[1], env, "decorEnabled", decorEnabled)) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    option.SetSubWindowDecorEnable(decorEnable);
+    option.SetSubWindowDecorEnable(decorEnabled);
     option.SetParentId(hostWindowId_);
-
     NapiAsyncTask::CompleteCallback complete =
         [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (weak == nullptr) {
-                WLOGFE("[NAPI]Window scene is null");
                 task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),"extensionWindow_ is null"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ is null"));
             }
             sptr<Rosen::WindowOption> windowOption = new WindowOption(option);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
             windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
             windowOption->SetOnlySupportSceneBoard(true);
             windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
-            auto extwindow = weak->GetWindow();
-            if (extwindow == nullptr) {
-                WLOGFE("[NAPI]Get window failed");
+            auto extWindow = weak->GetWindow();
+            if (extWindow == nullptr) {
                 task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ 's window is null"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
             }
-
             auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
-                return;                
+                return;
             }
             task.Resolve(env, CreateJsWindowObject(env, window));
             WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
         };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
-
     NapiAsyncTask::Schedule("JsExtensionWindow::OnCreateSubWindowWithOptions",
         env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
