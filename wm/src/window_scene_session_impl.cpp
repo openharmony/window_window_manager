@@ -1964,7 +1964,7 @@ sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_
 {
     std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
+        WLOGFE("[GetMainWin] Please create mainWindow First!");
         return nullptr;
     }
     uint32_t mainWinId = INVALID_WINDOW_ID;
@@ -1972,11 +1972,11 @@ sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
             mainWinId = win->GetWindowId();
-            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+            WLOGI("[GetMainWin] Find MainWinId:%{public}u.", mainWinId);
             return win;
         }
     }
-    WLOGFE("Cannot find Window!");
+    WLOGFE("[GetMainWin] Cannot find Window!");
     return nullptr;
 }
 

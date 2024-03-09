@@ -29,52 +29,52 @@ using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
+    const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
+        PiPControlGroup::VIDEO_PREVIOUS_NEXT,PiPControlGroup::FAST_FORWARD_BACKWARD
+    };
+    const std::set<PiPControlGroup> VIDEO_CALL_CONTROLS {
+        PiPControlGroup::MICROPHONE_SWITCH,PiPControlGroup::HANG_UP_BUTTON,
+        PiPControlGroup::CAMERA_SWITCH,
+    };
+    const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
+        PiPControlGroup::MUTE_SWITCH,PiPControlGroup::HANG_UP_BUTTON,
+        PiPControlGroup::CAMERA_SWITCH,
+    };
+    const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
+        {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
+        {PiPTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
+        {PiPTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
+        {PiPTemplateType::VIDEO_LIVE, {}},
+    };
 }
 
-const std::set<PipControlGroup> VIDEO_PLAY_CONTROLS {
-    PipControlGroup::VIDEO_PREVIOUS_NEXT,PipControlGroup::FAST_FORWARD_BACKWARD
-};
-const std::set<PipControlGroup> VIDEO_CALL_CONTROLS {
-    PipControlGroup::MICROPHONE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
-    PipControlGroup::CAMERA_SWITCH
-};
-const std::set<PipControlGroup> VIDEO_MEETING_CONTROLS {
-    PipControlGroup::MUTE_SWITCH,PipControlGroup::HANG_UP_BUTTON,
-    PipControlGroup::CAMERA_SWITCH
-};
-const std::map<PipTemplateType, std::set<PipControlGroup>> TEMPLATE_CONTROL_MAP {
-    {PipTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
-    {PipTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
-    {PipTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
-    {PipTemplateType::VIDEO_LIVE, {}}
-};
 std::mutex JsPipWindowManager::mutex_;
 
-static bool checkOptionParams(PipOption& option)
+static int32_t checkOptionParams(PipOption& option)
 {
     if (option.GetContext() == nullptr) {
         WLOGE("check pipoption param error, context is nullptr.");
-        return false;
+        return -1;
     }
     if (option.GetXComponentController() == nullptr) {
         WLOGE("check pipoption param error, XComponentController is nullptr.");
-        return false;
+        return -1;
     }
     uint32_t pipTemplateType = option.GetPipTemplate();
-    if (TEMPLATE_CONTROL_MAP.find(static_cast<PipTemplateType>(pipTemplateType))
+    if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType))
         == TEMPLATE_CONTROL_MAP.end()) {
         WLOGE("check pipoption param error, pipTemplateType not exists.");
-        return false;
+        return -1;
     }
-    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PipTemplateType>(pipTemplateType));
+    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
     for (auto control : option.GetControlGroup()) {
-        if (controls.find(static_cast<PipControlGroup>(control)) == controls.end()) {
+        if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
             WLOGE("check pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
-            return false;
+            return -1;
         }
     }
-    return true;
+    return 0;
 }
 
 static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
@@ -108,7 +108,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value controlGroup = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
-    uint32_t templateType = static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY);
+    uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
     uint32_t width = 0;
     uint32_t height = 0;
     std::vector<std::uint32_t> controls;
@@ -204,7 +204,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
                     WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
                 return;
             }
-            sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
+            sptr<Window> mainWindow = WindowSceneSessionImpl::GetMainWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
                 new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));

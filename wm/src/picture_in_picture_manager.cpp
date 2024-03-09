@@ -44,7 +44,7 @@ PictureInPictureManager::~PictureInPictureManager()
 
 bool PictureInPictureManager::ShouldAbortPipStart()
 {
-    return activeController_ != nullptr && activeController_->GetControllerState() == PipWindowState::STATE_STARTING;
+    return activeController_ != nullptr && activeController_->GetControllerState() == PiPWindowState::STATE_STARTING;
 }
 
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
