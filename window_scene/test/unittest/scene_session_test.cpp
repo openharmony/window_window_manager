@@ -2459,10 +2459,10 @@ HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     WSError res = scensession->SetPipActionEvent("close", 0);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_TYPE);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     res = scensession->SetPipActionEvent("close", 0);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 }
 }
