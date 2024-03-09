@@ -65,9 +65,9 @@ private:
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
+    int32_t hostWindowId_;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
-    int32_t hostWindowId_;
 };
 }  // namespace Rosen
 }  // namespace OHOS
