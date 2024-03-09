@@ -498,7 +498,7 @@ protected:
     mutable std::mutex keyEventMutex_;
     
     mutable std::mutex modalSubWindowVecMutex_;
-    std::vector<sptr<Session>> modalSubWindowVec_
+    std::vector<sptr<Session>> modalSubWindowVec_;
 
 private:
     void HandleDialogForeground();
