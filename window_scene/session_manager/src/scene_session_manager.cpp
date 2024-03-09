@@ -1283,11 +1283,6 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& scnSession)
     if (abilitySessionInfo == nullptr) {
         return ERR_NULL_OBJECT;
     }
-    
-    if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-        abilitySessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, abilitySessionInfo->persistentId);
-        abilitySessionInfo->collaboratorType = scnSession->GetCollaboratorType();
-    }
     return StartUIAbilityBySCB(abilitySessionInfo);
 }
 
@@ -1301,10 +1296,6 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& 
     auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
     if (abilitySessionInfo == nullptr) {
         return ERR_NULL_OBJECT;
-    }
-    if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-        abilitySessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, abilitySessionInfo->persistentId);
-        abilitySessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
     return AAFwk::AbilityManagerClient::GetInstance()->ChangeUIAbilityVisibilityBySCB(abilitySessionInfo, visibility);
 }
