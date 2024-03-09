@@ -73,7 +73,8 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     BindNativeFunction(env, objValue, "on", moduleName, JsExtensionWindow::RegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "off", moduleName, JsExtensionWindow::UnRegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "hideNonSecureWindows", moduleName, JsExtensionWindow::HideNonSecureWindows);
-    BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName, JsExtensionWindow::CreateSubWindowWithOptions);
+    BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName,
+        JsExtensionWindow::CreateSubWindowWithOptions);
 
     return objValue;
 }
@@ -662,10 +663,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ is null"));
             }
             sptr<Rosen::WindowOption> windowOption = new WindowOption(option);
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
-            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-            windowOption->SetOnlySupportSceneBoard(true);
-            windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+            JsExtensionWindow::SetWindowOption(windowOption);
             auto extWindow = weak->GetWindow();
             if (extWindow == nullptr) {
                 task.Reject(env, CreateJsError(env,
@@ -685,6 +683,14 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     NapiAsyncTask::Schedule("JsExtensionWindow::OnCreateSubWindowWithOptions",
         env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
+}
+
+void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
+{
+    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    windowOption->SetOnlySupportSceneBoard(true);
+    windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
 }
 }  // namespace Rosen
 }  // namespace OHOS
