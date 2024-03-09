@@ -30,14 +30,17 @@ using namespace Ace;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
-        PiPControlGroup::VIDEO_PREVIOUS_NEXT,PiPControlGroup::FAST_FORWARD_BACKWARD
+        PiPControlGroup::VIDEO_PREVIOUS_NEXT,
+        PiPControlGroup::FAST_FORWARD_BACKWARD
     };
     const std::set<PiPControlGroup> VIDEO_CALL_CONTROLS {
-        PiPControlGroup::MICROPHONE_SWITCH,PiPControlGroup::HANG_UP_BUTTON,
+        PiPControlGroup::MICROPHONE_SWITCH,
+        PiPControlGroup::HANG_UP_BUTTON,
         PiPControlGroup::CAMERA_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
-        PiPControlGroup::MUTE_SWITCH,PiPControlGroup::HANG_UP_BUTTON,
+        PiPControlGroup::MUTE_SWITCH,
+        PiPControlGroup::HANG_UP_BUTTON,
         PiPControlGroup::CAMERA_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
