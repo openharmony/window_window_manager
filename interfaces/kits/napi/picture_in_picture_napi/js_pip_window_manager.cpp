@@ -31,7 +31,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
-        PiPControlGroup::FAST_FORWARD_BACKWARD
+        PiPControlGroup::FAST_FORWARD_BACKWARD,
     };
     const std::set<PiPControlGroup> VIDEO_CALL_CONTROLS {
         PiPControlGroup::MICROPHONE_SWITCH,
@@ -64,8 +64,8 @@ static int32_t checkOptionParams(PipOption& option)
         return -1;
     }
     uint32_t pipTemplateType = option.GetPipTemplate();
-    if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType))
-        == TEMPLATE_CONTROL_MAP.end()) {
+    if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType)) ==
+        TEMPLATE_CONTROL_MAP.end()) {
         WLOGE("check pipoption param error, pipTemplateType not exists.");
         return -1;
     }
