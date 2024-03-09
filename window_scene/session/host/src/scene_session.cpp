@@ -1100,7 +1100,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return WSError::WS_OK;
         }
 
-        bool modalForeground = CheckModalSubWindowOnForeground();
         if (CheckModalSubWindowOnForeground() && isPointDown) {
             HandlePointDownModalSubWindow();
             pointerEvent->MarkProcessed();
