@@ -65,10 +65,10 @@ static napi_value ExportPictureInPictureTemplateType(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "VIDEO_PLAY", static_cast<int32_t>(PipTemplateType::VIDEO_PLAY));
-    (void)SetNamedProperty(env, result, "VIDEO_CALL", static_cast<int32_t>(PipTemplateType::VIDEO_CALL));
-    (void)SetNamedProperty(env, result, "VIDEO_MEETING", static_cast<int32_t>(PipTemplateType::VIDEO_MEETING));
-    (void)SetNamedProperty(env, result, "VIDEO_LIVE", static_cast<int32_t>(PipTemplateType::VIDEO_LIVE));
+    (void)SetNamedProperty(env, result, "VIDEO_PLAY", static_cast<int32_t>(PiPTemplateType::VIDEO_PLAY));
+    (void)SetNamedProperty(env, result, "VIDEO_CALL", static_cast<int32_t>(PiPTemplateType::VIDEO_CALL));
+    (void)SetNamedProperty(env, result, "VIDEO_MEETING", static_cast<int32_t>(PiPTemplateType::VIDEO_MEETING));
+    (void)SetNamedProperty(env, result, "VIDEO_LIVE", static_cast<int32_t>(PiPTemplateType::VIDEO_LIVE));
     napi_object_freeze(env, result);
     return result;
 }
@@ -77,12 +77,12 @@ static napi_value ExportPictureInPictureState(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "ABOUT_TO_START", static_cast<int32_t>(PipState::ABOUT_TO_START));
-    (void)SetNamedProperty(env, result, "STARTED", static_cast<int32_t>(PipState::STARTED));
-    (void)SetNamedProperty(env, result, "ABOUT_TO_STOP", static_cast<int32_t>(PipState::ABOUT_TO_STOP));
-    (void)SetNamedProperty(env, result, "STOPPED", static_cast<int32_t>(PipState::STOPPED));
-    (void)SetNamedProperty(env, result, "ABOUT_TO_RESTORE", static_cast<int32_t>(PipState::ABOUT_TO_RESTORE));
-    (void)SetNamedProperty(env, result, "ERROR", static_cast<int32_t>(PipState::ERROR));
+    (void)SetNamedProperty(env, result, "ABOUT_TO_START", static_cast<int32_t>(PiPState::ABOUT_TO_START));
+    (void)SetNamedProperty(env, result, "STARTED", static_cast<int32_t>(PiPState::STARTED));
+    (void)SetNamedProperty(env, result, "ABOUT_TO_STOP", static_cast<int32_t>(PiPState::ABOUT_TO_STOP));
+    (void)SetNamedProperty(env, result, "STOPPED", static_cast<int32_t>(PiPState::STOPPED));
+    (void)SetNamedProperty(env, result, "ABOUT_TO_RESTORE", static_cast<int32_t>(PiPState::ABOUT_TO_RESTORE));
+    (void)SetNamedProperty(env, result, "ERROR", static_cast<int32_t>(PiPState::ERROR));
     napi_object_freeze(env, result);
     return result;
 }
@@ -91,12 +91,12 @@ static napi_value ExportPictureInPictureControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT", static_cast<int32_t>(PipControlGroup::VIDEO_PREVIOUS_NEXT));
-    (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD", static_cast<int32_t>(PipControlGroup::FAST_FORWARD_BACKWARD));
-    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH", static_cast<int32_t>(PipControlGroup::MICROPHONE_SWITCH));
-    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON", static_cast<int32_t>(PipControlGroup::HANG_UP_BUTTON));
-    (void)SetNamedProperty(env, result, "CAMERA_SWITCH", static_cast<int32_t>(PipControlGroup::CAMERA_SWITCH));
-    (void)SetNamedProperty(env, result, "MUTE_SWITCH", static_cast<int32_t>(PipControlGroup::MUTE_SWITCH));
+    (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT", static_cast<int32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
+    (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD", static_cast<int32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH", static_cast<int32_t>(PiPControlGroup::MICROPHONE_SWITCH));
+    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON", static_cast<int32_t>(PiPControlGroup::HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "CAMERA_SWITCH", static_cast<int32_t>(PiPControlGroup::CAMERA_SWITCH));
+    (void)SetNamedProperty(env, result, "MUTE_SWITCH", static_cast<int32_t>(PiPControlGroup::MUTE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
@@ -106,7 +106,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
     const napi_property_descriptor properties[] = {
         DECLARE_NAPI_PROPERTY("PiPTemplateType", ExportPictureInPictureTemplateType(env)),
         DECLARE_NAPI_PROPERTY("PiPState", ExportPictureInPictureState(env)),
-        DECLARE_NAPI_PROPERTY("PipControlGroup", ExportPictureInPictureControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("PiPControlGroup", ExportPictureInPictureControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);

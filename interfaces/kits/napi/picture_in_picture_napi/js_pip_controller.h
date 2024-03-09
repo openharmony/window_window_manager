@@ -76,7 +76,7 @@ public:
         void OnRestoreUserInterface() override;
 
     private:
-        void OnPipListenerCallback(PipState state, int32_t errorCode);
+        void OnPipListenerCallback(PiPState state, int32_t errorCode);
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
         std::mutex mtx_;

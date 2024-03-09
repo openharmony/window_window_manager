@@ -71,7 +71,7 @@ public:
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
-    PipWindowState GetControllerState();
+    PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
 
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
@@ -119,7 +119,7 @@ private:
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
-    PipWindowState curState_ = PipWindowState::STATE_UNDEFINED;
+    PiPWindowState curState_ = PiPWindowState::STATE_UNDEFINED;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<XComponentController> pipXComponentController_;
     std::shared_ptr<XComponentController> mainWindowXComponentController_;

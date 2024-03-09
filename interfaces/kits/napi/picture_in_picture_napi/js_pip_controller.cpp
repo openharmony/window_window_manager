@@ -399,40 +399,40 @@ void CallJsMethod(napi_env env, napi_value method, napi_value const* argv, size_
 void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStart()
 {
     WLOGI("OnPreparePictureInPictureStart");
-    OnPipListenerCallback(PipState::ABOUT_TO_START, 0);
+    OnPipListenerCallback(PiPState::ABOUT_TO_START, 0);
 }
 
 void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStart()
 {
     WLOGI("OnPictureInPictureStart");
-    OnPipListenerCallback(PipState::STARTED, 0);
+    OnPipListenerCallback(PiPState::STARTED, 0);
 }
 
 void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStop()
 {
     WLOGI("OnPreparePictureInPictureStop");
-    OnPipListenerCallback(PipState::ABOUT_TO_STOP, 0);
+    OnPipListenerCallback(PiPState::ABOUT_TO_STOP, 0);
 }
 
 void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStop()
 {
     WLOGI("OnPictureInPictureStop");
-    OnPipListenerCallback(PipState::STOPPED, 0);
+    OnPipListenerCallback(PiPState::STOPPED, 0);
 }
 
 void JsPipController::PiPLifeCycleImpl::OnRestoreUserInterface()
 {
     WLOGI("OnRestoreUserInterface");
-    OnPipListenerCallback(PipState::ABOUT_TO_RESTORE, 0);
+    OnPipListenerCallback(PiPState::ABOUT_TO_RESTORE, 0);
 }
 
 void JsPipController::PiPLifeCycleImpl::OnPictureInPictureOperationError(int32_t errorCode)
 {
     WLOGI("OnPictureInPictureOperationError");
-    OnPipListenerCallback(PipState::ERROR, errorCode);
+    OnPipListenerCallback(PiPState::ERROR, errorCode);
 }
 
-void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PipState state, int32_t errorCode)
+void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PiPState state, int32_t errorCode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGI("OnPipListenerCallback is called, state: %{public}d", static_cast<int32_t>(state));

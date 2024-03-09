@@ -617,7 +617,7 @@ enum class WindowUpdateType : int32_t {
 /**
  * @brief Enumerates picture in picture window state.
  */
-enum class PipWindowState : uint32_t {
+enum class PiPWindowState : uint32_t {
     STATE_UNDEFINED = 0,
     STATE_STARTING = 1,
     STATE_STARTED = 2,
@@ -628,7 +628,7 @@ enum class PipWindowState : uint32_t {
 /**
  * @brief Enumerates picture in picture template type.
  */
-enum class PipTemplateType : uint32_t {
+enum class PiPTemplateType : uint32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
@@ -639,7 +639,7 @@ enum class PipTemplateType : uint32_t {
 /**
  * @brief Enumerates picture in picture control group.
  */
-enum class PipControlGroup : uint32_t {
+enum class PiPControlGroup : uint32_t {
     START = 0,
     VIDEO_PREVIOUS_NEXT = 1,
     FAST_FORWARD_BACKWARD = 2,
@@ -653,7 +653,7 @@ enum class PipControlGroup : uint32_t {
 /**
  * @brief Enumerates picture in picture state.
  */
-enum class PipState : int32_t {
+enum class PiPState : int32_t {
     ABOUT_TO_START = 1,
     STARTED = 2,
     ABOUT_TO_STOP = 3,

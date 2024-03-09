@@ -42,12 +42,12 @@ namespace {
 }
 static uint32_t GetPipPriority(uint32_t pipTemplateType)
 {
-    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PipTemplateType::END)) {
+    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
         WLOGFE("param invalid, pipTemplateType is %{public}d", pipTemplateType);
         return PIP_LOW_PRIORITY;
     }
-    if (pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_PLAY) ||
-        pipTemplateType == static_cast<uint32_t>(PipTemplateType::VIDEO_LIVE)) {
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY) ||
+        pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
         return PIP_LOW_PRIORITY;
     } else {
         return PIP_HIGH_PRIORITY;
@@ -59,7 +59,7 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
     : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env)
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    curState_ = PipWindowState::STATE_UNDEFINED;
+    curState_ = PiPWindowState::STATE_UNDEFINED;
     pipDisplayListener_ = new PictureInPictureController::PipDisplayListener(weakRef_);
 }
 
@@ -126,21 +126,21 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
         WLOGFE("Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    auto pipTemplateType = static_cast<PipTemplateType>(pipOption_->GetPipTemplate());
+    auto pipTemplateType = static_cast<PiPTemplateType>(pipOption_->GetPipTemplate());
     WLOGFI("mainWindow: %{public}u, pipWindow: %{public}u, template:%{public}u", mainWindowId_,
         window_->GetWindowId(), pipTemplateType);
     switch (pipTemplateType) {
         default:
-        case PipTemplateType::VIDEO_PLAY:
+        case PiPTemplateType::VIDEO_PLAY:
             window_->SetUIContentByAbc(VIDEO_PAGE_PATH, env_, nullptr, nullptr);
             break;
-        case PipTemplateType::VIDEO_CALL:
+        case PiPTemplateType::VIDEO_CALL:
             window_->SetUIContentByAbc(CALL_PAGE_PATH, env_, nullptr, nullptr);
             break;
-        case PipTemplateType::VIDEO_MEETING:
+        case PiPTemplateType::VIDEO_MEETING:
             window_->SetUIContentByAbc(MEETING_PAGE_PATH, env_, nullptr, nullptr);
             break;
-        case PipTemplateType::VIDEO_LIVE:
+        case PiPTemplateType::VIDEO_LIVE:
             window_->SetUIContentByAbc(LIVE_PAGE_PATH, env_, nullptr, nullptr);
             break;
     }
@@ -165,7 +165,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
 {
     WLOGI("StartPictureInPicture called");
     std::lock_guard<std::mutex> lock(mutex_);
-    if (curState_ == PipWindowState::STATE_STARTING || curState_ == PipWindowState::STATE_STARTED) {
+    if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
         WLOGFW("pip window is starting, state: %{public}u, pipWindow: %{public}u, mainWindow: %{public}u",
             curState_, window_->GetWindowId(), mainWindowId_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
@@ -185,7 +185,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(pipDisplayListener_);
-    curState_ = PipWindowState::STATE_STARTING;
+    curState_ = PiPWindowState::STATE_STARTING;
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
@@ -199,9 +199,9 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), this);
             WMError err = ShowPictureInPictureWindow(startType);
             if (err != WMError::WM_OK) {
-                curState_ = PipWindowState::STATE_UNDEFINED;
+                curState_ = PiPWindowState::STATE_UNDEFINED;
             } else {
-                curState_ = PipWindowState::STATE_STARTED;
+                curState_ = PiPWindowState::STATE_STARTED;
             }
             return err;
         }
@@ -215,7 +215,7 @@ WMError PictureInPictureController::StartPictureInPictureInner(StartPipType star
 {
     WMError errCode = CreatePictureInPictureWindow();
     if (errCode != WMError::WM_OK) {
-        curState_ = PipWindowState::STATE_UNDEFINED;
+        curState_ = PiPWindowState::STATE_UNDEFINED;
         WLOGFE("Create pip window failed, err: %{public}u", errCode);
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Create pip window failed");
@@ -223,13 +223,13 @@ WMError PictureInPictureController::StartPictureInPictureInner(StartPipType star
     }
     errCode = ShowPictureInPictureWindow(startType);
     if (errCode != WMError::WM_OK) {
-        curState_ = PipWindowState::STATE_UNDEFINED;
+        curState_ = PiPWindowState::STATE_UNDEFINED;
         WLOGFE("Show pip window failed, err: %{public}u", errCode);
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Show pip window failed");
         return errCode;
     }
-    curState_ = PipWindowState::STATE_STARTED;
+    curState_ = PiPWindowState::STATE_STARTED;
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
         pipOption_->GetPipTemplate(), SUCCESS, "start pip success");
     return WMError::WM_OK;
@@ -239,7 +239,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
 {
     WLOGI("StopPictureInPicture is called, destroyWindow: %{public}u, needAnim: %{public}u", destroyWindow, needAnim);
     std::lock_guard<std::mutex> lock(mutex_);
-    if (curState_ == PipWindowState::STATE_STOPPING || curState_ == PipWindowState::STATE_STOPPED) {
+    if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
         WLOGFE("Repeat stop request, curState: %{public}u", curState_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopPipType),
             pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
@@ -251,14 +251,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, boo
             pipOption_->GetPipTemplate(), FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    curState_ = PipWindowState::STATE_STOPPING;
+    curState_ = PiPWindowState::STATE_STOPPING;
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStop();
     }
     (void)Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(pipDisplayListener_);
     if (!destroyWindow) {
         ResetExtController();
-        curState_ = PipWindowState::STATE_STOPPED;
+        curState_ = PiPWindowState::STATE_STOPPED;
         if (pipLifeCycleListener_) {
             pipLifeCycleListener_->OnPictureInPictureStop();
         }
@@ -283,7 +283,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
         session->ResetExtController();
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
         if (ret != WmErrorCode::WM_OK) {
-            session->curState_ = PipWindowState::STATE_UNDEFINED;
+            session->curState_ = PiPWindowState::STATE_UNDEFINED;
             WLOGFE("Window destroy failed");
             int32_t err = static_cast<int32_t>(ret);
             if (session->pipLifeCycleListener_ != nullptr) {
@@ -299,7 +299,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(bool needAnim, Sto
         PictureInPictureManager::RemoveActiveController(session);
         PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
         session->window_ = nullptr;
-        session->curState_ = PipWindowState::STATE_STOPPED;
+        session->curState_ = PiPWindowState::STATE_STOPPED;
         std::string navId = session->pipOption_->GetNavigationId();
         if (navId != "" && session->mainWindow_) {
             auto navController = NavigationController::GetNavigationController(
@@ -360,7 +360,7 @@ void PictureInPictureController::IsAutoStartEnabled(bool& enable) const
     enable = isAutoStartEnabled_;
 }
 
-PipWindowState PictureInPictureController::GetControllerState()
+PiPWindowState PictureInPictureController::GetControllerState()
 {
     return curState_;
 }
@@ -371,7 +371,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         WLOGFE("invalid size");
         return;
     }
-    if (curState_ != PipWindowState::STATE_STARTED) {
+    if (curState_ != PiPWindowState::STATE_STARTED) {
         WLOGFD("UpdateContentSize is disabled when state: %{public}u", curState_);
         return;
     }
