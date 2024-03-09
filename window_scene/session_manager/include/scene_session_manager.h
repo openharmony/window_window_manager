@@ -550,8 +550,6 @@ private:
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     void ProcessPiPSessionForeground(const sptr<SceneSession> sceneSession);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
-    WSError UpdateParentSessionForSubWindow(const sptr<SceneSession>& sceneSession,
-        sptr<WindowSessionProperty> property);
 };
 } // namespace OHOS::Rosen
 

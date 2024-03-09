@@ -369,12 +369,6 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-    
-    void BindSubWindowToParentSession(const sptr<Session>& session);
-    void RemoveSubWindowToParentSession(const sptr<Session>& session);
-    bool CheckModalSubWindowOnForeground();
-    void HandlePointDownModalSubWindow();
-
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -496,9 +490,6 @@ protected:
 
     mutable std::mutex pointerEventMutex_;
     mutable std::mutex keyEventMutex_;
-    
-    mutable std::mutex modalSubWindowVecMutex_;
-    std::vector<sptr<Session>> modalSubWindowVec_;
 
 private:
     void HandleDialogForeground();
