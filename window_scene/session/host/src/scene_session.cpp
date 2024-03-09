@@ -1922,7 +1922,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
             session->changeSessionVisibilityWithStatusBarFunc_(info, visible);
         }
         SessionState oldState = session->GetSessionState();
-        SessionState newState = visible == false ? SessionState::STATE_HIDE : SessionState::STATE_FOREGROUND;
+        SessionState newState = visible == false ? SessionState::STATE_BACKGROUND : SessionState::STATE_FOREGROUND;
         if (oldState != newState) {
             session->SetSessionState(newState);
             session->NotifySessionStateChange(newState);
