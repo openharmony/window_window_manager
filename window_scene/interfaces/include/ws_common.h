@@ -112,7 +112,6 @@ enum class SessionState : uint32_t {
     STATE_FOREGROUND,
     STATE_ACTIVE,
     STATE_INACTIVE,
-    STATE_HIDE,
     STATE_BACKGROUND,
     STATE_END,
 };

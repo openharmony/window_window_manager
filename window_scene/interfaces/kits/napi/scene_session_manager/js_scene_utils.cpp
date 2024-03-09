@@ -719,8 +719,6 @@ napi_value CreateJsSessionState(napi_env env)
         static_cast<int32_t>(SessionState::STATE_ACTIVE)));
     napi_set_named_property(env, objValue, "STATE_INACTIVE", CreateJsValue(env,
         static_cast<int32_t>(SessionState::STATE_INACTIVE)));
-    napi_set_named_property(env, objValue, "STATE_HIDE", CreateJsValue(env,
-        static_cast<int32_t>(SessionState::STATE_HIDE)));
     napi_set_named_property(env, objValue, "STATE_BACKGROUND", CreateJsValue(env,
         static_cast<int32_t>(SessionState::STATE_BACKGROUND)));
     napi_set_named_property(env, objValue, "STATE_END", CreateJsValue(env,
