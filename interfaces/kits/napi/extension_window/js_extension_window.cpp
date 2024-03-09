@@ -33,8 +33,8 @@ constexpr Rect g_emptyRect = {0, 0, 0, 0};
 } // namespace
 
 JsExtensionWindow::JsExtensionWindow(
-     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
-     int32_t hostWindowId)
+    const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
+    int32_t hostWindowId)
     : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }

@@ -35,6 +35,7 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
+#include "session.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -2532,10 +2533,10 @@ void Session::RemoveSubWindowToParentSession(const sptr<Session>& session)
         session->GetPersistentId(), GetPersistentId());
 }
 
-bool Session::CheckModalSubWindowOnForeground(WindowType type)
+bool Session::CheckModalSubWindowOnForeground()
 {
     std::unique_lock<std::mutex> lock(modalSubWindowVecMutex_);
-    if (modalSubWindowVecMutex_.empty()) {
+    if (modalSubWindowVec_.empty()) {
         WLOGFD("[WMSDialog] Modal subwindow is empty, id: %{public}d", GetPersistentId());
         return false;
     }
