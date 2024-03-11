@@ -41,7 +41,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         return;
     }
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
-    WLOGFI("InputTracking id:%{public}d, Receive keyEvent, windowId:%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d, Receive keyEvent, windowId:%{public}u",
         keyEvent->GetId(), windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
@@ -58,7 +58,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent)
         WLOGFE("AxisEvent is nullptr");
         return;
     }
-    WLOGFD("Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
+    TLOGD(WmsLogTag::WMS_EVENT, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
     axisEvent->MarkProcessed();
 }
 
@@ -71,8 +71,9 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
     uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
-    WLOGFI("InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, windowId:%{public}u "
-        "action = %{public}d", pointerEvent->GetId(), windowId, pointerEvent->GetPointerAction());
+    TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, "
+        "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
+        pointerEvent->GetPointerAction());
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         if (windowId != invalidId) {

@@ -75,6 +75,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "SessionState", CreateJsSessionState(env));
     napi_set_named_property(env, exportObj, "SessionType", SessionTypeInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
+    napi_set_named_property(env, exportObj, "StartupVisibility", CreateJsSessionStartupVisibility(env));
+    napi_set_named_property(env, exportObj, "ProcessMode", CreateJsSessionProcessMode(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -99,6 +101,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::RequestSceneSessionByCall);
     BindNativeFunction(env, exportObj, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
+    BindNativeFunction(env, exportObj, "startUIAbilityBySCB", moduleName,
+        JsSceneSessionManager::StartUIAbilityBySCB);
+    BindNativeFunction(env, exportObj, "changeUIAbilityVisibilityBySCB", moduleName,
+        JsSceneSessionManager::ChangeUIAbilityVisibilityBySCB);
     BindNativeFunction(env, exportObj, "getSessionSnapshot", moduleName,
         JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
@@ -152,27 +158,27 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFI("[WMSLife][NAPI]sceneSession is nullptr");
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]sceneSession is nullptr");
         return;
     }
     auto iter = jsCbMap_.find(CREATE_SYSTEM_SESSION_CB);
     if (iter == jsCbMap_.end()) {
-        WLOGFE("[WMSLife][NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
         return;
     }
 
-    WLOGFD("[WMSLife][NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
     auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            WLOGFE("[WMSLife][NAPI]specific session is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]specific session is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = JsSceneSession::Create(env, specificSession);
         if (jsSceneSessionObj == nullptr) {
-            WLOGFE("[WMSLife][NAPI]jsSceneSessionObj is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSceneSessionObj is nullptr");
             return;
         }
         napi_value argv[] = {jsSceneSessionObj};
@@ -352,7 +358,7 @@ void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
-        WLOGFD("[WMSSystem] NotifyCreateSystemSessionFunc");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyCreateSystemSessionFunc");
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
@@ -545,6 +551,20 @@ napi_value JsSceneSessionManager::StartAbilityBySpecified(napi_env env, napi_cal
     WLOGI("[NAPI]StartAbilityBySpecified");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnStartAbilityBySpecified(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::StartUIAbilityBySCB(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]StartUIAbilityBySCB");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnStartUIAbilityBySCB(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]ChangeUIAbilityVisibilityBySCB");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnChangeUIAbilityVisibilityBySCB(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetWindowSceneConfig(napi_env env, napi_callback_info info)
@@ -1417,6 +1437,103 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnStartUIAbilityBySCB(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]OnStartUIAbilityBySCB");
+    WSErrorCode errCode = WSErrorCode::WS_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+    }
+
+    sptr<SceneSession> sceneSession = nullptr;
+    if (errCode == WSErrorCode::WS_OK) {
+        napi_value nativeObj = argv[0];
+        if (nativeObj == nullptr) {
+            WLOGFE("[NAPI]Failed to convert object to session info");
+            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+        } else {
+            void* pointerResult = nullptr;
+            napi_unwrap(env, nativeObj, &pointerResult);
+            auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+            if (jsSceneSession == nullptr) {
+                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
+            }
+        }
+    }
+
+    if (sceneSession == nullptr) {
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return NapiGetUndefined(env);
+    }
+
+    if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().StartUIAbilityBySCB(sceneSession);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]OnChangeUIAbilityVisibilityBySCB");
+    WSErrorCode errCode = WSErrorCode::WS_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+    }
+
+    sptr<SceneSession> sceneSession = nullptr;
+    if (errCode == WSErrorCode::WS_OK) {
+        napi_value nativeObj = argv[0];
+        if (nativeObj == nullptr) {
+            WLOGFE("[NAPI]Failed to convert object to session info");
+            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+        } else {
+            void* pointerResult = nullptr;
+            napi_unwrap(env, nativeObj, &pointerResult);
+            auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+            if (jsSceneSession == nullptr) {
+                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
+            }
+        }
+    }
+
+    if (sceneSession == nullptr) {
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return NapiGetUndefined(env);
+    }
+
+    if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool visibility = true;
+    ConvertFromJsValue(env, argv[1], visibility);
+
+    SceneSessionManager::GetInstance().ChangeUIAbilityVisibilityBySCB(sceneSession, visibility);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnGetWindowSceneConfig(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]OnGetWindowSceneConfig");
@@ -1972,7 +2089,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    
+
     std::unordered_map<std::string, std::string> mapPayload;
     if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_2], mapPayload)) {
         WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
