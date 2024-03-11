@@ -358,7 +358,7 @@ void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
-        WLOGFD("[WMSSystem] NotifyCreateSystemSessionFunc");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyCreateSystemSessionFunc");
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
@@ -2089,7 +2089,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    
+
     std::unordered_map<std::string, std::string> mapPayload;
     if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_2], mapPayload)) {
         WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
