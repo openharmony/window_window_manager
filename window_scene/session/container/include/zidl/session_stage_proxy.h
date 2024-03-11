@@ -55,6 +55,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyTransformChange(const Transform& transform) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
+    WSError UpdateDisplayId(uint64_t displayId) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
