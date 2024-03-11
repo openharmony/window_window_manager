@@ -375,11 +375,11 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetPendingSessionActivationEventListener(func);
-    WLOGFD("ProcessPendingSceneSessionActivationRegister success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessSessionStateChangeRegister()
@@ -521,7 +521,7 @@ void JsSceneSession::ProcessSessionEventRegister()
 
 void JsSceneSession::ProcessTerminateSessionRegister()
 {
-    WLOGFD("begin to run ProcessTerminateSessionRegister");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     NotifyTerminateSessionFunc func = [weak = weak_from_this()](const SessionInfo& info) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->TerminateSession(info);
@@ -532,12 +532,12 @@ void JsSceneSession::ProcessTerminateSessionRegister()
         return;
     }
     session->SetTerminateSessionListener(func);
-    WLOGFD("ProcessTerminateSessionRegister success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegisterNew()
 {
-    WLOGFD("begin to run ProcessTerminateSessionRegisterNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     NotifyTerminateSessionFuncNew func = [weak = weak_from_this()](const SessionInfo& info, bool needStartCaller) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->TerminateSessionNew(info, needStartCaller);
@@ -548,12 +548,12 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
         return;
     }
     session->SetTerminateSessionListenerNew(func);
-    WLOGFD("ProcessTerminateSessionRegisterNew success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegisterTotal()
 {
-    WLOGFD("begin to run ProcessTerminateSessionRegisterTotal");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     NotifyTerminateSessionFuncTotal func = [weak = weak_from_this()](const SessionInfo& info, TerminateType terminateType) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->TerminateSessionTotal(info, terminateType);
@@ -564,12 +564,12 @@ void JsSceneSession::ProcessTerminateSessionRegisterTotal()
         return;
     }
     session->SetTerminateSessionListenerTotal(func);
-    WLOGFD("ProcessTerminateSessionRegisterTotal success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 {
-    WLOGFD("begin to run ProcessPendingSessionToForegroundRegister");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     NotifyPendingSessionToForegroundFunc func = [weak = weak_from_this()](const SessionInfo& info) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->PendingSessionToForeground(info);
@@ -580,12 +580,12 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
         return;
     }
     session->SetPendingSessionToForegroundListener(func);
-    WLOGFD("ProcessPendingSessionToForegroundRegister success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
-    WLOGFD("begin to run ProcessPendingSessionToBackgroundForDelegatorRegister");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     auto weak = weak_from_this();
     NotifyPendingSessionToBackgroundForDelegatorFunc func = [weak = weak_from_this()](const SessionInfo& info) {
         auto weakJsSceneSession = weak.lock();
@@ -597,7 +597,7 @@ void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
         return;
     }
     session->SetPendingSessionToBackgroundForDelegatorListener(func);
-    WLOGFD("ProcessPendingSessionToBackgroundForDelegatorRegister success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
