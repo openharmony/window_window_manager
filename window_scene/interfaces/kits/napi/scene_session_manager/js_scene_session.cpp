@@ -354,9 +354,8 @@ void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFla
 
 void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
 {
-    NotifyChangeSessionVisibilityWithStatusBarFunc func = [weak = weak_from_this()](SessionInfo& info, bool visible) {
-        auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->ChangeSessionVisibilityWithStatusBar(info, visible);
+    NotifyChangeSessionVisibilityWithStatusBarFunc func = [this](SessionInfo& info, bool visible) {
+        this->ChangeSessionVisibilityWithStatusBar(info, visible);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -369,9 +368,8 @@ void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 {
-    NotifyPendingSessionActivationFunc func = [weak = weak_from_this()](SessionInfo& info) {
-        auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->PendingSessionActivation(info);
+    NotifyPendingSessionActivationFunc func = [this](SessionInfo& info) {
+        this->PendingSessionActivation(info);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1528,11 +1526,8 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
         return;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [weak = weak_from_this(), sessionInfo, visible]() {
-        auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) {
-            weakJsSceneSession->ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
-        }
+    auto task = [this, sessionInfo, visible]() {
+        this->ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
     };
     taskScheduler_->PostMainThreadTask(task, "ChangeSessionVisibilityWithStatusBar, visible:" +
         std::to_string(visible));
