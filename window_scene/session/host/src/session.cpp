@@ -223,6 +223,9 @@ void Session::SetSessionInfo(const SessionInfo& info)
 void Session::SetScreenId(uint64_t screenId)
 {
     sessionInfo_.screenId_ = screenId;
+    if (sessionStage_) {
+        sessionStage_->UpdateDisplayId(screenId);
+    }
 }
 
 const SessionInfo& Session::GetSessionInfo() const
@@ -780,6 +783,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     }
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
+        sessionStage_->UpdateDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
     if (property) {
