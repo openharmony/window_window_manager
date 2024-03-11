@@ -531,6 +531,12 @@ void WindowSessionImpl::UpdateDensity()
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
 
+WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
+{
+    property_->SetDisplayId(displayId);
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
     WLOGFI("[WMSFocus]Report update focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
