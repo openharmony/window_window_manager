@@ -1448,7 +1448,7 @@ HWTEST_F(WindowSessionImplTest, UpdateDisplayId, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     uint64_t newDisplayId = 2;
     auto ret = window->UpdateDisplayId(newDisplayId);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WSError::WM_OK);
     uint64_t displayId = window->property_->GetDisplayId();
     ASSERT_EQ(newDisplayId, displayId);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 end";
