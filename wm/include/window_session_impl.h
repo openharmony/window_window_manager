@@ -101,6 +101,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    WSError UpdateDisplayId(uint64_t displayId) override;
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
     WMError RequestFocus() const override;
