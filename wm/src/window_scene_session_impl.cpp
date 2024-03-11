@@ -134,7 +134,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<ISessionStage> iSessionStage(this);
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
     if (channel == nullptr || property_ == nullptr) {
-        WLOGFE("[WMSLife] inputChannel or property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "inputChannel or property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> eventChannel(channel);
@@ -148,7 +148,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (WindowHelper::IsSubWindow(type)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            WLOGFE("[WMSLife] parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);
             return WMError::WM_ERROR_NULLPTR;
         }
@@ -183,12 +183,12 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
-        WLOGFI("[WMSLife] create specific failed, session is nullptr, name: %{public}s",
+        TLOGI(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
     hostSession_ = session;
-    WLOGFI("[WMSLife] CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
+    TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
     return WMError::WM_OK;
@@ -312,10 +312,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     const sptr<Rosen::ISession>& iSession)
 {
     if (property_ == nullptr) {
-        WLOGFE("[WMSLife] Window Create failed, property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "Window Create failed, property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("[WMSLife] Window Create name:%{public}s, state:%{public}u, windowmode:%{public}u",
+    TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), state_, GetMode());
     // allow iSession is nullptr when create window by innerkits
     if (!context) {
@@ -341,7 +341,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
-        WLOGFI("[WMSLife]Create system or sub window");
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window");
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
@@ -355,7 +355,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
                 return WMError::WM_OK;
             }
         } else if (!WindowHelper::IsSubWindow(type)) {
-            WLOGFI("[WMSLife] create failed not system or sub type, type: %{public}d", type);
+            TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_TYPE;
         }
         ret = CreateAndConnectSpecificSession();
@@ -364,7 +364,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
     }
-    WLOGFD("[WMSLife] Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
+    TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
+        id:%{public}d], state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
@@ -673,15 +674,15 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     if (property_ == nullptr) {
-        WLOGFE("[WMSLife] Window show failed, property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& type = GetType();
-    WLOGFI("[WMSLife] Window show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u,"
+    TLOGI(WmsLogTag::WMS_LIFE, "Window show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u,"
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(),
         GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
-        WLOGFI("[WMSLife] session is invalid, id:%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -690,7 +691,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     property_->SetDecorEnable(isDecorEnable);
 
     if (state_ == WindowState::STATE_SHOWN) {
-        WLOGFD("[WMSLife] window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
+        TLOGD(WmsLogTag::WMS_LIFE, "window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
         if (WindowHelper::IsMainWindow(type) && hostSession_ != nullptr) {
             hostSession_->RaiseAppMainWindowToTop();
@@ -701,7 +702,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("[WMSLife] WindowSceneSessionImpl::Show display is null!");
+        TLOGE(WmsLogTag::WMS_LIFE, "WindowSceneSessionImpl::Show display is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
@@ -715,7 +716,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
     WMError ret = UpdateAnimationFlagProperty(withAnimation);
     if (ret != WMError::WM_OK) {
-        WLOGFE("[WMSLife] UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_LIFE, "UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
     }
     UpdateTitleButtonVisibility();
@@ -739,7 +740,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         NotifyForegroundFailed(ret);
     }
     NotifyWindowStatusChange(GetMode());
-    WLOGFI("[WMSLife] Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
+    TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
     return ret;
 }
@@ -747,28 +748,28 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     if (property_ == nullptr) {
-        WLOGFE("[WMSLife] Window hide failed, property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "Window hide failed, property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     const auto& type = GetType();
-    WLOGFI("[WMSLife] Window hide [id:%{public}d, type: %{public}d, reason:%{public}u, state:%{public}u, "
+    TLOGI(WmsLogTag::WMS_LIFE, "Window hide [id:%{public}d, type: %{public}d, reason:%{public}u, state:%{public}u, "
         "requestState:%{public}u", GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
-        WLOGFI("[WMSLife] session is invalid, id:%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     WindowState validState = WindowHelper::IsSubWindow(type) ? requestState_ : state_;
     if (validState == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFD("[WMSLife] window session is alreay hidden, id:%{public}d", property_->GetPersistentId());
+        TLOGD(WmsLogTag::WMS_LIFE, "window session is alreay hidden, id:%{public}d", property_->GetPersistentId());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
 
     WMError res = UpdateAnimationFlagProperty(withAnimation);
     if (res != WMError::WM_OK) {
-        WLOGFE("[WMSLife] UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(res));
+        TLOGE(WmsLogTag::WMS_LIFE, "UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(res));
         return res;
     }
 
@@ -803,7 +804,8 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     }
     NotifyWindowStatusChange(GetMode());
     escKeyEventTriggered_ = false;
-    WLOGFI("[WMSLife] Window hide success [id:%{public}d, type: %{public}d", property_->GetPersistentId(), type);
+    TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
+        property_->GetPersistentId(), type);
     return res;
 }
 
@@ -953,17 +955,17 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
     if (property_ == nullptr) {
-        WLOGFE("[WMSLife] Window destroy failed, property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "Window destroy failed, property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("[WMSLife] Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (needRemoveWindowInputChannel_) {
         InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
         needRemoveWindowInputChannel_ = false;
     }
     if (IsWindowSessionInvalid()) {
-        WLOGFI("[WMSLife] session is invalid, id: %{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
@@ -993,24 +995,24 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
-    WLOGFI("[WMSLife] Destroy success, id: %{public}d", property_->GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGFI("[WMSLayout] Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
-    WLOGFI("[WMSLayout] Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
@@ -1107,12 +1109,13 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
 
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGFI("[WMSLayout] Id:%{public}d Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d Resize %{public}u %{public}u",
+        property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        WLOGFW("[WMSLayout] Unsupported operation for pip window");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // Float camera window has special limits
@@ -1123,7 +1126,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
     Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
-    WLOGFI("[WMSLayout] Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,

@@ -758,15 +758,15 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
-    WLOGFI("[WMSLife] Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating);
+    TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d",
+        GetPersistentId(), static_cast<uint32_t>(GetSessionState()), isTerminating);
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
-        WLOGFE("[WMSLife]state is not disconnect state:%{public}u id:%{public}u!",
+        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
             GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("[WMSLife]session stage or eventChannel is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
@@ -844,11 +844,11 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LIFE, "Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
-        WLOGFE("[WMSLife] Foreground state invalid! state:%{public}u", state);
+        TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -940,7 +940,7 @@ WSError Session::Background()
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if ((state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) &&
         GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -976,7 +976,7 @@ void Session::NotifyCallingSessionBackground()
 WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
-    WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
@@ -992,26 +992,26 @@ WSError Session::Disconnect(bool isFromClient)
 
 WSError Session::Show(sptr<WindowSessionProperty> property)
 {
-    WLOGFD("[WMSLife] Show session, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", GetPersistentId());
     return WSError::WS_OK;
 }
 
 WSError Session::Hide()
 {
-    WLOGFD("[WMSLife] Hide session, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", GetPersistentId());
     return WSError::WS_OK;
 }
 
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] isActive: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
+    TLOGI(WmsLogTag::WMS_LIFE, "isActive: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (active == isActive_) {
-        WLOGFD("[WMSLife] Session active do not change: [%{public}d]", active);
+        TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
@@ -1086,7 +1086,7 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
             currLifeCycleTask->name.c_str(), persistentId_);
         return;
     }
-    WLOGFI("[WMSLife] Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
         currLifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTaskQueue_.pop_front();
     if (lifeCycleTaskQueue_.empty()) {
@@ -1113,12 +1113,13 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
     }
 
     if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
-        WLOGFE("[WMSLife] Failed to add task %{public}s to life cycle queue", name.c_str());
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
         return;
     }
     sptr<SessionLifeCycleTask> lifeCycleTask = new SessionLifeCycleTask(std::move(task), name, taskType);
     lifeCycleTaskQueue_.push_back(lifeCycleTask);
-    WLOGFI("[WMSLife] Add task %{public}s to life cycle queue, PersistentId=%{public}d", name.c_str(), persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
+        name.c_str(), persistentId_);
     if (lifeCycleTaskQueue_.size() == 1) {
         StartLifeCycleTask(lifeCycleTask);
         return;
@@ -1132,7 +1133,7 @@ void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
     if (lifeCycleTask->running) {
         return;
     }
-    WLOGFI("[WMSLife] Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
         lifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTask->running = true;
     lifeCycleTask->startTime = std::chrono::steady_clock::now();
@@ -1142,7 +1143,7 @@ void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
 WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("[WMSLife] abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto task = [this, abilitySessionInfo, needStartCaller]() {
@@ -1160,7 +1161,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
         if (terminateSessionFuncNew_) {
             terminateSessionFuncNew_(info, needStartCaller);
         }
-        WLOGFI("[WMSLife] TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
             GetPersistentId(), needStartCaller);
     };
     PostLifeCycleTask(task, "TerminateSessionNew", LifeCycleTaskType::STOP);
@@ -1864,7 +1865,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        WLOGI("[WMSLife] NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGI(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
@@ -2245,7 +2246,7 @@ void Session::SetUINodeId(uint32_t uiNodeId)
             OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
             "PID", getpid(),
             "UID", getuid());
-        WLOGE("[WMSLife] SetUINodeId: Repeat set UINodeId ret:%{public}d", eventRet);
+        TLOGE(WmsLogTag::WMS_LIFE, " SetUINodeId: Repeat set UINodeId ret:%{public}d", eventRet);
         return;
     }
     uiNodeId_ = uiNodeId;

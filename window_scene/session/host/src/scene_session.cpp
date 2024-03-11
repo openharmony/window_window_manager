@@ -61,12 +61,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     GeneratePersistentId(false, info.persistentId_);
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
-    WLOGFI("[WMSLife] Create session, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Create session, id: %{public}d", GetPersistentId());
 }
 
 SceneSession::~SceneSession()
 {
-    WLOGI("[WMSLife] ~SceneSession, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -79,7 +79,7 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSLife] session is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto ret = session->Session::Connect(
@@ -122,7 +122,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSLife] session or property is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session or property is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
@@ -159,14 +159,15 @@ WSError SceneSession::Background()
     auto type = GetWindowType();
     if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
         if (!SessionPermission::IsSystemCalling()) {
-            WLOGFE("[WMSLife]Background permission denied id: %{public}d type:%{public}u", GetPersistentId(), type);
+            TLOGE(WmsLogTag::WMS_LIFE, "Background permission denied id: %{public}d type:%{public}u",
+                GetPersistentId(), type);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSLife] session is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto ret = session->Session::Background();
@@ -215,11 +216,12 @@ WSError SceneSession::Disconnect(bool isFromClient)
     PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSLife] session is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (isFromClient) {
-            WLOGFI("[WMSLife] Client need notify destroy session, id: %{public}d", session->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_LIFE, "Client need notify destroy session, id: %{public}d",
+                session->GetPersistentId());
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
@@ -395,10 +397,10 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect fixedRect = session->winRect_;
-        WLOGFI("[WMSLayout] Before fixing, the id:%{public}d, the current rect: %{public}s",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s",
             session->GetPersistentId(), fixedRect.ToString().c_str());
         if (session->FixRectByAspectRatio(fixedRect)) {
-            WLOGFI("[WMSLayout] After fixing, the id:%{public}d, the fixed rect: %{public}s",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
                 session->GetPersistentId(), fixedRect.ToString().c_str());
             session->NotifySessionRectChange(fixedRect, SizeChangeReason::RESIZE);
         }
@@ -417,12 +419,12 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->winRect_ == rect) {
-            WLOGFI("[WMSLayout] skip same rect update id:%{public}d rect:%{public}s!",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s!",
                 session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
-            WLOGFE("[WMSLayout] id:%{public}d rect:%{public}s is invalid",
+            TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
                 session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
@@ -431,7 +433,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_)) {
-            WLOGFI("[WMSLayout] position change no need notify client id:%{public}d, rect:%{public}s, \
+            TLOGI(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, rect:%{public}s, \
                 preRect: %{public}s",
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
@@ -440,7 +442,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(rsTransaction);
         }
-        WLOGFD("[WMSLayout] id:%{public}d, reason:%{public}d, rect:%{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
             session->GetPersistentId(), session->reason_, rect.ToString().c_str());
 
         return WSError::WS_OK;
@@ -457,12 +459,12 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGD("[WMSLayout] NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:%{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:%{public}s",
             session->GetPersistentId(), session->reason_, session->winRect_.ToString().c_str());
         bool isMoveOrDrag = session->moveDragController_ &&
             (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
         if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
-            WLOGFD("[WMSLayout] skip redundant rect update!");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update!");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         WSError ret = WSError::WS_OK;
@@ -549,7 +551,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSLayout] session is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto newWinRect = session->winRect_;
@@ -583,7 +585,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             session->NotifySessionRectChange(rect, reason);
         }
 
-        WLOGFI("[WMSLayout] Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
             "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
             newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return WSError::WS_OK;
@@ -1916,7 +1918,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.callingTokenId_ = abilitySessionInfo->callingTokenId;
         info.reuse = abilitySessionInfo->reuse;
         info.processOptions = abilitySessionInfo->processOptions;
-        
+
         if (session->changeSessionVisibilityWithStatusBarFunc_) {
             session->changeSessionVisibilityWithStatusBarFunc_(info, visible);
         }
@@ -1926,7 +1928,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
             session->SetSessionState(newState);
             session->NotifySessionStateChange(newState);
         }
-        
+
         return WSError::WS_OK;
     };
     PostTask(task, "ChangeSessionVisibilityWithStatusBar");
@@ -2411,7 +2413,7 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                 "SceneSession::UpdateSizeChangeReason%d reason:%d",
                 session->GetPersistentId(), static_cast<uint32_t>(reason));
-            WLOGFD("[WMSLayout]UpdateSizeChangeReason Id: %{public}d, reason: %{public}d",
+            TLOGD(WmsLogTag::WMS_LAYOUT, "UpdateSizeChangeReason Id: %{public}d, reason: %{public}d",
                 session->GetPersistentId(), reason);
         }
         return WSError::WS_OK;
