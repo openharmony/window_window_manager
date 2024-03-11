@@ -87,7 +87,7 @@ static napi_value ExportPictureInPictureState(napi_env env)
     return result;
 }
 
-static napi_value ExportPictureInPictureControlGroup(napi_env env)
+static napi_value ExportVideoPlayControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
@@ -95,10 +95,34 @@ static napi_value ExportPictureInPictureControlGroup(napi_env env)
         static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
     (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD",
         static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
-    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH", static_cast<uint32_t>(PiPControlGroup::MICROPHONE_SWITCH));
-    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON", static_cast<uint32_t>(PiPControlGroup::HANG_UP_BUTTON));
-    (void)SetNamedProperty(env, result, "CAMERA_SWITCH", static_cast<uint32_t>(PiPControlGroup::CAMERA_SWITCH));
-    (void)SetNamedProperty(env, result, "MUTE_SWITCH", static_cast<uint32_t>(PiPControlGroup::MUTE_SWITCH));
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportVideoCallControlGroup(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH));
+    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportVideoMeetingControlGroup(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH));
+    (void)SetNamedProperty(env, result, "MUTE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
@@ -108,7 +132,9 @@ napi_status InitEnums(napi_env env, napi_value exports)
     const napi_property_descriptor properties[] = {
         DECLARE_NAPI_PROPERTY("PiPTemplateType", ExportPictureInPictureTemplateType(env)),
         DECLARE_NAPI_PROPERTY("PiPState", ExportPictureInPictureState(env)),
-        DECLARE_NAPI_PROPERTY("PiPControlGroup", ExportPictureInPictureControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoPlayControlGroup", ExportVideoPlayControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoCallControlGroup", ExportVideoCallControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoMeetingControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
