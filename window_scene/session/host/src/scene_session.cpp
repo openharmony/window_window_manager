@@ -179,9 +179,10 @@ WSError SceneSession::Background()
             if (session->scenePersistence_ && session->snapshot_) {
                 const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
                 session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+            } else {
+                session->snapshot_.reset();
             }
         }
-        session->snapshot_.reset();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(
@@ -232,6 +233,8 @@ WSError SceneSession::Disconnect(bool isFromClient)
             if (session->scenePersistence_ && session->snapshot_) {
                 const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
                 session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+            } else {
+                session->snapshot_.reset();
             }
         }
         if (WindowHelper::IsPipWindow(session->GetWindowType()) &&
@@ -239,7 +242,6 @@ WSError SceneSession::Disconnect(bool isFromClient)
             session->SavePiPRectInfo();
         }
         session->Session::Disconnect(isFromClient);
-        session->snapshot_.reset();
         session->isTerminating = false;
         return WSError::WS_OK;
     },
