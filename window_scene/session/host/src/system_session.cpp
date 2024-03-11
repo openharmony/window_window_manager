@@ -46,7 +46,7 @@ SystemSession::~SystemSession()
 void SystemSession::UpdateCameraFloatWindowStatus(bool isShowing)
 {
     if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
-        WLOGFD("[WMSSystem] CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
         specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
     }
 }
