@@ -51,11 +51,11 @@ enum class StopPipType : uint32_t {
 using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
-    constexpr static int32_t DEFAULT_TIME_DELAY = 400;
     PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture(StartPipType startType);
-    WMError StopPictureInPicture(bool destroyWindow, bool needAnim, StopPipType stopPipType);
+    WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
+    WMError StopPictureInPictureFromClient();
     sptr<Window> GetPipWindow();
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
@@ -91,7 +91,7 @@ private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
-    WMError StopPictureInPictureInner(bool needAnim, StopPipType stopType);
+    WMError StopPictureInPictureInner(StopPipType stopType);
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();

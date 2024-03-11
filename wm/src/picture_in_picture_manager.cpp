@@ -172,19 +172,19 @@ void PictureInPictureManager::DoRestore()
     activeController_->RestorePictureInPictureWindow();
 }
 
-void PictureInPictureManager::DoClose(bool destroyWindow, bool needAnim)
+void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
     WLOGD("DoClose is called");
     if (!HasActiveController()) {
         return;
     }
     StopPipType currentStopType = StopPipType::NULL_STOP;
-    if (needAnim) {
+    if (!byPriority) {
         currentStopType = StopPipType::USER_STOP;
     } else {
         currentStopType = StopPipType::OTHER_PACKAGE_STOP;
     }
-    activeController_->StopPictureInPicture(destroyWindow, needAnim, currentStopType);
+    activeController_->StopPictureInPicture(destroyWindow, currentStopType);
 }
 
 void PictureInPictureManager::DoStartMove()

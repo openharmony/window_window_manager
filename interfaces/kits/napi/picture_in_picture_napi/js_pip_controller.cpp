@@ -150,7 +150,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
                     "JsPipController::OnStopPictureInPicture failed."));
                 return;
             }
-            WMError errCode = weak->StopPictureInPicture(true, true, StopPipType::USER_STOP);
+            WMError errCode = weak->StopPictureInPictureFromClient();
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStopPictureInPicture failed."));
