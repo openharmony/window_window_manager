@@ -43,13 +43,19 @@ protected:
 
 private:
     void Init();
-    void FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& windowInfoList);
+    void FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
+        const std::vector<MMI::WindowInfo>& windowInfoList);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
     void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
+    bool CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
+        const std::vector<MMI::WindowInfo>& windowInfoList);
 
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    std::vector<MMI::DisplayInfo> lastDisplayInfos_;
+    std::vector<MMI::WindowInfo> lastWindowInfoList_;
+    int32_t lastFocusId_ { -1 };
 };
 }//Rosen
 }//OHOS
