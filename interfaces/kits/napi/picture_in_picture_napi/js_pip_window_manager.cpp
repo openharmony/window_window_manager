@@ -34,14 +34,14 @@ namespace {
         PiPControlGroup::FAST_FORWARD_BACKWARD,
     };
     const std::set<PiPControlGroup> VIDEO_CALL_CONTROLS {
-        PiPControlGroup::MICROPHONE_SWITCH,
-        PiPControlGroup::HANG_UP_BUTTON,
-        PiPControlGroup::CAMERA_SWITCH,
+        PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH,
+        PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON,
+        PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
-        PiPControlGroup::MUTE_SWITCH,
-        PiPControlGroup::HANG_UP_BUTTON,
-        PiPControlGroup::CAMERA_SWITCH,
+        PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON,
+        PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH,
+        PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
         {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
