@@ -1445,7 +1445,6 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
     taskScheduler_->PostMainThreadTask(task, "OnRaiseAboveTarget: " + std::to_string(subWindowId));
 }
 
-
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
@@ -1571,18 +1570,18 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = nullptr;
     if (info.persistentId_ == 0) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (result == BrokerStates::BROKER_NOT_START) {
-            WLOGE("[NAPI] The BrokerStates is not opened");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]BrokerStates not started");
             return;
         }
         if (info.reuse) {
-            WLOGFI("session need to be reusesd.");
+            TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
@@ -1592,10 +1591,10 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
             }
         }
         if (sceneSession == nullptr) {
-            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            TLOGI(WmsLogTag::WMS_LIFE, "GetSceneSessionByName return nullptr, RequestSceneSession");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
-                WLOGFE("RequestSceneSession return nullptr");
+                TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");
                 return;
             }
         } else {
@@ -1606,7 +1605,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
-            WLOGFE("GetSceneSession return nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "GetSceneSession return nullptr");
             return;
         }
         sceneSession->SetSessionInfo(info);
@@ -1632,16 +1631,16 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack, env_ref]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -1677,7 +1676,7 @@ void JsSceneSession::OnBackPressed(bool needMoveToBackground)
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), info.persistentId_);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
@@ -1691,16 +1690,16 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [sessionInfo, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -1711,7 +1710,7 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
 
 void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller)
 {
-    WLOGFI("[NAPI]run TerminateSessionNew, bundleName = %{public}s, id = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
@@ -1724,12 +1723,12 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
     }
     auto task = [needStartCaller, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsNeedStartCaller = CreateJsValue(env, needStartCaller);
         if (jsNeedStartCaller == nullptr) {
-            WLOGFE("[NAPI]this target jsNeedStartCaller is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsNeedStartCaller is nullptr");
             return;
         }
         napi_value argv[] = {jsNeedStartCaller};
@@ -1740,7 +1739,7 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
 
 void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType)
 {
-    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, id = %{public}s, terminateType = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, terminateType = %{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), static_cast<int32_t>(terminateType));
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
@@ -1753,12 +1752,12 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
     }
     auto task = [terminateType, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsTerminateType = CreateJsValue(env, static_cast<int32_t>(terminateType));
         if (jsTerminateType == nullptr) {
-            WLOGFE("[NAPI]this target jsTerminateType is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsTerminateType is nullptr");
             return;
         }
         napi_value argv[] = {jsTerminateType};
@@ -1857,7 +1856,7 @@ void JsSceneSession::UpdateSessionIcon(const std::string &iconPath)
 
 void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession)
 {
-    WLOGFI("[NAPI]run OnSessionException, bundleName = %{public}s, id = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
@@ -1871,17 +1870,17 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [sessionInfo, needRemoveSession, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         napi_value jsNeedRemoveSession = CreateJsValue(env, needRemoveSession);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {[0] = jsSessionInfo, [1] = jsNeedRemoveSession};
@@ -1892,14 +1891,14 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
 
 void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]run PendingSessionToForeground, bundleName = %{public}s, id = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(PENDING_SESSION_TO_FOREGROUND_CB);
         if (iter == jsCbMap_.end()) {
-            WLOGFE("[NAPI]fail to find pending session to foreground callback");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find pending session to foreground callback");
             return;
         }
         jsCallBack = iter->second;
@@ -1907,16 +1906,16 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [sessionInfo, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -1927,14 +1926,14 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 
 void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]run PendingSessionToBackgroundForDelegator, bundleName = %{public}s, id = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB);
         if (iter == jsCbMap_.end()) {
-            WLOGFE("[NAPI]fail to find pending session to background for delegator callback");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find pending session to background for delegator callback");
             return;
         }
         jsCallBack = iter->second;
@@ -1942,16 +1941,16 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [sessionInfo, jsCallBack, env = env_]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
