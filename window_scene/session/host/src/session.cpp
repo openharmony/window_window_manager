@@ -1107,7 +1107,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
             LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
         if (isCurrentTaskExpired) {
             WLOGFE("[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
-                name.c_str(), persistentId_);
+                currLifeCycleTask->name.c_str(), persistentId_);
             lifeCycleTaskQueue_.pop_front();
         }
     }
