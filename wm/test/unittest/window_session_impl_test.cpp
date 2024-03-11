@@ -1434,6 +1434,27 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateDisplayIdtest01
+ * @tc.desc: UpdateDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateDisplayId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateDisplayId");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    uint64_t newDisplayId = 2;
+    auto ret = window->UpdateDisplayId(newDisplayId);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    uint64_t displayId = window->property_->GetDisplayId();
+    ASSERT_EQ(newDisplayId, displayId);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 end";
+}
+
+/**
  * @tc.name: IsFloatingWindowAppTypetest01
  * @tc.desc: IsFloatingWindowAppType
  * @tc.type: FUNC
