@@ -2571,12 +2571,11 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
+    WLOGFD("NotifyPrepareClosePiPWindow type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
         return WMError::WM_DO_NOTHING;
     }
-    WLOGFD("NotifyPrepareClosePiPWindow start");
     hostSession_->NotifyPiPWindowPrepareClose();
-    WLOGFD("NotifyPrepareClosePiPWindow end");
     return WMError::WM_OK;
 }
 
