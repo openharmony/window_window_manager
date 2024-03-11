@@ -1936,17 +1936,17 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The interface permission failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "The permission check failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [weakThis = wptr(this), abilitySessionInfo]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (abilitySessionInfo == nullptr) {
-            WLOGFE("abilitySessionInfo is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
@@ -1971,14 +1971,14 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
-            WLOGFI("[WMSLife]PendingSessionActivation: want screenId %{public}" PRIu64 " uri: %{public}s",
+            TLOGI(WmsLogTag::WMS_LIFE, "want: screenId %{public}" PRIu64 " uri: %{public}s",
                 info.screenId_, info.want->GetElement().GetURI().c_str());
         }
 
-        WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
+        TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
             appIndex:%{public}d, affinity:%{public}s", info.bundleName_.c_str(), info.moduleName_.c_str(),
             info.abilityName_.c_str(), info.appIndex_, info.sessionAffinity.c_str());
-        WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, "
+        TLOGI(WmsLogTag::WMS_LIFE, "callState:%{public}d, want persistentId: %{public}d, "
             "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64
             ", windowMode: %{public}d, caller persistentId: %{public}d",
             info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
