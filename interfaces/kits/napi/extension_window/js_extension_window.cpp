@@ -648,14 +648,12 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    option.SetSubWindowTitle(title);
     bool decorEnabled;
     if (!ParseJsValue(argv[1], env, "decorEnabled", decorEnabled)) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    option.SetSubWindowDecorEnable(decorEnabled);
-    option.SetParentId(hostWindowId_);
+    option = SetOption(option, title, decorEnabled, hostWindowId_);
     NapiAsyncTask::CompleteCallback complete =
         [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (weak == nullptr) {
@@ -691,6 +689,14 @@ void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowOption->SetOnlySupportSceneBoard(true);
     windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+}
+
+WindowOption JsExtensionWindow::SetOption(WindowOption option, std::string title, bool decorEnabled, int32_t hostWindowId_)
+{
+    option.SetSubWindowTitle(title);
+    option.SetSubWindowDecorEnable(decorEnabled);
+    option.SetParentId(hostWindowId_);
+    return option;
 }
 }  // namespace Rosen
 }  // namespace OHOS
