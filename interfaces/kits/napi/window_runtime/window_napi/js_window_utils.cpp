@@ -569,7 +569,7 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     if (argc > 0 && GetType(env, argv[0]) != napi_function) {
         nativeArray = argv[0];
         if (nativeArray == nullptr) {
-            WLOGFE("Failed to convert parameter to SystemBarArray");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarArray");
             return false;
         }
         napi_get_array_length(env, nativeArray, &size);
@@ -587,7 +587,7 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
         napi_value getElementValue = nullptr;
         napi_get_element(env, nativeArray, i, &getElementValue);
         if (!ConvertFromJsValue(env, getElementValue, name)) {
-            WLOGFE("Failed to convert parameter to SystemBarName");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarName");
             return false;
         }
         if (name.compare("status") == 0) {
@@ -733,7 +733,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert avoidArea to jsObject");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert avoidArea to jsObject");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "visible",
