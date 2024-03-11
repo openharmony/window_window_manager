@@ -193,13 +193,13 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& w
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
         for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
-            WLOG_D("[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
+            TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
         }
         std::string windowinfolst = "windowinfo  ";
         for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-        WLOG_D("[EventDispatch] - %s", windowinfolst.c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 } 
 
@@ -238,7 +238,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
         for (auto& windowInfo : windowInfos) {
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-        WLOG_D("[EventDispatch] --- %s", windowinfolst.c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %s", windowinfolst.c_str());
         int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSession();
         MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
@@ -255,7 +255,8 @@ void SceneInputManager::FlushDisplayInfoToMMI()
         sceneSessionDirty_->ResetSessionDirty();
 
         std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
-        WLOG_D("[EventDispatch] - windowInfo:windowList = %{public}d", static_cast<int>(windowInfoList.size()));
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - windowInfo:windowList = %{public}d",
+            static_cast<int>(windowInfoList.size()));
         if (windowInfoList.size() == 0) {
             FlushFullInfoToMMI(windowInfoList);
             return;

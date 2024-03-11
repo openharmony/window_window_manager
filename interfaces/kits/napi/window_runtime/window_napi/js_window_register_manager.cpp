@@ -77,11 +77,11 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<J
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listener == nullptr) {
-        WLOGFE("[NAPI]listener is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     listener->SetIsDeprecatedInterface(true);

@@ -308,6 +308,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
     const auto sceneSessionMap = Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
+    std::string windowIDLstLog;
     for (const auto& sceneSessionValuePair : sceneSessionMap) {
         const auto& sceneSessionValue = sceneSessionValuePair.second;
         if (sceneSessionValue == nullptr) {
@@ -328,7 +329,10 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
                 iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId());
         }
         windowInfoList.emplace_back(windowInfo);
+        windowIDLstLog.append(std::to_string(windowInfo.id).append(", "));
     }
+    TLOGI(WmsLogTag::WMS_EVENT, "windowIDList: size:%{public}d %{public}s ",
+        static_cast<int>(windowInfoList.size()), windowIDLstLog.c_str());
     return windowInfoList;
 }
 
