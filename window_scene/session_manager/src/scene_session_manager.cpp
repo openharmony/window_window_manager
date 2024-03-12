@@ -5294,6 +5294,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
     auto task = [this, persistentId, gravity, percent]() -> WSError {
+        bool isKeyboardForeground = true;
         auto sceneSession = GetSceneSession(persistentId);
         if (!sceneSession) {
             WLOGFE("scene session is nullptr");
@@ -5309,17 +5310,21 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         RelayoutKeyBoard(sceneSession);
         if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
             sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
+            isKeyboardForeground = false;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, not need to adjust or restore callingWindow");
-            return WSError::WS_OK;
         }
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "input method is float mode");
             sceneSession->SetWindowAnimationFlag(false);
-            RestoreCallingSessionSizeIfNeed();
+            if (isKeyboardForeground) {
+                RestoreCallingSessionSizeIfNeed();
+            }
         } else {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "input method is bottom mode");
             sceneSession->SetWindowAnimationFlag(true);
-            ResizeSoftInputCallingSessionIfNeed(sceneSession);
+            if (isKeyboardForeground) {
+                ResizeSoftInputCallingSessionIfNeed(sceneSession);
+            }
         }
         return WSError::WS_OK;
     };
