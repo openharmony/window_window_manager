@@ -692,7 +692,7 @@ void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
 }
 
 WindowOption JsExtensionWindow::SetOption(WindowOption option, std::string title,
-    bool decorEnabled, int32_t hostWindowId_)
+    bool decorEnabled)
 {
     option.SetSubWindowTitle(title);
     option.SetSubWindowDecorEnable(decorEnabled);
