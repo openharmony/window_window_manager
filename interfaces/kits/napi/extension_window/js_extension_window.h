@@ -69,7 +69,7 @@ private:
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
     static void SetWindowOption(sptr<Rosen::WindowOption> windowOption);
-    WindowOption SetOption(WindowOption option, std::string title, bool decorEnabled, int32_t hostWindowId_);
+    WindowOption SetOption(WindowOption option, std::string title, bool decorEnabled);
 };
 }  // namespace Rosen
 }  // namespace OHOS
