@@ -18,6 +18,8 @@
 
 #include <shared_mutex>
 #include <system_ability.h>
+#include <mutex>
+#include <condition_variable>
 
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
@@ -174,6 +176,8 @@ public:
     DMError HasImmersiveWindow(bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
+    void BlockScreenOnByCV(void);
+
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
@@ -323,8 +327,9 @@ private:
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
     bool blockScreenPowerChange_ = false;
-    bool isReasonScreenOnSwitch_ = false;
 
+    std::mutex screenOnMutex_;
+    std::condition_variable screenOnCV_;
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;
