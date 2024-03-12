@@ -949,7 +949,7 @@ WSError Session::Background()
         isActive_ = false;
     }
     if (state != SessionState::STATE_INACTIVE) {
-        WLOGFW("[WMSLife] Background state invalid! state:%{public}u", state);
+        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1081,8 +1081,7 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
     }
     sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
     if (currLifeCycleTask->type != taskType) {
-        WLOGFW("[WMSLife] current removed task type does not match. Current running taskName=%{public}s, "
-               "PersistentId=%{public}d",
+        TLOGW(WmsLogTag::WMS_LIFE, "not match, current running taskName=%{public}s, PersistentId=%{public}d",
             currLifeCycleTask->name.c_str(), persistentId_);
         return;
     }
@@ -1106,7 +1105,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
             std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
             LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
         if (isCurrentTaskExpired) {
-            WLOGFE("[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
+            TLOGE(WmsLogTag::WMS_LIFE, "Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
                 currLifeCycleTask->name.c_str(), persistentId_);
             lifeCycleTaskQueue_.pop_front();
         }
@@ -1176,11 +1175,11 @@ void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew
 WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (isTerminating) {
-        WLOGFE("TerminateSessionTotal isTerminating, return!");
+        TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     isTerminating = true;
@@ -1241,7 +1240,7 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
 
 WSError Session::Clear()
 {
-    WLOGFI("Clear, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     auto task = [this]() {
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
@@ -1283,7 +1282,7 @@ void Session::SetPendingSessionToForegroundListener(const NotifyPendingSessionTo
 
 WSError Session::PendingSessionToForeground()
 {
-    WLOGFI("id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
@@ -1299,7 +1298,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
 
 WSError Session::PendingSessionToBackgroundForDelegator()
 {
-    WLOGFD("run PendingSessionToBackgroundForDelegator");
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
         pendingSessionToBackgroundForDelegatorFunc_(info);
