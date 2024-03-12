@@ -580,7 +580,9 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newRequestRect.width_ = rect.width_;
                 newRequestRect.height_ = rect.height_;
             }
-            session->SetSessionRect(newWinRect);
+            if (session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                session->SetSessionRect(newWinRect);
+            }
             session->SetSessionRequestRect(newRequestRect);
             session->NotifySessionRectChange(newRequestRect, newReason);
         } else {
