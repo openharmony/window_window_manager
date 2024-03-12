@@ -820,23 +820,6 @@ enum class CaseType {
     CASE_STAGE
 };
 
-const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string SYSTEM_BAR_TINT_CHANGE_CB = "systemBarTintChange";
-const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
-const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
-const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
-const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
-const std::string WINDOW_EVENT_CB = "windowEvent";
-const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
-const std::string TOUCH_OUTSIDE_CB = "touchOutside";
-const std::string SCREENSHOT_EVENT_CB = "screenshot";
-const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
-const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
-const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
-const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
-const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
-const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
-const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

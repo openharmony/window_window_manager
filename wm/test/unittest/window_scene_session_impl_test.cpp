@@ -509,14 +509,14 @@ HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Close02
+ * @tc.name: Close03
  * @tc.desc: Close
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, Close03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Connect02");
+    option->SetWindowName("Connect03");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     windowscenesession->property_->SetPersistentId(1);
