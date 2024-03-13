@@ -2392,10 +2392,9 @@ HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     scenesession->SetSessionProperty(property);
 
-    uint32_t width = 800;
-    uint32_t height = 600;
-    PiPRectUpdateReason reason = PiPRectUpdateReason::REASON_PIP_START_WINDOW;
-    WSError result = scenesession->UpdatePiPRect(width, height, reason);
+    Rect rect = {0, 0, 800, 600};
+    SizeChangeReason reason = SizeChangeReason::PIP_START;
+    WSError result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -2441,6 +2440,33 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->RequestHideKeyboard();
     ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: SetPipActionEvent
+ * @tc.desc:  * @tc.name: SetPipActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPipActionEvent";
+    info.bundleName_ = "SetPipActionEvent";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    scensession->SetSessionProperty(property);
+    WSError res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
+
+    property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    scensession->SetSessionProperty(property);
+    res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 }
 }

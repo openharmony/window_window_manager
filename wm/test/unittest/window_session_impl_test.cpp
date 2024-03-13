@@ -1659,6 +1659,24 @@ HWTEST_F(WindowSessionImplTest, UnregisterExtensionAvoidAreaChangeListener, Func
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterExtensionAvoidAreaChangeListener end";
 }
+
+/**
+ * @tc.name: SetPipActionEvent
+ * @tc.desc: SetPipActionEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetPipActionEvent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetPipActionEvent start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonArea");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    WSError res = window->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetPipActionEvent end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

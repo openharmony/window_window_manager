@@ -45,7 +45,7 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
-constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI = 200;
+constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 } // namespace
 
@@ -758,15 +758,15 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
-    WLOGFI("[WMSLife] Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating);
+    TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d",
+        GetPersistentId(), static_cast<uint32_t>(GetSessionState()), isTerminating);
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
-        WLOGFE("[WMSLife]state is not disconnect state:%{public}u id:%{public}u!",
+        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
             GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("[WMSLife]session stage or eventChannel is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
@@ -844,11 +844,11 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LIFE, "Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
-        WLOGFE("[WMSLife] Foreground state invalid! state:%{public}u", state);
+        TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -859,7 +859,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
         !GetParentSession()->IsSessionForeground()) {
-        WLOGFD("[WMSDialog] parent is not foreground");
+        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
         SetSessionState(SessionState::STATE_BACKGROUND);
     }
 
@@ -882,7 +882,7 @@ void Session::HandleDialogBackground()
 {
     const auto& type = GetWindowType();
     if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
-        WLOGFD("[WMSDialog] Current session is not main window, id: %{public}d, type: %{public}d",
+        TLOGD(WmsLogTag::WMS_DIALOG, "Current session is not main window, id: %{public}d, type: %{public}d",
             GetPersistentId(), type);
         return;
     }
@@ -896,11 +896,11 @@ void Session::HandleDialogBackground()
         if (dialog == nullptr) {
             continue;
         }
-        WLOGFI("[WMSDialog] Background dialog, id: %{public}d, dialogId: %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Background dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
         dialog->SetSessionState(SessionState::STATE_BACKGROUND);
         if (!dialog->sessionStage_) {
-            WLOGD("[WMSDialog] dialog session stage is nullptr");
+            TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
         }
         dialog->sessionStage_->NotifyDialogStateChange(false);
@@ -911,7 +911,7 @@ void Session::HandleDialogForeground()
 {
     const auto& type = GetWindowType();
     if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
-        WLOGFD("[WMSDialog] Current session is not main window, id: %{public}d, type: %{public}d",
+        TLOGD(WmsLogTag::WMS_DIALOG, "Current session is not main window, id: %{public}d, type: %{public}d",
             GetPersistentId(), type);
         return;
     }
@@ -925,11 +925,11 @@ void Session::HandleDialogForeground()
         if (dialog == nullptr) {
             continue;
         }
-        WLOGFI("[WMSDialog] Foreground dialog, id: %{public}d, dialogId: %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Foreground dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
         dialog->SetSessionState(SessionState::STATE_ACTIVE);
         if (!dialog->sessionStage_) {
-            WLOGD("[WMSDialog] dialog session stage is nullptr");
+            TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
         }
         dialog->sessionStage_->NotifyDialogStateChange(true);
@@ -940,7 +940,7 @@ WSError Session::Background()
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if ((state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) &&
         GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -949,7 +949,7 @@ WSError Session::Background()
         isActive_ = false;
     }
     if (state != SessionState::STATE_INACTIVE) {
-        WLOGFW("[WMSLife] Background state invalid! state:%{public}u", state);
+        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -976,7 +976,7 @@ void Session::NotifyCallingSessionBackground()
 WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
-    WLOGFI("[WMSLife] Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
@@ -992,26 +992,26 @@ WSError Session::Disconnect(bool isFromClient)
 
 WSError Session::Show(sptr<WindowSessionProperty> property)
 {
-    WLOGFD("[WMSLife] Show session, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", GetPersistentId());
     return WSError::WS_OK;
 }
 
 WSError Session::Hide()
 {
-    WLOGFD("[WMSLife] Hide session, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", GetPersistentId());
     return WSError::WS_OK;
 }
 
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] isActive: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
+    TLOGI(WmsLogTag::WMS_LIFE, "isActive: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (active == isActive_) {
-        WLOGFD("[WMSLife] Session active do not change: [%{public}d]", active);
+        TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
@@ -1052,6 +1052,12 @@ bool Session::GetForegroundInteractiveStatus() const
     return foregroundInteractiveStatus_.load();
 }
 
+void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
+    const NotifyChangeSessionVisibilityWithStatusBarFunc& func)
+{
+    changeSessionVisibilityWithStatusBarFunc_ = func;
+}
+
 void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
 {
     pendingSessionActivationFunc_ = func;
@@ -1075,12 +1081,11 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
     }
     sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
     if (currLifeCycleTask->type != taskType) {
-        WLOGFW("[WMSLife] current removed task type does not match. Current running taskName=%{public}s, "
-               "PersistentId=%{public}d",
+        TLOGW(WmsLogTag::WMS_LIFE, "not match, current running taskName=%{public}s, PersistentId=%{public}d",
             currLifeCycleTask->name.c_str(), persistentId_);
         return;
     }
-    WLOGFI("[WMSLife] Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
         currLifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTaskQueue_.pop_front();
     if (lifeCycleTaskQueue_.empty()) {
@@ -1092,35 +1097,42 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    if (!lifeCycleTaskQueue_.empty()) {
+        // remove current running task if expired
+        sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+        bool isCurrentTaskExpired =
+            std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
+            LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
+        if (isCurrentTaskExpired) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
+                currLifeCycleTask->name.c_str(), persistentId_);
+            lifeCycleTaskQueue_.pop_front();
+        }
+    }
+
     if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
-        WLOGFE("[WMSLife] Failed to add task %{public}s to life cycle queue", name.c_str());
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
         return;
     }
     sptr<SessionLifeCycleTask> lifeCycleTask = new SessionLifeCycleTask(std::move(task), name, taskType);
     lifeCycleTaskQueue_.push_back(lifeCycleTask);
-    WLOGFI("[WMSLife] Add task %{public}s to life cycle queue, PersistentId=%{public}d", name.c_str(), persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
+        name.c_str(), persistentId_);
     if (lifeCycleTaskQueue_.size() == 1) {
         StartLifeCycleTask(lifeCycleTask);
         return;
     }
 
-    // remove current running task if expired
-    sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
-    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    bool isCurrentTaskExpired =
-        std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
-        LIFE_CYCLE_TASK_EXPIRED_TIME_MILLI;
-    if (isCurrentTaskExpired) {
-        WLOGFE(
-            "[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d", name.c_str(), persistentId_);
-        lifeCycleTaskQueue_.pop_front();
-        StartLifeCycleTask(lifeCycleTaskQueue_.front());
-    }
+    StartLifeCycleTask(lifeCycleTaskQueue_.front());
 }
 
 void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
 {
-    WLOGFI("[WMSLife] Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
+    if (lifeCycleTask->running) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
         lifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTask->running = true;
     lifeCycleTask->startTime = std::chrono::steady_clock::now();
@@ -1130,7 +1142,7 @@ void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
 WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("[WMSLife] abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto task = [this, abilitySessionInfo, needStartCaller]() {
@@ -1148,7 +1160,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
         if (terminateSessionFuncNew_) {
             terminateSessionFuncNew_(info, needStartCaller);
         }
-        WLOGFI("[WMSLife] TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
             GetPersistentId(), needStartCaller);
     };
     PostLifeCycleTask(task, "TerminateSessionNew", LifeCycleTaskType::STOP);
@@ -1163,11 +1175,11 @@ void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew
 WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (isTerminating) {
-        WLOGFE("TerminateSessionTotal isTerminating, return!");
+        TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     isTerminating = true;
@@ -1228,7 +1240,7 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
 
 WSError Session::Clear()
 {
-    WLOGFI("Clear, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     auto task = [this]() {
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
@@ -1270,7 +1282,7 @@ void Session::SetPendingSessionToForegroundListener(const NotifyPendingSessionTo
 
 WSError Session::PendingSessionToForeground()
 {
-    WLOGFI("id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
@@ -1286,7 +1298,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
 
 WSError Session::PendingSessionToBackgroundForDelegator()
 {
-    WLOGFD("run PendingSessionToBackgroundForDelegator");
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
         pendingSessionToBackgroundForDelegatorFunc_(info);
@@ -1345,7 +1357,7 @@ void Session::SetParentSession(const sptr<Session>& session)
         return;
     }
     parentSession_ = session;
-    WLOGFD("[WMSSystem][WMSSub] Set parent success, parentId: %{public}d, id: %{public}d",
+    TLOGD(WmsLogTag::WMS_SUB, "[WMSDialog][WMSSub]Set parent success, parentId: %{public}d, id: %{public}d",
         session->GetPersistentId(), GetPersistentId());
 }
 
@@ -1359,12 +1371,12 @@ void Session::BindDialogToParentSession(const sptr<Session>& session)
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
-        WLOGFW("[WMSDialog] Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
+        TLOGW(WmsLogTag::WMS_DIALOG, "Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
             session->GetPersistentId(), GetPersistentId());
         return;
     }
     dialogVec_.push_back(session);
-    WLOGFD("[WMSDialog] Bind dialog success, id: %{public}d, parentId: %{public}d",
+    TLOGD(WmsLogTag::WMS_DIALOG, "Bind dialog success, id: %{public}d, parentId: %{public}d",
         session->GetPersistentId(), GetPersistentId());
 }
 
@@ -1373,11 +1385,11 @@ void Session::RemoveDialogToParentSession(const sptr<Session>& session)
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
-        WLOGFD("[WMSDialog] Remove dialog success, id: %{public}d, parentId: %{public}d",
+        TLOGD(WmsLogTag::WMS_DIALOG, "Remove dialog success, id: %{public}d, parentId: %{public}d",
             session->GetPersistentId(), GetPersistentId());
         dialogVec_.erase(iter);
     }
-    WLOGFW("[WMSDialog] Remove dialog failed, id: %{public}d, parentId: %{public}d",
+    TLOGW(WmsLogTag::WMS_DIALOG, "Remove dialog failed, id: %{public}d, parentId: %{public}d",
         session->GetPersistentId(), GetPersistentId());
 }
 
@@ -1391,7 +1403,7 @@ void Session::ClearDialogVector()
 {
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
     dialogVec_.clear();
-    WLOGFD("[WMSDialog] parentId: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_DIALOG, "parentId: %{public}d", GetPersistentId());
     return;
 }
 
@@ -1399,14 +1411,14 @@ bool Session::CheckDialogOnForeground()
 {
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
     if (dialogVec_.empty()) {
-        WLOGFD("[WMSDialog] Dialog is empty, id: %{public}d", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_DIALOG, "Dialog is empty, id: %{public}d", GetPersistentId());
         return false;
     }
     for (auto iter = dialogVec_.rbegin(); iter != dialogVec_.rend(); iter++) {
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
-            WLOGFD("[WMSDialog] Notify touch dialog window, id: %{public}d", GetPersistentId());
+            TLOGD(WmsLogTag::WMS_DIALOG, "Notify touch dialog window, id: %{public}d", GetPersistentId());
             return true;
         }
     }
@@ -1456,7 +1468,7 @@ bool Session::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEve
         parentSessionState != SessionState::STATE_ACTIVE) ||
         (state_ != SessionState::STATE_FOREGROUND &&
         state_ != SessionState::STATE_ACTIVE)) {
-        WLOGFE("[WMSDialog] Dialog's parent info : [persistentId: %{publicd}d, state:%{public}d];"
+        TLOGE(WmsLogTag::WMS_DIALOG, "Dialog's parent info : [persistentId: %{publicd}d, state:%{public}d];"
             "Dialog info:[persistentId: %{publicd}d, state:%{public}d]",
             parentSession->GetPersistentId(), parentSessionState, GetPersistentId(), state_);
         return false;
@@ -1469,7 +1481,7 @@ bool Session::IsTopDialog() const
     int32_t currentPersistentId = GetPersistentId();
     auto parentSession = GetParentSession();
     if (parentSession == nullptr) {
-        WLOGFW("[WMSDialog] Dialog's Parent is NULL. id: %{public}d", currentPersistentId);
+        TLOGW(WmsLogTag::WMS_DIALOG, "Dialog's Parent is NULL. id: %{public}d", currentPersistentId);
         return false;
     }
     std::unique_lock<std::mutex> lock(parentSession->dialogVecMutex_);
@@ -1535,7 +1547,7 @@ void Session::HandlePointDownDialog()
             dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
             dialog->RaiseToAppTopForPointDown();
             dialog->PresentFocusIfPointDown();
-            WLOGFD("[WMSDialog] Point main window, raise to top and dialog need focus, "
+            TLOGD(WmsLogTag::WMS_DIALOG, "Point main window, raise to top and dialog need focus, "
                 "id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
         }
     }
@@ -1552,7 +1564,7 @@ void Session::NotifyPointerEventToRs(int32_t pointAction)
 WSError Session::HandleSubWindowClick(int32_t action)
 {
     if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-        WLOGFD("[WMSDialog] Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
@@ -1592,7 +1604,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         if (parentSession_ && parentSession_->CheckDialogOnForeground() && isPointDown) {
             parentSession_->HandlePointDownDialog();
             if (!IsTopDialog()) {
-                WLOGFI("[WMSDialog] There is at least one active dialog upon this dialog, id: %{public}d",
+                TLOGI(WmsLogTag::WMS_DIALOG, "There is at least one active dialog upon this dialog, id: %{public}d",
                     GetPersistentId());
                 return WSError::WS_ERROR_INVALID_PERMISSION;
             }
@@ -1654,12 +1666,12 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
-            WLOGFD("[WMSDialog] Has dialog on foreground, not transfer pointer event");
+            TLOGD(WmsLogTag::WMS_DIALOG, "Has dialog on foreground, not transfer pointer event");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            WLOGFD("[WMSDialog] Its main window has dialog on foreground, not transfer pointer event");
+            TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, not transfer pointer event");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
@@ -1852,7 +1864,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        WLOGI("[WMSLife] NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGI(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
@@ -1963,9 +1975,8 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
 
 WSError Session::UpdateFocus(bool isFocused)
 {
-    WLOGFD("[WMSFocus]Update focus id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (isFocused_ == isFocused) {
-        WLOGFD("[WMSFocus]Session focus do not change");
+        TLOGD(WmsLogTag::WMS_FOCUS, "Session focus do not change");
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
@@ -1989,7 +2000,6 @@ WSError Session::UpdateFocus(bool isFocused)
 
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
-    WLOGFD("[WMSFocus]Notify focus, id: %{public}d, status: %{public}d", GetPersistentId(), isFocused);
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -2032,10 +2042,10 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)
 {
-    WLOGFD("[WMSFocus]Session set blocking focus of lower session, id: %{public}d, mode: %{public}d", GetPersistentId(),
-        blocking);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Session set blocking focus, id: %{public}d, mode: %{public}d",
+        GetPersistentId(), blocking);
     if (!sessionInfo_.isSystem_) {
-        WLOGFW("[WMSFocus]Session is not system.");
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is not system.");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     blockingFocus_ = blocking;
@@ -2139,7 +2149,7 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFI("[WMSDialog] this is dialog, id: %{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
     return sessionStage_->HandleBackEvent();
@@ -2235,7 +2245,7 @@ void Session::SetUINodeId(uint32_t uiNodeId)
             OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
             "PID", getpid(),
             "UID", getuid());
-        WLOGE("[WMSLife] SetUINodeId: Repeat set UINodeId ret:%{public}d", eventRet);
+        TLOGE(WmsLogTag::WMS_LIFE, " SetUINodeId: Repeat set UINodeId ret:%{public}d", eventRet);
         return;
     }
     uiNodeId_ = uiNodeId;
