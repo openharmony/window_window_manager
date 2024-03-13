@@ -33,25 +33,12 @@ static constexpr unsigned int HILOG_DOMAIN_DMS_DISPLAY_RUNTIME = 0xD004287;
 static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_RUNTIME = 0xD004288;
 static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_SHOT = 0xD004289;
 
-static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
+#define PRINT_WLOG(level, ...) HILOG_IMPL(LABEL.type, level, LABEL.domain, LABEL.tag, ##__VA_ARGS__)
 
-#define WLOG_F(...)  (void)OHOS::HiviewDFX::HiLog::Fatal(LOG_LABEL, __VA_ARGS__)
-#define WLOG_E(...)  (void)OHOS::HiviewDFX::HiLog::Error(LOG_LABEL, __VA_ARGS__)
-#define WLOG_W(...)  (void)OHOS::HiviewDFX::HiLog::Warn(LOG_LABEL, __VA_ARGS__)
-#define WLOG_I(...)  (void)OHOS::HiviewDFX::HiLog::Info(LOG_LABEL, __VA_ARGS__)
-#define WLOG_D(...)  (void)OHOS::HiviewDFX::HiLog::Debug(LOG_LABEL, __VA_ARGS__)
-
-#define _W_DFUNC HiviewDFX::HiLog::Debug
-#define _W_IFUNC HiviewDFX::HiLog::Info
-#define _W_WFUNC HiviewDFX::HiLog::Warn
-#define _W_EFUNC HiviewDFX::HiLog::Error
-
-#define _W_CPRINTF(func, fmt, ...) func(LABEL, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
-
-#define WLOGD(fmt, ...) _W_CPRINTF(_W_DFUNC, fmt, ##__VA_ARGS__)
-#define WLOGI(fmt, ...) _W_CPRINTF(_W_IFUNC, fmt, ##__VA_ARGS__)
-#define WLOGW(fmt, ...) _W_CPRINTF(_W_WFUNC, fmt, ##__VA_ARGS__)
-#define WLOGE(fmt, ...) _W_CPRINTF(_W_EFUNC, fmt, ##__VA_ARGS__)
+#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
 
 #define _W_FUNC __func__
 

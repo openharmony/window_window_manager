@@ -5379,7 +5379,7 @@ void SceneSessionManager::InitPersistentStorage()
 
 WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
-    WLOGFI("GetAccessibilityWindowInfo Called.");
+    WLOGFD("GetAccessibilityWindowInfo Called.");
     if (!SessionPermission::IsSystemServiceCalling()) {
         WLOGFE("The interface only support for system service.");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
