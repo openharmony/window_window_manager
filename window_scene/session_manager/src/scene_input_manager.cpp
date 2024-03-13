@@ -181,7 +181,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::WindowInfo>& w
         mainScreenHeight = displayInfos[0].height;
     }
     if (sceneSessionDirty_ == nullptr) {
-        WLOG_E("scene session dirty is null");
+        WLOGFE("scene session dirty is null");
         return;
     }
 
