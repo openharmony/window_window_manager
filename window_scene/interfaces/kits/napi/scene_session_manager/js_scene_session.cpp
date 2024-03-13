@@ -67,6 +67,25 @@ constexpr int ARG_INDEX_3 = 3;
 
 std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
 
+static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& session)
+{
+    napi_value pipTemplateInfoValue = nullptr;
+    napi_create_object(env, &pipTemplateInfoValue);
+    napi_set_named_property(env, pipTemplateInfoValue, "pipTemplateType",
+        CreateJsValue(env, session->GetPiPTemplateInfo().pipTemplateType));
+    napi_set_named_property(env, pipTemplateInfoValue, "priority",
+        CreateJsValue(env, session->GetPiPTemplateInfo().priority));
+    napi_value controlArrayValue = nullptr;
+    std::vector<std::uint32_t> controlGroups = session->GetPiPTemplateInfo().controlGroup;
+    napi_create_array_with_length(env, controlGroups.size(), &controlArrayValue);
+    auto index = 0;
+    for (const auto& controlGroup : controlGroups) {
+        napi_set_element(env, controlArrayValue, index++, CreateJsValue(env, controlGroup));
+    }
+    napi_set_named_property(env, pipTemplateInfoValue, "controlGroup", controlArrayValue);
+    return pipTemplateInfoValue;
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
     WLOGD("[NAPI]Create");
@@ -86,6 +105,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     napi_set_named_property(env, objValue, "type",
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     napi_set_named_property(env, objValue, "isAppType", CreateJsValue(env, session->IsFloatingWindowAppType()));
+    napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
 
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsSceneSession::RegisterCallback);
@@ -105,6 +125,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
+    BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -945,6 +966,13 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info) {
     WLOGI("[NAPI]SetOffset");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetPipActionEvent");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetPipActionEvent(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2395,6 +2423,44 @@ napi_value JsSceneSession::OnRequestHideKeyboard(napi_env env, napi_callback_inf
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetPipActionEvent(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string action;
+    if (!ConvertFromJsValue(env, argv[0], action)) {
+        WLOGFE("[NAPI]Failed to convert parameter to string");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t status = -1;
+    if (argc > 1) {
+        if (!ConvertFromJsValue(env, argv[1], status)) {
+            WLOGFE("[NAPI]Failed to convert parameter to int");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]Session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Session is nullptr"));
+        return NapiGetUndefined(env);
+    }
+    session->SetPipActionEvent(action, status);
+    return NapiGetUndefined(env);
+}
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
 {

@@ -914,6 +914,18 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
 
+WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t status)
+{
+    WLOGFI("action: %{public}s, status: %{public}d", action.c_str(), status);
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetPipActionEvent(action, status);
+}
+
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
     static std::pair<int32_t, MMI::WindowArea> preWindowArea =
@@ -2339,49 +2351,22 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
         .ReportPiPResize(static_cast<int32_t>(pipRectInfo_.level_), newRect.width_, newRect.height_);
 }
 
-WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
         return WSError::WS_DO_NOTHING;
     }
-    auto task = [weakThis = wptr(this), width, height, reason]() {
+    auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session || session->isTerminating) {
             WLOGE("SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        switch (reason) {
-            case PiPRectUpdateReason::REASON_PIP_START_WINDOW:
-                session->InitPiPRectInfo();
-                session->ProcessUpdatePiPRect(SizeChangeReason::CUSTOM_ANIMATION_SHOW);
-                break;
-            case PiPRectUpdateReason::REASON_PIP_SCALE_CHANGE:
-                session->pipRectInfo_.level_ = static_cast<PiPScaleLevel>((static_cast<int32_t>(
-                    session->pipRectInfo_.level_) + 1) % static_cast<int32_t>(PiPScaleLevel::COUNT));
-                session->ProcessUpdatePiPRect(SizeChangeReason::TRANSFORM);
-                break;
-            case PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE:
-                session->ClearPiPRectPivotInfo();
-                session->pipRectInfo_.originWidth_ = width;
-                session->pipRectInfo_.originHeight_ = height;
-                if (session->moveDragController_ && (session->moveDragController_->GetStartDragFlag() ||
-                    session->moveDragController_->GetStartMoveFlag())) {
-                    WSRect rect = session->moveDragController_->GetTargetRect();
-                    ScenePersistentStorage::Insert(
-                        "pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
-                    ScenePersistentStorage::Insert(
-                        "pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
-                }
-                session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
-                SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
-                break;
-            case PiPRectUpdateReason::REASON_DISPLAY_ROTATION_CHANGE:
-                session->ProcessUpdatePiPRect(SizeChangeReason::ROTATION);
-                session->ClearPiPRectPivotInfo();
-                break;
-            default:
-                return WSError::WS_DO_NOTHING;
+        WSRect wsRect = SessionHelper::TransferToWSRect(rect);
+        if (reason == SizeChangeReason::PIP_START) {
+            session->SetSessionRequestRect(wsRect);
         }
+        session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdatePiPRect");
