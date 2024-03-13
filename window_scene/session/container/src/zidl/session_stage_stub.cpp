@@ -73,6 +73,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTransformChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE),
         &SessionStageStub::HandleNotifyDialogStateChange),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT),
+        &SessionStageStub::HandleSetPipActionEvent),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAYID_CHANGE),
         &SessionStageStub::HandleUpdateDisplayId),
 };
@@ -327,6 +329,22 @@ int SessionStageStub::HandleNotifyDialogStateChange(MessageParcel& data, Message
     WLOGD("HandleNotifyDialogStateChange!");
     bool isForeground = data.ReadBool();
     NotifyDialogStateChange(isForeground);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleSetPipActionEvent");
+    std::string action = data.ReadString();
+    if (action.empty()) {
+        WLOGFE("SessionStageStub pip action event is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t status;
+    if (!data.ReadInt32(status)) {
+        return ERR_INVALID_VALUE;
+    }
+    SetPipActionEvent(action, status);
     return ERR_NONE;
 }
 
