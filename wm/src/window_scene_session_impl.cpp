@@ -385,15 +385,17 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
         sourceType, outside, vpr, rect);
-    if (dragType != AreaType::UNDEFINED) {
-        hostSession_->SendPointEventForMoveDrag(pointerEvent);
-        needNotifyEvent = false;
-    } else if (isMoveArea) {
-        hostSession_->SendPointEventForMoveDrag(pointerEvent);
-    } else if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
-        hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (dragType != AreaType::UNDEFINED) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+            needNotifyEvent = false;
+        } else if (isMoveArea) {
+            hostSession_->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     }
     return needNotifyEvent;
 }
