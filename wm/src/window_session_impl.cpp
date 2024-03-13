@@ -87,6 +87,7 @@ std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSession
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
+bool WindowSessionImpl::isUIExtensionAbility_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -706,6 +707,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         default:
         case WindowSetUIContentType::DEFAULT:
             aceRet = uiContent->Initialize(this, contentInfo, storage);
+            if (isUIExtensionAbility_ && WindowHelper::IsExtensionSubWindow(GetType())) {
+                uiContent->SetUIExtensionSubWindow(true);
+                uiContent->SetUIExtensionAbilityProcess(true);
+            }
             break;
         case WindowSetUIContentType::DISTRIBUTE:
             aceRet = uiContent->Restore(this, contentInfo, storage);
