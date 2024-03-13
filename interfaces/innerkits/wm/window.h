@@ -1499,7 +1499,7 @@ public:
      * @param height width of pip window.
      * @param reason reason of update.
      */
-    virtual void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) {}
+    virtual void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) {}
 
     /**
      * @brief Recovery pip main window.

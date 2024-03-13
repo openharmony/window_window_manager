@@ -96,8 +96,7 @@ void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
             break;
         }
         case MOTION_ACTION_LEFT_LANDSCAPE: {
-            motionRotation = ScreenRotationProperty::IsDefaultDisplayRotationPortrait() ?
-                DeviceRotation::ROTATION_LANDSCAPE_INVERTED : DeviceRotation::ROTATION_LANDSCAPE;
+            motionRotation = DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
             break;
         }
         case MOTION_ACTION_PORTRAIT_INVERTED: {
@@ -105,8 +104,7 @@ void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
             break;
         }
         case MOTION_ACTION_RIGHT_LANDSCAPE: {
-            motionRotation = ScreenRotationProperty::IsDefaultDisplayRotationPortrait() ?
-                DeviceRotation::ROTATION_LANDSCAPE : DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
+            motionRotation = DeviceRotation::ROTATION_LANDSCAPE;
             break;
         }
         default: {
