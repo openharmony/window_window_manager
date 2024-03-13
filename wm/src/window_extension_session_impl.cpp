@@ -61,6 +61,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         windowExtensionSessionSet_.insert(this);
     }
     state_ = WindowState::STATE_CREATED;
+    isUIExtensionAbility_ = true;
     return WMError::WM_OK;
 }
 
