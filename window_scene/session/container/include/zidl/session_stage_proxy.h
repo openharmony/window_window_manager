@@ -55,6 +55,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyTransformChange(const Transform& transform) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
+    WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
 
 private:

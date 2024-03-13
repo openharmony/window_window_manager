@@ -215,10 +215,10 @@ void SessionListenerController::NotifySessionFocused(int32_t persistentId)
     auto task = [weak = weak_from_this(), persistentId]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionFocused failed");
+            TLOGE(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionFocused failed");
             return;
         }
-        WLOGFI("NotifySessionFocused, persistentId:%{public}d.", persistentId);
+        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionFocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionFocused, persistentId);
     };
     taskScheduler_->PostVoidSyncTask(task, "NotifySessionFocused" + std::to_string(persistentId));
@@ -237,10 +237,10 @@ void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
     auto task = [weak = weak_from_this(), persistentId]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionUnfocused failed");
+            TLOGD(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionUnfocused failed");
             return;
         }
-        WLOGFI("NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
+        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionUnfocused, persistentId);
     };
     taskScheduler_->PostVoidSyncTask(task, "NotifySessionUnfocused:PID:" + std::to_string(persistentId));

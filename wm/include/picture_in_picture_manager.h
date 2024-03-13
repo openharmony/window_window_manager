@@ -47,7 +47,7 @@ public:
     static void DoClose(bool destroyWindow, bool needAnim);
     static void DoStartMove();
     static void DoScale();
-    static void DoActionEvent(std::string actionName);
+    static void DoActionEvent(const std::string& actionName, int32_t status);
     static void AutoStartPipWindow(std::string navigationId);
 private:
     // controller in use

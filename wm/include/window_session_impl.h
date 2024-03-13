@@ -177,8 +177,9 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     bool IsMainHandlerAvailable() const override;
+    WSError SetPipActionEvent(const std::string& action, int32_t status) override;
 
-    void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
