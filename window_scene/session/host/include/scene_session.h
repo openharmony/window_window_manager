@@ -142,7 +142,7 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
-    WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
+    WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
@@ -217,6 +217,7 @@ public:
     void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+    WSError SetPipActionEvent(const std::string& action, int32_t status);
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
