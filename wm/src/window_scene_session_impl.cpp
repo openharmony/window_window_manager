@@ -2782,13 +2782,13 @@ WMError WindowSceneSessionImpl::CreateForUIExtension(const std::shared_ptr<Abili
     isSpecificSession = true;
     const auto& type = GetType();
     property_->SetExtensionFlag(true);
-    ret = CreateAndConnectSpecificSessionForUIExtension();
-    
+    ret = CreateAndConnectSpecificSessionForUIExtension();    
     if (ret == WMError::WM_OK) {
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
     }
-    WLOGFD("[WMSLife] Window CreateForUIExtension success [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
+    WLOGFD("[WMSLife] Window CreateForUIExtension success 
+        [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
@@ -2824,7 +2824,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSessionForUIExtension()
         return WMError::WM_ERROR_NULLPTR;
     }
     hostSession_ = session;
-    WLOGFI("[WMSLife] CreateAndConnectSpecificSessionForUIExtension [name:%{public}s, id:%{public}d, parentId: %{public}d, "
+    WLOGFI("[WMSLife] CreateAndConnectSpecificSessionForUIExtension 
+        [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
     return WMError::WM_OK;
