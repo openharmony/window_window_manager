@@ -931,13 +931,12 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsExtensionSubWindow(GetType())) {
+        } else if (WindowHelper::IsSubWindow(GetType())) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
+            (property_->GetExtensionFlag() != true)) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsExtensionSubWindow(GetType())) {
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
