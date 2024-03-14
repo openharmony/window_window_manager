@@ -149,7 +149,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (property_->GetExtensionFlag() == false) {
             auto parentSession = FindParentSessionByParentId(property_->GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-                WLOGFE("[WMSLife] parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+                TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                     property_->GetWindowName().c_str(), type);
                 return WMError::WM_ERROR_NULLPTR;
             }
