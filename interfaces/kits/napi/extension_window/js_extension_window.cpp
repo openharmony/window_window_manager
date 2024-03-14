@@ -689,6 +689,7 @@ void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowOption->SetOnlySupportSceneBoard(true);
     windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+    windowOption->SetExtensionTag(true);
 }
 
 WindowOption JsExtensionWindow::SetOption(WindowOption option, std::string title,
