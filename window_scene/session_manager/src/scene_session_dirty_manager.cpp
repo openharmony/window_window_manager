@@ -91,7 +91,7 @@ void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sce
     }
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    std::unordered_map<ScreenId, ScreenProperty> screensProperties =
+    std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
