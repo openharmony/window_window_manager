@@ -418,7 +418,7 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool onlySupportSceneBoard_ = false;
-    bool isExtensionFlag_ = false;
+    bool isExtensionTag_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

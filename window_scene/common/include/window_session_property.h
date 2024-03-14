@@ -141,7 +141,6 @@ public:
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
     bool IsLayoutFullScreen() const;
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
-    bool GetExtensionFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;

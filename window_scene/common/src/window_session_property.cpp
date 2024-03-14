@@ -745,7 +745,7 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
     isExtensionFlag_ = isExtensionFlag;
 }
 
-void WindowSessionProperty::GetExtensionFlag() const
+bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
 }
