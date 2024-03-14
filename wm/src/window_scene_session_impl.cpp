@@ -2813,6 +2813,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSessionForUIExtension()
     const WindowType& type = GetType();
     // set parent persistentId
     property_->SetParentPersistentId(property_->GetParentId());
+    property_->SetExtensionFlag(true);
     // creat sub session by parent session
     SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
         surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
