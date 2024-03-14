@@ -137,6 +137,8 @@ public:
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
+    WMError CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession) override;
 
 protected:
     void DestroySubWindow();
@@ -155,6 +157,7 @@ protected:
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    WMError CreateAndConnectSpecificSessionForUIExtension();
 
 private:
     WMError DestroyInner(bool needNotifyServer);

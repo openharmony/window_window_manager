@@ -217,5 +217,51 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
         WindowImpl::UpdateConfigurationForAll(configuration);
     }
 }
+
+sptr<Window> Window::CreateSubWindowForUIExtension(const std::string& windowName, sptr<WindowOption>& option,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
+{
+    if (windowName.empty()) {
+        WLOGFE("window name is empty");
+        return nullptr;
+    }
+    if (option == nullptr) {
+        option = new(std::nothrow) WindowOption();
+        if (option == nullptr) {
+            WLOGFE("malloc option failed");
+            return nullptr;
+        }
+    }
+    uint32_t version = 12;
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI new framework support after API10
+    if (version < 12) {
+        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    }
+    option->SetWindowName(windowName);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        WLOGFD("CreateSubWindowForUIExtensionWithSession");
+        sptr<WindowSessionImpl> windowSessionImpl = nullptr;
+        auto sessionType = option->GetWindowSessionType();
+        windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
+        if (windowSessionImpl == nullptr) {
+            WLOGFE("malloc windowSessionImpl failed");
+            return nullptr;
+        }
+        windowSessionImpl->SetWindowType(option->GetWindowType());
+        WMError error = windowSessionImpl->CreateForUIExtension(context, iSession);
+        if (error != WMError::WM_OK) {
+            errCode = error;
+            WLOGFD("CreateWindowWithSession, error: %{public}u", static_cast<uint32_t>(errCode));
+            return nullptr;
+        }
+        return windowSessionImpl;
+    } else {
+        errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

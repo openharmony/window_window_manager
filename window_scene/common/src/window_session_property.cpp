@@ -733,9 +733,14 @@ bool WindowSessionProperty::IsLayoutFullScreen() const
     return isLayoutFullScreen_;
 }
 
-void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
+void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 {
-    isLayoutFullScreen_ = isLayoutFullScreen;
+    isExtensionFlag_ = isExtensionFlag;
+}
+
+void WindowSessionProperty::GetExtensionFlag() const
+{
+    return isExtensionFlag_;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -76,6 +76,7 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingWindow(uint32_t windowId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
+    void SetExtensionFlag(bool isExtensionFlag);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -139,6 +140,7 @@ public:
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
     bool IsLayoutFullScreen() const;
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
+    bool GetExtensionFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -195,6 +197,7 @@ private:
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
+    bool isExtensionFlag_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
