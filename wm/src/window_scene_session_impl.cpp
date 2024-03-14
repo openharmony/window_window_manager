@@ -940,7 +940,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
                 auto parentSession = FindParentSessionByParentId(GetParentId());
                 if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                     return WMError::WM_ERROR_NULLPTR;
-                    }
+                }
             }
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
