@@ -2508,7 +2508,6 @@ WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool sho
         return WSError::WS_OK;
     };
 
-    PostTask(task, "AddOrRemoveSecureExtSession");
-    return WSError::WS_OK;
+    return PostSyncTask(task, "AddOrRemoveSecureExtSession");
 }
 } // namespace OHOS::Rosen
