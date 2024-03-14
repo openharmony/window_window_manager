@@ -27,7 +27,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 WMError WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    return wmAgentContainer_.RegisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
+    return wmAgentContainer_.RegisterAgent(windowManagerAgent, type) ? WMError::WM_OK :
+        WMError::WM_ERROR_REPEAT_OPERATION;
 }
 
 WMError WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
