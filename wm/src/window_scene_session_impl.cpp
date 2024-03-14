@@ -145,24 +145,25 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType& type = GetType();
-    if (WindowHelper::IsSubWindow(type)) { // sub window
-        if (property_->GetExtensionFlag() == false) {
-            auto parentSession = FindParentSessionByParentId(property_->GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                    property_->GetWindowName().c_str(), type);
-                return WMError::WM_ERROR_NULLPTR;
-            }
-            // set parent persistentId
-            property_->SetParentPersistentId(parentSession->GetPersistentId());
-        } else {
-            property_->SetParentPersistentId(property_->GetParentId());
+    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
+        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_NULLPTR;
         }
+        // set parent persistentId
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+    } else if (property_->GetExtensionFlag() == true) {
+        property_->SetParentPersistentId(property_->GetParentId());
+        // creat sub session by parent session
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
         if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
             (type == WindowType::WINDOW_TYPE_TOAST)) {
@@ -936,14 +937,14 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType())) {
-            if(property_->GetExtensionFlag() == false) {
-                auto parentSession = FindParentSessionByParentId(GetParentId());
-                if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-                    return WMError::WM_ERROR_NULLPTR;
-                }
+        } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
+            auto parentSession = FindParentSessionByParentId(GetParentId());
+            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+                return WMError::WM_ERROR_NULLPTR;
             }
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        } else if (property_->GetExtensionFlag() == true) {
+             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
 
