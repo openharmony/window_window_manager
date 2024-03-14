@@ -387,7 +387,7 @@ public:
     /**
      * @brief Get only sceneboard supported
      *
-     * @return Return ture means only sceneboard supported, otherwise not.
+     * @return Return ExtensionTag of subwindow.
     */
     bool GetExtensionTag() const;
 
