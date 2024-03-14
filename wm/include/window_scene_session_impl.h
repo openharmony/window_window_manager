@@ -155,6 +155,7 @@ protected:
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    WMError CreateAndConnectSpecificSessionForUIExtension();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
