@@ -26,18 +26,8 @@ public:
     JsPipManager();
     ~JsPipManager();
     static void Finalizer(napi_env env, void* data, void* hint);
-    static napi_value TriggerAction(napi_env env, napi_callback_info info);
-    static napi_value Restore(napi_env env, napi_callback_info info);
-    static napi_value Close(napi_env env, napi_callback_info info);
-    static napi_value StartMove(napi_env env, napi_callback_info info);
-    static napi_value ProcessScale(napi_env env, napi_callback_info info);
     static napi_value InitXComponentController(napi_env env, napi_callback_info info);
 private:
-    napi_value OnTriggerAction(napi_env env, napi_callback_info info);
-    napi_value OnRestore(napi_env env, napi_callback_info info);
-    napi_value OnClose(napi_env env, napi_callback_info info);
-    napi_value OnStartMove(napi_env env, napi_callback_info info);
-    napi_value OnProcessScale(napi_env env, napi_callback_info info);
     napi_value OnInitXComponentController(napi_env env, napi_callback_info info);
 };
 } // namespace Rosen

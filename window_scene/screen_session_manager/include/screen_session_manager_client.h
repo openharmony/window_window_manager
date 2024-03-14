@@ -46,7 +46,7 @@ public:
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
-    std::unordered_map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
+    std::map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
     FoldDisplayMode GetFoldDisplayMode() const;
 
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation);
