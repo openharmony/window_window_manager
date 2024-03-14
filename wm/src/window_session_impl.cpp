@@ -137,6 +137,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingWindow(option->GetCallingWindow());
+    property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
@@ -2428,12 +2429,6 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 WMError WindowSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
     return SingletonContainer::Get<WindowAdapter>().HideNonSecureWindows(shouldHide);
-}
-
-WMError WindowSessionImpl::CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
-{
-    return WMError::WM_OK;
 }
 
 } // namespace Rosen

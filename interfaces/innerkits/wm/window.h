@@ -1672,18 +1672,6 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief create subwindow for UIExtension
-     *
-     * @param windowName window name, identify window instance
-     * @param option window propertion
-     * @param context ability context
-     * @return sptr<Window> If create window success,return window instance;Otherwise, return nullptr
-     */
-    static sptr<Window> CreateSubWindowForUIExtension(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr,
-        WMError& errCode = DefaultCreateErrCode);
 };
 }
 }

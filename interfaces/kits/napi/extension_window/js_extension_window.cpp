@@ -667,7 +667,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
             }
-            auto window = Window::CreateSubWindowForUIExtension(windowName, windowOption, extWindow->GetContext());
+            auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));

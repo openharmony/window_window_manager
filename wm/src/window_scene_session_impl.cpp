@@ -145,7 +145,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType& type = GetType();
-    if (WindowHelper::IsSubWindow(type)) { // sub window
+    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             WLOGFE("[WMSLife] parent of sub window is nullptr, name: %{public}s, type: %{public}d",
@@ -159,6 +159,12 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+    } else if (property_->GetExtensionFlag() == true) { //extension sub window
+        // set parent persistentId
+        property_->SetParentPersistentId(property_->GetParentId());
+        // creat sub session by parent session
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
         if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
             (type == WindowType::WINDOW_TYPE_TOAST)) {
@@ -931,12 +937,13 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType())) {
+        } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
-            if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
-            (property_->GetExtensionFlag() != true)) {
+            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        } else if ((property_->GetExtensionFlag() == true)) {
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
@@ -2747,87 +2754,6 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         type, state_, requestState_);
     return WSError::WS_OK;
-}
-
-WMError WindowSceneSessionImpl::CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
-{
-    if (property_ == nullptr) {
-        WLOGFE("[WMSLife] Window CreateForUIExtension failed, property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    WLOGFI("[WMSLife] Window CreateForUIExtension name:%{public}s, state:%{public}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), state_, GetMode());
-    // allow iSession is nullptr when create window by innerkits
-    if (!context) {
-        WLOGFW("[WMSLife] context is nullptr, name:%{public}s", property_->GetWindowName().c_str());
-    }
-    WMError ret = WindowSessionCreateCheck();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-    SetDefaultDisplayIdIfNeed();
-    hostSession_ = iSession;
-    context_ = context;
-    AdjustWindowAnimationFlag();
-    if (context && context->GetApplicationInfo() &&
-        context->GetApplicationInfo()->apiCompatibleVersion >= 12 && // 12: api version
-        !SessionPermission::IsSystemCalling()) {
-        WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
-        property_->SetWindowFlags(property_->GetWindowFlags() &
-            (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
-    }
-    WLOGFI("[WMSLife]CreateForUIExtension system or sub window");
-    isSpecificSession = true;
-    const auto& type = GetType();
-    property_->SetExtensionFlag(true);
-    ret = CreateAndConnectSpecificSessionForUIExtension();
-    if (ret == WMError::WM_OK) {
-        UpdateWindowState();
-        RegisterSessionRecoverListener(isSpecificSession);
-    }
-    WLOGFD("[WMSLife] Window CreateForUIExtension success
-        [name:%{public}s, id:%{public}d], state:%{public}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
-    return ret;
-}
-
-WMError WindowSceneSessionImpl::CreateAndConnectSpecificSessionForUIExtension()
-{
-    sptr<ISessionStage> iSessionStage(this);
-    sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
-    if (channel == nullptr || property_ == nullptr) {
-        WLOGFE("[WMSLife] inputChannel or property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    sptr<IWindowEventChannel> eventChannel(channel);
-    auto persistentId = INVALID_SESSION_ID;
-    sptr<Rosen::ISession> session;
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
-    if (token) {
-        property_->SetTokenState(true);
-    }
-    const WindowType& type = GetType();
-    // set parent persistentId
-    property_->SetParentPersistentId(property_->GetParentId());
-    // creat sub session by parent session
-    SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-        surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-    property_->SetPersistentId(persistentId);
-    if (session == nullptr) {
-        WLOGFI("[WMSLife] create specific failed, session is nullptr, name: %{public}s",
-            property_->GetWindowName().c_str());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    hostSession_ = session;
-    WLOGFI("[WMSLife] CreateAndConnectSpecificSessionForUIExtension
-        [name:%{public}s, id:%{public}d, parentId: %{public}d, "
-        "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
-        property_->GetParentPersistentId(), GetType());
-    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
