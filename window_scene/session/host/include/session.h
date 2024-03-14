@@ -47,6 +47,7 @@ class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
+using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
@@ -201,6 +202,8 @@ public:
     void SetNeedSnapshot(bool needSnapshot);
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
+    void SetChangeSessionVisibilityWithStatusBarEventListener(
+        const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
@@ -438,6 +441,7 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
+    NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;

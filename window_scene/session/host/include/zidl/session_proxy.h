@@ -36,6 +36,8 @@ public:
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
     WSError UpdateActiveStatus(bool isActive) override;
+    WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+        bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     bool WriteAbilitySessionInfoBasic(MessageParcel& data, const sptr<AAFwk::SessionInfo> abilitySessionInfo);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
@@ -68,7 +70,7 @@ public:
     void TriggerBindModalUIExtension() override;
 
     void NotifyPiPWindowPrepareClose() override;
-    WSError UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;

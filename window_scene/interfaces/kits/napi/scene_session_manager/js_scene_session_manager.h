@@ -45,6 +45,8 @@ public:
     static napi_value NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
     static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
+    static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
@@ -82,6 +84,8 @@ private:
     napi_value OnNotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSessionByCall(napi_env env, napi_callback_info info);
     napi_value OnStartAbilityBySpecified(napi_env env, napi_callback_info info);
+    napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);

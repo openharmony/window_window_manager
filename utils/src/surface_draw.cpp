@@ -24,7 +24,7 @@
 #include "image_source.h"
 #include "image_type.h"
 #include "image_utils.h"
-#include "pixel_map.h"
+#include "render/rs_pixel_map_util.h"
 #include "surface_capture_future.h"
 #include "window_manager_hilog.h"
 
@@ -192,7 +192,7 @@ void SurfaceDraw::DrawPixelmap(Drawing::Canvas &canvas, const std::string& image
     Drawing::scalar penWidth = 1;
     pen.SetWidth(penWidth);
     canvas.AttachPen(pen);
-    canvas.DrawBitmap(*pixelmap, 0, 0);
+    RSPixelMapUtil::DrawPixelMap(canvas, *pixelmap, 0, 0);
 }
 
 bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath)
@@ -337,7 +337,7 @@ bool SurfaceDraw::DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& 
     int top = (winHeight - scaledPixelMapH) / 2; // 2 is the top and bottom boundaries of the win
     WLOGFD("pixelMap width: %{public}d win height: %{public}d left:%{public}d top:%{public}d.",
         pixelMap->GetWidth(), pixelMap->GetHeight(), left, top);
-    canvas.DrawBitmap(*pixelMap, left, top);
+    RSPixelMapUtil::DrawPixelMap(canvas, *pixelMap, left, top);
     // bufferSize is actual size of the surface buffer after alignment
     int32_t bufferSize = bufferStride * winHeight;
     uint8_t* bitmapAddr = static_cast<uint8_t*>(bitmap.GetPixels());
