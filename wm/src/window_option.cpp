@@ -279,6 +279,7 @@ bool WindowOption::GetExtensionTag() const
     return isExtensionTag_;
 }
 
+
 } // namespace Rosen
 } // namespace OHOS
 
