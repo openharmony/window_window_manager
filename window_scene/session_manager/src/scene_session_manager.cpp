@@ -7139,7 +7139,7 @@ WSError SceneSessionManager::HandleSecureSessionShouldHide(const sptr<SceneSessi
         for (const auto& item: nonSystemFloatSceneSessionMap_) {
             auto session = item.second;
             if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
-                session->NotifyForceHideChange(stateShouldChange);
+                session->NotifyForceHideChange(shouldHide);
                 TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
                     session->GetWindowName().c_str(), item.first);
             }

@@ -1527,7 +1527,7 @@ WSError SceneSessionManagerProxy::AddOrRemoveSecureExtSession(int32_t persistent
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;

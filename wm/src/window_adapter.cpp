@@ -594,11 +594,11 @@ WMError WindowAdapter::AddOrRemoveSecureSession(int32_t persistentId, bool shoul
 }
 
 WMError WindowAdapter::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
- {
+{
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->AddOrRemoveSecureExtSession(persistentId,
         parentId, shouldHide));
- }
+}
 
 } // namespace Rosen
 } // namespace OHOS
