@@ -783,7 +783,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     }
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
-        sessionStage_->UpdateDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
     if (property) {
