@@ -230,16 +230,19 @@ void SceneSessionManager::InitScheduleUtils()
     int64_t value = 0;
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
     auto task = []() {
+        const int32_t userInteraction = 2;
         std::unordered_map<std::string, std::string> payload{
             {"pid", std::to_string(getpid())},
             {"tid", std::to_string(gettid())},
             {"uid", std::to_string(getuid())},
-            {"bundleName", SCENE_BOARD_BUNDLE_NAME},
+            {"extType", "10002"},
+            {"cgroupPrio", "1"},
+            {"isSa", "0"},
+            {"threadName", "OS_SceneSession"}
         };
-        uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
-        int64_t value = 0;
-        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
-        TLOGI(WmsLogTag::WMS_LIFE, "set qos success");
+        uint32_t type = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, userInteraction, payload);
+        TLOGI(WmsLogTag::WMS_LIFE, "set RES_TYPE_KEY_PERF_SCENE success");
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
 #endif
