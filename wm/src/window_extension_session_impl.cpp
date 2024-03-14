@@ -367,10 +367,16 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFI("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
-        rect.height_, static_cast<int>(reason));
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
+    auto preRect = GetRect();
+    if (rect.width_ == preRect.width_ && rect.height_ == preRect.height_) {
+        WLOGFD("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+            rect.height_, static_cast<int>(reason));
+    } else {
+        WLOGFI("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+            rect.height_, static_cast<int>(reason));
+    }
     property_->SetWindowRect(wmRect);
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         auto preRect = GetRect();
