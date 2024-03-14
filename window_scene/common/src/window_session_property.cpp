@@ -735,6 +735,11 @@ bool WindowSessionProperty::IsLayoutFullScreen() const
     return isLayoutFullScreen_;
 }
 
+void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
+{
+    isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
 void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 {
     isExtensionFlag_ = isExtensionFlag;
