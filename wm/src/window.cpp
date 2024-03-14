@@ -232,14 +232,6 @@ sptr<Window> Window::CreateSubWindowForUIExtension(const std::string& windowName
             return nullptr;
         }
     }
-    uint32_t version = 12;
-    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
-        version = context->GetApplicationInfo()->apiCompatibleVersion;
-    }
-    // 10 ArkUI new framework support after API10
-    if (version < 12) {
-        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    }
     option->SetWindowName(windowName);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         WLOGFD("CreateSubWindowForUIExtensionWithSession");
