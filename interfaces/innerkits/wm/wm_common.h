@@ -803,6 +803,13 @@ public:
         return config;
     }
 };
+
+enum class CaseType {
+    CASE_WINDOW_MANAGER = 0,
+    CASE_WINDOW,
+    CASE_STAGE
+};
+
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
