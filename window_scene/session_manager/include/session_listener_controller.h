@@ -65,16 +65,7 @@ private:
     void OnListenerDied(const wptr<IRemoteObject>& remote);
 
     template<typename F, typename... Args>
-    void CallListeners(F func, Args&& ... args)
-    {
-        std::lock_guard<ffrt::mutex> guard(listenerLock_);
-        WLOG_I("CallListeners size: %{public}d ", static_cast<int32_t>(sessionListeners_.size()));
-        for (auto listener : sessionListeners_) {
-            if (listener) {
-                (listener->*func)(std::forward<Args>(args)...);
-            }
-        }
-    }
+    void CallListeners(F func, Args&& ... args);
 
     class ListenerDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

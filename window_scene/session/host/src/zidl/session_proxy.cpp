@@ -21,6 +21,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "accessibility_event_info_parcel.h"
+#include "process_options.h"
 #include "want.h"
 #include "key_event.h"
 #include "pointer_event.h"
@@ -212,6 +213,53 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         if (needUpdate) {
             property->SetWindowMode(static_cast<WindowMode>(reply.ReadUint32()));
         }
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::ChangeSessionVisibilityWithStatusBar(sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
+        WLOGFE("WriteInterfaceToken or other param failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (abilitySessionInfo->callerToken) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
+            WLOGFE("Write callerToken info failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write has not callerToken info failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (abilitySessionInfo->startSetting) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startSetting.get())) {
+            WLOGFE("Write startSetting failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write has not startSetting failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    data.WriteBool(visible);
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -897,7 +945,7 @@ void SessionProxy::NotifyPiPWindowPrepareClose()
     }
 }
 
-WSError SessionProxy::UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason)
+WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -906,12 +954,20 @@ WSError SessionProxy::UpdatePiPRect(const uint32_t width, const uint32_t height,
         WLOGFE("writeInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(width)) {
-        WLOGFE("width write failed.");
+    if (!data.WriteInt32(rect.posX_)) {
+        WLOGFE("write posX_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(height)) {
-        WLOGFE("height write failed.");
+    if (!data.WriteInt32(rect.posY_)) {
+        WLOGFE("write posY_ failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.width_)) {
+        WLOGFE("write width_ failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.height_)) {
+        WLOGFE("write height_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(static_cast<int32_t>(reason))) {
