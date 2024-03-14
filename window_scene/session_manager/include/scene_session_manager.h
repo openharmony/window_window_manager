@@ -287,7 +287,10 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     void FlushWindowInfoToMMI();
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
-    WSError HideNonSecureWindows(bool shouldHide) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId) override;
+    WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
+    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
@@ -418,6 +421,7 @@ private:
         const std::vector<std::string>& params, std::string& dumpInfo);
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
+    void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void CleanUserMap();
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
@@ -439,9 +443,11 @@ private:
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
+    std::map<sptr<IRemoteObject>,  std::pair<int32_t, int32_t>> remoteExtSessionMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
+    std::set<int32_t> secureSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
@@ -509,6 +515,8 @@ private:
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+    sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
+        std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
     sptr<SceneSession> callingSession_ = nullptr;
     uint32_t callingWindowId_ = 0;
 
@@ -552,6 +560,7 @@ private:
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
+    WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 

@@ -386,6 +386,41 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionWindowVisibilityListene
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleAddOrRemoveSecureSession
+ * @tc.desc: test HandleAddOrRemoveSecureSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(12345);
+    data.WriteBool(true);
+
+    int res = stub_->HandleAddOrRemoveSecureExtSession(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleAddOrRemoveSecureExtSession
+ * @tc.desc: test HandleAddOrRemoveSecureExtSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureExtSession, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(12345);
+    data.WriteInt32(1234);
+    data.WriteBool(true);
+
+    int res = stub_->HandleAddOrRemoveSecureExtSession(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
 }
 }
 }

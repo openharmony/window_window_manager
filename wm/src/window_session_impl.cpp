@@ -2435,10 +2435,5 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     }
 }
 
-WMError WindowSessionImpl::HideNonSecureWindows(bool shouldHide)
-{
-    return SingletonContainer::Get<WindowAdapter>().HideNonSecureWindows(shouldHide);
-}
-
 } // namespace Rosen
 } // namespace OHOS

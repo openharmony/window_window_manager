@@ -92,7 +92,10 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    WSError HideNonSecureWindows(bool shouldHide) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId) override;
+    WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
+    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
 
 private:
     template<typename T>
