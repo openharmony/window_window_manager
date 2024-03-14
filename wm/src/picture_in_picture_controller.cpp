@@ -358,6 +358,17 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
         PictureInPictureManager::AttachAutoStartController(handleId_, weakRef_);
     } else {
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
+        if (!pipOption_) {
+            return;
+        }
+        std::string navId = pipOption_->GetNavigationId();
+        if (navId != "" && mainWindow_) {
+            auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+            if (navController) {
+                navController->DeletePIPMode(handleId_);
+                WLOGFI("Delete pip mode id: %{public}d", handleId_);
+            }
+        }
     }
 }
 
