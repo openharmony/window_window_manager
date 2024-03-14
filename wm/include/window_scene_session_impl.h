@@ -137,8 +137,6 @@ public:
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
-    WMError CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession) override;
 
 protected:
     void DestroySubWindow();
