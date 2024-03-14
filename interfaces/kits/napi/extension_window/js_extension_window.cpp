@@ -667,7 +667,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
             }
-            auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
+            auto window = Window::CreateSubWindowForUIExtension(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
@@ -685,7 +685,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
 
 void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
 {
-    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_EXTENSION_SUB_WINDOW);
+    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowOption->SetOnlySupportSceneBoard(true);
     windowOption->SetWindowTag(WindowTag::SUB_WINDOW);

@@ -2430,5 +2430,11 @@ WMError WindowSessionImpl::HideNonSecureWindows(bool shouldHide)
     return SingletonContainer::Get<WindowAdapter>().HideNonSecureWindows(shouldHide);
 }
 
+WMError WindowSessionImpl::CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<Rosen::ISession>& iSession)
+{
+    return WMError::WM_OK;
+}
+
 } // namespace Rosen
 } // namespace OHOS

@@ -194,6 +194,8 @@ public:
     void RecoverSessionListener();
     void SetDefaultDisplayIdIfNeed();
     WMError HideNonSecureWindows(bool shouldHide) override;
+    virtual WMError CreateForUIExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession);
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
