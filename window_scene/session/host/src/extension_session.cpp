@@ -164,8 +164,8 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
 WSError ExtensionSession::Background()
 {
     SessionState state = GetSessionState();
-    WLOGFI("[WMSLife] Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
-            static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LIFE, "Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"",
+        GetPersistentId(), static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION) {
         UpdateSessionState(SessionState::STATE_INACTIVE);
         state = SessionState::STATE_INACTIVE;

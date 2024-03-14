@@ -55,6 +55,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_start_setting",
     "ability_runtime:napi_common",
+    "ability_runtime:process_options",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
