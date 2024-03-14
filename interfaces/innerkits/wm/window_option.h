@@ -231,6 +231,13 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
+     * @brief Set ExtensionSubWindow tag.
+     *
+     * @param isExtensionTag ExtensionSubWindow tag.
+     */
+    void SetExtensionTag(bool isExtensionTag);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -376,6 +383,13 @@ public:
      * @return Return ture means only sceneboard supported, otherwise not.
     */
     bool GetOnlySupportSceneBoard() const;
+
+    /**
+     * @brief Get only sceneboard supported
+     *
+     * @return Return ture means only sceneboard supported, otherwise not.
+    */
+    bool GetExtensionTag() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
