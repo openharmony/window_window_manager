@@ -114,7 +114,10 @@ public:
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
-    virtual WMError HideNonSecureWindows(bool shouldHide);
+    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId);
+    virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
+    virtual WMError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

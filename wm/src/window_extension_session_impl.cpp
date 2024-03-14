@@ -23,6 +23,7 @@
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include "anr_handler.h"
+#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -60,8 +61,16 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
+    AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
+{
+    sptr<ISessionStage> iSessionStage(this);
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
+        property_->GetParentId());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -97,6 +106,10 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
+    }
+    if (shouldHideNonSecureWindows_) {
+        SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+            property_->GetParentId(), false);
     }
     hostSession_ = nullptr;
     {
@@ -556,6 +569,15 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
 
+WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
+{
+    if (shouldHideNonSecureWindows_) {
+        SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+            property_->GetParentId(), true);
+    }
+    return this->WindowSessionImpl::Show(reason, withAnimation);
+}
+
 WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d WindowExtensionSessionImpl Hide, reason:%{public}u, state:%{public}u",
@@ -577,10 +599,25 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
+        if (shouldHideNonSecureWindows_) {
+            SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+                property_->GetParentId(), false);
+        }
     } else {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session Hide to Background is error");
     }
     return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
+{
+    shouldHideNonSecureWindows_ = shouldHide;
+    if (state_ != WindowState::STATE_SHOWN) {
+        return WMError::WM_OK;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+        property_->GetParentId(), shouldHide);
 }
 } // namespace Rosen
 } // namespace OHOS

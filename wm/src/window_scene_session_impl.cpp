@@ -2747,5 +2747,10 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         type, state_, requestState_);
     return WSError::WS_OK;
 }
+
+WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
+{
+    return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureSession(property_->GetPersistentId(), shouldHide);
+}
 } // namespace Rosen
 } // namespace OHOS

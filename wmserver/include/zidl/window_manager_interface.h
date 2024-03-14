@@ -83,7 +83,6 @@ public:
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_GET_FOCUS_WINDOW_INFO,
-        TRANS_ID_HIDE_NON_SECURE_WINDOWS,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -187,7 +186,13 @@ public:
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual WSError HideNonSecureWindows(bool shouldHide)
+    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId) {}
+    virtual WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
     {
         return WSError::WS_OK;
     }
