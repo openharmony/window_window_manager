@@ -37,7 +37,7 @@ InputTransferStation::~InputTransferStation()
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
-        WLOGFE("KeyEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
         return;
     }
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
@@ -46,7 +46,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         keyEvent->MarkProcessed();
-        WLOGFE("WindowInputChannel is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr");
         return;
     }
     channel->HandleKeyEvent(keyEvent);
@@ -55,7 +55,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
 {
     if (axisEvent == nullptr) {
-        WLOGFE("AxisEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "AxisEvent is nullptr");
         return;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
@@ -65,19 +65,22 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent)
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr");
         return;
     }
     // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
     uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
-    TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, "
-        "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
-        pointerEvent->GetPointerAction());
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, "
+            "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
+            pointerEvent->GetPointerAction());
+    }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         if (windowId != invalidId) {
-            WLOGFE("WindowInputChannel is nullptr");
+            TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr");
         }
         pointerEvent->MarkProcessed();
         return;
@@ -92,29 +95,31 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
     }
 
     uint32_t windowId = window->GetWindowId();
-    WLOGFD("Add input window, windowId: %{public}u", windowId);
+    TLOGD(WmsLogTag::WMS_EVENT, "Add input window, windowId: %{public}u", windowId);
 
     // INPUT_WINDOW_TYPE_SKIPPED should not set input consumer
     if (INPUT_WINDOW_TYPE_SKIPPED.find(window->GetType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
-        WLOGFW("skip window for InputConsumer [id:%{public}u, type:%{public}d]", windowId, window->GetType());
+        TLOGW(WmsLogTag::WMS_EVENT, "skip window for InputConsumer [id:%{public}u, type:%{public}d]",
+            windowId, window->GetType());
         return;
     }
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
     std::lock_guard<std::mutex> lock(mtx_);
     if (destroyed_) {
-        WLOGFW("Already destroyed");
+        TLOGW(WmsLogTag::WMS_EVENT, "Already destroyed");
         return;
     }
     windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
     if (inputListener_ == nullptr) {
-        WLOGFD("Init input listener, IsMainHandlerAvailable: %{public}u", window->IsMainHandlerAvailable());
+        TLOGD(WmsLogTag::WMS_EVENT, "Init input listener, IsMainHandlerAvailable: %{public}u",
+            window->IsMainHandlerAvailable());
         std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
         auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainEventRunner != nullptr && window->IsMainHandlerAvailable()) {
-            WLOGFD("MainEventRunner is available");
+            TLOGD(WmsLogTag::WMS_EVENT, "MainEventRunner is available");
             eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
         } else {
-            WLOGFD("MainEventRunner is not available");
+            TLOGD(WmsLogTag::WMS_EVENT, "MainEventRunner is not available");
             eventHandler_ = AppExecFwk::EventHandler::Current();
             auto curThreadId = std::this_thread::get_id();
             if (!eventHandler_ || (mainEventRunner != nullptr &&
@@ -132,7 +137,7 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 
 void InputTransferStation::RemoveInputWindow(uint32_t windowId)
 {
-    WLOGFD("Remove input window, windowId: %{public}u", windowId);
+    TLOGD(WmsLogTag::WMS_EVENT, "Remove input window, windowId: %{public}u", windowId);
     sptr<WindowInputChannel> inputChannel = nullptr;
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -149,7 +154,7 @@ void InputTransferStation::RemoveInputWindow(uint32_t windowId)
     if (inputChannel != nullptr) {
         inputChannel->Destroy();
     } else {
-        WLOGFE("Can not find windowId: %{public}u", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "Can not find windowId: %{public}u", windowId);
     }
 }
 
@@ -157,7 +162,7 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (destroyed_) {
-        WLOGFW("Already destroyed");
+        TLOGW(WmsLogTag::WMS_EVENT, "Already destroyed");
         return nullptr;
     }
     auto iter = windowInputChannels_.find(windowId);
