@@ -86,6 +86,55 @@ napi_value JsEmbeddableWindowStage::LoadContentByName(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
 
+napi_value JsEmbeddableWindowStage::CreateSubWindow(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]CreateSubWindow");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindow(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]GetSubWindow");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
+{
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        };
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = (argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnGetSubWindow",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsEmbeddableWindowStage::OnCreateSubWindow(napi_env env, napi_callback_info info)
+{
+    std::string windowName;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        };
+    napi_value callback = (argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnCreateSubWindow",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
 {
     NapiAsyncTask::CompleteCallback complete =
@@ -309,6 +358,8 @@ napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, 
         objValue, "getMainWindowSync", moduleName, JsEmbeddableWindowStage::GetMainWindowSync);
     BindNativeFunction(env, objValue, "on", moduleName, JsEmbeddableWindowStage::On);
     BindNativeFunction(env, objValue, "off", moduleName, JsEmbeddableWindowStage::Off);
+    BindNativeFunction(env, objValue, "createSubWindow", moduleName, JsEmbeddableWindowStage::CreateSubWindow);
+    BindNativeFunction(env, objValue, "getSubWindow", moduleName, JsEmbeddableWindowStage::GetSubWindow);
 
     return objValue;
 }
