@@ -395,6 +395,25 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsWindowListener::OnWindowNoInteractionCallback()
+{
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr) {
+                WLOGFE("[NAPI]this listener is nullptr");
+                return;
+            }
+            thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowNoInteractionCallback", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 {
     WLOGFD("[NAPI]OnWindowStatusChange");
