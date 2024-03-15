@@ -2759,5 +2759,13 @@ WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
     return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureSession(property_->GetPersistentId(), shouldHide);
 }
+
+WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
