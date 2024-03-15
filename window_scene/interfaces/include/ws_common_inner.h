@@ -51,6 +51,7 @@ enum class WSPropertyChangeAction : uint32_t {
     ACTION_UPDATE_STATUS_PROPS = 1 << 24,
     ACTION_UPDATE_NAVIGATION_PROPS = 1 << 25,
     ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS = 1 << 26,
+    ACTION_UPDATE_TEXTFIELD_AVOID_INFO = 1 << 27,
 };
 
 enum class AreaType : uint32_t {
