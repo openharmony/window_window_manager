@@ -77,13 +77,16 @@ public:
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError HideNonSecureWindows(bool shouldHide) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
+    void AddExtensionWindowStageToSCB();
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
 
@@ -95,6 +98,7 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     int16_t rotationAnimationCount_ { 0 };
+    bool shouldHideNonSecureWindows_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
