@@ -208,6 +208,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     }
     if (property) {
         property->SetPersistentId(reply.ReadInt32());
+        property->SetDisplayId(reply.ReadUint64());
         bool needUpdate = reply.ReadBool();
         property->SetIsNeedUpdateWindowMode(needUpdate);
         if (needUpdate) {

@@ -223,6 +223,9 @@ void Session::SetSessionInfo(const SessionInfo& info)
 void Session::SetScreenId(uint64_t screenId)
 {
     sessionInfo_.screenId_ = screenId;
+    if (sessionStage_) {
+        sessionStage_->UpdateDisplayId(screenId);
+    }
 }
 
 const SessionInfo& Session::GetSessionInfo() const
