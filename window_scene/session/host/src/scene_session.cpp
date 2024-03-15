@@ -147,6 +147,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
         return WSError::WS_OK;
     };
@@ -187,6 +188,7 @@ WSError SceneSession::Background()
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
         return WSError::WS_OK;
     };
@@ -243,6 +245,9 @@ WSError SceneSession::Disconnect(bool isFromClient)
         }
         session->Session::Disconnect(isFromClient);
         session->isTerminating = false;
+        if (session->specificCallback_ != nullptr) {
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+        }
         return WSError::WS_OK;
     },
         "Disconnect");
@@ -2473,5 +2478,36 @@ bool SceneSession::IsStartMoving() const
 void SceneSession::SetIsStartMoving(const bool startMoving)
 {
     isStartMoving_.store(startMoving);
+}
+
+bool SceneSession::ShouldHideNonSecureWindows() const
+{
+    return IsSessionForeground() && (shouldHideNonSecureWindows_.load() || !secureExtSessionSet_.empty());
+}
+
+void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)
+{
+    shouldHideNonSecureWindows_.store(shouldHide);
+}
+
+WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide)
+{
+    auto task = [weakThis = wptr(this), persistentId, shouldHide]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "session is nullptr");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+
+        auto& sessionSet = session->secureExtSessionSet_;
+        if (shouldHide) {
+            sessionSet.insert(persistentId);
+        } else {
+            sessionSet.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+
+    return PostSyncTask(task, "AddOrRemoveSecureExtSession");
 }
 } // namespace OHOS::Rosen

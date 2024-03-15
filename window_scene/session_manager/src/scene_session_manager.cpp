@@ -910,6 +910,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onOutsideDownEvent_ = std::bind(&SceneSessionManager::OnOutsideDownEvent,
         this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onHandleSecureSessionShouldHide_ = std::bind(&SceneSessionManager::HandleSecureSessionShouldHide,
+        this, std::placeholders::_1);
     return specificCb;
 }
 
@@ -1643,6 +1645,23 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
         remoteObjectMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroySpecificSession");
+}
+
+void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession)
+{
+    auto task = [this, remoteExtSession]() {
+        auto iter = remoteExtSessionMap_.find(remoteExtSession);
+        if (iter == remoteExtSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession");
+            return;
+        }
+        auto persistentId = iter->second.first;
+        auto parentId = iter->second.second;
+        TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
+        AddOrRemoveSecureExtSession(persistentId, parentId, false);
+        remoteExtSessionMap_.erase(iter);
+    };
+    taskScheduler_->PostAsyncTask(task, "DestroyExtensionSession");
 }
 
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -7071,24 +7090,113 @@ void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
 
-WSError SceneSessionManager::HideNonSecureWindows(bool shouldHide)
+void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+    int32_t parentId)
 {
-    WLOGFI("HideNonSecureWindows, shouldHide %{public}u", shouldHide);
-    if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("HideNonSecureWindows permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    if (sessionStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
+        return;
     }
-    auto task = [this, shouldHide]() {
+
+    auto remoteExtSession = sessionStage->AsObject();
+    remoteExtSessionMap_.insert(std::make_pair(remoteExtSession, std::make_pair(persistentId, parentId)));
+
+    if (extensionDeath_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to create death recipient");
+        return;
+    }
+    if (!remoteExtSession->AddDeathRecipient(extensionDeath_)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to add death recipient");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_UIEXT, "add extension window stage Id: %{public}d, parent Id: %{public}d",
+        persistentId, parentId);
+}
+
+WSError SceneSessionManager::HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sceneSession is nullptr");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+
+    auto persistentId = sceneSession->GetPersistentId();
+    auto shouldHide = sceneSession->ShouldHideNonSecureWindows();
+    auto sizeBefore = secureSessionSet_.size();
+    if (shouldHide) {
+        secureSessionSet_.insert(persistentId);
+    } else {
+        secureSessionSet_.erase(persistentId);
+    }
+
+    auto sizeAfter = secureSessionSet_.size();
+    if (sizeBefore == sizeAfter) {
+        return WSError::WS_OK;
+    }
+
+    auto stateShouldChange = (sizeBefore == 0 && sizeAfter > 0) || (sizeBefore > 0 && sizeAfter == 0);
+    if (stateShouldChange) {
         for (const auto& item: nonSystemFloatSceneSessionMap_) {
             auto session = item.second;
             if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
                 session->NotifyForceHideChange(shouldHide);
-                WLOGFI("HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
-                       session->GetWindowName().c_str(), item.first);
+                TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
+                    session->GetWindowName().c_str(), item.first);
             }
         }
-        return WSError::WS_OK;
+    }
+
+    auto subSessions = sceneSession->GetSubSession();
+    for (const auto& subSession: subSessions) {
+        subSession->NotifyForceHideChange(shouldHide);
+        TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d",
+            subSession->GetWindowName().c_str(), subSession->GetPersistentId());
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureSession, shouldHide %{public}u", shouldHide);
+    auto task = [this, persistentId, shouldHide]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        auto iter = sceneSessionMap_.find(persistentId);
+        if (iter == sceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", persistentId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+
+        auto sceneSession = iter->second;
+        sceneSession->SetShouldHideNonSecureWindows(shouldHide);
+        return HandleSecureSessionShouldHide(sceneSession);
     };
-    return taskScheduler_->PostSyncTask(task);
+
+    taskScheduler_->PostAsyncTask(task, "AddOrRemoveSecureSession");
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureExtSession, shouldHide %{public}u", shouldHide);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto task = [this, persistentId, parentId, shouldHide]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        auto iter = sceneSessionMap_.find(parentId);
+        if (iter == sceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", parentId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+
+        auto sceneSession = iter->second;
+        sceneSession->AddOrRemoveSecureExtSession(persistentId, shouldHide);
+        return HandleSecureSessionShouldHide(sceneSession);
+    };
+
+    taskScheduler_->PostAsyncTask(task, "AddOrRemoveSecureExtSession");
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

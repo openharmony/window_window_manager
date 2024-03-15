@@ -2468,6 +2468,75 @@ HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
     res = scensession->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: ShouldHideNonSecureWindows
+ * @tc.desc:  * @tc.name: ShouldHideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ShouldHideNonSecureWindows, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ShouldHideNonSecureWindows";
+    info.bundleName_ = "ShouldHideNonSecureWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->ShouldHideNonSecureWindows());
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->SetShouldHideNonSecureWindows(true);
+    EXPECT_TRUE(sceneSession->ShouldHideNonSecureWindows());
+}
+
+
+/**
+ * @tc.name: SetShouldHideNonSecureWindows
+ * @tc.desc:  * @tc.name: SetShouldHideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetShouldHideNonSecureWindows, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetShouldHideNonSecureWindows";
+    info.bundleName_ = "SetShouldHideNonSecureWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->shouldHideNonSecureWindows_.load());
+    sceneSession->SetShouldHideNonSecureWindows(true);
+    EXPECT_TRUE(sceneSession->shouldHideNonSecureWindows_.load());
+}
+
+/**
+ * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.desc:  * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddOrRemoveSecureExtSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddOrRemoveSecureExtSession";
+    info.bundleName_ = "AddOrRemoveSecureExtSession";
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+            new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
+    sceneSession->AddOrRemoveSecureExtSession(12345, true);
+    EXPECT_EQ(sceneSession->secureExtSessionSet_.size(), 1);
+    EXPECT_EQ(*sceneSession->secureExtSessionSet_.begin(), 12345);
+    sceneSession->AddOrRemoveSecureExtSession(12345, false);
+    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
+}
 }
 }
 }

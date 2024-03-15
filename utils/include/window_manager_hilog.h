@@ -61,6 +61,7 @@ enum class WmsLogTag : uint8_t {
     WMS_LIFE,                  // C0420A
     WMS_KEYBOARD,              // C0420B
     WMS_EVENT,                 // C0420C
+    WMS_UIEXT,                 // C0420D
 
     END = 256,                 // Last one, do not use
 };
@@ -79,6 +80,7 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_LIFE, "WMSLife" },
     { WmsLogTag::WMS_KEYBOARD, "WMSKeyboard" },
     { WmsLogTag::WMS_EVENT, "WMSEvent" },
+    { WmsLogTag::WMS_UIEXT, "WMSUiext" },
 };
 
 #define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
