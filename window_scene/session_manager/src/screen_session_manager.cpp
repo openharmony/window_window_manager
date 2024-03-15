@@ -42,6 +42,7 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
+#include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
 
 namespace OHOS::Rosen {
@@ -3258,12 +3259,13 @@ static std::string Str16ToStr8(const std::u16string& str)
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGFI("Dump begin");
-    if (fd < 0) {
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    if (dumper == nullptr) {
+        WLOGFE("dumper is nullptr");
         return -1;
     }
-    (void) signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE crash
-    UniqueFd ufd = UniqueFd(fd); // auto close
-    fd = ufd.Get();
+    dumper->ExcuteDumpCmd();
+
     std::vector<std::string> params;
     for (auto& arg : args) {
         params.emplace_back(Str16ToStr8(arg));
@@ -3293,11 +3295,6 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
-    }
-    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
-    if (ret < 0) {
-        WLOGFE("dprintf error");
-        return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("dump end");
     return 0;
