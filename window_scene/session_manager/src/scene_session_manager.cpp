@@ -314,7 +314,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     }
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
     item = config["defaultWindowMode"];
-    if (GetSingleIntItem(item, param) && 
+    if (GetSingleIntItem(item, param) &&
         (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
         param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
         systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
