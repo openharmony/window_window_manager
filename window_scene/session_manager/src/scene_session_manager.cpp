@@ -306,16 +306,16 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigDecor(item);
     }
+
     item = config["backgroundswitch"];
-    int32_t param = -1; 
+    int32_t param = -1;
     if (GetSingleIntItem(item, param) && param == 1) {
         systemConfig_.backgroundswitch = true;
     }
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
     item = config["defaultWindowMode"];
     if (GetSingleIntItem(item, param) && 
-        (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
-         param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+        (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) || param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
         systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
     }
     item = config["defaultMaximizeMode"];

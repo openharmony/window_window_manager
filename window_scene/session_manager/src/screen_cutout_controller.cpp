@@ -28,6 +28,9 @@ constexpr std::vector<int>::size_type BOTTOM = 3;
 constexpr uint8_t HALF_SCREEN = 2;
 constexpr uint8_t QUARTER_SCREEN = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenCutoutController" };
+constexpr int32_t Rotate90 = 90;
+constexpr int32_t Rotate180 = 180;
+constexpr int32_t Rotate270 = 270;
 
 template<int32_t>
 DMRect GetRotatedRect(uint32_t width, uint32_t height, const DMRect& rect);
@@ -109,19 +112,19 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<90>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotate90>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_180: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<180>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotate180>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_270: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<270>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotate270>(displayWidth, displayHeight, rect));
             }
             break;
         }
