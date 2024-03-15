@@ -730,6 +730,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         uiContent_ = std::move(uiContent);
     }
 
+    WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}u, isUIExtensionAbilityProcess:%{public}u",
+        static_cast<uint32_t>(uiContent_->GetUIExtensionSubWindow()), static_cast<uint32_t>(uiContent_->GetUIExtensionAbilityProcess()));
+
     if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
         SetAPPWindowLabel(subWindowTitle_);
     }
