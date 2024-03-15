@@ -23,6 +23,7 @@
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include "anr_handler.h"
+#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -60,8 +61,16 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
+    AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
+{
+    sptr<ISessionStage> iSessionStage(this);
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
+        property_->GetParentId());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -83,10 +92,10 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr
 
 WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
-    WLOGFI("[WMSLife]Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
+    TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("[WMSLife]session is invalid");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (hostSession_ != nullptr) {
@@ -97,6 +106,10 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
+    }
+    if (shouldHideNonSecureWindows_) {
+        SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+            property_->GetParentId(), false);
     }
     hostSession_ = nullptr;
     {
@@ -372,10 +385,16 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFI("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
-        rect.height_, static_cast<int>(reason));
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
+    auto preRect = GetRect();
+    if (rect.width_ == preRect.width_ && rect.height_ == preRect.height_) {
+        WLOGFD("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+            rect.height_, static_cast<int>(reason));
+    } else {
+        WLOGFI("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+            rect.height_, static_cast<int>(reason));
+    }
     property_->SetWindowRect(wmRect);
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         auto preRect = GetRect();
@@ -555,17 +574,27 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
 
+WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
+{
+    if (shouldHideNonSecureWindows_) {
+        SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+            property_->GetParentId(), true);
+    }
+    return this->WindowSessionImpl::Show(reason, withAnimation);
+}
+
 WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGFI("[WMSLife]id:%{public}d WindowExtensionSessionImpl Hide, reason:%{public}u, state:%{public}u",
-           GetPersistentId(), reason, state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d WindowExtensionSessionImpl Hide, reason:%{public}u, state:%{public}u",
+        GetPersistentId(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFD("[WMSLife]window extension session is already hidden [name:%{public}s,id:%{public}d,type: %{public}u]",
-               property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
+        TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
+            [name:%{public}s,id:%{public}d,type: %{public}u]",
+            property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
@@ -575,10 +604,25 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
+        if (shouldHideNonSecureWindows_) {
+            SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+                property_->GetParentId(), false);
+        }
     } else {
-        WLOGFD("[WMSLife]window extension session Hide to Background is error");
+        TLOGD(WmsLogTag::WMS_LIFE, "window extension session Hide to Background is error");
     }
     return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
+{
+    shouldHideNonSecureWindows_ = shouldHide;
+    if (state_ != WindowState::STATE_SHOWN) {
+        return WMError::WM_OK;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
+        property_->GetParentId(), shouldHide);
 }
 } // namespace Rosen
 } // namespace OHOS

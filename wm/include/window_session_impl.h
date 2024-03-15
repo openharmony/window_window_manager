@@ -101,6 +101,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    WSError UpdateDisplayId(uint64_t displayId) override;
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
     WMError RequestFocus() const override;
@@ -176,8 +177,9 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     bool IsMainHandlerAvailable() const override;
+    WSError SetPipActionEvent(const std::string& action, int32_t status) override;
 
-    void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
+    void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -193,7 +195,6 @@ public:
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
     void RecoverSessionListener();
     void SetDefaultDisplayIdIfNeed();
-    WMError HideNonSecureWindows(bool shouldHide) override;
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;

@@ -3062,6 +3062,63 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTe
     EXPECT_EQ(pixelMap, nullptr);
 }
 
+/**
+ * @tc.name: HandleSecureSessionShouldHide
+ * @tc.desc: SceneSesionManager handle secure session should hide
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSecureSessionShouldHide";
+    info.bundleName_ = "HandleSecureSessionShouldHide";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->SetShouldHideNonSecureWindows(true);
+    auto ret = ssm_->HandleSecureSessionShouldHide(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
+    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), sceneSession->persistentId_);
+}
+
+/**
+ * @tc.name: AddOrRemoveSecureSession
+ * @tc.desc: SceneSesionManager hide non-secure windows by scene session
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureSession, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddOrRemoveSecureSession";
+    info.bundleName_ = "AddOrRemoveSecureSession1";
+
+    int32_t persistentId = 12345;
+    auto ret = ssm_->AddOrRemoveSecureSession(persistentId, true);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.desc: SceneSesionManager hide non-secure windows by extension session
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureExtSession, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddOrRemoveSecureExtSession";
+    info.bundleName_ = "AddOrRemoveSecureExtSession1";
+
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    auto ret = ssm_->AddOrRemoveSecureExtSession(persistentId, parentId, true);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

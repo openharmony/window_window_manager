@@ -86,7 +86,9 @@ private:
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleHideNonSecureWindows(MessageParcel& data, MessageParcel& reply);
+    int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
+    int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
+    int HandleAddOrRemoveSecureExtSession(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

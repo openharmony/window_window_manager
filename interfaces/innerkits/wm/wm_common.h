@@ -285,6 +285,9 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_TO_FULL,
     FULL_TO_FLOATING,
     FLOATING_TO_FULL,
+    PIP_START,
+    PIP_SHOW,
+    PIP_RATIO_CHANGE,
     END,
 };
 
@@ -649,18 +652,6 @@ enum class PipState : int32_t {
 };
 
 /**
- * @brief Enumerates pip window rect update reason.
- */
-enum class PiPRectUpdateReason : int32_t {
-    REASON_PIP_START_WINDOW,
-    REASON_PIP_MOVE,
-    REASON_PIP_VIDEO_RATIO_CHANGE,
-    REASON_PIP_SCALE_CHANGE,
-    REASON_PIP_DESTROY_WINDOW,
-    REASON_DISPLAY_ROTATION_CHANGE,
-};
-
-/**
  * @brief Enumerates picture in picture scale level.
  */
 enum class PiPScaleLevel : int32_t {
@@ -812,6 +803,13 @@ public:
         return config;
     }
 };
+
+enum class CaseType {
+    CASE_WINDOW_MANAGER = 0,
+    CASE_WINDOW,
+    CASE_STAGE
+};
+
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

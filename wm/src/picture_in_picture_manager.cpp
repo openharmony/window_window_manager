@@ -26,6 +26,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PictureInPictureManager"};
+    const std::string ACTION_CLOSE = "close";
+    const std::string ACTION_RESTORE = "restore";
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
@@ -170,19 +172,19 @@ void PictureInPictureManager::DoRestore()
     activeController_->RestorePictureInPictureWindow();
 }
 
-void PictureInPictureManager::DoClose(bool destroyWindow, bool needAnim)
+void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
     WLOGD("DoClose is called");
     if (!HasActiveController()) {
         return;
     }
     StopPipType currentStopType = StopPipType::NULL_STOP;
-    if (needAnim) {
+    if (!byPriority) {
         currentStopType = StopPipType::USER_STOP;
     } else {
         currentStopType = StopPipType::OTHER_PACKAGE_STOP;
     }
-    activeController_->StopPictureInPicture(destroyWindow, needAnim, currentStopType);
+    activeController_->StopPictureInPicture(destroyWindow, currentStopType);
 }
 
 void PictureInPictureManager::DoStartMove()
@@ -203,13 +205,19 @@ void PictureInPictureManager::DoScale()
     activeController_->DoScale();
 }
 
-void PictureInPictureManager::DoActionEvent(std::string actionName)
+void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
     WLOGD("DoActionEvent is called");
     if (!HasActiveController()) {
         return;
     }
-    activeController_->DoActionEvent(actionName);
+    if (actionName.c_str() == ACTION_CLOSE) {
+        DoClose(true, false);
+    } else if (actionName.c_str() == ACTION_RESTORE) {
+        DoRestore();
+    } else {
+        activeController_->DoActionEvent(actionName, status);
+    }
 }
 
 void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)

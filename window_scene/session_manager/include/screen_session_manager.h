@@ -18,6 +18,8 @@
 
 #include <shared_mutex>
 #include <system_ability.h>
+#include <mutex>
+#include <condition_variable>
 
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
@@ -116,8 +118,6 @@ public:
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
-    DMError SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
-    DMError SetOrientationController(ScreenId screenId, Orientation newOrientation, bool isFromWindow);
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
     bool SetRotationFromWindow(Rotation targetRotation);
@@ -175,6 +175,8 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
+
+    void BlockScreenOnByCV(void);
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -239,6 +241,7 @@ private:
     void RegisterRefreshRateModeChangeListener();
     void OnHgmRefreshRateModeChange(int32_t refreshRateMode);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
+    void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
 
@@ -325,6 +328,8 @@ private:
     bool needScreenOnWhenKeyguardNotify_ = false;
     bool blockScreenPowerChange_ = false;
 
+    std::mutex screenOnMutex_;
+    std::condition_variable screenOnCV_;
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;

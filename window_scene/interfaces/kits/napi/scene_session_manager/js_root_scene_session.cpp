@@ -217,20 +217,20 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack, env_ref]() {
         if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            WLOGFE("[NAPI]this target session info is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSessionInfo is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        WLOGFI("[NAPI]PendingSessionActivationInner task success.");
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success.");
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -239,28 +239,28 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
-        WLOGFE("RequestSceneSession return nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
     
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
-        WLOGFI("[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
         if (isNeedBackToOther) {
             int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
             if (realCallerSessionId == sceneSession->GetPersistentId()) {
-                WLOGFI("[NAPI]caller is self, need back to self caller.");
+                TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, need back to self caller.");
                 auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
                 if (scnSession != nullptr) {
                     realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
                 }
             }
-            WLOGFI("[NAPI]need to back to other session: %{public}d.", realCallerSessionId);
+            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]need to back to other session: %{public}d.", realCallerSessionId);
             info.callerPersistentId_ = realCallerSessionId;
         } else {
             info.callerPersistentId_ = 0;

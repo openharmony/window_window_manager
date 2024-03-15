@@ -59,6 +59,7 @@ using NotifyTouchOutsideFunc = std::function<void()>;
 using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
+using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -74,6 +75,7 @@ public:
         GetAINavigationBarArea onGetAINavigationBarArea_;
         RecoveryCallback onRecoveryPullPiPMainWindow_;
         OnOutsideDownEvent onOutsideDownEvent_;
+        NotifyAddOrRemoveSecureSessionFunc onHandleSecureSessionShouldHide_;
     };
 
     // callback for notify SceneBoard
@@ -121,6 +123,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
@@ -141,7 +144,7 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
-    WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason) override;
+    WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
@@ -216,6 +219,10 @@ public:
     void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+    bool ShouldHideNonSecureWindows() const;
+    void SetShouldHideNonSecureWindows(bool shouldHide);
+    WSError AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide);
+    WSError SetPipActionEvent(const std::string& action, int32_t status);
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
@@ -286,6 +293,8 @@ private:
     PiPTemplateInfo pipTemplateInfo_;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
+    std::atomic_bool shouldHideNonSecureWindows_ { false };
+    std::set<int32_t> secureExtSessionSet_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
