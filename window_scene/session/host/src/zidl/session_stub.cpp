@@ -23,6 +23,7 @@
 #include "key_event.h"
 
 #include "accessibility_event_info_parcel.h"
+#include "process_options.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 
@@ -80,6 +81,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleRaiseAboveTarget),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
         &SessionStub::HandleRaiseAppMainWindowToTop),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
+        &SessionStub::HandleChangeSessionVisibilityWithStatusBar),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         &SessionStub::HandlePendingSessionActivation),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE),
@@ -227,6 +230,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
+        reply.WriteUint64(property->GetDisplayId());
         bool needUpdate = property->GetIsNeedUpdateWindowMode();
         reply.WriteBool(needUpdate);
         if (needUpdate) {
@@ -280,6 +284,32 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleChangeSessionVisibilityWithStatusBar");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    abilitySessionInfo->want = *localWant;
+    abilitySessionInfo->requestCode = data.ReadInt32();
+    abilitySessionInfo->persistentId = data.ReadInt32();
+    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
+    abilitySessionInfo->uiAbilityId = data.ReadInt64();
+    abilitySessionInfo->callingTokenId = data.ReadUint32();
+    abilitySessionInfo->reuse = data.ReadBool();
+    abilitySessionInfo->processOptions =
+        std::shared_ptr<AAFwk::ProcessOptions>(data.ReadParcelable<AAFwk::ProcessOptions>());
+    if (data.ReadBool()) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+    if (data.ReadBool()) {
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
+    bool visible = data.ReadBool();
+    const WSError& errCode = ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
@@ -292,6 +322,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     abilitySessionInfo->callingTokenId = data.ReadUint32();
     abilitySessionInfo->reuse = data.ReadBool();
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -526,10 +557,9 @@ int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageP
 int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdatePiPRect!");
-    uint32_t width = data.ReadUint32();
-    uint32_t height = data.ReadUint32();
-    auto reason = static_cast<PiPRectUpdateReason>(data.ReadInt32());
-    WSError errCode = UpdatePiPRect(width, height, reason);
+    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
+    auto reason = static_cast<SizeChangeReason>(data.ReadInt32());
+    WSError errCode = UpdatePiPRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

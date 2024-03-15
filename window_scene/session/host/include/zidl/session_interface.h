@@ -62,6 +62,8 @@ public:
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+        bool isShow) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) { return WSError::WS_OK; }
     virtual WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WSError::WS_OK; }
@@ -84,7 +86,7 @@ public:
 
     // PictureInPicture
     virtual void NotifyPiPWindowPrepareClose() {}
-    virtual WSError UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+    virtual WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         { return WSError::WS_OK; }
     virtual WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) { return WSError::WS_OK; }
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }

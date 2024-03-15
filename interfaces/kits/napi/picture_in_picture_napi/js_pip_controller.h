@@ -87,7 +87,7 @@ public:
         PiPActionObserverImpl(napi_env env, std::shared_ptr<NativeReference> callback)
             : engine_(env), jsCallBack_(callback) {}
         ~PiPActionObserverImpl() {}
-        void OnActionEvent(const std::string& actionEvent) override;
+        void OnActionEvent(const std::string& actionEvent, int32_t status) override;
     private:
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;

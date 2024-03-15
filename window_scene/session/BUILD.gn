@@ -83,6 +83,7 @@ ohos_shared_library("scene_session") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_start_setting",
+    "ability_runtime:process_options",
     "accessibility:accessibility_interface",
     "c_utils:utils",
     "eventhandler:libeventhandler",
