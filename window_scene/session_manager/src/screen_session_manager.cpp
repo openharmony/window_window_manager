@@ -1369,6 +1369,10 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screen = GetScreenSession(screenId);
+        if (screen == nullptr) {
+            WLOGFW("[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
         screen->PowerStatusChange(event, status, reason);
     }
     return true;
