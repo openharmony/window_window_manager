@@ -28,6 +28,33 @@ constexpr std::vector<int>::size_type BOTTOM = 3;
 constexpr uint8_t HALF_SCREEN = 2;
 constexpr uint8_t QUARTER_SCREEN = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenCutoutController" };
+
+template<int32_t>
+DMRect GetRotatedRect(uint32_t width, uint32_t height, const DMRect& rect);
+
+template<>
+DMRect GetRotatedRect<90>(uint32_t width, uint32_t height, const DMRect& rect)
+{
+    return DMRect { .posX_ = width - rect.posY_ - rect.height_,
+                    .posY_ = rect.posX_,
+                    .width_ = rect.height_,
+                    .height_ = rect.width_ };
+}
+
+template<>
+DMRect GetRotatedRect<180>(uint32_t width, uint32_t height, const DMRect& rect)
+{
+    return DMRect { width - rect.posX_ - rect.width_,
+                    height - rect.posY_ - rect.height_, rect.width_, rect.height_ };
+}
+
+template<>
+DMRect GetRotatedRect<270>(uint32_t width, uint32_t height, const DMRect& rect)
+{
+    return DMRect { rect.posY_, height - rect.posX_ - rect.width_,
+                    rect.height_, rect.width_ };
+}
+
 }
 
 uint32_t ScreenCutoutController::defaultDeviceRotation_ = 0;
@@ -46,6 +73,20 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     return cutoutInfo;
 }
 
+std::vector<DMRect> ScreenCutoutController::GetBoundaryRects(sptr<DisplayInfo> displayInfo)
+{
+    std::vector<DMRect> displayBoundaryRects;
+    if (ScreenSessionManager::GetInstance().IsFoldable() &&
+        (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
+        displayBoundaryRects = {{ 507, 18, 66, 66}}; // x:507, y:18, w:66, h:66
+    } else {
+        displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect();
+    }
+    CheckBoundaryRects(displayBoundaryRects, displayInfo);
+
+    return displayBoundaryRects;
+}
+
 void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId)
 {
     std::vector<DMRect> finalVector;
@@ -57,16 +98,9 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     }
 
     Rotation currentRotation = displayInfo->GetRotation();
-    std::vector<DMRect> displayBoundaryRects;
-    if (ScreenSessionManager::GetInstance().IsFoldable() &&
-        (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
-        displayBoundaryRects = {{ 507, 18, 66, 66}}; // x:507, y:18, w:66, h:66
-    } else {
-        displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect();
-    }
-    CheckBoundaryRects(displayBoundaryRects, displayInfo);
+    std::vector<DMRect> displayBoundaryRects = GetBoundaryRects(displayInfo);
     if (currentRotation == Rotation::ROTATION_0) {
-        boundaryRects = displayBoundaryRects;
+        boundaryRects = std::move(displayBoundaryRects);
         return;
     }
 
@@ -74,33 +108,27 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect {
-                    .posX_ = displayWidth - rect.posY_ - rect.height_,
-                    .posY_ = rect.posX_,
-                    .width_ = rect.height_,
-                    .height_ = rect.width_ });
+            for (const DMRect& rect : displayBoundaryRects) {
+                finalVector.emplace_back(GetRotatedRect<90>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_180: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect { displayWidth - rect.posX_ - rect.width_,
-                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_ });
+            for (const DMRect& rect : displayBoundaryRects) {
+                finalVector.emplace_back(GetRotatedRect<180>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_270: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(
-                    DMRect { rect.posY_, displayHeight - rect.posX_ - rect.width_, rect.height_, rect.width_ });
+            for (const DMRect& rect : displayBoundaryRects) {
+                finalVector.emplace_back(GetRotatedRect<270>(displayWidth, displayHeight, rect));
             }
             break;
         }
         default:
             break;
     }
-    boundaryRects = finalVector;
+    boundaryRects = std::move(finalVector);
 }
 
 void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo)

@@ -160,6 +160,16 @@ int Comp(const std::pair<uint64_t, WindowVisibilityState> &a, const std::pair<ui
 {
     return a.first < b.first;
 }
+
+bool GetSingleIntItem(WindowSceneConfig::ConfigItem const& item, int32_t& value)
+{
+    if (item.IsInts() && item.intsValue_ && item.intsValue_->size() == 1) {
+        const auto& numbers = *item.intsValue_;
+        value = numbers[0];
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 SceneSessionManager& SceneSessionManager::GetInstance()
@@ -292,64 +302,44 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigWindowEffect(item);
     }
-
     item = config["decor"];
     if (item.IsMap()) {
         ConfigDecor(item);
     }
-
     item = config["backgroundswitch"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1 && numbers[0] == 1) {
-            systemConfig_.backgroundswitch = true;
-        }
+    int32_t param = -1; 
+    if (GetSingleIntItem(item, param) && param == 1) {
+        systemConfig_.backgroundswitch = true;
     }
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
-
     item = config["defaultWindowMode"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1 &&
-            (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
-             numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
-            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
-        }
+    if (GetSingleIntItem(item, param) && 
+        (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+         param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+        systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
     }
-
     item = config["defaultMaximizeMode"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1 &&
-            (numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-            numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
-            SceneSession::maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
-        }
+    if (GetSingleIntItem(item, param) &&  
+        (param == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+         param == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
+        SceneSession::maximizeMode_ = static_cast<MaximizeMode>(param);
     }
-
     item = config["keyboardAnimation"];
     if (item.IsMap()) {
         ConfigKeyboardAnimation(item);
     }
-
     item = config["maxFloatingWindowSize"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1) {
-            systemConfig_.maxFloatingWindowSize_ = static_cast<uint32_t>(numbers[0]);
-        }
+    if (GetSingleIntItem(item, param)) {
+        systemConfig_.maxFloatingWindowSize_ = static_cast<uint32_t>(param);
     }
-
     item = config["windowAnimation"];
     if (item.IsMap()) {
         ConfigWindowAnimation(item);
     }
-
     item = config["startWindowTransitionAnimation"];
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
-
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
 }
