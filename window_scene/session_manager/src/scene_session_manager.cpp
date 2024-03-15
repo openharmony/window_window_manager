@@ -315,11 +315,12 @@ void SceneSessionManager::ConfigWindowSceneXml()
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
     item = config["defaultWindowMode"];
     if (GetSingleIntItem(item, param) && 
-        (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) || param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+        (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+        param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
         systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
     }
     item = config["defaultMaximizeMode"];
-    if (GetSingleIntItem(item, param) &&  
+    if (GetSingleIntItem(item, param) &&
         (param == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
          param == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
         SceneSession::maximizeMode_ = static_cast<MaximizeMode>(param);
