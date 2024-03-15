@@ -7096,24 +7096,27 @@ void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
     int32_t parentId)
 {
-    if (sessionStage == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
-        return;
-    }
+    auto task = [this, sessionStage, persistentId, parentId]() {
+        if (sessionStage == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
+            return;
+        }
 
-    auto remoteExtSession = sessionStage->AsObject();
-    remoteExtSessionMap_.insert(std::make_pair(remoteExtSession, std::make_pair(persistentId, parentId)));
+        auto remoteExtSession = sessionStage->AsObject();
+        remoteExtSessionMap_.insert(std::make_pair(remoteExtSession, std::make_pair(persistentId, parentId)));
 
-    if (extensionDeath_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed to create death recipient");
-        return;
-    }
-    if (!remoteExtSession->AddDeathRecipient(extensionDeath_)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed to add death recipient");
-        return;
-    }
-    TLOGD(WmsLogTag::WMS_UIEXT, "add extension window stage Id: %{public}d, parent Id: %{public}d",
-        persistentId, parentId);
+        if (extensionDeath_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "failed to create death recipient");
+            return;
+        }
+        if (!remoteExtSession->AddDeathRecipient(extensionDeath_)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "failed to add death recipient");
+            return;
+        }
+        TLOGD(WmsLogTag::WMS_UIEXT, "add extension window stage Id: %{public}d, parent Id: %{public}d",
+            persistentId, parentId);
+    };
+    taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
 }
 
 WSError SceneSessionManager::HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession)
