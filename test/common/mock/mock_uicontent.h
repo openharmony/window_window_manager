@@ -102,8 +102,8 @@ public:
     MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
     MOCK_METHOD1(SetUIExtensionSubWindow, void(bool isUIExtensionSubWindow));
     MOCK_METHOD1(SetUIExtensionAbilityProcess, void(bool isUIExtensionAbilityProcess));
-    MOCK_METHOD0(GetUIExtensionSubWindow, bool());
-    MOCK_METHOD0(GetUIExtensionAbilityProcess, bool());
+    MOCK_METHOD0(IsUIExtensionSubWindow, bool());
+    MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
 };
 } // namespace Ace
 } // namespace OHOS

@@ -705,7 +705,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (type) {
         default:
-        case WindowSetUIContentType::DEFAULT:         
+        case WindowSetUIContentType::DEFAULT:
             if (isUIExtensionAbility_ && property_->GetExtensionFlag() == true) {
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
