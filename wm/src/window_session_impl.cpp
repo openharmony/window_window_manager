@@ -707,7 +707,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         default:
         case WindowSetUIContentType::DEFAULT:
             aceRet = uiContent->Initialize(this, contentInfo, storage);
-            if (isUIExtensionAbility_ && WindowHelper::IsExtensionSubWindow(GetType())) {
+            if (isUIExtensionAbility_ && property_->GetExtensionFlag() == true) {
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
             }
