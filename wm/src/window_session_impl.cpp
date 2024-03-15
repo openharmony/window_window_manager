@@ -705,12 +705,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (type) {
         default:
-        case WindowSetUIContentType::DEFAULT:
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+        case WindowSetUIContentType::DEFAULT:         
             if (isUIExtensionAbility_ && property_->GetExtensionFlag() == true) {
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
             }
+            aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::DISTRIBUTE:
             aceRet = uiContent->Restore(this, contentInfo, storage);
@@ -730,8 +730,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         uiContent_ = std::move(uiContent);
     }
 
-    WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}u, isUIExtensionAbilityProcess:%{public}u",
-        static_cast<uint32_t>(uiContent_->GetUIExtensionSubWindow()), static_cast<uint32_t>(uiContent_->GetUIExtensionAbilityProcess()));
+    WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
+        uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
 
     if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
         SetAPPWindowLabel(subWindowTitle_);
