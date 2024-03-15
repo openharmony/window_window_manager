@@ -3099,7 +3099,7 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureSession, Function | SmallTest
 
     int32_t persistentId = 12345;
     auto ret = ssm_->AddOrRemoveSecureSession(persistentId, true);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
@@ -3116,7 +3116,7 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureExtSession, Function | SmallT
     int32_t persistentId = 12345;
     int32_t parentId = 1234;
     auto ret = ssm_->AddOrRemoveSecureExtSession(persistentId, parentId, true);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 }
