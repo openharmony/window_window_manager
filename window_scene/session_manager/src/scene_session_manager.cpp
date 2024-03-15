@@ -521,7 +521,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             }
             sceneSession->NotifySessionException(scnSessionInfo, false);
         }
-    }
+    };
     return taskScheduler_->PostAsyncTask(task, "UpdateSessionInfoBySCB");
 }
 
