@@ -75,6 +75,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyDialogStateChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT),
         &SessionStageStub::HandleSetPipActionEvent),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAYID_CHANGE),
+        &SessionStageStub::HandleUpdateDisplayId),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -343,6 +345,15 @@ int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     SetPipActionEvent(action, status);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateDisplayId(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("UpdateDisplayId!");
+    uint64_t displayId = data.ReadUint64();
+    WSError errCode = UpdateDisplayId(displayId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
