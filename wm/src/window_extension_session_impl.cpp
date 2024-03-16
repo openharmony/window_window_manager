@@ -631,39 +631,17 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
         property_->GetParentId(), shouldHide);
 }
 
-WMError WindowExtensionSessionImpl::AddWindowFlag(WindowFlag flag)
+WMError WindowExtensionSessionImpl::AddExtensionWindowFlag(ExtensionWindowFlag flag)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "AddWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
-    uint32_t updateFlags = extensionWindowFlags_;
-    switch (flag) {
-        case WindowFlag::WINDOW_FLAG_WATER_MARK: {
-            isWaterMarkEnable_ = true;
-            if (state_ == WindowState::STATE_SHOWN) {
-                updateFlags |= (static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK));
-            }
-            break;
-        }
-        default:
-            break;
-    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "AddWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
+    uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetExtWindowFlags(updateFlags);
 }
 
 WMError WindowExtensionSessionImpl::RemoveWindowFlag(WindowFlag flag)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "RemoveWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
-    uint32_t updateFlags = extensionWindowFlags_;
-    switch (flag) {
-        case WindowFlag::WINDOW_FLAG_WATER_MARK: {
-            isWaterMarkEnable_ = true;
-            if (state_ == WindowState::STATE_SHOWN) {
-                updateFlags &= (~(static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)));
-            }
-            break;
-        }
-        default:
-            break;
-    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "RemoveWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
+    uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetExtWindowFlags(updateFlags);
 }
 
@@ -687,10 +665,10 @@ void WindowExtensionSessionImpl::CheckAndRemoveExtWindowFlags()
 
 WMError WindowExtensionSessionImpl::SetExtWindowFlags(uint32_t flags)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "SetExtWindowFlags extensionWindowFlags_:%{public}u, flags:%{public}u",
+    TLOGI(WmsLogTag::WMS_UIEXT, "SetExtWindowFlags extensionWindowFlags_:%{public}u, flags:%{public}u",
         extensionWindowFlags_, flags);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGI(WmsLogTag::WMS_UIEXT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (extensionWindowFlags_ == flags) {

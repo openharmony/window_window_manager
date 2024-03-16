@@ -838,7 +838,7 @@ int SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession(MessageParcel &da
 
 int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleRemoveExtensionSessionInfo!");
+    TLOGI(WmsLogTag::WMS_UIEXT, "run HandleRemoveExtensionSessionInfo!");
     int32_t parentId = data.ReadInt32();
     int32_t persistentId = data.ReadInt32();
     uint32_t extWindowFlags = data.ReadUint32();

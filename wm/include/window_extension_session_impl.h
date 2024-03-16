@@ -80,8 +80,8 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
-    WMError AddWindowFlag(WindowFlag flag) override;
-    WMError RemoveWindowFlag(WindowFlag flag) override;
+    WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) override;
+    WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
