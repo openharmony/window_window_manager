@@ -223,7 +223,7 @@ public:
     void SetShouldHideNonSecureWindows(bool shouldHide);
     WSError AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
-    void UpdateExtWindowFlags(int32_t extPersistentId, uint32_t flags);
+    void UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags);
     bool IsExtWindowHasWaterMarkFlag();
     void RomoveExtWindowFlags(int32_t extPersistentId);
     void ClearExtWindowFlags();

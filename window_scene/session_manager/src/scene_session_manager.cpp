@@ -1665,7 +1665,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         auto sceneSession = GetSceneSession(parentId);
         if (sceneSession != nullptr) {
             auto oldWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
-            sceneSession->RemoveExtensionWindowFlag(persistentId);
+            sceneSession->RomoveExtWindowFlags(persistentId);
             if (oldWaterMark) {
                 CheckAndNotifyWaterMarkChangedResult();
             }
@@ -4372,7 +4372,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             }
             bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
                 & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-            bool isExtWindowHasWaterMarkFlag = session->IsExtWindowHasWaterMarkFlag()
+            bool isExtWindowHasWaterMarkFlag = session->IsExtWindowHasWaterMarkFlag();
             if ((hasWaterMark && session->GetVisible()) || isExtWindowHasWaterMarkFlag) {
                 currentWaterMarkShowState = true;
                 break;
@@ -7239,7 +7239,7 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags")
+    taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags");
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
