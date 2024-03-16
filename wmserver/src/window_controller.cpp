@@ -1583,6 +1583,11 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             ret = ResizeRectAndFlush(windowId, newRect, WindowSizeChangeReason::MAXIMIZE);
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
+            node->GetWindowProperty()->SetTextFieldPositionY(property->GetTextFieldPositionY());
+            node->GetWindowProperty()->SetTextFieldHeight(property->GetTextFieldHeight());
+            break;
+        }
         default:
             break;
     }
