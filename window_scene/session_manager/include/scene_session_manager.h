@@ -294,6 +294,7 @@ public:
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override;
 
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
@@ -433,6 +434,7 @@ private:
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
     WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+    int64_t ConvertParentIdAndPersistentIdToExtId(int32_t parentId, int32_t persistentId);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
@@ -449,6 +451,8 @@ private:
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> secureSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
+    std::shared_mutex extensionWindowFlagsMapMutex_;
+    std::map<int64_t, uint32_t> extensionWindowFlagsMap_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     std::map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;

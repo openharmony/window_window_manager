@@ -138,6 +138,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleAddOrRemoveSecureSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION),
         &SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
+        &SceneSessionManagerStub::HandleUpdateExtWindowFlags),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -830,6 +832,17 @@ int SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession(MessageParcel &da
     int32_t parentId = data.ReadInt32();
     bool shouldHide = data.ReadBool();
     WSError ret = AddOrRemoveSecureExtSession(persistentId, parentId, shouldHide);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRemoveExtensionSessionInfo!");
+    int32_t parentId = data.ReadInt32();
+    int32_t persistentId = data.ReadInt32();
+    uint32_t extWindowFlags = data.ReadUint32();
+    WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

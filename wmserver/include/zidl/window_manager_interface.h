@@ -83,6 +83,7 @@ public:
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_GET_FOCUS_WINDOW_INFO,
+        TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -193,6 +194,10 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
     {
         return WSError::WS_OK;
     }

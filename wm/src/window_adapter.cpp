@@ -600,5 +600,11 @@ WMError WindowAdapter::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t
         parentId, shouldHide));
 }
 
+WMError WindowAdapter::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->UpdateExtWindowFlags(parentId, persistentId,
+        extWindowFlags));
+}
 } // namespace Rosen
 } // namespace OHOS

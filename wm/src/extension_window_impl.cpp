@@ -45,5 +45,15 @@ WMError ExtensionWindowImpl::HideNonSecureWindows(bool shouldHide)
     WLOGI("HideNonSecureWindows is called");
     return windowExtensionSessionImpl_->HideNonSecureWindows(shouldHide);
 }
+
+WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
+{
+    WLOGI("SetWaterMarkFlag is called");
+    if (isEnable) {
+        return windowExtensionSessionImpl_->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    } else {
+        return windowExtensionSessionImpl_->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
