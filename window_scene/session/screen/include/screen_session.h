@@ -164,6 +164,7 @@ public:
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
     void SetFoldScreen(bool isFold);
+    void UpdateRotationAfterBoot(bool foldToExpand);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
 
 private:
@@ -177,6 +178,7 @@ private:
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
+    float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
 };
