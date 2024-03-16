@@ -46,6 +46,7 @@ private:
     int HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply);
     int HandleTransferExecuteAction(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferAccessibilityHoverEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_STUB_H

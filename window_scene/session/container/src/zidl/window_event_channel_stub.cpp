@@ -317,4 +317,22 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
+
+int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel& data, MessageParcel& reply)
+{
+    float pointX, pointY;
+    int32_t sourceType, eventType;
+    int64_t timeMs;
+    if (!data.ReadFloat(pointX) ||
+        !data.ReadFloat(pointY) ||
+        !data.ReadInt32(sourceType) ||
+        !data.ReadInt32(eventType) ||
+        !data.ReadInt64(timeMs)) {
+        WLOGFE("Read HandleTransferAccessibilityHoverEvent data failed!");
+        return ERR_INVALID_DATA;
+    };
+    WSError errCode = TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
 }

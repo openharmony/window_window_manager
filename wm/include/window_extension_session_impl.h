@@ -58,6 +58,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent) override;
+    WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
