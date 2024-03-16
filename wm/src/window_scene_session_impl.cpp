@@ -109,7 +109,8 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
                 if (WindowHelper::IsMainWindow(item.second.second->GetType()) ||
                     WindowHelper::IsSystemWindow(item.second.second->GetType())) {
                     WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
-                        item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
+                        item.second.second->GetProperty()->GetWindowName().c_str(), 
+                        parentId, GetProperty()->GetPersistentId());
                     return item.second.second;
                 } else if (WindowHelper::IsSubWindow(item.second.second->GetType())) {
                     auto granParendId = item.second.second->GetParendId();
@@ -123,7 +124,8 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
-bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId) {
+bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId) 
+{
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& item : windowSessionMap_) {
         if (item.second.second && item.second.second->GetProperty() &&
@@ -206,8 +208,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
                 return WMError::WM_ERROR_NULLPTR;
             }
             if (WindowHelper::IsSystemSubWindow(parentSession->GetType())) {
-                TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window is system sub window, name: %{public}s, type: %{public}d",
-                    property_->GetWindowName().c_str(), type);
+                TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window is system sub window, name: %{public}s, 
+                    type: %{public}d", property_->GetWindowName().c_str(), type);
                 return WMError::WM_ERROR_INVALID_TYPE;
             }
             // set parent persistentId
