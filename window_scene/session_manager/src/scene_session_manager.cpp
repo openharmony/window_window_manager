@@ -2772,6 +2772,10 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             UpdateHideNonSystemFloatingWindows(property, sceneSession);
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
+            sceneSession->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
+            break;
+        }
         default:
             break;
     }

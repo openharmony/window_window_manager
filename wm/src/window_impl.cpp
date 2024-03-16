@@ -3803,6 +3803,7 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
 {
     property_->SetTextFieldPositionY(textFieldPositionY);
     property_->SetTextFieldHeight(textFieldHeight);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
 } // namespace Rosen
