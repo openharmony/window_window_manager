@@ -232,7 +232,7 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
             pipOption_->GetPipTemplate(), FAILED, "window is null");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (curState_ == PipWindowState::STATE_STOPPING || curState_ == PipWindowState::STATE_STOPPED) {
+    if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
         WLOGFE("Repeat stop request, curState: %{public}u", curState_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(StopPipType::USER_STOP),
             pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
