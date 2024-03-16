@@ -638,7 +638,7 @@ WMError WindowExtensionSessionImpl::AddExtensionWindowFlag(ExtensionWindowFlag f
     return SetExtWindowFlags(updateFlags);
 }
 
-WMError WindowExtensionSessionImpl::RemoveWindowFlag(WindowFlag flag)
+WMError WindowExtensionSessionImpl::RemoveExtensionWindowFlag(ExtensionWindowFlag flag)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "RemoveWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));

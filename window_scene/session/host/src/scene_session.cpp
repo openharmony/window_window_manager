@@ -2513,7 +2513,7 @@ WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool sho
     return PostSyncTask(task, "AddOrRemoveSecureExtSession");
 }
 
-void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t flags)
+void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
 {
     std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     auto iter = extWindowFlagsMap_.find(extPersistentId);
