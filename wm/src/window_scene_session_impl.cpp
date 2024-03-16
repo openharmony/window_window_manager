@@ -111,7 +111,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
                     WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
                         item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
                     return item.second.second;
-                } else if (WindowHelper::IsSubWindow(item.second.second->GetType()) {
+                } else if (WindowHelper::IsSubWindow(item.second.second->GetType())) {
                     auto granParendId = item.second.second->GetParendId();
                     if (isSessionMainWindow(granParendId)) {
                         return item.second.second;
@@ -1713,7 +1713,7 @@ WMError WindowSceneSessionImpl::Close()
             hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-    } else if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType()) {
+    } else if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType())) {
         WLOGFI("WindowSceneSessionImpl::Close subwindow");
         return Destroy(true);
     }
