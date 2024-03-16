@@ -166,7 +166,7 @@ napi_value JsExtensionWindow::CreateSubWindowWithOptions(napi_env env, napi_call
 
 napi_value JsExtensionWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWaterMark is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMark is called");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
@@ -794,24 +794,24 @@ napi_value JsExtensionWindow::OnHideNonSecureWindows(napi_env env, napi_callback
 napi_value JsExtensionWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
     if (extensionWindow_ == nullptr) {
-        WLOGFE("extensionWindow_ is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
-        WLOGFE("windowImpl is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isEnable = false;
     if (!ConvertFromJsValue(env, argv[0], isEnable)) {
-        WLOGFE("Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to bool");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
@@ -820,7 +820,7 @@ napi_value JsExtensionWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_inf
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    WLOGI("OnSetWaterMark end, window [%{public}u, %{public}s], isEnable:%{public}u.",
+    TLOGI(WmsLogTag::WMS_UIEXT, "OnSetWaterMark end, window [%{public}u, %{public}s], isEnable:%{public}u.",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), isEnable);
     return NapiGetUndefined(env);
 }

@@ -48,11 +48,13 @@ WMError ExtensionWindowImpl::HideNonSecureWindows(bool shouldHide)
 
 WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
 {
-    WLOGI("SetWaterMarkFlag is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMarkFlag is called");
     if (isEnable) {
-        return windowExtensionSessionImpl_->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+        return windowExtensionSessionImpl_->AddExtensionWindowFlag(
+            ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK);
     } else {
-        return windowExtensionSessionImpl_->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+        return windowExtensionSessionImpl_->RemoveExtensionWindowFlag(
+            ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK);
     }
 }
 } // namespace Rosen

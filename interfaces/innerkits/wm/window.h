@@ -644,6 +644,20 @@ public:
      */
     virtual WMError RemoveWindowFlag(WindowFlag flag) { return WMError::WM_OK; }
     /**
+     * @brief Add uiextension window flag.
+     *
+     * @param flag Flag of uiextension window.
+     * @return WM_OK means add success, others means failed.
+     */
+    virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Remove uiextension window flag.
+     *
+     * @param flag Flag of uiextension window
+     * @return WM_OK means remove success, others means failed.
+     */
+    virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief Set window flag.
      *
      * @param flags Flag of window
