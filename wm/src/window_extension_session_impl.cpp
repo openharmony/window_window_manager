@@ -23,6 +23,8 @@
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include "anr_handler.h"
+#include "session_permission.h"
+#include "singleton_container.h"
 #include "window_adapter.h"
 
 namespace OHOS {
@@ -99,6 +101,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    CheckAndRemoveExtWindowFlags();
     if (hostSession_ != nullptr) {
         hostSession_->Disconnect();
     }
@@ -581,6 +584,7 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
         SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
             property_->GetParentId(), true);
     }
+    CheckAndAddExtWindowFlags();
     return this->WindowSessionImpl::Show(reason, withAnimation);
 }
 
@@ -592,6 +596,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
             [name:%{public}s,id:%{public}d,type: %{public}u]",
@@ -624,6 +629,86 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 
     return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureExtSession(property_->GetPersistentId(),
         property_->GetParentId(), shouldHide);
+}
+
+WMError WindowExtensionSessionImpl::AddWindowFlag(WindowFlag flag)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "AddWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
+    uint32_t updateFlags = extensionWindowFlags_;
+    switch (flag) {
+        case WindowFlag::WINDOW_FLAG_WATER_MARK: {
+            isWaterMarkEnable_ = true;
+            if (state_ == WindowState::STATE_SHOWN) {
+                updateFlags |= (static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return SetExtWindowFlags(updateFlags);
+}
+
+WMError WindowExtensionSessionImpl::RemoveWindowFlag(WindowFlag flag)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "RemoveWindowFlag flags:%{public}u", (static_cast<uint32_t>(flag)));
+    uint32_t updateFlags = extensionWindowFlags_;
+    switch (flag) {
+        case WindowFlag::WINDOW_FLAG_WATER_MARK: {
+            isWaterMarkEnable_ = true;
+            if (state_ == WindowState::STATE_SHOWN) {
+                updateFlags &= (~(static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return SetExtWindowFlags(updateFlags);
+}
+
+void WindowExtensionSessionImpl::CheckAndAddExtWindowFlags()
+{
+    uint32_t updateFlags = extensionWindowFlags_;
+    if (isWaterMarkEnable_) {
+        updateFlags |= (static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK));
+    }
+    SetExtWindowFlags(updateFlags);
+}
+
+void WindowExtensionSessionImpl::CheckAndRemoveExtWindowFlags()
+{
+    uint32_t updateFlags = extensionWindowFlags_;
+    if (isWaterMarkEnable_) {
+        updateFlags &= (~(static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)));
+    }
+    SetExtWindowFlags(updateFlags);
+}
+
+WMError WindowExtensionSessionImpl::SetExtWindowFlags(uint32_t flags)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "SetExtWindowFlags extensionWindowFlags_:%{public}u, flags:%{public}u",
+        extensionWindowFlags_, flags);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (extensionWindowFlags_ == flags) {
+        return WMError::WM_OK;
+    }
+    auto oriFlags = extensionWindowFlags_;
+    extensionWindowFlags_ = flags;
+    WMError ret = UpdateExtWindowFlags();
+    if (ret != WMError::WM_OK) {
+        extensionWindowFlags_ = oriFlags;
+    }
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::UpdateExtWindowFlags()
+{
+    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(property_->GetParentId(), GetPersistentId(),
+        extensionWindowFlags_);
 }
 } // namespace Rosen
 } // namespace OHOS

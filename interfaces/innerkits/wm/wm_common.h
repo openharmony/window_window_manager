@@ -266,6 +266,14 @@ enum class WindowFlag : uint32_t {
 };
 
 /**
+ * @brief Enumerates flag of uiextension window.
+ */
+enum class ExtensionWindowFlag : uint32_t {
+    EXTENSION_WINDOW_FLAG_WATER_MARK = 1,
+    EXTENSION_WINDOW_FLAG_END = 1 << 1,
+};
+
+/**
  * @brief Enumerates window size change reason.
  */
 enum class WindowSizeChangeReason : uint32_t {

@@ -148,6 +148,7 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -1663,6 +1664,10 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
         AddOrRemoveSecureExtSession(persistentId, parentId, false);
         remoteExtSessionMap_.erase(iter);
+        std::shared_lock<std::shared_mutex> lock(extensionWindowFlagsMapMutex_);
+        int64_t extId = ConvertParentIdAndPersistentIdToExtId(parentId, persistentId);
+        extensionWindowFlagsMap_.erase(extId);
+        CheckAndNotifyWaterMarkChangedResult();
     };
     taskScheduler_->PostAsyncTask(task, "DestroyExtensionSession");
 }
@@ -4364,6 +4369,17 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
                 & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
             if (hasWaterMark && session->GetVisible()) {
+                currentWaterMarkShowState = true;
+                break;
+            }
+        }
+        std::shared_lock<std::shared_mutex> extLock(extensionWindowFlagsMapMutex_);
+        for (const auto& iter: extensionWindowFlagsMap_) {
+            auto& extWindowFlags = iter.second;
+            if (!extWindowFlags) {
+                continue;
+            }
+            if (extWindowFlags & static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)) {
                 currentWaterMarkShowState = true;
                 break;
             }
@@ -7204,5 +7220,48 @@ WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, i
 
     taskScheduler_->PostAsyncTask(task, "AddOrRemoveSecureExtSession");
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "UpdateExtWindowFlags, parentId:%{public}d, persistentId:%{public}d, \
+        extWindowFlags:%{public}d", parentId, persistentId, extWindowFlags);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "UpdateExtWindowFlags permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, parentId, persistentId, extWindowFlags]() {
+        std::shared_lock<std::shared_mutex> lock(extensionWindowFlagsMapMutex_);
+        int64_t extId = ConvertParentIdAndPersistentIdToExtId(parentId, persistentId);
+        auto iter = extensionWindowFlagsMap_.find(extId);
+        bool waterMarkChanged = false;
+        if (iter == extensionWindowFlagsMap_.end()) {
+            extensionWindowFlagsMap_.insert({ extId, extWindowFlags});
+            waterMarkChanged = true;
+        } else {
+            auto oriFlags = iter->second;
+            TLOGI(WmsLogTag::WMS_LIFE, "UpdateExtWindowFlags, oriFlags:%{public}d", oriFlags);
+            auto oldWaterMarkFlag = oriFlags &
+                (static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK));
+            auto newWaterMarkFlag = extWindowFlags &
+                (static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK));
+            if (oldWaterMarkFlag != newWaterMarkFlag) {
+                waterMarkChanged = true;
+            }
+            extensionWindowFlagsMap_[iter->first] = extWindowFlags;
+        }
+        if (waterMarkChanged) {
+            CheckAndNotifyWaterMarkChangedResult();
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+int64_t SceneSessionManager::ConvertParentIdAndPersistentIdToExtId(int32_t parentId, int32_t persistentId)
+{
+    int64_t result = parentId;
+    result = (result << LOGICAL_DISPLACEMENT_32) | persistentId;
+    return result;
 }
 } // namespace OHOS::Rosen
