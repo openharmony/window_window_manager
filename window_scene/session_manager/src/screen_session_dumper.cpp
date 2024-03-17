@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr int LINE_WIDTH = 25;
+constexpr int LINE_WIDTH = 30;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionDumper" };
 }
 
@@ -91,9 +91,159 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         std::ostringstream oss;
         oss << "---------------- Screen ID: " << screenId << " ----------------" << std::endl;
         dumpInfo_.append(oss.str());
+        DumpScreenSessionById(screenId);
+        DumpRsInfoById(screenId);
+        DumpCutoutInfoById(screenId);
         DumpScreenInfoById(screenId);
         DumpScreenPropertyById(screenId);
     }
+}
+
+void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
+{
+    std::ostringstream oss;
+    oss << "[SCREEN SESSION]" << std::endl;
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        return;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "Name: "
+        << screenSession->GetName() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "RSScreenId: "
+        << screenSession->GetRSScreenId() << std::endl;
+    sptr<SupportedScreenModes> activeModes = screenSession->GetActiveScreenMode();
+    if (activeModes != nullptr) {
+        oss << std::left << std::setw(LINE_WIDTH) << "activeModes<id, W, H, RS>: "
+            << activeModes->id_ << ", " << activeModes->width_ << ", "
+            << activeModes->height_ << ", " << activeModes->refreshRate_ << std::endl;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "SourceMode: "
+        << static_cast<int32_t>(screenSession->GetSourceMode()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "ScreenCombination: "
+        << static_cast<int32_t>(screenSession->GetScreenCombination()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "Orientation: "
+        << static_cast<int32_t>(screenSession->GetOrientation()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "Rotation: "
+        << static_cast<int32_t>(screenSession->GetRotation()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "ScreenRequestedOrientation: "
+        << static_cast<int32_t>(screenSession->GetScreenRequestedOrientation()) << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
+{
+    std::ostringstream oss;
+    oss << "[RS INFO]" << std::endl;
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        return;
+    }
+    std::vector<ScreenColorGamut> colorGamuts;
+    DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "SupportedColorGamuts: ";
+        for (uint32_t i = 0; i < colorGamuts.size() -1 ; i++) {
+            oss << static_cast<int32_t>(colorGamuts[i]) << ", ";
+        }
+        oss << static_cast<int32_t>(colorGamuts[colorGamuts.size() -1]) << std::endl;
+    }
+    ScreenColorGamut colorGamut;
+    ret = screenSession->GetScreenColorGamut(colorGamut);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "ScreenColorGamut: "
+            << static_cast<int32_t>(colorGamut) << std::endl;
+    }
+    ScreenGamutMap gamutMap;
+    ret = screenSession->GetScreenGamutMap(gamutMap);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "ScreenGamutMap: "
+            << static_cast<int32_t>(gamutMap) << std::endl;
+    }
+    GraphicPixelFormat pixelFormat;
+    ret = screenSession->GetPixelFormat(pixelFormat);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "GraphicPixelFormat: "
+            << static_cast<int32_t>(pixelFormat) << std::endl;
+    }
+    dumpInfo_.append(oss.str());
+    DumpRsInfoById01(screenSession); // 拆分函数，避免函数过长
+}
+
+void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
+{
+    std::ostringstream oss;
+    std::vector<ScreenHDRFormat> hdrFormats;
+    DMError ret = screenSession->GetSupportedHDRFormats(hdrFormats);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "SupportedScreenHDRFormat: ";
+        for (uint32_t i = 0; i < hdrFormats.size() -1 ; i++) {
+            oss << static_cast<int32_t>(hdrFormats[i]) << ", ";
+        }
+        oss << static_cast<int32_t>(hdrFormats[hdrFormats.size() -1]) << std::endl;
+    }
+    ScreenHDRFormat hdrFormat;
+    ret = screenSession->GetScreenHDRFormat(hdrFormat);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "ScreenHDRFormat: "
+            << static_cast<int32_t>(hdrFormat) << std::endl;
+    }
+    std::vector<GraphicCM_ColorSpaceType> colorSpaces;
+    ret = screenSession->GetSupportedColorSpaces(colorSpaces);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "SupportedColorSpaces: ";
+        for (uint32_t i = 0; i < colorSpaces.size() -1 ; i++) {
+            oss << static_cast<int32_t>(colorSpaces[i]) << ", ";
+        }
+        oss << static_cast<int32_t>(colorSpaces[colorSpaces.size() -1]) << std::endl;
+    }
+    GraphicCM_ColorSpaceType colorSpace;
+    ret = screenSession->GetScreenColorSpace(colorSpace);
+    if (ret == DMError::DM_OK) {
+        oss << std::left << std::setw(LINE_WIDTH) << "ScreenColorSpace: "
+            << static_cast<int32_t>(colorSpace) << std::endl;
+    }
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
+{
+    std::ostringstream oss;
+    oss << "[CUTOUT INFO]" << std::endl;
+    sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfo(id);
+    if (cutoutInfo == nullptr) {
+        WLOGFE("cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
+        return;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_L<X,Y,W,H>: "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posX_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posY_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().left.width_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().left.height_ << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_T<X,Y,W,H>: "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posX_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posY_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().top.width_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().top.height_ << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_R<X,Y,W,H>: "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posX_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posY_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().right.width_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().right.height_ << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_B<X,Y,W,H>: "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posX_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posY_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.width_ << ", "
+        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.height_ << std::endl;
+
+    std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
+    oss << std::left << std::setw(LINE_WIDTH) << "BoundingRects<X,Y,W,H>: ";
+    for (auto rect : boundingRects) {
+        oss << "[" << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_ << "] ";
+    }
+    oss << std::endl;
+    dumpInfo_.append(oss.str());
 }
 
 void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
@@ -105,10 +255,6 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
         WLOGFE("screenInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
-    auto modes = screenInfo->GetModes();
-    auto modeId = screenInfo->GetModeId();
-    oss << std::left << std::setw(LINE_WIDTH) << "Name: "
-        << screenInfo->GetName() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "VirtualWidth: "
         << screenInfo->GetVirtualWidth() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "VirtualHeight: "
@@ -129,19 +275,6 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
         << static_cast<int32_t>(screenInfo->GetSourceMode()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenType: "
         << static_cast<int32_t>(screenInfo->GetType()) << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "ModeId: " << modeId << std::endl;
-    if (modes.size() > modeId) {
-        oss << std::left << std::setw(LINE_WIDTH) << "modes<id>: "
-            << modes[modeId]->id_ << std::endl;
-        oss << std::left << std::setw(LINE_WIDTH) << "modes<width>: "
-            << modes[modeId]->width_ << std::endl;
-        oss << std::left << std::setw(LINE_WIDTH) << "modes<height>: "
-            << modes[modeId]->height_ << std::endl;
-        oss << std::left << std::setw(LINE_WIDTH) << "modes<refreshRate>: "
-            << modes[modeId]->refreshRate_ << std::endl;
-    } else {
-        WLOGFW("invalid modes size: %{public}u ", static_cast<uint32_t>(modes.size()));
-    }
     dumpInfo_.append(oss.str());
 }
 
