@@ -142,6 +142,7 @@ public:
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
+    WMError CreateSystemWindow(WindowType type);
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
