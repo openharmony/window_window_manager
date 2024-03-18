@@ -186,33 +186,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
-            (type == WindowType::WINDOW_TYPE_TOAST)) {
-            property_->SetParentPersistentId(GetFloatingWindowParentId());
-            TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
-                property_->GetParentPersistentId(), type);
-            auto mainWindow = FindMainWindowWithContext();
-            property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
-        } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
-            auto mainWindow = FindMainWindowWithContext();
-            if (mainWindow != nullptr) {
-                property_->SetParentPersistentId(mainWindow->GetPersistentId());
-                TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
-            }
-        } else if (WindowHelper::IsSystemSubWindow(type)) {
-            auto parentSession = FindParentSessionByParentId(property_->GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window, name: %{public}s, type: %{public}d",
-                    property_->GetWindowName().c_str(), type);
-                return WMError::WM_ERROR_NULLPTR;
-            }
-            if (WindowHelper::IsSystemSubWindow(parentSession->GetType())) {
-                TLOGE(WmsLogTag::WMS_LIFE, "parent is system sub window, name: %{public}s, type: %{public}d",
-                    property_->GetWindowName().c_str(), type);
-                return WMError::WM_ERROR_INVALID_TYPE;
-            }
-            // set parent persistentId
-            property_->SetParentPersistentId(parentSession->GetPersistentId());
+        WMError createSystemWindowRet = CreateSystemWindow(type);
+        if(createSystemWindowRet != WMError::WM_OK) {
+            return createSystemWindowRet;
         }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
@@ -231,6 +207,39 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
+{
+    if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
+        (type == WindowType::WINDOW_TYPE_TOAST)) {
+        property_->SetParentPersistentId(GetFloatingWindowParentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
+            property_->GetParentPersistentId(), type);
+        auto mainWindow = FindMainWindowWithContext();
+        property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
+    } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr) {
+            property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
+        }
+    } else if (WindowHelper::IsSystemSubWindow(type)) {
+        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (WindowHelper::IsSystemSubWindow(parentSession->GetType())) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent is system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        // set parent persistentId
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
+    }
     return WMError::WM_OK;
 }
 
