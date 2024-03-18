@@ -1258,6 +1258,20 @@ HWTEST_F(WindowSessionTest, NotifyExtensionDied, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyExtensionTimeOut
+ * @tc.desc: NotifyExtensionTimeOut Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyExtensionTimeOut, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyExtensionTimeOut(3);
+
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+}
+
+/**
  * @tc.name: SetAspectRatio
  * @tc.desc: SetAspectRatio Test
  * @tc.type: FUNC
