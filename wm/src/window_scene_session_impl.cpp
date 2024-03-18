@@ -112,11 +112,10 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
                         item.second.second->GetProperty()->GetWindowName().c_str(), parentId,
                         GetProperty()->GetPersistentId());
                     return item.second.second;
-                } else if (WindowHelper::IsSubWindow(item.second.second->GetType())) {
-                    auto granParendId = item.second.second->GetParentId();
-                    if (isSessionMainWindow(granParendId)) {
-                        return item.second.second;
-                    }
+                } else if (WindowHelper::IsSubWindow(item.second.second->GetType()) &&
+                    isSessionMainWindow(item.second.second->GetParentId())) {
+                    // subwindow grandparent is mainwindow
+                    return item.second.second;
                 }
         }
     }
