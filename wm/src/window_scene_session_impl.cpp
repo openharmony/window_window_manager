@@ -187,7 +187,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
-        if(createSystemWindowRet != WMError::WM_OK) {
+        if (createSystemWindowRet != WMError::WM_OK) {
             return createSystemWindowRet;
         }
         PreProcessCreate();
