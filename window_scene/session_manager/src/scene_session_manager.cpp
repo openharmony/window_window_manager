@@ -490,26 +490,40 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
     WLOGFI("[WMSRecover] Number of persistentIds recovered = %{public}zu. CurrentUserId = "
            "%{public}d",
         recoveredPersistentIds.size(), currentUserId_);
-    std::vector<AAFwk::SessionInfo> abilitySessionInfos;
 
-    for (auto i = 0; i < static_cast<int32_t>(recoveredPersistentIds.size()); i++) {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        auto search = sceneSessionMap_.find(recoveredPersistentIds.at(i));
-        if (search == sceneSessionMap_.end() || search->second == nullptr) {
-            continue;
+    auto task = [this, recoveredPersistentIds]() {
+        std::list<AAFwk::SessionInfo> abilitySessionInfos;
+        for (const auto& persistentId : recoveredPersistentIds) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            WLOGFD("[WMSRecover] recovered persistentId = %{public}d", persistentId);
+            const auto& abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+            if (!abilitySessionInfo) {
+                WLOGFW("[WMSRecover] abilitySessionInfo is null");
+                continue;
+            }
+            abilitySessionInfos.emplace_back(*abilitySessionInfo);
         }
-        WLOGFD("[WMSRecover] recovered persistentId = %{public}d", search->first);
-        auto sceneSession = search->second;
-        const auto& abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-        if (!abilitySessionInfo) {
-            WLOGFW("[WMSRecover] abilitySessionInfo is null");
-            return;
-        }
-        abilitySessionInfos.emplace_back(*abilitySessionInfo);
-    }
-    auto task = [abilitySessionInfos]() {
+        std::vector<int32_t> unrecoverableSessionIds;
         AAFwk::AbilityManagerClient::GetInstance()->UpdateSessionInfoBySCB(
-            abilitySessionInfos, SceneSessionManager::GetInstance().GetCurrentUserId());
+            abilitySessionInfos, currentUserId_, unrecoverableSessionIds);
+        WLOGFI("[WMSRecover] Number of unrecoverableSessionIds = %{public}zu", unrecoverableSessionIds.size());
+        for (const auto& sessionId : unrecoverableSessionIds) {
+            auto sceneSession = GetSceneSession(sessionId);
+            if (sceneSession == nullptr) {
+                WLOGFW("[WMSRecover]There is no session corresponding to sessionId = %{public}d ", sessionId);
+                continue;
+            }
+            WLOGFI("[WMSRecover] unrecoverable sessionId = %{public}d", sessionId);
+            const auto& scnSessionInfo = SetAbilitySessionInfo(sceneSession);
+            if (!scnSessionInfo) {
+                WLOGFW("[WMSRecover] scnSessionInfo is null");
+                continue;
+            }
+            sceneSession->NotifySessionException(scnSessionInfo, false);
+        }
     };
     return taskScheduler_->PostAsyncTask(task, "UpdateSessionInfoBySCB");
 }
