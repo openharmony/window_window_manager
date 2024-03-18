@@ -78,6 +78,7 @@ public:
     }
     virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
+    virtual void NotifyExtensionTimeOut(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}

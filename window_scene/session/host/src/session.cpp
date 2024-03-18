@@ -339,6 +339,17 @@ void Session::NotifyExtensionDied()
     }
 }
 
+void Session::NotifyExtensionTimeOut(int32_t errorCode)
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnExtensionTimeOut(errorCode);
+        }
+    }
+}
+
 void Session::NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
     int64_t uiExtensionIdLevel)
 {
