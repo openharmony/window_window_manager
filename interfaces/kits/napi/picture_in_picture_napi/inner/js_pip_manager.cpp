@@ -54,87 +54,10 @@ void JsPipManager::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<JsPipManager>(static_cast<JsPipManager*>(data));
 }
 
-napi_value JsPipManager::TriggerAction(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnTriggerAction(env, info) : nullptr;
-}
-
-napi_value JsPipManager::Restore(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnRestore(env, info) : nullptr;
-}
-
-napi_value JsPipManager::Close(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnClose(env, info) : nullptr;
-}
-
-napi_value JsPipManager::StartMove(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnStartMove(env, info) : nullptr;
-}
-
-napi_value JsPipManager::ProcessScale(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnProcessScale(env, info) : nullptr;
-}
-
 napi_value JsPipManager::InitXComponentController(napi_env env, napi_callback_info info)
 {
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
     return (me != nullptr) ? me->OnInitXComponentController(env, info) : nullptr;
-}
-
-napi_value JsPipManager::OnTriggerAction(napi_env env, napi_callback_info info)
-{
-    WLOGFD("[NAPI]JsPipManager::OnTriggerAction");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
-        return NapiThrowInvalidParam(env);
-    }
-    std::string actionName = "";
-    if (!ConvertFromJsValue(env, argv[0], actionName)) {
-        WLOGFE("[NAPI]Failed to convert params to string");
-        return NapiGetUndefined(env);
-    }
-    PictureInPictureManager::DoActionEvent(actionName);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsPipManager::OnRestore(napi_env env, napi_callback_info info)
-{
-    WLOGFD("[NAPI]JsPipManager::OnRestore");
-    PictureInPictureManager::DoRestore();
-    return NapiGetUndefined(env);
-}
-
-napi_value JsPipManager::OnClose(napi_env env, napi_callback_info info)
-{
-    WLOGFD("[NAPI]JsPipManager::OnClose");
-    PictureInPictureManager::DoClose(true, true);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsPipManager::OnStartMove(napi_env env, napi_callback_info info)
-{
-    WLOGFD("[NAPI]JsPipManager::OnStartMove");
-    PictureInPictureManager::DoStartMove();
-    return NapiGetUndefined(env);
-}
-
-napi_value JsPipManager::OnProcessScale(napi_env env, napi_callback_info info)
-{
-    WLOGFD("[NAPI]JsPipManager::OnProcessScale");
-    PictureInPictureManager::DoScale();
-    return NapiGetUndefined(env);
 }
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
@@ -179,11 +102,6 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     std::unique_ptr<JsPipManager> jsPipManager = std::make_unique<JsPipManager>();
     napi_wrap(env, exportObj, jsPipManager.release(), JsPipManager::Finalizer, nullptr, nullptr);
     const char* moduleName = "JsPipManager";
-    BindNativeFunction(env, exportObj, "triggerAction", moduleName, JsPipManager::TriggerAction);
-    BindNativeFunction(env, exportObj, "restore", moduleName, JsPipManager::Restore);
-    BindNativeFunction(env, exportObj, "close", moduleName, JsPipManager::Close);
-    BindNativeFunction(env, exportObj, "startMove", moduleName, JsPipManager::StartMove);
-    BindNativeFunction(env, exportObj, "processScale", moduleName, JsPipManager::ProcessScale);
     BindNativeFunction(env, exportObj, "initXComponentController", moduleName, JsPipManager::InitXComponentController);
     return NapiGetUndefined(env);
 }

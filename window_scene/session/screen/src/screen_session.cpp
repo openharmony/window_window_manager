@@ -72,10 +72,11 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
     (void)rsId_;
-    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
+    // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
+    Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        WLOGI("Success to create displayNode in constructor_3, screenid is %{public}" PRIu64"", screenId_);
+        WLOGI("Success to create displayNode in constructor_3, rs id is %{public}" PRIu64"", rsId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,

@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,40 +14,40 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 
-es2abc_gen_abc("gen_extension_window_abc") {
-  src_js = rebase_path("extension_window.js")
-  dst_file = rebase_path(target_out_dir + "/extension_window.abc")
-  in_puts = [ "extension_window.js" ]
-  out_puts = [ target_out_dir + "/extension_window.abc" ]
+es2abc_gen_abc("gen_embeddable_window_stage_abc") {
+  src_js = rebase_path("embeddable_window_stage.js")
+  dst_file = rebase_path(target_out_dir + "/embeddable_window_stage.abc")
+  in_puts = [ "embeddable_window_stage.js" ]
+  out_puts = [ target_out_dir + "/embeddable_window_stage.abc" ]
   extra_args = [ "--module" ]
 }
 
-gen_js_obj("extension_window_js") {
-  input = "extension_window.js"
-  output = target_out_dir + "/extension_window.o"
+gen_js_obj("embeddable_window_stage_js") {
+  input = "embeddable_window_stage.js"
+  output = target_out_dir + "/embeddable_window_stage.o"
 }
 
-gen_js_obj("extension_window_abc") {
-  input = get_label_info(":gen_extension_window_abc", "target_out_dir") +
-          "/extension_window.abc"
-  output = target_out_dir + "/extension_window_abc.o"
-  dep = ":gen_extension_window_abc"
+gen_js_obj("embeddable_window_stage_abc") {
+  input = get_label_info(":gen_embeddable_window_stage_abc", "target_out_dir") +
+          "/embeddable_window_stage.abc"
+  output = target_out_dir + "/embeddable_window_stage_abc.o"
+  dep = ":gen_embeddable_window_stage_abc"
 }
 
-ohos_shared_library("extensionwindow") {
+ohos_shared_library("embeddablewindowstage") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
-  sources = [ "extension_window_module.cpp" ]
+  sources = [ "embeddable_window_stage_module.cpp" ]
 
   configs = [ "../../../../resources/config/build:coverage_flags" ]
 
   deps = [
-    ":extension_window_abc",
-    ":extension_window_js",
+    ":embeddable_window_stage_abc",
+    ":embeddable_window_stage_js",
   ]
 
   external_deps = [ "napi:ace_napi" ]
@@ -57,10 +57,11 @@ ohos_shared_library("extensionwindow") {
   subsystem_name = "window"
 }
 
-config("extension_window_kit_config") {
+config("embeddable_window_stage_kit_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "../extension_window",
     "../window_runtime/window_napi",
     "../../../innerkits/wm",
     "../../../../utils/include",
@@ -69,39 +70,32 @@ config("extension_window_kit_config") {
   ]
 }
 
-ohos_shared_library("extensionwindow_napi") {
+ohos_shared_library("embeddablewindowstage_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
-  sources = [
-    "js_extension_window.cpp",
-    "js_extension_window_listener.cpp",
-    "js_extension_window_register_manager.cpp",
-    "js_extension_window_utils.cpp",
-  ]
+  sources = [ "js_embeddable_window_stage.cpp" ]
 
   configs = [
-    ":extension_window_kit_config",
+    ":embeddable_window_stage_kit_config",
     "../../../../resources/config/build:coverage_flags",
   ]
 
-  include_dirs = [ "extension_window" ]
+  include_dirs = [ "embeddable_window_stage" ]
   deps = [
     "../../../../utils:libwmutil",
     "../../../../wm:libwm",
-    "../window_runtime:window_native_kit",
+    "../extension_window:extensionwindow_napi",
   ]
 
   external_deps = [
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
 

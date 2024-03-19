@@ -768,6 +768,12 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::FULL_TO_FLOATING)));
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
+    napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_START)));
+    napi_set_named_property(env, objValue, "PIP_SHOW", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_SHOW)));
+    napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

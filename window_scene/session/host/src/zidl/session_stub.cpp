@@ -230,6 +230,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
+        reply.WriteUint64(property->GetDisplayId());
         bool needUpdate = property->GetIsNeedUpdateWindowMode();
         reply.WriteBool(needUpdate);
         if (needUpdate) {
@@ -556,10 +557,9 @@ int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageP
 int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdatePiPRect!");
-    uint32_t width = data.ReadUint32();
-    uint32_t height = data.ReadUint32();
-    auto reason = static_cast<PiPRectUpdateReason>(data.ReadInt32());
-    WSError errCode = UpdatePiPRect(width, height, reason);
+    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
+    auto reason = static_cast<SizeChangeReason>(data.ReadInt32());
+    WSError errCode = UpdatePiPRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

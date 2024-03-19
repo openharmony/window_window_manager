@@ -147,6 +147,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
         return WSError::WS_OK;
     };
@@ -187,6 +188,7 @@ WSError SceneSession::Background()
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
         return WSError::WS_OK;
     };
@@ -243,6 +245,9 @@ WSError SceneSession::Disconnect(bool isFromClient)
         }
         session->Session::Disconnect(isFromClient);
         session->isTerminating = false;
+        if (session->specificCallback_ != nullptr) {
+            session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+        }
         return WSError::WS_OK;
     },
         "Disconnect");
@@ -580,7 +585,9 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newRequestRect.width_ = rect.width_;
                 newRequestRect.height_ = rect.height_;
             }
-            session->SetSessionRect(newWinRect);
+            if (session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                session->SetSessionRect(newWinRect);
+            }
             session->SetSessionRequestRect(newRequestRect);
             session->NotifySessionRectChange(newRequestRect, newReason);
         } else {
@@ -912,6 +919,18 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
+}
+
+WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t status)
+{
+    WLOGFI("action: %{public}s, status: %{public}d", action.c_str(), status);
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetPipActionEvent(action, status);
 }
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
@@ -2339,49 +2358,22 @@ void SceneSession::ProcessUpdatePiPRect(SizeChangeReason reason)
         .ReportPiPResize(static_cast<int32_t>(pipRectInfo_.level_), newRect.width_, newRect.height_);
 }
 
-WSError SceneSession::UpdatePiPRect(uint32_t width, uint32_t height, PiPRectUpdateReason reason)
+WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
         return WSError::WS_DO_NOTHING;
     }
-    auto task = [weakThis = wptr(this), width, height, reason]() {
+    auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session || session->isTerminating) {
             WLOGE("SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        switch (reason) {
-            case PiPRectUpdateReason::REASON_PIP_START_WINDOW:
-                session->InitPiPRectInfo();
-                session->ProcessUpdatePiPRect(SizeChangeReason::CUSTOM_ANIMATION_SHOW);
-                break;
-            case PiPRectUpdateReason::REASON_PIP_SCALE_CHANGE:
-                session->pipRectInfo_.level_ = static_cast<PiPScaleLevel>((static_cast<int32_t>(
-                    session->pipRectInfo_.level_) + 1) % static_cast<int32_t>(PiPScaleLevel::COUNT));
-                session->ProcessUpdatePiPRect(SizeChangeReason::TRANSFORM);
-                break;
-            case PiPRectUpdateReason::REASON_PIP_VIDEO_RATIO_CHANGE:
-                session->ClearPiPRectPivotInfo();
-                session->pipRectInfo_.originWidth_ = width;
-                session->pipRectInfo_.originHeight_ = height;
-                if (session->moveDragController_ && (session->moveDragController_->GetStartDragFlag() ||
-                    session->moveDragController_->GetStartMoveFlag())) {
-                    WSRect rect = session->moveDragController_->GetTargetRect();
-                    ScenePersistentStorage::Insert(
-                        "pip_window_pos_x", rect.posX_, ScenePersistentStorageType::PIP_INFO);
-                    ScenePersistentStorage::Insert(
-                        "pip_window_pos_y", rect.posY_, ScenePersistentStorageType::PIP_INFO);
-                }
-                session->ProcessUpdatePiPRect(SizeChangeReason::UNDEFINED);
-                SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
-                break;
-            case PiPRectUpdateReason::REASON_DISPLAY_ROTATION_CHANGE:
-                session->ProcessUpdatePiPRect(SizeChangeReason::ROTATION);
-                session->ClearPiPRectPivotInfo();
-                break;
-            default:
-                return WSError::WS_DO_NOTHING;
+        WSRect wsRect = SessionHelper::TransferToWSRect(rect);
+        if (reason == SizeChangeReason::PIP_START) {
+            session->SetSessionRequestRect(wsRect);
         }
+        session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdatePiPRect");
@@ -2488,5 +2480,76 @@ bool SceneSession::IsStartMoving() const
 void SceneSession::SetIsStartMoving(const bool startMoving)
 {
     isStartMoving_.store(startMoving);
+}
+
+bool SceneSession::ShouldHideNonSecureWindows() const
+{
+    return IsSessionForeground() && (shouldHideNonSecureWindows_.load() || !secureExtSessionSet_.empty());
+}
+
+void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)
+{
+    shouldHideNonSecureWindows_.store(shouldHide);
+}
+
+WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide)
+{
+    auto task = [weakThis = wptr(this), persistentId, shouldHide]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "session is nullptr");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+
+        auto& sessionSet = session->secureExtSessionSet_;
+        if (shouldHide) {
+            sessionSet.insert(persistentId);
+        } else {
+            sessionSet.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+
+    return PostSyncTask(task, "AddOrRemoveSecureExtSession");
+}
+
+void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    auto iter = extWindowFlagsMap_.find(extPersistentId);
+    if (iter == extWindowFlagsMap_.end()) {
+        extWindowFlagsMap_.insert({ extPersistentId, extWindowFlags });
+    } else {
+        extWindowFlagsMap_[iter->first] = extWindowFlags;
+    }
+}
+bool SceneSession::IsExtWindowHasWaterMarkFlag()
+{
+    bool isExtWindowHasWaterMarkFlag = false;
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    for (const auto& iter: extWindowFlagsMap_) {
+        auto& extWindowFlags = iter.second;
+        if (!extWindowFlags) {
+            continue;
+        }
+        if (extWindowFlags & static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)) {
+            isExtWindowHasWaterMarkFlag = true;
+            break;
+        }
+    }
+    return isExtWindowHasWaterMarkFlag;
+}
+void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    auto iter = extWindowFlagsMap_.find(extPersistentId);
+    if (iter != extWindowFlagsMap_.end()) {
+        extWindowFlagsMap_.erase(iter);
+    }
+}
+void SceneSession::ClearExtWindowFlags()
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    extWindowFlagsMap_.clear();
 }
 } // namespace OHOS::Rosen

@@ -500,6 +500,19 @@ ohos_unittest("ws_screen_rotation_property_test") {
   }
 }
 
+ohos_unittest("ws_screen_session_dumper_test") {
+  module_out_path = module_out_path
+
+  sources = [ "ws_screen_session_dumper_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_move_drag_controller_test") {
   module_out_path = module_out_path
 

@@ -597,7 +597,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_) &&
-        parcel.WriteBool(isLayoutFullScreen_);
+        parcel.WriteBool(isLayoutFullScreen_) &&
+        parcel.WriteBool(isExtensionFlag_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -649,6 +650,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingWindow(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
+    property->SetExtensionFlag(parcel.ReadBool());
     return property;
 }
 
@@ -736,6 +738,16 @@ bool WindowSessionProperty::IsLayoutFullScreen() const
 void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
 {
     isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
+void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
+{
+    isExtensionFlag_ = isExtensionFlag;
+}
+
+bool WindowSessionProperty::GetExtensionFlag() const
+{
+    return isExtensionFlag_;
 }
 } // namespace Rosen
 } // namespace OHOS

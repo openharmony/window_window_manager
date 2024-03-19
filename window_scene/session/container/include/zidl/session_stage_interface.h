@@ -66,6 +66,8 @@ public:
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
+    virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
+    virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
 
 
     // **Non** IPC interface

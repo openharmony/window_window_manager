@@ -87,6 +87,7 @@ std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSession
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
+bool WindowSessionImpl::isUIExtensionAbility_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -137,6 +138,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingWindow(option->GetCallingWindow());
+    property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
@@ -473,8 +475,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
             return;
@@ -530,6 +532,12 @@ void WindowSessionImpl::UpdateDensity()
     UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
     WLOGFI("WindowSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+}
+
+WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
+{
+    property_->SetDisplayId(displayId);
+    return WSError::WS_OK;
 }
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
@@ -705,6 +713,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     switch (type) {
         default:
         case WindowSetUIContentType::DEFAULT:
+            if (isUIExtensionAbility_ && property_->GetExtensionFlag() == true) {
+                uiContent->SetUIExtensionSubWindow(true);
+                uiContent->SetUIExtensionAbilityProcess(true);
+            }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::DISTRIBUTE:
@@ -724,6 +736,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         uiContent_ = std::move(uiContent);
     }
+
+    WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
+        uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
 
     if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
         SetAPPWindowLabel(subWindowTitle_);
@@ -1525,11 +1540,7 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
 
 void WindowSessionImpl::NotifyAfterFocused()
 {
-    {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
-    }
+    NotifyWindowAfterFocused();
     if (uiContent_ != nullptr) {
         NotifyUIContentFocusStatus();
     } else {
@@ -1539,18 +1550,28 @@ void WindowSessionImpl::NotifyAfterFocused()
 
 void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 {
-    {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        // use needNotifyUinContent to separate ui content callbacks
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
-    }
+    NotifyWindowAfterUnfocused();
     if (needNotifyUiContent) {
         if (uiContent_ == nullptr) {
             shouldReNotifyFocus_ = true;
         }
         CALL_UI_CONTENT(UnFocus);
     }
+}
+
+void WindowSessionImpl::NotifyWindowAfterFocused()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyWindowAfterUnfocused()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    // use needNotifyUinContent to separate ui content callbacks
+    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
 }
 
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
@@ -1729,7 +1750,7 @@ WSError WindowSessionImpl::NotifyDestroy()
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
     WLOGFD("WindowSessionImpl::NotifyCloseExistPipWindow");
-    PictureInPictureManager::DoClose(true, false);
+    PictureInPictureManager::DoClose(true, true);
     return WSError::WS_OK;
 }
 
@@ -1881,6 +1902,13 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
         avoidArea->bottomRect_.height_);
     NotifyAvoidAreaChange(avoidArea, type);
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t status)
+{
+    WLOGFI("action: %{public}s, status: %{public}d", action.c_str(), status);
+    PictureInPictureManager::DoActionEvent(action, status);
     return WSError::WS_OK;
 }
 
@@ -2398,13 +2426,14 @@ WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason)
+void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (IsWindowSessionInvalid()) {
         WLOGFE("HostSession is invalid");
         return;
     }
-    hostSession_->UpdatePiPRect(width, height, reason);
+    auto wsReason = static_cast<SizeChangeReason>(reason);
+    hostSession_->UpdatePiPRect(rect, wsReason);
 }
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
@@ -2441,11 +2470,6 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     if (uiContent_ != nullptr) {
         uiContent_->UpdateTransform(transform);
     }
-}
-
-WMError WindowSessionImpl::HideNonSecureWindows(bool shouldHide)
-{
-    return SingletonContainer::Get<WindowAdapter>().HideNonSecureWindows(shouldHide);
 }
 
 } // namespace Rosen

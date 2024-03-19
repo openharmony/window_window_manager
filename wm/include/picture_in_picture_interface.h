@@ -40,7 +40,7 @@ public:
  */
 class IPiPActionObserver : virtual public RefBase {
 public:
-    virtual void OnActionEvent(const std::string& name) {}
+    virtual void OnActionEvent(const std::string& name, int32_t status) {}
 };
 } // namespace Rosen
 } // namespace OHOS

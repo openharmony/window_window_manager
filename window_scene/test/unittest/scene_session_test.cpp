@@ -2392,10 +2392,9 @@ HWTEST_F(SceneSessionTest, UpdatePiPRect, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     scenesession->SetSessionProperty(property);
 
-    uint32_t width = 800;
-    uint32_t height = 600;
-    PiPRectUpdateReason reason = PiPRectUpdateReason::REASON_PIP_START_WINDOW;
-    WSError result = scenesession->UpdatePiPRect(width, height, reason);
+    Rect rect = {0, 0, 800, 600};
+    SizeChangeReason reason = SizeChangeReason::PIP_START;
+    WSError result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -2441,6 +2440,102 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->RequestHideKeyboard();
     ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: SetPipActionEvent
+ * @tc.desc:  * @tc.name: SetPipActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPipActionEvent";
+    info.bundleName_ = "SetPipActionEvent";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    scensession->SetSessionProperty(property);
+    WSError res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
+
+    property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    scensession->SetSessionProperty(property);
+    res = scensession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ShouldHideNonSecureWindows
+ * @tc.desc:  * @tc.name: ShouldHideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ShouldHideNonSecureWindows, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ShouldHideNonSecureWindows";
+    info.bundleName_ = "ShouldHideNonSecureWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->ShouldHideNonSecureWindows());
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->SetShouldHideNonSecureWindows(true);
+    EXPECT_TRUE(sceneSession->ShouldHideNonSecureWindows());
+}
+
+
+/**
+ * @tc.name: SetShouldHideNonSecureWindows
+ * @tc.desc:  * @tc.name: SetShouldHideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetShouldHideNonSecureWindows, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetShouldHideNonSecureWindows";
+    info.bundleName_ = "SetShouldHideNonSecureWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->shouldHideNonSecureWindows_.load());
+    sceneSession->SetShouldHideNonSecureWindows(true);
+    EXPECT_TRUE(sceneSession->shouldHideNonSecureWindows_.load());
+}
+
+/**
+ * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.desc:  * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddOrRemoveSecureExtSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddOrRemoveSecureExtSession";
+    info.bundleName_ = "AddOrRemoveSecureExtSession";
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+            new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
+    sceneSession->AddOrRemoveSecureExtSession(12345, true);
+    EXPECT_EQ(sceneSession->secureExtSessionSet_.size(), 1);
+    EXPECT_EQ(*sceneSession->secureExtSessionSet_.begin(), 12345);
+    sceneSession->AddOrRemoveSecureExtSession(12345, false);
+    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
 }
 }
 }

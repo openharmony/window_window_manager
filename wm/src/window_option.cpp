@@ -269,6 +269,17 @@ bool WindowOption::GetOnlySupportSceneBoard() const
     return onlySupportSceneBoard_;
 }
 
+void WindowOption::SetExtensionTag(bool isExtensionTag)
+{
+    isExtensionTag_ = isExtensionTag;
+}
+
+bool WindowOption::GetExtensionTag() const
+{
+    return isExtensionTag_;
+}
+
+
 } // namespace Rosen
 } // namespace OHOS
 
