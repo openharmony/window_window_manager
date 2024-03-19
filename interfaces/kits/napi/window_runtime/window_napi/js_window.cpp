@@ -268,35 +268,35 @@ napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarEnable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
@@ -310,28 +310,28 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "GetAvoidArea");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowAvoidAreaSync");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }

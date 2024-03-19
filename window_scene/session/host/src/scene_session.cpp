@@ -712,7 +712,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+        TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d, id:%{public}d",
+            static_cast<int32_t>(status), session->GetPersistentId());
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
             session->sessionChangeCallback_->OnNeedAvoid_(status);
         }
@@ -905,7 +906,8 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGI(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType: %{public}u", type);
+                TLOGI(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
+                    type, session->GetPersistentId());
                 return avoidArea;
             }
         }
