@@ -1269,8 +1269,8 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         auto persistentId = scnSession->GetPersistentId();
         scnSession->NotifyForegroundInteractiveStatus(true);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
-        TLOGI(WmsLogTag::WMS_MAIN, "active persistentId: %{public}d isSystem_:%{public}u",
-            persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
+        TLOGI(WmsLogTag::WMS_MAIN, "active persistentId: %{public}d isSystem_:%{public}u, isNewActive:%{public}d",
+            persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_), isNewActive);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "session is invalid with %{public}d", persistentId);
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION));
@@ -2093,16 +2093,16 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
             TLOGD(WmsLogTag::WMS_LIFE, "Create system session, id:%{public}d, type: %{public}d",
                 newSession->GetPersistentId(), type);
         } else {
-            WLOGFW("[WMSLife] Didn't create jsSceneSession for this system type, id:%{public}d, "
-                "type: %{public}d", newSession->GetPersistentId(), type);
+            TLOGW(WmsLogTag::WMS_LIFE, "Didn't create jsSceneSession for this system type, id:%{public}d, "
+                "type:%{public}d", newSession->GetPersistentId(), type);
             return;
         }
     } else if (SessionHelper::IsSubWindow(type)) {
         NotifyCreateSubSession(property->GetParentPersistentId(), newSession);
-        TLOGD(WmsLogTag::WMS_LIFE, "Notify sub jsSceneSession, id:%{public}d, parentId: %{public}d, type: %{public}d",
+        TLOGD(WmsLogTag::WMS_LIFE, "Notify sub jsSceneSession, id:%{public}d, parentId:%{public}d, type:%{public}d",
             newSession->GetPersistentId(), property->GetParentPersistentId(), type);
     } else {
-        WLOGFW("[WMSLife] Invalid session type, id:%{public}d, type: %{public}d",
+        TLOGW(WmsLogTag::WMS_LIFE, "Invalid session type, id:%{public}d, type:%{public}d",
             newSession->GetPersistentId(), type);
     }
 }
@@ -2115,7 +2115,7 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
     }
     auto iter = createSubSessionFuncMap_.find(persistentId);
     if (iter == createSubSessionFuncMap_.end()) {
-        WLOGFW("[WMSLife] Can't find CreateSubSessionListener, parentId: %{public}d", persistentId);
+        TLOGW(WmsLogTag::WMS_LIFE, "Can't find CreateSubSessionListener, parentId: %{public}d", persistentId);
         return;
     }
 
@@ -3109,15 +3109,17 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         auto task = [this, info]() {
             auto scnSession = GetSceneSession(info.persistentId_);
             if (scnSession == nullptr) {
-                WLOGFW("[WMSLife]NotifySessionExceptionFunc, Not found session, id: %{public}d", info.persistentId_);
+                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, Not found session, id: %{public}d",
+                    info.persistentId_);
                 return;
             }
             if (listenerController_ == nullptr) {
-                WLOGFW("[WMSLife]NotifySessionExceptionFunc, listenerController_ is nullptr");
+                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, listenerController_ is nullptr");
                 return;
             }
             if (scnSession->GetSessionInfo().isSystem_) {
-                WLOGFW("[WMSLife]NotifySessionExceptionFunc, id: %{public}d is system", scnSession->GetPersistentId());
+                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, id: %{public}d is system",
+                    scnSession->GetPersistentId());
                 return;
             }
             TLOGI(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, errorCode: %{public}d, id: %{public}d",
@@ -4893,15 +4895,15 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
 WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
 {
     if (info == nullptr) {
-        WLOGFI("sessionInfo is nullptr.");
+        TLOGI(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    WLOGFI("run TerminateSessionNew, bundleName=%{public}s, needStartCaller=%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, needStartCaller=%{public}d",
         info->want.GetElement().GetBundleName().c_str(), needStartCaller);
     auto task = [this, info, needStartCaller]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
-            WLOGFE("fail to find session by token.");
+            TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
@@ -5930,13 +5932,13 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
 
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
-    WLOGFI("run PendingSessionToForeground");
+    TLOGI(WmsLogTag::WMS_LIFE, "run PendingSessionToForeground");
     auto task = [this, &token]() {
         auto session = FindSessionByToken(token);
         if (session != nullptr) {
             return session->PendingSessionToForeground();
         }
-        WLOGFE("fail to find token");
+        TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionToForeground:fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToForeground");
@@ -5949,7 +5951,7 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
         if (session != nullptr) {
             return session->PendingSessionToBackgroundForDelegator();
         }
-        WLOGFE("fail to find token");
+        TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionToBackgroundForDelegator:fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
@@ -6460,13 +6462,13 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
 
 WSError SceneSessionManager::MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId)
 {
-    WLOGFI("run MoveSessionsToForeground");
+    TLOGI(WmsLogTag::WMS_LIFE, "run");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
@@ -6476,13 +6478,13 @@ WSError SceneSessionManager::MoveSessionsToForeground(const std::vector<int32_t>
 WSError SceneSessionManager::MoveSessionsToBackground(const std::vector<int32_t>& sessionIds,
     std::vector<int32_t>& result)
 {
-    WLOGFI("run MoveSessionsToBackground");
+    TLOGI(WmsLogTag::WMS_LIFE, "run");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
