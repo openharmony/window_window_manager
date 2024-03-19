@@ -547,7 +547,7 @@ void JsSceneSession::ProcessTerminateSessionRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetTerminateSessionListener(func);
@@ -563,7 +563,7 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetTerminateSessionListenerNew(func);
@@ -579,7 +579,7 @@ void JsSceneSession::ProcessTerminateSessionRegisterTotal()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetTerminateSessionListenerTotal(func);
@@ -595,7 +595,7 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetPendingSessionToForegroundListener(func);
@@ -612,7 +612,7 @@ void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetPendingSessionToBackgroundForDelegatorListener(func);
@@ -1319,7 +1319,7 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFW("[WMSLife] session is nullptr");
+        TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
 
@@ -1328,7 +1328,8 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(SESSION_STATE_CHANGE_CB);
         if (iter == jsCbMap_.end()) {
-            WLOGFW("[WMSLife] Not find sessionStateChangeCallback, id: %{public}d", session->GetPersistentId());
+            TLOGW(WmsLogTag::WMS_LIFE, "Not find sessionStateChangeCallback, id: %{public}d",
+                session->GetPersistentId());
             return;
         }
         jsCallBack = iter->second;
