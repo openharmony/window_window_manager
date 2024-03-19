@@ -83,20 +83,28 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
-        if(controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT) != controls.end() &&
-            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD) != controls.end()) {
+        auto iter = std::find(controls.begin(), controls.end(),
+            static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
+        if (iter == controls.end()) {
+            return -1;
+        }
+        iter = std::find(controls.begin(), controls.end(),
+            static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+        if (iter == controls.end()) {
             return -1;
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL)) {
-        if (controlGroups.size != 0 &&
-            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON) == controls.end()) {
+        auto iter = std::find(controls.begin(), controls.end(),
+            static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
+        if (controlGroups.size != 0 && iter == controls.end()) {
             return -1;
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
-        if (controlGroups.size != 0 &&
-            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON) == controls.end()) {
+        auto iter = std::find(controls.begin(), controls.end(),
+            static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
+        if (controlGroups.size != 0 && iter == controls.end()) {
             return -1;
         }
     }
