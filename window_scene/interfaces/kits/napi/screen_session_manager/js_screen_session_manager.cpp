@@ -168,6 +168,7 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
+        WLOGE("[NAPI]screenConnectionCallback is nullptr");
         return;
     }
 
