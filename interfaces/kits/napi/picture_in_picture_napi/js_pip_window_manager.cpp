@@ -69,11 +69,34 @@ static int32_t checkOptionParams(PipOption& option)
         WLOGE("check pipoption param error, pipTemplateType not exists.");
         return -1;
     }
+    return checkControlsRules(pipTemplateType, option.GetControlGroup());
+}
+
+static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
+{
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
-    for (auto control : option.GetControlGroup()) {
+    for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
             WLOGE("check pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
+            return -1;
+        }
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
+        if(controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT) != controls.end() &&
+            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD) != controls.end()) {
+            return -1;
+        }
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL)) {
+        if (controlGroups.size != 0 &&
+            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON) == controls.end()) {
+            return -1;
+        }
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
+        if (controlGroups.size != 0 &&
+            controlGroups.find(static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON) == controls.end()) {
             return -1;
         }
     }
