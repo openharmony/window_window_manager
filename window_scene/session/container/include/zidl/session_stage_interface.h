@@ -69,7 +69,6 @@ public:
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
 
-
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
