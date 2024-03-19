@@ -2085,7 +2085,11 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
             }
         }
         if (createSystemSessionFunc_ && type != WindowType::WINDOW_TYPE_DIALOG) {
-            createSystemSessionFunc_(newSession);
+            if (WindowHelper::IsSystemSubWindow(type)) {
+                NotifyCreateSubSession(property->GetParentPersistentId(), newSession);
+            } else {
+                createSystemSessionFunc_(newSession);
+            }
             TLOGD(WmsLogTag::WMS_LIFE, "Create system session, id:%{public}d, type: %{public}d",
                 newSession->GetPersistentId(), type);
         } else {
