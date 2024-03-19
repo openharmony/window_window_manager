@@ -53,62 +53,64 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static int32_t checkOptionParams(PipOption& option)
-{
-    if (option.GetContext() == nullptr) {
-        WLOGE("check pipoption param error, context is nullptr.");
-        return -1;
-    }
-    if (option.GetXComponentController() == nullptr) {
-        WLOGE("check pipoption param error, XComponentController is nullptr.");
-        return -1;
-    }
-    uint32_t pipTemplateType = option.GetPipTemplate();
-    if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType)) ==
-        TEMPLATE_CONTROL_MAP.end()) {
-        WLOGE("check pipoption param error, pipTemplateType not exists.");
-        return -1;
-    }
-    return checkControlsRules(pipTemplateType, option.GetControlGroup());
-}
-
 static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
     for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
-            WLOGE("check pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
+            WLOGE("pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
             return -1;
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
-        auto iter = std::find(controls.begin(), controls.end(),
+        auto iterFirst = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
-        if (iter == controls.end()) {
-            return -1;
-        }
-        iter = std::find(controls.begin(), controls.end(),
+        iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
-        if (iter == controls.end()) {
+        if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
+            WLOGE("pipoption param error, %{public}u conflicts with %{public}u in controlGroups",
+                static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
+                static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
             return -1;
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL)) {
-        auto iter = std::find(controls.begin(), controls.end(),
+        auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
-        if (controlGroups.size != 0 && iter == controls.end()) {
+        if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
+            WLOGE("pipoption param error, requires HANG_UP_BUTTON when using controlGroups in VIDEO_CALL.");
             return -1;
         }
     }
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
-        auto iter = std::find(controls.begin(), controls.end(),
+        auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
-        if (controlGroups.size != 0 && iter == controls.end()) {
+        if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
+            WLOGE("pipoption param error, requires HANG_UP_BUTTON when using controlGroups in VIDEO_MEETING.");
             return -1;
         }
     }
     return 0;
+}
+
+static int32_t checkOptionParams(PipOption& option)
+{
+    if (option.GetContext() == nullptr) {
+        WLOGE("pipoption param error, context is nullptr.");
+        return -1;
+    }
+    if (option.GetXComponentController() == nullptr) {
+        WLOGE("pipoption param error, XComponentController is nullptr.");
+        return -1;
+    }
+    uint32_t pipTemplateType = option.GetPipTemplate();
+    if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType)) ==
+        TEMPLATE_CONTROL_MAP.end()) {
+        WLOGE("pipoption param error, pipTemplateType not exists.");
+        return -1;
+    }
+    return checkControlsRules(pipTemplateType, option.GetControlGroup());
 }
 
 static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
