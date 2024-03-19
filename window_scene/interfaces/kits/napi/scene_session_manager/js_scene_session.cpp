@@ -1990,7 +1990,7 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]OnSystemBarPropertyChange");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnSystemBarPropertyChange");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -2014,7 +2014,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
 
 void JsSceneSession::OnNeedAvoid(bool status)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);

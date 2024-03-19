@@ -1451,10 +1451,10 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
         GetWindowId(), static_cast<uint32_t>(type),
         property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty window state is invalid");
+        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty property is same");
+        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u property is same", GetWindowId());
         return WMError::WM_OK;
     }
 
