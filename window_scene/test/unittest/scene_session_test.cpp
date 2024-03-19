@@ -2553,11 +2553,11 @@ HWTEST_F(SceneSessionTest, ChangeSessionVisibilityWithStatusBar, Function | Smal
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<AAFwk::SceneSession> info1 = nullptr;
+    sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = sceneSession->ChangeSessionVisibilityWithStatusBar(info1, false);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 
-    sptr<AAFwk::SceneSession> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
     delete sceneSession;
