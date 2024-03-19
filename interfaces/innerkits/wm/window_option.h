@@ -231,6 +231,13 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
+     * @brief Set ExtensionSubWindow tag.
+     *
+     * @param isExtensionTag ExtensionSubWindow tag.
+     */
+    void SetExtensionTag(bool isExtensionTag);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -377,6 +384,13 @@ public:
     */
     bool GetOnlySupportSceneBoard() const;
 
+    /**
+     * @brief Get only sceneboard supported
+     *
+     * @return Return ExtensionTag of subwindow.
+    */
+    bool GetExtensionTag() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -404,6 +418,7 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool onlySupportSceneBoard_ = false;
+    bool isExtensionTag_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

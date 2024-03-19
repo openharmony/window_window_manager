@@ -85,6 +85,38 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionWindowVisibilityListener001,
     sceneSessionManagerProxy_ = nullptr;
 }
 
+/**
+ * @tc.name: AddOrRemoveSecureSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureSession001, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    int32_t persistentId = 12345;
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->AddOrRemoveSecureSession(persistentId, true));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
+/**
+ * @tc.name: AddOrRemoveSecureExtSession001
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureExtSession001, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->AddOrRemoveSecureExtSession(persistentId, parentId,
+        true));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
 }
 }
 }

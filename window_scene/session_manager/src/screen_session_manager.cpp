@@ -42,6 +42,7 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
+#include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
 
 namespace OHOS::Rosen {
@@ -51,7 +52,7 @@ const std::string SCREEN_SESSION_MANAGER_THREAD = "OS_ScreenSessionManager";
 const std::string SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD = "OS_ScreenSessionManager_ScreenPower";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
-const int SLEEP_US = 48 * 1000; // 48ms
+const int CV_WAIT_MS = 300;
 const std::u16string DEFAULT_USTRING = u"error";
 const std::string DEFAULT_STRING = "error";
 const std::string ARG_DUMP_HELP = "-h";
@@ -946,6 +947,18 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
+void ScreenSessionManager::BlockScreenOnByCV(void)
+{
+    if (keyguardDrawnDone_ == false) {
+        WLOGFI("[UL_POWER]screenOnCV_ set");
+        needScreenOnWhenKeyguardNotify_ = true;
+        std::unique_lock<std::mutex> lock(screenOnMutex_);
+        if (screenOnCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_MS)) == std::cv_status::timeout) {
+            WLOGFI("[UL_POWER]wait ScreenOnCV_ timeout");
+        }
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -998,25 +1011,10 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     }
     switch (state) {
         case ScreenPowerState::POWER_ON: {
-            if (keyguardDrawnDone_) {
-                WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is true step 1");
-                status = ScreenPowerStatus::POWER_STATUS_ON;
-                break;
-            } else {
-                if (reason ==  PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH) {
-                    isReasonScreenOnSwitch_ = true;
-                }
-                needScreenOnWhenKeyguardNotify_ = true;
-                auto task = [this, reason]() {
-                    SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, reason);
-                    isReasonScreenOnSwitch_ = false;
-                    needScreenOnWhenKeyguardNotify_ = false;
-                    keyguardDrawnDone_ = true;
-                    WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is true step 2");
-                };
-                taskScheduler_->PostTask(task, "screenOnTask", 300); // Retry after 300 ms.
-                return true;
-            }
+            keyguardDrawnDone_ = false;
+            WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
         }
         case ScreenPowerState::POWER_OFF: {
             keyguardDrawnDone_ = false;
@@ -1148,15 +1146,10 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         keyguardDrawnDone_ = true;
         WLOGFI("[UL_POWER]NotifyDisplayEvent keyguardDrawnDone_ is true");
         if (needScreenOnWhenKeyguardNotify_) {
-            taskScheduler_->RemoveTask("screenOnTask");
-            usleep(SLEEP_US);
-            if (isReasonScreenOnSwitch_ == true) {
-                SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-                isReasonScreenOnSwitch_ = false;
-            } else {
-                SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-            }
-            needScreenOnWhenKeyguardNotify_ = false;
+            std::unique_lock <std::mutex> lock(screenOnMutex_);
+            screenOnCV_.notify_all();
+            WLOGFI("[UL_POWER]screenOnCV_ notify one");
+            needScreenOnWhenKeyguardNotify_=false;
         }
     }
 
@@ -1377,6 +1370,10 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screen = GetScreenSession(screenId);
+        if (screen == nullptr) {
+            WLOGFW("[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
         screen->PowerStatusChange(event, status, reason);
     }
     return true;
@@ -3262,12 +3259,13 @@ static std::string Str16ToStr8(const std::u16string& str)
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGFI("Dump begin");
-    if (fd < 0) {
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    if (dumper == nullptr) {
+        WLOGFE("dumper is nullptr");
         return -1;
     }
-    (void) signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE crash
-    UniqueFd ufd = UniqueFd(fd); // auto close
-    fd = ufd.Get();
+    dumper->ExcuteDumpCmd();
+
     std::vector<std::string> params;
     for (auto& arg : args) {
         params.emplace_back(Str16ToStr8(arg));
@@ -3297,11 +3295,6 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
-    }
-    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
-    if (ret < 0) {
-        WLOGFE("dprintf error");
-        return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("dump end");
     return 0;

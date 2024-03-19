@@ -51,6 +51,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+                ScreenSessionManager::GetInstance().BlockScreenOnByCV();
             }
             break;
         }
