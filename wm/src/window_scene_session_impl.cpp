@@ -91,7 +91,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
-        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH)) {
+        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW)) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid type: %{public}u", type);
         return false;
     }
@@ -101,18 +102,38 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint32_t parentId)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& item : windowSessionMap_) {
         if (item.second.second && item.second.second->GetProperty() &&
-            item.second.second->GetWindowId() == parentId &&
-            WindowHelper::IsMainWindow(item.second.second->GetType())) {
-            WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
-                item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
-            return item.second.second;
+            item.second.second->GetWindowId() == parentId) {
+                if (WindowHelper::IsMainWindow(item.second.second->GetType()) ||
+                    WindowHelper::IsSystemWindow(item.second.second->GetType())) {
+                    WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
+                        item.second.second->GetProperty()->GetWindowName().c_str(), parentId,
+                        GetProperty()->GetPersistentId());
+                    return item.second.second;
+                } else if (WindowHelper::IsSubWindow(item.second.second->GetType()) &&
+                    isSessionMainWindow(item.second.second->GetParentId())) {
+                    // subwindow grandparent is mainwindow
+                    return item.second.second;
+                }
         }
     }
     WLOGFD("[WMSCom] Can not find parent window, id: %{public}d", parentId);
     return nullptr;
+}
+
+bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& item : windowSessionMap_) {
+        if (item.second.second && item.second.second->GetProperty() &&
+            item.second.second->GetWindowId() == parentId &&
+            WindowHelper::IsMainWindow(item.second.second->GetType())) {
+                return true;
+        }
+    }
+    return false;
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
@@ -165,19 +186,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
-            (type == WindowType::WINDOW_TYPE_TOAST)) {
-            property_->SetParentPersistentId(GetFloatingWindowParentId());
-            TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
-                property_->GetParentPersistentId(), type);
-            auto mainWindow = FindMainWindowWithContext();
-            property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
-        } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
-            auto mainWindow = FindMainWindowWithContext();
-            if (mainWindow != nullptr) {
-                property_->SetParentPersistentId(mainWindow->GetPersistentId());
-                TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
-            }
+        WMError createSystemWindowRet = CreateSystemWindow(type);
+        if (createSystemWindowRet != WMError::WM_OK) {
+            return createSystemWindowRet;
         }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
@@ -196,6 +207,39 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
+{
+    if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
+        (type == WindowType::WINDOW_TYPE_TOAST)) {
+        property_->SetParentPersistentId(GetFloatingWindowParentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
+            property_->GetParentPersistentId(), type);
+        auto mainWindow = FindMainWindowWithContext();
+        property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
+    } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr) {
+            property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
+        }
+    } else if (WindowHelper::IsSystemSubWindow(type)) {
+        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (WindowHelper::IsSystemSubWindow(parentSession->GetType())) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent is system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        // set parent persistentId
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
+    }
     return WMError::WM_OK;
 }
 
@@ -350,11 +394,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
-            if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
-                TLOGI(WmsLogTag::WMS_SYSTEM, "System sub window is not support");
-                return WMError::WM_ERROR_INVALID_TYPE;
-            }
-
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(type)) {
                 return WMError::WM_OK;
@@ -1684,7 +1723,7 @@ WMError WindowSceneSessionImpl::Close()
             hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-    } else if (WindowHelper::IsSubWindow(GetType())) {
+    } else if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType())) {
         WLOGFI("WindowSceneSessionImpl::Close subwindow");
         return Destroy(true);
     }
