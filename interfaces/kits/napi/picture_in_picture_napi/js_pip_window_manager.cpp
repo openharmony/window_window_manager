@@ -66,7 +66,7 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
         auto iterFirst = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
-        iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
+        auto iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
         if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
             WLOGE("pipoption param error, %{public}u conflicts with %{public}u in controlGroups",
