@@ -1801,7 +1801,7 @@ HWTEST_F(SceneSessionManagerTest, StartUIAbilityBySCB, Function | SmallTest | Le
     info.bundleName_ = "StartUIAbilityBySCB";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    int32_t ret = ssm->StartUIAbilityBySCB(sceneSession);
+    int32_t ret = ssm_->StartUIAbilityBySCB(sceneSession);
     EXPECT_EQ(ret, 2097202);
 }
 
@@ -1817,7 +1817,7 @@ HWTEST_F(SceneSessionManagerTest, ChangeUIAbilityVisibilityBySCB, Function | Sma
     info.bundleName_ = "ChangeUIAbilityVisibilityBySCB";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    int32_t ret = ssm->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
     EXPECT_EQ(ret, 2097202);
 }
 

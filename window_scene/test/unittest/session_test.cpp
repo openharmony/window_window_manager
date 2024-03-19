@@ -2889,10 +2889,10 @@ HWTEST_F(WindowSessionTest, IsTerminated49, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, consst bool visible) {
+    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
         resultValue = 1;
     };
-    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, consst bool visible) {
+    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
         resultValue = 2;
     };
 
