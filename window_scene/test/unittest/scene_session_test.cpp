@@ -2563,8 +2563,6 @@ HWTEST_F(SceneSessionTest, ChangeSessionVisibilityWithStatusBar, Function | Smal
     delete sceneSession;
 }
 
-
-
 }
 }
 }
