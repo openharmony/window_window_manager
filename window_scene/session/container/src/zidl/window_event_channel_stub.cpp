@@ -322,9 +322,11 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
 
 int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel& data, MessageParcel& reply)
 {
-    float pointX, pointY;
-    int32_t sourceType, eventType;
-    int64_t timeMs;
+    float pointX = 0;
+    float pointY = 0;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
     if (!data.ReadFloat(pointX) ||
         !data.ReadFloat(pointY) ||
         !data.ReadInt32(sourceType) ||
