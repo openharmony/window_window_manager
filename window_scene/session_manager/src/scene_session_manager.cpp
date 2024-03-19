@@ -148,6 +148,7 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -1675,6 +1676,14 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         auto persistentId = iter->second.first;
         auto parentId = iter->second.second;
         TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
+        auto sceneSession = GetSceneSession(parentId);
+        if (sceneSession != nullptr) {
+            auto oldWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
+            sceneSession->RomoveExtWindowFlags(persistentId);
+            if (oldWaterMark) {
+                CheckAndNotifyWaterMarkChangedResult();
+            }
+        }
         AddOrRemoveSecureExtSession(persistentId, parentId, false);
         remoteExtSessionMap_.erase(iter);
     };
@@ -4381,7 +4390,8 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             }
             bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
                 & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-            if (hasWaterMark && session->GetVisible()) {
+            bool isExtWindowHasWaterMarkFlag = session->IsExtWindowHasWaterMarkFlag();
+            if ((hasWaterMark && session->GetVisible()) || isExtWindowHasWaterMarkFlag) {
                 currentWaterMarkShowState = true;
                 break;
             }
@@ -5843,6 +5853,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
 #endif
         sceneSession->SetVisible(false);
         sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        sceneSession->ClearExtWindowFlags();
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
             WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
@@ -7226,6 +7237,32 @@ WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, i
     };
 
     taskScheduler_->PostAsyncTask(task, "AddOrRemoveSecureExtSession");
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags, parentId:%{public}d, persistentId:%{public}d, \
+        extWindowFlags:%{public}d", parentId, persistentId, extWindowFlags);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, parentId, persistentId, extWindowFlags]() {
+        auto sceneSession = GetSceneSession(parentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", parentId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        auto oldWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
+        sceneSession->UpdateExtWindowFlags(persistentId, extWindowFlags);
+        auto newWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
+        if (oldWaterMark != newWaterMark) {
+            CheckAndNotifyWaterMarkChangedResult();
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags");
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

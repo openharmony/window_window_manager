@@ -118,6 +118,7 @@ public:
         int32_t parentId);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
     virtual WMError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide);
+    virtual WMError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

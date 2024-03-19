@@ -223,6 +223,10 @@ public:
     void SetShouldHideNonSecureWindows(bool shouldHide);
     WSError AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
+    void UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags);
+    bool IsExtWindowHasWaterMarkFlag();
+    void RomoveExtWindowFlags(int32_t extPersistentId);
+    void ClearExtWindowFlags();
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
@@ -295,6 +299,9 @@ private:
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
+    std::shared_mutex extWindowFlagsMapMutex_;
+    std::map<int32_t, uint32_t> extWindowFlagsMap_;
+    
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

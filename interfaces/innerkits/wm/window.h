@@ -1672,6 +1672,22 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Add uiextension window flag.
+     *
+     * @param flag Flag of uiextension window.
+     * @return WM_OK means add success, others means failed.
+     */
+    virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Remove uiextension window flag.
+     *
+     * @param flag Flag of uiextension window
+     * @return WM_OK means remove success, others means failed.
+     */
+    virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

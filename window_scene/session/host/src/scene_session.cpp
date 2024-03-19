@@ -2512,4 +2512,44 @@ WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool sho
 
     return PostSyncTask(task, "AddOrRemoveSecureExtSession");
 }
+
+void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    auto iter = extWindowFlagsMap_.find(extPersistentId);
+    if (iter == extWindowFlagsMap_.end()) {
+        extWindowFlagsMap_.insert({ extPersistentId, extWindowFlags });
+    } else {
+        extWindowFlagsMap_[iter->first] = extWindowFlags;
+    }
+}
+bool SceneSession::IsExtWindowHasWaterMarkFlag()
+{
+    bool isExtWindowHasWaterMarkFlag = false;
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    for (const auto& iter: extWindowFlagsMap_) {
+        auto& extWindowFlags = iter.second;
+        if (!extWindowFlags) {
+            continue;
+        }
+        if (extWindowFlags & static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)) {
+            isExtWindowHasWaterMarkFlag = true;
+            break;
+        }
+    }
+    return isExtWindowHasWaterMarkFlag;
+}
+void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    auto iter = extWindowFlagsMap_.find(extPersistentId);
+    if (iter != extWindowFlagsMap_.end()) {
+        extWindowFlagsMap_.erase(iter);
+    }
+}
+void SceneSession::ClearExtWindowFlags()
+{
+    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
+    extWindowFlagsMap_.clear();
+}
 } // namespace OHOS::Rosen

@@ -57,6 +57,7 @@ public:
     static napi_value SetWindowBrightness(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+    static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
@@ -77,6 +78,7 @@ private:
     napi_value OnSetWindowBrightness(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+    napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 
