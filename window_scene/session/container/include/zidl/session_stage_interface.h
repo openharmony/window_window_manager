@@ -49,15 +49,9 @@ public:
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
     virtual WSError NotifyCloseExistPipWindow() = 0;
-    virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
-    {
-        return WSError::WS_OK;
-    }
+    virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) = 0;
     virtual WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
-        AAFwk::WantParams& reWantParams)
-    {
-        return WSErrorCode::WS_OK;
-    }
+        AAFwk::WantParams& reWantParams) = 0;
     virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void NotifyScreenshot() = 0;
@@ -71,10 +65,7 @@ public:
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
     virtual void NotifyTransformChange(const Transform& transform) = 0;
-    virtual WSError NotifyDialogStateChange(bool isForeground)
-    {
-        return WSError::WS_OK;
-    }
+    virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
 
 
     // **Non** IPC interface

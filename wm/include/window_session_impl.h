@@ -156,6 +156,9 @@ public:
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     WSError NotifyCloseExistPipWindow() override;
+    WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
+    WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+        AAFwk::WantParams& reWantParams) override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
@@ -175,6 +178,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+    WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
 
     void UpdatePiPRect(const uint32_t width, const uint32_t height, PiPRectUpdateReason reason) override;
