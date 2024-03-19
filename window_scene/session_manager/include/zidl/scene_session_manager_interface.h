@@ -99,6 +99,7 @@ public:
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
         TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION,
+        TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -211,6 +212,10 @@ public:
         return WSError::WS_OK;
     }
     WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override
     {
         return WSError::WS_OK;
     }
