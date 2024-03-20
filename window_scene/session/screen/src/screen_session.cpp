@@ -315,6 +315,7 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
+    currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
         listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
@@ -405,6 +406,15 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
+{
+    if (foldToExpand) {
+        if (property_.GetRotation() != currentSensorRotation_) {
+            SensorRotationChange(currentSensorRotation_);
+        }
+    }
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
