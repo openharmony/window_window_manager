@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "intention_event/service/timer_manager/include/timer_manager.h"
 #include "intention_event/service/anr_manager/include/anr_manager.h"
+#include "intention_event/framework/anr_handler/include/anr_handler.h"
 #include <algorithm>
 #include <cinttypes>
 #include "window_manager_hilog.h"
@@ -346,6 +347,105 @@ HWTEST_F(TimerManagerTest, AddTimerInternal004, Function | SmallTest | Level2)
     ASSERT_EQ(res, -1);
     delete(timermanager);
     GTEST_LOG_(INFO) << "AddTimerInternal004::ProcessTimersInternal start";
+}
+
+/**
+ * @tc.name: ANRHandler.HandleEventConsumed
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, HandleEventConsumed01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed01 start";
+    int32_t evenid = -1;
+    int64_t actionTime = 10;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->HandleEventConsumed(evenid, actionTime);
+    ASSERT_EQ(evenid, -1);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed01 end";
+}
+
+/**
+ * @tc.name: ANRHandler.HandleEventConsumed
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, HandleEventConsumed02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed02 start";
+    int32_t evenid = 0;
+    int64_t actionTime = 10;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->HandleEventConsumed(evenid, actionTime);
+    ASSERT_EQ(evenid, 0);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed02 end";
+}
+
+/**
+ * @tc.name: ANRHandler.HandleEventConsumed
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, HandleEventConsumed03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed03 start";
+    int32_t evenid = 1;
+    int64_t actionTime = 10;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->HandleEventConsumed(evenid, actionTime);
+    ASSERT_EQ(evenid, 1);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed03 end";
+}
+
+/**
+ * @tc.name: ANRHandler.OnWindowDestroyed
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, OnWindowDestroyed01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed01 start";
+    int32_t persistentId = 1;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->OnWindowDestroyed(persistentId);
+    ASSERT_EQ(persistentId, 1);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed01 end";
+}
+
+/**
+ * @tc.name: ANRHandler.OnWindowDestroyed
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, OnWindowDestroyed02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed02 start";
+    int32_t persistentId = -1;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->OnWindowDestroyed(persistentId);
+    ASSERT_EQ(persistentId, -1);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed02 end";
+}
+
+/**
+ * @tc.name: ANRHandler.UpdateLatestEventId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, UpdateLatestEventId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ANRHandler::UpdateLatestEventId start";
+    int32_t eventId = -1;
+    ANRHandler* ANRHandler = new (class ANRHandler)();
+    ANRHandler->UpdateLatestEventId(eventId);
+    ASSERT_EQ(eventId, -1);
+    delete ANRHandler;
+    GTEST_LOG_(INFO) << "ANRHandler::UpdateLatestEventId end";
 }
 }
 }

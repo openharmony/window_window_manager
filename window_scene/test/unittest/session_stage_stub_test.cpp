@@ -380,6 +380,20 @@ HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTes
     ASSERT_EQ(0, sessionStageStub_->HandleUpdateTitleInTargetPos(data, reply));
 }
 
+/**
+ * @tc.name: HandleSetPipActionEvent
+ * @tc.desc: test function : HandleSetPipActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("str");
+    data.WriteInt32(1);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleSetPipActionEvent(data, reply));
+}
 }
 }
 }

@@ -215,10 +215,10 @@ void SessionListenerController::NotifySessionFocused(int32_t persistentId)
     auto task = [weak = weak_from_this(), persistentId]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionFocused failed");
+            TLOGE(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionFocused failed");
             return;
         }
-        WLOGFI("NotifySessionFocused, persistentId:%{public}d.", persistentId);
+        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionFocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionFocused, persistentId);
     };
     taskScheduler_->PostVoidSyncTask(task, "NotifySessionFocused" + std::to_string(persistentId));
@@ -237,10 +237,10 @@ void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
     auto task = [weak = weak_from_this(), persistentId]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionUnfocused failed");
+            TLOGD(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionUnfocused failed");
             return;
         }
-        WLOGFI("NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
+        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
         self->CallListeners(&ISessionListener::OnMissionUnfocused, persistentId);
     };
     taskScheduler_->PostVoidSyncTask(task, "NotifySessionUnfocused:PID:" + std::to_string(persistentId));
@@ -331,6 +331,18 @@ void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote
     if (it != sessionListeners_.end()) {
         WLOGFI("Died Delete SessionListener");
         sessionListeners_.erase(it);
+    }
+}
+
+template<typename F, typename... Args>
+void SessionListenerController::CallListeners(F func, Args&& ... args)
+{
+    std::lock_guard<ffrt::mutex> guard(listenerLock_);
+    WLOGFI("CallListeners size: %{public}d ", static_cast<int32_t>(sessionListeners_.size()));
+    for (auto listener : sessionListeners_) {
+        if (listener) {
+            (listener->*func)(std::forward<Args>(args)...);
+        }
     }
 }
 

@@ -51,11 +51,11 @@ enum class StopPipType : uint32_t {
 using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
-    constexpr static int32_t DEFAULT_TIME_DELAY = 400;
     PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture(StartPipType startType);
-    WMError StopPictureInPicture(bool destroyWindow, bool needAnim, StopPipType stopPipType);
+    WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
+    WMError StopPictureInPictureFromClient();
     sptr<Window> GetPipWindow();
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
@@ -64,7 +64,7 @@ public:
     void UpdateContentSize(int32_t width, int32_t height);
     void StartMove();
     void DoScale();
-    void DoActionEvent(std::string& actionName);
+    void DoActionEvent(const std::string& actionName, int32_t status);
     void RestorePictureInPictureWindow();
     void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
     void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);
@@ -87,26 +87,11 @@ public:
         std::string navigationId_ = "";
     };
 
-    class PipDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
-    public:
-        PipDisplayListener(wptr<PictureInPictureController> pipController)
-        {
-            pipController_ = pipController;
-            preRotation_ = Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetRotation();
-        }
-        void OnCreate(DisplayId displayId) override;
-        void OnDestroy(DisplayId displayId) override;
-        void OnChange(DisplayId displayId) override;
-    private:
-        wptr<PictureInPictureController> pipController_;
-        Rotation preRotation_;
-    };
-
 private:
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
-    WMError StopPictureInPictureInner(bool needAnim, StopPipType stopType);
+    WMError StopPictureInPictureInner(StopPipType stopType);
     void UpdateXComponentPositionAndSize();
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
@@ -126,7 +111,6 @@ private:
     napi_env env_;
     std::mutex mutex_;
     int32_t handleId_ = -1;
-    sptr<PictureInPictureController::PipDisplayListener> pipDisplayListener_;
 };
 } // namespace Rosen
 } // namespace OHOS
