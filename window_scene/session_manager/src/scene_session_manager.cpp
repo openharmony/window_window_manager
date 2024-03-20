@@ -5318,8 +5318,7 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_,
         sceneSession->textFieldPositionY_, sceneSession->textFieldHeight_);
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
-        occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo rect: %{public}s", occupiedArea.ToString().c_str());
     callingSession_->NotifyOccupiedAreaChangeInfo(info);
 }
 
@@ -5331,9 +5330,9 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         return;
     }
 
+    WSRect overlapRect = { 0, 0, 0, 0 };
+    NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
-        WSRect overlapRect = { 0, 0, 0, 0 };
-        NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
         if (needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
             callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
             callingSession_->GetSessionRect() == callingWindowNewRect_) {
