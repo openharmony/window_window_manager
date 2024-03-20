@@ -2853,6 +2853,8 @@ HWTEST_F(SceneSessionTest, OnPiPMoveCallback, Function | SmallTest | Level2)
     scensession->OnPiPMoveCallback(rect, SizeChangeReason::MOVE);
     scensession->OnPiPMoveCallback(rect, SizeChangeReason::DRAG_END);
     EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, property->GetWindowType());
+}
+
  * @tc.name: SetPipActionEvent
  * @tc.desc:  * @tc.name: SetPipActionEvent
  * @tc.type: FUNC
