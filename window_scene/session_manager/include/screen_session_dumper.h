@@ -40,6 +40,10 @@ private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
     void OutputDumpInfo();
+    void DumpScreenSessionById(ScreenId id);
+    void DumpRsInfoById(ScreenId id);
+    void DumpRsInfoById01(sptr<ScreenSession> screenSession);
+    void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
 
