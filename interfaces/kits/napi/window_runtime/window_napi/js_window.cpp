@@ -268,35 +268,35 @@ napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetFullScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarEnable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
@@ -310,28 +310,28 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetAvoidArea");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetWindowAvoidAreaSync");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -677,6 +677,13 @@ napi_value JsWindow::Minimize(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]Minimize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMinimize(env, info) : nullptr;
+}
+
+napi_value JsWindow::Maximize(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]Maximize");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnMaximize(env, info) : nullptr;
 }
 
 napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
@@ -1877,14 +1884,14 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     bool isFullScreen = false;
     if (errCode == WMError::WM_OK) {
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to isFullScreen");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isFullScreen");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             napi_get_value_bool(env, nativeVal, &isFullScreen);
@@ -1896,7 +1903,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
         [weakToken, isFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
+                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 return;
             }
@@ -1910,7 +1917,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window SetFullScreen failed."));
             }
-            WLOGI("Window [%{public}u, %{public}s] set full screen end, ret = %{public}d",
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1928,14 +1935,14 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     bool isLayoutFullScreen = false;
     if (errCode == WMError::WM_OK) {
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to isLayoutFullScreen");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isLayoutFullScreen");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             napi_get_value_bool(env, nativeVal, &isLayoutFullScreen);
@@ -1946,7 +1953,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
         [weakToken, isLayoutFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
+                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 return;
             }
@@ -1961,7 +1968,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
-            WLOGI("Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
@@ -1978,14 +1985,14 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool isLayoutFullScreen = false;
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to isLayoutFullScreen");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isLayoutFullScreen");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             napi_get_value_bool(env, nativeVal, &isLayoutFullScreen);
@@ -2012,8 +2019,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
-            WLOGI("Window [%{public}u, %{public}s] set window layout full screen end, ret = %{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set window layout full screen end, "
+                "ret = %{public}d", weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     napi_value lastParam = (argc <= 1) ? nullptr :
@@ -2032,7 +2039,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
@@ -2063,7 +2070,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(ret), "JsWindow::OnSetSystemBarEnable failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] set system bar enable end, ret = %{public}d",
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set system bar enable end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     napi_value lastParam = nullptr;
@@ -2188,7 +2195,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
@@ -2222,7 +2229,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnSetSystemBarProperties failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] set prop end, ret = %{public}d",
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set prop end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -2294,13 +2301,13 @@ static void ParseAvoidAreaParam(napi_env env, napi_callback_info info, WMError& 
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WMError::WM_OK) {
         napi_value nativeMode = argv[0];
         if (nativeMode == nullptr) {
-            WLOGFE("Failed to convert parameter to AvoidAreaType");
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to AvoidAreaType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             uint32_t resultValue = 0;
@@ -2322,13 +2329,13 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
         [weakToken, errCode, avoidAreaType](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
+                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 return;
             }
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
-                WLOGFE("window is nullptr or get invalid param");
+                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr or get invalid param");
                 return;
             }
             // getAvoidRect by avoidAreaType
@@ -2347,7 +2354,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnGetAvoidArea failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] get avoid area end, ret = %{public}d",
+            TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] get avoid area end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     size_t argc = 4;
@@ -2400,7 +2407,7 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         avoidArea.rightRect_ = g_emptyRect;
         avoidArea.bottomRect_ = g_emptyRect;
     }
-    WLOGI("Window [%{public}u, %{public}s] get avoid area type %{public}d end, ret %{public}d "
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] get avoid area type %{public}d end, ret %{public}d "
           "top{%{public}d,%{public}d,%{public}d,%{public}d}, down{%{public}d,%{public}d,%{public}d,%{public}d}",
           window->GetWindowId(), window->GetWindowName().c_str(), avoidAreaType, ret,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
@@ -4789,6 +4796,62 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    if (!WindowHelper::IsMainWindow(weakToken->GetType())) {
+        WLOGFE("[NAPI] maximize interface only support main Window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnMaximize failed."));
+                return;
+            }
+            WMError ret = weakWindow->Maximize();
+            auto uicontent = weakWindow->GetUIContent();
+            if (uicontent == nullptr) {
+                WLOGFE("uicontent is nullptr");
+                ret = WMError::WM_ERROR_NULLPTR;
+            } else {
+                uicontent->UpdateDecorVisible(false);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Maximize failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] maximize end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnMaximize",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFD("Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -5130,6 +5193,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(env, object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
     BindNativeFunction(env, object, "minimize", moduleName, JsWindow::Minimize);
+    BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(env, object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);

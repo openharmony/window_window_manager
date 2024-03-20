@@ -105,6 +105,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             scenePersistence->snapshotPath_.find('/') == std::string::npos) {
             WLOGFE("scenePersistence is%{public}s nullptr, pixelMap is%{public}s nullptr",
                 scenePersistence == nullptr ? "" : " not", pixelMap == nullptr ? "" : " not");
+            resetSnapshotCallback();
             return;
         }
 
@@ -124,6 +125,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         std::set<std::string> formats;
         if (imagePacker.GetSupportedFormats(formats)) {
             WLOGFE("Failed to get supported formats");
+            resetSnapshotCallback();
             return;
         }
 

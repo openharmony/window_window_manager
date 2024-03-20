@@ -83,6 +83,7 @@
           "base_group": [
             "//foundation/window/window_manager/snapshot:snapshot_display",
             "//foundation/window/window_manager/setresolution:setresolution_screen",
+            "//foundation/window/window_manager/interfaces/kits/napi/embeddable_window_stage:embeddablewindowstage",
             "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
@@ -304,6 +305,16 @@
             "header": {
               "header_files": [],
               "header_base": "//foundation/window/window_manager/previewer/include"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/embeddable_window_stage:embeddablewindowstage_kit",
+            "header": {
+              "header_files": [
+                "js_embeddable_window_stage.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/napi/embeddable_window_stage"
             }
           },
           {
