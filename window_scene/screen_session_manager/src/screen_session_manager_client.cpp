@@ -69,6 +69,7 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
 
     screenConnectionListener_ = listener;
     ConnectToServer();
+    WLOGFI("Success to register screen connection listener");
 }
 
 bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
