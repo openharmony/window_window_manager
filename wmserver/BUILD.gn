@@ -133,7 +133,7 @@ ohos_shared_library("sms") {
 
 if (scene_board_enabled) {
   group("libwms") {
-    deps = []
+    deps = [ "../etc:wms_etc" ]
   }
 } else {
   ohos_shared_library("libwms") {
