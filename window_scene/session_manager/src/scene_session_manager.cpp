@@ -1714,7 +1714,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             WLOGE("The hostWindow is not thie parentwindow ! parentwindow bundleName: %{public}s, "
                 "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
-            return SError::WS_ERROR_INVALID_WINDOW;
+            return WSError::WS_ERROR_INVALID_WINDOW;
         }
     }
 
