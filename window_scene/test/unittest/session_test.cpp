@@ -2881,6 +2881,34 @@ HWTEST_F(WindowSessionTest, IsTerminated49, Function | SmallTest | Level2)
     ASSERT_EQ(false, res);
 }
 
+/**
+ * @tc.name: SetSystemActive48
+ * @tc.desc: SetSystemActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 1;
+    };
+    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 2;
+    };
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+
+    SessionInfo info;
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 1);
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 2);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

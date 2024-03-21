@@ -2950,6 +2950,32 @@ HWTEST_F(SceneSessionTest, AddOrRemoveSecureExtSession, Function | SmallTest | L
     sceneSession->AddOrRemoveSecureExtSession(12345, false);
     EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
 }
+
+/**
+ * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.desc:  * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ChangeSessionVisibilityWithStatusBar";
+    info.bundleName_ = "ChangeSessionVisibilityWithStatusBar";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<AAFwk::SessionInfo> info1 = nullptr;
+    WSError result = sceneSession->ChangeSessionVisibilityWithStatusBar(info1, false);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    delete sceneSession;
+}
+
 }
 }
 }
