@@ -164,11 +164,9 @@ int Comp(const std::pair<uint64_t, WindowVisibilityState> &a, const std::pair<ui
 bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
 {
     if (item.IsInts() && item.intsValue_ && item.intsValue_->size() == 1) {
-        const auto& numbers = *item.intsValue_;
-        value = item.intsValue_->numbers[0];
+        value = (*item.intsValue_)[0];
         return true;
     }
-    value = -1; 
     return false;
 }
 } // namespace
@@ -310,9 +308,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
 
     item = config["backgroundswitch"];
     int32_t param = -1;
-    if (GetSingleIntItem(item, param) && param == 1) {
-        systemConfig_.backgroundswitch = GetSingleIntItem(item, param) && param == 1;
-    }
+    systemConfig_.backgroundswitch = GetSingleIntItem(item, param) && param == 1;
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
     item = config["defaultWindowMode"];
     if (GetSingleIntItem(item, param) &&
