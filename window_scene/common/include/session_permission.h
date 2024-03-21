@@ -35,6 +35,7 @@ public:
     static bool IsSACalling();
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool IsSameBundleNameAsCalling(const std::string& bundleName);
+    static bool IsStartedByUIExtension();
 };
 } // Rosen
 } // OHOS
