@@ -350,6 +350,19 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     NotifyKeyEvent(keyEvent, isConsumed, false);
 }
 
+bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
+}
+
+bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    return PreNotifyKeyEvent(keyEvent);
+}
+
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u \

@@ -45,6 +45,7 @@ public:
         bool notifyInputMethod = true) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
     virtual void NotifyFocusStateEvent(bool focusState) {}
+    virtual bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {return false;}
     virtual int32_t GetPersistentId() const
     {
         return -1;

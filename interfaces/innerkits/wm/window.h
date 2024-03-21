@@ -927,6 +927,12 @@ public:
      */
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) {}
     /**
+     * @brief Notify KeyEvent to arkui.
+     *
+     * @param inputEvent Keyboard input event
+     */
+    virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {return false;}
+    /**
      * @brief Consume PointerEvent from MMI.
      *
      * @param inputEvent Pointer input event

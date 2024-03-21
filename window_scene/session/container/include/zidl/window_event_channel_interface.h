@@ -40,7 +40,8 @@ public:
 
     // transfer sync key event for weather consumed
     virtual WSError TransferBackpressedEventForConsumed(bool& isConsumed) = 0;
-    virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) = 0;
+    virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool isPreImeEvent = false) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
     virtual WSError TransferFocusState(bool focusState) = 0;
     virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
