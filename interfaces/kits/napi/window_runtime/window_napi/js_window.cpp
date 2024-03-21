@@ -315,6 +315,14 @@ napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info inf
     return (me != nullptr) ? me->OnSetSystemBarProperties(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowSystemBarPropertiesSync");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowSystemBarPropertiesSync(env, info) : nullptr;
+}
+
+
 napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
@@ -2238,6 +2246,26 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     NapiAsyncTask::Schedule("JsWindow::OnSetSystemBarProperties",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto weakWindow = weakToken.promote();
+    if (weakWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(weakWindow->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "only main window has right to call");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    auto objValue = CreateJsSystemBarPropertiesObject(env, weakWindow);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return objValue;
 }
 
 napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info)
@@ -5143,6 +5171,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setSystemBarEnable", moduleName, JsWindow::SetSystemBarEnable);
     BindNativeFunction(env, object, "setWindowSystemBarEnable", moduleName, JsWindow::SetWindowSystemBarEnable);
     BindNativeFunction(env, object, "setSystemBarProperties", moduleName, JsWindow::SetSystemBarProperties);
+    BindNativeFunction(env, object, "getWindowSystemBarProperties",
+        moduleName, JsWindow::GetWindowSystemBarPropertiesSync);
     BindNativeFunction(env, object, "setWindowSystemBarProperties",
         moduleName, JsWindow::SetWindowSystemBarProperties);
     BindNativeFunction(env, object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
