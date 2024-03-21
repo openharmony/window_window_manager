@@ -3004,31 +3004,40 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
     }
 
     wptr<Window> weakToken(windowToken_);
+    std::shared_ptr<WmErrorCode> errCodeExe = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodeExe] () {
+        if (errCodeExe == nullptr) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodeExe = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodeExe = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
+        WLOGI("Window [%{public}u, %{public}s] set keep screen on end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, keepScreenOn](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task.Reject(env,
-                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "Invalidate params."));
+        [weakToken, keepScreenOn, errCodeExe](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodeExe == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "System abnormal."));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
-            if (ret == WmErrorCode::WM_OK) {
+            if (*errCodeExe == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodeExe),
                     "Window set keep screen on failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] set keep screen on end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowKeepScreenOn",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
