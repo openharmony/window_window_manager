@@ -1705,7 +1705,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
-    if (property->GetExtensionFlag() == true) {
+    if (SessionPermission::IsStartedByUIExtension() &&
+        property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
