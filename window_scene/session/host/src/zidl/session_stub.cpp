@@ -531,10 +531,9 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleNotifyExtensionTimeout called");
     int32_t errorCode = 0;
     if (!data.ReadInt32(errorCode)) {
-        WLOGFE("Read eventId from parcel failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read eventId from parcel failed!");
         return ERR_INVALID_DATA;
     }
     NotifyExtensionTimeout(errorCode);

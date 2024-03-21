@@ -330,7 +330,7 @@ void Session::NotifyDisconnect()
 
 void Session::NotifyExtensionDied()
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
@@ -342,7 +342,8 @@ void Session::NotifyExtensionDied()
 
 void Session::NotifyExtensionTimeout(int32_t errorCode)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) called in session.", errorCode);
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) in session(persistentId:%{public}d).",
+        errorCode, persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
