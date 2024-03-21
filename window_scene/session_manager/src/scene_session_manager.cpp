@@ -165,7 +165,7 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
 {
     if (item.IsInts() && item.intsValue_ && item.intsValue_->size() == 1) {
         const auto& numbers = *item.intsValue_;
-        value = numbers[0];
+        value = item.intsValue_->numbers[0];
         return true;
     }
     return false;
