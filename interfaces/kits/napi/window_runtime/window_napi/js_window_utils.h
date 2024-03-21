@@ -66,6 +66,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_SYSTEM_TOAST,
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
+    TYPE_HANDWRITE,
     TYPE_END
 };
 
@@ -101,6 +102,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
+    { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -125,6 +127,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_SYSTEM_TOAST,        WindowType::WINDOW_TYPE_SYSTEM_TOAST        },
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
+    { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -191,6 +194,7 @@ struct SystemBarPropertyFlag {
 
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
+    napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
         sptr<Window>& window);

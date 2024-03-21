@@ -387,6 +387,17 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IWindowNoInteractionListenerSptr
+ *
+ * @brief Listener to observe no interaction event for a long time of window.
+*/
+class IWindowNoInteractionListener : virtual public RefBase {
+public:
+    virtual void OnWindowNoInteractionCallback() {};
+};
+using IWindowNoInteractionListenerSptr = sptr<IWindowNoInteractionListener>;
+
+/**
  * @class IWindowTitleButtonRectChangedListener
  *
  * @brief Listener to observe event when window size or the height of title bar changed.
@@ -927,6 +938,12 @@ public:
      */
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) {}
     /**
+     * @brief Notify KeyEvent to arkui.
+     *
+     * @param inputEvent Keyboard input event
+     */
+    virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {return false;}
+    /**
      * @brief Consume PointerEvent from MMI.
      *
      * @param inputEvent Pointer input event
@@ -1285,6 +1302,15 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
+    
+    /**
+     * @brief maximize window with layoutOption.
+     *
+     * @param option UI layout param.
+     * @return WM_OK means maximize window ok, others means failed.
+     */
+    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
@@ -1502,14 +1528,6 @@ public:
     virtual void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) {}
 
     /**
-     * @brief Recovery pip main window.
-     *
-     * @param Rect of window.
-     * @return Errorcode of window.
-     */
-    virtual WMError RecoveryPullPiPMainWindow(const Rect& rect) { return WMError::WM_OK; }
-
-    /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
@@ -1551,6 +1569,30 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @param timeout uint32_t if timeout(seconds) pass with no interaction, the listener will be executed.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener,
+        uint32_t timeout)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window no interaction listener.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1666,6 +1708,17 @@ public:
     }
 
     /**
+     * @brief Set the modality of window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetSubWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief recovery the main window by function overloading. It is called by JsWindow.
      *
      * @param reason reason of update.
@@ -1680,7 +1733,7 @@ public:
      * @return WM_OK means add success, others means failed.
      */
     virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Remove uiextension window flag.
      *
@@ -1688,6 +1741,17 @@ public:
      * @return WM_OK means remove success, others means failed.
      */
     virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Make multi-window become landscape or not.
+     *
+     * @param isLandscapeMultiWindow means whether multi-window's scale is landscape.
+     * @return WMError WM_OK means set success, others means failed.
+     */
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

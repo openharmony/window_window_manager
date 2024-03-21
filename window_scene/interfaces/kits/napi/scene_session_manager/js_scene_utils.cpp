@@ -645,6 +645,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, sessionInfo.abilityName_));
     napi_set_named_property(env, objValue, "appIndex", CreateJsValue(env, sessionInfo.appIndex_));
     napi_set_named_property(env, objValue, "isSystem", CreateJsValue(env, sessionInfo.isSystem_));
+    napi_set_named_property(env, objValue, "isCastSession", CreateJsValue(env, sessionInfo.isCastSession_));
     napi_set_named_property(env, objValue, "persistentId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.persistentId_)));
     napi_set_named_property(env, objValue, "callerPersistentId",
@@ -956,6 +957,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
+    SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
     return objValue;
 }
 
