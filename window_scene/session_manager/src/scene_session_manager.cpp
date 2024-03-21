@@ -161,7 +161,7 @@ int Comp(const std::pair<uint64_t, WindowVisibilityState> &a, const std::pair<ui
     return a.first < b.first;
 }
 
-bool GetSingleIntItem(WindowSceneConfig::ConfigItem const& item, int32_t& value)
+bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
 {
     if (item.IsInts() && item.intsValue_ && item.intsValue_->size() == 1) {
         const auto& numbers = *item.intsValue_;
