@@ -168,6 +168,7 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
         value = item.intsValue_->numbers[0];
         return true;
     }
+    value = -1; 
     return false;
 }
 } // namespace
