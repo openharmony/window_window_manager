@@ -2370,6 +2370,14 @@ bool SceneSession::IsExtWindowHasWaterMarkFlag()
     }
     return isExtWindowHasWaterMarkFlag;
 }
+
+void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
+{
+    if (sessionStage_) {
+        sessionStage_->NotifyDisplayMove(from, to);
+    }
+}
+
 void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
 {
     std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);

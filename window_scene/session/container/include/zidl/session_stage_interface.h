@@ -68,6 +68,7 @@ public:
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
+    virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
