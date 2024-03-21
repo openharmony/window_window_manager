@@ -1938,13 +1938,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         if (session->changeSessionVisibilityWithStatusBarFunc_) {
             session->changeSessionVisibilityWithStatusBarFunc_(info, visible);
         }
-        SessionState oldState = session->GetSessionState();
-        SessionState newState = visible == false ? SessionState::STATE_BACKGROUND : SessionState::STATE_FOREGROUND;
-        if (oldState != newState) {
-            session->SetSessionState(newState);
-            session->NotifySessionStateChange(newState);
-        }
-
+        
         return WSError::WS_OK;
     };
     PostTask(task, "ChangeSessionVisibilityWithStatusBar");
