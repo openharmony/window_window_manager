@@ -12,3 +12,4 @@
 # limitations under the License.
 
 bootevent.wms.fullscreen.ready = foundation:foundation:0775
+bootevent.wms.ready = foundation:foundation:0775

@@ -26,9 +26,6 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
-}
 
 std::mutex JsPipWindowManager::mutex_;
 
@@ -44,7 +41,7 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
         napi_value getElementValue = nullptr;
         napi_get_element(env, controlGroup, i, &getElementValue);
         if (!ConvertFromJsValue(env, getElementValue, controlType)) {
-            WLOGE("Failed to convert parameter to controlType");
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
             return false;
         }
         controls.push_back(controlType);
@@ -102,7 +99,7 @@ JsPipWindowManager::~JsPipWindowManager()
 
 void JsPipWindowManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGFD("Finalizer");
+    TLOGD(WmsLogTag::WMS_PIP, "Finalizer");
     std::unique_ptr<JsPipWindowManager>(static_cast<JsPipWindowManager*>(data));
 }
 
@@ -114,7 +111,7 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGFD("OnIsPipEnabled called");
+    TLOGD(WmsLogTag::WMS_PIP, "OnIsPipEnabled called");
     return CreateJsValue(env, true);
 }
 
@@ -126,24 +123,24 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
 
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnCreatePipController called");
+    TLOGI(WmsLogTag::WMS_PIP, "OnCreatePipController called");
     std::lock_guard<std::mutex> lock(mutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Missing args when creating pipController");
+        TLOGE(WmsLogTag::WMS_PIP, "Missing args when creating pipController");
         return NapiThrowInvalidParam(env);
     }
     napi_value config = argv[0];
     if (config == nullptr) {
-        WLOGFE("Failed to convert object to pip Configuration");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert object to pip Configuration");
         return NapiThrowInvalidParam(env);
     }
     PipOption pipOption;
     int32_t errCode = GetPictureInPictureOptionFromJs(env, config, pipOption);
     if (errCode == -1) {
-        WLOGFE("Configuration is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "Configuration is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
     napi_value callback = nullptr;
@@ -172,9 +169,9 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
 
 napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)
 {
-    WLOGFD("JsPipWindowManagerInit");
+    TLOGD(WmsLogTag::WMS_PIP, "JsPipWindowManagerInit");
     if (env == nullptr || exportObj == nullptr) {
-        WLOGFE("JsPipWindowManagerInit env or exportObj is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "JsPipWindowManagerInit env or exportObj is nullptr");
         return nullptr;
     }
     std::unique_ptr<JsPipWindowManager> jsPipManager = std::make_unique<JsPipWindowManager>();

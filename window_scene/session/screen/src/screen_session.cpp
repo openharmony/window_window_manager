@@ -360,6 +360,16 @@ void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> u
     updateToInputManagerCallback_ = updateToInputManagerCallback;
 }
 
+VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
+{
+    return screenFlag_;
+}
+
+void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
+{
+    screenFlag_ = screenFlag;
+}
+
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
@@ -533,14 +543,11 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    sptr<SupportedScreenModes> info = GetActiveScreenMode();
-    if (info == nullptr) {
-        return DisplayOrientation::UNKNOWN;
-    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
-    bool isVerticalScreen = info->width_ < info->height_;
+    bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
-        isVerticalScreen = info->width_ > info->height_;
+        WLOGD("foldDisplay is verticalScreen when width is greater than height");
+        isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     switch (rotation) {
         case Rotation::ROTATION_0: {
@@ -577,6 +584,9 @@ ScreenSourceMode ScreenSession::GetSourceMode() const
         }
         case ScreenCombination::SCREEN_ALONE: {
             return ScreenSourceMode::SCREEN_ALONE;
+        }
+        case ScreenCombination::SCREEN_UNIQUE: {
+            return ScreenSourceMode::SCREEN_UNIQUE;
         }
         default: {
             return ScreenSourceMode::SCREEN_ALONE;
