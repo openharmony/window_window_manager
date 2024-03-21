@@ -47,7 +47,11 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         WLOGFE("Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    bool isPreImeEvent = false;
+    if (!data.WriteBool(isPreImeEvent)) {
+        WLOGFE("Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -103,7 +107,7 @@ WSError WindowEventChannelProxy::TransferBackpressedEventForConsumed(bool& isCon
 }
 
 WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -117,7 +121,10 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
         WLOGFE("Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteBool(isPreImeEvent)) {
+        WLOGFE("Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

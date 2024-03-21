@@ -912,6 +912,22 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: PreNotifyKeyEvent
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, PreNotifyKeyEvent, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
+    std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
+    window->PreNotifyKeyEvent(inputEvent);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: get
  * @tc.type: FUNC

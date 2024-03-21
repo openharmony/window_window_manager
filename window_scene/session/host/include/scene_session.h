@@ -216,7 +216,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void ClearSpecificSessionCbMap();
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
-    void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
+    bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
     bool ShouldHideNonSecureWindows() const;
