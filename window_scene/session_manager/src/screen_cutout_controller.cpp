@@ -32,11 +32,11 @@ constexpr int32_t Rotate90 = 90;
 constexpr int32_t Rotate180 = 180;
 constexpr int32_t Rotate270 = 270;
 
-template<int32_t>
+template<Rotation>
 DMRect GetRotatedRect(uint32_t width, uint32_t height, const DMRect& rect);
 
 template<>
-DMRect GetRotatedRect<90>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect GetRotatedRect<Rotation::ROTATION_90>(uint32_t width, uint32_t height, const DMRect& rect)
 {
     return DMRect { .posX_ = width - rect.posY_ - rect.height_,
                     .posY_ = rect.posX_,
@@ -45,14 +45,14 @@ DMRect GetRotatedRect<90>(uint32_t width, uint32_t height, const DMRect& rect)
 }
 
 template<>
-DMRect GetRotatedRect<180>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect GetRotatedRect<Rotation::ROTATION_180>(uint32_t width, uint32_t height, const DMRect& rect)
 {
     return DMRect { width - rect.posX_ - rect.width_,
                     height - rect.posY_ - rect.height_, rect.width_, rect.height_ };
 }
 
 template<>
-DMRect GetRotatedRect<270>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect GetRotatedRect<Rotation::ROTATION_270>(uint32_t width, uint32_t height, const DMRect& rect)
 {
     return DMRect { rect.posY_, height - rect.posX_ - rect.width_,
                     rect.height_, rect.width_ };
@@ -112,19 +112,19 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotate90>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_90>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_180: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotate180>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_180>(displayWidth, displayHeight, rect));
             }
             break;
         }
         case Rotation::ROTATION_270: {
             for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotate270>(displayWidth, displayHeight, rect));
+                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_270>(displayWidth, displayHeight, rect));
             }
             break;
         }
