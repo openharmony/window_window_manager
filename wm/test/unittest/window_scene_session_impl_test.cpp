@@ -527,6 +527,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetActive01, Function | SmallTest | Level2)
 
     windowscenesession->hostSession_ = session;
     ASSERT_EQ(WSError::WS_OK, windowscenesession->SetActive(false));
+    ASSERT_EQ(WSError::WS_OK, windowscenesession->SetActive(true));
 }
 
 /**
