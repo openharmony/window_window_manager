@@ -67,7 +67,7 @@ public:
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     void NotifyExtensionDied() override;
-    void NotifyExtensionTimeOut(int32_t errorCode) override;
+    void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
 
     void NotifyPiPWindowPrepareClose() override;

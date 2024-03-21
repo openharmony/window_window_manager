@@ -865,7 +865,7 @@ void SessionProxy::NotifyExtensionDied()
     }
 }
 
-void SessionProxy::NotifyExtensionTimeOut(int32_t errorCode)
+void SessionProxy::NotifyExtensionTimeout(int32_t errorCode)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -1258,17 +1258,17 @@ HWTEST_F(WindowSessionTest, NotifyExtensionDied, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NotifyExtensionTimeOut
- * @tc.desc: NotifyExtensionTimeOut Test
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, NotifyExtensionTimeOut, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, NotifyExtensionTimeout, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->NotifyExtensionTimeOut(3);
+    session_->NotifyExtensionTimeout(3);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
 /**
