@@ -272,7 +272,7 @@ void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)
     proxy->NotifyRemoteReady();
     proxy->NotifyExtensionDied();
     int32_t errorCode = 1;
-    proxy->NotifyExtensionTimeOut(errorCode);
+    proxy->NotifyExtensionTimeout(errorCode);
 }
 
 void ProxyInterfaceFuzzTest(const uint8_t* data, size_t size)

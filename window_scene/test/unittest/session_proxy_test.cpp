@@ -431,18 +431,18 @@ HWTEST_F(SessionProxyTest, NotifyExtensionDied, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NotifyExtensionTimeOut
+ * @tc.name: NotifyExtensionTimeout
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, NotifyExtensionTimeOut, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, NotifyExtensionTimeout, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeOut start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeout start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sProxy->NotifyExtensionTimeOut(2);
+    sProxy->NotifyExtensionTimeout(2);
 
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeOut end";
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeout end";
 }
 
 /**
