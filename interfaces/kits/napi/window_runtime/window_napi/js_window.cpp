@@ -658,6 +658,13 @@ napi_value JsWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetHandwritingFlag");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetHandwritingFlag(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetAspectRatio");
@@ -4644,6 +4651,57 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value nativeBool = argv[0];
+    if (nativeBool == nullptr) {
+        WLOGFE("SetHandwritingFlag Invalid window flag");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    bool isAddFlag = false;
+    napi_get_value_bool(env, nativeBool, &isAddFlag);
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, isAddFlag](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnSetHandwritingFlag failed."));
+                return;
+            }
+            WMError ret = WMError::WM_OK;
+            if (isAddFlag) {
+                ret = window->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
+            } else {
+                ret = window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "SetHandwritingFlag failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] set handwriting flag end, ret = %{public}d",
+                window->GetWindowId(), window->GetWindowName().c_str(), ret);
+        };
+
+    napi_value lastParam = (argc == 1) ? nullptr :
+        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetHandwritingFlag",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 
 napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
 {
@@ -5192,6 +5250,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
     BindNativeFunction(env, object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(env, object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
+    BindNativeFunction(env, object, "setHandwritingFlag", moduleName, JsWindow::SetHandwritingFlag);
     BindNativeFunction(env, object, "minimize", moduleName, JsWindow::Minimize);
     BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
