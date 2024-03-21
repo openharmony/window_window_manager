@@ -92,7 +92,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
         type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW)) {
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_HANDWRITE)){
         TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid type: %{public}u", type);
         return false;
     }
@@ -1908,6 +1908,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
         WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
