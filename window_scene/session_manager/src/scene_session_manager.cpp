@@ -310,7 +310,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     item = config["backgroundswitch"];
     int32_t param = -1;
     if (GetSingleIntItem(item, param) && param == 1) {
-        systemConfig_.backgroundswitch = true;
+        systemConfig_.backgroundswitch = GetSingleIntItem(item, param) && param == 1;
     }
     WLOGFD("Load ConfigWindowSceneXml backgroundswitch%{public}d", systemConfig_.backgroundswitch);
     item = config["defaultWindowMode"];
