@@ -1710,7 +1710,7 @@ HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetUIContentInner");
-    option->SetExtensionFlag(true);
+    option->SetExtensionTag(true);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     string url = "";
