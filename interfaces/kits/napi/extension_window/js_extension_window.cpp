@@ -119,7 +119,8 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName,
         JsExtensionWindow::SetPreferredOrientation);
-
+    BindNativeFunction(env, objValue, "getPreferredOrientation", moduleName,
+        JsExtensionWindow::GetPreferredOrientation);
     return objValue;
 }
 
@@ -253,6 +254,13 @@ napi_value JsExtensionWindow::SetPreferredOrientation(napi_env env, napi_callbac
     WLOGD("SetPreferredOrientation");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    WLOGD("GetPreferredOrientation");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetUIContext(napi_env env, napi_callback_info info)

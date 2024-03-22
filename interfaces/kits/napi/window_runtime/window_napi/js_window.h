@@ -99,6 +99,7 @@ public:
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
     static napi_value SetCallingWindow(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value RaiseToAppTop(napi_env env, napi_callback_info info);
