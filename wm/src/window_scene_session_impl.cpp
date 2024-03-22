@@ -1162,6 +1162,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Unsupport operation for full screen window. WindowId: %{public}d",
+            GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
