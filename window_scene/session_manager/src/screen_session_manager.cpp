@@ -52,7 +52,8 @@ const std::string SCREEN_SESSION_MANAGER_THREAD = "OS_ScreenSessionManager";
 const std::string SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD = "OS_ScreenSessionManager_ScreenPower";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
-const int CV_WAIT_MS = 300;
+const int32_t SLEEP_10_MS = 10 * 1000; // 10ms
+const int32_t CV_WAIT_MS = 300;
 const std::u16string DEFAULT_USTRING = u"error";
 const std::string DEFAULT_STRING = "error";
 const std::string ARG_DUMP_HELP = "-h";
@@ -888,19 +889,31 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
 bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpBegin(%u)", reason);
-    WLOGFI("[UL_POWER]WakeUpBegin remove suspend begin task");
+    currentWakeUpReason_ = reason;
+    WLOGFI("[UL_POWER]WakeUpBegin remove suspend begin task, reason: %{public}u", static_cast<uint32_t>(reason));
+
     blockScreenPowerChange_ = false;
     taskScheduler_->RemoveTask("suspendBeginTask");
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
         return true;
     }
+    // Handling Power Button Conflicts
+    if (IsFastFingerprintReason(lastWakeUpReason_) && reason == PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY) {
+        WLOGFI("[UL_POWER]WakeUpBegin buttonBlock_ is true");
+        buttonBlock_ = true;
+        screenOnCV_.notify_all();
+        usleep(SLEEP_10_MS);
+    }
+    lastWakeUpReason_ = reason;
+
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN, reason);
 }
 
 bool ScreenSessionManager::WakeUpEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpEnd");
+    WLOGFI("[UL_POWER]WakeUpEnd enter");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
         return true;
@@ -912,8 +925,15 @@ bool ScreenSessionManager::WakeUpEnd()
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendBegin(%u)", reason);
-    WLOGFI("[UL_POWER]SuspendBegin block screen power change is true");
+    WLOGFI("[UL_POWER]SuspendBegin block screen power change is true, reason: %{public}u",
+        static_cast<uint32_t>(reason));
+    lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     blockScreenPowerChange_ = true;
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        sessionDisplayPowerController_->SuspendBegin(reason);
+        lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+        return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
+    }
     auto suspendBeginTask = [this]() {
         WLOGFI("[UL_POWER]SuspendBegin delay task start");
         blockScreenPowerChange_ = false;
@@ -941,14 +961,46 @@ bool ScreenSessionManager::SuspendEnd()
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
+bool ScreenSessionManager::BlockSetDisplayState()
+{
+    return prePowerStateChangeReason == PowerStateChangeReason::POWER_BUTTON;
+}
+
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
 {
     WLOGFI("[UL_POWER]SetDisplayState enter");
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
+bool ScreenSessionManager::IsFastFingerprintReason(PowerStateChangeReason reason)
+{
+    switch (reason) {
+        case PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT : {
+            [[fallthrough]];
+        }
+        case PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS : {
+            [[fallthrough]];
+        }
+        case PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON : {
+            [[fallthrough]];
+        }
+        case PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF : {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 void ScreenSessionManager::BlockScreenOnByCV(void)
 {
+    // Handling Power Button Conflicts
+    if (buttonBlock_ && currentWakeUpReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY) {
+        WLOGFI("[UL_POWER]BlockScreenOnByCV exit because buttonBlock_");
+        return;
+    }
+
     if (keyguardDrawnDone_ == false) {
         WLOGFI("[UL_POWER]screenOnCV_ set");
         needScreenOnWhenKeyguardNotify_ = true;
@@ -1004,22 +1056,44 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
 
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
+    WLOGFI("[UL_POWER]state: %{public}u, reason: %{public}u",
+        static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
     ScreenPowerStatus status;
     if (blockScreenPowerChange_) {
         WLOGFI("[UL_POWER]SetScreenPowerForAll block screen power change");
         return true;
     }
+    // Handling Power Button Conflicts
+    if (buttonBlock_ && reason != PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY &&
+            state == ScreenPowerState::POWER_ON) {
+        WLOGFI("[UL_POWER]SetScreenPowerForAll exit because buttonBlock_");
+        buttonBlock_ = false;
+        return true;
+    }
+
     switch (state) {
         case ScreenPowerState::POWER_ON: {
+            if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
+                status = ScreenPowerStatus::POWER_STATUS_ON_ADVANCED;
+                WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON_ADVANCED");
+            } else {
+                status = ScreenPowerStatus::POWER_STATUS_ON;
+                WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
+            }
             keyguardDrawnDone_ = false;
             WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
-            status = ScreenPowerStatus::POWER_STATUS_ON;
             break;
         }
         case ScreenPowerState::POWER_OFF: {
+            if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+                status = ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED;
+                WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF_ADVANCED");
+            } else {
+                status = ScreenPowerStatus::POWER_STATUS_OFF;
+                WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
+            }
             keyguardDrawnDone_ = false;
             WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
-            status = ScreenPowerStatus::POWER_STATUS_OFF;
             break;
         }
         default: {
@@ -1027,6 +1101,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
             return false;
         }
     }
+    prePowerStateChangeReason = reason;
     return SetScreenPower(status, reason);
 }
 
@@ -1043,6 +1118,14 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         taskScheduler_->RemoveTask("screenOnTask");
     }
 
+    // Handling Power Button Conflicts
+    if (buttonBlock_ && reason != PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY &&
+            status != ScreenPowerStatus::POWER_STATUS_OFF) {
+        WLOGFI("[UL_POWER]SetScreenPower exit because buttonBlock_");
+        buttonBlock_ = false;
+        return true;
+    }
+
     if (foldScreenController_ != nullptr) {
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
         HandlerSensor(status);
@@ -1055,6 +1138,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
+    buttonBlock_ = false;
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
