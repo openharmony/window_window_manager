@@ -904,27 +904,6 @@ void WindowSceneSessionImpl::SetDefaultProperty()
     }
 }
 
-WSError WindowSceneSessionImpl::SetActive(bool active)
-{
-    WLOGFI("[WMSCom] active status: %{public}d", active);
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        if (hostSession_ == nullptr) {
-            WLOGFD("hostSession_ nullptr");
-            return WSError::WS_ERROR_INVALID_WINDOW;
-        }
-        WSError ret = hostSession_->UpdateActiveStatus(active);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-    }
-    if (active) {
-        NotifyAfterActive();
-    } else {
-        NotifyAfterInactive();
-    }
-    return WSError::WS_OK;
-}
-
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     const int32_t& parentPersistentId = property_->GetParentPersistentId();
