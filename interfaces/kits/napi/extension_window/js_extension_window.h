@@ -53,6 +53,7 @@ public:
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value GetUIContext(napi_env env, napi_callback_info info);
     static napi_value SetWindowBrightness(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
