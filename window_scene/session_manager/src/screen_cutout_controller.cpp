@@ -37,7 +37,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
 {
     WLOGFD("get screen cutout info.");
     std::vector<DMRect> boundaryRects;
-    if (!ScreenSceneConfig::GetCutoutBoundaryRect().empty()) {
+    if (!ScreenSceneConfig::GetCutoutBoundaryRect(displayId).empty()) {
         ConvertBoundaryRectsByRotation(boundaryRects, displayId);
     }
 
@@ -62,7 +62,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
         displayBoundaryRects = {{ 507, 18, 66, 66}}; // x:507, y:18, w:66, h:66
     } else {
-        displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect();
+        displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     }
     CheckBoundaryRects(displayBoundaryRects, displayInfo);
     if (currentRotation == Rotation::ROTATION_0) {
