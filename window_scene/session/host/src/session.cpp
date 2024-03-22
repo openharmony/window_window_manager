@@ -1729,7 +1729,8 @@ WSError Session::TransferBackPressedEventForConsumed(bool& isConsumed)
     return windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
 }
 
-WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool isPreImeEvent)
 {
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
@@ -1739,7 +1740,7 @@ WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent
         WLOGFE("KeyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
 }
 
 WSError Session::TransferFocusActiveEvent(bool isFocusActive)

@@ -2376,12 +2376,13 @@ void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> point
     }
 }
 
-void SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent)
+bool SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent)
 {
     std::lock_guard<std::mutex> lock(keyEventMutex_);
     if (systemSessionKeyEventFunc_ != nullptr) {
-        systemSessionKeyEventFunc_(keyEvent);
+        return systemSessionKeyEventFunc_(keyEvent, isPreImeEvent);
     }
+    return false;
 }
 
 WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
