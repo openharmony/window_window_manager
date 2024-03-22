@@ -1785,7 +1785,8 @@ HWTEST_F(SceneSessionManagerTest, GetSceneSessionByName, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, GetSceneSessionVectorByType, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE);
+    uint64_t displayId = 0;
+    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     ASSERT_EQ(ret, 0);
 }
 
