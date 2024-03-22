@@ -28,9 +28,6 @@ constexpr std::vector<int>::size_type BOTTOM = 3;
 constexpr uint8_t HALF_SCREEN = 2;
 constexpr uint8_t QUARTER_SCREEN = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenCutoutController" };
-constexpr int32_t Rotate90 = 90;
-constexpr int32_t Rotate180 = 180;
-constexpr int32_t Rotate270 = 270;
 
 template<Rotation>
 DMRect GetRotatedRect(uint32_t width, uint32_t height, const DMRect& rect);
