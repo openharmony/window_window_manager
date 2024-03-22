@@ -1932,7 +1932,7 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1952,7 +1952,14 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea);
+    int32_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[2], displayId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea, displayId);
     return NapiGetUndefined(env);
 }
 
