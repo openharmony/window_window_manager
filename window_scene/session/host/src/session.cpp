@@ -959,7 +959,8 @@ WSError Session::Background()
         isActive_ = false;
     }
     if (state != SessionState::STATE_INACTIVE) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! state:%{public}u", state);
+        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
+            GetPersistentId(), state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
