@@ -151,7 +151,7 @@ int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& re
 
 int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("Notify Pip AlreadyExists");
+    TLOGD(WmsLogTag::WMS_PIP, "Notify Pip AlreadyExists");
     WSError errCode = NotifyCloseExistPipWindow();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -334,10 +334,10 @@ int SessionStageStub::HandleNotifyDialogStateChange(MessageParcel& data, Message
 
 int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleSetPipActionEvent");
+    TLOGD(WmsLogTag::WMS_PIP, "HandleSetPipActionEvent");
     std::string action = data.ReadString();
     if (action.empty()) {
-        WLOGFE("SessionStageStub pip action event is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "SessionStageStub pip action event is nullptr");
         return ERR_INVALID_VALUE;
     }
     int32_t status;

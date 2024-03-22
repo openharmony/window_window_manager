@@ -659,36 +659,6 @@ enum class PipState : int32_t {
     ERROR = 6,
 };
 
-/**
- * @brief Enumerates picture in picture scale level.
- */
-enum class PiPScaleLevel : int32_t {
-    PIP_SCALE_LEVEL_SMALLEST = 0,
-    PIP_SCALE_LEVEL_BIGGEST = 1,
-    COUNT = 2,
-};
-
-/**
- * @brief Enumerates picture in picture scale pivot.
- */
-enum class PiPScalePivot : int32_t {
-    UNDEFINED = 0,
-    START,
-    MIDDLE,
-    END,
-};
-
-/**
- * @brief Structure of picture in picture rect info.
- */
-struct PiPRectInfo {
-    PiPScalePivot xPivot_;
-    PiPScalePivot yPivot_;
-    uint32_t originWidth_;
-    uint32_t originHeight_;
-    PiPScaleLevel level_;
-};
-
 struct PiPTemplateInfo {
     uint32_t pipTemplateType;
     uint32_t priority;
