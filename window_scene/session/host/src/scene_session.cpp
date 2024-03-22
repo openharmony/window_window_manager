@@ -40,6 +40,7 @@
 #include "wm_math.h"
 #include <running_lock.h>
 #include "singleton_container.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -760,12 +761,15 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
     }
+    uint64_t displayId = GetSessionProperty()->GetDisplayId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
+         system::GetParameter("const.product.devicetype", "unknown") == "tablet") &&
+        (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
             return;
@@ -780,8 +784,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = display->GetWidth();
         return;
     }
-    std::vector<sptr<SceneSession>> statusBarVector =
-        specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
+    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         if (!(statusBar->isVisible_)) {
             continue;
@@ -803,8 +807,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
          system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         return;
     }
-    std::vector<sptr<SceneSession>> inputMethodVector =
-        specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    if (!GetSessionProperty()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get session property");
+        return;
+    }
+    std::vector<sptr<SceneSession>> inputMethodVector = specificCallback_->onGetSceneSessionVectorByType_(
+        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, GetSessionProperty()->GetDisplayId());
     for (auto& inputMethod : inputMethodVector) {
         if (inputMethod->GetSessionState() != SessionState::STATE_FOREGROUND &&
             inputMethod->GetSessionState() != SessionState::STATE_ACTIVE) {
@@ -859,7 +867,11 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         return;
     }
-    WSRect barArea = specificCallback_->onGetAINavigationBarArea_();
+    if (!GetSessionProperty()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get session property");
+        return;
+    }
+    WSRect barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
@@ -1359,9 +1371,13 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         WLOGFE("specificCallback_ is null!");
         return;
     }
+    if (!GetSessionProperty()) {
+        WLOGFE("get session property is null!");
+        return;
+    }
     float tmpPosY = 0.0;
-    std::vector<sptr<SceneSession>> statusBarVector =
-        specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
+    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         if (!(statusBar->isVisible_)) {
             continue;
