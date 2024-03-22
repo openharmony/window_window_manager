@@ -1119,7 +1119,8 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     // get new limit config with the settings of system and app
     const auto& sizeLimits = property_->GetWindowLimits();
     // limit minimum size of floating (not system type) window
-    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    if ((!WindowHelper::IsSystemWindow(property_->GetWindowType())) ||
+        (property_->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
         width = std::max(sizeLimits.minWidth_, width);
         height = std::max(sizeLimits.minHeight_, height);
     }
