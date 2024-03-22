@@ -230,7 +230,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success.");
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id: %{public}d",
+            sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -250,7 +251,8 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]session: %{public}d isNeedBackToOther: %{public}d",
+            sceneSession->GetPersistentId(), isNeedBackToOther);
         if (isNeedBackToOther) {
             int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
             if (realCallerSessionId == sceneSession->GetPersistentId()) {
