@@ -986,43 +986,6 @@ WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("writeInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(rect.posX_)) {
-        WLOGFE("Write posX_ failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(rect.posY_)) {
-        WLOGFE("Write posY_ failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(rect.width_)) {
-        WLOGFE("Write width_ failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(rect.height_)) {
-        WLOGFE("Write height_ failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVERY_PULL_PIP_MAIN_WINDOW),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return WSError::WS_OK;
-}
-
 WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     MessageParcel data;

@@ -114,8 +114,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         &SessionStub::HandleUpdatePiPRect),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVERY_PULL_PIP_MAIN_WINDOW),
-        &SessionStub::HandleRecoveryPullPiPMainWindow)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -555,31 +553,17 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
 
 int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleNotifyPiPWindowPrepareClose");
+    TLOGD(WmsLogTag::WMS_PIP, "HandleNotifyPiPWindowPrepareClose");
     NotifyPiPWindowPrepareClose();
     return ERR_NONE;
 }
 
 int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdatePiPRect!");
+    TLOGD(WmsLogTag::WMS_PIP, "HandleUpdatePiPRect!");
     Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
     auto reason = static_cast<SizeChangeReason>(data.ReadInt32());
     WSError errCode = UpdatePiPRect(rect, reason);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleNotifyRecoveryPullPiPMainWindow");
-    int32_t persistentId = 0;
-    if (!data.ReadInt32(persistentId)) {
-        WLOGFE("Read eventId from parcel failed!");
-        return ERR_INVALID_DATA;
-    }
-    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
-    WSError errCode = RecoveryPullPiPMainWindow(persistentId, rect);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

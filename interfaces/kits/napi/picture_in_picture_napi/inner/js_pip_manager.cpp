@@ -23,7 +23,6 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipManager"};
     constexpr int32_t NUMBER_ONE = 1;
 }
 
@@ -50,7 +49,7 @@ JsPipManager::~JsPipManager()
 
 void JsPipManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGFD("[NAPI]JsPipManager::Finalizer");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::Finalizer");
     std::unique_ptr<JsPipManager>(static_cast<JsPipManager*>(data));
 }
 
@@ -62,12 +61,12 @@ napi_value JsPipManager::InitXComponentController(napi_env env, napi_callback_in
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]JsPipManager::OnInitXComponentController");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::OnInitXComponentController");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < NUMBER_ONE) {
-        WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
     napi_value xComponentController = argv[0];
@@ -75,28 +74,28 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         XComponentController::GetXComponentControllerFromNapiValue(xComponentController);
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (!pipWindow) {
-        WLOGFE("[NAPI]Failed to find pip window");
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
-        WLOGFE("[NAPI]Failed to get pictureInPictureController");
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    WLOGFI("[NAPI]set xComponentController to window: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]set xComponentController to window: %{public}u", windowId);
     WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
-        WLOGFE("[NAPI]Failed to set xComponentController");
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to set xComponentController");
     }
     return NapiGetUndefined(env);
 }
 
 napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
 {
-    WLOGFD("[NAPI]JsPipManager::JsPipManagerInit");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::JsPipManagerInit");
     if (env == nullptr || exportObj == nullptr) {
-        WLOGFE("JsPipManagerInit failed, env or exportObj is null");
+        TLOGE(WmsLogTag::WMS_PIP, "JsPipManagerInit failed, env or exportObj is null");
         return nullptr;
     }
     std::unique_ptr<JsPipManager> jsPipManager = std::make_unique<JsPipManager>();
