@@ -859,13 +859,16 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
     return nullptr;
 }
 
-std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
+    WindowType type, uint64_t displayId)
 {
     std::vector<sptr<SceneSession>> sceneSessionVector;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
-        if (sceneSession->GetWindowType() == type) {
+        if (sceneSession->GetWindowType() == type &&
+            sceneSession->GetSessionProperty() &&
+            sceneSession->GetSessionProperty()->GetDisplayId == displayId) {
             sceneSessionVector.emplace_back(sceneSession);
         }
     }
@@ -914,7 +917,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
-        this, std::placeholders::_1);
+        this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea, this, std::placeholders::_1);
     specificCb->onWindowInfoUpdate_ = std::bind(&SceneSessionManager::NotifyWindowInfoChange,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -922,7 +925,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onSessionTouchOutside_ = std::bind(&SceneSessionManager::NotifySessionTouchOutside,
         this, std::placeholders::_1);
-    specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea, this);
+    specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea,
+        this, std::placeholders::_1);
     specificCb->onOutsideDownEvent_ = std::bind(&SceneSessionManager::OnOutsideDownEvent,
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onHandleSecureSessionShouldHide_ = std::bind(&SceneSessionManager::HandleSecureSessionShouldHide,
@@ -5237,11 +5241,12 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     isReportTaskStart_ = true;
 }
 
-int32_t SceneSessionManager::GetStatusBarHeight()
+int32_t SceneSessionManager::GetStatusBarHeight(uint64_t displayId)
 {
     int32_t statusBarHeight = 0;
     int32_t height = 0;
-    std::vector<sptr<SceneSession>> statusBarVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    std::vector<sptr<SceneSession>> statusBarVector = GetSceneSessionVectorByType(
+        WindowType::WINDOW_TYPE_STATUS_BAR, displayId);
     for (auto& statusBar : statusBarVector) {
         if (statusBar == nullptr || !IsSessionVisible(statusBar)) {
             continue;
@@ -5258,6 +5263,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
 {
     if (callingSession_ == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "calling session is nullptr");
+        return;
+    }
+    if (!sceneSession->GetSessionProperty()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "scene session property is nullptr");
         return;
     }
     SessionGravity gravity;
@@ -5291,7 +5300,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     }
 
     WSRect newRect = callingSessionRect;
-    int32_t statusHeight = GetStatusBarHeight();
+    int32_t statusHeight = GetStatusBarHeight(sceneSession->GetSessionProperty()->GetDisplayId());
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         // calculate new rect of calling window
         newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
@@ -6157,17 +6166,19 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
     return;
 }
 
-WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea)
+WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
 {
-    WLOGFI("NotifyAINavigationBarShowStatus: isVisible: %{public}u, area{%{public}d,%{public}d,%{public}d,%{public}d}",
-        isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
-    auto task = [this, isVisible, barArea]() {
-        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarArea_ != barArea) {
+    WLOGFI("NotifyAINavigationBarShowStatus: isVisible: %{public}u, " \
+        "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64"",
+        isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
+    auto task = [this, isVisible, barArea, displayId]() {
+        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarAreaMap_[displayId] != barArea) {
             isAINavigationBarVisible_ = isVisible;
-            currAINavigationBarArea_ = barArea;
+            currAINavigationBarAreaMap_.clear();
+            currAINavigationBarAreaMap_[displayId] = barArea;
             if (!isVisible && !barArea.IsEmpty()) {
                 WLOGFD("NotifyAINavigationBarShowStatus: barArea should be empty if invisible");
-                currAINavigationBarArea_ = WSRect();
+                currAINavigationBarAreaMap_[displayId] = WSRect();
             }
             WLOGFI("NotifyAINavigationBarShowStatus: enter: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
@@ -6194,9 +6205,12 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
     return WSError::WS_OK;
 }
 
-WSRect SceneSessionManager::GetAINavigationBarArea()
+WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
 {
-    return currAINavigationBarArea_;
+    if (currAINavigationBarAreaMap_.count(displayId) < 1) {
+        return {};
+    }
+    return currAINavigationBarAreaMap_[displayId];
 }
 
 WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
