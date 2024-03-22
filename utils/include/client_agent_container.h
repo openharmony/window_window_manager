@@ -64,9 +64,8 @@ template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = std::find_if(agentMap_[type].begin(), agentMap_[type].end(), finder_t(agent->AsObject()));
-    if (iter != agentMap_[type].end()) {
-        WLOGFW("failed to register agent");
+    if (agent == nullptr) {
+        WLOGFE("agent is invalid");
         return false;
     }
     agentMap_[type].insert(agent);
@@ -80,14 +79,18 @@ template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::UnregisterAgent(const sptr<T1>& agent, T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (agent == nullptr || agentMap_.count(type) == 0) {
-        WLOGFE("agent or type is invalid");
+    if (agent == nullptr) {
+        WLOGFE("agent is invalid");
         return false;
     }
+    if (agentMap_.count(type) == 0) {
+        WLOGFD("repeat unregister agent");
+        return true;
+    }
     auto& agents = agentMap_.at(type);
-    bool ret = UnregisterAgentLocked(agents, agent->AsObject());
+    UnregisterAgentLocked(agents, agent->AsObject());
     agent->AsObject()->RemoveDeathRecipient(deathRecipient_);
-    return ret;
+    return true;
 }
 
 template<typename T1, typename T2>
