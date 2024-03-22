@@ -3655,7 +3655,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
 
 WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "RequestSessionFocus, id: %{public}d, by foreground: %{public}d",
+    TLOGD(WmsLogTag::WMS_FOCUS, "RequestSessionFocus, id: %{public}d, by foreground: %{public}d",
         persistentId, byForeground);
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
     if (basicCheckRet != WSError::WS_OK) {
@@ -3693,7 +3693,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
 
 WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "RequestSessionUnfocus, id: %{public}d", persistentId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "RequestSessionUnfocus, id: %{public}d", persistentId);
     if (persistentId == INVALID_SESSION_ID) {
         WLOGFE("id is invalid");
         return WSError::WS_ERROR_INVALID_SESSION;

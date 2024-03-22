@@ -1480,7 +1480,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
