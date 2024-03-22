@@ -1755,7 +1755,7 @@ WSError WindowSessionImpl::NotifyDestroy()
 
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
-    WLOGFD("WindowSessionImpl::NotifyCloseExistPipWindow");
+    TLOGD(WmsLogTag::WMS_PIP, "WindowSessionImpl::NotifyCloseExistPipWindow");
     PictureInPictureManager::DoClose(true, true);
     return WSError::WS_OK;
 }
@@ -1902,7 +1902,7 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
 
 WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t status)
 {
-    WLOGFI("action: %{public}s, status: %{public}d", action.c_str(), status);
+    TLOGI(WmsLogTag::WMS_PIP, "action: %{public}s, status: %{public}d", action.c_str(), status);
     PictureInPictureManager::DoActionEvent(action, status);
     return WSError::WS_OK;
 }

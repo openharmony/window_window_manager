@@ -57,7 +57,6 @@ const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
-const std::string SHOW_PIP_MAIN_WINDOW_CB = "showPiPMainWindow";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 } // namespace
 
@@ -146,7 +145,6 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { STATUS_BAR_ENABLED_CHANGE_CB, &JsSceneSessionManager::ProcessStatusBarEnabledChangeListener},
         { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
         { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
-        { SHOW_PIP_MAIN_WINDOW_CB,      &JsSceneSessionManager::ProcessShowPiPMainWindow },
         { START_UI_ABILITY_ERROR,       &JsSceneSessionManager::ProcessStartUIAbilityErrorRegister},
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
@@ -324,22 +322,6 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
 }
 
-void JsSceneSessionManager::OnShowPiPMainWindow(int32_t persistentId)
-{
-    WLOGFI("[NAPI]OnShowPiPMainWindow");
-    auto iter = jsCbMap_.find(SHOW_PIP_MAIN_WINDOW_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
-    }
-
-    auto jsCallBack = iter->second;
-    auto task = [this, persistentId, jsCallBack, env = env_]() {
-        napi_value argv[] = {CreateJsValue(env, persistentId)};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnShowPiPMainWindow, persistentId:" + std::to_string(persistentId));
-}
-
 void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingWindowIdChange");
@@ -436,15 +418,6 @@ void JsSceneSessionManager::ProcessShiftFocus()
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
-}
-
-void JsSceneSessionManager::ProcessShowPiPMainWindow()
-{
-    ProcessShowPiPMainWindowFunc func = [this](int32_t persistentId) {
-        WLOGFD("ProcessShowPiPMainWindow called, persistentId: %{public}d", persistentId);
-        this->OnShowPiPMainWindow(persistentId);
-    };
-    SceneSessionManager::GetInstance().SetShowPiPMainWindowListener(func);
 }
 
 void JsSceneSessionManager::ProcessCallingWindowIdChangeRegister()
