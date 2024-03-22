@@ -533,14 +533,11 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    sptr<SupportedScreenModes> info = GetActiveScreenMode();
-    if (info == nullptr) {
-        return DisplayOrientation::UNKNOWN;
-    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
-    bool isVerticalScreen = info->width_ < info->height_;
+    bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
-        isVerticalScreen = info->width_ > info->height_;
+        WLOGD("foldDisplay is verticalScreen when width is greater than height");
+        isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     switch (rotation) {
         case Rotation::ROTATION_0: {
