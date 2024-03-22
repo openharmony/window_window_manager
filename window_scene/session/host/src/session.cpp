@@ -1890,7 +1890,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
 {
     sessionFocusableChangeFunc_ = func;
-    sessionFocusableChangeFunc_(GetFocusable());
+    NotifySessionFocusableChange(GetFocusable());
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
@@ -1906,7 +1906,7 @@ void Session::SetClickListener(const NotifyClickFunc& func)
 
 void Session::NotifySessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("Notify session focusable change, id: %{public}d, focusable: %{public}u", GetPersistentId(), isFocusable);
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusable: %{public}u", GetPersistentId(), isFocusable);
     if (sessionFocusableChangeFunc_) {
         sessionFocusableChangeFunc_(isFocusable);
     }
