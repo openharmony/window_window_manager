@@ -91,7 +91,12 @@ WSError SystemSession::Hide()
 {
     auto type = GetWindowType();
     if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
-        if (!SessionPermission::IsSystemCalling()) {
+        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            if (!SessionPermission::IsStartedByInputMethod()) {
+                WLOGFE("[WMSLife]Hide permission denied, keyboard is not hidden by current input method");
+                return WSError::WS_ERROR_INVALID_PERMISSION;
+            }
+        } else if (!SessionPermission::IsSystemCalling()) {
             WLOGFE("[WMSLife]Hide permission denied id: %{public}d type:%{public}u", GetPersistentId(), type);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
