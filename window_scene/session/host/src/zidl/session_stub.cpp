@@ -237,6 +237,12 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             reply.WriteUint32(static_cast<uint32_t>(property->GetWindowMode()));
         }
         property->SetIsNeedUpdateWindowMode(false);
+
+        Rect winRect = property->GetWindowRect();
+        reply.WriteInt32(winRect.posX_);
+        reply.WriteInt32(winRect.posY_);
+        reply.WriteUint32(winRect.width_);
+        reply.WriteUint32(winRect.height_);
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

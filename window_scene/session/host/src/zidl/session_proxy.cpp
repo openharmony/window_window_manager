@@ -214,6 +214,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         if (needUpdate) {
             property->SetWindowMode(static_cast<WindowMode>(reply.ReadUint32()));
         }
+        Rect rect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
+        property->SetWindowRect(rect);
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

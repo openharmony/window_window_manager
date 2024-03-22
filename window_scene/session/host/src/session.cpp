@@ -784,6 +784,13 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
+    Rect rect = {
+        winRect_.posX_,
+        winRect_.posY_,
+        static_cast<uint32_t>(winRect_.width_),
+        static_cast<uint32_t>(winRect_.height_)
+    };
+    property->SetWindowRect(rect);
     SetSessionProperty(property);
     if (property) {
         property->SetPersistentId(GetPersistentId());
