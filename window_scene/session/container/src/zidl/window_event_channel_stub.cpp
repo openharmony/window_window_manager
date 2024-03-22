@@ -81,7 +81,7 @@ int WindowEventChannelStub::HandleTransferBackpressedEvent(MessageParcel& data, 
     WSError errCode = TransferBackpressedEventForConsumed(isConsumed);
 
     reply.WriteBool(isConsumed);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -101,7 +101,7 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
     WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed);
 
     reply.WriteBool(isConsumed);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -118,7 +118,7 @@ int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     WSError errCode = TransferPointerEvent(pointerEvent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -126,7 +126,7 @@ int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, 
 {
     bool isFocusActive = data.ReadBool();
     WSError errCode = TransferFocusActiveEvent(isFocusActive);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -134,7 +134,7 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
 {
     bool focusState = data.ReadBool();
     WSError errCode = TransferFocusState(focusState);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -158,8 +158,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
     std::list<Accessibility::AccessibilityElementInfo> infos;
     WSError errCode = TransferSearchElementInfo(elementId, mode, baseParent, infos);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     int64_t count = static_cast<int64_t>(infos.size());
     if (!reply.WriteInt64(count)) {
@@ -196,8 +196,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
     std::list<Accessibility::AccessibilityElementInfo> infos;
     WSError errCode = TransferSearchElementInfosByText(elementId, text, baseParent, infos);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     int64_t count = static_cast<int64_t>(infos.size());
     if (!reply.WriteInt64(count)) {
@@ -234,8 +234,8 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
     Accessibility::AccessibilityElementInfo info;
     WSError errCode = TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
@@ -265,8 +265,8 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
     Accessibility::AccessibilityElementInfo info;
     WSError errCode = TransferFocusMoveSearch(elementId, direction, baseParent, info);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
@@ -316,7 +316,7 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
         return ERR_INVALID_DATA;
     }
     WSError errCode = TransferExecuteAction(elementId, actionArguments, action, baseParent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -336,7 +336,7 @@ int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel&
         return ERR_INVALID_DATA;
     };
     WSError errCode = TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 }
