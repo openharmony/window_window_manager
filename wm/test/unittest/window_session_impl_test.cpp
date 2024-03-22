@@ -1698,6 +1698,26 @@ HWTEST_F(WindowSessionImplTest, SetPipActionEvent, Function | SmallTest | Level2
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetPipActionEvent end";
 }
+
+/**
+ * @tc.name: SetUIContentInner
+ * @tc.desc: SetUIContentInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUIContentInner");
+    option->SetExtensionTag(true);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    string url = "";
+    WMError res = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
