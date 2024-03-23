@@ -44,7 +44,7 @@ constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
-std::vector<DMRect> ScreenSceneConfig::cutoutBoundaryRectMap_;
+std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
