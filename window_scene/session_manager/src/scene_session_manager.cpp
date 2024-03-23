@@ -44,6 +44,8 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include "transaction/rs_sync_transaction_controller.h"
+#include "screen_manager.h"
+#include "screen.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -1559,6 +1561,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        HandleCastScreenDisConnection(scnSession);
         auto persistentId = scnSession->GetPersistentId();
         RequestSessionUnfocus(persistentId);
         lastUpdatedAvoidArea_.erase(persistentId);
@@ -1594,6 +1597,26 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()):"nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession)
+{
+    auto sessionInfo = sceneSession->GetSessionInfo();
+    ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    if (defScreenId == sessionInfo.screenId_) {
+        return;
+    }
+    auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(sessionInfo.screenId_);
+    if (flag != VirtualScreenFlag::CAST) {
+        return;
+    }
+    std::vector<uint64_t> mirrorIds { sessionInfo.screenId_ };
+    ScreenId groupId;
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().MakeMirror(0, mirrorIds, groupId);
+    if (ret != Rosen::DMError::DM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "MakeMirror failed,ret: %{public}d", ret);
+        return;
+    }
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestructionInner(
