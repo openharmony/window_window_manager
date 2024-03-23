@@ -49,6 +49,8 @@ public:
     ~WindowSessionImpl();
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
+    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    virtual bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
@@ -101,6 +103,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    WSError UpdateDisplayId(uint64_t displayId) override;
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
     WMError RequestFocus() const override;
@@ -194,12 +197,11 @@ public:
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
     void RecoverSessionListener();
     void SetDefaultDisplayIdIfNeed();
-    WMError HideNonSecureWindows(bool shouldHide) override;
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
-    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-    void NotifyAfterFocused();
+    void NotifyWindowAfterUnfocused();
+    void NotifyWindowAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
@@ -249,6 +251,7 @@ protected:
     bool needRemoveWindowInputChannel_ = false;
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
+    static bool isUIExtensionAbility_;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -283,6 +286,8 @@ private:
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
 
     void NotifyUIContentFocusStatus();
+    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterFocused();
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 

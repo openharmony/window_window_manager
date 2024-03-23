@@ -946,6 +946,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         return;
     }
 
+    WLOGFI("MapFloatingWindowToAppIfNeeded: enter this");
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1230,6 +1231,14 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     return ret;
 }
 
+bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
+}
+
 void WindowImpl::InitAbilityInfo()
 {
     AbilityInfo info;
@@ -1301,6 +1310,7 @@ void WindowImpl::DestroyDialogWindow()
 void WindowImpl::DestroyFloatingWindow()
 {
     // remove from appFloatingWindowMap_
+    WLOGFI("DestroyFloatingWindow:remove from appFloatingWindowMap_");
     for (auto& floatingWindows: appFloatingWindowMap_) {
         for (auto iter = floatingWindows.second.begin(); iter != floatingWindows.second.end(); ++iter) {
             if ((*iter) == nullptr) {
@@ -1314,6 +1324,7 @@ void WindowImpl::DestroyFloatingWindow()
     }
 
     // Destroy app floating window if exist
+    WLOGFI("DestroyFloatingWindow:Destroy app floating window if exist");
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
         auto& floatingWindows = appFloatingWindowMap_.at(GetWindowId());
         for (auto iter = floatingWindows.begin(); iter != floatingWindows.end(); iter = floatingWindows.begin()) {
@@ -3803,6 +3814,7 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
 {
     property_->SetTextFieldPositionY(textFieldPositionY);
     property_->SetTextFieldHeight(textFieldHeight);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
 } // namespace Rosen

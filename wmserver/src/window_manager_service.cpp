@@ -59,6 +59,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
     SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
+const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
     rsInterface_(RSInterfaces::GetInstance()),
@@ -108,7 +109,7 @@ void WindowManagerService::OnStart()
 
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener = new WindowInfoQueriedListener();
     DisplayManagerServiceInner::GetInstance().RegisterWindowInfoQueriedListener(windowInfoQueriedListener);
-
+    system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);

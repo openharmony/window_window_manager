@@ -57,6 +57,7 @@ const std::string ARG_DUMP_WINDOW = "-w";
 const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
+const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
 } // namespace
 
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -187,7 +188,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
 
     RegisterMockSessionManagerService();
     WLOGFI("sessionManagerService set success!");
-
+    system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
     GetSceneSessionManager();
 
     return true;

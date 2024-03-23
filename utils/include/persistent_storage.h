@@ -31,57 +31,10 @@ public:
     ~PersistentStorage() = default;
 
     template <typename T>
-    static void Insert(const std::string& key, const T& value, PersistentStorageType storageType)
-    {
-        auto pref = GetPreference(storageType);
-        if (!pref) {
-            WLOG_E("[PersistentStorage] Preferences is nullptr");
-            return;
-        }
-        switch (storageType) {
-            case PersistentStorageType::ASPECT_RATIO: {
-                pref->PutFloat(key, value);
-                WLOG_D("[PersistentStorage] Insert aspect ratio, key %{public}s, value %{public}f",
-                    key.c_str(), static_cast<float>(value));
-                break;
-            }
-            case PersistentStorageType::MAXIMIZE_STATE: {
-                pref->PutInt(key, value);
-                WLOG_D("[PersistentStorage] Insert Maximize state, key %{public}s, value %{public}d",
-                    key.c_str(), static_cast<int>(value));
-                break;
-            }
-            default:
-                WLOG_W("[PersistentStorage] Unknown storage type!");
-        }
-        pref->Flush();
-    }
+    static void Insert(const std::string& key, const T& value, PersistentStorageType storageType);
 
     template <typename T>
-    static void Get(const std::string& key, T& value, PersistentStorageType storageType)
-    {
-        auto pref = GetPreference(storageType);
-        if (!pref) {
-            WLOG_E("[PersistentStorage] Preferences is nullptr");
-            return;
-        }
-        switch (storageType) {
-            case PersistentStorageType::ASPECT_RATIO: {
-                value = pref->GetFloat(key);
-                WLOG_D("[PersistentStorage] Get aspect ratio, key: %{public}s, value:%{public}f",
-                    key.c_str(), static_cast<float>(value));
-                break;
-            }
-            case PersistentStorageType::MAXIMIZE_STATE: {
-                value = pref->GetInt(key);
-                WLOG_D("[PersistentStorage] Get Maximize state, key: %{public}s, value:%{public}d",
-                    key.c_str(), static_cast<int>(value));
-                break;
-            }
-            default:
-                WLOG_W("[PersistentStorage] Unknown storage type!");
-        }
-    }
+    static void Get(const std::string& key, T& value, PersistentStorageType storageType);
 
     static bool HasKey(const std::string& key, PersistentStorageType storageType);
     static void Delete(const std::string& key, PersistentStorageType storageType);

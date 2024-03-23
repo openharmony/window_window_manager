@@ -95,8 +95,9 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
         WLOGFE("Read Key Event failed");
         return ERR_INVALID_DATA;
     }
+    bool isPreImeEvent = data.ReadBool();
     bool isConsumed = false;
-    WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed);
+    WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
 
     reply.WriteBool(isConsumed);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

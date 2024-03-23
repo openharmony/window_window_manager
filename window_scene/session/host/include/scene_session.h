@@ -59,6 +59,7 @@ using NotifyTouchOutsideFunc = std::function<void()>;
 using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
+using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -72,8 +73,8 @@ public:
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
-        RecoveryCallback onRecoveryPullPiPMainWindow_;
         OnOutsideDownEvent onOutsideDownEvent_;
+        NotifyAddOrRemoveSecureSessionFunc onHandleSecureSessionShouldHide_;
     };
 
     // callback for notify SceneBoard
@@ -144,7 +145,6 @@ public:
     WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
-    WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -214,10 +214,17 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void ClearSpecificSessionCbMap();
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
-    void SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent);
+    bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+    bool ShouldHideNonSecureWindows() const;
+    void SetShouldHideNonSecureWindows(bool shouldHide);
+    WSError AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
+    void UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags);
+    bool IsExtWindowHasWaterMarkFlag();
+    void RomoveExtWindowFlags(int32_t extPersistentId);
+    void ClearExtWindowFlags();
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
@@ -230,6 +237,10 @@ public:
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
+
+    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
+    WSRect callingWindowNewRect_ = {0, 0, 0, 0};
+    bool needUpdateSessionRect_ = false;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -268,12 +279,6 @@ private:
     void SetSurfaceBounds(const WSRect &rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
-    void OnPiPMoveCallback(const WSRect& rect, const SizeChangeReason& reason);
-    bool InitPiPRectInfo();
-    void ClearPiPRectPivotInfo();
-    void SavePiPRectInfo();
-    void GetNewPiPRect(const uint32_t displayWidth, const uint32_t displayHeight, Rect& rect);
-    void ProcessUpdatePiPRect(SizeChangeReason reason);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
@@ -284,10 +289,14 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
-    PiPRectInfo pipRectInfo_;
     PiPTemplateInfo pipTemplateInfo_;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
+    std::atomic_bool shouldHideNonSecureWindows_ { false };
+    std::set<int32_t> secureExtSessionSet_;
+    std::shared_mutex extWindowFlagsMapMutex_;
+    std::map<int32_t, uint32_t> extWindowFlagsMap_;
+    
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

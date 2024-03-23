@@ -21,6 +21,10 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowRegisterManager"};
+const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
+const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
+const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
+const std::string WINDOW_EVENT_CB = "windowEvent";
 }
 
 JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()

@@ -20,6 +20,12 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PersistentStorage"};
 }
+
+template void PersistentStorage::Insert(const std::string&, const int&, PersistentStorageType);
+template void PersistentStorage::Insert(const std::string&, const float&, PersistentStorageType);
+template void PersistentStorage::Get(const std::string&, int&, PersistentStorageType);
+template void PersistentStorage::Get(const std::string&, float&, PersistentStorageType);
+
 std::map<PersistentStorageType, std::string> PersistentStorage::storagePath_ = {
     { PersistentStorageType::ASPECT_RATIO, "/data/service/el1/public/window/window_aspect_ratio.xml" },
     { PersistentStorageType::MAXIMIZE_STATE, "/data/service/el1/public/window/window_maximize_state.xml" },
@@ -62,6 +68,59 @@ std::shared_ptr<PersistentPerference> PersistentStorage::GetPreference(Persisten
     auto pref = NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode);
     WLOGD("[PersistentStorage] GetPreference fileName: %{public}s, errCode: %{public}d", fileName.c_str(), errCode);
     return pref;
+}
+
+template <typename T>
+void PersistentStorage::Insert(const std::string& key, const T& value, PersistentStorageType storageType)
+{
+    auto pref = GetPreference(storageType);
+    if (!pref) {
+        WLOGFE("[PersistentStorage] Preferences is nullptr");
+        return;
+    }
+    switch (storageType) {
+        case PersistentStorageType::ASPECT_RATIO: {
+            pref->PutFloat(key, value);
+            WLOGFD("[PersistentStorage] Insert aspect ratio, key %{public}s, value %{public}f",
+                key.c_str(), static_cast<float>(value));
+            break;
+        }
+        case PersistentStorageType::MAXIMIZE_STATE: {
+            pref->PutInt(key, value);
+            WLOGFD("[PersistentStorage] Insert Maximize state, key %{public}s, value %{public}d",
+                key.c_str(), static_cast<int>(value));
+            break;
+        }
+        default:
+            WLOGFW("[PersistentStorage] Unknown storage type!");
+    }
+    pref->Flush();
+}
+
+template <typename T>
+void PersistentStorage::Get(const std::string& key, T& value, PersistentStorageType storageType)
+{
+    auto pref = GetPreference(storageType);
+    if (!pref) {
+        WLOGFE("[PersistentStorage] Preferences is nullptr");
+        return;
+    }
+    switch (storageType) {
+        case PersistentStorageType::ASPECT_RATIO: {
+            value = pref->GetFloat(key);
+            WLOGFD("[PersistentStorage] Get aspect ratio, key: %{public}s, value:%{public}f",
+                key.c_str(), static_cast<float>(value));
+            break;
+        }
+        case PersistentStorageType::MAXIMIZE_STATE: {
+            value = pref->GetInt(key);
+            WLOGFD("[PersistentStorage] Get Maximize state, key: %{public}s, value:%{public}d",
+                key.c_str(), static_cast<int>(value));
+            break;
+        }
+        default:
+            WLOGFW("[PersistentStorage] Unknown storage type!");
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

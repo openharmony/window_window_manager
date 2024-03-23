@@ -146,17 +146,17 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
         return nullptr;
     }
     if (!option || option->GetWindowName().empty()) {
-        WLOGE("host window session is nullptr:%{public}u or option is null: %{public}u",
+        TLOGE(WmsLogTag::WMS_PIP, "host window session is nullptr:%{public}u or option is null: %{public}u",
             option->GetWindowName().empty(), option == nullptr);
         return nullptr;
     }
     if (!WindowHelper::IsPipWindow(option->GetWindowType())) {
-        WLOGE("window type is not pip window.");
+        TLOGE(WmsLogTag::WMS_PIP, "window type is not pip window.");
         return nullptr;
     }
     sptr<WindowSessionImpl> windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
     if (windowSessionImpl == nullptr) {
-        WLOGFE("malloc windowSessionImpl failed.");
+        TLOGE(WmsLogTag::WMS_PIP, "malloc windowSessionImpl failed.");
         return nullptr;
     }
     if (windowSessionImpl->GetProperty() != nullptr) {
@@ -165,7 +165,7 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     WMError error = windowSessionImpl->Create(context, nullptr);
     if (error != WMError::WM_OK) {
         errCode = error;
-        WLOGFD("Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
+        TLOGD(WmsLogTag::WMS_PIP, "Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;

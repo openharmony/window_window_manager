@@ -72,6 +72,7 @@ public:
     static napi_value SetSystemBarEnable(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
     static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
@@ -104,6 +105,7 @@ public:
     static napi_value SetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value ResetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value Minimize(napi_env env, napi_callback_info info);
+    static napi_value Maximize(napi_env env, napi_callback_info info);
     static napi_value RaiseAboveTarget(napi_env env, napi_callback_info info);
     static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
@@ -174,6 +176,7 @@ private:
     napi_value OnSetSystemBarEnable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
@@ -187,6 +190,7 @@ private:
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnMinimize(napi_env env, napi_callback_info info);
+    napi_value OnMaximize(napi_env env, napi_callback_info info);
     napi_value OnRaiseAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);

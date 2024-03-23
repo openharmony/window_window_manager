@@ -927,6 +927,12 @@ public:
      */
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) {}
     /**
+     * @brief Notify KeyEvent to arkui.
+     *
+     * @param inputEvent Keyboard input event
+     */
+    virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {return false;}
+    /**
      * @brief Consume PointerEvent from MMI.
      *
      * @param inputEvent Pointer input event
@@ -1502,14 +1508,6 @@ public:
     virtual void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) {}
 
     /**
-     * @brief Recovery pip main window.
-     *
-     * @param Rect of window.
-     * @return Errorcode of window.
-     */
-    virtual WMError RecoveryPullPiPMainWindow(const Rect& rect) { return WMError::WM_OK; }
-
-    /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
@@ -1672,6 +1670,22 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Add uiextension window flag.
+     *
+     * @param flag Flag of uiextension window.
+     * @return WM_OK means add success, others means failed.
+     */
+    virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Remove uiextension window flag.
+     *
+     * @param flag Flag of uiextension window
+     * @return WM_OK means remove success, others means failed.
+     */
+    virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
