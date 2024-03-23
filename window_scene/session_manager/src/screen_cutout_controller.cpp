@@ -51,8 +51,9 @@ DMRect TransferRectByRotation270(const DMRect& rect, uint32_t width, uint32_t he
                     rect.height_, rect.width_ };
 }
 
-using TransferRectByRotationFunc = std::function<DMRect(const DMRect&,uint32_t,uint32_t)>;
-TransferRectByRotationFunc SelectTransferRectByRotationFunc(Rotation currentRotation) {
+using TransferRectByRotationFunc = std::function<DMRect(const DMRect&, uint32_t, uint32_t)>;
+TransferRectByRotationFunc SelectTransferRectByRotationFunc(Rotation currentRotation)
+{
     TransferRectByRotationFunc func;
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
@@ -127,7 +128,6 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     if (!transferFunc) {
         return;
     }
-
 
     for (const DMRect& rect : displayBoundaryRects) {
         boundaryRects.emplace_back(transferFunc(rect, displayHeight, displayWidth));
