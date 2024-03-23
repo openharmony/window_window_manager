@@ -157,13 +157,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 
 WSError SceneSession::Background()
 {
-    auto type = GetWindowType();
-    if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
-        if (!SessionPermission::IsSystemCalling()) {
-            WLOGFE("[WMSLife]Background permission denied id: %{public}d type:%{public}u", GetPersistentId(), type);
-            return WSError::WS_ERROR_INVALID_PERMISSION;
-        }
-    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
