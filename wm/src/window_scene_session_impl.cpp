@@ -2008,8 +2008,7 @@ sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
-            mainWinId = win->GetWindowId();
-            WLOGI("[GetMainWin] Find MainWinId:%{public}u.", mainWinId);
+            WLOGI("[GetMainWin] Find MainWinId:%{public}u.", win->GetWindowId());
             return win;
         }
     }
