@@ -889,5 +889,10 @@ WMError WindowImpl::SetSingleFrameComposerEnabled(bool enable)
 {
     return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
+
+WMError WindowImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -172,6 +172,7 @@ public:
     virtual void SetColorSpace(ColorSpace colorSpace) override;
     virtual ColorSpace GetColorSpace() override;
     WSError NotifyTouchOutside() override;
+    WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError NotifyWindowVisibility(bool isVisible) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;

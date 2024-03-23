@@ -874,6 +874,8 @@ napi_value JsSceneSessionManager::CreateAbilityItemInfo(napi_env env, const AppE
     napi_set_named_property(env, objValue, "continuable", CreateJsValue(env, abilityInfo.continuable));
     napi_set_named_property(env, objValue, "removeSessionAfterTerminate",
         CreateJsValue(env, abilityInfo.removeMissionAfterTerminate));
+    napi_set_named_property(env, objValue, "preferMultiWindowOrientation",
+        CreateJsValue(env, abilityInfo.preferMultiWindowOrientation));
     return objValue;
 }
 
