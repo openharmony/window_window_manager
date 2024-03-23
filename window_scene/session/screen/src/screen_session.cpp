@@ -360,6 +360,16 @@ void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> u
     updateToInputManagerCallback_ = updateToInputManagerCallback;
 }
 
+VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
+{
+    return screenFlag_;
+}
+
+void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
+{
+    screenFlag_ = screenFlag;
+}
+
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
@@ -574,6 +584,9 @@ ScreenSourceMode ScreenSession::GetSourceMode() const
         }
         case ScreenCombination::SCREEN_ALONE: {
             return ScreenSourceMode::SCREEN_ALONE;
+        }
+        case ScreenCombination::SCREEN_UNIQUE: {
+            return ScreenSourceMode::SCREEN_UNIQUE;
         }
         default: {
             return ScreenSourceMode::SCREEN_ALONE;

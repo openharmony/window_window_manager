@@ -361,4 +361,13 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const Scree
     }
     return iter->second;
 }
+
+ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
+{
+    auto iter = screenSessionMap_.begin();
+    if (iter != screenSessionMap_.end()) {
+        return iter->first;
+    }
+    return SCREEN_ID_INVALID;
+}
 } // namespace OHOS::Rosen
