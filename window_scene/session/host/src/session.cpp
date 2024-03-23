@@ -2430,6 +2430,16 @@ WSError Session::TransferExecuteAction(int64_t elementId, const std::map<std::st
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
 }
 
+WSError Session::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+    int64_t timeMs)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
     sessionInfoLockedStateChangeFunc_ = func;

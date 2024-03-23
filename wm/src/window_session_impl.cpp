@@ -1901,6 +1901,17 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
     }
 }
 
+WSError WindowSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
+{
+    return WSError::WS_OK;
+}
+
+WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+    AAFwk::WantParams& reWantParams)
+{
+    return WSErrorCode::WS_OK;
+}
+
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
@@ -2425,6 +2436,11 @@ void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimat
 }
 
 WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
 {
     return WSError::WS_OK;
 }
