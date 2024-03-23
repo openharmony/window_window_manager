@@ -868,7 +868,7 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
         auto sceneSession = item.second;
         if (sceneSession->GetWindowType() == type &&
             sceneSession->GetSessionProperty() &&
-            sceneSession->GetSessionProperty()->GetDisplayId == displayId) {
+            sceneSession->GetSessionProperty()->GetDisplayId() == displayId) {
             sceneSessionVector.emplace_back(sceneSession);
         }
     }
