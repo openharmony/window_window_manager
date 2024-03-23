@@ -59,7 +59,8 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     auto controls = iter->second;
     for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
-            WLOGE("pipoption param error, controlGroup not matches, controlGroup: %{public}u", control);
+            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, controlGroup not matches, controlGroup: %{public}u",
+                control);
             return -1;
         }
     }
@@ -69,7 +70,7 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
         auto iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
         if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
-            WLOGE("pipoption param error, %{public}u conflicts with %{public}u in controlGroups",
+            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, %{public}u conflicts with %{public}u in controlGroups",
                 static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
                 static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
             return -1;
@@ -79,7 +80,8 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
         auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
         if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
-            WLOGE("pipoption param error, requires HANG_UP_BUTTON when using controlGroups in VIDEO_CALL.");
+            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, requires HANG_UP_BUTTON "
+                "when using controlGroups in VIDEO_CALL.");
             return -1;
         }
     }
@@ -87,7 +89,8 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
         auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
             static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
         if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
-            WLOGE("pipoption param error, requires HANG_UP_BUTTON when using controlGroups in VIDEO_MEETING.");
+            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, requires HANG_UP_BUTTON "
+                "when using controlGroups in VIDEO_MEETING.");
             return -1;
         }
     }
@@ -97,17 +100,17 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
 static int32_t checkOptionParams(PipOption& option)
 {
     if (option.GetContext() == nullptr) {
-        WLOGE("pipoption param error, context is nullptr.");
+        TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, context is nullptr.");
         return -1;
     }
     if (option.GetXComponentController() == nullptr) {
-        WLOGE("pipoption param error, XComponentController is nullptr.");
+        TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, XComponentController is nullptr.");
         return -1;
     }
     uint32_t pipTemplateType = option.GetPipTemplate();
     if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType)) ==
         TEMPLATE_CONTROL_MAP.end()) {
-        WLOGE("pipoption param error, pipTemplateType not exists.");
+        TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, pipTemplateType not exists.");
         return -1;
     }
     return checkControlsRules(pipTemplateType, option.GetControlGroup());
