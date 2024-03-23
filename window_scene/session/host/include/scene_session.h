@@ -238,6 +238,10 @@ public:
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
 
+    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
+    WSRect callingWindowNewRect_ = {0, 0, 0, 0};
+    bool needUpdateSessionRect_ = false;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
