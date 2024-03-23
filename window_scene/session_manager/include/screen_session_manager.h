@@ -76,6 +76,7 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    bool IsFastFingerprintReason(PowerStateChangeReason reason);
     bool WakeUpBegin(PowerStateChangeReason reason) override;
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
@@ -177,6 +178,7 @@ public:
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);
+    bool BlockSetDisplayState();
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -330,6 +332,12 @@ private:
 
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
+
+    std::atomic<PowerStateChangeReason> prePowerStateChangeReason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    std::atomic<PowerStateChangeReason> lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    std::atomic<PowerStateChangeReason> currentWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    std::atomic<bool> buttonBlock_ = false;
+
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;
