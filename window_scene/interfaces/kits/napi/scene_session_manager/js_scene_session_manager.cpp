@@ -1953,7 +1953,7 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
         return NapiGetUndefined(env);
     }
     int32_t displayId = -1;
-    if (!ConvertFromJsValue(env, argv[2], displayId)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], displayId)) {
         WLOGFE("[NAPI]Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
