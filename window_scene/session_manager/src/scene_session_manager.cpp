@@ -6178,26 +6178,31 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             WLOGFI("NotifyAINavigationBarShowStatus: enter: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {
-                auto sceneSession = GetSceneSession(persistentId);
-                if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
-                    continue;
-                }
-                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-                if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-                    sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
-                    continue;
-                }
-                WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
-                    "{%{public}d,%{public}d,%{public}d,%{public}d}", persistentId,
-                    avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-                    avoidArea.bottomRect_.width_, avoidArea.bottomRect_.height_);
-                UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
-                                             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+                NotifySessionAINavigationBarChange(persistentId);
             }
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyAINavigationBarShowStatus");
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
+        return;
+    }
+    AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
+        sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
+        return;
+    }
+    WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
+        "{%{public}d,%{public}d,%{public}d,%{public}d}", persistentId,
+        avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+        avoidArea.bottomRect_.width_, avoidArea.bottomRect_.height_);
+    UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
