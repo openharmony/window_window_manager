@@ -19,6 +19,8 @@
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
+#include <functional>
+
 namespace OHOS::Rosen {
 namespace {
 constexpr std::vector<int>::size_type LEFT = 0;
@@ -29,11 +31,7 @@ constexpr uint8_t HALF_SCREEN = 2;
 constexpr uint8_t QUARTER_SCREEN = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenCutoutController" };
 
-template<Rotation>
-DMRect GetRotatedRect(uint32_t width, uint32_t height, const DMRect& rect);
-
-template<>
-DMRect GetRotatedRect<Rotation::ROTATION_90>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect TransferRectByRotation90(const DMRect& rect, uint32_t width, uint32_t height)
 {
     return DMRect { .posX_ = width - rect.posY_ - rect.height_,
                     .posY_ = rect.posX_,
@@ -41,18 +39,38 @@ DMRect GetRotatedRect<Rotation::ROTATION_90>(uint32_t width, uint32_t height, co
                     .height_ = rect.width_ };
 }
 
-template<>
-DMRect GetRotatedRect<Rotation::ROTATION_180>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect TransferRectByRotation180(const DMRect& rect, uint32_t width, uint32_t height)
 {
     return DMRect { width - rect.posX_ - rect.width_,
                     height - rect.posY_ - rect.height_, rect.width_, rect.height_ };
 }
 
-template<>
-DMRect GetRotatedRect<Rotation::ROTATION_270>(uint32_t width, uint32_t height, const DMRect& rect)
+DMRect TransferRectByRotation270(const DMRect& rect, uint32_t width, uint32_t height)
 {
     return DMRect { rect.posY_, height - rect.posX_ - rect.width_,
                     rect.height_, rect.width_ };
+}
+
+using TransferRectByRotationFunc = std::function<DMRect(const DMRect&,uint32_t,uint32_t)>;
+TransferRectByRotationFunc SelectTransferRectByRotationFunc(Rotation currentRotation) {
+    TransferRectByRotationFunc func;
+    switch (currentRotation) {
+        case Rotation::ROTATION_90: {
+            func = &TransferRectByRotation90;
+            break;
+        }
+        case Rotation::ROTATION_180: {
+            func = &TransferRectByRotation180;
+            break;
+        }
+        case Rotation::ROTATION_270: {
+            func = &TransferRectByRotation270;
+            break;
+        }
+        default: {
+        }
+    }
+    return func;
 }
 
 }
@@ -89,11 +107,10 @@ std::vector<DMRect> ScreenCutoutController::GetBoundaryRects(sptr<DisplayInfo> d
 
 void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId)
 {
-    std::vector<DMRect> finalVector;
+    boundaryRects.clear();
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
         WLOGFE("displayInfo invalid");
-        boundaryRects = finalVector;
         return;
     }
 
@@ -106,29 +123,15 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
 
     uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    switch (currentRotation) {
-        case Rotation::ROTATION_90: {
-            for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_90>(displayWidth, displayHeight, rect));
-            }
-            break;
-        }
-        case Rotation::ROTATION_180: {
-            for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_180>(displayWidth, displayHeight, rect));
-            }
-            break;
-        }
-        case Rotation::ROTATION_270: {
-            for (const DMRect& rect : displayBoundaryRects) {
-                finalVector.emplace_back(GetRotatedRect<Rotation::ROTATION_270>(displayWidth, displayHeight, rect));
-            }
-            break;
-        }
-        default:
-            break;
+    TransferRectByRotationFunc transferFunc = SelectTransferRectByRotationFunc(currentRotation);
+    if (!transferFunc) {
+        return;
     }
-    boundaryRects = std::move(finalVector);
+
+
+    for (const DMRect& rect : displayBoundaryRects) {
+        boundaryRects.emplace_back(transferFunc(rect, displayHeight, displayWidth));
+    }
 }
 
 void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo)
