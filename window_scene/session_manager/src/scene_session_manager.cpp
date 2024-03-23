@@ -2776,12 +2776,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetCallingWindow(property->GetCallingWindow());
-            }
-            if (callingWindowIdChangeFunc_ != nullptr) {
-                callingWindowIdChangeFunc_(property->GetCallingWindow());
-            }
+            UpdateCallingWindowIdAndPosition(property, sceneSession);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
@@ -5279,7 +5274,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
     WSRect callingSessionRect;
     if (isInputUpdated && isCallingSessionFloating) {
-        callingSessionRect = callingWindowRestoringRect_;
+        callingSessionRect = callingSession_->callingWindowRestoringRect_;
     } else {
         callingSessionRect = callingSession_->GetSessionRect();
     }
@@ -5299,13 +5294,13 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     }
 
     if (!isInputUpdated) {
-        callingWindowRestoringRect_ = callingSessionRect;
+        callingSession_->callingWindowRestoringRect_ = callingSessionRect;
     }
     NotifyOccupiedAreaChangeInfo(sceneSession, newRect, softInputSessionRect);
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
-        needUpdateSessionRect_ = true;
+        callingSession_->needUpdateSessionRect_ = true;
         callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
-        callingWindowNewRect_ = callingSession_->GetSessionRect();
+        callingSession_->callingWindowNewRect_ = callingSession_->GetSessionRect();
     }
 }
 
@@ -5336,16 +5331,18 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
     }
 
     WSRect overlapRect = { 0, 0, 0, 0 };
-    NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
-        if (needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
+    NotifyOccupiedAreaChangeInfo(callingSession_, callingSession_->callingWindowRestoringRect_, overlapRect);
+    if (!SessionHelper::IsEmptyRect(callingSession_->callingWindowRestoringRect_)) {
+        if (callingSession_->needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
             callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            callingSession_->GetSessionRect() == callingWindowNewRect_) {
-            callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+            callingSession_->GetSessionRect() == callingSession_->callingWindowNewRect_) {
+            callingSession_->UpdateSessionRect(callingSession_->callingWindowRestoringRect_,
+                SizeChangeReason::UNDEFINED);
         }
     }
-    needUpdateSessionRect_ = false;
-    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+    callingSession_->needUpdateSessionRect_ = false;
+    callingSession_->callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+    callingSession_->callingWindowNewRect_ = {0, 0, 0, 0};
 }
 
 WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
@@ -5424,6 +5421,40 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
     TLOGD(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
     sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
+}
+
+void SceneSessionManager::UpdateCallingWindowIdAndPosition(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession->GetSessionProperty() == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to update calling window id: %{public}d", property->GetCallingWindow());
+        return;
+    }
+    uint32_t curWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
+    uint32_t newWindowId = property->GetCallingWindow();
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
+    // When calling window id changes, restore the old calling window, raise the new calling window.
+    if (curWindowId != INVALID_WINDOW_ID && newWindowId != curWindowId && callingSession_ != nullptr) {
+        RestoreCallingSessionSizeIfNeed();
+
+        callingSession_ = GetSceneSession(newWindowId);
+        if (callingSession_ == nullptr) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId_);
+            callingSession_ = GetSceneSession(focusedSessionId_);
+            if (callingSession_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Calling window id invalid,Calling session is null");
+                return;
+            } else {
+                newWindowId = focusedSessionId_;
+            }
+        }
+        ResizeSoftInputCallingSessionIfNeed(sceneSession);
+    }
+    sceneSession->GetSessionProperty()->SetCallingWindow(newWindowId);
+
+    if (callingWindowIdChangeFunc_ != nullptr) {
+        callingWindowIdChangeFunc_(newWindowId);
+    }
 }
 
 void SceneSessionManager::InitPersistentStorage()
