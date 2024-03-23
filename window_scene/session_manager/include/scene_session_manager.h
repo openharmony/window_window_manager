@@ -430,7 +430,7 @@ private:
     WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
-    void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentId)
+    void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
 
     sptr<RootSceneSession> rootSceneSession_;
