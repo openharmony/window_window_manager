@@ -855,6 +855,7 @@ WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSessio
         return WSError::WS_ERROR_NULLPTR;
     }
     auto parentPersistentId = property->GetParentPersistentId();
+    sceneSession->SetParentPersistentId(parentPersistentId);
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
@@ -4904,7 +4905,6 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         scnSession->SetParentSession(parentSession);
-        scnSession->SetParentPersistentId(parentSession->GetPersistentId());
         UpdateParentSessionForDialog(scnSession, scnSession->GetSessionProperty());
         WLOGFI("[WMSDialog] Bind dialog success, dialog id %{public}" PRIu64 ", parentId %{public}d",
             persistentId, parentSession->GetPersistentId());
