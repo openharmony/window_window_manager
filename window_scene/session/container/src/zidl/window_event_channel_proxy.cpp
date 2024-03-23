@@ -381,4 +381,32 @@ WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(pointX) ||
+        !data.WriteFloat(pointY) ||
+        !data.WriteInt32(sourceType) ||
+        !data.WriteInt32(eventType) ||
+        !data.WriteInt64(timeMs)) {
+        WLOGFE("Write TransferAccessibilityHoverEvent data failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen
