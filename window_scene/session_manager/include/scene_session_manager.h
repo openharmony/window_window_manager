@@ -557,6 +557,7 @@ private:
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+    void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
 
