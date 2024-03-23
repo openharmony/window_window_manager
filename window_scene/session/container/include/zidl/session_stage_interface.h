@@ -45,6 +45,7 @@ public:
         bool notifyInputMethod = true) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
     virtual void NotifyFocusStateEvent(bool focusState) {}
+    virtual bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {return false;}
     virtual int32_t GetPersistentId() const
     {
         return -1;
@@ -110,6 +111,7 @@ public:
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
+    virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

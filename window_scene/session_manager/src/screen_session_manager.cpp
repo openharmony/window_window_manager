@@ -42,6 +42,7 @@
 #include "screen_rotation_property.h"
 #include "screen_sensor_connector.h"
 #include "screen_setting_helper.h"
+#include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
 
 namespace OHOS::Rosen {
@@ -1044,6 +1045,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (foldScreenController_ != nullptr) {
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
+        HandlerSensor(status);
     } else {
         for (auto screenId : screenIds) {
             rsInterface_.SetScreenPowerStatus(screenId, status);
@@ -1369,6 +1371,10 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screen = GetScreenSession(screenId);
+        if (screen == nullptr) {
+            WLOGFW("[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
         screen->PowerStatusChange(event, status, reason);
     }
     return true;
@@ -3254,12 +3260,13 @@ static std::string Str16ToStr8(const std::u16string& str)
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGFI("Dump begin");
-    if (fd < 0) {
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    if (dumper == nullptr) {
+        WLOGFE("dumper is nullptr");
         return -1;
     }
-    (void) signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE crash
-    UniqueFd ufd = UniqueFd(fd); // auto close
-    fd = ufd.Get();
+    dumper->ExcuteDumpCmd();
+
     std::vector<std::string> params;
     for (auto& arg : args) {
         params.emplace_back(Str16ToStr8(arg));
@@ -3289,11 +3296,6 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
-    }
-    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
-    if (ret < 0) {
-        WLOGFE("dprintf error");
-        return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("dump end");
     return 0;
@@ -3421,6 +3423,12 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     WLOGFI("NotifyFoldToExpandCompletion ENTER");
     SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        WLOGFE("fail to get default screenSession");
+        return;
+    }
+    screenSession->UpdateRotationAfterBoot(foldToExpand);
 }
 
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const

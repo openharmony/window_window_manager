@@ -121,6 +121,11 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
         });
 }
 
+void RootScene::SetDisplayOrientation(int32_t orientation)
+{
+    orientation_ = orientation;
+}
+
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (uiContent_ == nullptr) {
@@ -131,6 +136,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density_);
+    config.SetOrientation(orientation_);
     uiContent_->UpdateViewportConfig(config, reason);
 }
 

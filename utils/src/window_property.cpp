@@ -869,6 +869,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
             ret = ret && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_));
             break;
+        case PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO:
+            ret = ret && parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
+            break;
         default:
             break;
     }
@@ -947,6 +950,10 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
             SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO:
+            SetTextFieldPositionY(parcel.ReadDouble());
+            SetTextFieldHeight(parcel.ReadDouble());
             break;
         default:
             break;

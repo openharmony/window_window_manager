@@ -239,22 +239,6 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleRecoveryPullPiPMainWindow005
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleRecoveryPullPiPMainWindow005, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
-    auto res = session_->HandleRecoveryPullPiPMainWindow(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

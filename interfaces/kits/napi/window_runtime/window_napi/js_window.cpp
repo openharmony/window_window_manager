@@ -45,7 +45,7 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
-    constexpr int32_t MIN_DECOR_HEIGHT = 48;
+    constexpr int32_t MIN_DECOR_HEIGHT = 37;
     constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 
@@ -268,35 +268,35 @@ napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarEnable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
@@ -310,28 +310,36 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowSystemBarPropertiesSync");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowSystemBarPropertiesSync(env, info) : nullptr;
+}
+
+
 napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
+    TLOGD(WmsLogTag::WMS_IMMS, "SetWindowSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "GetAvoidArea");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowAvoidAreaSync");
+    TLOGD(WmsLogTag::WMS_IMMS, "GetWindowAvoidAreaSync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -677,6 +685,13 @@ napi_value JsWindow::Minimize(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]Minimize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMinimize(env, info) : nullptr;
+}
+
+napi_value JsWindow::Maximize(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]Maximize");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnMaximize(env, info) : nullptr;
 }
 
 napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
@@ -2231,6 +2246,26 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     NapiAsyncTask::Schedule("JsWindow::OnSetSystemBarProperties",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto weakWindow = weakToken.promote();
+    if (weakWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(weakWindow->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "only main window has right to call");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    auto objValue = CreateJsSystemBarPropertiesObject(env, weakWindow);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return objValue;
 }
 
 napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info)
@@ -4789,6 +4824,62 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    if (!WindowHelper::IsMainWindow(weakToken->GetType())) {
+        WLOGFE("[NAPI] maximize interface only support main Window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnMaximize failed."));
+                return;
+            }
+            WMError ret = weakWindow->Maximize();
+            auto uicontent = weakWindow->GetUIContent();
+            if (uicontent == nullptr) {
+                WLOGFE("uicontent is nullptr");
+                ret = WMError::WM_ERROR_NULLPTR;
+            } else {
+                uicontent->UpdateDecorVisible(false);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Maximize failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] maximize end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnMaximize",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFD("Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -4995,7 +5086,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
     int32_t height = 0;
     napi_get_value_int32(env, nativeVal, &height);
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
-        WLOGFE("height should greater than 48 or smaller than 112");
+        WLOGFE("height should greater than 37 or smaller than 112");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
@@ -5080,6 +5171,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setSystemBarEnable", moduleName, JsWindow::SetSystemBarEnable);
     BindNativeFunction(env, object, "setWindowSystemBarEnable", moduleName, JsWindow::SetWindowSystemBarEnable);
     BindNativeFunction(env, object, "setSystemBarProperties", moduleName, JsWindow::SetSystemBarProperties);
+    BindNativeFunction(env, object, "getWindowSystemBarProperties",
+        moduleName, JsWindow::GetWindowSystemBarPropertiesSync);
     BindNativeFunction(env, object, "setWindowSystemBarProperties",
         moduleName, JsWindow::SetWindowSystemBarProperties);
     BindNativeFunction(env, object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
@@ -5130,6 +5223,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(env, object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
     BindNativeFunction(env, object, "minimize", moduleName, JsWindow::Minimize);
+    BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(env, object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);

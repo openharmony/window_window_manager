@@ -1434,6 +1434,27 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateDisplayIdtest01
+ * @tc.desc: UpdateDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateDisplayId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateDisplayId");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    uint64_t newDisplayId = 2;
+    auto ret = window->UpdateDisplayId(newDisplayId);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    uint64_t displayId = window->property_->GetDisplayId();
+    ASSERT_EQ(newDisplayId, displayId);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 end";
+}
+
+/**
  * @tc.name: IsFloatingWindowAppTypetest01
  * @tc.desc: IsFloatingWindowAppType
  * @tc.type: FUNC
@@ -1676,6 +1697,26 @@ HWTEST_F(WindowSessionImplTest, SetPipActionEvent, Function | SmallTest | Level2
     WSError res = window->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetPipActionEvent end";
+}
+
+/**
+ * @tc.name: SetUIContentInner
+ * @tc.desc: SetUIContentInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUIContentInner");
+    option->SetExtensionTag(true);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    string url = "";
+    WMError res = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner end";
 }
 }
 } // namespace Rosen

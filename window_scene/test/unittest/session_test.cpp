@@ -43,7 +43,8 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
-    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool isPreImeEvent = false) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
@@ -79,7 +80,7 @@ WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 }
 
 WSError TestWindowEventChannel::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
 {
     return WSError::WS_OK;
 }
@@ -2879,6 +2880,34 @@ HWTEST_F(WindowSessionTest, IsTerminated49, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     res = session_->IsTerminated();
     ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetSystemActive48
+ * @tc.desc: SetSystemActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 1;
+    };
+    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 2;
+    };
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+
+    SessionInfo info;
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 1);
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 2);
 }
 
 }

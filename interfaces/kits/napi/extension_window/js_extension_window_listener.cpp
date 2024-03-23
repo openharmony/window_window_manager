@@ -28,6 +28,11 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowListener"};
+const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
+const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
+const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
+const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
+const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 }
 
 JsExtensionWindowListener::~JsExtensionWindowListener()
