@@ -387,6 +387,17 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IWindowNoInteractionListenerSptr
+ *
+ * @brief Listener to observe no interaction event for a long time of window.
+*/
+class IWindowNoInteractionListener : virtual public RefBase {
+public:
+    virtual void OnWindowNoInteractionCallback() {};
+};
+using IWindowNoInteractionListenerSptr = sptr<IWindowNoInteractionListener>;
+
+/**
  * @class IWindowTitleButtonRectChangedListener
  *
  * @brief Listener to observe event when window size or the height of title bar changed.
@@ -1549,6 +1560,30 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @param timeout uint32_t if timeout(seconds) pass with no interaction, the listener will be executed.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener,
+        uint32_t timeout)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window no interaction listener.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

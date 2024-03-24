@@ -1547,10 +1547,12 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
         WLOGFE("Window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    constexpr size_t ARGC_MIN = 2;
+    constexpr size_t ARGC_MAX = 3;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) { // 2: params num
+    if (argc < ARGC_MIN || argc > ARGC_MAX) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -1559,12 +1561,20 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
         WLOGFE("Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value value = argv[1];
-    if (!NapiIsCallable(env, value)) {
-        WLOGI("Callback(info->argv[1]) is not callable");
+    size_t cbIndex = argc - 1;
+    napi_value callback = argv[cbIndex];
+    if (!NapiIsCallable(env, callback)) {
+        WLOGI("Callback(info->argv[%{public}zu]) is not callable", cbIndex);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WmErrorCode ret = registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, env, value);
+
+    napi_value parameter = nullptr;
+    if (argc > ARGC_MIN) {
+        parameter = argv[cbIndex - 1];
+    }
+
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW,
+        env, callback, parameter);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }

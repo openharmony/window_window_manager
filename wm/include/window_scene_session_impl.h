@@ -135,6 +135,7 @@ public:
     void UpdateSubWindowState(const WindowType& type);
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
 
