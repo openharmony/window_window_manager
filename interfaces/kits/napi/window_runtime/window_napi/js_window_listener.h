@@ -47,6 +47,7 @@ const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
+const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetect";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -61,7 +62,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IWindowVisibilityChangedListener,
                          public IWindowTitleButtonRectChangedListener,
-                         public IWindowStatusChangeListener {
+                         public IWindowStatusChangeListener,
+                         public IWindowNoInteractionListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -90,6 +92,7 @@ public:
     void SetMainEventHandler();
     void OnWindowStatusChange(WindowStatus windowstatus) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
 private:
     uint32_t currentWidth_ = 0;

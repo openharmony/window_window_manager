@@ -33,7 +33,7 @@ public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, napi_env env, napi_value value);
+        CaseType caseType, napi_env env, napi_value value, napi_value parameter = nullptr);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, napi_env env, napi_value value);
 };
