@@ -937,12 +937,12 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     WLOGFI("[UL_POWER]SuspendBegin block screen power change is true, reason: %{public}u",
         static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
-    blockScreenPowerChange_ = true;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         sessionDisplayPowerController_->SuspendBegin(reason);
         lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
         return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
     }
+    blockScreenPowerChange_ = true;
     auto suspendBeginTask = [this]() {
         WLOGFI("[UL_POWER]SuspendBegin delay task start");
         blockScreenPowerChange_ = false;
