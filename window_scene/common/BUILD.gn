@@ -55,6 +55,7 @@ ohos_shared_library("window_scene_common") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "image_framework:image_native",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]
