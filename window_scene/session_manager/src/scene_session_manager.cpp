@@ -2630,11 +2630,6 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK) {
-        if (!SessionPermission::VerifyCallingPermission("ohos.permission.MASK_WINDOW")) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
-    }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     property->SetSystemCalling(isSystemCalling);
