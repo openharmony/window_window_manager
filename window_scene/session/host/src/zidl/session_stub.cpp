@@ -108,6 +108,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT),
+        &SessionStub::HandleNotifyExtensionTimeout),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
         &SessionStub::HandleTriggerBindModalUIExtension),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
@@ -539,6 +541,17 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 {
     WLOGFD("called");
     NotifyExtensionDied();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t errorCode = 0;
+    if (!data.ReadInt32(errorCode)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    NotifyExtensionTimeout(errorCode);
     return ERR_NONE;
 }
 
