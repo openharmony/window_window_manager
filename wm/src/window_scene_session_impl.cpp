@@ -1275,8 +1275,6 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     uint32_t windowId = GetWindowId();
-    TLOGI(WmsLogTag::WMS_IMMS,
-        "GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
     WindowMode mode = GetMode();
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
@@ -1291,9 +1289,16 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "hostSession_ is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d "
+          "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
+          windowId, GetWindowName().c_str(), type,
+          avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
+          avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
+          avoidArea.bottomRect_.height_);
     return WMError::WM_OK;
 }
 
@@ -1363,8 +1368,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    TLOGI(WmsLogTag::WMS_IMMS,
-        "winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s status:%{public}d",
+        GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -1412,7 +1417,7 @@ SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType 
 
 WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "windowId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1423,15 +1428,10 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
 
 WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFD("NotifySpecificWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "windowId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if ((state_ == WindowState::STATE_CREATED &&
-         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
-        state_ == WindowState::STATE_HIDDEN) {
-        return WMError::WM_OK;
     }
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
@@ -1443,62 +1443,44 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-        GetWindowId(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
-    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u state is invalid", GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u property is same", GetWindowId());
-        return WMError::WM_OK;
-    }
-
-    if (property_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    isSystembarPropertiesSet_ = true;
-    property_->SetSystemBarProperty(type, property);
-    WMError ret = NotifyWindowSessionProperty();
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
-            GetWindowId(), static_cast<int32_t>(ret));
-    }
-    return ret;
-}
-
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
-           "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-           GetWindowId(), static_cast<uint32_t>(type),
-           property.enable_, property.backgroundColor_, property.contentColor_);
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u"
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
+        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u property is same", GetWindowId());
         return WMError::WM_OK;
     }
 
     if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }
 
+WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return SetSpecificBarProperty(type, property);
+}
+
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+        "winId:%{public}u %{public}s status:%{public}d",
+        GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }

@@ -2033,6 +2033,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
         auto iter = jsCbMap_.find(SYSTEMBAR_PROPERTY_CHANGE_CB);
         if (iter == jsCbMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find systemBar property change  callback");
             return;
         }
         jsCallBack = iter->second;
