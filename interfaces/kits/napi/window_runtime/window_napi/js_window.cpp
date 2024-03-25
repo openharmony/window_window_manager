@@ -4955,9 +4955,9 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         WLOGFE("[NAPI] maximize interface only support main Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-
+    MaximizeLayoutOption option;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        [weakToken, option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env,
@@ -4965,14 +4965,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
                     "OnMaximize failed."));
                 return;
             }
-            WMError ret = weakWindow->Maximize();
-            auto uicontent = weakWindow->GetUIContent();
-            if (uicontent == nullptr) {
-                WLOGFE("uicontent is nullptr");
-                ret = WMError::WM_ERROR_NULLPTR;
-            } else {
-                uicontent->UpdateDecorVisible(false);
-            }
+            WMError ret = weakWindow->Maximize(option);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {

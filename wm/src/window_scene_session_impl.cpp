@@ -1565,6 +1565,23 @@ WMError WindowSceneSessionImpl::Maximize()
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::Maximize(MaximizeLayoutOption option)
+{
+    if (option.dock != ShowType::HIDE || option.decor == ShowType::FORBIDDEN) {
+        WLOGE("[WMLayout] dock cannot be hide always! dock is not hide: %{public}d", option.dock != ShowType::HIDE);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("maximize fail, not main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetIsLayoutFullScreen(option.decor == ShowType::HIDE);
+    return SetFullScreen(true);
+}
+
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
