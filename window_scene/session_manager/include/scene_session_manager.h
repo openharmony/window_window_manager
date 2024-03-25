@@ -556,7 +556,12 @@ private:
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
+    void AddSecureSession(int32_t persistentId, bool shouldHide, size_t& sizeBefore, size_t& sizeAfter);
+    void HideNonSecureFloatingWindows(size_t sizeBefore, size_t sizeAfter, bool shouldHide);
+    void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession, size_t sizeBefore, size_t sizeAfter,
+        bool shouldHide);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+    WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
