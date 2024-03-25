@@ -757,14 +757,14 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
-struct TopWindowInfoList {
-    sptr<Window> window = nullptr;
-    AppExecFwk::Ability* ability = nullptr;
-    int32_t errorCode = 0;
-    std::string errMsg = "";
-};
 static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value callback, bool newApi)
 {
+    struct TopWindowInfoList {
+        sptr<Window> window = nullptr;
+        AppExecFwk::Ability* ability = nullptr;
+        int32_t errorCode = 0;
+        std::string errMsg = "";
+    };
     std::shared_ptr<TopWindowInfoList> lists = std::make_shared<TopWindowInfoList>();
     bool isOldApi = GetAPI7Ability(env, lists->ability);
     NapiAsyncTask::ExecuteCallback execute = [lists, isOldApi, newApi, contextPtr]() {
@@ -808,13 +808,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             task.Reject(env, CreateJsError(env, error, "Get top window failed"));
             return;
         }
-        std::string windowName = lists->window->GetWindowName();
-        std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
-        if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
-            task.Resolve(env, jsWindowObj->GetNapiValue());
-        } else {
-            task.Resolve(env, CreateJsWindowObject(env, lists->window));
-        }
+        task.Resolve(env, CreateJsWindowObject(env, lists->window));
         WLOGD("Get top window %{public}s success", windowName.c_str());
     };
     napi_value result = nullptr;
