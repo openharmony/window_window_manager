@@ -413,6 +413,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    auto windowMask = sceneSession->GetSessionProperty()->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -426,7 +427,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
-        .transform = transformData
+        .transform = transformData,
+        .windowMask = windowMask
     };
     return windowInfo;
 }
