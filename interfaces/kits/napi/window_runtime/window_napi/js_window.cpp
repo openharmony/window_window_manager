@@ -2563,7 +2563,6 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
 
 napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
