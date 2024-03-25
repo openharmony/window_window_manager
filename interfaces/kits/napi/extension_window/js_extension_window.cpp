@@ -374,6 +374,18 @@ napi_value JsExtensionWindow::OnSetPreferredOrientation(napi_env env, napi_callb
     return result;
 }
 
+napi_value JsExtensionWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        WLOGFE("Argc is invalid: %{public}zu, expect zero params", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
 napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
 {
     NapiAsyncTask::CompleteCallback complete =

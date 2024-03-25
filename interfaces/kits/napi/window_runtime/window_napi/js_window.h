@@ -187,6 +187,7 @@ private:
     napi_value OnIsShowing(napi_env env, napi_callback_info info);
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
+    napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
