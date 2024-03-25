@@ -2630,6 +2630,11 @@ WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionPrope
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK) {
+        if (!SessionPermission::VerifyCallingPermission("ohos.permission.MASK_WINDOW")) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     property->SetSystemCalling(isSystemCalling);
@@ -2832,6 +2837,13 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
             sceneSession->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
             break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
+                sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
+            }
+            FlushWindowInfoToMMI();
         }
         default:
             break;

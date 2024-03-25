@@ -2813,6 +2813,10 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
     uint32_t length = maskeWidth * maskHeight;
     uint32_t data = new (std::nothrow) uint32_t[length];
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return nullptr;
+    }
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
