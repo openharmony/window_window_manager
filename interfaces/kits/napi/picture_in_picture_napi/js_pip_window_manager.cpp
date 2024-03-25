@@ -28,7 +28,6 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsPipWindowManager"};
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
