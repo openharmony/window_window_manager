@@ -2578,8 +2578,16 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     Orientation requestedOrientation = weakWindow->GetRequestedOrientation();
-    napi_value result = nullptr;
-    return result;
+    ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
+    if (requestedOrientation >= ApiOrientation::UNSPECIFIED && requestedOrientation <= ApiOrientation::LOCKED) {
+        apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
+    } else {
+        WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
+            static_cast<uint32_t>(requestedOrientation));
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetPreferredOrientation end, Orientation = %{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
+    return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
 }
 
 napi_value JsWindow::OnIsSupportWideGamut(napi_env env, napi_callback_info info)
