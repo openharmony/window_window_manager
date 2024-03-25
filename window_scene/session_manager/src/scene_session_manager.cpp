@@ -7230,6 +7230,7 @@ void SceneSessionManager::HideNonSecureFloatingWindows(size_t sizeBefore, size_t
 void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession,
     size_t sizeBefore, size_t sizeAfter, bool shouldHide)
 {
+    // don't let sub-window show when switching secure host window to background
     if (!sceneSession->IsSessionForeground() || sizeBefore == sizeAfter) {
         return;
     }
@@ -7306,6 +7307,7 @@ WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, i
         auto iter = sceneSessionMap_.find(parentId);
         if (iter == sceneSessionMap_.end()) {
             TLOGD(WmsLogTag::WMS_UIEXT, "Parent session with persistentId %{public}d not found", parentId);
+            // process UIExtension that created by SceneBoard
             return HandleSecureExtSessionShouldHide(persistentId, shouldHide);
         }
 
