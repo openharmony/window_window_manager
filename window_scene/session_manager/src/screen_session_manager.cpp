@@ -1137,13 +1137,12 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (foldScreenController_ != nullptr) {
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
-        HandlerSensor(status);
     } else {
         for (auto screenId : screenIds) {
             rsInterface_.SetScreenPowerStatus(screenId, status);
-            HandlerSensor(status);
         }
     }
+    HandlerSensor(status);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1160,7 +1159,8 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
 {
     auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-    if (isPhone) {
+    auto isTablet = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
+    if (isPhone || isTablet) {
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
             WLOGFI("subscribe rotation sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
