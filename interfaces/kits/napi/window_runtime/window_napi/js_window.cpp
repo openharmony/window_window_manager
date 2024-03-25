@@ -5179,9 +5179,9 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = 
-        [waekToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (waekWindow == nullptr) {
+            if (weakWindow == nullptr) {
                 task.Reject(env,
                     CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "Invalidate params"));
