@@ -541,6 +541,40 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag02, Function | SmallTest | Level
     ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
     ASSERT_EQ(DMError::DM_OK, ret);
 }
+
+/**
+ * @tc.name: SetVirtualMirrorScreenScaleMode01
+ * @tc.desc: SetVirtualMirrorScreenScaleMode01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
+        ScreenScaleMode::FILL_MODE);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: SetVirtualMirrorScreenScaleMode02
+ * @tc.desc: SetVirtualMirrorScreenScaleMode02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
+        ScreenScaleMode::UNISCALE_MODE);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

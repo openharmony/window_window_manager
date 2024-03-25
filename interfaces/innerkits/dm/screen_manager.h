@@ -206,6 +206,15 @@ public:
     DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
 
     /**
+     * @brief Set virtual screen scale mode
+     *
+     * @param screenId Screen id.
+     * @param scaleMode scale mode
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode);
+
+    /**
      * @brief Set the screen power state on the specified screen.
      *
      * @param screenId Screen id.
