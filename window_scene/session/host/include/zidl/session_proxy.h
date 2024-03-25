@@ -55,6 +55,7 @@ public:
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
+    WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;

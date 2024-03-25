@@ -985,6 +985,16 @@ WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 }
 
+WMError WindowSessionImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    WLOGI("SetLandscapeMultiWindow");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    hostSession_->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
 {
     WLOGFD("Set the enable flag of single frame composer.");
