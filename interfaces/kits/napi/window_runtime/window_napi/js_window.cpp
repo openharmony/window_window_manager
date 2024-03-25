@@ -3002,33 +3002,73 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    int x = 10;
+    x = x + 1;
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> errCodeExe = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodeExe] () {
-        if (errCodeExe == nullptr) {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr] () {
+        if (errCodePtr == nullptr) {
             return;
         }
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            *errCodeExe = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodeExe = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
         WLOGI("Window [%{public}u, %{public}s] set keep screen on end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, keepScreenOn, errCodeExe](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCodeExe == nullptr) {
+        [weakToken, keepScreenOn, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                 "System abnormal."));
                 return;
             }
-            if (*errCodeExe == WmErrorCode::WM_OK) {
+            if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodeExe),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodePtr),
                     "Window set keep screen on failed"));
             }
         };
