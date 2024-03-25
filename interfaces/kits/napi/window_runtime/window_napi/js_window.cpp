@@ -5198,8 +5198,11 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
             WLOGI("Window [%{public}u, %{public}s] set window mask succeed",
                 waekWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        ((argv[1] != nullptr && GetType))
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::SetWindowMask",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
