@@ -225,6 +225,7 @@ public:
     bool IsExtWindowHasWaterMarkFlag();
     void RomoveExtWindowFlags(int32_t extPersistentId);
     void ClearExtWindowFlags();
+    void NotifyDisplayMove(DisplayId from, DisplayId to);
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;

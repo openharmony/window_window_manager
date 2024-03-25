@@ -62,6 +62,7 @@ constexpr int32_t ANIMATION_TIME = 400;
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
+std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::displayMoveListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
 std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
@@ -85,6 +86,7 @@ std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1129,6 +1131,20 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
     return RegisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    WLOGFD("RegisterDisplayMoveListener");
+    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    return RegisterListener(displayMoveListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    WLOGFD("UnregisterDisplayMoveListener");
+    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
     WLOGFD("Start register");
@@ -1448,6 +1464,10 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
 
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+        ClearUselessListeners(displayMoveListeners_, persistentId);
+    }
     {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         ClearUselessListeners(lifecycleListeners_, persistentId);
@@ -1772,6 +1792,27 @@ WSError WindowSessionImpl::NotifyDestroy()
         }
     }
     return WSError::WS_OK;
+}
+
+template<typename T>
+EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
+    for (auto& listener : displayMoveListeners_[GetPersistentId()]) {
+        displayMoveListeners.push_back(listener);
+    }
+    return displayMoveListeners;
+}
+
+void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
+    for (auto& listener : displayMoveListeners) {
+        if (listener != nullptr) {
+            listener->OnDisplayMove(from, to);
+        }
+    }
 }
 
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
