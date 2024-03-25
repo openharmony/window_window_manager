@@ -1587,6 +1587,25 @@ HWTEST_F(WindowSessionImplTest, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSubWindowModal
+ * @tc.desc: SetSubWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetSubWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetSubWindowModal");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool isModal = true;
+    WMError res = window->SetSubWindowModal(isModal);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 end";
+}
+
+/**
  * @tc.name: SetDecorHeight
  * @tc.desc: SetDecorHeight and check the retCode
  * @tc.type: FUNC

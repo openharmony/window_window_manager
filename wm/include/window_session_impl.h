@@ -194,6 +194,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetSubWindowModal(bool isModal) override;
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;

@@ -1189,6 +1189,12 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+{
+    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+}
+
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     if (uiContent_ == nullptr) {

@@ -18,6 +18,7 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include "window_manager_hilog.h"
+#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -103,10 +104,14 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
-        WLOGFE("pointerEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr");
         return;
     }
-    WLOGFD("Receive pointer event, Id: %{public}u, action: %{public}d",
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "Receive pointer event, Id: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) &&
         (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
@@ -120,7 +125,27 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         pointerEvent->MarkProcessed();
         return;
     }
-    WLOGFD("Dispatch move event, windowId: %{public}u, action: %{public}d",
+
+    bool isModal = window_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    bool isSubWindow = WindowHelper::IsSubWindow(window_->GetType());
+    if (isModal && isSubWindow) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        bool validPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+        bool outsideWindow = !WindowHelper::IsPointInTargetRectWithBound(pointerItem.GetDisplayX(),
+            pointerItem.GetDisplayY(), window_->GetRect());
+        auto action = pointerEvent->GetPointerAction();
+        bool isTargetAction = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        bool isInterceptAction = isTargetAction || action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+        if (validPointItem && outsideWindow && isInterceptAction) {
+            if (isTargetAction) {
+                window_->NotifyTouchDialogTarget(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            }
+            pointerEvent->MarkProcessed();
+            return;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "Dispatch move event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     window_->ConsumePointerEvent(pointerEvent);
 }
