@@ -5180,7 +5180,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = 
         [waekToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto waekWindow = waekToken.promote();
+            auto weakWindow = weakToken.promote();
             if (waekWindow == nullptr) {
                 task.Reject(env,
                     CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
@@ -5191,12 +5191,12 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
                 WLOGI("Window [%{public}u, %{public}s] set window mask failed",
-                    waekWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 return;
             }
             task.Resolve(env, NapiGetUndefined(env));
             WLOGI("Window [%{public}u, %{public}s] set window mask succeed",
-                waekWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
     napi_value lastParam = nullptr;
     napi_value result = nullptr;

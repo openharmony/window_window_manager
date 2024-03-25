@@ -2844,6 +2844,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
+    surfaceNode_->SetMask(mask);//RS interface to set mask
     RSTransaction::FlushImplicitTransaction();
 
     property_->SetWindowMask(mask);
