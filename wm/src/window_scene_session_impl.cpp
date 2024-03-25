@@ -2004,7 +2004,6 @@ sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_
         WLOGFE("[GetMainWin] Please create mainWindow First!");
         return nullptr;
     }
-    uint32_t mainWinId = INVALID_WINDOW_ID;
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
