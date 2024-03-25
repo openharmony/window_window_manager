@@ -69,6 +69,7 @@ public:
     MOCK_METHOD2(HandleTransferExtensionData, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleNotifyRemoteReady, int(MessageParcel &data, MessageParcel &reply));
     MOCK_METHOD2(HandleNotifyExtensionDied, int(MessageParcel &data, MessageParcel &reply));
+    MOCK_METHOD2(HandleNotifyExtensionTimeout, int(MessageParcel &data, MessageParcel &reply));
 };
 } // namespace Rosen
 } // namespace OHOS
