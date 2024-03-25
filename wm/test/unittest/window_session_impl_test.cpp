@@ -863,6 +863,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    sptr<IDisplayMoveListener> listener6 = nullptr;
+    res = window->RegisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
 
@@ -915,6 +921,33 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
+}
+
+/**
+ * @tc.name: NotifyDisplayMove
+ * @tc.desc: NotifyDisplayMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyDisplayMove, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyDisplayMove start";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("NotifyDisplayMove");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    int res = 0;
+    DisplayId from = 0;
+    DisplayId to = 2;
+    window->NotifyDisplayMove(from, to);
+    ASSERT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyDisplayMove end";
 }
 
 /**

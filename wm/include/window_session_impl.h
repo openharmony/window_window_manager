@@ -118,9 +118,12 @@ public:
         bool notifyInputMethod = true) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
+    void NotifyDisplayMove(DisplayId from, DisplayId to) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
+    WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
@@ -272,6 +275,7 @@ private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
+    template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
     template<typename T>
@@ -324,7 +328,9 @@ private:
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
+    static std::recursive_mutex displayMoveListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
+    static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;

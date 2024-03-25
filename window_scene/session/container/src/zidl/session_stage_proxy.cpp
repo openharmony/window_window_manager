@@ -631,4 +631,31 @@ WSError SessionStageProxy::SetPipActionEvent(const std::string& action, int32_t 
     }
     return WSError::WS_OK;
 }
+
+void SessionStageProxy::NotifyDisplayMove(DisplayId from, DisplayId to)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint64(from)) {
+        WLOGFE("Write from id failed");
+        return;
+    }
+
+    if (!data.WriteUint64(to)) {
+        WLOGFE("Write to id failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest notify display move failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
