@@ -77,6 +77,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetWindowAnimationFlag),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
         &SessionStub::HandleUpdateWindowSceneAfterCustomAnimation),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW),
+                   &SessionStub::HandleSetLandscapeMultiWindow),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         &SessionStub::HandleRaiseAboveTarget),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
@@ -474,6 +476,15 @@ int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data
     WLOGD("HandleUpdateWindowSceneAfterCustomAnimation!");
     bool isAdd = data.ReadBool();
     const WSError& errCode = UpdateWindowSceneAfterCustomAnimation(isAdd);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleSetLandscapeMultiWindow!");
+    bool isLandscapeMultiWindow = data.ReadBool();
+    const WSError errCode = SetLandscapeMultiWindow(isLandscapeMultiWindow);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

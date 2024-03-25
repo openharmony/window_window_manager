@@ -774,6 +774,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (Session::GetFloatingScale() <= miniScale) {
             return;
         }
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            rect.height_ < rect.width_) {
+            return;
+        }
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
@@ -1923,7 +1927,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         if (session->changeSessionVisibilityWithStatusBarFunc_) {
             session->changeSessionVisibilityWithStatusBarFunc_(info, visible);
         }
-        
+
         return WSError::WS_OK;
     };
     PostTask(task, "ChangeSessionVisibilityWithStatusBar");
@@ -2171,6 +2175,28 @@ void SceneSession::NotifyPiPWindowPrepareClose()
         return;
     };
     PostTask(task, "NotifyPiPWindowPrepareClose");
+}
+
+WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    WLOGFD("NotifySetLandscapeMultiWindow");
+    auto task = [weakThis = wptr(this), isLandscapeMultiWindow]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_ &&
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_) {
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_(
+                isLandscapeMultiWindow);
+        }
+        WLOGFD("NotifySetLandscapeMultiWindow, id: %{public}d, isLandscapeMultiWindow: %{public}u",
+               session->GetPersistentId(), isLandscapeMultiWindow);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "NotifySetLandscapeMultiWindow");
+    return WSError::WS_OK;
 }
 
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const

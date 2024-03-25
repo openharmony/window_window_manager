@@ -308,6 +308,20 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::EnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
+{
+    WLOGI("EnableLandscapeMultiWindow");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnEnableLandscapeMultiWindow(env, info) : nullptr;
+}
+
+napi_value JsWindow::DisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
+{
+    WLOGI("DisableLandscapeMultiWindow");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnDisableLandscapeMultiWindow(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperties");
@@ -2207,6 +2221,67 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetSpecificSystemBarEnabled",
         env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnEnableLandscapeMultiWindow");
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, err](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        auto weakWindow = weakToken.promote();
+        err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
+        if (err != WmErrorCode::WM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err)));
+            return;
+        }
+        WMError ret = weakWindow->SetLandscapeMultiWindow(true);
+        if (ret == WMError::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+                                           "JsWindow::OnEnableLandscapeMultiWindow failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnEnableLandscapeMultiWindow",
+                            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
+{
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, err](napi_env env, NapiAsyncTask &task, int32_t status) mutable {
+        auto weakWindow = weakToken.promote();
+        err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
+        if (err != WmErrorCode::WM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(err)));
+            return;
+        }
+        WMError ret = weakWindow->SetLandscapeMultiWindow(false);
+        if (ret == WMError::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+                                           "JsWindow::OnDisableLandscapeMultiWindow failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnDisableLandscapeMultiWindow",
+                            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -4861,7 +4936,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         WLOGFE("[NAPI] maximize interface only support main Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
@@ -5307,6 +5382,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
         JsWindow::SetSingleFrameComposerEnabled);
+    BindNativeFunction(env, object, "enableLandscapeMultiWindow", moduleName, JsWindow::EnableLandscapeMultiWindow);
+    BindNativeFunction(env, object, "disableLandscapeMultiWindow", moduleName, JsWindow::DisableLandscapeMultiWindow);
     BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);

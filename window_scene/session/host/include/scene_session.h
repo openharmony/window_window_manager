@@ -60,6 +60,7 @@ using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persist
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
+using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -94,6 +95,7 @@ public:
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+        NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
 
     // func for change window scene pattern property
@@ -151,6 +153,7 @@ public:
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void SetForegroundInteractiveStatus(bool interactive) override;
+    WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -298,7 +301,7 @@ private:
     std::set<int32_t> secureExtSessionSet_;
     std::shared_mutex extWindowFlagsMapMutex_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
-    
+
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

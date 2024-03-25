@@ -58,6 +58,7 @@ const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateChange";
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
+const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 constexpr int SCALE_ARG_COUNT = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
@@ -209,6 +210,7 @@ void JsSceneSession::InitListenerFuncs()
         { WINDOW_DRAG_HOT_AREA_CB,               &JsSceneSession::ProcessWindowDragHotAreaRegister },
         { SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     &JsSceneSession::ProcessSessionInfoLockedStateChangeRegister },
         { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
+        { LANDSCAPE_MULTI_WINDOW_CB,             &JsSceneSession::ProcessLandscapeMultiWindowRegister },
     };
 }
 
@@ -285,6 +287,40 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
     }
     session->SetSessionInfoLockedStateChangeListener(func);
     WLOGFD("ProcessSessionInfoLockedStateChangeRegister success");
+}
+
+void JsSceneSession::ProcessLandscapeMultiWindowRegister()
+{
+    WLOGFD("ProcessLandscapeMultiWindowRegister");
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = std::bind(&JsSceneSession::SetLandscapeMultiWindow,
+                                                                      this, std::placeholders::_1);
+    WLOGFD("ProcessLandscapeMultiWindowRegister success");
+}
+
+void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    WLOGFI("[NAPI]SetLandScapeMultiWindow, isLandscapeMultiWindow: %{public}u", isLandscapeMultiWindow);
+    auto iter = jsCbMap_.find(LANDSCAPE_MULTI_WINDOW_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto task = [isLandscapeMultiWindow, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionLandscapeMultiWindowObj = CreateJsValue(env, isLandscapeMultiWindow);
+        napi_value argv[] = {jsSessionLandscapeMultiWindowObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task,
+        "SetLandscapeMultiWindow, isLandscapeMultiWindow:" + std::to_string(isLandscapeMultiWindow));
 }
 
 void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
