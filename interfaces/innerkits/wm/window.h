@@ -1699,6 +1699,17 @@ public:
     }
 
     /**
+     * @brief Set the modality of window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetSubWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief recovery the main window by function overloading. It is called by JsWindow.
      *
      * @param reason reason of update.

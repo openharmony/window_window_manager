@@ -729,6 +729,13 @@ napi_value JsWindow::SetWindowDecorVisible(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnSetWindowDecorVisible(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetSubWindowModal(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "[NAPI]SetSubWindowModal");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSubWindowModal(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowDecorHeight");
@@ -5075,6 +5082,61 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    bool isModal = false;
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) { // 1: the param num
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM, napi_get_value_bool(env, argv[0], &isModal));
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, isModal, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WmErrorCode::WM_OK) {
+                TLOGE(WmsLogTag::WMS_DIALOG, "invalid parameter");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "invalid parameter."));
+                return;
+            }
+
+            WmErrorCode wmErrorCode;
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                TLOGE(WmsLogTag::WMS_DIALOG, "window is nullptr");
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "window is nullptr."));
+                return;
+            }
+
+            if (!WindowHelper::IsSubWindow(window->GetType())) {
+                TLOGE(WmsLogTag::WMS_DIALOG, "called by invalid window type, type:%{public}d", window->GetType());
+                wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "invalid window type."));
+                return;
+            }
+            WMError ret = window->SetSubWindowModal(isModal);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                TLOGE(WmsLogTag::WMS_DIALOG, "Set subwindow modal failed, ret is %{public}d", wmErrorCode);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Set subwindow modal failed"));
+            }
+            TLOGI(WmsLogTag::WMS_DIALOG, "id:%{public}u, name:%{public}s, isModal:%{public}d",
+                window->GetWindowId(), window->GetWindowName().c_str(), isModal);
+        };
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::SetSubWindowModal",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5246,6 +5308,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
         JsWindow::SetSingleFrameComposerEnabled);
     BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
+    BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
