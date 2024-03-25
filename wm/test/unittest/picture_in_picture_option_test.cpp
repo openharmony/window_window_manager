@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "picture_in_picture_option.h"
-
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -89,14 +89,15 @@ HWTEST_F(PictureInPictureOptionTest, NavigationId, Function | SmallTest | Level2
  * @tc.desc: SetNavigationId/GetNavigationId
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, SetGetPiPTemplateInfoTest, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
-    option->SetPiPTemplateInfo(pipTemplateInfo);
-    ASSERT_EQ(option->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
+    std::vector<std::uint32_t> controlGroup;
+    controlGroup.push_back(static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH));
+    controlGroup.push_back(static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
+    controlGroup.push_back(static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
+    option->SetControlGroup(controlGroup);
+    ASSERT_NE(option->GetControlGroup().size(), 0);
 }
 
 /**
