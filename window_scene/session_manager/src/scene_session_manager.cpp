@@ -6167,7 +6167,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64"",
         isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
     auto task = [this, isVisible, barArea, displayId]() {
-        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarAreaMap_[displayId] != barArea) {
+        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarAreaMap_.count(displayId) < 1 ||
+            currAINavigationBarAreaMap_[displayId] != barArea) {
             isAINavigationBarVisible_ = isVisible;
             currAINavigationBarAreaMap_.clear();
             currAINavigationBarAreaMap_[displayId] = barArea;
