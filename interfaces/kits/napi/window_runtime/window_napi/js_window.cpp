@@ -3002,47 +3002,6 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    int x = 10;
-    x = x + 1;
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr] () {

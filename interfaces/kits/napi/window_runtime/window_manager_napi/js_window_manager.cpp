@@ -809,7 +809,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             return;
         }
         task.Resolve(env, CreateJsWindowObject(env, lists->window));
-        WLOGD("Get top window %{public}s success", windowName.c_str());
+        WLOGD("Get top window success");
     };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
