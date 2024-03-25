@@ -2283,6 +2283,19 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     window->FlushFrameRate(rate);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: Maximize01
+ * @tc.desc: maximize interface Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    MaximizeLayoutOption option;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
