@@ -225,6 +225,13 @@ DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId scre
     return displayManagerServiceProxy_->SetVirtualMirrorScreenCanvasRotation(screenId, canvasRotation);
 }
 
+DMError ScreenManagerAdapter::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    WLOGFI("DisplayManagerAdapter::SetVirtualMirrorScreenScaleMode");
+    return displayManagerServiceProxy_->SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
+}
+
 DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
