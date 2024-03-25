@@ -5200,7 +5200,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         };
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::SetWindowMask",
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowMask",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
