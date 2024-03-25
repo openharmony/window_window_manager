@@ -789,6 +789,20 @@ enum class CaseType {
     CASE_STAGE
 };
 
+/**
+ * maximize layout show type
+ */
+enum ShowType : int32_t {
+    SHOW, // normally show
+    HIDE, // show when hover, but hide normally
+    FORBIDDEN // hide always
+};
+
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
+};
+
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
