@@ -204,6 +204,7 @@ enum class ScreenChangeEvent : uint32_t {
     UPDATE_ROTATION,
     CHANGE_MODE,
     VIRTUAL_PIXEL_RATIO_CHANGED,
+    SCREEN_SWITCH_CHANGE,
 };
 
 /**
@@ -316,6 +317,7 @@ enum class ScreenSourceMode: uint32_t {
     SCREEN_MIRROR = 1,
     SCREEN_EXTEND = 2,
     SCREEN_ALONE = 3,
+    SCREEN_UNIQUE = 4,
 };
 
 /**

@@ -27,14 +27,15 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 WMError WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    return wmAgentContainer_.RegisterAgent(windowManagerAgent, type) ? WMError::WM_OK :
-        WMError::WM_ERROR_REPEAT_OPERATION;
+    return wmAgentContainer_.RegisterAgent(
+        windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
 WMError WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    return wmAgentContainer_.UnregisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
+    return wmAgentContainer_.UnregisterAgent(
+        windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
 void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)

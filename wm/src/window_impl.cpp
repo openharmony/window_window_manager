@@ -1231,6 +1231,14 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     return ret;
 }
 
+bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
+}
+
 void WindowImpl::InitAbilityInfo()
 {
     AbilityInfo info;

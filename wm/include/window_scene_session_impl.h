@@ -51,12 +51,12 @@ public:
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
     void SetDefaultProperty();
-    WSError SetActive(bool active) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
+    WMError Maximize(MaximizeLayoutOption option) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
@@ -133,10 +133,10 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
 

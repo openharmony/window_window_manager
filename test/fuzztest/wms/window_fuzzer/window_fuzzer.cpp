@@ -111,6 +111,13 @@ public:
     }
 };
 
+class WindowNoInteractionListener : public IWindowNoInteractionListener {
+public:
+    void OnWindowNoInteractionCallback() override
+    {
+    }
+};
+
 class AnimationTransitionController : public IAnimationTransitionController {
 public:
     void AnimationForShown() override

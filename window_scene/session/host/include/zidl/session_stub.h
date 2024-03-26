@@ -64,6 +64,7 @@ private:
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
+    int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -72,6 +73,7 @@ private:
     int HandleNotifySyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAsyncOn(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply);
     int HandleTriggerBindModalUIExtension(MessageParcel& data, MessageParcel& reply);
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
@@ -79,7 +81,6 @@ private:
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
-    int HandleRecoveryPullPiPMainWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

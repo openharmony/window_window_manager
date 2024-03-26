@@ -40,7 +40,8 @@ public:
 
     // transfer sync key event for weather consumed
     virtual WSError TransferBackpressedEventForConsumed(bool& isConsumed) = 0;
-    virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) = 0;
+    virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool isPreImeEvent = false) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
     virtual WSError TransferFocusState(bool focusState) = 0;
     virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
@@ -53,6 +54,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) = 0;
     virtual WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t baseParent) = 0;
+    virtual WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H
