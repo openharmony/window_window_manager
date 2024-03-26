@@ -211,6 +211,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         }
         if (windowNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
+            WLOGFD("add handwriting flag to window: %{public}u", windowNode->GetWindowId());
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
         }
         windowsInfo.emplace_back(windowInfo);
