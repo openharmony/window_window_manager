@@ -182,7 +182,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
 };
 
-const std::map<ApiOrientation, Orientation> NATIVE_TO_JS_ORIENTATION_MAP {
+const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
     {Orientation::UNSPECIFIED,                           ApiOrientation::UNSPECIFIED                        },
     {Orientation::VERTICAL,                              ApiOrientation::PORTRAIT                           },
     {Orientation::HORIZONTAL,                            ApiOrientation::LANDSCAPE                          },
