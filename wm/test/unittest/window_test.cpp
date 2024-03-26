@@ -118,19 +118,11 @@ HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> windowOption = nullptr;
+    sptr<WindowOption> option = nullptr;
     PiPTemplateInfo pipTemplateInfo;
     ASSERT_EQ(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
-    windowOption = new WindowOption();
-    ASSERT_EQ(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
-    windowOption->SetWindowName("pip_window");
-    windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
-    } else {
-        ASSERT_EQ(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
-    }
+    option = new WindowOption();
+    ASSERT_NE(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
 }
 
 /**
