@@ -661,4 +661,28 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
 
     return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
 }
+
+VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId id is invalid");
+        return VirtualScreenFlag::DEFAULT;
+    }
+
+    return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
+}
+
+DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return displayManagerServiceProxy_->SetVirtualScreenFlag(screenId, screenFlag);
+}
 } // namespace OHOS::Rosen

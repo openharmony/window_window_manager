@@ -79,7 +79,7 @@ WSError WindowEventChannel::TransferBackpressedEventForConsumed(bool& isConsumed
 }
 
 WSError WindowEventChannel::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
 {
     WLOGFD("WindowEventChannel receive key event");
     if (!sessionStage_) {
@@ -89,6 +89,12 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     if (keyEvent == nullptr) {
         WLOGFE("keyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (isPreImeEvent) {
+        isConsumed = sessionStage_->NotifyOnKeyPreImeEvent(keyEvent);
+        TLOGI(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumed isConsumed = %{public}d",
+            static_cast<int>(isConsumed));
+        return WSError::WS_OK;
     }
     DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
@@ -261,5 +267,15 @@ WSError WindowEventChannel::TransferExecuteAction(int64_t elementId,
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyExecuteAction(elementId, actionArguments, action, baseParent);
+}
+
+WSError WindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 } // namespace OHOS::Rosen

@@ -72,6 +72,7 @@ public:
     static napi_value SetSystemBarEnable(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
     static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
@@ -111,6 +112,8 @@ public:
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -139,6 +142,7 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
@@ -176,6 +180,7 @@ private:
     napi_value OnSetSystemBarEnable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
@@ -196,6 +201,7 @@ private:
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
@@ -233,6 +239,8 @@ private:
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    napi_value OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // animation Config
     napi_value OnOpacity(napi_env env, napi_callback_info info);

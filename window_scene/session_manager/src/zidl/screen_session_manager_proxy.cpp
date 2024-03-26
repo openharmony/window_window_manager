@@ -2166,4 +2166,55 @@ void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
 }
+
+VirtualScreenFlag ScreenSessionManagerProxy::GetVirtualScreenFlag(ScreenId screenId)
+{
+    if (screenId == SCREEN_ID_INVALID) {
+        return VirtualScreenFlag::DEFAULT;
+    }
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    return static_cast<VirtualScreenFlag>(reply.ReadUint32());
+}
+
+DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag)
+{
+    if (screenId == SCREEN_ID_INVALID) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteUint32(static_cast<uint32_t>(screenFlag))) {
+        WLOGFE("Write screenId or screenFlag failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_FLAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

@@ -52,6 +52,8 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
         &WindowEventChannelStub::HandleTransferFocusMoveSearch),
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
         &WindowEventChannelStub::HandleTransferExecuteAction),
+    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
+        &WindowEventChannelStub::HandleTransferAccessibilityHoverEvent),
 };
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
@@ -79,7 +81,7 @@ int WindowEventChannelStub::HandleTransferBackpressedEvent(MessageParcel& data, 
     WSError errCode = TransferBackpressedEventForConsumed(isConsumed);
 
     reply.WriteBool(isConsumed);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -95,11 +97,12 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
         WLOGFE("Read Key Event failed");
         return ERR_INVALID_DATA;
     }
+    bool isPreImeEvent = data.ReadBool();
     bool isConsumed = false;
-    WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed);
+    WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
 
     reply.WriteBool(isConsumed);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -116,7 +119,7 @@ int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     WSError errCode = TransferPointerEvent(pointerEvent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -124,7 +127,7 @@ int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, 
 {
     bool isFocusActive = data.ReadBool();
     WSError errCode = TransferFocusActiveEvent(isFocusActive);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -132,7 +135,7 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
 {
     bool focusState = data.ReadBool();
     WSError errCode = TransferFocusState(focusState);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -156,8 +159,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
     std::list<Accessibility::AccessibilityElementInfo> infos;
     WSError errCode = TransferSearchElementInfo(elementId, mode, baseParent, infos);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     int64_t count = static_cast<int64_t>(infos.size());
     if (!reply.WriteInt64(count)) {
@@ -194,8 +197,8 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
     std::list<Accessibility::AccessibilityElementInfo> infos;
     WSError errCode = TransferSearchElementInfosByText(elementId, text, baseParent, infos);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     int64_t count = static_cast<int64_t>(infos.size());
     if (!reply.WriteInt64(count)) {
@@ -232,8 +235,8 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
     Accessibility::AccessibilityElementInfo info;
     WSError errCode = TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
@@ -263,8 +266,8 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
     Accessibility::AccessibilityElementInfo info;
     WSError errCode = TransferFocusMoveSearch(elementId, direction, baseParent, info);
     if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<uint32_t>(errCode));
-        return static_cast<uint32_t>(errCode);
+        WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<int32_t>(errCode));
+        return static_cast<int32_t>(errCode);
     }
     Accessibility::AccessibilityElementInfoParcel infoParcel(info);
     if (!reply.WriteParcelable(&infoParcel)) {
@@ -314,7 +317,27 @@ int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, Mes
         return ERR_INVALID_DATA;
     }
     WSError errCode = TransferExecuteAction(elementId, actionArguments, action, baseParent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel& data, MessageParcel& reply)
+{
+    float pointX = 0;
+    float pointY = 0;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    if (!data.ReadFloat(pointX) ||
+        !data.ReadFloat(pointY) ||
+        !data.ReadInt32(sourceType) ||
+        !data.ReadInt32(eventType) ||
+        !data.ReadInt64(timeMs)) {
+        WLOGFE("Read HandleTransferAccessibilityHoverEvent data failed!");
+        return ERR_INVALID_DATA;
+    };
+    WSError errCode = TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 }

@@ -62,6 +62,7 @@ public:
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
@@ -78,6 +79,7 @@ public:
     }
     virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}
@@ -88,7 +90,6 @@ public:
     virtual void NotifyPiPWindowPrepareClose() {}
     virtual WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         { return WSError::WS_OK; }
-    virtual WSError RecoveryPullPiPMainWindow(int32_t persistentId, const Rect& rect) { return WSError::WS_OK; }
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     {

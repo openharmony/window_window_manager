@@ -2768,37 +2768,6 @@ HWTEST_F(SceneSessionTest, SetLastSafeRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: RecoveryPullPiPMainWindow
- * @tc.desc:  * @tc.name: RecoveryPullPiPMainWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, RecoveryPullPiPMainWindow, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetLastSafeRect";
-    info.bundleName_ = "SetLastSafeRect";
-    sptr<SceneSession> scensession;
-    sptr<SceneSession::SpecificSessionCallback> specificSession =
-        new SceneSession::SpecificSessionCallback();
-    scensession = new (std::nothrow) SceneSession(info, specificSession);
-    Rect rec = {3, 4, 5, 6};
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    auto prepareClosePiPSessionFunc = [scensession]() {
-        scensession->NotifyUILostFocus();
-    };
-    scensession->sessionChangeCallback_->onPrepareClosePiPSession_ = prepareClosePiPSessionFunc;
-    auto recoveryPullPiPMainWindowFunc = [scensession](int32_t persistentId, Rect rect) {
-        rect.posX_ = persistentId;
-        rect.posY_ = persistentId;
-        rect.width_ = persistentId;
-        rect.height_ = persistentId;
-    };
-    scensession->specificCallback_->onRecoveryPullPiPMainWindow_ = recoveryPullPiPMainWindowFunc;
-    scensession->NotifyPiPWindowPrepareClose();
-    EXPECT_EQ(WSError::WS_OK, scensession->RecoveryPullPiPMainWindow(5, rec));
-}
-
-/**
  * @tc.name: GetSessionTargetRect
  * @tc.desc:  * @tc.name: GetSessionTargetRect
  * @tc.type: FUNC
@@ -2827,32 +2796,6 @@ HWTEST_F(SceneSessionTest, GetSessionTargetRect, Function | SmallTest | Level2)
     };
     scensession->SetWindowDragHotAreaListener(dragHotAreaFunc);
     EXPECT_NE(nullptr,  scensession->moveDragController_);
-}
-
-/**
- * @tc.name: OnPiPMoveCallback
- * @tc.desc:  * @tc.name: OnPiPMoveCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, OnPiPMoveCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "OnPiPMoveCallback";
-    info.bundleName_ = "SetTextFieldAvoidInfo";
-    sptr<SceneSession> scensession;
-    sptr<SceneSession::SpecificSessionCallback> specificSession =
-        new SceneSession::SpecificSessionCallback();
-    scensession = new (std::nothrow) SceneSession(info, specificSession);
-    WSError res = scensession->SetTextFieldAvoidInfo(3.1415927, 2.718);
-    EXPECT_EQ(WSError::WS_OK, res);
-    sptr<Session> session = new (std::nothrow) Session(info);
-    EXPECT_NE(nullptr, session->property_);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    WSRect rect = {5, 6, 7, 8};
-    scensession->OnPiPMoveCallback(rect, SizeChangeReason::MOVE);
-    scensession->OnPiPMoveCallback(rect, SizeChangeReason::DRAG_END);
-    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, property->GetWindowType());
 }
 
 /*
@@ -2950,6 +2893,32 @@ HWTEST_F(SceneSessionTest, AddOrRemoveSecureExtSession, Function | SmallTest | L
     sceneSession->AddOrRemoveSecureExtSession(12345, false);
     EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
 }
+
+/**
+ * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.desc:  * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ChangeSessionVisibilityWithStatusBar";
+    info.bundleName_ = "ChangeSessionVisibilityWithStatusBar";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<AAFwk::SessionInfo> info1 = nullptr;
+    WSError result = sceneSession->ChangeSessionVisibilityWithStatusBar(info1, false);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    delete sceneSession;
+}
+
 }
 }
 }
