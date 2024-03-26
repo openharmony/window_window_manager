@@ -20,7 +20,6 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
-#include "window_scene_session_impl.h"
 #include "xcomponent_controller.h"
 
 namespace OHOS {
@@ -242,7 +241,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
                     WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
                 return;
             }
-            sptr<Window> mainWindow = WindowSceneSessionImpl::GetMainWindowWithContext(context->lock());
+            sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
             sptr<PictureInPictureController> pipController =
                 new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));
