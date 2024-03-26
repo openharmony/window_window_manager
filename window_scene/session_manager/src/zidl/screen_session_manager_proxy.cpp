@@ -1294,7 +1294,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
                                                                                DmErrorCode* errorCode)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
+    WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: remote is nullptr");

@@ -646,7 +646,7 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
     }
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end() && iter->second != nullptr) {
-        WLOGFI("get screen in screen map");
+        WLOGFD("get screen in screen map");
         iter->second->UpdateScreenInfo(screenInfo);
         return true;
     }
