@@ -2576,9 +2576,9 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
         WLOGFE("window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    Orientation requestedOrientation = weakWindow->GetRequestedOrientation();
+    Orientation requestedOrientation = window->GetRequestedOrientation();
     ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
-    if (requestedOrientation >= ApiOrientation::UNSPECIFIED && requestedOrientation <= ApiOrientation::LOCKED) {
+    if (requestedOrientation >= Orientation::UNSPECIFIED && requestedOrientation <= Orientation::LOCKED) {
         apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
     } else {
         WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
