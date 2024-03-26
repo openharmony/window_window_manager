@@ -1843,8 +1843,12 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        return true;
+        if (isPC) {
+            WLOGFD("check create float window permission success on 2in1 device.");
+            return true;
+        }
     }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
         WLOGFD("check create permission success, create with system calling.");
