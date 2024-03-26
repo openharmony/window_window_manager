@@ -393,7 +393,24 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 */
 class IWindowNoInteractionListener : virtual public RefBase {
 public:
+    /**
+     * @brief Observe event when no interaction for a long time.
+     */
     virtual void OnWindowNoInteractionCallback() {};
+
+    /**
+     * @brief Set timeout of the listener.
+     *
+     * @param timeout.
+     */
+    virtual void SetTimeout(int64_t timeout) {};
+
+    /**
+     * @brief get timeout of the listener.
+     *
+     * @return timeout.
+     */
+    virtual int64_t GetTimeout() const { return 0;};
 };
 using IWindowNoInteractionListenerSptr = sptr<IWindowNoInteractionListener>;
 
@@ -1577,11 +1594,9 @@ public:
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
      *
      * @param listener IWindowNoInteractionListenerSptr.
-     * @param timeout uint32_t if timeout(seconds) pass with no interaction, the listener will be executed.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener,
-        uint32_t timeout)
+    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

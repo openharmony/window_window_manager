@@ -214,7 +214,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGD("called");
-    if (window == nullptr) {
+    if (window == nullptr || listener == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowVisibilityChangedListener> thisListener(listener);
@@ -239,12 +239,23 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsW
         return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowNoInteractionListener(thisListener));
     }
 
-    uint32_t timeout = 0;
+    int64_t timeout = 0;
     if (parameter == nullptr || !ConvertFromJsNumber(env, parameter, timeout)) {
         WLOGFE("Failed to convert parameter to timeout");
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener, timeout));
+
+    constexpr int64_t S_TO_MS_RATIO = 1000;
+    constexpr int64_t NO_INTERACTION_MAX = LLONG_MAX / S_TO_MS_RATIO;
+    if (timeout <= 0 || (timeout > NO_INTERACTION_MAX)) {
+        WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
+            timeout, NO_INTERACTION_MAX);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+
+    thisListener->SetTimeout(timeout * S_TO_MS_RATIO);
+
+    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
