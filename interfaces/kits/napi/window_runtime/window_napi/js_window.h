@@ -112,6 +112,8 @@ public:
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -139,6 +141,7 @@ public:
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
@@ -198,6 +201,7 @@ private:
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
@@ -235,6 +239,8 @@ private:
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    napi_value OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // animation Config
     napi_value OnOpacity(napi_env env, napi_callback_info info);

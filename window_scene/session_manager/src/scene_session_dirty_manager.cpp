@@ -244,7 +244,17 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
 
     for (const auto& elem: sessionMap) {
         const auto& session = elem.second;
-        if (session != nullptr && session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (session == nullptr) {
+            continue;
+        }
+        bool isModalSubWindow = false;
+        auto property = session->GetSessionProperty();
+        if (property != nullptr) {
+            bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
+            bool isModal = property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
+            isModalSubWindow = isSubWindow && isModal;
+        }
+        if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             const auto& parentSession = session->GetParentSession();
             if (parentSession == nullptr) {
                 continue;

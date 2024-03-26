@@ -55,6 +55,7 @@ public:
     MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
     MOCK_METHOD2(SetPipActionEvent, WSError(const std::string& action, int32_t status));
     MOCK_METHOD1(UpdateDisplayId, WSError(uint64_t displayId));
+    MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
 };
 } // namespace Rosen
 } // namespace OHOS
