@@ -112,6 +112,8 @@ public:
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -236,6 +238,8 @@ private:
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
+    napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    napi_value OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
 
     // animation Config
     napi_value OnOpacity(napi_env env, napi_callback_info info);

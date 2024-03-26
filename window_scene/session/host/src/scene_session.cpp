@@ -650,15 +650,16 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
 
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    property->SetSystemBarProperty(type, systemBarProperty);
-    TLOGI(WmsLogTag::WMS_IMMS, "SceneSession SetSystemBarProperty persistentId():%{public}u type:%{public}u"
+    TLOGD(WmsLogTag::WMS_IMMS, "persistentId():%{public}u type:%{public}u"
         "enable:%{public}u bgColor:%{public}x Color:%{public}x",
         GetPersistentId(), static_cast<uint32_t>(type),
         systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetSystemBarProperty(type, systemBarProperty);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
@@ -774,6 +775,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (Session::GetFloatingScale() <= miniScale) {
             return;
         }
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            rect.height_ < rect.width_) {
+            return;
+        }
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
@@ -836,12 +841,12 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "GetCutoutAvoidArea There is no CutoutInfo");
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no CutoutInfo");
         return;
     }
     std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
     if (cutoutAreas.empty()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "GetCutoutAvoidArea There is no cutoutAreas");
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutoutAreas");
         return;
     }
     for (auto& cutoutArea : cutoutAreas) {
@@ -883,12 +888,15 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 session->GetSystemAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
-            case AvoidAreaType::TYPE_KEYBOARD: {
-                session->GetKeyboardAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
             case AvoidAreaType::TYPE_CUTOUT: {
                 session->GetCutoutAvoidArea(rect, avoidArea);
+                return avoidArea;
+            }
+            case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
+                return avoidArea;
+            }
+            case AvoidAreaType::TYPE_KEYBOARD: {
+                session->GetKeyboardAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
@@ -896,7 +904,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGI(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
+                TLOGE(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
                     type, session->GetPersistentId());
                 return avoidArea;
             }
@@ -1923,7 +1931,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         if (session->changeSessionVisibilityWithStatusBarFunc_) {
             session->changeSessionVisibilityWithStatusBarFunc_(info, visible);
         }
-        
+
         return WSError::WS_OK;
     };
     PostTask(task, "ChangeSessionVisibilityWithStatusBar");
@@ -2171,6 +2179,28 @@ void SceneSession::NotifyPiPWindowPrepareClose()
         return;
     };
     PostTask(task, "NotifyPiPWindowPrepareClose");
+}
+
+WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    WLOGFD("NotifySetLandscapeMultiWindow");
+    auto task = [weakThis = wptr(this), isLandscapeMultiWindow]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_ &&
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_) {
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_(
+                isLandscapeMultiWindow);
+        }
+        WLOGFD("NotifySetLandscapeMultiWindow, id: %{public}d, isLandscapeMultiWindow: %{public}u",
+               session->GetPersistentId(), isLandscapeMultiWindow);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "NotifySetLandscapeMultiWindow");
+    return WSError::WS_OK;
 }
 
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
