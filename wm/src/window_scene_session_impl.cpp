@@ -2803,7 +2803,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
-    uint32_t maskeWidth = windowMask[0].size();
+    uint32_t maskWidth = windowMask[0].size();
     if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
@@ -2814,8 +2814,8 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     opts.pixelFormat = Media::PixelFormat::RGBA_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-    uint32_t length = maskeWidth * maskHeight;
-    uint32_t data = new (std::nothrow) uint32_t[length];
+    uint32_t length = maskWidth * maskHeight;
+    uint32_t *data = new (std::nothrow) uint32_t[length];
     if (data == nullptr) {
         WLOGFE("data is nullptr");
         return nullptr;
@@ -2845,9 +2845,10 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
+    auto RSMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
-    surfaceNode_->SetMask(mask); // RS interface to set mask
+    surfaceNode_->SetMask(RSMask); // RS interface to set mask
     RSTransaction::FlushImplicitTransaction();
 
     property_->SetWindowMask(mask);
