@@ -395,6 +395,16 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsWindowListener::SetTimeout(int64_t timeout)
+{
+    noInteractionTimeout_ = timeout;
+}
+
+int64_t JsWindowListener::GetTimeout() const
+{
+    return noInteractionTimeout_;
+}
+
 void JsWindowListener::OnWindowNoInteractionCallback()
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
