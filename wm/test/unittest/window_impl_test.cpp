@@ -2855,7 +2855,7 @@ HWTEST_F(WindowImplTest, ConsumeKeyEvent, Function | SmallTest | Level3)
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, ProcessKeyEvent(_));
+    EXPECT_CALL(*content, ProcessKeyEvent(_, _));
     window->ConsumeKeyEvent(keyEvent);
 
     window->inputEventConsumer_.reset(new MockInputEventConsumer);

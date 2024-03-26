@@ -142,6 +142,9 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+    virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

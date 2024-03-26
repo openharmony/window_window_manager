@@ -242,8 +242,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
-    WINDOW_FLAG_HANDWRITING = 1 << 5,
-    WINDOW_FLAG_END = 1 << 6,
+    WINDOW_FLAG_IS_MODAL = 1 << 5,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_END = 1 << 7,
 };
 
 /**
@@ -704,6 +705,21 @@ public:
         return config;
     }
 };
+
+/**
+ * maximize layout show type
+ */
+enum ShowType : int32_t {
+    SHOW, // normally show
+    HIDE, // show when hover, but hide normally
+    FORBIDDEN // hide always
+};
+
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
+};
+
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

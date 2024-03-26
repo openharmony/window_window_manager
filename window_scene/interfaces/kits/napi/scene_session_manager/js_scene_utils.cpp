@@ -645,6 +645,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, sessionInfo.abilityName_));
     napi_set_named_property(env, objValue, "appIndex", CreateJsValue(env, sessionInfo.appIndex_));
     napi_set_named_property(env, objValue, "isSystem", CreateJsValue(env, sessionInfo.isSystem_));
+    napi_set_named_property(env, objValue, "isCastSession", CreateJsValue(env, sessionInfo.isCastSession_));
     napi_set_named_property(env, objValue, "persistentId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.persistentId_)));
     napi_set_named_property(env, objValue, "callerPersistentId",

@@ -39,6 +39,12 @@ struct VirtualScreenOption {
     std::vector<uint64_t> missionIds_ {};
 };
 
+enum class VirtualScreenFlag : uint32_t {
+    DEFAULT = 0,
+    CAST = 1,
+    MAX = 2,
+};
+
 class Screen : public RefBase {
 friend class ScreenManager;
 public:
