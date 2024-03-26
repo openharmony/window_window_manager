@@ -1724,7 +1724,7 @@ public:
 
     /**
      * @brief Set Shaped Window Mask.
-     * 
+     *
      * @param windowMask Mask of the shaped window.
      * @return WM_OK means set success, others means failed.
     */

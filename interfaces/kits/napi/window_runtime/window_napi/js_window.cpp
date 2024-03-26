@@ -5157,7 +5157,7 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
-napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info) 
+napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4;
@@ -5178,13 +5178,20 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = 
+    NapiAsyncTask::CompleteCallback complete =
         [weakToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env,
                     CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "Invalidate params"));
+                return;
+            }
+            if (!WindowHelper::IsSubWindow(weakWindow->GetType()) &&
+                !WindowHelper::IsAppFloatingWindow(weakWindow->GetType())) {
+                task.Reject(env,
+                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING),
+                    "Invalidate window type"));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
