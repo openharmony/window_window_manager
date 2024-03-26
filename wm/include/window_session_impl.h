@@ -138,8 +138,7 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
-    WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener,
-                                                uint32_t timeout) override;
+    WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
@@ -180,7 +179,7 @@ public:
     WSError NotifyTouchOutside() override;
     WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError NotifyWindowVisibility(bool isVisible) override;
-    WSError NotifyNoInteractionTimeout();
+    WSError NotifyNoInteractionTimeout(const IWindowNoInteractionListenerSptr& listener);
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -316,6 +315,7 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
+    void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
@@ -349,7 +349,6 @@ private:
     sptr<IAceAbilityHandler> aceAbilityHandler_;
 
     std::atomic<int32_t> lastInteractionEventId_ { -1 };
-    std::atomic<int32_t> noInteractionTimeout_ { 0 }; // ms
 
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
