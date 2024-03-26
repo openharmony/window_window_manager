@@ -203,7 +203,7 @@ sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRunti
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return WindowSceneSessionImpl::GetMainWindowWithContext(context);
     } else {
-        return null;
+        return nullptr;
     }
 }
 
