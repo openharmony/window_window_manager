@@ -582,7 +582,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
 
 void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property)
 {
-    bool isShaped_ = parcel.ReadBool();
+    bool isShaped = parcel.ReadBool();
     property->SetIsShaped(isShaped);
     if (isShaped) {
         property->SetWindowMask(parcel.ReadParcelable<Media::PixelMap>());
@@ -786,7 +786,7 @@ sptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
     return windowMask_;
 }
 
-void WindowSessionProperty::SetIsShaped(bool isShaped) const
+void WindowSessionProperty::SetIsShaped(bool isShaped)
 {
     isShaped_ = isShaped;
 }

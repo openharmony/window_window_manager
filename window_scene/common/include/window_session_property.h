@@ -207,7 +207,7 @@ private:
     bool isExtensionFlag_ = false;
 
     bool isShaped_ = false;
-    sptr<Media::PixleMap> windowMask_ = nullptr;
+    sptr<Media::PixelMap> windowMask_ = nullptr;
 };
 
 struct SystemSessionConfig : public Parcelable {
