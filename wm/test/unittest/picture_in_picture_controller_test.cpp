@@ -234,9 +234,6 @@ HWTEST_F(PictureInPictureControllerTest, StartMove, Function | SmallTest | Level
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     GTEST_LOG_(INFO) << "TearDownCasecccccc";
 
-    pipControl->StartMove();
-    pipControl->DoScale();
-
     sptr<PictureInPictureController::PipMainWindowLifeCycleImpl> pipMainWindowLifeCycleImpl =
         new PictureInPictureController::PipMainWindowLifeCycleImpl(navigationId);
     GTEST_LOG_(INFO) << "TearDownCasecccccc3";

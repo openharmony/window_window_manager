@@ -518,6 +518,17 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int64_t elementId,
     return WSError::WS_OK;
 }
 
+WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("NotifyExecuteAction error, no uiContent_");
+        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
+    }
+    uiContent_->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    return WSError::WS_OK;
+}
+
 WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
     int64_t uiExtensionIdLevel)
 {

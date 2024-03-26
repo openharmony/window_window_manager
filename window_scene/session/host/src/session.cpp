@@ -330,11 +330,25 @@ void Session::NotifyDisconnect()
 
 void Session::NotifyExtensionDied()
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnExtensionDied();
+        }
+    }
+}
+
+void Session::NotifyExtensionTimeout(int32_t errorCode)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) in session(persistentId:%{public}d).",
+        errorCode, persistentId_);
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnExtensionTimeout(errorCode);
         }
     }
 }
@@ -784,6 +798,13 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
+    Rect rect = {
+        winRect_.posX_,
+        winRect_.posY_,
+        static_cast<uint32_t>(winRect_.width_),
+        static_cast<uint32_t>(winRect_.height_)
+    };
+    property->SetWindowRect(rect);
     SetSessionProperty(property);
     if (property) {
         property->SetPersistentId(GetPersistentId());
@@ -952,7 +973,8 @@ WSError Session::Background()
         isActive_ = false;
     }
     if (state != SessionState::STATE_INACTIVE) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! state:%{public}u", state);
+        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
+            GetPersistentId(), state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1722,7 +1744,8 @@ WSError Session::TransferBackPressedEventForConsumed(bool& isConsumed)
     return windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
 }
 
-WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool isPreImeEvent)
 {
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
@@ -1732,7 +1755,7 @@ WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent
         WLOGFE("KeyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
 }
 
 WSError Session::TransferFocusActiveEvent(bool isFocusActive)
@@ -1883,7 +1906,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
 {
     sessionFocusableChangeFunc_ = func;
-    sessionFocusableChangeFunc_(GetFocusable());
+    NotifySessionFocusableChange(GetFocusable());
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
@@ -1899,7 +1922,7 @@ void Session::SetClickListener(const NotifyClickFunc& func)
 
 void Session::NotifySessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("Notify session focusable change, id: %{public}d, focusable: %{public}u", GetPersistentId(), isFocusable);
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusable: %{public}u", GetPersistentId(), isFocusable);
     if (sessionFocusableChangeFunc_) {
         sessionFocusableChangeFunc_(isFocusable);
     }
@@ -2419,6 +2442,16 @@ WSError Session::TransferExecuteAction(int64_t elementId, const std::map<std::st
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+}
+
+WSError Session::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+    int64_t timeMs)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)

@@ -263,8 +263,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
-    WINDOW_FLAG_HANDWRITING = 1 << 5,
-    WINDOW_FLAG_END = 1 << 6,
+    WINDOW_FLAG_IS_MODAL = 1 << 5,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_END = 1 << 7,
 };
 
 /**
@@ -661,36 +662,6 @@ enum class PipState : int32_t {
     ERROR = 6,
 };
 
-/**
- * @brief Enumerates picture in picture scale level.
- */
-enum class PiPScaleLevel : int32_t {
-    PIP_SCALE_LEVEL_SMALLEST = 0,
-    PIP_SCALE_LEVEL_BIGGEST = 1,
-    COUNT = 2,
-};
-
-/**
- * @brief Enumerates picture in picture scale pivot.
- */
-enum class PiPScalePivot : int32_t {
-    UNDEFINED = 0,
-    START,
-    MIDDLE,
-    END,
-};
-
-/**
- * @brief Structure of picture in picture rect info.
- */
-struct PiPRectInfo {
-    PiPScalePivot xPivot_;
-    PiPScalePivot yPivot_;
-    uint32_t originWidth_;
-    uint32_t originHeight_;
-    PiPScaleLevel level_;
-};
-
 struct PiPTemplateInfo {
     uint32_t pipTemplateType;
     uint32_t priority;
@@ -818,6 +789,20 @@ enum class CaseType {
     CASE_WINDOW_MANAGER = 0,
     CASE_WINDOW,
     CASE_STAGE
+};
+
+/**
+ * maximize layout show type
+ */
+enum ShowType : int32_t {
+    SHOW, // normally show
+    HIDE, // show when hover, but hide normally
+    FORBIDDEN // hide always
+};
+
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
 };
 
 }

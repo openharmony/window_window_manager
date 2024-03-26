@@ -55,6 +55,8 @@ public:
         density_ = density;
     }
 
+    void SetDisplayOrientation(int32_t orientation);
+
     float GetDisplayDensity()
     {
         return density_;
@@ -94,6 +96,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
+    int32_t orientation_;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
     std::function<void()> frameLayoutFinishCb_ = nullptr;

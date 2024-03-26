@@ -912,6 +912,22 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: PreNotifyKeyEvent
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, PreNotifyKeyEvent, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
+    std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
+    window->PreNotifyKeyEvent(inputEvent);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: get
  * @tc.type: FUNC
@@ -2266,6 +2282,19 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     uint32_t rate = 120;
     window->FlushFrameRate(rate);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Maximize01
+ * @tc.desc: maximize interface Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    MaximizeLayoutOption option;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
 }
 }
 } // namespace Rosen
