@@ -146,7 +146,7 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
         return nullptr;
     }
     if (!option || option->GetWindowName().empty()) {
-        WLOGE("host window session is nullptr:%{public}u or option is null: %{public}u",
+        TLOGE(WmsLogTag::WMS_PIP, "host window session is nullptr:%{public}u or option is null: %{public}u",
             option->GetWindowName().empty(), option == nullptr);
         return nullptr;
     }
