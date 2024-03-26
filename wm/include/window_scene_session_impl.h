@@ -139,7 +139,7 @@ public:
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
-    WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMsak) const;
+    WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMsak) override;
 
 protected:
     void DestroySubWindow();
@@ -179,7 +179,7 @@ private:
         const MMI::PointerEvent::PointerItem& pointerItem);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
-    std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>& windowMask);
+    std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
 };
