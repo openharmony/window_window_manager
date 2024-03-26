@@ -94,11 +94,14 @@ public:
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
+    void SetTimeout(int64_t timeout) override;
+    int64_t GetTimeout() const override;
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
+    int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_;
     wptr<JsWindowListener> weakRef_  = nullptr;
