@@ -22,13 +22,52 @@
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
+#include <input_method_controller.h>
 #include "common/include/session_permission.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionPermission"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionPermission"};
+
+sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        WLOGFE("Failed to get system ability mgr.");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject
+        = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        WLOGFE("Failed to get bundle manager service.");
+        return nullptr;
+    }
+    auto bundleManagerServiceProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (!bundleManagerServiceProxy || !bundleManagerServiceProxy->AsObject()) {
+        WLOGFE("Failed to get bundle manager proxy.");
+        return nullptr;
+    }
+    return bundleManagerServiceProxy;
+}
+
+bool GetInputMethodBundleName(std::string &name)
+{
+    auto imc = MiscServices::InputMethodController::GetInstance();
+    if (!imc) {
+        WLOGFE("InputMethodController is nullptr");
+        return false;
+    }
+    auto imProp = imc->GetCurrentInputMethod();
+    if (!imProp) {
+        WLOGFE("CurrentInputMethod is nullptr");
+        return false;
+    }
+    name = imProp->name;
+    return true;
+}
 }
 
 bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
@@ -134,21 +173,14 @@ bool SessionPermission::IsStartByHdcd()
 
 bool SessionPermission::IsStartedByInputMethod()
 {
-    sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        WLOGFE("Failed to get system ability mgr.");
+    auto bundleManagerServiceProxy_ = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy_) {
+        WLOGFE("failed to get BundleManagerServiceProxy");
         return false;
     }
-    sptr<IRemoteObject> remoteObject
-        = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        WLOGFE("Failed to get display manager service.");
-        return false;
-    }
-    auto bundleManagerServiceProxy_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    if ((!bundleManagerServiceProxy_) || (!bundleManagerServiceProxy_->AsObject())) {
-        WLOGFE("Failed to get system display manager services");
+    std::string inputMethodBundleName;
+    if (!GetInputMethodBundleName(inputMethodBundleName)) {
+        WLOGFE("failed to get input method bundle name");
         return false;
     }
 
@@ -173,11 +205,7 @@ bool SessionPermission::IsStartedByInputMethod()
         [](AppExecFwk::ExtensionAbilityInfo extensionInfo) {
             return (extensionInfo.type == AppExecFwk::ExtensionAbilityType::INPUTMETHOD);
         });
-    if (extensionInfo != bundleInfo.extensionInfos.end()) {
-        return true;
-    } else {
-        return false;
-    }
+    return extensionInfo != bundleInfo.extensionInfos.end() && extensionInfo->bundleName == inputMethodBundleName;
 }
 } // namespace Rosen
 } // namespace OHOS
