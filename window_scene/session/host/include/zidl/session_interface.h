@@ -62,6 +62,7 @@ public:
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
@@ -78,6 +79,7 @@ public:
     }
     virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
     virtual void NotifySyncOn() {}
     virtual void NotifyAsyncOn() {}

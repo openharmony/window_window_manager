@@ -1302,6 +1302,15 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
+    
+    /**
+     * @brief maximize window with layoutOption.
+     *
+     * @param option UI layout param.
+     * @return WM_OK means maximize window ok, others means failed.
+     */
+    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
@@ -1724,7 +1733,7 @@ public:
      * @return WM_OK means add success, others means failed.
      */
     virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Remove uiextension window flag.
      *
@@ -1732,6 +1741,17 @@ public:
      * @return WM_OK means remove success, others means failed.
      */
     virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Make multi-window become landscape or not.
+     *
+     * @param isLandscapeMultiWindow means whether multi-window's scale is landscape.
+     * @return WMError WM_OK means set success, others means failed.
+     */
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
