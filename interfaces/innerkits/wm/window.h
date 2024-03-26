@@ -1302,6 +1302,15 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
+    
+    /**
+     * @brief maximize window with layoutOption.
+     *
+     * @param option UI layout param.
+     * @return WM_OK means maximize window ok, others means failed.
+     */
+    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
@@ -1699,6 +1708,17 @@ public:
     }
 
     /**
+     * @brief Set the modality of window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetSubWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief recovery the main window by function overloading. It is called by JsWindow.
      *
      * @param reason reason of update.
@@ -1713,7 +1733,7 @@ public:
      * @return WM_OK means add success, others means failed.
      */
     virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Remove uiextension window flag.
      *
@@ -1731,6 +1751,17 @@ public:
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Make multi-window become landscape or not.
+     *
+     * @param isLandscapeMultiWindow means whether multi-window's scale is landscape.
+     * @return WMError WM_OK means set success, others means failed.
+     */
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+    {
+        return WMError::WM_OK;
     }
 };
 }
