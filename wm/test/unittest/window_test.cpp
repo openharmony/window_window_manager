@@ -120,9 +120,9 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = nullptr;
     PiPTemplateInfo pipTemplateInfo;
-    ASSERT_EQ(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option = new WindowOption();
-    ASSERT_NE(nullptr, Window::CreatePiP(windowOption, pipTemplateInfo, abilityContext_));
+    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
 }
 
 /**
