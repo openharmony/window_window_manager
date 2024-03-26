@@ -563,6 +563,11 @@ DMError ScreenManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, b
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(screenId, rotation);
 }
 
+DMError ScreenManager::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
+}
+
 VirtualScreenFlag ScreenManager::GetVirtualScreenFlag(ScreenId screenId)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetVirtualScreenFlag(screenId);
