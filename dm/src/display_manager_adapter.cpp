@@ -410,7 +410,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("BaseAdapter destory!");
+    WLOGFD("BaseAdapter destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerServiceProxy_ = nullptr;
 }
@@ -502,7 +502,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFI("DisplayManagerAdapter::GetCutoutInfo");
+    WLOGFD("DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;
