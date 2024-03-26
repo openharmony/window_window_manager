@@ -5330,14 +5330,14 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         [weakToken, windowMask, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                errorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errorCode), "Invalidate params"));
+                errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
             if (!WindowHelper::IsSubWindow(weakWindow->GetType()) &&
                 !WindowHelper::IsAppFloatingWindow(weakWindow->GetType())) {
-                errorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errorCode), "Invalidate window type"));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "Invalidate window type"));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
