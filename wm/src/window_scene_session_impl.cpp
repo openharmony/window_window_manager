@@ -2800,6 +2800,10 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
 {
     const Rect& windowRect = GetRect();
     uint32_t maskHeight = windowMask.size();
+    if (maskHeight <= 0) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
     uint32_t maskeWidth = windowMask[0].size();
     if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
         WLOGFE("WindowMask is invalid");
@@ -2844,7 +2848,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
-    surfaceNode_->SetMask(mask);//RS interface to set mask
+    surfaceNode_->SetMask(mask);// RS interface to set mask
     RSTransaction::FlushImplicitTransaction();
 
     property_->SetWindowMask(mask);
