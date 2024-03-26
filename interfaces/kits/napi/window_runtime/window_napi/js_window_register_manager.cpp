@@ -337,7 +337,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, value)) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
@@ -369,7 +369,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
