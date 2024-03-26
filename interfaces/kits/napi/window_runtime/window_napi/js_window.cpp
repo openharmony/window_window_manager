@@ -5319,7 +5319,6 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     std::vector<std::vector<uint32_t>> windowMask;
     if (errCode == WmErrorCode::WM_OK) {
         if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
-            WLOGFE("GetWindowMaskFromJsValue failed");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     }
@@ -5328,19 +5327,17 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, windowMask, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                task.Reject(env,
-                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "Invalidate params"));
+                errorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errorCode), "Invalidate params"));
                 return;
             }
             if (!WindowHelper::IsSubWindow(weakWindow->GetType()) &&
                 !WindowHelper::IsAppFloatingWindow(weakWindow->GetType())) {
-                task.Reject(env,
-                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING),
-                    "Invalidate window type"));
+                errorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errorCode), "Invalidate window type"));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
