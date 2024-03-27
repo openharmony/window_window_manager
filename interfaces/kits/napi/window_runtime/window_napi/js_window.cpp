@@ -5339,7 +5339,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
-                WLOGI("Window [%{public}u, %{public}s] set window mask failed",
+                WLOGFE("Window [%{public}u, %{public}s] set window mask failed",
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 return;
             }
