@@ -286,7 +286,7 @@ DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
 
 std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect(uint64_t displayId)
 {
-    if (cutoutBoundaryRectMap_.count(displayId) < 1) {
+    if (cutoutBoundaryRectMap_.count(displayId) == 0) {
         return {};
     }
     return cutoutBoundaryRectMap_[displayId];
