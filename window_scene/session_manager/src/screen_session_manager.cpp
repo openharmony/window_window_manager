@@ -164,7 +164,6 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
-    RegisterRefreshRateModeChangeListener();
 
     bool isPcDevice = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPcDevice) {
@@ -296,12 +295,14 @@ void ScreenSessionManager::RegisterScreenChangeListener()
 
 void ScreenSessionManager::RegisterRefreshRateModeChangeListener()
 {
-    auto res = rsInterface_.RegisterHgmRefreshRateModeChangeCallback(
-        [this](int32_t refreshRateMode) { OnHgmRefreshRateModeChange(refreshRateMode); });
-    if (res != StatusCode::SUCCESS) {
-        WLOGFE("Register refresh rate mode change listener failed, retry after 50 ms.");
-        auto task = [this]() { RegisterRefreshRateModeChangeListener(); };
-        taskScheduler_->PostAsyncTask(task, "RegisterRefreshRateModeChangeListener", 50); // Retry after 50 ms.
+    static bool isRegisterRefreshRateListener = false;
+    if (!isRegisterRefreshRateListener) {
+        auto res = rsInterface_.RegisterHgmRefreshRateModeChangeCallback(
+            [this](int32_t refreshRateMode) { OnHgmRefreshRateModeChange(refreshRateMode); });
+        if (res != StatusCode::SUCCESS) {
+            WLOGFE("Register refresh rate mode change listener failed.");
+        }
+        isRegisterRefreshRateListener = true;
     }
 }
 
@@ -852,6 +853,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
+    RegisterRefreshRateModeChangeListener();
     return session;
 }
 
