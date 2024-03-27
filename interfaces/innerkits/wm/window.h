@@ -489,6 +489,13 @@ public:
      */
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     /**
+     * @brief Get the main window by context.
+     *
+     * @param context Indicates the context on which the window depends
+     * @return sptr<Window>
+     */
+    static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    /**
      * @brief Get the all sub windows by parent
      *
      * @param parentId parent window id

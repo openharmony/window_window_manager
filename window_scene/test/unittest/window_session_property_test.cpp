@@ -169,10 +169,10 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTe
 {
     WindowSessionProperty *property = new WindowSessionProperty();
     PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     property->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(property->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**
