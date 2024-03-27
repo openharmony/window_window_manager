@@ -1770,7 +1770,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
 
         NotifyCreateSpecificSession(sceneSession, property, type);
         CacheSubSessionForRecovering(sceneSession, property);
-        RecoverWindowSessionProperty(persistentId);
+        NotifySessionUnfocusedToClient(persistentId);
         AddClientDeathRecipient(sessionStage, sceneSession);
         session = sceneSession;
         return errCode;
@@ -1835,7 +1835,7 @@ void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
     recoverSubSessionCacheMap_.erase(iter);
 }
 
-void SceneSessionManager::RecoverWindowSessionProperty(int32_t persistentId)
+void SceneSessionManager::NotifySessionUnfocusedToClient(int32_t persistentId)
 {
     if (listenerController_ != nullptr) {
         WLOGFI("[WMSRecover] NotifySessionUnfocused persistentId = %{public}" PRId32, persistentId);
@@ -1892,7 +1892,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         sceneSessionMap_.erase(sessionInfo.persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
-    RecoverWindowSessionProperty(sceneSession->GetPersistentId());
+    NotifySessionUnfocusedToClient(sceneSession->GetPersistentId());
     session = sceneSession;
     return WSError::WS_OK;
 }
