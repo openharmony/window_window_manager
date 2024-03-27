@@ -22,7 +22,6 @@
 #include <key_event.h>
 #include <pointer_event.h>
 
-#include "iremote_proxy.h"
 #include "anr_handler.h"
 #include "window_manager_hilog.h"
 
@@ -31,42 +30,33 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
 }
 
-class WindowEventChannelListenerProxy : public IRemoteProxy<IWindowEventChannelListener> {
-public:
-    explicit WindowEventChannelListenerProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IWindowEventChannelListener>(impl) {}
-    virtual ~WindowEventChannelListenerProxy() = default;
-
-    void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override
-    {
-        MessageParcel data;
-        MessageParcel reply;
-        MessageOption option(MessageOption::TF_ASYNC);
-        if (!data.WriteInterfaceToken(GetDescriptor())) {
-            TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
-            return;
-        }
-
-        if (!data.WriteBool(isConsumed)) {
-            TLOGE(WmsLogTag::WMS_EVENT, "isConsumed write failed.");
-            return;
-        }
-
-        if (!data.WriteInt32(static_cast<int32_t>(retCode))) {
-            TLOGE(WmsLogTag::WMS_EVENT, "retCode write failed.");
-            return;
-        }
-
-        if (Remote()->SendRequest(static_cast<uint32_t>(
-            WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC),
-            data, reply, option) != ERR_NONE) {
-            TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
-            return;
-        }
+void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
+        return;
     }
-private:
-    static inline BrokerDelegator<WindowEventChannelListenerProxy> delegator_;
-};
+
+    if (!data.WriteBool(isConsumed)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "isConsumed write failed.");
+        return;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(retCode))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "retCode write failed.");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
+        return;
+    }
+}
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
@@ -144,14 +134,15 @@ WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent, const sptr<IRemoteObject>& listener)
 {
     bool isConsumed = false;
-    auto ret = TransferKeyEventForConsumed(keyEvent, isConsumed);
+    auto ret = TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
     auto wecListener = iface_cast<IWindowEventChannelListener>(listener);
     if (wecListener == nullptr) {
-        TLOGD(WmsLogTag::WMS_EVENT, "listener is null.");
+        TLOGE(WmsLogTag::WMS_EVENT, "listener is null.");
         return ret;
     }
 
-    WLOGFD("TransferKeyEventForConsumedAsync finished with isConsumed:%{public}d ret:%{public}d", isConsumed, ret);
+    TLOGD(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumedAsync finished with isConsumed:%{public}d ret:%{public}d",
+        isConsumed, ret);
     wecListener->OnTransferKeyEventForConsumed(isConsumed, ret);
     return ret;
 }

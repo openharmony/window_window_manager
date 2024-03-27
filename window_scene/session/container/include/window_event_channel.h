@@ -20,6 +20,7 @@
 #include <list>
 #include <map>
 
+#include "iremote_proxy.h"
 #include "accessibility_element_info.h"
 
 #include "interfaces/include/ws_common.h"
@@ -27,6 +28,17 @@
 #include "session/container/include/zidl/window_event_channel_stub.h"
 
 namespace OHOS::Rosen {
+class WindowEventChannelListenerProxy : public IRemoteProxy<IWindowEventChannelListener> {
+public:
+    explicit WindowEventChannelListenerProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IWindowEventChannelListener>(impl) {}
+    virtual ~WindowEventChannelListenerProxy() = default;
+
+    void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override;
+private:
+    static inline BrokerDelegator<WindowEventChannelListenerProxy> delegator_;
+};
+
 class WindowEventChannel : public WindowEventChannelStub {
 public:
     explicit WindowEventChannel(sptr<ISessionStage> iSessionStage) : sessionStage_(iSessionStage)
