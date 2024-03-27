@@ -145,9 +145,12 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         return nullptr;
     }
-    if (!option || option->GetWindowName().empty()) {
-        TLOGE(WmsLogTag::WMS_PIP, "host window session is nullptr:%{public}u or option is null: %{public}u",
-            option->GetWindowName().empty(), option == nullptr);
+    if (!option) {
+        TLOGE(WmsLogTag::WMS_PIP, "option is null.");
+        return nullptr;
+    }
+    if (option->GetWindowName().empty()) {
+        TLOGE(WmsLogTag::WMS_PIP, "the window name of option is empty.");
         return nullptr;
     }
     if (!WindowHelper::IsPipWindow(option->GetWindowType())) {
