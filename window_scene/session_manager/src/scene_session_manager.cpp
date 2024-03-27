@@ -7221,7 +7221,7 @@ void SceneSessionManager::HideNonSecureFloatingWindows(size_t sizeBefore, size_t
         auto session = item.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
+            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
                 "shouldHide=%{public}u", session->GetWindowName().c_str(), item.first, shouldHide);
         }
     }
@@ -7237,8 +7237,13 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
 
     auto subSessions = sceneSession->GetSubSession();
     for (const auto& subSession: subSessions) {
+        if (subSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_UIEXT, "sub session is nullptr");
+            continue;
+        }
+
         subSession->NotifyForceHideChange(shouldHide);
-        TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
+        TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
             "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),
             shouldHide);
     }
@@ -7274,7 +7279,7 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
 
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
     auto task = [this, persistentId, shouldHide]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(persistentId);
@@ -7295,7 +7300,7 @@ WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool
 
 WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, shouldHide=%{public}u", persistentId,
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, shouldHide=%{public}u", persistentId,
         parentId, shouldHide);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
