@@ -92,6 +92,7 @@ public:
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetWindowPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value SetTouchableAreas(napi_env env, napi_callback_info info);
     static napi_value SetResizeByDragEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
@@ -228,6 +229,7 @@ private:
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetWindowPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnSetTouchableAreas(napi_env env, napi_callback_info info);
     napi_value OnSetResizeByDragEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
