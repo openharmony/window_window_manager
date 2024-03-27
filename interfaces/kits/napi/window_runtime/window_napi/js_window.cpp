@@ -532,6 +532,13 @@ napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    WLOGD("GetPreferredOrientation");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
 {
     WLOGI("SetSnapshotSkip");
@@ -2655,6 +2662,34 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     NapiAsyncTask::Schedule("JsWindow::OnSetPreferredOrientation",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        WLOGFE("Argc is invalid: %{public}zu, expect zero params", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Orientation requestedOrientation = window->GetRequestedOrientation();
+    ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
+    if (requestedOrientation >= Orientation::UNSPECIFIED && requestedOrientation <= Orientation::LOCKED) {
+        apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
+    } else {
+        WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
+            static_cast<uint32_t>(requestedOrientation));
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetPreferredOrientation end, Orientation = %{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
+    return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
 }
 
 napi_value JsWindow::OnIsSupportWideGamut(napi_env env, napi_callback_info info)
@@ -5367,6 +5402,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "dump", moduleName, JsWindow::Dump);
     BindNativeFunction(env, object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
     BindNativeFunction(env, object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
+    BindNativeFunction(env, object, "getPreferredOrientation", moduleName, JsWindow::GetPreferredOrientation);
     BindNativeFunction(env, object, "opacity", moduleName, JsWindow::Opacity);
     BindNativeFunction(env, object, "scale", moduleName, JsWindow::Scale);
     BindNativeFunction(env, object, "rotate", moduleName, JsWindow::Rotate);
