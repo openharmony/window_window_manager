@@ -2845,8 +2845,9 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
                 sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
+                FlushWindowInfoToMMI();
             }
-            FlushWindowInfoToMMI();
+            break;
         }
         default:
             break;
