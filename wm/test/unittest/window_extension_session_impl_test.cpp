@@ -412,6 +412,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Func
 }
 
 /**
+ * @tc.name: HideNonSecureWindows
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.HideNonSecureWindows(true));
+    windowExtensionSessionImpl.state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.HideNonSecureWindows(true));
+}
+
+/**
  * @tc.name: UpdateConfiguration
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC

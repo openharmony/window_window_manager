@@ -2071,6 +2071,22 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: HideNonSecureWindows01
+ * @tc.desc: HideNonSecureWindows
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("HideNonSecureWindows01");
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    ASSERT_EQ(WMError::WM_OK, window->HideNonSecureWindows(true));
+}
+
+/**
  * @tc.name: Maximize01
  * @tc.desc: test errorCode
  * @tc.type: FUNC
