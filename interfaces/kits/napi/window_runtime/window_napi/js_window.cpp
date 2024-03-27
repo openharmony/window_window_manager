@@ -5308,20 +5308,16 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::vector<std::vector<uint32_t>> windowMask;
-    if (errCode == WmErrorCode::WM_OK) {
-        if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        }
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
+        WLOGFE("GetWindowMaskFromJsValue failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
