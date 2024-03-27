@@ -47,7 +47,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScen
 constexpr int WAIT_FOR_SECONDS = 2;
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int ARG_INDEX_1 = 1;
-constexpr int ARG_INDEX_2 = 2;
+constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_3 = 3;
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
@@ -1800,7 +1800,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     bool byForeground = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], byForeground)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], byForeground)) {
         WLOGFE("[NAPI]Failed to convert parameter to byForeground");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1952,9 +1952,9 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t displayId = -1;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], displayId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to displayId");
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -2071,7 +2071,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     }
 
     std::unordered_map<std::string, std::string> mapPayload;
-    if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_2], mapPayload)) {
+    if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_TWO], mapPayload)) {
         WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
