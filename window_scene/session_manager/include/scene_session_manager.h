@@ -514,7 +514,6 @@ private:
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
     sptr<SceneSession> callingSession_ = nullptr;
-    uint32_t callingWindowId_ = 0;
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
@@ -549,7 +548,7 @@ private:
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session);
     void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
-    void RecoverWindowSessionProperty(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
+    void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
