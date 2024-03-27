@@ -862,6 +862,10 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
     WindowType type, uint64_t displayId)
 {
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "displayId is invalid");
+        return {};
+    }
     std::vector<sptr<SceneSession>> sceneSessionVector;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
@@ -6167,15 +6171,23 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64"",
         isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
     auto task = [this, isVisible, barArea, displayId]() {
-        if (isAINavigationBarVisible_ != isVisible || currAINavigationBarAreaMap_.count(displayId) < 1 ||
-            currAINavigationBarAreaMap_[displayId] != barArea) {
-            isAINavigationBarVisible_ = isVisible;
-            currAINavigationBarAreaMap_.clear();
-            currAINavigationBarAreaMap_[displayId] = barArea;
-            if (!isVisible && !barArea.IsEmpty()) {
+        bool isNeedUpdate = false;
+        {
+            std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
+            isNeedUpdate = isAINavigationBarVisible_ != isVisible ||
+                currAINavigationBarAreaMap_.count(displayId) == 0 ||
+                currAINavigationBarAreaMap_[displayId] != barArea;
+            if (isNeedUpdate) {
+                isAINavigationBarVisible_ = isVisible;
+                currAINavigationBarAreaMap_.clear();
+                currAINavigationBarAreaMap_[displayId] = barArea;
+            }
+            if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
                 WLOGFD("NotifyAINavigationBarShowStatus: barArea should be empty if invisible");
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
+        }
+        if (isNeedUpdate) {
             WLOGFI("NotifyAINavigationBarShowStatus: enter: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {
@@ -6208,7 +6220,8 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
 {
-    if (currAINavigationBarAreaMap_.count(displayId) < 1) {
+    std::shared_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
+    if (currAINavigationBarAreaMap_.count(displayId) == 0) {
         return {};
     }
     return currAINavigationBarAreaMap_[displayId];
