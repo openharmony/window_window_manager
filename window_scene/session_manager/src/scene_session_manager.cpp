@@ -7274,13 +7274,13 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
 
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureSession, persistentId=%{public}d, shouldHide=%{public}u",
-        persistentId, shouldHide);
+    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
     auto task = [this, persistentId, shouldHide]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(persistentId);
         if (iter == sceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", persistentId);
+            TLOGE(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureSession: Session with persistentId %{public}d not found",
+                persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
 
@@ -7295,8 +7295,8 @@ WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool
 
 WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureExtSession, persistentId=%{public}d, parentId=%{public}d, "
-        "shouldHide=%{public}u", persistentId, parentId, shouldHide);
+    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, shouldHide=%{public}u", persistentId,
+        parentId, shouldHide);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -7306,7 +7306,8 @@ WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, i
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(parentId);
         if (iter == sceneSessionMap_.end()) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "Parent session with persistentId %{public}d not found", parentId);
+            TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureExtSession: Parent session with persistentId %{public}d not "
+                "found", parentId);
             // process UIExtension that created by SceneBoard
             return HandleSecureExtSessionShouldHide(persistentId, shouldHide);
         }
