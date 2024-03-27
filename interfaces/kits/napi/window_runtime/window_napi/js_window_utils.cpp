@@ -844,6 +844,10 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     }
     uint32_t size = 0;
     napi_get_array_length(env, jsObject, &size);
+    if (size == 0) {
+        WLOGFE("Invalid window mask");
+        return false;
+    }
     for (uint32_t i = 0; i < size; i++) {
         std::vector<uint32_t> elementArray;
         napi_value getElementValue = nullptr;
