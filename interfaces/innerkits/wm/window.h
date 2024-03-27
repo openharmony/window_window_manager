@@ -428,6 +428,22 @@ public:
     virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) {}
 };
 
+/**
+ * @class IWindowRectChangeListener
+ *
+ * @brief IWindowRectChangeListener is used to observe the window rect and its changing reason when window changed.
+ */
+class IWindowRectChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rect changed.
+     *
+     * @param Rect Rect of the current window.
+     * @param reason Reason for window size change.
+     */
+    virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1771,6 +1787,28 @@ public:
      * @return WMError WM_OK means set success, others means failed.
      */
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
     {
         return WMError::WM_OK;
     }
