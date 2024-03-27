@@ -489,6 +489,7 @@ private:
     sptr<AppAnrListener> appAnrListener_;
 
     bool isAINavigationBarVisible_ = false;
+    std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
 
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
