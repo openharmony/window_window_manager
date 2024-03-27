@@ -195,10 +195,10 @@ HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, Function | SmallTest | Leve
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     scensession->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(scensession->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**
