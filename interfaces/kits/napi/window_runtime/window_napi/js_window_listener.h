@@ -48,6 +48,7 @@ const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetect";
+const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -63,7 +64,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowVisibilityChangedListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener,
-                         public IWindowNoInteractionListener {
+                         public IWindowNoInteractionListener,
+                         public IWindowRectChangeListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -96,6 +98,8 @@ public:
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
+    void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+
 private:
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;

@@ -48,6 +48,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
         { WINDOW_VISIBILITY_CHANGE_CB,        &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
         { WINDOW_NO_INTERACTION_DETECT_CB,    &JsWindowRegisterManager::ProcessWindowNoInteractionRegister        },
+        { WINDOW_RECT_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowRectChangeRegister           },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -439,6 +440,22 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowRectChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
     }
     return ret;
 }
