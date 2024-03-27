@@ -5143,7 +5143,7 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         scnSession->SetParentSession(parentSession);
-        scnSession->SetParentPersistenId(parentSession->GetPersistentId());
+        scnSession->SetParentPersistentId(parentSession->GetPersistentId());
         UpdateParentSessionForDialog(scnSession, scnSession->GetSessionProperty());
         TLOGI(WmsLogTag::WMS_DIALOG, "Bind dialog success, dialog id %{public}" PRIu64 ", parentId %{public}d",
             persistentId, parentSession->GetPersistentId());
