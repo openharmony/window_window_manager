@@ -784,8 +784,11 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = display->GetWidth();
         return;
     }
-    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
-        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    std::vector<sptr<SceneSession>> statusBarVector;
+    if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
+        statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    }
     for (auto& statusBar : statusBarVector) {
         if (!(statusBar->isVisible_)) {
             continue;
@@ -811,8 +814,11 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to get session property");
         return;
     }
-    std::vector<sptr<SceneSession>> inputMethodVector = specificCallback_->onGetSceneSessionVectorByType_(
-        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, GetSessionProperty()->GetDisplayId());
+    std::vector<sptr<SceneSession>> inputMethodVector;
+    if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
+        inputMethodVector = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, GetSessionProperty()->GetDisplayId());
+    }
     for (auto& inputMethod : inputMethodVector) {
         if (inputMethod->GetSessionState() != SessionState::STATE_FOREGROUND &&
             inputMethod->GetSessionState() != SessionState::STATE_ACTIVE) {
@@ -871,7 +877,10 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to get session property");
         return;
     }
-    WSRect barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+    WSRect barArea;
+    if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
+        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+    }
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
@@ -1376,8 +1385,11 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         return;
     }
     float tmpPosY = 0.0;
-    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
-        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    std::vector<sptr<SceneSession>> statusBarVector;
+    if (specificCallback_->onGetSceneSessionVectorByType_) {
+        statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    }
     for (auto& statusBar : statusBarVector) {
         if (!(statusBar->isVisible_)) {
             continue;
