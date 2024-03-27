@@ -2215,6 +2215,9 @@ void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> point
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     if (systemSessionPointerEventFunc_ != nullptr) {
         systemSessionPointerEventFunc_(pointerEvent);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEventFunc_ nullptr, id:%{public}d", pointerEvent->GetId());
+        pointerEvent->MarkProcessed();
     }
 }
 
