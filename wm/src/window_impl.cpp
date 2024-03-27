@@ -920,8 +920,12 @@ WMError WindowImpl::SetAspectRatio(float ratio)
         WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);
         return WMError::WM_OK;
     }
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
-    return WMError::WM_OK;
+    auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("Set AspectRatio failed. errorCode: %{public}u", ret);
+        return ret;
+    }
+    return ret;
 }
 
 WMError WindowImpl::ResetAspectRatio()
