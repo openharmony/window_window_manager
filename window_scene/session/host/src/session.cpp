@@ -2494,7 +2494,7 @@ void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPo
 
 void Session::SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func)
 {
-    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    std::unique_lock<std::shared_mutex> lock(keyEventMutex_);
     systemSessionKeyEventFunc_ = func;
 }
 

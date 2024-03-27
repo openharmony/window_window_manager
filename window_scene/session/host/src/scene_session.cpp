@@ -2281,7 +2281,7 @@ void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> point
 
 bool SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent)
 {
-    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
     if (systemSessionKeyEventFunc_ != nullptr) {
         return systemSessionKeyEventFunc_(keyEvent, isPreImeEvent);
     }

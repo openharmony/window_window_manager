@@ -501,7 +501,7 @@ protected:
     sptr<Session> parentSession_;
 
     mutable std::mutex pointerEventMutex_;
-    mutable std::mutex keyEventMutex_;
+    mutable std::shared_mutex keyEventMutex_;
 
 private:
     void HandleDialogForeground();
