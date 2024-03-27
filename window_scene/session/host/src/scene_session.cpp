@@ -2436,6 +2436,8 @@ void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
 {
     if (sessionStage_) {
         sessionStage_->NotifyDisplayMove(from, to);
+    } else {
+        WLOGFE("Notify display move failed, sessionStage is null");
     }
 }
 

@@ -1211,15 +1211,15 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
-    if (scnSession->GetSessionProperty()) {
-        abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
-            static_cast<int>(scnSession->GetSessionProperty()->GetDisplayId()));
-    }
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
         abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
+    }
+    if (scnSession->GetSessionProperty()) {
+        abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
+            static_cast<int>(scnSession->GetSessionProperty()->GetDisplayId()));
     }
     return abilitySessionInfo;
 }
@@ -6876,7 +6876,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         return WSError::WS_ERROR_NULLPTR;
     }
     scnSession->GetSessionProperty()->SetDisplayId(screenId);
-    WLOGFD("Session move display %{public}" PRIu64" from %{public}" PRIu64"", screenId, fromScreenId);
+    WLOGFD("Session move display %{public}" PRIu64 " from %{public}" PRIu64, screenId, fromScreenId);
     NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     scnSession->NotifyDisplayMove(fromScreenId, screenId);
     scnSession->UpdateDensity();

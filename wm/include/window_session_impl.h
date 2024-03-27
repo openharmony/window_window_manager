@@ -329,7 +329,7 @@ private:
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
-    static std::recursive_mutex displayMoveListenerMutex_;
+    static std::mutex displayMoveListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;

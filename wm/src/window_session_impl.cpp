@@ -86,7 +86,7 @@ std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
-std::recursive_mutex WindowSessionImpl::displayMoveListenerMutex_;
+std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1143,15 +1143,15 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
 
 WMError WindowSessionImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    WLOGFD("RegisterDisplayMoveListener");
-    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    WLOGFD("start register");
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
     return RegisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    WLOGFD("UnregisterDisplayMoveListener");
-    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    WLOGFD("Start unregister");
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
     return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
@@ -1475,7 +1475,7 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
     {
-        std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+        std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
         ClearUselessListeners(displayMoveListeners_, persistentId);
     }
     {
@@ -1816,7 +1816,8 @@ EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> W
 
 void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
 {
-    std::lock_guard<std::recursive_mutex> lockListener(displayMoveListenerMutex_);
+    WLOGFD("Notify display move from %{public}" PRIu64 " to %{public}" PRIu64, from, to);
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
     auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
     for (auto& listener : displayMoveListeners) {
         if (listener != nullptr) {
