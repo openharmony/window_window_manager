@@ -291,6 +291,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
 {
+    if (isFocused_) {
+        UpdateFocus(false);
+    }
     SessionInfo info;
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
@@ -523,6 +526,11 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
+    
+    if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        WLOGFI("[WMSRecover] input method window does not need to recover");
+        return;
+    }
 
     wptr<WindowSceneSessionImpl> weakThis = this;
     auto callbackFunc = [weakThis, isSpecificSession] {
