@@ -757,64 +757,49 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
-static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value callback, bool newApi)
+static void GetTopWindowTask(void* contextPtr, napi_env env, NapiAsyncTask& task, bool newApi)
 {
-    struct TopWindowInfoList {
-        sptr<Window> window = nullptr;
-        AppExecFwk::Ability* ability = nullptr;
-        int32_t errorCode = 0;
-        std::string errMsg = "";
-    };
-    std::shared_ptr<TopWindowInfoList> lists = std::make_shared<TopWindowInfoList>();
-    bool isOldApi = GetAPI7Ability(env, lists->ability);
-    NapiAsyncTask::ExecuteCallback execute = [lists, isOldApi, newApi, contextPtr]() {
-        if (lists == nullptr) {
-            return;
-        }
-        if (isOldApi) {
-            if (lists->ability->GetWindow() == nullptr) {
-                lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "FA mode can not get ability window";
-                return;
-            }
-            lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
-        } else {
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-            if (contextPtr == nullptr || context == nullptr) {
-                lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "Stage mode without context";
-                return;
-            }
-            lists->window = Window::GetTopWindowWithContext(context->lock());
-        }
-    };
-    NapiAsyncTask::CompleteCallback complete = [lists, newApi](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (lists == nullptr) {
-            int32_t error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+    std::string windowName;
+    sptr<Window> window = nullptr;
+    AppExecFwk::Ability* ability = nullptr;
+    bool isOldApi = GetAPI7Ability(env, ability);
+    int32_t error;
+    if (isOldApi) {
+        if (ability->GetWindow() == nullptr) {
+            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                 static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-            task.Reject(env, CreateJsError(env, error, "napi abnormal"));
+            task.Reject(env, CreateJsError(env, error, "FA mode can not get ability window"));
+            WLOGE("FA mode can not get ability window");
             return;
         }
-        if (lists->errorCode != 0) {
-            task.Reject(env, CreateJsError(env, lists->errorCode, lists->errMsg));
-            WLOGFE("%{public}s", lists->errMsg.c_str());
-            return;
-        }
-        if (lists->window == nullptr) {
-            auto error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+        window = Window::GetTopWindowWithId(ability->GetWindow()->GetWindowId());
+    } else {
+        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+        if (contextPtr == nullptr || context == nullptr) {
+            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                 static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-            task.Reject(env, CreateJsError(env, error, "Get top window failed"));
+            task.Reject(env, CreateJsError(env, error, "Stage mode without context"));
+            WLOGFE("Stage mode without context");
             return;
         }
-        task.Resolve(env, CreateJsWindowObject(env, lists->window));
-        WLOGD("Get top window success");
-    };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
-        env, CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
-    return result;
+        window = Window::GetTopWindowWithContext(context->lock());
+    }
+    if (window == nullptr) {
+        error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(env, CreateJsError(env, error, "Get top window failed"));
+        WLOGFE("Get top window failed");
+        return;
+    }
+    windowName = window->GetWindowName();
+    std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+    if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
+        task.Resolve(env, jsWindowObj->GetNapiValue());
+    } else {
+        task.Resolve(env, CreateJsWindowObject(env, window));
+    }
+    WLOGD("Get top window %{public}s success", windowName.c_str());
+    return;
 }
 
 napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info)
@@ -841,7 +826,20 @@ napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info
         }
         GetNativeContext(env, nativeContext, contextPtr, errCode);
     }
-    return GetTopWindowTask(contextPtr, env, nativeCallback, false);
+
+    WLOGI("err %{public}u", errCode);
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WMError::WM_OK) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "Invalidate params"));
+                return;
+            }
+            return GetTopWindowTask(contextPtr, env, task, false);
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
+        env, CreateAsyncTaskWithLastParam(env, nativeCallback, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info info)
@@ -868,7 +866,14 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
         return NapiGetUndefined(env);
     }
 
-    return GetTopWindowTask(contextPtr, env, nativeCallback, true);
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            return GetTopWindowTask(contextPtr, env, task, true);
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
+        env, CreateAsyncTaskWithLastParam(env, nativeCallback, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_info info)
