@@ -110,7 +110,6 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
 
 int WindowEventChannelStub::HandleTransferKeyEventAsync(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("TransferKeyEvent!");
     auto keyEvent = MMI::KeyEvent::Create();
     if (keyEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to create key event!");
@@ -120,10 +119,18 @@ int WindowEventChannelStub::HandleTransferKeyEventAsync(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_EVENT, "Read Key Event failed");
         return ERR_INVALID_DATA;
     }
-    bool isPreImeEvent = data.ReadBool();
+    bool isPreImeEvent = false;
+    if (!data.ReadBool(isPreImeEvent)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read Key Event failed");
+        return ERR_INVALID_DATA;
+    }
     sptr<IRemoteObject> listener = data.ReadRemoteObject();
-    WSError errCode = TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "ReadRemoteObject failed");
+        return ERR_INVALID_DATA;
+    }
 
+    WSError errCode = TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
