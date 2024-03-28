@@ -44,7 +44,7 @@ constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
-std::vector<DMRect> ScreenSceneConfig::cutoutBoundaryRect_;
+std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
@@ -245,10 +245,10 @@ void ScreenSceneConfig::DumpConfig()
     }
 }
 
-void ScreenSceneConfig::SetCutoutSvgPath(const std::string& svgPath)
+void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath)
 {
-    cutoutBoundaryRect_.clear();
-    cutoutBoundaryRect_.emplace_back(CalcCutoutBoundaryRect(svgPath));
+    cutoutBoundaryRectMap_.clear();
+    cutoutBoundaryRectMap_[displayId].emplace_back(CalcCutoutBoundaryRect(svgPath));
 }
 
 DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
@@ -284,9 +284,12 @@ DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
     return cutoutMinOuterRect;
 }
 
-std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect()
+std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect(uint64_t displayId)
 {
-    return cutoutBoundaryRect_;
+    if (cutoutBoundaryRectMap_.count(displayId) == 0) {
+        return {};
+    }
+    return cutoutBoundaryRectMap_[displayId];
 }
 
 bool ScreenSceneConfig::IsWaterfallDisplay()

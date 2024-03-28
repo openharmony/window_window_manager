@@ -262,8 +262,8 @@ public:
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
-    WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea);
-    WSRect GetAINavigationBarArea();
+    WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
+    WSRect GetAINavigationBarArea(uint64_t displayId);
     bool UpdateImmersiveState();
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds);
@@ -358,14 +358,14 @@ private:
     WSError UpdateParentSessionForDialog(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(int32_t persistentId);
-    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
     bool UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
-    int32_t GetStatusBarHeight();
+    int32_t GetStatusBarHeight(uint64_t displayId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -432,6 +432,7 @@ private:
     WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
+    void NotifySessionAINavigationBarChange(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
 
     sptr<RootSceneSession> rootSceneSession_;
@@ -487,7 +488,8 @@ private:
     sptr<AppAnrListener> appAnrListener_;
 
     bool isAINavigationBarVisible_ = false;
-    WSRect currAINavigationBarArea_;
+    std::shared_mutex currAINavigationBarAreaMapMutex_;
+    std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
 
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
