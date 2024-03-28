@@ -26,7 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Extens
 } // namespace
 
 void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(
-    std::shared_ptr<std::promise<bool>>& isConsumedPromise, std::shared_ptr<WSError>& retCode)
+    const std::shared_ptr<std::promise<bool>>& isConsumedPromise, const std::shared_ptr<WSError>& retCode)
 {
     std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
     isConsumedPromise_ = isConsumedPromise;
@@ -51,8 +51,8 @@ void WindowEventChannelListener::OnTransferKeyEventForConsumed(bool isConsumed, 
     *retCode_ = retCode;
 }
 
-int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::WMS_EVENT, "InterfaceToken check failed");
@@ -199,7 +199,6 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
         TLOGE(WmsLogTag::WMS_EVENT, "Created WindowEventChannelListener is nullptr.");
         return WSError::WS_ERROR_NULLPTR;
     }
-
     listener->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
     auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
 
@@ -214,9 +213,7 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
     } else {
         isTimeout = false;
         isConsumed = isConsumedFuture.get();
-        if (retCode != nullptr) {
-            ret = *retCode;
-        }
+        ret = *retCode;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "isConsumed is %{public}d, Timeout is %{public}d, ret is %{public}d in id:%{public}d.",
         isConsumed, isTimeout, ret, keyEvent->GetId());

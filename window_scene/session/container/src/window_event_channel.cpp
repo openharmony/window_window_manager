@@ -54,7 +54,6 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(bool isConsu
         WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
-        return;
     }
 }
 
@@ -135,15 +134,15 @@ WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
 {
     bool isConsumed = false;
     auto ret = TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
-    auto wecListener = iface_cast<IWindowEventChannelListener>(listener);
-    if (wecListener == nullptr) {
+    auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
+    if (channelListener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is null.");
         return ret;
     }
 
-    TLOGD(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumedAsync finished with isConsumed:%{public}d ret:%{public}d",
+    TLOGD(WmsLogTag::WMS_EVENT, "finished with isConsumed:%{public}d ret:%{public}d",
         isConsumed, ret);
-    wecListener->OnTransferKeyEventForConsumed(isConsumed, ret);
+    channelListener->OnTransferKeyEventForConsumed(isConsumed, ret);
     return ret;
 }
 

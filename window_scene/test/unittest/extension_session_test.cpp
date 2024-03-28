@@ -261,18 +261,18 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     info.bundleName_ = "SetBrightness1";
-    ExtensionSession extensionSession_(info);
-    ASSERT_NE(extensionSession_, nullptr);
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
 
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
-    extensionSession_.windowEventChannel_ = mockEventChannel;
+    extensionSession.windowEventChannel_ = mockEventChannel;
     EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync)
         .WillOnce([](const std::shared_ptr<MMI::KeyEvent> &keyEvent,
-                      bool isPreImeEvent,
-                      const sptr<IRemoteObject> &listener) {
-            auto wecListener = iface_cast<IWindowEventChannelListener>(listener);
-            wecListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
+                     bool isPreImeEvent,
+                     const sptr<IRemoteObject> &listener) {
+            auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
+            channelListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
             return WSError::WS_OK;
         });
 
@@ -281,8 +281,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTe
     bool isConsumed = false;
     bool isTimeout = false;
     bool isPreImeEvent = false;
-
-    WSError result = extensionSession_.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(isTimeout, false);
 }
@@ -297,12 +296,12 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     info.bundleName_ = "SetBrightness1";
-    ExtensionSession extensionSession_(info);
-    ASSERT_NE(extensionSession_, nullptr);
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
 
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
-    extensionSession_.windowEventChannel_ = mockEventChannel;
+    extensionSession.windowEventChannel_ = mockEventChannel;
     EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync);
 
     auto keyEvent = MMI::KeyEvent::Create();
@@ -310,8 +309,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
     bool isConsumed = false;
     bool isTimeout = false;
     bool isPreImeEvent = false;
-
-    WSError result = extensionSession_.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(isTimeout, true);
 }
@@ -326,16 +324,15 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed03, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     info.bundleName_ = "SetBrightness1";
-    ExtensionSession extensionSession_(info);
-    ASSERT_NE(extensionSession_, nullptr);
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
 
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     bool isConsumed = false;
     bool isTimeout = false;
     bool isPreImeEvent = false;
-
-    WSError result = extensionSession_.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -349,19 +346,18 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed04, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     info.bundleName_ = "SetBrightness1";
-    ExtensionSession extensionSession_(info);
-    ASSERT_NE(extensionSession_, nullptr);
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
 
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
-    extensionSession_.windowEventChannel_ = mockEventChannel;
+    extensionSession.windowEventChannel_ = mockEventChannel;
 
     auto keyEvent = nullptr;
     bool isConsumed = false;
     bool isTimeout = false;
     bool isPreImeEvent = false;
-
-    WSError result = extensionSession_.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -379,7 +375,7 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Func
     data.WriteBool(true);
     data.WriteInt32(0);
     uint32_t code = static_cast<uint32_t>(IWindowEventChannelListener::WindowEventChannelListenerMessage::
-            TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC);
+        TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC);
     WindowEventChannelListener listener;
     ASSERT_EQ(listener.OnRemoteRequest(code, data, reply, option), 0);
 }
