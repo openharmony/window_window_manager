@@ -92,8 +92,8 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     }
     if (isPreImeEvent) {
         isConsumed = sessionStage_->NotifyOnKeyPreImeEvent(keyEvent);
-        TLOGI(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumed isConsumed = %{public}d",
-            static_cast<int>(isConsumed));
+        TLOGI(WmsLogTag::WMS_EVENT, "NotifyOnKeyPreImeEvent id:%{public}d isConsumed:%{public}d",
+            keyEvent->GetId(), static_cast<int>(isConsumed));
         return WSError::WS_OK;
     }
     DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
