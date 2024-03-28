@@ -217,22 +217,12 @@ enum class ScreenGroupChangeEvent : uint32_t {
 };
 
 /**
- * @brief Enumerates refresh rate modes.
+ * @brief Enumerates max refresh rates.
  */
-enum class RefreshRateMode : int32_t {
-    SMART = -1,
-    NORMAL = 1,
-    MIDDLE = 2,
-    HIGH = 3,
-};
-
-/**
- * @brief Enumerates refresh rates.
- */
-enum class RefreshRate : uint32_t {
-    NORMAL = 60,
-    MIDDLE = 90,
-    HIGH = 120,
+enum class MaxRefreshrate : uint32_t {
+    MAX_REFRESHRATE_60 = 60,
+    MAX_REFRESHRATE_90 = 90,
+    MAX_REFRESHRATE_120 = 120,
 };
 
 /**
