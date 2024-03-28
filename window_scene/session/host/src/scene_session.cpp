@@ -451,40 +451,49 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
+WSError SceneSession::NotifyClientToUpdateRectTask(
+    wptr<SceneSession> weakThis, std::shared_ptr<RSTransaction> rsTransaction)
+{
+    auto session = weakThis.promote();
+    if (!session) {
+        WLOGFE("session is null");
+        return WSError::WS_ERROR_DESTROYED_OBJECT;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
+        session->GetPersistentId(), session->reason_, session->winRect_.ToString().c_str());
+    bool isMoveOrDrag = session->moveDragController_ &&
+        (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
+    if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update!");
+        return WSError::WS_ERROR_REPEAT_OPERATION;
+    }
+    WSError ret = WSError::WS_OK;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
+        session->GetPersistentId(), session->winRect_.posX_,
+        session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
+    // once reason is undefined, not use rsTransaction
+    // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
+    if (session->reason_ == SizeChangeReason::UNDEFINED || session->reason_ == SizeChangeReason::MOVE ||
+        session->reason_ == SizeChangeReason::RESIZE) {
+        ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
+    } else {
+        ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+    }
+
+    return ret;
+}
+
 WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
 {
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyClientToUpdateRect id:%{public}d, reason:%{public}d, rect:%{public}s",
-            session->GetPersistentId(), session->reason_, session->winRect_.ToString().c_str());
-        bool isMoveOrDrag = session->moveDragController_ &&
-            (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
-        if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update!");
-            return WSError::WS_ERROR_REPEAT_OPERATION;
-        }
-        WSError ret = WSError::WS_OK;
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
-            session->GetPersistentId(), session->winRect_.posX_,
-            session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
-        // once reason is undefined, not use rsTransaction
-        // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
-        if (session->reason_ == SizeChangeReason::UNDEFINED || session->reason_ == SizeChangeReason::MOVE ||
-            session->reason_ == SizeChangeReason::RESIZE) {
-            ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
-        } else {
-            ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
-        }
-        if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-        }
-        // clear after use
-        if (ret == WSError::WS_OK || session->sessionInfo_.isSystem_) {
+        WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
+        if (ret == WSError::WS_OK) {
+            if (session->specificCallback_ != nullptr) {
+                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            }
+            // clear after use
             if (session->reason_ != SizeChangeReason::DRAG) {
                 session->reason_ = SizeChangeReason::UNDEFINED;
                 session->isDirty_ = false;
@@ -982,7 +991,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 
     auto windowType = Session::GetWindowType();
     auto iter = Session::windowAreas_.cend();
-    if (!Session::IsSystemSession() &&
+    if (!IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
         iter = Session::windowAreas_.cbegin();
