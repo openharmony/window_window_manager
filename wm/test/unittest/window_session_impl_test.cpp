@@ -1771,7 +1771,7 @@ HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2
     option->SetExtensionTag(true);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    string url = "";
+    std::string url = "";
     WMError res = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner end";

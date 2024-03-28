@@ -65,7 +65,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
     AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
-    isUIExtensionAbility_ = true;
+    isUIExtensionAbilityProcess_ = true;
     return WMError::WM_OK;
 }
 

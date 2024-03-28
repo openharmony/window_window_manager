@@ -93,7 +93,7 @@ std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSession
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
-bool WindowSessionImpl::isUIExtensionAbility_ = false;
+bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -738,7 +738,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     switch (type) {
         default:
         case WindowSetUIContentType::DEFAULT:
-            if (isUIExtensionAbility_ && property_->GetExtensionFlag() == true) {
+            if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
+                // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
             }
