@@ -791,6 +791,13 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTitleButtonVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowMask");
@@ -5451,6 +5458,63 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
+static inline bool GetNativeBool(napi_env env, napi_value nativeVal, bool* flag)
+{
+    if (nativeVal == nullptr) {
+        return false;
+    }
+    napi_get_value_bool(env, nativeVal, flag);
+    return true;
+}
+
+napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 3) { // 3: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    constexpr size_t IS_MAX_ARGC = 0;
+    constexpr size_t IS_MIN_ARGC = 1;
+    constexpr size_t IS_SPLIT_ARGC = 2;
+    bool isMaximizeVisible = true;
+    if (!GetNativeBool(env, argv[IS_MAX_ARGC], &isMaximizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMaximizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMinimizeVisible = true;
+    if (!GetNativeBool(env, argv[IS_MIN_ARGC], &isMinimizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isSplitVisible = true;
+    if (!GetNativeBool(env, argv[IS_SPLIT_ARGC], &isSplitVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible,
+        isSplitVisible);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5603,6 +5667,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
+    BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
 }
 }  // namespace Rosen
