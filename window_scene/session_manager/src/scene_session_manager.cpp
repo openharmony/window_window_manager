@@ -1763,7 +1763,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_DO_NOTHING;
         }
         auto parentSession = GetSceneSession(property->GetParentPersistentId());
-        if (parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
+        if (parentSession != nullptr && parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
             TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as parent window disconnected");
             return WSError::WS_DO_NOTHING;
         }
