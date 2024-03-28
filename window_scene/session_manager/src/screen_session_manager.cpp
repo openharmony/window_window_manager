@@ -263,6 +263,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         WLOGFD("defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
         ScreenSceneConfig::SetCutoutSvgPath(GetDefaultScreenId(), defaultDisplayCutoutPath);
     }
+    if (stringConfig.count("subDisplayCutoutPath") != 0) {
+        std::string subDisplayCutoutPath = static_cast<std::string>(stringConfig["subDisplayCutoutPath"]);
+        WLOGFD("subDisplayCutoutPath = %{public}s.", subDisplayCutoutPath.c_str());
+        ScreenSceneConfig::SetSubCutoutSvgPath(subDisplayCutoutPath);
+    }
     ConfigureWaterfallDisplayCompressionParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {

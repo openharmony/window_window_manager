@@ -34,20 +34,40 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER, "ScreenSceneConfig"};
-constexpr char IS_WATERFALL_DISPLAY[] = "isWaterfallDisplay";
-constexpr char CURVED_SCREEN_BOUNDARY[] = "curvedScreenBoundary";
-constexpr char CURVED_AREA_IN_LANDSCAPE[] = "waterfallAreaCompressionSizeWhenHorzontal";
-constexpr char IS_CURVED_COMPRESS_ENABLED[] = "isWaterfallAreaCompressionEnableWhenHorizontal";
 constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
+enum XmlNodeElement {
+    DPI = 0,
+    IS_WATERFALL_DISPLAY,
+    CURVED_SCREEN_BOUNDARY,
+    CURVED_AREA_IN_LANDSCAPE,
+    IS_CURVED_COMPRESS_ENABLED,
+    BUILD_IN_DEFAULT_ORIENTATION,
+    DEFAULT_DEVICE_ROTATION_OFFSET,
+    DEFAULT_DISPLAY_CUTOUT_PATH,
+    SUB_DISPLAY_CUTOUT_PATH
+};
 }
 
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
 std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
+std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
+std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
+    {DPI, "dpi"},
+    {IS_WATERFALL_DISPLAY, "isWaterfallDisplay"},
+    {CURVED_SCREEN_BOUNDARY, "curvedScreenBoundary"},
+    {CURVED_AREA_IN_LANDSCAPE, "waterfallAreaCompressionSizeWhenHorzontal"},
+    {IS_CURVED_COMPRESS_ENABLED, "isWaterfallAreaCompressionEnableWhenHorizontal"},
+    {BUILD_IN_DEFAULT_ORIENTATION, "buildInDefaultOrientation"},
+    {DEFAULT_DEVICE_ROTATION_OFFSET, "defaultDeviceRotationOffset"},
+    {DEFAULT_DISPLAY_CUTOUT_PATH, "defaultDisplayCutoutPath"},
+    {SUB_DISPLAY_CUTOUT_PATH, "subDisplayCutoutPath"}
+};
+
 
 std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string pattern)
 {
@@ -118,23 +138,21 @@ bool ScreenSceneConfig::LoadConfigXml()
             continue;
         }
 
-        auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(IS_WATERFALL_DISPLAY)) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(IS_CURVED_COMPRESS_ENABLED))) {
+        std::string nodeName(reinterpret_cast<const char*>(curNodePtr->name));
+        if ((xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
+            (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName)) {
             ReadEnableConfigInfo(curNodePtr);
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(CURVED_SCREEN_BOUNDARY)) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(CURVED_AREA_IN_LANDSCAPE)) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("buildInDefaultOrientation"))) {
+        } else if ((xmlNodeMap_[DPI] == nodeName) ||
+            (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
+            (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
+            (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
+            (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName)) {
             ReadIntNumbersConfigInfo(curNodePtr);
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDisplayCutoutPath"))) {
+        } else if ((xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
+            (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName)) {
             ReadStringConfigInfo(curNodePtr);
-            continue;
+        } else {
+            WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
         }
     }
     xmlFreeDoc(docPtr);
@@ -189,9 +207,9 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
     if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
         enableConfig_[nodeName] = true;
-        if (IS_WATERFALL_DISPLAY == nodeName) {
+        if (xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) {
             isWaterfallDisplay_ = true;
-        } else if (IS_CURVED_COMPRESS_ENABLED == nodeName) {
+        } else if (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) {
             isScreenCompressionEnableInLandscape_ = true;
         }
     } else {
@@ -251,6 +269,12 @@ void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& 
     cutoutBoundaryRectMap_[displayId].emplace_back(CalcCutoutBoundaryRect(svgPath));
 }
 
+void ScreenSceneConfig::SetSubCutoutSvgPath(const std::string& svgPath)
+{
+    subCutoutBoundaryRect_.clear();
+    subCutoutBoundaryRect_.emplace_back(CalcCutoutBoundaryRect(svgPath));
+}
+
 DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
 {
     DMRect emptyRect = { 0, 0, 0, 0 };
@@ -292,6 +316,11 @@ std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect(uint64_t displayId)
     return cutoutBoundaryRectMap_[displayId];
 }
 
+std::vector<DMRect> ScreenSceneConfig::GetSubCutoutBoundaryRect()
+{
+    return subCutoutBoundaryRect_;
+}
+
 bool ScreenSceneConfig::IsWaterfallDisplay()
 {
     return isWaterfallDisplay_;
@@ -299,8 +328,8 @@ bool ScreenSceneConfig::IsWaterfallDisplay()
 
 void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
 {
-    if (intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE].size() > 0) {
-        curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE][0]);
+    if (intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]].size() > 0) {
+        curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]][0]);
     } else {
         WLOGFW("waterfallAreaCompressionSizeWhenHorzontal value is not exist");
     }
@@ -308,7 +337,7 @@ void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
 
 std::vector<int> ScreenSceneConfig::GetCurvedScreenBoundaryConfig()
 {
-    return intNumbersConfig_[CURVED_SCREEN_BOUNDARY];
+    return intNumbersConfig_[xmlNodeMap_[CURVED_SCREEN_BOUNDARY]];
 }
 
 uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
