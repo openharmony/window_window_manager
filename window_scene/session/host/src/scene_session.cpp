@@ -416,7 +416,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect) {
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
+            session->reason_ != SizeChangeReason::DRAG_END) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s!",
                 session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
@@ -430,7 +431,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         // position change no need to notify client, since frame layout finish will notify
-        if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_)) {
+        if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
+            (session->reason_ != SizeChangeReason::MOVE || !session->rectChangeListenerRegistered_)) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, rect:%{public}s, \
                 preRect: %{public}s",
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
@@ -483,8 +485,10 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
         }
         // clear after use
         if (ret == WSError::WS_OK || session->sessionInfo_.isSystem_) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->isDirty_ = false;
+            if (session->reason_ != SizeChangeReason::DRAG) {
+                session->reason_ = SizeChangeReason::UNDEFINED;
+                session->isDirty_ = false;
+            }
         }
         return ret;
     };
@@ -1373,8 +1377,8 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetSurfaceBounds(rect);
+    UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::MOVE) {
-        UpdateSizeChangeReason(reason);
         UpdateRect(rect, reason);
     }
     if (reason == SizeChangeReason::DRAG_END) {
@@ -2481,5 +2485,20 @@ void SceneSession::ClearExtWindowFlags()
 {
     std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     extWindowFlagsMap_.clear();
+}
+
+WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
+{
+    auto task = [weakThis = wptr(this), isRegister]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->rectChangeListenerRegistered_ = isRegister;
+        return WSError::WS_OK;
+    };
+    PostTask(task, "UpdateRectChangeListenerRegistered");
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

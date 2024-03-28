@@ -48,6 +48,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleShow),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
         &SessionStub::HandleHide),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
+        &SessionStub::HandleUpdateRectChangeListenerRegistered),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
@@ -611,6 +613,14 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
         return -1;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = data.ReadBool();
+    WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

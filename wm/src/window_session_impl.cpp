@@ -74,6 +74,7 @@ std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl:
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -87,6 +88,7 @@ std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
+std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1383,6 +1385,35 @@ void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleB
     }
 }
 
+template<typename T>
+EnableIfSame<T, IWindowRectChangeListener,
+    std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowRectChangeListener>> windowRectChangeListeners;
+    for (auto& listener : windowRectChangeListeners_[GetPersistentId()]) {
+        windowRectChangeListeners.push_back(listener);
+    }
+    return windowRectChangeListeners;
+}
+
+WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+    WMError ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+    if (ret == WMError::WM_OK) {
+        hostSession_->UpdateRectChangeListenerRegistered(true);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+    WMError ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+    hostSession_->UpdateRectChangeListenerRegistered(false);
+    return ret;
+}
+
 void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
@@ -1509,6 +1540,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+        ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
 }
 
@@ -1865,6 +1900,13 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     for (auto& listener : windowChangeListeners) {
         if (listener != nullptr) {
             listener->OnSizeChange(rect, reason);
+        }
+    }
+    std::lock_guard<std::mutex> lockRectListener(windowRectChangeListenerMutex_);
+    auto windowRectChangeListeners = GetListeners<IWindowRectChangeListener>();
+    for (auto& listener : windowRectChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnRectChange(rect, reason);
         }
     }
 }
