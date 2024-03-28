@@ -497,27 +497,6 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     return objValue;
 }
 
-napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
-{
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert SystemBarProperties to jsObject");
-        return nullptr;
-    }
-    SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarProperty navi = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    napi_set_named_property(env, objValue, "statusBarColor", CreateJsValue(env, status.backgroundColor_));
-    napi_set_named_property(env, objValue, "statusBarContentColor", CreateJsValue(env, status.contentColor_));
-    napi_set_named_property(env, objValue, "isStatusBarLightIcon",
-        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
-    napi_set_named_property(env, objValue, "navigationBarColor", CreateJsValue(env, navi.backgroundColor_));
-    napi_set_named_property(env, objValue, "navigationBarContentColor", CreateJsValue(env, navi.contentColor_));
-    napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
-        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
-    return objValue;
-}
-
 static std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -530,6 +509,31 @@ static std::string GetHexColor(uint32_t color)
     std::string finalColor("#");
     finalColor += tmpColor;
     return finalColor;
+}
+
+napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert SystemBarProperties to jsObject");
+        return nullptr;
+    }
+    SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navi = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    napi_set_named_property(env, objValue, "statusBarColor",
+        CreateJsValue(env, GetHexColor(status.backgroundColor_)));
+    napi_set_named_property(env, objValue, "statusBarContentColor",
+        CreateJsValue(env, GetHexColor(status.contentColor_)));
+    napi_set_named_property(env, objValue, "isStatusBarLightIcon",
+        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    napi_set_named_property(env, objValue, "navigationBarColor",
+        CreateJsValue(env, GetHexColor(navi.backgroundColor_)));
+    napi_set_named_property(env, objValue, "navigationBarContentColor",
+        CreateJsValue(env, GetHexColor(navi.contentColor_)));
+    napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
+        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    return objValue;
 }
 
 static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBarRegionTint& tint)
