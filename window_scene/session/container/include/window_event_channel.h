@@ -20,8 +20,8 @@
 #include <list>
 #include <map>
 
-#include "iremote_proxy.h"
 #include "accessibility_element_info.h"
+#include "iremote_proxy.h"
 
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
@@ -35,6 +35,7 @@ public:
     virtual ~WindowEventChannelListenerProxy() = default;
 
     void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override;
+
 private:
     static inline BrokerDelegator<WindowEventChannelListenerProxy> delegator_;
 };
