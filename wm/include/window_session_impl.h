@@ -268,7 +268,8 @@ protected:
     bool needRemoveWindowInputChannel_ = false;
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
-    static bool isUIExtensionAbility_;
+    // Check whether the UIExtensionAbility process is started
+    static bool isUIExtensionAbilityProcess_;
 
 private:
     //Trans between colorGamut and colorSpace
