@@ -398,6 +398,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     }
     TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
         window_->GetWindowId(), width, height);
+    pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
 }
