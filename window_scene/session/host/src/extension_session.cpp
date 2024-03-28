@@ -203,14 +203,14 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
     listener->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
     auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
 
-    constexpr int64_t TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+    // Timeout cannot exceed APP_INPUT_BLOCK
+    constexpr int64_t TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS = 4000;
     auto isConsumedFuture = isConsumedPromise->get_future().share();
     if (isConsumedFuture.wait_for(std::chrono::milliseconds(TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS)) ==
             std::future_status::timeout) {
         // Prevent external variables from being used after the lifecycle ends.
         listener->ResetTransferKeyEventForConsumedParams();
         isTimeout = true;
-        keyEvent->MarkProcessed();
     } else {
         isTimeout = false;
         isConsumed = isConsumedFuture.get();
