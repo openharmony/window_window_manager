@@ -338,7 +338,7 @@ template<typename F, typename... Args>
 void SessionListenerController::CallListeners(F func, Args&& ... args)
 {
     std::lock_guard<ffrt::mutex> guard(listenerLock_);
-    WLOGFI("CallListeners size: %{public}d ", static_cast<int32_t>(sessionListeners_.size()));
+    WLOGFD("size: %{public}d ", static_cast<int32_t>(sessionListeners_.size()));
     for (auto listener : sessionListeners_) {
         if (listener) {
             (listener->*func)(std::forward<Args>(args)...);
