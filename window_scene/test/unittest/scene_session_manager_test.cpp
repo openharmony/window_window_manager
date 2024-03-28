@@ -1785,7 +1785,8 @@ HWTEST_F(SceneSessionManagerTest, GetSceneSessionByName, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, GetSceneSessionVectorByType, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE);
+    uint64_t displayId = 0;
+    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     ASSERT_EQ(ret, 0);
 }
 
@@ -3005,7 +3006,8 @@ HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, Function | Sm
 {
     bool isVisible = false;
     WSRect barArea = { 0, 0, 320, 240}; // width: 320, height: 240
-    WSError result = ssm_->NotifyAINavigationBarShowStatus(isVisible, barArea);
+    uint64_t displayId = 0;
+    WSError result = ssm_->NotifyAINavigationBarShowStatus(isVisible, barArea, displayId);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -3095,6 +3097,83 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTe
 }
 
 /**
+ * @tc.name: AddSecureSession
+ * @tc.desc: SceneSesionManager add secure session
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AddSecureSession, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 12345;
+    size_t sizeBefore = 0;
+    size_t sizeAfter = 0;
+    ssm_->AddSecureSession(persistentId, true, sizeBefore, sizeAfter);
+    EXPECT_EQ(sizeBefore, 0);
+    EXPECT_EQ(sizeAfter, 1);
+    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
+    ssm_->AddSecureSession(persistentId, false, sizeBefore, sizeAfter);
+    EXPECT_EQ(sizeBefore, 1);
+    EXPECT_EQ(sizeAfter, 0);
+    ssm_->secureSessionSet_.clear();
+}
+
+/**
+ * @tc.name: HideNonSecureFloatingWindows
+ * @tc.desc: SceneSesionManager hide non-secure floating windows
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "HideNonSecureFloatingWindows";
+    info.bundleName_ = "HideNonSecureFloatingWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureFloatingWindows(0, 0, true);
+    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureFloatingWindows(0, 1, true);
+    EXPECT_TRUE(sceneSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureFloatingWindows(1, 0, false);
+    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
+    ssm_->nonSystemFloatSceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: HideNonSecureSubWindows
+ * @tc.desc: SceneSesionManager hide non-secure sub windows
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HideNonSecureSubWindows, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "HideNonSecureSubWindows";
+    info.bundleName_ = "HideNonSecureSubWindows";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+
+    sptr<SceneSession> subSession;
+    subSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(subSession, nullptr);
+
+    sceneSession->AddSubSession(subSession);
+    EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureSubWindows(sceneSession, 0, 0, true);
+    EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureSubWindows(sceneSession, 0, 1, true);
+    EXPECT_TRUE(subSession->GetSessionProperty()->GetForceHide());
+    ssm_->HideNonSecureSubWindows(sceneSession, 1, 0, false);
+    EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
+}
+
+/**
  * @tc.name: HandleSecureSessionShouldHide
  * @tc.desc: SceneSesionManager handle secure session should hide
  * @tc.type: FUNC
@@ -3116,6 +3195,30 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | Smal
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
     EXPECT_EQ(*ssm_->secureSessionSet_.begin(), sceneSession->persistentId_);
+    sceneSession->SetShouldHideNonSecureWindows(false);
+    ret = ssm_->HandleSecureSessionShouldHide(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
+    ssm_->secureSessionSet_.clear();
+}
+
+/**
+ * @tc.name: HandleSecureExtSessionShouldHide
+ * @tc.desc: SceneSesionManager handle secure extension session should hide
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleSecureExtSessionShouldHide, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 12345;
+    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
+    auto ret = ssm_->HandleSecureExtSessionShouldHide(persistentId, true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
+    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
+    ret = ssm_->HandleSecureExtSessionShouldHide(persistentId, false);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
+    ssm_->secureSessionSet_.clear();
 }
 
 /**

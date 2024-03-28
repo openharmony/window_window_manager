@@ -34,11 +34,11 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
-    WLOGFI("state:%{public}u", state);
+    WLOGFI("[UL_POWER]state:%{public}u", state);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (displayState_ == state) {
-            WLOGFE("state is already set");
+        if (displayState_ == state && ScreenSessionManager::GetInstance().BlockSetDisplayState()) {
+            WLOGFE("[UL_POWER]state is already set");
             return false;
         }
     }
@@ -67,7 +67,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             break;
         }
         default: {
-            WLOGFW("unknown DisplayState!");
+            WLOGFW("[UL_POWER]unknown DisplayState!");
             return false;
         }
     }
@@ -83,7 +83,7 @@ DisplayState SessionDisplayPowerController::GetDisplayState(DisplayId displayId)
 
 void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
-    WLOGFI("DisplayEvent:%{public}u", event);
+    WLOGFI("[UL_POWER]DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
         std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);

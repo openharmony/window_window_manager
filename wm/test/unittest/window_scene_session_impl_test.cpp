@@ -1651,6 +1651,29 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
 }
 
 /**
+ * @tc.name: GetMainWindowWithContext01
+ * @tc.desc: GetMainWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetMainWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetMainWindowWithContext");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    std::shared_ptr<AbilityRuntime::Context> context;
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    if (windowscenesession->GetMainWindowWithContext(context) == nullptr) {
+        ASSERT_EQ(nullptr, windowscenesession->GetMainWindowWithContext(context));
+    }
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
+    ASSERT_NE(nullptr, windowscenesession->GetMainWindowWithContext(context));
+}
+
+/**
  * @tc.name: NotifyMemoryLevel01
  * @tc.desc: NotifyMemoryLevel
  * @tc.type: FUNC
@@ -2045,6 +2068,92 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
     ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
     ASSERT_EQ(windowSizeLimits.minWidth_, 1000);
     ASSERT_EQ(windowSizeLimits.minHeight_, 1000);
+}
+
+/**
+ * @tc.name: HideNonSecureWindows01
+ * @tc.desc: HideNonSecureWindows
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("HideNonSecureWindows01");
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    ASSERT_EQ(WMError::WM_OK, window->HideNonSecureWindows(true));
+}
+
+/**
+ * @tc.name: Maximize01
+ * @tc.desc: test errorCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Maximize02, Function | SmallTest | Level2)
+{
+    sptr option = new (std::nothrow) WindowOption();
+    option->SetWindowName("Maximize02");
+    option->SetDisplayId(0);
+
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetWindowName("Maximize02");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->property_->SetPersistentId(2);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    MaximizeLayoutOption layoutOption;
+    // not support subWinodw call
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(layoutOption));
+
+    // window not support fullscreen
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(layoutOption));
+}
+
+/**
+ * @tc.name: Maximize02
+ * @tc.desc: test maximizeLayoutOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Maximize03, Function | SmallTest | Level2)
+{
+    sptr option = new (std::nothrow) WindowOption();
+    option->SetWindowName("Maximize03");
+    option->SetDisplayId(0);
+
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetWindowName("Maximize03");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetPersistentId(2);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    ASSERT_NE(nullptr, window);
+    MaximizeLayoutOption layoutOption;
+    // dock can not be hide from maximize interface!
+    layoutOption.dock = ShowType::FORBIDDEN;
+    auto ret = window->Maximize(layoutOption);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    layoutOption.dock = ShowType::HIDE;
+    layoutOption.decor = ShowType::HIDE;
+    ASSERT_NE(WMError::WM_ERROR_INVALID_PARAM, window->Maximize(layoutOption));
+    layoutOption.dock = ShowType::HIDE;
+    layoutOption.decor = ShowType::SHOW;
+    ASSERT_NE(WMError::WM_ERROR_INVALID_PARAM, window->Maximize(layoutOption));
 }
 }
 } // namespace Rosen

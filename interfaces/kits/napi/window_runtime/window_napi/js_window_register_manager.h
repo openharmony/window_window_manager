@@ -29,35 +29,47 @@ public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-        CaseType caseType, napi_env env, napi_value value);
+        CaseType caseType, napi_env env, napi_value callback, napi_value parameter = nullptr);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, napi_env env, napi_value value);
 private:
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
-    WmErrorCode ProcessWindowChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessWindowChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
-    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
-    WmErrorCode ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessGestureNavigationEnabledChangeRegister(sptr<JsWindowListener> listener,
-        sptr<Window> window, bool isRegister);
+        sptr<Window> window, bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
-        sptr<Window> window, bool isRegister);
+        sptr<Window> window, bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
-        bool isRegister);
-    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool,
+        napi_env env, napi_value parameter);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
     std::map<CaseType, std::map<std::string, Func>> listenerProcess_;

@@ -48,6 +48,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleShow),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
         &SessionStub::HandleHide),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
+        &SessionStub::HandleUpdateRectChangeListenerRegistered),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
@@ -77,6 +79,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetWindowAnimationFlag),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
         &SessionStub::HandleUpdateWindowSceneAfterCustomAnimation),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW),
+                   &SessionStub::HandleSetLandscapeMultiWindow),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         &SessionStub::HandleRaiseAboveTarget),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
@@ -106,6 +110,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifySyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT),
+        &SessionStub::HandleNotifyExtensionTimeout),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
         &SessionStub::HandleTriggerBindModalUIExtension),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
@@ -478,6 +484,15 @@ int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleSetLandscapeMultiWindow!");
+    bool isLandscapeMultiWindow = data.ReadBool();
+    const WSError errCode = SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleTransferAbilityResult!");
@@ -528,6 +543,17 @@ int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& r
 {
     WLOGFD("called");
     NotifyExtensionDied();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t errorCode = 0;
+    if (!data.ReadInt32(errorCode)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    NotifyExtensionTimeout(errorCode);
     return ERR_NONE;
 }
 
@@ -587,6 +613,14 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
         return -1;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = data.ReadBool();
+    WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

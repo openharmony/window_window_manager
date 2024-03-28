@@ -387,6 +387,34 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IWindowNoInteractionListenerSptr
+ *
+ * @brief Listener to observe no interaction event for a long time of window.
+*/
+class IWindowNoInteractionListener : virtual public RefBase {
+public:
+    /**
+     * @brief Observe event when no interaction for a long time.
+     */
+    virtual void OnWindowNoInteractionCallback() {};
+
+    /**
+     * @brief Set timeout of the listener.
+     *
+     * @param timeout.
+     */
+    virtual void SetTimeout(int64_t timeout) {};
+
+    /**
+     * @brief get timeout of the listener.
+     *
+     * @return timeout.
+     */
+    virtual int64_t GetTimeout() const { return 0;};
+};
+using IWindowNoInteractionListenerSptr = sptr<IWindowNoInteractionListener>;
+
+/**
  * @class IWindowTitleButtonRectChangedListener
  *
  * @brief Listener to observe event when window size or the height of title bar changed.
@@ -398,6 +426,22 @@ public:
      * @param titleButtonRect An area of title buttons relative to the upper right corner of the window.
      */
     virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) {}
+};
+
+/**
+ * @class IWindowRectChangeListener
+ *
+ * @brief IWindowRectChangeListener is used to observe the window rect and its changing reason when window changed.
+ */
+class IWindowRectChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rect changed.
+     *
+     * @param Rect Rect of the current window.
+     * @param reason Reason for window size change.
+     */
+    virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -460,6 +504,13 @@ public:
      * @return sptr<Window>
      */
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
+    /**
+     * @brief Get the main window by context.
+     *
+     * @param context Indicates the context on which the window depends
+     * @return sptr<Window>
+     */
+    static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     /**
      * @brief Get the all sub windows by parent
      *
@@ -1291,6 +1342,15 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
+    
+    /**
+     * @brief maximize window with layoutOption.
+     *
+     * @param option UI layout param.
+     * @return WM_OK means maximize window ok, others means failed.
+     */
+    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
@@ -1554,6 +1614,28 @@ public:
     }
 
     /**
+     * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window no interaction listener.
+     *
+     * @param listener IWindowNoInteractionListenerSptr.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Register window status change listener.
      *
      * @param listener IWindowStatusChangeListener.
@@ -1664,6 +1746,17 @@ public:
     }
 
     /**
+     * @brief Set the modality of window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetSubWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief recovery the main window by function overloading. It is called by JsWindow.
      *
      * @param reason reason of update.
@@ -1678,7 +1771,7 @@ public:
      * @return WM_OK means add success, others means failed.
      */
     virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Remove uiextension window flag.
      *
@@ -1686,6 +1779,39 @@ public:
      * @return WM_OK means remove success, others means failed.
      */
     virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Make multi-window become landscape or not.
+     *
+     * @param isLandscapeMultiWindow means whether multi-window's scale is landscape.
+     * @return WMError WM_OK means set success, others means failed.
+     */
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

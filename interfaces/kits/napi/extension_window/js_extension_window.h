@@ -53,6 +53,7 @@ public:
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value GetUIContext(napi_env env, napi_callback_info info);
     static napi_value SetWindowBrightness(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
@@ -74,6 +75,7 @@ private:
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
+    napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
     napi_value OnSetWindowBrightness(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
@@ -87,7 +89,7 @@ private:
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
     static void SetWindowOption(sptr<Rosen::WindowOption> windowOption);
-    WindowOption SetOption(WindowOption option, std::string title, bool decorEnabled);
+    bool ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option);
 };
 }  // namespace Rosen
 }  // namespace OHOS

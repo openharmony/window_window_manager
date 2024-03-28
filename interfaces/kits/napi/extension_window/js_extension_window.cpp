@@ -119,7 +119,8 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName,
         JsExtensionWindow::SetPreferredOrientation);
-
+    BindNativeFunction(env, objValue, "getPreferredOrientation", moduleName,
+        JsExtensionWindow::GetPreferredOrientation);
     return objValue;
 }
 
@@ -255,6 +256,13 @@ napi_value JsExtensionWindow::SetPreferredOrientation(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
 
+napi_value JsExtensionWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    WLOGD("GetPreferredOrientation");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
+}
+
 napi_value JsExtensionWindow::GetUIContext(napi_env env, napi_callback_info info)
 {
     WLOGD("GetUIContext");
@@ -364,6 +372,11 @@ napi_value JsExtensionWindow::OnSetPreferredOrientation(napi_env env, napi_callb
     NapiAsyncTask::Schedule("JsExtensionWindow::OnSetPreferredOrientation",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value JsExtensionWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
@@ -853,17 +866,11 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     WindowOption option;
-    std::string title;
-    if (!ParseJsValue(argv[1], env, "title", title)) {
+    if (!ParseSubWindowOptions(env, argv[1], option)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Get invalid options param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    bool decorEnabled;
-    if (!ParseJsValue(argv[1], env, "decorEnabled", decorEnabled)) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
-    option = SetOption(option, title, decorEnabled);
     NapiAsyncTask::CompleteCallback complete =
         [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (weak == nullptr) {
@@ -901,13 +908,33 @@ void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
     windowOption->SetExtensionTag(true);
 }
 
-WindowOption JsExtensionWindow::SetOption(WindowOption option, std::string title,
-    bool decorEnabled)
+bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
 {
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "jsObject is null");
+        return false;
+    }
+    std::string title;
+    if (!ParseJsValue(jsObject, env, "title", title)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to title");
+        return false;
+    }
+    bool decorEnabled;
+    if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to decorEnabled");
+        return false;
+    }
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "isModal:%{public}d", isModal);
+        if (isModal) {
+            option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+        }
+    }
     option.SetSubWindowTitle(title);
     option.SetSubWindowDecorEnable(decorEnabled);
     option.SetParentId(hostWindowId_);
-    return option;
+    return true;
 }
 }  // namespace Rosen
 }  // namespace OHOS

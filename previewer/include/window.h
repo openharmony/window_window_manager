@@ -102,6 +102,10 @@ class IWindowVisibilityChangedListener : virtual public RefBase {
 };
 using WindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
+class IWindowNoInteractionListener : virtual public RefBase {
+};
+using IWindowNoInteractionListenerSptr = sptr<IWindowNoInteractionListener>;
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class WINDOW_EXPORT Window : public RefBase {
 public:
@@ -270,7 +274,16 @@ public:
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
@@ -288,7 +301,19 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    /**
+     * @brief Set the modality of window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetSubWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
+    
+    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

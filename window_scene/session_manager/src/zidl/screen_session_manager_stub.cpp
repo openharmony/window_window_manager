@@ -210,6 +210,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenScaleMode scaleMode = static_cast<ScreenScaleMode>(data.ReadUint32());
+            DMError result = SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
+            reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError result = DestroyVirtualScreen(screenId);
@@ -650,6 +657,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
             bool foldToExpand = data.ReadBool();
             NotifyFoldToExpandCompletion(foldToExpand);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenFlag screenFlag = GetVirtualScreenFlag(screenId);
+            reply.WriteUint32(static_cast<uint32_t>(screenFlag));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenFlag screenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
+            DMError setRet = SetVirtualScreenFlag(screenId, screenFlag);
+            reply.WriteInt32(static_cast<int32_t>(setRet));
             break;
         }
         default:

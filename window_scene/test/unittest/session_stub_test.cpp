@@ -172,6 +172,8 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(0, res);
+    res = session_->HandleNotifyExtensionTimeout(data, reply);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -267,6 +269,22 @@ HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallT
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleSendPointerEvenForMoveDrag(data, reply);
+    ASSERT_EQ(-1, res);
+}
+
+/**
+ * @tc.name: HandleUpdateRectChangeListenerRegistered008
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
     ASSERT_EQ(-1, res);
 }
 }
