@@ -197,6 +197,36 @@ const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
     {Orientation::LOCKED,                                ApiOrientation::LOCKED                             },
 };
 
+enum class RectChangeReason : uint32_t {
+    UNDEFINED = 0,
+    MAXIMIZE,
+    RECOVER,
+    MOVE,
+    DRAG,
+    DRAG_START,
+    DRAG_END,
+};
+
+const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
+    { WindowSizeChangeReason::UNDEFINED,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE,              RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER,               RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
+    { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
+    { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::HIDE,                  RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::TRANSFORM,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW, RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_SPLIT,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
+};
+
 struct SystemBarPropertyFlag {
     bool enableFlag;
     bool backgroundColorFlag;

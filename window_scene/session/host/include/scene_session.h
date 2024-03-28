@@ -242,6 +242,7 @@ public:
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
+    WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
 
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     WSRect callingWindowNewRect_ = {0, 0, 0, 0};

@@ -95,6 +95,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

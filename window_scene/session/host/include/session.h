@@ -502,6 +502,7 @@ protected:
 
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
+    bool rectChangeListenerRegistered_ = false;
 
 private:
     void HandleDialogForeground();
