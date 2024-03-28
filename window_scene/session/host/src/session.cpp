@@ -330,11 +330,25 @@ void Session::NotifyDisconnect()
 
 void Session::NotifyExtensionDied()
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnExtensionDied();
+        }
+    }
+}
+
+void Session::NotifyExtensionTimeout(int32_t errorCode)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) in session(persistentId:%{public}d).",
+        errorCode, persistentId_);
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnExtensionTimeout(errorCode);
         }
     }
 }
@@ -2430,6 +2444,16 @@ WSError Session::TransferExecuteAction(int64_t elementId, const std::map<std::st
     return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
 }
 
+WSError Session::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+    int64_t timeMs)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
     sessionInfoLockedStateChangeFunc_ = func;
@@ -2470,7 +2494,7 @@ void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPo
 
 void Session::SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func)
 {
-    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    std::unique_lock<std::shared_mutex> lock(keyEventMutex_);
     systemSessionKeyEventFunc_ = func;
 }
 

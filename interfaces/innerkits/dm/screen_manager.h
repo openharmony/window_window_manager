@@ -206,6 +206,15 @@ public:
     DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
 
     /**
+     * @brief Set virtual screen scale mode
+     *
+     * @param screenId Screen id.
+     * @param scaleMode scale mode
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode);
+
+    /**
      * @brief Set the screen power state on the specified screen.
      *
      * @param screenId Screen id.
@@ -295,6 +304,23 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+
+    /**
+     * @brief Get virtual screen flag.
+     *
+     * @param screenId virtual screen id.
+     * @return virtual screen flag
+     */
+    VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+
+    /**
+     * @brief Set virtual screen flag.
+     *
+     * @param screenId virtual screen id.
+     * @param screenFlag virtual screen flag.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
 private:
     ScreenManager();
     ~ScreenManager();

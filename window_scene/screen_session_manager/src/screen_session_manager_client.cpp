@@ -79,8 +79,8 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
         return false;
     }
     if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
-        if (name == "HiCar" || name == "SuperLauncher") {
-            WLOGFI("HiCar or SuperLauncher, need to connect the screen");
+        if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine") {
+            WLOGFI("HiCar or SuperLauncher or CastEngine, need to connect the screen");
             return true;
         } else {
             WLOGFE("ScreenType is virtual, no need to connect the screen");
@@ -310,9 +310,9 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    WLOGFI("Begin calling the SetScreenPrivacyState() of screenSessionManager_, hasPrivate: %{public}d", hasPrivate);
+    WLOGFD("Begin calling the SetScreenPrivacyState() of screenSessionManager_, hasPrivate: %{public}d", hasPrivate);
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
-    WLOGFI("End calling the SetScreenPrivacyState() of screenSessionManager_");
+    WLOGFD("End calling the SetScreenPrivacyState() of screenSessionManager_");
 }
 
 void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
@@ -360,5 +360,14 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const Scree
         return nullptr;
     }
     return iter->second;
+}
+
+ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
+{
+    auto iter = screenSessionMap_.begin();
+    if (iter != screenSessionMap_.end()) {
+        return iter->first;
+    }
+    return SCREEN_ID_INVALID;
 }
 } // namespace OHOS::Rosen

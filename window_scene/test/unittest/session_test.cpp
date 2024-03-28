@@ -57,6 +57,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t baseParent) override;
+    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -121,6 +123,12 @@ WSError TestWindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32
 
 WSError TestWindowEventChannel::TransferExecuteAction(int64_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t baseParent)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
 {
     return WSError::WS_OK;
 }
@@ -1254,6 +1262,20 @@ HWTEST_F(WindowSessionTest, NotifyExtensionDied, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
     session_->NotifyExtensionDied();
+
+    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+/**
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyExtensionTimeout, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyExtensionTimeout(3);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }

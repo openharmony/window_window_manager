@@ -62,6 +62,7 @@ constexpr int32_t ANIMATION_TIME = 400;
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
+std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::displayMoveListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
 std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
@@ -70,8 +71,10 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -81,8 +84,11 @@ std::recursive_mutex WindowSessionImpl::occupiedAreaChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
+std::mutex WindowSessionImpl::displayMoveListenerMutex_;
+std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -981,6 +987,16 @@ WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 }
 
+WMError WindowSessionImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
+{
+    WLOGI("SetLandscapeMultiWindow");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    hostSession_->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
 {
     WLOGFD("Set the enable flag of single frame composer.");
@@ -1127,6 +1143,20 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
     return RegisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    WLOGFD("start register");
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+    return RegisterListener(displayMoveListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    WLOGFD("Start unregister");
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+    return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
     WLOGFD("Start register");
@@ -1185,6 +1215,12 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     uiContent_->SetContainerModalTitleVisible(isVisible, true);
     WLOGI("Change the visibility of decor success");
     return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+{
+    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
 }
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
@@ -1349,6 +1385,35 @@ void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleB
     }
 }
 
+template<typename T>
+EnableIfSame<T, IWindowRectChangeListener,
+    std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowRectChangeListener>> windowRectChangeListeners;
+    for (auto& listener : windowRectChangeListeners_[GetPersistentId()]) {
+        windowRectChangeListeners.push_back(listener);
+    }
+    return windowRectChangeListeners;
+}
+
+WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+    WMError ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+    if (ret == WMError::WM_OK) {
+        hostSession_->UpdateRectChangeListenerRegistered(true);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+    WMError ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+    hostSession_->UpdateRectChangeListenerRegistered(false);
+    return ret;
+}
+
 void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
@@ -1441,6 +1506,10 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
     {
+        std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+        ClearUselessListeners(displayMoveListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         ClearUselessListeners(lifecycleListeners_, persistentId);
     }
@@ -1471,6 +1540,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+        ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
 }
 
@@ -1766,6 +1839,28 @@ WSError WindowSessionImpl::NotifyDestroy()
     return WSError::WS_OK;
 }
 
+template<typename T>
+EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
+    for (auto& listener : displayMoveListeners_[GetPersistentId()]) {
+        displayMoveListeners.push_back(listener);
+    }
+    return displayMoveListeners;
+}
+
+void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
+{
+    WLOGFD("Notify display move from %{public}" PRIu64 " to %{public}" PRIu64, from, to);
+    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+    auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
+    for (auto& listener : displayMoveListeners) {
+        if (listener != nullptr) {
+            listener->OnDisplayMove(from, to);
+        }
+    }
+}
+
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
     TLOGD(WmsLogTag::WMS_PIP, "WindowSessionImpl::NotifyCloseExistPipWindow");
@@ -1805,6 +1900,13 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     for (auto& listener : windowChangeListeners) {
         if (listener != nullptr) {
             listener->OnSizeChange(rect, reason);
+        }
+    }
+    std::lock_guard<std::mutex> lockRectListener(windowRectChangeListenerMutex_);
+    auto windowRectChangeListeners = GetListeners<IWindowRectChangeListener>();
+    for (auto& listener : windowRectChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnRectChange(rect, reason);
         }
     }
 }
@@ -1899,6 +2001,17 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
             listener->OnAvoidAreaChanged(*avoidArea, type);
         }
     }
+}
+
+WSError WindowSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
+{
+    return WSError::WS_OK;
+}
+
+WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
+    AAFwk::WantParams& reWantParams)
+{
+    return WSErrorCode::WS_OK;
 }
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
@@ -2038,6 +2151,26 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
     return ret;
 }
 
+WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+{
+    WLOGFD("Start to register window no interaction listener.");
+    std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+    WMError ret = RegisterListener(windowNoInteractionListeners_[GetPersistentId()], listener);
+    SubmitNoInteractionMonitorTask(this->lastInteractionEventId_.load(), listener);
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+{
+    WLOGFD("Start to unregister window no interaction listener.");
+    std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+    WMError ret = UnregisterListener(windowNoInteractionListeners_[GetPersistentId()], listener);
+    if (windowNoInteractionListeners_[GetPersistentId()].empty()) {
+        lastInteractionEventId_.store(-1);
+    }
+    return ret;
+}
+
 template<typename T>
 EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::GetListeners()
 {
@@ -2046,6 +2179,16 @@ EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityL
         windowVisibilityChangeListeners.push_back(listener);
     }
     return windowVisibilityChangeListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    std::vector<IWindowNoInteractionListenerSptr> noInteractionListeners;
+    for (auto& listener : windowNoInteractionListeners_[GetPersistentId()]) {
+        noInteractionListeners.push_back(listener);
+    }
+    return noInteractionListeners;
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
@@ -2059,6 +2202,19 @@ WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
             listener->OnWindowVisibilityChangedCallback(isVisible);
         }
     }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyNoInteractionTimeout(const IWindowNoInteractionListenerSptr& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("invalid listener: nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("Notify window no interaction timeout, window: name=%{public}s, id=%{public}u, timeout=%{public}" PRId64,
+        GetWindowName().c_str(), GetPersistentId(), listener->GetTimeout());
+
+    listener->OnWindowNoInteractionCallback();
     return WSError::WS_OK;
 }
 
@@ -2197,7 +2353,7 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
-    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    WLOGD("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard || isKeyBack);
 }
 
@@ -2429,6 +2585,11 @@ WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
+{
+    return WSError::WS_OK;
+}
+
 void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (IsWindowSessionInvalid()) {
@@ -2472,6 +2633,41 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     WLOGFI("NotifyWindowStatusChange");
     if (uiContent_ != nullptr) {
         uiContent_->UpdateTransform(transform);
+    }
+}
+
+void WindowSessionImpl::SubmitNoInteractionMonitorTask(int32_t eventId,
+    const IWindowNoInteractionListenerSptr& listener)
+{
+    auto task = [sessionWptr = wptr(this), eventId, listenerWptr = wptr(listener)]() {
+        auto session = sessionWptr.promote();
+        if (session == nullptr) {
+            WLOGFE("windowInteractionMonitor task running failed, window session is null");
+            return;
+        }
+        if (eventId != session->lastInteractionEventId_.load()) {
+            WLOGFD("event id of windowInteractionMonitor has been changed, need not notify!");
+            return;
+        }
+        if (session->state_ != WindowState::STATE_SHOWN) {
+            WLOGFD("window state is not show, need not notify!");
+            return;
+        }
+        session->NotifyNoInteractionTimeout(listenerWptr.promote());
+    };
+    handler_->PostTask(task, listener->GetTimeout());
+}
+
+void WindowSessionImpl::RefreshNoInteractionTimeoutMonitor(int32_t eventId)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+    if (windowNoInteractionListeners_[GetPersistentId()].empty()) {
+        return;
+    }
+    this->lastInteractionEventId_.store(eventId);
+    auto noInteractionListeners = GetListeners<IWindowNoInteractionListener>();
+    for (const auto& listenerItem : noInteractionListeners) {
+        SubmitNoInteractionMonitorTask(eventId, listenerItem);
     }
 }
 

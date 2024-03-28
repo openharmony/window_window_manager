@@ -395,6 +395,35 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsWindowListener::SetTimeout(int64_t timeout)
+{
+    noInteractionTimeout_ = timeout;
+}
+
+int64_t JsWindowListener::GetTimeout() const
+{
+    return noInteractionTimeout_;
+}
+
+void JsWindowListener::OnWindowNoInteractionCallback()
+{
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr) {
+                WLOGFE("[NAPI]this listener is nullptr");
+                return;
+            }
+            thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowNoInteractionCallback", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 {
     WLOGFD("[NAPI]OnWindowStatusChange");
@@ -472,6 +501,47 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowTitleButtonRectChanged",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
+{
+    RectChangeReason rectChangReason = JS_SIZE_CHANGE_REASON.at(reason);
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, rect, rectChangReason, env = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "this listener or env is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create js object");
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create rect js object");
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_set_named_property(env, objValue, "reason", CreateJsValue(env, rectChangReason));
+        napi_value argv[] = {objValue};
+        thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(env, scope);
+    };
+
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(jsCallback, "wms:JsWindowRectListener::OnRectChange", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    currentWidth_ = rect.width_;
+    currentHeight_ = rect.height_;
 }
 } // namespace Rosen
 } // namespace OHOS

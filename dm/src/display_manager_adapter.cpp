@@ -225,6 +225,13 @@ DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId scre
     return displayManagerServiceProxy_->SetVirtualMirrorScreenCanvasRotation(screenId, canvasRotation);
 }
 
+DMError ScreenManagerAdapter::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    WLOGFI("DisplayManagerAdapter::SetVirtualMirrorScreenScaleMode");
+    return displayManagerServiceProxy_->SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
+}
+
 DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -403,7 +410,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("BaseAdapter destory!");
+    WLOGFD("BaseAdapter destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerServiceProxy_ = nullptr;
 }
@@ -495,7 +502,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFI("DisplayManagerAdapter::GetCutoutInfo");
+    WLOGFD("DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;
@@ -660,5 +667,29 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
+}
+
+VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId id is invalid");
+        return VirtualScreenFlag::DEFAULT;
+    }
+
+    return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
+}
+
+DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return displayManagerServiceProxy_->SetVirtualScreenFlag(screenId, screenFlag);
 }
 } // namespace OHOS::Rosen

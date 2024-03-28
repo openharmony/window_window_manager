@@ -262,7 +262,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
-    WINDOW_FLAG_END = 1 << 5,
+    WINDOW_FLAG_IS_MODAL = 1 << 5,
+    WINDOW_FLAG_END = 1 << 6,
 };
 
 /**
@@ -628,7 +629,7 @@ enum class WindowUpdateType : int32_t {
 /**
  * @brief Enumerates picture in picture window state.
  */
-enum class PipWindowState : uint32_t {
+enum class PiPWindowState : uint32_t {
     STATE_UNDEFINED = 0,
     STATE_STARTING = 1,
     STATE_STARTED = 2,
@@ -639,7 +640,7 @@ enum class PipWindowState : uint32_t {
 /**
  * @brief Enumerates picture in picture template type.
  */
-enum class PipTemplateType : uint32_t {
+enum class PiPTemplateType : uint32_t {
     VIDEO_PLAY = 0,
     VIDEO_CALL = 1,
     VIDEO_MEETING = 2,
@@ -648,9 +649,32 @@ enum class PipTemplateType : uint32_t {
 };
 
 /**
+ * @brief Enumerates picture in picture control group.
+ */
+enum class PiPControlGroup : uint32_t {
+    VIDEO_PLAY_START = 100,
+    VIDEO_PREVIOUS_NEXT = 101,
+    FAST_FORWARD_BACKWARD = 102,
+    VIDEO_PLAY_END,
+
+    VIDEO_CALL_START = 200,
+    VIDEO_CALL_MICROPHONE_SWITCH = 201,
+    VIDEO_CALL_HANG_UP_BUTTON = 202,
+    VIDEO_CALL_CAMERA_SWITCH = 203,
+    VIDEO_CALL_END,
+
+    VIDEO_MEETING_START = 300,
+    VIDEO_MEETING_HANG_UP_BUTTON = 301,
+    VIDEO_MEETING_CAMERA_SWITCH = 302,
+    VIDEO_MEETING_MUTE_SWITCH = 303,
+    VIDEO_MEETING_END,
+    END,
+};
+
+/**
  * @brief Enumerates picture in picture state.
  */
-enum class PipState : int32_t {
+enum class PiPState : int32_t {
     ABOUT_TO_START = 1,
     STARTED = 2,
     ABOUT_TO_STOP = 3,
@@ -786,6 +810,20 @@ enum class CaseType {
     CASE_WINDOW_MANAGER = 0,
     CASE_WINDOW,
     CASE_STAGE
+};
+
+/**
+ * maximize layout show type
+ */
+enum ShowType : int32_t {
+    SHOW, // normally show
+    HIDE, // show when hover, but hide normally
+    FORBIDDEN // hide always
+};
+
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
 };
 
 }

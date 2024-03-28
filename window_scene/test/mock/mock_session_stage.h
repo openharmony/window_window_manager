@@ -34,6 +34,8 @@ public:
     MOCK_METHOD0(NotifyDestroy, WSError(void));
     MOCK_METHOD1(UpdateFocus, WSError(bool isFocused));
     MOCK_METHOD1(NotifyTransferComponentData, WSError(const AAFwk::WantParams& wantParams));
+    MOCK_METHOD2(NotifyTransferComponentDataSync, WSErrorCode(const AAFwk::WantParams& wantParams,
+        AAFwk::WantParams& reWantParams));
     MOCK_METHOD1(MarkProcessed, WSError(int32_t eventId));
     MOCK_METHOD1(NotifyOccupiedAreaChangeInfo, void(sptr<OccupiedAreaChangeInfo> info));
     MOCK_METHOD2(UpdateAvoidArea, WSError(const sptr<AvoidArea>& avoidArea, AvoidAreaType type));
@@ -50,8 +52,10 @@ public:
     MOCK_METHOD1(UpdateWindowDrawingContentInfo, void(const WindowDrawingContentInfo& info));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
+    MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
     MOCK_METHOD2(SetPipActionEvent, WSError(const std::string& action, int32_t status));
     MOCK_METHOD1(UpdateDisplayId, WSError(uint64_t displayId));
+    MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
 };
 } // namespace Rosen
 } // namespace OHOS

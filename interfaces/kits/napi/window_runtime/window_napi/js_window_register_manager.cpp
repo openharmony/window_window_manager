@@ -16,8 +16,10 @@
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "js_runtime_utils.h"
 namespace OHOS {
 namespace Rosen {
+using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
 }
@@ -45,6 +47,8 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { WINDOW_STATUS_CHANGE_CB,            &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
         { WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
         { WINDOW_VISIBILITY_CHANGE_CB,        &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
+        { WINDOW_NO_INTERACTION_DETECT_CB,    &JsWindowRegisterManager::ProcessWindowNoInteractionRegister        },
+        { WINDOW_RECT_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowRectChangeRegister           },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -57,7 +61,7 @@ JsWindowRegisterManager::~JsWindowRegisterManager()
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
@@ -74,7 +78,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowLi
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Window is nullptr");
@@ -96,7 +100,7 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<J
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
@@ -113,7 +117,7 @@ WmErrorCode JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindo
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
@@ -130,7 +134,7 @@ WmErrorCode JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindow
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
@@ -147,7 +151,7 @@ WmErrorCode JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWi
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     sptr<ISystemBarChangedListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
@@ -162,7 +166,7 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindo
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     sptr<IGestureNavigationEnabledChangedListener> thisListener(listener);
     WmErrorCode ret;
@@ -177,7 +181,7 @@ WmErrorCode JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegist
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     sptr<IWaterMarkFlagChangedListener> thisListener(listener);
     WmErrorCode ret;
@@ -191,7 +195,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsW
     return ret;
 }
 WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGI("called");
     if (window == nullptr) {
@@ -208,10 +212,10 @@ WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowLi
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGD("called");
-    if (window == nullptr) {
+    if (window == nullptr || listener == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowVisibilityChangedListener> thisListener(listener);
@@ -224,8 +228,39 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowNoInteractionListener> thisListener(listener);
+
+    if (!isRegister) {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowNoInteractionListener(thisListener));
+    }
+
+    int64_t timeout = 0;
+    if (parameter == nullptr || !ConvertFromJsNumber(env, parameter, timeout)) {
+        WLOGFE("Failed to convert parameter to timeout");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+
+    constexpr int64_t S_TO_MS_RATIO = 1000;
+    constexpr int64_t NO_INTERACTION_MAX = LLONG_MAX / S_TO_MS_RATIO;
+    if (timeout <= 0 || (timeout > NO_INTERACTION_MAX)) {
+        WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
+            timeout, NO_INTERACTION_MAX);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+
+    thisListener->SetTimeout(timeout * S_TO_MS_RATIO);
+
+    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGI("called");
     if (window == nullptr) {
@@ -243,7 +278,7 @@ WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowList
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -259,7 +294,7 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWin
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -274,7 +309,7 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<Js
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGD("called");
     if (window == nullptr) {
@@ -310,11 +345,11 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value)
+    CaseType caseType, napi_env env, napi_value value, napi_value parameter)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, value)) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
@@ -329,7 +364,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true);
+    WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true, env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -346,7 +381,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
@@ -354,7 +389,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false);
+            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -370,7 +405,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false);
+            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
@@ -393,7 +428,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
@@ -405,6 +440,22 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowRectChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
     }
     return ret;
 }

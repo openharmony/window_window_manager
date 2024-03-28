@@ -310,7 +310,8 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedScreenBoundaryConfig, Function | SmallT
  */
 HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Level3)
 {
-    auto result = ScreenSceneConfig::GetCutoutBoundaryRect();
+    uint64_t displayId = -1;
+    auto result = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     ASSERT_FALSE(result.size() > 0);
 }
 
@@ -368,8 +369,9 @@ HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect, Function | SmallTest | L
  */
 HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, Function | SmallTest | Level3)
 {
-    ScreenSceneConfig::SetCutoutSvgPath("oo");
-    auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect();
+    uint64_t displayId = 0;
+    ScreenSceneConfig::SetCutoutSvgPath(displayId, "oo");
+    auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     ASSERT_NE(0, result_.size());
 }
 

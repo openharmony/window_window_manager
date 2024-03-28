@@ -268,4 +268,14 @@ WSError WindowEventChannel::TransferExecuteAction(int64_t elementId,
     }
     return sessionStage_->NotifyExecuteAction(elementId, actionArguments, action, baseParent);
 }
+
+WSError WindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
 } // namespace OHOS::Rosen
