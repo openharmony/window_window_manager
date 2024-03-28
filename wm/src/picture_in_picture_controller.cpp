@@ -396,6 +396,20 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         TLOGE(WmsLogTag::WMS_PIP, "pipWindow not exist");
         return;
     }
+    if (mainWindowXComponentController_) {
+        float posX = 0;
+        float posY = 0;
+        float newWidth = 0;
+        float newHeight = 0;
+        mainWindowXComponentController_->GetGlobalPosition(posX, posY);
+        mainWindowXComponentController_->GetSize(newWidth, newHeight);
+        if (windowRect_.width_ != static_cast<uint32_t>(newWidth) ||
+            windowRect_.height_ != static_cast<uint32_t>(newHeight) ||
+            windowRect_.posX_ != static_cast<uint32_t>(posX) || windowRect_.posY_ != static_cast<uint32_t>(posY)) {
+            Rect r = {posX, posY, newWidth, newHeight};
+            window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
+        }
+    }
     TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
         window_->GetWindowId(), width, height);
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
