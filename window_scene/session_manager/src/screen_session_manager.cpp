@@ -2701,7 +2701,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
 {
-    WLOGFI("GetDisplaySnapshot ENTER!");
+    WLOGFD("ENTER!");
 
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         WLOGFI("GetDisplaySnapshot was disabled by edm!");
@@ -2970,7 +2970,7 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
     if (agents.empty()) {
-        WLOGFI("OnScreenshot agents empty");
+        WLOGFD("agents empty");
         return;
     }
     WLOGFI("onScreenshot");
@@ -3650,7 +3650,7 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
     if (Permission::CheckIsCallingBundleName(bundleName) == false) {
-        WLOGI("BundleName not in whitelist!");
+        WLOGD("BundleName not in whitelist!");
         return;
     }
     int32_t eventRet = HiSysEventWrite(
