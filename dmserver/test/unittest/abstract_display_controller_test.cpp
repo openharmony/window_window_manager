@@ -121,7 +121,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect02, 
 {
     auto group = absScreen_->GetGroup();
     EXPECT_NE(nullptr, group);
-    group->abstractScreenMap_.insert(std::make_pair(100, std::make_pair(absScreen_, Point(0, 0)))); // 100 is test data
+    group->screenMap_.insert(std::make_pair(100, absScreen_)); // 100 is test data
     group->combination_ = ScreenCombination::SCREEN_MIRROR;
     absDisplayController_->OnAbstractScreenConnect(absScreen_);
     absDisplayController_->OnAbstractScreenDisconnect(absScreen_);
@@ -136,7 +136,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect03, 
 {
     auto group = absScreen_->GetGroup();
     EXPECT_NE(nullptr, group);
-    group->abstractScreenMap_.insert(std::make_pair(100, std::make_pair(absScreen_, Point(0, 0)))); // 100 is test data
+    group->screenMap_.insert(std::make_pair(100, absScreen_)); // 100 is test data
     group->combination_ = ScreenCombination::SCREEN_EXPAND;
     absDisplayController_->OnAbstractScreenConnect(absScreen_);
     absDisplayController_->OnAbstractScreenDisconnect(absScreen_);
