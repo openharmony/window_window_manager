@@ -261,7 +261,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
         WLOGFD("defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
-        ScreenSceneConfig::SetCutoutSvgPath(defaultDisplayCutoutPath);
+        ScreenSceneConfig::SetCutoutSvgPath(GetDefaultScreenId(), defaultDisplayCutoutPath);
     }
     ConfigureWaterfallDisplayCompressionParams();
 
