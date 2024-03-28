@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+    constexpr int32_t DELAY_ANIM = 500;
     constexpr int32_t SUCCESS = 1;
     constexpr int32_t FAILED = 0;
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
@@ -96,7 +97,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
     sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
+        TLOGW(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     window_ = window;
@@ -445,7 +446,20 @@ void PictureInPictureController::RestorePictureInPictureWindow()
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
         }
     }
-    StopPictureInPicture(true, StopPipType::NULL_STOP);
+    if (handler_) {
+        auto stopTask = [weakThis = wptr(this)]() {
+            auto controller = weakThis.promote();
+            if (!controller) {
+                TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+                return;
+            }
+            controller->StopPictureInPicture(true, StopPipType::NULL_STOP);
+        };
+        handler_->PostTask(stopTask, "wms:StopPictureInPicture_restore", DELAY_ANIM);
+    } else {
+        TLOGW(WmsLogTag::WMS_PIP, "StopPictureInPicture no delay while restore");
+        StopPictureInPicture(true, StopPipType::NULL_STOP);
+    }
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
