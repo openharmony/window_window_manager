@@ -1589,10 +1589,10 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start.");
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Get instance failed, Notify Input framework close keyboard failed.");
         }
 #endif
     }
@@ -1608,6 +1608,7 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
     auto task = [weak = wptr(this)]() {
         auto window = weak.promote();
         if (!window) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is null, Notify input framework close keyboard failed.");
             return;
         }
         bool isNeedKeyboard = false;
@@ -1620,14 +1621,13 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = (window->property_) ? window->property_->GetKeepKeyboardFlag() : false;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-            isNeedKeyboard, keepKeyboardFlag);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+            window->GetPersistentId(), isNeedKeyboard, keepKeyboardFlag);
         RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ != nullptr) {
         uiContent_->SetOnWindowFocused(task);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "set need soft keyboard callback success!");
     }
 }
 
