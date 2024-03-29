@@ -4809,36 +4809,40 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
     bool isAddFlag = false;
     napi_get_value_bool(env, nativeBool, &isAddFlag);
     wptr<Window> weakToken(windowToken_);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr] () {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        WMError ret = isAddFlag ? weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING) :
+            weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        WLOGI("Window [%{public}u, %{public}s] set handwriting flag on end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isAddFlag](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto window = weakToken.promote();
-            if (window == nullptr) {
-                task.Reject(env,
-                    CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "OnSetHandwritingFlag failed."));
+        [weakToken, isAddFlag, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "System abnormal."));
                 return;
             }
-            WMError ret = WMError::WM_OK;
-            if (isAddFlag) {
-                ret = window->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
-            } else {
-                ret = window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
-            }
-            if (ret == WMError::WM_OK) {
+            if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "SetHandwritingFlag failed."));
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodePtr), "SetHandwritingFlag failed."));
             }
-            WLOGI("[NAPI]Window [%{public}u, %{public}s] set handwriting flag end, ret = %{public}d",
-                window->GetWindowId(), window->GetWindowName().c_str(), ret);
         };
 
-    napi_value lastParam = (argc == 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetHandwritingFlag",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
