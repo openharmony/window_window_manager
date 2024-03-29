@@ -2811,7 +2811,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     Media::InitializationOptions opts;
     opts.size.width = maskWidth;
     opts.size.height = maskHeight;
-    opts.pixelFormat = Media::PixelFormat::RGBA_8888;
+    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
     uint32_t length = maskWidth * maskHeight;
