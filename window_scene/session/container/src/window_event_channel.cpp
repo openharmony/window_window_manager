@@ -30,6 +30,33 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
 }
 
+void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteBool(isConsumed)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "isConsumed write failed.");
+        return;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(retCode))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "retCode write failed.");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
+    }
+}
+
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     WLOGFD("WindowEventChannel receive key event");
@@ -100,6 +127,23 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent, const sptr<IRemoteObject>& listener)
+{
+    bool isConsumed = false;
+    auto ret = TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
+    if (channelListener == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "listener is null.");
+        return ret;
+    }
+
+    TLOGD(WmsLogTag::WMS_EVENT, "finished with isConsumed:%{public}d ret:%{public}d",
+        isConsumed, ret);
+    channelListener->OnTransferKeyEventForConsumed(isConsumed, ret);
+    return ret;
 }
 
 WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)

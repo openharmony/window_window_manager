@@ -111,6 +111,22 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumed, Function | Sm
 }
 
 /**
+ * @tc.name: TransferKeyEventForConsumedAsync
+ * @tc.desc: test function : TransferKeyEventForConsumedAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, Function | SmallTest | Level1)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isPreImeEvent = false;
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    WSError res = windowEventChannelProxy_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent,
+        iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: TransferFocusActiveEvent
  * @tc.desc: test function : TransferFocusActiveEvent
  * @tc.type: FUNC
