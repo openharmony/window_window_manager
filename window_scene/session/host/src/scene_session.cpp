@@ -1950,6 +1950,8 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
+        info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
         info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
         info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
         info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
@@ -1995,6 +1997,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
+        info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
         info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
         info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
         info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
