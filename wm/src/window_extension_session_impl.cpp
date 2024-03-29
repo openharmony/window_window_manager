@@ -401,7 +401,6 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     }
     property_->SetWindowRect(wmRect);
     if (wmReason == WindowSizeChangeReason::ROTATION) {
-        auto preRect = GetRect();
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else {
         NotifySizeChange(wmRect, wmReason);
