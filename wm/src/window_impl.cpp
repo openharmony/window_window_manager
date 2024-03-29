@@ -1169,7 +1169,7 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -1180,6 +1180,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
+    property_->SetDisplayId(DISPLAY_ID_INVALID);
     SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
