@@ -55,6 +55,28 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
     }
 }
 
+void WindowManagerAgentProxy::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    MessageParcel data;
+    
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint8(static_cast<uint8_t>(type))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write displayId failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;

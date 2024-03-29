@@ -103,6 +103,16 @@ enum class WindowMode : uint32_t {
 };
 
 /**
+ * @brief Enumerates modeType of window.
+ */
+enum class WindowModeType : uint8_t {
+    WINDOW_MODE_SPLIT_FLOATING = 0,
+    WINDOW_MODE_SPLIT = 1,
+    WINDOW_MODE_FLOATING = 2,
+    WINDOW_MODE_OTHER = 3
+};
+
+/**
  * @brief Enumerates mode supported of window.
  */
 enum WindowModeSupport : uint32_t {
