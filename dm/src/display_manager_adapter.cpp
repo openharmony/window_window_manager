@@ -400,7 +400,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    WLOGFI("dms OnRemoteDied");
+    WLOGFD("dms OnRemoteDied");
     adapter_.Clear();
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
@@ -417,7 +417,7 @@ BaseAdapter::~BaseAdapter()
 
 void BaseAdapter::Clear()
 {
-    WLOGFI("BaseAdapter Clear!");
+    WLOGFD("BaseAdapter Clear!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
