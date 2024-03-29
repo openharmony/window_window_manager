@@ -16,6 +16,7 @@ import("../../../windowmanager_aafwk.gni")
 
 config("intention_event_public_config") {
   include_dirs = [
+    "${accessibility_path}/interfaces/innerkits/common/include/",
     "anr_manager/include",
     "event_stage/include",
     "timer_manager/include",
@@ -47,7 +48,7 @@ ohos_shared_library("intention_event_anr_manager") {
   ]
 
   public_configs = [ ":intention_event_public_config" ]
-  public_external_deps = [ "accessibility:accessibility_common" ]
+
   external_deps = [
     "ability_base:want",
     "c_utils:utils",

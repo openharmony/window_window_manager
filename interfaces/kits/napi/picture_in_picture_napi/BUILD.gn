@@ -16,7 +16,10 @@ import("../../../../windowmanager_aafwk.gni")
 
 config("pip_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "../../../../wm/include" ]
+  include_dirs = [
+    "../../../../wm/include",
+    "${arkui_path}/ace_engine/interface/inner_api/ace",
+  ]
 }
 
 ohos_shared_library("pipwindow_napi") {
