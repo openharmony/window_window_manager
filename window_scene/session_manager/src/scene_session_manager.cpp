@@ -5283,7 +5283,8 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     bool isCallingSessionFloating = callingSession_->GetSessionProperty() &&
         callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 
-    const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
+    const WSRect& softInputSessionRect = (sceneSession->GetSessionRect().height_ != 0) ?
+        sceneSession->GetSessionRect() : sceneSession->GetSessionRequestRect();
     WSRect callingSessionRect;
     if (isInputUpdated && isCallingSessionFloating) {
         callingSessionRect = callingSession_->callingWindowRestoringRect_;
