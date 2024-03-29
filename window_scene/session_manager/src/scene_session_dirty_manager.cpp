@@ -34,7 +34,7 @@ constexpr float DIRECTION180 = 180 ;
 constexpr float DIRECTION270 = 270 ;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionDirtyManager"};
 constexpr unsigned int POINTER_CHANGE_AREA_COUNT = 8;
-constexpr int POINTER_CHANGE_AREA_SEXTEEN = 16;
+constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr int UPDATE_TASK_DURATION = 10;
@@ -359,28 +359,28 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 vpr = screenSession->GetScreenProperty().GetDensity();
             }
         }
-        int32_t pointerArea_Five_Px = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
-        int32_t pointerArea_Sexteen_Px = static_cast<int32_t>(POINTER_CHANGE_AREA_SEXTEEN * vpr);
+        int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
+        int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
 
         if (sceneSession->GetSessionInfo().isSetPointerAreas_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_Px, pointerArea_Sexteen_Px,
-                pointerArea_Five_Px, pointerArea_Sexteen_Px, pointerArea_Five_Px};
+                POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, pointerAreaSixteenPx,
+                pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
             return;
         }
         auto limits = sceneSession->GetSessionProperty()->GetWindowLimits();
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
-            pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_Px,
+            pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
                 POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                pointerArea_Five_Px, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+                pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
         } else if (limits.minWidth_ != limits.maxWidth_ && limits.minHeight_ == limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_Px, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_Px};
+                POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,
+                POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx};
         } else if (limits.minWidth_ != limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
-            pointerChangeAreas = {pointerArea_Sexteen_Px, pointerArea_Five_Px,
-                pointerArea_Sexteen_Px, pointerArea_Five_Px, pointerArea_Sexteen_Px,
-                pointerArea_Five_Px, pointerArea_Sexteen_Px, pointerArea_Five_Px};
+            pointerChangeAreas = {pointerAreaSixteenPx, pointerAreaFivePx,
+                pointerAreaSixteenPx, pointerAreaFivePx, pointerAreaSixteenPx,
+                pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
         WLOGFD("UpdatePointerAreas sceneSession is: %{public}d dragEnabled is false", sceneSession->GetPersistentId());
