@@ -1088,7 +1088,12 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
             return;
         }
         WLOGFD("Remote died, id: %{public}d", iter->second);
-        DestroyAndDisconnectSpecificSession(iter->second);
+        auto sceneSession = GetSceneSession(iter->second);
+        if (sceneSession == nullptr) {
+            WLOGFW("Remote died, session is nullptr, id: %{public}d", iter->second);
+            return;
+        }
+        DestroyAndDisconnectSpecificSessionInner(sceneSession);
         remoteObjectMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task);
@@ -1203,36 +1208,51 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession)
+{
+    if (sceneSession == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    const auto& persistentId = sceneSession->GetPersistentId();
+    auto ret = sceneSession->UpdateActiveStatus(false);
+    WindowDestroyNotifyVisibility(sceneSession);
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        if (parentSession == nullptr) {
+            WLOGFE("Dialog not bind parent");
+        } else {
+            parentSession->RemoveDialogToParentSession(sceneSession);
+        }
+        sceneSession->NotifyDestroy();
+    }
+    ret = sceneSession->Disconnect();
+    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    {
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMap_.erase(persistentId);
+    }
+    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        auto sessionInfo = sceneSession->GetSessionInfo();
+        WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
+    }
+    return ret;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
-    auto task = [this, persistentId]() {
+    const auto& callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [this, persistentId, callingPid]() {
         WLOGFI("Destroy specific session persistentId: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        auto ret = sceneSession->UpdateActiveStatus(false);
-        WindowDestroyNotifyVisibility(sceneSession);
-        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            if (parentSession == nullptr) {
-                WLOGFE("Dialog not bind parent");
-            } else {
-                parentSession->RemoveDialogToParentSession(sceneSession);
-            }
-            sceneSession->NotifyDestroy();
+        
+        if (callingPid != sceneSession->GetCallingPid()) {
+            WLOGFE("[WMSSystem][WMSSub] Permission denied, not destroy by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        ret = sceneSession->Disconnect();
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        {
-            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            sceneSessionMap_.erase(persistentId);
-        }
-        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            auto sessionInfo = sceneSession->GetSessionInfo();
-            WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
-        }
-        return ret;
+        return DestroyAndDisconnectSpecificSessionInner(sceneSession);
     };
 
     return taskScheduler_->PostSyncTask(task);

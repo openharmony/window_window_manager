@@ -254,6 +254,7 @@ private:
                                       const sptr<SceneSession>& sceneSession);
     WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                        const sptr<SceneSession>& sceneSession);
+    WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
