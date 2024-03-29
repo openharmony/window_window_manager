@@ -1296,9 +1296,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d "
+    getAvoidAreaCnt_++;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
           "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
-          windowId, GetWindowName().c_str(), type,
+          windowId, GetWindowName().c_str(), type, getAvoidAreaCnt_,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
           avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
           avoidArea.bottomRect_.height_);
@@ -1448,17 +1449,22 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u property is same", GetWindowId());
+        setSameSystembarPropertyCnt_++;
+        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set same property %{public}u times, "
+            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x",
+            GetWindowId(), GetWindowName().c_str(), setSameSystembarPropertyCnt_,
+            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_);
         return WMError::WM_OK;
     }
+    setSameSystembarPropertyCnt_ = 0;
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
