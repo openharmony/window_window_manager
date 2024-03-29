@@ -898,6 +898,10 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
 bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpBegin(%u)", reason);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("WakeUpBegin permission denied!");
+        return false;
+    }
     currentWakeUpReason_ = reason;
     WLOGFI("[UL_POWER]WakeUpBegin remove suspend begin task, reason: %{public}u", static_cast<uint32_t>(reason));
 
@@ -922,6 +926,10 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 bool ScreenSessionManager::WakeUpEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:WakeUpEnd");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("WakeUpEnd permission denied!");
+        return false;
+    }
     WLOGFI("[UL_POWER]WakeUpEnd enter");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
@@ -934,6 +942,10 @@ bool ScreenSessionManager::WakeUpEnd()
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendBegin(%u)", reason);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SuspendBegin permission denied!");
+        return false;
+    }
     WLOGFI("[UL_POWER]SuspendBegin block screen power change is true, reason: %{public}u",
         static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
@@ -959,6 +971,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::SuspendEnd()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SuspendEnd permission denied!");
+        return false;
+    }
     WLOGFI("[UL_POWER]SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendEnd");
     blockScreenPowerChange_ = false;
@@ -977,6 +993,10 @@ bool ScreenSessionManager::BlockSetDisplayState()
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetDisplayState permission denied!");
+        return false;
+    }
     WLOGFI("[UL_POWER]SetDisplayState enter");
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
@@ -1065,6 +1085,10 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
 
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenPowerForAll permission denied!");
+        return false;
+    }
     WLOGFI("[UL_POWER]state: %{public}u, reason: %{public}u",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
     ScreenPowerStatus status;
@@ -1080,6 +1104,18 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
         return true;
     }
 
+    if (!GetPowerStatus(state, reason, status)) {
+        return false;
+    }
+    keyguardDrawnDone_ = false;
+    WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
+    prePowerStateChangeReason = reason;
+    return SetScreenPower(status, reason);
+}
+
+bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason,
+    ScreenPowerStatus& status)
+{
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
@@ -1089,8 +1125,6 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                 status = ScreenPowerStatus::POWER_STATUS_ON;
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
             }
-            keyguardDrawnDone_ = false;
-            WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
             break;
         }
         case ScreenPowerState::POWER_OFF: {
@@ -1101,8 +1135,6 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
                 status = ScreenPowerStatus::POWER_STATUS_OFF;
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
             }
-            keyguardDrawnDone_ = false;
-            WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
             break;
         }
         default: {
@@ -1110,8 +1142,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
             return false;
         }
     }
-    prePowerStateChangeReason = reason;
-    return SetScreenPower(status, reason);
+    return true;
 }
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
