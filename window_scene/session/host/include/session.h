@@ -379,6 +379,7 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+    void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -537,6 +538,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
+    std::function<void()> windowModeCallback_;
 
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
