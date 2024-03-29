@@ -25,7 +25,6 @@ ohos_shared_library("libintention_event") {
     "./include",
     "${window_base_path}/wm/include",
     "${window_base_path}/window_scene/session/host/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [ "src/intention_event_manager.cpp" ]
@@ -48,6 +47,7 @@ ohos_shared_library("libintention_event") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
+    "accessibility:accessibility_common",
   ]
 
   defines = []
