@@ -1103,6 +1103,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
     }
@@ -1453,6 +1457,10 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WMError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     property->SetSystemCalling(isSystemCalling);
     wptr<SceneSessionManager> weak = this;
