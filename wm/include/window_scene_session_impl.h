@@ -181,6 +181,8 @@ private:
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
+    uint32_t setSameSystembarPropertyCnt_ = 0;
+    uint32_t getAvoidAreaCnt_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
