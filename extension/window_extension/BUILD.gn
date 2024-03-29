@@ -84,10 +84,7 @@ ohos_shared_library("libwindow_extension") {
 config("window_extension_module_private_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "include",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-  ]
+  include_dirs = [" include" ]
 }
 
 ## Build libwindow_extension_module.so
@@ -109,6 +106,7 @@ ohos_shared_library("window_extension_module") {
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "ability_runtime:ability_context_native",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "napi:ace_napi",

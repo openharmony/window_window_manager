@@ -41,11 +41,8 @@ config("session_manager_public_config") {
     "${window_base_path}/dmserver/include",
 
     # for scene session manager
-    "${ability_runtime_inner_api_path}/session_handler/include",
-    "${resourceschedule_path}/ffrt/interfaces/kits",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wmserver/include",
-    "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
 
     "${window_base_path}/window_scene/screen_session_manager/include",
 
@@ -55,7 +52,6 @@ config("session_manager_public_config") {
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
 
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -97,7 +93,14 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
   ]
-
+  public_external_deps = [
+    "input:libmmi-util",
+    "input:libmmi-client",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "ffrt:libffrt",
+    "graphic_2d:window_animation",
+  ]
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
@@ -214,7 +217,13 @@ ohos_shared_library("screen_session_manager") {
   cflags_cc = [ "-std=c++17" ]
 
   public_configs = [ ":session_manager_public_config" ]
-
+  public_external_deps = [
+    "input:libmmi-util",
+    "input:libmmi-client",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "graphic_2d:window_animation",
+  ]
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -297,7 +306,13 @@ ohos_shared_library("session_manager") {
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [ "${window_base_path}/utils:libwmutil" ]
-
+  public_external_deps = [
+    "input:libmmi-util",
+    "input:libmmi-client",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "graphic_2d:window_animation",
+  ]
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
@@ -333,7 +348,13 @@ ohos_shared_library("session_manager_lite") {
   cflags_cc = [ "-std=c++17" ]
 
   public_configs = [ ":session_manager_public_config" ]
-
+  public_external_deps = [
+    "input:libmmi-util",
+    "input:libmmi-client",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "graphic_2d:window_animation",
+  ]
   deps = []
 
   external_deps = [
