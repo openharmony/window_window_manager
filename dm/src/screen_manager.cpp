@@ -639,7 +639,7 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
         return false;
     }
     ScreenId screenId = screenInfo->GetScreenId();
-    WLOGFI("screenId:%{public}" PRIu64".", screenId);
+    WLOGFD("screenId:%{public}" PRIu64".", screenId);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("displayId is invalid.");
         return false;
@@ -662,7 +662,7 @@ bool ScreenManager::Impl::isAllListenersRemoved() const
 
 void ScreenManager::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    WLOGFD("dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
     virtualScreenAgent_ = nullptr;

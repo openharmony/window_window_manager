@@ -1142,7 +1142,7 @@ DMError DisplayManager::Impl::RegisterDisplayModeListener(sptr<IDisplayModeListe
         WLOGFW("RegisterDisplayModeListener failed !");
         displayModeListenerAgent_ = nullptr;
     } else {
-        WLOGI("IDisplayModeListener register success");
+        WLOGD("IDisplayModeListener register success");
         displayModeListeners_.insert(listener);
     }
     return ret;
@@ -1453,7 +1453,7 @@ DMError DisplayManager::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
 
 void DisplayManager::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    WLOGFD("dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerListener_ = nullptr;
     displayStateAgent_ = nullptr;
