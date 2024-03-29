@@ -2030,7 +2030,10 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
 WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "action: %{public}s, status: %{public}d", action.c_str(), status);
-    PictureInPictureManager::DoActionEvent(action, status);
+    auto task = [action, status]() {
+        PictureInPictureManager::DoActionEvent(action, status);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SetPipActionEvent");
     return WSError::WS_OK;
 }
 

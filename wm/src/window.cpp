@@ -168,7 +168,7 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     WMError error = windowSessionImpl->Create(context, nullptr);
     if (error != WMError::WM_OK) {
         errCode = error;
-        TLOGD(WmsLogTag::WMS_PIP, "Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
+        TLOGW(WmsLogTag::WMS_PIP, "Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
