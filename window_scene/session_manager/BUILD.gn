@@ -357,7 +357,6 @@ ohos_shared_library("session_manager_lite") {
     "input:libmmi-client",
     "input:libmmi-util",
   ]
-  deps = []
 
   external_deps = [
     "ability_base:session_info",
