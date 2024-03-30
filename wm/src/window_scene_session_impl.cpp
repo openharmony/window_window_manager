@@ -2875,7 +2875,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
-    surfaceNode_->SetMask(RSMask); // RS interface to set mask
+    surfaceNode_->SetMask(rsMask); // RS interface to set mask
     RSTransaction::FlushImplicitTransaction();
 
     property_->SetWindowMask(mask);
