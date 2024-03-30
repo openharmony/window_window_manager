@@ -195,10 +195,10 @@ HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, Function | SmallTest | Leve
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     scensession->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(scensession->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**
@@ -755,7 +755,8 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+        uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -892,7 +893,8 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type)-> std::vector<sptr<SceneSession>>
+        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+            uint64_t displayId)-> std::vector<sptr<SceneSession>>
     {
         SessionInfo info_;
         info_.abilityName_ = "Background01";

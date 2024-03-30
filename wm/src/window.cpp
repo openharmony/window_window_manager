@@ -145,9 +145,12 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         return nullptr;
     }
-    if (!option || option->GetWindowName().empty()) {
-        TLOGE(WmsLogTag::WMS_PIP, "host window session is nullptr:%{public}u or option is null: %{public}u",
-            option->GetWindowName().empty(), option == nullptr);
+    if (!option) {
+        TLOGE(WmsLogTag::WMS_PIP, "option is null.");
+        return nullptr;
+    }
+    if (option->GetWindowName().empty()) {
+        TLOGE(WmsLogTag::WMS_PIP, "the window name of option is empty.");
         return nullptr;
     }
     if (!WindowHelper::IsPipWindow(option->GetWindowType())) {
@@ -165,7 +168,7 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     WMError error = windowSessionImpl->Create(context, nullptr);
     if (error != WMError::WM_OK) {
         errCode = error;
-        TLOGD(WmsLogTag::WMS_PIP, "Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
+        TLOGW(WmsLogTag::WMS_PIP, "Create pip window with session, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
@@ -195,6 +198,15 @@ sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
         return WindowSceneSessionImpl::GetTopWindowWithId(mainWinId);
     } else {
         return WindowImpl::GetTopWindowWithId(mainWinId);
+    }
+}
+
+sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetMainWindowWithContext(context);
+    } else {
+        return nullptr;
     }
 }
 

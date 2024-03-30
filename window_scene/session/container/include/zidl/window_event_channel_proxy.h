@@ -36,6 +36,8 @@ public:
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false) override;
+    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
+        const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,

@@ -483,6 +483,13 @@ napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetTouchable(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetTouchableAreas(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "SetTouchableAreas");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTouchableAreas(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetResizeByDragEnabled(napi_env env, napi_callback_info info)
 {
     WLOGI("SetResizeByDragEnabled");
@@ -530,6 +537,13 @@ napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info in
     WLOGD("SetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    WLOGD("GetPreferredOrientation");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
@@ -2664,6 +2678,34 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     return result;
 }
 
+napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        WLOGFE("Argc is invalid: %{public}zu, expect zero params", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Orientation requestedOrientation = window->GetRequestedOrientation();
+    ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
+    if (requestedOrientation >= Orientation::UNSPECIFIED && requestedOrientation <= Orientation::LOCKED) {
+        apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
+    } else {
+        WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
+            static_cast<uint32_t>(requestedOrientation));
+    }
+    WLOGI("Window [%{public}u, %{public}s] OnGetPreferredOrientation end, Orientation = %{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
+    return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
+}
+
 napi_value JsWindow::OnIsSupportWideGamut(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -3352,6 +3394,48 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTouchable",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Rect windowRect = windowToken_->GetRect();
+    std::vector<Rect> touchableAreas;
+    WmErrorCode errCode = ParseTouchableAreas(env, info, windowRect, touchableAreas);
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, errCode);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, touchableAreas](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                TLOGE(WmsLogTag::WMS_EVENT, "CompleteCallback window is nullptr");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "OnSetTouchableAreas failed"));
+            }
+            TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] setTouchableAreas end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetTouchableAreas",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -5413,6 +5497,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setPrivacyMode", moduleName, JsWindow::SetPrivacyMode);
     BindNativeFunction(env, object, "setWindowPrivacyMode", moduleName, JsWindow::SetWindowPrivacyMode);
     BindNativeFunction(env, object, "setTouchable", moduleName, JsWindow::SetTouchable);
+    BindNativeFunction(env, object, "setTouchableAreas", moduleName, JsWindow::SetTouchableAreas);
     BindNativeFunction(env, object, "setWindowTouchable", moduleName, JsWindow::SetWindowTouchable);
     BindNativeFunction(env, object, "setTransparent", moduleName, JsWindow::SetTransparent);
     BindNativeFunction(env, object, "setCallingWindow", moduleName, JsWindow::SetCallingWindow);
@@ -5422,6 +5507,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "dump", moduleName, JsWindow::Dump);
     BindNativeFunction(env, object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
     BindNativeFunction(env, object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
+    BindNativeFunction(env, object, "getPreferredOrientation", moduleName, JsWindow::GetPreferredOrientation);
     BindNativeFunction(env, object, "opacity", moduleName, JsWindow::Opacity);
     BindNativeFunction(env, object, "scale", moduleName, JsWindow::Scale);
     BindNativeFunction(env, object, "rotate", moduleName, JsWindow::Rotate);

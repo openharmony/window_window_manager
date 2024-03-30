@@ -111,8 +111,8 @@ protected:
     void GetStoragedAspectRatio(const sptr<WindowNode>& node);
     bool IsNeedAnimationSync(WindowType type);
 
-    Rect displayGroupRect_;
-    Rect displayGroupLimitRect_;
+    Rect displayGroupRect_{};
+    Rect displayGroupLimitRect_{};
     bool isMultiDisplay_ = false;
     mutable std::map<DisplayId, Rect> limitRectMap_;
     DisplayGroupWindowTree& displayGroupWindowTree_;

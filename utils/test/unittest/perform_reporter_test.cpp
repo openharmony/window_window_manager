@@ -406,6 +406,24 @@ HWTEST_F(PerformReporterTest, ClearRecordedInfos016, Function | SmallTest | Leve
     windowInfoReporter.ClearRecordedInfos();
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: ReportWindowProfileInfo017
+ * @tc.desc: ReportWindowProfileInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, Function | SmallTest | Level2)
+{
+    int32_t res = 0;
+    WindowProfileInfo windowProfileInfo;
+    windowProfileInfo.bundleName = "bundleName";
+    windowProfileInfo.windowLocatedScreen = 0;
+    windowProfileInfo.windowSceneMode = 102;
+    windowProfileInfo.windowVisibleState = 2;
+    WindowInfoReporter windowInfoReporter;
+    res = windowInfoReporter.ReportWindowProfileInfo(windowProfileInfo);
+    ASSERT_EQ(res, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

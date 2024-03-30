@@ -122,7 +122,16 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
     PiPTemplateInfo pipTemplateInfo;
     ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option = new WindowOption();
-    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    option->SetWindowName("pip_window");
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    } else {
+        ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    }
 }
 
 /**
@@ -2295,6 +2304,36 @@ HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     MaximizeLayoutOption option;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
+}
+
+/**
+ * @tc.name: RegisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->RegisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->UnregisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen

@@ -1651,6 +1651,29 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
 }
 
 /**
+ * @tc.name: GetMainWindowWithContext01
+ * @tc.desc: GetMainWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetMainWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetMainWindowWithContext");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    std::shared_ptr<AbilityRuntime::Context> context;
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    if (windowscenesession->GetMainWindowWithContext(context) == nullptr) {
+        ASSERT_EQ(nullptr, windowscenesession->GetMainWindowWithContext(context));
+    }
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
+    ASSERT_NE(nullptr, windowscenesession->GetMainWindowWithContext(context));
+}
+
+/**
  * @tc.name: NotifyMemoryLevel01
  * @tc.desc: NotifyMemoryLevel
  * @tc.type: FUNC
@@ -2045,6 +2068,22 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
     ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
     ASSERT_EQ(windowSizeLimits.minWidth_, 1000);
     ASSERT_EQ(windowSizeLimits.minHeight_, 1000);
+}
+
+/**
+ * @tc.name: HideNonSecureWindows01
+ * @tc.desc: HideNonSecureWindows
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("HideNonSecureWindows01");
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    ASSERT_EQ(WMError::WM_OK, window->HideNonSecureWindows(true));
 }
 
 /**

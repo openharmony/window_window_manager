@@ -423,10 +423,8 @@ HWTEST_F(AbstractScreenControllerTest, RemoveChildFromGroup01, Function | SmallT
 {
     sptr<AbstractScreen> screen = screenVec[0];
     ScreenId dmsId = screen->dmsId_;
-    Point point;
-    auto p = std::make_pair(screen, point);
     sptr<AbstractScreenGroup> screenGroup = absController_->dmsScreenGroupMap_[0];
-    screenGroup->abstractScreenMap_.insert(std::make_pair(dmsId, p));
+    screenGroup->screenMap_.insert(std::make_pair(dmsId, screen));
     ASSERT_EQ(true, absController_->RemoveChildFromGroup(screen, screenGroup));
 }
 /**
@@ -652,9 +650,8 @@ HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup01, Function | SmallTest
 {
     sptr<AbstractScreenGroup> group = screenGroupVec[0];
     Point point;
-    auto abs2pointPair = std::make_pair(screenVec[0], point);
-    group->abstractScreenMap_.insert(std::make_pair(0, abs2pointPair));
-    group->abstractScreenMap_.insert(std::make_pair(1, abs2pointPair));
+    group->screenMap_.insert(std::make_pair(0, screenVec[0]));
+    group->screenMap_.insert(std::make_pair(1, screenVec[0]));
     std::vector<Point> startPoints;
     std::vector<ScreenId> screens;
     for (ScreenId i = 0; i < 7; ++i) {
@@ -676,9 +673,8 @@ HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup02, Function | SmallTest
 {
     sptr<AbstractScreenGroup> group = screenGroupVec[0];
     Point point;
-    auto abs2pointPair = std::make_pair(screenVec[0], point);
-    group->abstractScreenMap_.insert(std::make_pair(0, abs2pointPair));
-    group->abstractScreenMap_.insert(std::make_pair(1, abs2pointPair));
+    group->screenMap_.insert(std::make_pair(0, screenVec[0]));
+    group->screenMap_.insert(std::make_pair(1, screenVec[0]));
     std::vector<Point> startPoints;
     std::vector<ScreenId> screens;
     for (ScreenId i = 0; i < 7; ++i) {

@@ -379,6 +379,7 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+    void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -499,9 +500,11 @@ protected:
     mutable std::mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
+    sptr<IWindowEventChannel> windowEventChannel_;
 
     mutable std::mutex pointerEventMutex_;
-    mutable std::mutex keyEventMutex_;
+    mutable std::shared_mutex keyEventMutex_;
+    bool rectChangeListenerRegistered_ = false;
 
 private:
     void HandleDialogForeground();
@@ -532,10 +535,10 @@ private:
 
     std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
-    sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
+    std::function<void()> windowModeCallback_;
 
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;

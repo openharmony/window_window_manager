@@ -92,6 +92,7 @@ public:
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetWindowPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value SetTouchableAreas(napi_env env, napi_callback_info info);
     static napi_value SetResizeByDragEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
@@ -99,6 +100,7 @@ public:
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
     static napi_value SetCallingWindow(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value RaiseToAppTop(napi_env env, napi_callback_info info);
@@ -190,6 +192,7 @@ private:
     napi_value OnIsShowing(napi_env env, napi_callback_info info);
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
+    napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
@@ -227,6 +230,7 @@ private:
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetWindowPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnSetTouchableAreas(napi_env env, napi_callback_info info);
     napi_value OnSetResizeByDragEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);

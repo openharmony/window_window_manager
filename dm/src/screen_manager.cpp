@@ -563,6 +563,11 @@ DMError ScreenManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, b
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(screenId, rotation);
 }
 
+DMError ScreenManager::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
+}
+
 VirtualScreenFlag ScreenManager::GetVirtualScreenFlag(ScreenId screenId)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetVirtualScreenFlag(screenId);
@@ -634,14 +639,14 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
         return false;
     }
     ScreenId screenId = screenInfo->GetScreenId();
-    WLOGFI("screenId:%{public}" PRIu64".", screenId);
+    WLOGFD("screenId:%{public}" PRIu64".", screenId);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("displayId is invalid.");
         return false;
     }
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end() && iter->second != nullptr) {
-        WLOGFI("get screen in screen map");
+        WLOGFD("get screen in screen map");
         iter->second->UpdateScreenInfo(screenInfo);
         return true;
     }
@@ -657,7 +662,7 @@ bool ScreenManager::Impl::isAllListenersRemoved() const
 
 void ScreenManager::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    WLOGFD("dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
     virtualScreenAgent_ = nullptr;

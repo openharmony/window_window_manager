@@ -291,6 +291,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
 {
+    if (isFocused_) {
+        UpdateFocus(false);
+    }
     SessionInfo info;
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
@@ -523,6 +526,11 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
+    
+    if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        WLOGFI("[WMSRecover] input method window does not need to recover");
+        return;
+    }
 
     wptr<WindowSceneSessionImpl> weakThis = this;
     auto callbackFunc = [weakThis, isSpecificSession] {
@@ -1156,11 +1164,6 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Unsupport operation for full screen window. WindowId: %{public}d",
-            GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
@@ -1293,9 +1296,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d "
+    getAvoidAreaCnt_++;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
           "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
-          windowId, GetWindowName().c_str(), type,
+          windowId, GetWindowName().c_str(), type, getAvoidAreaCnt_,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
           avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
           avoidArea.bottomRect_.height_);
@@ -1445,17 +1449,22 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u property is same", GetWindowId());
+        setSameSystembarPropertyCnt_++;
+        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set same property %{public}u times, "
+            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x",
+            GetWindowId(), GetWindowName().c_str(), setSameSystembarPropertyCnt_,
+            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_);
         return WMError::WM_OK;
     }
+    setSameSystembarPropertyCnt_ = 0;
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
@@ -2007,6 +2016,24 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
         return nullptr;
     }
     return FindWindowById(topWinId);
+}
+
+sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Please create mainWindow First!");
+        return nullptr;
+    }
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
+            TLOGI(WmsLogTag::WMS_MAIN, "Find MainWinId:%{public}u.", win->GetWindowId());
+            return win;
+        }
+    }
+    TLOGE(WmsLogTag::WMS_MAIN, "Cannot find Window!");
+    return nullptr;
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)

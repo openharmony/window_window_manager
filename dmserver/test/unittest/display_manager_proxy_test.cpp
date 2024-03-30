@@ -706,6 +706,207 @@ HWTEST_F(DisplayManagerProxyTest, SetFreeze, Function | SmallTest | Level1)
     auto result = proxy.SetFreeze(displayIds, true);
     ASSERT_TRUE(result);
 }
+
+/**
+ * @tc.name: StopMirror
+ * @tc.desc: test DisplayManagerProxy::StopMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, StopMirror, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    DisplayEvent event = DisplayEvent{0};
+    proxy.NotifyDisplayEvent(event);
+
+    std::vector<ScreenId> mirrorScreenIds;
+    auto result = proxy.StopMirror(mirrorScreenIds);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetScreenInfoById
+ * @tc.desc: test DisplayManagerProxy::GetScreenInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetScreenInfoById, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    DisplayEvent event = DisplayEvent{0};
+    proxy.NotifyDisplayEvent(event);
+
+    auto result = proxy.GetScreenInfoById(0);
+    EXPECT_EQ(nullptr, result);
+}
+
+/**
+ * @tc.name: GetScreenGroupInfoById
+ * @tc.desc: test DisplayManagerProxy::GetScreenGroupInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetScreenGroupInfoById, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    DisplayEvent event = DisplayEvent{0};
+    proxy.NotifyDisplayEvent(event);
+
+    auto result = proxy.GetScreenGroupInfoById(0);
+    EXPECT_EQ(nullptr, result);
+}
+
+/**
+ * @tc.name: GetAllScreenInfos
+ * @tc.desc: test DisplayManagerProxy::GetAllScreenInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetAllScreenInfos, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    auto result = proxy.GetAllScreenInfos(screenInfos);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: MakeExpand
+ * @tc.desc: test DisplayManagerProxy::MakeExpand
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, MakeExpand, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<ScreenId> screenId;
+    std::vector<Point> startPoint;
+    ScreenId screenGroupId;
+    auto result = proxy.MakeExpand(screenId, startPoint, screenGroupId);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: StopExpand
+ * @tc.desc: test DisplayManagerProxy::StopExpand
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, StopExpand, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<ScreenId> expandScreenIds;
+    auto result = proxy.StopExpand(expandScreenIds);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetScreenActiveMode
+ * @tc.desc: test DisplayManagerProxy::SetScreenActiveMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatio
+ * @tc.desc: test DisplayManagerProxy::SetVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.SetVirtualPixelRatio(screenId, 1.0);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: test DisplayManagerProxy::SetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetResolution, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.SetResolution(screenId, 50, 100, 1.00);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: IsScreenRotationLocked
+ * @tc.desc: test DisplayManagerProxy::IsScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    bool isLocked = true;
+    auto result = proxy.IsScreenRotationLocked(isLocked);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetScreenRotationLocked
+ * @tc.desc: test DisplayManagerProxy::SetScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    bool isLocked = true;
+    auto result = proxy.SetScreenRotationLocked(isLocked);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: ResizeVirtualScreen
+ * @tc.desc: test DisplayManagerProxy::ResizeVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.ResizeVirtualScreen(screenId, 50, 100);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: MakeUniqueScreen
+ * @tc.desc: test DisplayManagerProxy::MakeUniqueScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<ScreenId> screenIds;
+    auto result = proxy.MakeUniqueScreen(screenIds);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
