@@ -1018,6 +1018,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.screenId_);
         }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
+        auto windowModeCallback = [this]() {
+            ProcessSplitFloating();
+        };
+        sceneSession->RegisterWindowModeChangedCallback(windowModeCallback);
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
@@ -2829,6 +2833,14 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             sceneSession->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
+                sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
+                FlushWindowInfoToMMI();
+            }
+            break;
+        }
         default:
             break;
     }
@@ -4266,6 +4278,49 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         default:
             break;
     }
+    ProcessSplitFloating();
+}
+
+void SceneSessionManager::ProcessSplitFloating()
+{
+    bool inSplit = false;
+    bool inFloating = false;
+    for (const auto& session : sceneSessionMap_) {
+        if (session.second == nullptr || !Rosen::SceneSessionManager::GetInstance().IsSessionVisible(session.second)) {
+            continue;
+        }
+        auto mode = session.second->GetWindowMode();
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            inSplit = true;
+        }
+        if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+            inFloating = true;
+        }
+    }
+    NotifyRSSWindowModeTypeUpdate(inSplit, inFloating);
+}
+
+void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating)
+{
+    WindowModeType type;
+    if (inSplit) {
+        if (inFloating) {
+            type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
+        } else {
+            type = WindowModeType::WINDOW_MODE_SPLIT;
+        }
+    } else {
+        if (inFloating) {
+            type = WindowModeType::WINDOW_MODE_FLOATING;
+        } else {
+            type = WindowModeType::WINDOW_MODE_OTHER;
+        }
+    }
+    if (lastWindowModeType_ == type) {
+        return;
+    }
+    lastWindowModeType_ = type;
+    SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(type);
 }
 
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
@@ -5240,6 +5295,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     }
     auto task = [this]() {
         WindowInfoReporter::GetInstance().ReportRecordedInfos();
+        ReportWindowProfileInfos();
         isReportTaskStart_ = false;
         StartWindowInfoReportLoop();
     };
@@ -5453,9 +5509,9 @@ void SceneSessionManager::UpdateCallingWindowIdAndPosition(const sptr<WindowSess
     }
     uint32_t curWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
     uint32_t newWindowId = property->GetCallingWindow();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
     // When calling window id changes, restore the old calling window, raise the new calling window.
     if (curWindowId != INVALID_WINDOW_ID && newWindowId != curWindowId && callingSession_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
         RestoreCallingSessionSizeIfNeed();
 
         callingSession_ = GetSceneSession(newWindowId);
@@ -7364,5 +7420,47 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
     };
     taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags");
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ReportWindowProfileInfos()
+{
+    enum class WindowVisibleState : int32_t {
+        FOCUSBLE = 0,
+        VISIBLE,
+        MINIMIZED,
+        OCCLUSION
+    };
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    auto focusWindowId = GetFocusedSession();
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        if (curSession == nullptr || curSession->GetSessionInfo().isSystem_ ||
+            curSession->GetWindowType() !=  WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            continue;
+        }
+        WindowProfileInfo windowProfileInfo;
+        windowProfileInfo.bundleName = curSession->GetSessionInfo().bundleName_;
+        windowProfileInfo.windowLocatedScreen = static_cast<int32_t>(
+            curSession->GetSessionProperty()->GetDisplayId());
+        windowProfileInfo.windowSceneMode = static_cast<int32_t>(curSession->GetWindowMode());
+        if (focusWindowId == static_cast<int32_t>(curSession->GetWindowId())) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FOCUSBLE);
+        } else if (curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::MINIMIZED);
+        } else if (!curSession->GetVisible()) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::OCCLUSION);
+        } else {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::VISIBLE);
+        }
+        WindowInfoReporter::GetInstance().ReportWindowProfileInfo(windowProfileInfo);
+        WLOGFD("ReportWindowProfileInfo, bundleName:%{public}s, windowVisibleState:%{public}d, "
+            "windowLocatedScreen:%{public}d, windowSceneMode:%{public}d",
+            windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
+            windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode);
+    }
 }
 } // namespace OHOS::Rosen
