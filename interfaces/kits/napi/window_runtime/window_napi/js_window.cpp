@@ -47,6 +47,9 @@ namespace {
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
     constexpr int32_t MIN_DECOR_HEIGHT = 37;
     constexpr int32_t MAX_DECOR_HEIGHT = 112;
+    constexpr size_t INDEX_ZERO = 0;
+    constexpr size_t INDEX_ONE = 1;
+    constexpr size_t INDEX_TWO = 2;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -5458,15 +5461,6 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
-static inline bool GetNativeBool(napi_env env, napi_value nativeVal, bool* flag)
-{
-    if (nativeVal == nullptr) {
-        return false;
-    }
-    napi_get_value_bool(env, nativeVal, flag);
-    return true;
-}
-
 napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling()) {
@@ -5480,21 +5474,18 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    constexpr size_t IS_MAX_ARGC = 0;
-    constexpr size_t IS_MIN_ARGC = 1;
-    constexpr size_t IS_SPLIT_ARGC = 2;
     bool isMaximizeVisible = true;
-    if (!GetNativeBool(env, argv[IS_MAX_ARGC], &isMaximizeVisible)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMaximizeVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isMinimizeVisible = true;
-    if (!GetNativeBool(env, argv[IS_MIN_ARGC], &isMinimizeVisible)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isSplitVisible = true;
-    if (!GetNativeBool(env, argv[IS_SPLIT_ARGC], &isSplitVisible)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], isSplitVisible)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
