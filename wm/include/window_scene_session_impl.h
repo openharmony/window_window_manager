@@ -140,7 +140,7 @@ public:
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
-    virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMsak) override;
+    virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
 protected:
     void DestroySubWindow();

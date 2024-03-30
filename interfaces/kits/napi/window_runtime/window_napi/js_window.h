@@ -148,6 +148,7 @@ public:
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
