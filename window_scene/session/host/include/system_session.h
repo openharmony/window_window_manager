@@ -32,12 +32,6 @@ public:
     WSError Disconnect(bool isFromClient = false) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
-    void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func) override;
-    void NotifyCallingSessionUpdateRect() override;
-    void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func) override;
-    void NotifyCallingSessionForeground() override;
-    void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func) override;
-    void NotifyCallingSessionBackground() override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError ProcessBackEvent() override;
 
@@ -49,10 +43,6 @@ protected:
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
-
-    NotifyCallingSessionUpdateRectFunc notifyCallingSessionUpdateRectFunc_;
-    NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
-    NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

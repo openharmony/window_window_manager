@@ -101,8 +101,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
         &SceneSessionManagerStub::HandleSetSessionContinueState),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
-        &SceneSessionManagerStub::HandleSetSessionGravity),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
         &SceneSessionManagerStub::HandleClearSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
@@ -582,17 +580,6 @@ int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, 
     auto continueState = static_cast<ContinueState>(data.ReadInt32());
     const WSError &ret = SetSessionContinueState(token, continueState);
     reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
-{
-    WLOGFI("run HandleSetSessionGravity!");
-    auto persistentId = data.ReadInt32();
-    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
-    uint32_t percent = data.ReadUint32();
-    WSError ret = SetSessionGravity(persistentId, gravity, percent);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

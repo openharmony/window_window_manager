@@ -365,24 +365,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState, Function | 
 }
 
 /**
- * @tc.name: HandleSetSessionGravity
- * @tc.desc: test HandleSetSessionGravity
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionGravity, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteInt32(1);
-    data.WriteUint32(0);
-    data.WriteUint32(10);
-
-    int res = stub_->HandleSetSessionGravity(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleUpdateSessionWindowVisibilityListener
  * @tc.desc: test HandleUpdateSessionWindowVisibilityListener
  * @tc.type: FUNC
