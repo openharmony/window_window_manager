@@ -699,5 +699,16 @@ WMError WindowExtensionSessionImpl::UpdateExtWindowFlags()
     return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(property_->GetParentId(), GetPersistentId(),
         extensionWindowFlags_);
 }
+
+Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
+{
+    Rect rect;
+    if (hostWindowId != property_->GetParentId()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "hostWindowId is invalid");
+        return rect;
+    }
+    SingletonContainer::Get<WindowAdapter>().GetHostWindowRect(hostWindowId, rect);
+    return rect;
+}
 } // namespace Rosen
 } // namespace OHOS
