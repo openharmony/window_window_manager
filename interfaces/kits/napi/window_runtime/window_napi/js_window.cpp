@@ -791,6 +791,13 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowMask");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowMask(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -5444,6 +5451,53 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
+napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::vector<std::vector<uint32_t>> windowMask;
+    if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
+        WLOGFE("GetWindowMaskFromJsValue failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Invalidate params"));
+                return;
+            }
+            if (!WindowHelper::IsSubWindow(weakWindow->GetType()) &&
+                !WindowHelper::IsAppFloatingWindow(weakWindow->GetType())) {
+                WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Invalidate window type"));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
+            if (ret != WmErrorCode::WM_OK) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
+                WLOGFE("Window [%{public}u, %{public}s] set window mask failed",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                return;
+            }
+            task.Resolve(env, NapiGetUndefined(env));
+            WLOGI("Window [%{public}u, %{public}s] set window mask succeed",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowMask",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -5549,6 +5603,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
+    BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
 }
 }  // namespace Rosen
 }  // namespace OHOS

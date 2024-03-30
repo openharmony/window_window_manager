@@ -2827,5 +2827,67 @@ WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY,
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
+
+std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
+    const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    const Rect& windowRect = GetRect();
+    uint32_t maskHeight = windowMask.size();
+    if (maskHeight <= 0) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    uint32_t maskWidth = windowMask[0].size();
+    if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    Media::InitializationOptions opts;
+    opts.size.width = maskWidth;
+    opts.size.height = maskHeight;
+    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    uint32_t length = maskWidth * maskHeight;
+    uint32_t* data = new (std::nothrow) uint32_t[length];
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < maskHeight; i++) {
+        for (uint32_t j = 0; j < maskWidth; j++) {
+            uint32_t idx = i * maskWidth + j;
+            data[idx] = windowMask[i][j];
+        }
+    }
+    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(data, length, opts);
+    delete[] data;
+    return mask;
+}
+
+WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    WLOGFI("SetWindowMask, WindowId: %{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    sptr<Media::PixelMap> mask = sptr<Media::PixelMap>(HandleWindowMask(windowMask).release());
+    if (mask == nullptr) {
+        WLOGFE("Failed to create pixelMap of window mask");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
+    surfaceNode_->SetCornerRadius(0.0f);
+    surfaceNode_->SetShadowRadius(0.0f);
+    surfaceNode_->SetMask(rsMask); // RS interface to set mask
+    RSTransaction::FlushImplicitTransaction();
+
+    property_->SetWindowMask(mask);
+    property_->SetIsShaped(true);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+}
 } // namespace Rosen
 } // namespace OHOS
