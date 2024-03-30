@@ -4805,12 +4805,11 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
         WLOGFE("SetHandwritingFlag Invalid window flag");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     bool isAddFlag = false;
     napi_get_value_bool(env, nativeBool, &isAddFlag);
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr] () {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr]() {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -4829,7 +4828,7 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
         [weakToken, isAddFlag, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCodePtr == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                "System abnormal."));
+                    "System abnormal."));
                 return;
             }
             if (*errCodePtr == WmErrorCode::WM_OK) {
