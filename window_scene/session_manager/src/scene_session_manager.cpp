@@ -1740,7 +1740,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     if ((property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT && !secureSessionSet_.empty()) ||
         (SessionHelper::IsSubWindow(property->GetWindowType()) &&
         secureSessionSet_.find(property->GetParentPersistentId()) != secureSessionSet_.end())) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure windows permission denied!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
