@@ -142,6 +142,7 @@ public:
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
+    static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
@@ -260,6 +261,7 @@ private:
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

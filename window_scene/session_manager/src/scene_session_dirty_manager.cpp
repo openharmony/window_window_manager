@@ -438,6 +438,12 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .zOrder = zOrder,
         .transform = transformData
     };
+    auto property = sceneSession->GetSessionProperty();
+    if (property != nullptr && (property->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
+        WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
+    }
     return windowInfo;
 }
 
