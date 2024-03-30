@@ -5501,9 +5501,9 @@ void SceneSessionManager::UpdateCallingWindowIdAndPosition(const sptr<WindowSess
     }
     uint32_t curWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
     uint32_t newWindowId = property->GetCallingWindow();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
     // When calling window id changes, restore the old calling window, raise the new calling window.
     if (curWindowId != INVALID_WINDOW_ID && newWindowId != curWindowId && callingSession_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
         RestoreCallingSessionSizeIfNeed();
 
         callingSession_ = GetSceneSession(newWindowId);
