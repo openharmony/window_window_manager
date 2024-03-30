@@ -86,6 +86,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
     napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
+    napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
 
     return objValue;
 }
@@ -924,6 +926,30 @@ bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
         return false;
     } else {
         WLOGI("Get ability");
+    }
+    return true;
+}
+bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask)
+{
+    if (jsObject == nullptr) {
+        WLOGFE("Failed to convert parameter to window mask");
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
+    if (size == 0 || size > WINDOW_MAX_WIDTH) {
+        WLOGFE("Invalid window mask");
+        return false;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        std::vector<uint32_t> elementArray;
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, jsObject, i, &getElementValue);
+        if (!ConvertNativeValueToVector(env, getElementValue, elementArray)) {
+            WLOGFE("Failed to convert parameter to window mask");
+            return false;
+        }
+        windowMask.emplace_back(elementArray);
     }
     return true;
 }

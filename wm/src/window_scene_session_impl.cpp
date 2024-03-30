@@ -92,7 +92,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
         type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW)) {
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_HANDWRITE)) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid type: %{public}u", type);
         return false;
     }
@@ -1296,9 +1296,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d "
+    getAvoidAreaCnt_++;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
           "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
-          windowId, GetWindowName().c_str(), type,
+          windowId, GetWindowName().c_str(), type, getAvoidAreaCnt_,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
           avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
           avoidArea.bottomRect_.height_);
@@ -1448,17 +1449,22 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u property is same", GetWindowId());
+        setSameSystembarPropertyCnt_++;
+        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set same property %{public}u times, "
+            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x",
+            GetWindowId(), GetWindowName().c_str(), setSameSystembarPropertyCnt_,
+            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_);
         return WMError::WM_OK;
     }
+    setSameSystembarPropertyCnt_ = 0;
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
@@ -1910,6 +1916,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
         !SessionPermission::IsSystemCalling()) {
         WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
         return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
@@ -2499,7 +2509,10 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling window id failed, property_ is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling window id: %{public}d", callingWindowId);
+    if (callingWindowId != property_->GetCallingWindow()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling window id form %{public}d to: %{public}d",
+            property_->GetCallingWindow(), callingWindowId);
+    }
     property_->SetCallingWindow(callingWindowId);
 
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
@@ -2813,6 +2826,68 @@ WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY,
     property_->SetTextFieldHeight(textFieldHeight);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
+}
+
+std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
+    const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    const Rect& windowRect = GetRect();
+    uint32_t maskHeight = windowMask.size();
+    if (maskHeight <= 0) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    uint32_t maskWidth = windowMask[0].size();
+    if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    Media::InitializationOptions opts;
+    opts.size.width = maskWidth;
+    opts.size.height = maskHeight;
+    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    uint32_t length = maskWidth * maskHeight;
+    uint32_t* data = new (std::nothrow) uint32_t[length];
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < maskHeight; i++) {
+        for (uint32_t j = 0; j < maskWidth; j++) {
+            uint32_t idx = i * maskWidth + j;
+            data[idx] = windowMask[i][j];
+        }
+    }
+    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(data, length, opts);
+    delete[] data;
+    return mask;
+}
+
+WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    WLOGFI("SetWindowMask, WindowId: %{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    sptr<Media::PixelMap> mask = sptr<Media::PixelMap>(HandleWindowMask(windowMask).release());
+    if (mask == nullptr) {
+        WLOGFE("Failed to create pixelMap of window mask");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
+    surfaceNode_->SetCornerRadius(0.0f);
+    surfaceNode_->SetShadowRadius(0.0f);
+    surfaceNode_->SetMask(rsMask); // RS interface to set mask
+    RSTransaction::FlushImplicitTransaction();
+
+    property_->SetWindowMask(mask);
+    property_->SetIsShaped(true);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 }
 } // namespace Rosen
 } // namespace OHOS
