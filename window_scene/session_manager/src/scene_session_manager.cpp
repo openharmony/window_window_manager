@@ -5287,6 +5287,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     }
     auto task = [this]() {
         WindowInfoReporter::GetInstance().ReportRecordedInfos();
+        ReportWindowProfileInfos();
         isReportTaskStart_ = false;
         StartWindowInfoReportLoop();
     };
@@ -7411,5 +7412,47 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
     };
     taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags");
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ReportWindowProfileInfos()
+{
+    enum class WindowVisibleState : int32_t {
+        FOCUSBLE = 0,
+        VISIBLE,
+        MINIMIZED,
+        OCCLUSION
+    };
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    auto focusWindowId = GetFocusedSession();
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        if (curSession == nullptr || curSession->GetSessionInfo().isSystem_ ||
+            curSession->GetWindowType() !=  WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            continue;
+        }
+        WindowProfileInfo windowProfileInfo;
+        windowProfileInfo.bundleName = curSession->GetSessionInfo().bundleName_;
+        windowProfileInfo.windowLocatedScreen = static_cast<int32_t>(
+            curSession->GetSessionProperty()->GetDisplayId());
+        windowProfileInfo.windowSceneMode = static_cast<int32_t>(curSession->GetWindowMode());
+        if (focusWindowId == static_cast<int32_t>(curSession->GetWindowId())) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FOCUSBLE);
+        } else if (curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::MINIMIZED);
+        } else if (!curSession->GetVisible()) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::OCCLUSION);
+        } else {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::VISIBLE);
+        }
+        WindowInfoReporter::GetInstance().ReportWindowProfileInfo(windowProfileInfo);
+        WLOGFD("ReportWindowProfileInfo, bundleName:%{public}s, windowVisibleState:%{public}d, "
+            "windowLocatedScreen:%{public}d, windowSceneMode:%{public}d",
+            windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
+            windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode);
+    }
 }
 } // namespace OHOS::Rosen
