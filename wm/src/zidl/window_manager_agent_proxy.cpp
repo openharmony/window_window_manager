@@ -252,6 +252,28 @@ void WindowManagerAgentProxy::NotifyGestureNavigationEnabledResult(bool enable)
     }
 }
 
+void WindowManagerAgentProxy::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(accessTokenId)) {
+        WLOGFE("Write accessTokenId failed");
+        return;
+    }
+    if (!data.WriteBool(isShowing)) {
+        WLOGFE("Write isShowing status failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
