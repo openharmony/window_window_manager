@@ -17,14 +17,14 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
 
 #include <iremote_broker.h>
+#include "common/include/window_session_property.h"
+#include "iability_manager_collaborator.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
-#include "common/include/window_session_property.h"
-#include "session_info.h"
-#include "mission_listener_interface.h"
 #include "mission_info.h"
+#include "mission_listener_interface.h"
 #include "mission_snapshot.h"
-#include "iability_manager_collaborator.h"
+#include "session_info.h"
 #include "zidl/window_manager_lite_interface.h"
 namespace OHOS::Media {
 class PixelMap;
