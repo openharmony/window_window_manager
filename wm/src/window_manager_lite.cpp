@@ -78,6 +78,9 @@ void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusCh
     }
     WLOGFD("NotifyFocused listeners: %{public}zu", focusChangeListeners.size());
     for (auto& listener : focusChangeListeners) {
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnFocused(focusChangeInfo);
     }
 }
@@ -94,6 +97,9 @@ void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focus
     }
     WLOGFD("NotifyUnfocused listeners: %{public}zu", focusChangeListeners.size());
     for (auto& listener : focusChangeListeners) {
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnUnfocused(focusChangeInfo);
     }
 }
@@ -108,6 +114,9 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityInfoChanged(
     }
     for (auto& listener : visibilityChangeListeners) {
         WLOGD("Notify WindowVisibilityInfo to caller");
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
     }
 }
@@ -122,6 +131,9 @@ void WindowManagerLite::Impl::NotifyWindowDrawingContentInfoChanged(
     }
     for (auto& listener : windowDrawingContentChangeListeners) {
         WLOGFD("Notify windowDrawingContentInfo to caller");
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
     }
 }
