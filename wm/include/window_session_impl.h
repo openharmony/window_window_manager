@@ -65,7 +65,6 @@ public:
         const sptr<Rosen::ISession>& iSession);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
-    WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,

@@ -262,7 +262,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusedSessionId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_EVENT, "focusedSessionId is invalid");
         keyEvent->MarkProcessed();

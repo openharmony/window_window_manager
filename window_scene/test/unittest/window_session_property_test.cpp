@@ -280,16 +280,16 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetSessionGravity
- * @tc.desc: SetSessionGravity test
+ * @tc.name: SetKeyboardSessionGravity
+ * @tc.desc: SetKeyboardSessionGravity test
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSessionPropertyTest, SetSessionGravity, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetKeyboardSessionGravity, Function | SmallTest | Level2)
 {
     SessionGravity sessionGravity = SessionGravity::SESSION_GRAVITY_FLOAT;
     uint32_t percent = 1234567890;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSessionGravity(sessionGravity, percent);
+    windowSessionProperty.SetKeyboardSessionGravity(sessionGravity, percent);
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetTokenState(), false);
 }

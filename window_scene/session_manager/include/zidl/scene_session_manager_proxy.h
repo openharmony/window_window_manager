@@ -48,7 +48,6 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) override;
     WMError SetGestureNavigaionEnabled(bool enable) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
