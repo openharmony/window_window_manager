@@ -1985,6 +1985,13 @@ void Session::NotifyUILostFocus()
     }
 }
 
+void Session::RegisterWindowModeChangedCallback(const std::function<void()>& callback)
+{
+    if (callback != nullptr) {
+        windowModeCallback_ = callback;
+    }
+}
+
 void Session::PresentFoucusIfNeed(int32_t pointerAction)
 {
     WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
@@ -2056,10 +2063,16 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property_->SetWindowMode(mode);
         property_->SetIsNeedUpdateWindowMode(true);
+        if (windowModeCallback_) {
+            windowModeCallback_();
+        }
     } else {
         property_->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        }
+        if (windowModeCallback_) {
+            windowModeCallback_();
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
@@ -2494,7 +2507,7 @@ void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPo
 
 void Session::SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func)
 {
-    std::lock_guard<std::mutex> lock(keyEventMutex_);
+    std::unique_lock<std::shared_mutex> lock(keyEventMutex_);
     systemSessionKeyEventFunc_ = func;
 }
 

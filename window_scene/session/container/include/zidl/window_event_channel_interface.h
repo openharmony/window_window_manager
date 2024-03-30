@@ -31,6 +31,16 @@ namespace OHOS::Accessibility {
     class AccessibilityElementInfo;
 }
 namespace OHOS::Rosen {
+class IWindowEventChannelListener : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowEventChannelListener");
+    enum class WindowEventChannelListenerMessage : int32_t {
+        TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC,
+    };
+
+    virtual void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) = 0;
+};
+
 class IWindowEventChannel : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowEventChannel");
@@ -42,6 +52,8 @@ public:
     virtual WSError TransferBackpressedEventForConsumed(bool& isConsumed) = 0;
     virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false) = 0;
+    virtual WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
+        const sptr<IRemoteObject>& listener) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
     virtual WSError TransferFocusState(bool focusState) = 0;
     virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,

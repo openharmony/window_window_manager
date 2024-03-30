@@ -650,6 +650,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.persistentId_)));
     napi_set_named_property(env, objValue, "callerPersistentId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callerPersistentId_)));
+    napi_set_named_property(env, objValue, "callerBundleName", CreateJsValue(env, sessionInfo.callerBundleName_));
+    napi_set_named_property(env, objValue, "callerAbilityName", CreateJsValue(env, sessionInfo.callerAbilityName_));
     napi_set_named_property(env, objValue, "callState",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callState_)));
     napi_set_named_property(env, objValue, "windowMode",

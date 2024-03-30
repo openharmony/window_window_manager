@@ -138,8 +138,7 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
-    WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener,
-                                                uint32_t timeout) override;
+    WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
@@ -180,7 +179,7 @@ public:
     WSError NotifyTouchOutside() override;
     WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError NotifyWindowVisibility(bool isVisible) override;
-    WSError NotifyNoInteractionTimeout();
+    WSError NotifyNoInteractionTimeout(const IWindowNoInteractionListenerSptr& listener);
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -210,6 +209,9 @@ public:
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
     void RecoverSessionListener();
     void SetDefaultDisplayIdIfNeed();
+    WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -266,7 +268,8 @@ protected:
     bool needRemoveWindowInputChannel_ = false;
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
-    static bool isUIExtensionAbility_;
+    // Check whether the UIExtensionAbility process is started
+    static bool isUIExtensionAbilityProcess_;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -302,6 +305,8 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
 
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -316,6 +321,7 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
+    void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
@@ -329,7 +335,8 @@ private:
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
-    static std::recursive_mutex displayMoveListenerMutex_;
+    static std::mutex displayMoveListenerMutex_;
+    static std::mutex windowRectChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
@@ -344,12 +351,12 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
         windowTitleButtonRectChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
 
     std::atomic<int32_t> lastInteractionEventId_ { -1 };
-    std::atomic<int32_t> noInteractionTimeout_ { 0 }; // ms
 
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;

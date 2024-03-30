@@ -75,6 +75,8 @@ public:
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

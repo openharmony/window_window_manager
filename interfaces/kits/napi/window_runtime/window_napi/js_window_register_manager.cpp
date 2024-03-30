@@ -48,6 +48,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
         { WINDOW_VISIBILITY_CHANGE_CB,        &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
         { WINDOW_NO_INTERACTION_DETECT_CB,    &JsWindowRegisterManager::ProcessWindowNoInteractionRegister        },
+        { WINDOW_RECT_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowRectChangeRegister           },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -214,7 +215,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     WLOGD("called");
-    if (window == nullptr) {
+    if (window == nullptr || listener == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowVisibilityChangedListener> thisListener(listener);
@@ -239,12 +240,23 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsW
         return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowNoInteractionListener(thisListener));
     }
 
-    uint32_t timeout = 0;
+    int64_t timeout = 0;
     if (parameter == nullptr || !ConvertFromJsNumber(env, parameter, timeout)) {
         WLOGFE("Failed to convert parameter to timeout");
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener, timeout));
+
+    constexpr int64_t S_TO_MS_RATIO = 1000;
+    constexpr int64_t NO_INTERACTION_MAX = LLONG_MAX / S_TO_MS_RATIO;
+    if (timeout <= 0 || (timeout > NO_INTERACTION_MAX)) {
+        WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
+            timeout, NO_INTERACTION_MAX);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+
+    thisListener->SetTimeout(timeout * S_TO_MS_RATIO);
+
+    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
@@ -337,7 +349,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, value)) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
@@ -369,7 +381,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
@@ -428,6 +440,22 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowRectChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
     }
     return ret;
 }

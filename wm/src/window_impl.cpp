@@ -920,8 +920,12 @@ WMError WindowImpl::SetAspectRatio(float ratio)
         WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);
         return WMError::WM_OK;
     }
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
-    return WMError::WM_OK;
+    auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("Set AspectRatio failed. errorCode: %{public}u", ret);
+        return ret;
+    }
+    return ret;
 }
 
 WMError WindowImpl::ResetAspectRatio()
@@ -1169,7 +1173,7 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -1180,6 +1184,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
+    property_->SetDisplayId(DISPLAY_ID_INVALID);
     SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
@@ -1788,7 +1793,9 @@ WMError WindowImpl::SetBrightness(float brightness)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
+    if ((brightness < MINIMUM_BRIGHTNESS &&
+         std::fabs(brightness - UNDEFINED_BRIGHTNESS) >= std::numeric_limits<float>::min()) ||
+         brightness > MAXIMUM_BRIGHTNESS) {
         WLOGFE("invalid brightness value: %{public}f", brightness);
         return WMError::WM_ERROR_INVALID_PARAM;
     }

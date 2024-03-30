@@ -45,6 +45,14 @@ void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeI
     }
 }
 
+void WindowManagerAgentController::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE)) {
+        agent->UpdateWindowModeTypeInfo(type);
+    }
+}
+
 void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGFD("tints size: %{public}u", static_cast<uint32_t>(tints.size()));

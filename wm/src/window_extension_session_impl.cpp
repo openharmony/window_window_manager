@@ -65,7 +65,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
     AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
-    isUIExtensionAbility_ = true;
+    isUIExtensionAbilityProcess_ = true;
     return WMError::WM_OK;
 }
 
@@ -676,7 +676,7 @@ void WindowExtensionSessionImpl::CheckAndRemoveExtWindowFlags()
 
 WMError WindowExtensionSessionImpl::SetExtWindowFlags(uint32_t flags)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetExtWindowFlags extensionWindowFlags_:%{public}u, flags:%{public}u",
+    TLOGD(WmsLogTag::WMS_UIEXT, "extensionWindowFlags_:%{public}u, flags:%{public}u",
         extensionWindowFlags_, flags);
     if (IsWindowSessionInvalid()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "session is invalid");

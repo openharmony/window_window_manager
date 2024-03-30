@@ -21,6 +21,7 @@
 #include "mock/mock_window_event_channel.h"
 #include "session/container/include/window_event_channel.h"
 #include "window_manager_hilog.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -196,6 +197,56 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     isConsumed = true;
     res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
     ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumedAsync01
+ * @tc.desc: normal function TransferKeyEventForConsumedAsync01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync01, Function | SmallTest | Level2)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isPreImeEvent = false;
+
+    sptr<ISessionStage> sessionStage = new SessionStageMocker();
+    sptr<WindowEventChannel> windowEventChannel = new WindowEventChannel(sessionStage);
+    ASSERT_NE(windowEventChannel, nullptr);
+    auto res = windowEventChannel->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, nullptr);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumedAsync02
+ * @tc.desc: normal function TransferKeyEventForConsumedAsync02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, Function | SmallTest | Level2)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isPreImeEvent = false;
+
+    sptr<ISessionStage> sessionStage = new SessionStageMocker();
+    sptr<WindowEventChannel> windowEventChannel = new WindowEventChannel(sessionStage);
+    ASSERT_NE(windowEventChannel, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    auto res = windowEventChannel->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, iRemoteObjectMocker);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: WindowEventChannelListenerProxyOnTransferKeyEventForConsumed
+ * @tc.desc: normal function WindowEventChannelListenerProxyOnTransferKeyEventForConsumed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, WindowEventChannelListenerProxyOnTransferKeyEventForConsumed,
+    Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    WindowEventChannelListenerProxy listenerProxy(iRemoteObjectMocker);
+    listenerProxy.OnTransferKeyEventForConsumed(true, WSError::WS_OK);
 }
 
 /**
