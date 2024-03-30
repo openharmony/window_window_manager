@@ -59,7 +59,6 @@ namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
 }
-
 class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -434,6 +433,7 @@ private:
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+    void ReportWindowProfileInfos();
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
@@ -490,6 +490,7 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+    WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
@@ -564,6 +565,8 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
+    void ProcessSplitFloating();
+    void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
 };
 } // namespace OHOS::Rosen
 
