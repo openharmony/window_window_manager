@@ -7469,12 +7469,8 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
             TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        if (!sceneSession->GetSessionProperty()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "scene session property is nullptr");
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        Rect persrect = sceneSession->GetSessionProperty()->GetWindowRect();
-        rect = persrect;
+        WSRect persrect = sceneSession->GetSessionRect();
+        rect = {persrect.posX_, persrect.posY_, persrect.width_, persrect.height_ };
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task, "GetHostWindowRect");
