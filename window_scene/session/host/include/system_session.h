@@ -30,7 +30,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
 private:
-    void UpdateCameraFloatWindowStatus(bool isShowing);
+    void UpdateCameraWindowStatus(bool isShowing);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

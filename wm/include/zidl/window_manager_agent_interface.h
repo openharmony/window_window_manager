@@ -31,6 +31,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
     WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
     WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
 };
 
@@ -47,6 +48,7 @@ public:
         TRANS_ID_UPDATE_CAMERA_FLOAT,
         TRANS_ID_UPDATE_WATER_MARK_FLAG,
         TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
+        TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_MODE_TYPE,
     };
 
@@ -61,6 +63,7 @@ public:
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWaterMarkFlagChangedResult(bool isShowing) = 0;
     virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;
+    virtual void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
