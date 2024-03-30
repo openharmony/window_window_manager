@@ -19,13 +19,12 @@
 #include <cinttypes>
 
 #include "input_manager.h"
-
+#include "i_window_checker.h"
 #include "marshalling_helper.h"
 #include "window_adapter_lite.h"
 #include "window_manager_agent_lite.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "i_window_checker.h"
 
 namespace OHOS {
 namespace Rosen {
