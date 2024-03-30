@@ -14,7 +14,9 @@
  */
 
 #include "session/host/include/system_session.h"
+
 #include "common/include/session_permission.h"
+#include "key_event.h"
 #include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -83,7 +85,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 WSError SystemSession::Hide()
 {
     auto type = GetWindowType();
-    if (WindowHelper::IsSystemWindow(type) && Session::NeedSystemPermission(type)) {
+    if (WindowHelper::IsSystemWindow(type) && NeedSystemPermission(type)) {
         if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             if (!SessionPermission::IsStartedByInputMethod()) {
                 TLOGE(WmsLogTag::WMS_LIFE, "Hide permission denied, keyboard is not hidden by current input method");
@@ -120,6 +122,37 @@ WSError SystemSession::Hide()
     };
     PostTask(task, "Hide");
     return WSError::WS_OK;
+}
+
+WSError SystemSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+    int32_t pid, int32_t uid)
+{
+    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        WindowState windowState = property->GetWindowState();
+        WindowType type = property->GetWindowType();
+        if (windowState == WindowState::STATE_SHOWN) {
+            session->isActive_ = true;
+            if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                session->UpdateSessionState(SessionState::STATE_ACTIVE);
+            } else {
+                session->UpdateSessionState(SessionState::STATE_FOREGROUND);
+            }
+        } else {
+            session->isActive_ = false;
+            session->UpdateSessionState(SessionState::STATE_BACKGROUND);
+        }
+        return WSError::WS_OK;
+    });
 }
 
 WSError SystemSession::Disconnect(bool isFromClient)
@@ -159,5 +192,142 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
+}
+
+void SystemSession::SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func)
+{
+    notifyCallingSessionUpdateRectFunc_ = func;
+}
+
+void SystemSession::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
+{
+    notifyCallingSessionForegroundFunc_ = func;
+}
+
+void SystemSession::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func)
+{
+    notifyCallingSessionBackgroundFunc_ = func;
+}
+
+void SystemSession::NotifyCallingSessionUpdateRect()
+{
+    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionUpdateRectFunc_) {
+        WLOGFI("Notify calling window that input method update rect");
+        notifyCallingSessionUpdateRectFunc_(persistentId_);
+    }
+}
+
+void SystemSession::NotifyCallingSessionForeground()
+{
+    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionForegroundFunc_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method shown");
+        notifyCallingSessionForegroundFunc_(persistentId_);
+    }
+}
+
+void SystemSession::NotifyCallingSessionBackground()
+{
+    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionBackgroundFunc_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method hide");
+        notifyCallingSessionBackgroundFunc_();
+    }
+}
+
+WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (parentSession_ && parentSession_->CheckDialogOnForeground() &&
+            !IsTopDialog()) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (!CheckKeyEventDispatch(keyEvent)) {
+            WLOGFW("Do not dispatch the key event.");
+            return WSError::WS_DO_NOTHING;
+        }
+    }
+
+    WSError ret = Session::TransferKeyEvent(keyEvent);
+    return ret;
+}
+
+WSError SystemSession::ProcessBackEvent()
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
+        return WSError::WS_OK;
+    }
+    return sessionStage_->HandleBackEvent();
+}
+
+WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
+{
+    auto task = [weakThis = wptr(this), rsTransaction]() {
+        auto session = weakThis.promote();
+        WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
+        if (ret == WSError::WS_OK) {
+            if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                session->NotifyCallingSessionUpdateRect();
+            }
+            if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
+                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            }
+            if (session->reason_ != SizeChangeReason::DRAG) {
+                session->reason_ = SizeChangeReason::UNDEFINED;
+                session->isDirty_ = false;
+            }
+        }
+        return ret;
+    };
+    PostTask(task, "NotifyClientToUpdateRect");
+    return WSError::WS_OK;
+}
+
+bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    auto currentRect = winRect_;
+    if (!GetVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
+        WLOGE("Error size: [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
+            " persistentId: %{public}d",
+            currentRect.width_, currentRect.height_, GetVisible(), GetPersistentId());
+        return false;
+    }
+
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        WLOGFW("Dialog parent is null");
+        return false;
+    }
+    auto parentSessionState = parentSession->GetSessionState();
+    if ((parentSessionState != SessionState::STATE_FOREGROUND &&
+        parentSessionState != SessionState::STATE_ACTIVE) ||
+        (state_ != SessionState::STATE_FOREGROUND &&
+        state_ != SessionState::STATE_ACTIVE)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Dialog's parent info : [persistentId: %{publicd}d, state:%{public}d];"
+            "Dialog info:[persistentId: %{publicd}d, state:%{public}d]",
+            parentSession->GetPersistentId(), parentSessionState, GetPersistentId(), state_);
+        return false;
+    }
+    return true;
+}
+
+bool SystemSession::NeedSystemPermission(WindowType type)
+{
+    return !(type == WindowType::WINDOW_TYPE_SCENE_BOARD || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
+        type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
+        type == WindowType::WINDOW_TYPE_PIP);
 }
 } // namespace OHOS::Rosen
