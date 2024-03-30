@@ -68,6 +68,14 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
     // for window manager service
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
         &SceneSessionManagerLiteStub::HandleGetFocusSessionInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
+                   &SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
+                   &SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID),
+                   &SceneSessionManagerLiteStub::HandleCheckWindowId),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
+                   &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -301,6 +309,64 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, 
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo);
     reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleCheckWindowId!");
+    int32_t windowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(windowId)) {
+        WLOGE("Failed to readInt32 windowId");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pid = INVALID_PID;
+    WMError errCode = CheckWindowId(windowId, pid);
+    if (errCode != WMError::WM_OK) {
+        WLOGE("Failed to checkWindowId(%{public}d)", pid);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(pid)) {
+        WLOGE("Failed to WriteInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+
+int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("[Test]run HandleRegisterWindowManagerAgent!");
+    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+            iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("[Test]run HandleUnregisterWindowManagerAgent!");
+    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+            iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    WMError errCode = GetVisibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
+        WLOGFE("Write visibility window infos failed");
+        return -1;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
