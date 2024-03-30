@@ -22,7 +22,6 @@ config("libwm_private_config") {
     "../wmserver/include",
     "../wmserver/include/zidl",
     "../window_scene/session/host/include",
-    "//foundation/arkui/napi",  # because of ability_context.h
   ]
 }
 
@@ -50,7 +49,6 @@ ohos_static_library("libwm_static") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -107,6 +105,7 @@ ohos_static_library("libwm_static") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -121,6 +120,7 @@ ohos_static_library("libwm_static") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
@@ -189,7 +189,6 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -246,6 +245,7 @@ ohos_shared_library("libwm") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -260,6 +260,7 @@ ohos_shared_library("libwm") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
@@ -337,6 +338,7 @@ ohos_shared_library("libwm_lite") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
