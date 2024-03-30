@@ -140,6 +140,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         &SceneSessionManagerStub::HandleUpdateExtWindowFlags),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_RECT),
+        &SceneSessionManagerStub::HandleGetHostWindowRect),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -840,6 +842,20 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, Mes
     int32_t persistentId = data.ReadInt32();
     uint32_t extWindowFlags = data.ReadUint32();
     WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
+    int32_t hostWindowId = data.ReadInt32();
+    Rect rect;
+    WSError ret = GetHostWindowRect(hostWindowId, rect);
+    reply.WriteInt32(rect.posX_);
+    reply.WriteInt32(rect.posY_);
+    reply.WriteUint32(rect.height_);
+    reply.WriteUint32(rect.width_);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

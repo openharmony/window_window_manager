@@ -84,6 +84,7 @@ public:
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_GET_FOCUS_WINDOW_INFO,
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
+        TRANS_ID_GET_HOST_WINDOW_RECT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -198,6 +199,10 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     {
         return WSError::WS_OK;
     }
