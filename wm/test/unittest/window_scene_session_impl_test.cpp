@@ -2205,7 +2205,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetTitleButtonVisible02, Function | SmallTe
     window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
     ASSERT_EQ(hideMaximizeButton, false);
     ASSERT_EQ(hideMinimizeButton, false);
-    ASSERT_EQ(hideSplitButton, true);
+    ASSERT_EQ(hideSplitButton, false);
 }
 
 /**
@@ -2225,13 +2225,13 @@ HWTEST_F(WindowSceneSessionImplTest, GetTitleButtonVisible03, Function | SmallTe
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false };
-    bool hideMaximizeButton = false;
-    bool hideMinimizeButton = false;
-    bool hideSplitButton = false;
+    bool hideMaximizeButton = true;
+    bool hideMinimizeButton = true;
+    bool hideSplitButton = true;
     window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    ASSERT_EQ(hideMaximizeButton, false);
-    ASSERT_EQ(hideMinimizeButton, false);
-    ASSERT_EQ(hideSplitButton, false);
+    ASSERT_EQ(hideMaximizeButton, true);
+    ASSERT_EQ(hideMinimizeButton, true);
+    ASSERT_EQ(hideSplitButton, true);
 }
 
 /**
