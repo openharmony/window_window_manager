@@ -18,10 +18,10 @@
 
 #include <iremote_broker.h>
 
+#include "interfaces/include/ws_common.h"
 #include "window_property.h"
 #include "window_transition_info.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "interfaces/include/ws_common.h"
 
 namespace OHOS {
 namespace MMI {
