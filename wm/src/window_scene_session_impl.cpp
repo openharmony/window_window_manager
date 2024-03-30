@@ -1291,6 +1291,13 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
+    if (mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType()))) {
+        TLOGI(WmsLogTag::WMS_IMMS,"Window: %{public}u, avoidAreaType:%{public}u,"
+            "windowMode:%{public}u, return default avoid area for sub window.",
+            GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+        return WMError::WM_OK;
+    }
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "hostSession_ is null");
         return WMError::WM_ERROR_NULLPTR;
