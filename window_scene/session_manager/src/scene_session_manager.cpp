@@ -6034,7 +6034,7 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
     return taskScheduler_->PostSyncTask(task, "GetFocusSessionToken");
 }
 
-WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &elemnt)
+WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &element)
 {
     auto task = [this, &token]() {
         WLOGFD("run GetFocusSessionElement with focusedSessionId: %{public}d", focusedSessionId_);
@@ -6043,7 +6043,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &ele
             auto sessionInfo = sceneSession->GetSessionInfo();
             AAFwk::Want want;
             want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-            element = want.getElement;
+            element = want.getElement();
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;
