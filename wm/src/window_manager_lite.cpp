@@ -68,7 +68,7 @@ public:
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    TLOGD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -84,7 +84,7 @@ void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusCh
 
 void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+    TLOGD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_));
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -158,7 +158,7 @@ WMError WindowManagerLite::RegisterFocusChangedListener(const sptr<IFocusChanged
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
-        pImpl_->focusChangedListenerAgent_ = new WindowManagerAgentLite();
+        pImpl_->focusChangedListenerAgent_ = new (std::no_throw) WindowManagerAgentLite();
         ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
     }
@@ -210,7 +210,7 @@ WMError WindowManagerLite::RegisterVisibilityChangedListener(const sptr<IVisibil
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowVisibilityListenerAgent_ == nullptr) {
-        pImpl_->windowVisibilityListenerAgent_ = new WindowManagerAgentLite();
+        pImpl_->windowVisibilityListenerAgent_ = new (std::no_throw) WindowManagerAgentLite();
         ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityListenerAgent_);
@@ -318,7 +318,7 @@ WMError WindowManagerLite::RegisterDrawingContentChangedListener(const sptr<IDra
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowDrawingContentListenerAgent_ == nullptr) {
-        pImpl_->windowDrawingContentListenerAgent_ = new WindowManagerAgentLite();
+        pImpl_->windowDrawingContentListenerAgent_ = new (std::no_throw) WindowManagerAgentLite();
         ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
             pImpl_->windowDrawingContentListenerAgent_);
