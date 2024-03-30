@@ -29,12 +29,8 @@ config("session_public_config") {
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
 
-    # for mouse style
-    "${multimodalinput_path}/input/util/common/include",
-
     #for element
     "${accessibility_path}/common/interface/include/parcel",
-    "${accessibility_path}/interfaces/innerkits/common/include",
   ]
 }
 
@@ -99,7 +95,10 @@ ohos_shared_library("scene_session") {
     "ipc:ipc_single",
     "preferences:native_preferences",
   ]
-
+  public_external_deps = [
+    "accessibility:accessibility_common",
+    "input:libmmi-util",
+  ]
   defines = []
 
   if (defined(global_parts_info) &&
@@ -158,6 +157,10 @@ ohos_shared_library("screen_session") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
+  ]
+  public_external_deps = [
+    "accessibility:accessibility_common",
+    "input:libmmi-util",
   ]
 
   innerapi_tags = [ "platformsdk" ]
