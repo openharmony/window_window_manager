@@ -161,6 +161,15 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/utils:libwmutil_static",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/utils/include"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/dm:libdm",
             "header": {
               "header_files": [
