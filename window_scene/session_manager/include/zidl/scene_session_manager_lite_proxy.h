@@ -50,6 +50,12 @@ public:
     WSError ClearAllSessions() override;
  
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
 
 private:
     template<typename T>
