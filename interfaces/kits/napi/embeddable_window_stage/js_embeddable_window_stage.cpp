@@ -24,9 +24,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsEmbeddableWindowStage"};
-} // namespace
 
 JsEmbeddableWindowStage::JsEmbeddableWindowStage(sptr<Rosen::Window> window, sptr<AAFwk::SessionInfo> sessionInfo)
     : windowExtensionSessionImpl_(window), sessionInfo_(sessionInfo),

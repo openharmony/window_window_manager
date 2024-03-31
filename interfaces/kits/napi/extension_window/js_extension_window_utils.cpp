@@ -22,9 +22,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace  AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowUtils"};
-}
 
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
