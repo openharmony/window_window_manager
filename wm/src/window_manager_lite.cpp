@@ -68,11 +68,12 @@ public:
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    if (focusChangeInfo != nullptr) {
-        WLOGFD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
-                focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
-                static_cast<uint32_t>(focusChangeInfo->windowType_));
+    if (focusChangeInfo == nullptr) {
+        return;
     }
+    WLOGFD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+        static_cast<uint32_t>(focusChangeInfo->windowType_));
 
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
     {
@@ -90,11 +91,12 @@ void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusCh
 
 void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    if (focusChangeInfo != nullptr) {
-        WLOGFD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
-                focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
-                static_cast<uint32_t>(focusChangeInfo->windowType_));
+    if (focusChangeInfo == nullptr) {
+        return;
     }
+    WLOGFD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+        static_cast<uint32_t>(focusChangeInfo->windowType_));
 
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
     {
@@ -119,7 +121,6 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityInfoChanged(
         visibilityChangeListeners = windowVisibilityListeners_;
     }
     for (auto& listener : visibilityChangeListeners) {
-        WLOGD("Notify WindowVisibilityInfo to caller");
         if (listener == nullptr) {
             continue;
         }
@@ -136,7 +137,6 @@ void WindowManagerLite::Impl::NotifyWindowDrawingContentInfoChanged(
         windowDrawingContentChangeListeners = windowDrawingContentListeners_;
     }
     for (auto& listener : windowDrawingContentChangeListeners) {
-        WLOGFD("Notify windowDrawingContentInfo to caller");
         if (listener == nullptr) {
             continue;
         }

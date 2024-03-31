@@ -16,17 +16,17 @@
 #ifndef OHOS_ROSEN_WINDOW_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_MANAGER_LITE_H
 
+#include <iremote_object.h>
 #include <memory>
 #include <mutex>
 #include <refbase.h>
 #include <vector>
-#include <iremote_object.h>
-#include "wm_single_instance.h"
-#include "wm_common.h"
 #include "focus_change_info.h"
-#include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
 #include "window_manager.h"
+#include "window_visibility_info.h"
+#include "wm_common.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
