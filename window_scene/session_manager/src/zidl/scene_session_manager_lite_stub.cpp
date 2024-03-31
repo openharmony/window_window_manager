@@ -336,7 +336,7 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel &data, Messag
 
 int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("[Test]run HandleRegisterWindowManagerAgent!");
+    WLOGFI("run HandleRegisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
@@ -348,7 +348,7 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel 
 
 int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("[Test]run HandleUnregisterWindowManagerAgent!");
+    WLOGFI("run HandleUnregisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
