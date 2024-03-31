@@ -68,9 +68,12 @@ public:
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    TLOGD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
-        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
-        static_cast<uint32_t>(focusChangeInfo->windowType_));
+    if (focusChangeInfo != nullptr) {
+        TLOGD("[WMSFocus]NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+                focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+                static_cast<uint32_t>(focusChangeInfo->windowType_));
+    }
+
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -87,9 +90,12 @@ void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusCh
 
 void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    TLOGD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
-        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
-        static_cast<uint32_t>(focusChangeInfo->windowType_));
+    if (focusChangeInfo != nullptr) {
+        TLOGD("[WMSFocus]NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u]",
+                focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+                static_cast<uint32_t>(focusChangeInfo->windowType_));
+    }
+
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
