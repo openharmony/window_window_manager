@@ -43,7 +43,7 @@ PictureInPictureManager::~PictureInPictureManager()
 {
 }
 
-bool IsSupportPiP()
+bool PictureInPictureManager::IsSupportPiP()
 {
     return SceneBoardJudgement::IsSceneBoardEnabled();
 }
