@@ -267,6 +267,8 @@ public:
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
+    virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
+    virtual bool IsTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;

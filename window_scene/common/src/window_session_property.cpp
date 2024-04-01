@@ -219,6 +219,16 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowSessionProperty::SetTopmost(bool topmost)
+{
+    topmost_ = topmost;
+}
+
+bool WindowSessionProperty::IsTopmost() const
+{
+    return topmost_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -607,7 +617,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) && parcel.WriteBool(topmost_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -654,6 +664,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
+    property->SetTopmost(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
