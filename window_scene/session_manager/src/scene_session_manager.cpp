@@ -6034,7 +6034,7 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
     return taskScheduler_->PostSyncTask(task, "GetFocusSessionToken");
 }
 
-WSError SceneSessionManager::GetFocusSessionElement(sptr<AppExecFwk::ElementName> &element)
+WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &element)
 {
     auto task = [this, &element]() {
         WLOGFD("run GetFocusSessionElement with focusedSessionId: %{public}d", focusedSessionId_);

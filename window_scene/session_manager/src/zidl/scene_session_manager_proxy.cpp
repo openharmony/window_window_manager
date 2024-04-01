@@ -995,7 +995,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetFocusSessionElement(sptr<AppExecFwk::ElementName> &element)
+WSError SceneSessionManagerProxy::GetFocusSessionElement(AppExecFwk::ElementName &element)
 {
     WLOGFD("run SceneSessionManagerProxy::GetFocusSessionElement");
     MessageParcel data;
@@ -1012,7 +1012,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionElement(sptr<AppExecFwk::Elemen
         return WSError::WS_ERROR_IPC_FAILED;
     }
     element = reply.ReadRemoteObject();
-    if (element == nullptr) {
+    if (element == null) {
         WLOGFD("get element null.");
     }
     return static_cast<WSError>(reply.ReadInt32());
