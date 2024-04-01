@@ -127,11 +127,7 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
-    } else {
-        ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
-    }
+    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
 }
 
 /**
