@@ -6041,7 +6041,8 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
         auto sceneSession = GetSceneSession(focusedSessionId_);
         if (sceneSession) {
             auto sessionInfo = sceneSession->GetSessionInfo();
-            element = AppExecFwk::ElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
+            element = AppExecFwk::ElementName("", sessionInfo.bundleName_,
+                sessionInfo.abilityName_, sessionInfo.moduleName_);
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;
