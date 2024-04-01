@@ -47,6 +47,9 @@ namespace {
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
     constexpr int32_t MIN_DECOR_HEIGHT = 37;
     constexpr int32_t MAX_DECOR_HEIGHT = 112;
+    constexpr size_t INDEX_ZERO = 0;
+    constexpr size_t INDEX_ONE = 1;
+    constexpr size_t INDEX_TWO = 2;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -789,6 +792,13 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]GetTitleButtonsRect");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTitleButtonVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
@@ -5451,6 +5461,51 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
+napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 3) { // 3: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMaximizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMaximizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMinimizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isSplitVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], isSplitVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible,
+        isSplitVisible);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5603,6 +5658,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
+    BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
 }
 }  // namespace Rosen
