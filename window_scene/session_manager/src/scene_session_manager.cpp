@@ -6012,7 +6012,7 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
 }
 
-WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
+WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     if (!SessionPermission::IsSACalling()) {
         WLOGFE("GetFocusSessionToken permission denied!");
@@ -6034,16 +6034,14 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
     return taskScheduler_->PostSyncTask(task, "GetFocusSessionToken");
 }
 
-WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &element)
+WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element)
 {
     auto task = [this, &element]() {
         WLOGFD("run GetFocusSessionElement with focusedSessionId: %{public}d", focusedSessionId_);
         auto sceneSession = GetSceneSession(focusedSessionId_);
         if (sceneSession) {
             auto sessionInfo = sceneSession->GetSessionInfo();
-            AAFwk::Want want;
-            want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-            element = want.GetElement();
+            element = ElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;

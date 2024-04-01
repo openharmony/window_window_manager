@@ -521,11 +521,11 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleGetFocusSessionElement!");
     AppExecFwk::ElementName element;
-    const WSError& errCode = GetFocusSessionElement(element);
+    const WSError errCode = GetFocusSessionElement(element);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;

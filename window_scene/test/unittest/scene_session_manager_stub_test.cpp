@@ -179,7 +179,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
-
     int res = stub_->HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
