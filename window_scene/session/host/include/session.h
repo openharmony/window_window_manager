@@ -236,7 +236,7 @@ public:
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
-    WSError ProcessBackEvent(); // send back event to session_stage
+    virtual WSError ProcessBackEvent(); // send back event to session_stage
     WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
@@ -265,11 +265,11 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     bool GetStateFromManager(const ManagerState key);
-    void PresentFoucusIfNeed(int32_t pointerAcrion);
-    WSError UpdateFocus(bool isFocused);
+    virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
+    virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
-    WSError UpdateWindowMode(WindowMode mode);
-    WSError SetSystemSceneBlockingFocus(bool blocking);
+    virtual WSError UpdateWindowMode(WindowMode mode);
+    virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
@@ -323,13 +323,13 @@ public:
     float GetPivotX() const;
     float GetPivotY() const;
 
-    void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func);
-    void NotifyCallingSessionUpdateRect();
-    void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func);
-    void NotifyCallingSessionForeground();
-    void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
+    virtual void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func) { return; };
+    virtual void NotifyCallingSessionUpdateRect() { return; };
+    virtual void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func) { return; };
+    virtual void NotifyCallingSessionForeground() { return; };
+    virtual void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func) { return; };
+    virtual void NotifyCallingSessionBackground() { return; };
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
-    void NotifyCallingSessionBackground();
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
     void PostLifeCycleTask(Task &&task, const std::string &name, const LifeCycleTaskType &taskType);
@@ -338,7 +338,7 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
-    void PresentFocusIfPointDown();
+    virtual void PresentFocusIfPointDown();
     void ResetSnapshot();
     std::shared_ptr<Media::PixelMap> GetSnapshotPixelMap(const float oriScale = 1.0f, const float newScale = 1.0f);
     virtual std::vector<Rect> GetTouchHotAreas() const
@@ -372,7 +372,7 @@ public:
     WSRectF UpdateHotRect(const WSRect& rect);
     WSError RaiseToAppTopForPointDown();
 
-    void NotifyForegroundInteractiveStatus(bool interactive);
+    virtual void NotifyForegroundInteractiveStatus(bool interactive);
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height);
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
@@ -401,11 +401,9 @@ protected:
     WSRectF UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area);
-    void UpdatePointerArea(const WSRect& rect);
-    bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
-    bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    virtual void UpdatePointerArea(const WSRect& rect);
+    virtual bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool IsTopDialog() const;
-    bool NeedSystemPermission(WindowType type);
     void HandlePointDownDialog(int32_t pointAction);
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
@@ -472,9 +470,6 @@ protected:
     NotifySessionSnapshotFunc notifySessionSnapshotFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
-    NotifyCallingSessionUpdateRectFunc notifyCallingSessionUpdateRectFunc_;
-    NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
-    NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
