@@ -1127,11 +1127,6 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON_ADVANCED");
             } else {
                 status = ScreenPowerStatus::POWER_STATUS_ON;
-                if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
-                    FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-                } else {
-                    WLOGFI("Duplicate registration posture is not allowed.");
-                }
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
             }
             break;
@@ -1165,11 +1160,6 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (status == ScreenPowerStatus::POWER_STATUS_OFF) {
         taskScheduler_->RemoveTask("screenOnTask");
-        if (g_foldScreenFlag && !FoldScreenSensorManager::GetInstance().allowPosture) {
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-        } else {
-            WLOGFI("Duplicate unregistration posture is not allowed.");
-        }
     }
 
     // Handling Power Button Conflicts
@@ -1187,7 +1177,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    HandlerSensor(status);
+    HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1201,17 +1191,28 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
     keyguardDrawnDone_ = flag;
 }
 
-void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
+void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto isTablet = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
     if (isPhone || isTablet) {
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
-            WLOGFI("subscribe rotation sensor when phone turn on");
+            WLOGFI("subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
+            if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
+                WLOGFI("Duplicate register posture is not allowed.");
+            }
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
-            WLOGFI("unsubscribe rotation sensor when phone turn off");
+            WLOGFI("unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
+            if (g_foldScreenFlag && !FoldScreenSensorManager::GetInstance().allowPosture &&
+                reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+            } else {
+                WLOGFI("Duplicate unregister, or not fold product, switch screen reason, failed unregister posture.");
+            }
         } else {
             WLOGFI("SetScreenPower state not support");
         }
