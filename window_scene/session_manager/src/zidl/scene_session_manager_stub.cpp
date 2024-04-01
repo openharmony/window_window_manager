@@ -524,7 +524,7 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, Mes
 int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFD("run HandleGetFocusSessionElement!");
-    sptr<AppExecFwk::ElementName> element = nullptr;
+    AppExecFwk::ElementName element;
     const WSError& errCode = GetFocusSessionElement(element);
     reply.WriteRemoteObject(element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
