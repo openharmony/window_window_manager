@@ -43,6 +43,11 @@ PictureInPictureManager::~PictureInPictureManager()
 {
 }
 
+bool IsSupportPiP()
+{
+    return SceneBoardJudgement::IsSceneBoardEnabled();
+}
+
 bool PictureInPictureManager::ShouldAbortPipStart()
 {
     return activeController_ != nullptr && activeController_->GetControllerState() == PiPWindowState::STATE_STARTING;
