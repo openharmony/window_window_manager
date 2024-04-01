@@ -142,6 +142,9 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
 sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return nullptr;
+    }
     if (!option) {
         TLOGE(WmsLogTag::WMS_PIP, "option is null.");
         return nullptr;
@@ -153,9 +156,6 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     if (!WindowHelper::IsPipWindow(option->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_PIP, "window type is not pip window.");
         return nullptr;
-    }
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return Create(option->GetWindowName(), option, context, errCode);
     }
     sptr<WindowSessionImpl> windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
     if (windowSessionImpl == nullptr) {
@@ -206,7 +206,7 @@ sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRunti
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return WindowSceneSessionImpl::GetMainWindowWithContext(context);
     } else {
-        return WindowImpl::GetMainWindowWithContext(context);
+        return nullptr;
     }
 }
 

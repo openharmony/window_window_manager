@@ -229,23 +229,6 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
     return FindWindowById(topWinId);
 }
 
-sptr<Window> WindowImpl::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
-{
-    if (windowMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
-        return nullptr;
-    }
-    for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        auto win = iter->second.second;
-        if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
-            WLOGI("GetMainWindow Find MainWinId:%{public}u.", win->GetWindowId());
-            return win;
-        }
-    }
-    WLOGFE("Cannot find main Window!");
-    return nullptr;
-}
-
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 {
     if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
