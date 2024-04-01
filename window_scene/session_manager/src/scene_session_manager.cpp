@@ -1741,6 +1741,14 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
+    bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT && !secureSessionSet_.empty()) ||
+        (SessionHelper::IsSubWindow(property->GetWindowType()) &&
+         secureSessionSet_.find(property->GetParentPersistentId()) != secureSessionSet_.end());
+    if (shouldBlock) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+
     if (SessionPermission::IsStartedByUIExtension() &&
         property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
