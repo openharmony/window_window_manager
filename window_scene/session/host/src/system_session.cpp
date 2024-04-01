@@ -51,7 +51,7 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
         auto pipType = GetPiPTemplateInfo().pipTemplateType;
         if (pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL) ||
             pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
-            WLOGFD("PiPWindow status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
+            TLOGI(WmsLogTag::WMS_SYSTEM, "PiPWindow status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
             specificCallback_->onCameraSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
         }
     } else {
