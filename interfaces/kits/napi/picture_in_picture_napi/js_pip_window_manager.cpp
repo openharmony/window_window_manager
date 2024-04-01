@@ -234,7 +234,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
     }
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(
                     WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
                 return;
