@@ -2835,6 +2835,14 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             sceneSession->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
+                sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
+                FlushWindowInfoToMMI();
+            }
+            break;
+        }
         default:
             break;
     }
@@ -5508,9 +5516,9 @@ void SceneSessionManager::UpdateCallingWindowIdAndPosition(const sptr<WindowSess
     }
     uint32_t curWindowId = sceneSession->GetSessionProperty()->GetCallingWindow();
     uint32_t newWindowId = property->GetCallingWindow();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
     // When calling window id changes, restore the old calling window, raise the new calling window.
     if (curWindowId != INVALID_WINDOW_ID && newWindowId != curWindowId && callingSession_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindow curId: %{public}d, newId: %{public}d", curWindowId, newWindowId);
         RestoreCallingSessionSizeIfNeed();
 
         callingSession_ = GetSceneSession(newWindowId);

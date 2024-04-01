@@ -16,14 +16,17 @@
 #ifndef OHOS_ROSEN_WINDOW_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_MANAGER_LITE_H
 
+#include <iremote_object.h>
 #include <memory>
 #include <mutex>
 #include <refbase.h>
 #include <vector>
-#include <iremote_object.h>
-#include "wm_single_instance.h"
-#include "wm_common.h"
 #include "focus_change_info.h"
+#include "window_drawing_content_info.h"
+#include "window_manager.h"
+#include "window_visibility_info.h"
+#include "wm_common.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,9 +37,45 @@ namespace Rosen {
  */
 class WindowManagerLite {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerLite);
+friend class WindowManagerAgentLite;
 friend class WMSDeathRecipient;
 friend class SSMDeathRecipient;
 public:
+    /**
+     * @brief Register focus changed listener.
+     *
+     * @param listener IFocusChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+    /**
+     * @brief Unregister focus changed listener.
+     *
+     * @param listener IFocusChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+    /**
+     * @brief Register visibility changed listener.
+     *
+     * @param listener IVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    /**
+     * @brief Unregister visibility changed listener.
+     *
+     * @param listener IVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    /**
+     * @brief Get visibility window info.
+     *
+     * @param infos Visible window infos
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     /**
      * @brief Get focus window.
      *
@@ -44,12 +83,36 @@ public:
      * @return FocusChangeInfo object about focus window.
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    /**
+    * @brief Register drawingcontent changed listener.
+    *
+    * @param listener IDrawingContentChangedListener.
+    * @return WM_OK means register success, others means register failed.
+    */
+    WMError RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
+
+    /**
+     * @brief Unregister drawingcontent changed listener.
+     *
+     * @param listener IDrawingContentChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
 private:
     WindowManagerLite();
     ~WindowManagerLite();
     std::recursive_mutex mutex_;
+    class Impl;
+    std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
 
+    void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
+        DisplayId displayId, bool focused) const;
+    void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
+    void UpdateWindowVisibilityInfo(
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
+    void UpdateWindowDrawingContentInfo(
+        const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void OnRemoteDied();
 };
 } // namespace Rosen
