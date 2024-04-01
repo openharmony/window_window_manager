@@ -299,7 +299,6 @@ HWTEST_F(SessionStubTest, HandleShow009, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleShow(data, reply);
     ASSERT_EQ(0, res);
 }
@@ -315,7 +314,6 @@ HWTEST_F(SessionStubTest, HandleHide010, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleHide(data, reply);
     ASSERT_EQ(0, res);
 }
@@ -331,7 +329,6 @@ HWTEST_F(SessionStubTest, HandlePendingSessionActivation011, Function | SmallTes
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     AAFwk::Want options;
     EXPECT_NE(data.WriteString("HandlePendingSessionActivation"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
@@ -352,7 +349,6 @@ HWTEST_F(SessionStubTest, HandleNotifySyncOn012, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleNotifySyncOn(data, reply);
     ASSERT_EQ(0, res);
 }
@@ -368,7 +364,6 @@ HWTEST_F(SessionStubTest, HandleNotifyAsyncOn013, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleNotifyAsyncOn(data, reply);
     ASSERT_EQ(0, res);
 }
@@ -384,7 +379,6 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
 }
