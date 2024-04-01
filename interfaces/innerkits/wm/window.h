@@ -1812,6 +1812,17 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set Shaped Window Mask.
+     *
+     * @param windowMask Mask of the shaped window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

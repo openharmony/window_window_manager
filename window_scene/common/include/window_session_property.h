@@ -25,6 +25,7 @@
 #include "wm_common.h"
 #include "dm_common.h"
 #include <cfloat>
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -77,6 +78,8 @@ public:
     void SetCallingWindow(uint32_t windowId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetExtensionFlag(bool isExtensionFlag);
+    void SetWindowMask(const sptr<Media::PixelMap>& windowMask);
+    void SetIsShaped(bool isShaped);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -119,6 +122,8 @@ public:
     uint32_t GetCallingWindow() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     bool GetExtensionFlag() const;
+    sptr<Media::PixelMap> GetWindowMask() const;
+    bool GetIsShaped() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -128,6 +133,8 @@ public:
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
+    bool MarshallingWindowMask(Parcel& parcel) const;
+    static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -198,6 +205,9 @@ private:
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
     bool isExtensionFlag_ = false;
+
+    bool isShaped_ = false;
+    sptr<Media::PixelMap> windowMask_ = nullptr;
 };
 
 struct SystemSessionConfig : public Parcelable {

@@ -14,11 +14,12 @@
  */
 
 #include "window_adapter_lite.h"
+#include <key_event.h>
 #include "window_manager_hilog.h"
+#include "wm_common.h"
+#include "scene_board_judgement.h"
 #include "session_manager_lite.h"
 #include "focus_change_info.h"
-#include "singleton_delegator.h"
-
 
 namespace OHOS {
 namespace Rosen {
@@ -34,6 +35,32 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapterLite)
             return ret;                     \
         }                                   \
     } while (false)
+
+WMError WindowAdapterLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+WMError WindowAdapterLite::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+WMError WindowAdapterLite::CheckWindowId(int32_t windowId, int32_t &pid)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->CheckWindowId(windowId, pid);
+}
+
+WMError WindowAdapterLite::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->GetVisibilityWindowInfo(infos);
+}
 
 bool WindowAdapterLite::InitSSMProxy()
 {
@@ -66,7 +93,6 @@ void WindowAdapterLite::ClearWindowAdapter()
     if ((windowManagerServiceProxy_ != nullptr) && (windowManagerServiceProxy_->AsObject() != nullptr)) {
         windowManagerServiceProxy_->AsObject()->RemoveDeathRecipient(wmsDeath_);
     }
-
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     isProxyValid_ = false;
 }
