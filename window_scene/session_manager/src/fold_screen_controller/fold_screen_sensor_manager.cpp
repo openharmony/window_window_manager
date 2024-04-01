@@ -59,7 +59,11 @@ WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
 FoldScreenSensorManager::FoldScreenSensorManager()
 {
-    RegisterPostureCallback();
+    if (allowPosture) {
+        RegisterPostureCallback();
+    } else {
+        WLOGFI("Duplicate registration posture is not allowed.");
+    }
     RegisterHallCallback();
 }
 
@@ -79,6 +83,9 @@ void FoldScreenSensorManager::RegisterPostureCallback()
     WLOGFI("RegisterPostureCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterPostureCallback failed.");
+    } else {
+        allowPosture = false;
+        WLOGFI("FoldScreenSensorManager.RegisterPostureCallback success.");
     }
 }
 
@@ -87,6 +94,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
+        allowPosture = true;
         WLOGFI("FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
@@ -195,12 +203,9 @@ void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
 
 void FoldScreenSensorManager::UpdateSwitchScreenBoundaryForAlta(float angle, int hall)
 {
-    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    if (hall == HALL_FOLDED_THRESHOLD || !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         allowUseSensorForAlta = SMALLER_BOUNDARY_FLAG;
-    }
-    if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
-        allowUseSensorForAlta = LARGER_BOUNDARY_FLAG;
-    } else if (hall == HALL_FOLDED_THRESHOLD) {
+    } else if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
         allowUseSensorForAlta = SMALLER_BOUNDARY_FLAG;
     }
 }
@@ -213,16 +218,14 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     }
     FoldStatus state;
 
-    if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
-        return FoldStatus::EXPAND;
-    }
-
     if (allowUseSensorForAlta == SMALLER_BOUNDARY_FLAG) {
         if (hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
         } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
             hall == HALL_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
+        } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
+            state = FoldStatus::EXPAND;
         } else {
             state = mState_;
             if (state == FoldStatus::UNKNOWN) {
@@ -239,6 +242,8 @@ FoldStatus FoldScreenSensorManager::TransferAngleToScreenState(float angle, int 
     } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
         std::isgreater(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD + ALTA_HALF_FOLDED_BUFFER)) {
         state = FoldStatus::HALF_FOLD;
+    } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
+        state = FoldStatus::EXPAND;
     } else {
         state = mState_;
         if (state == FoldStatus::UNKNOWN) {

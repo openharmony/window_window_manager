@@ -1122,6 +1122,11 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
 {
     switch (state) {
         case ScreenPowerState::POWER_ON: {
+            if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
+                WLOGFI("Duplicate registration posture is not allowed.");
+            }
             if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 status = ScreenPowerStatus::POWER_STATUS_ON_ADVANCED;
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON_ADVANCED");

@@ -34,6 +34,8 @@ class FoldScreenSensorManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(FoldScreenSensorManager);
 
 public:
+    void RegisterPostureCallback();
+
     void UnRegisterPostureCallback();
 
     void UnRegisterHallCallback();
@@ -43,6 +45,8 @@ public:
     void HandlePostureData(const SensorEvent * const event);
 
     void HandleHallData(const SensorEvent * const event);
+
+    bool allowPosture = true;
 
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
@@ -56,8 +60,6 @@ private:
     SensorUser hallUser;
 
     int allowUseSensorForAlta = 0;
-
-    void RegisterPostureCallback();
 
     void RegisterHallCallback();
 
