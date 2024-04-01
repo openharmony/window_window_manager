@@ -1186,7 +1186,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest054, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteBool(false);
     uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE);
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -1226,7 +1226,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, Function | SmallTest 
     uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, -1);
 }
 }
 }
