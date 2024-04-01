@@ -234,6 +234,11 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
     }
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+                    WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
+                return;
+            }
             sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
             auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
             if (context == nullptr) {
