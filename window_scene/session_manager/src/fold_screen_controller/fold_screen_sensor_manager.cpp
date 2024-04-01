@@ -206,7 +206,7 @@ void FoldScreenSensorManager::UpdateSwitchScreenBoundaryForAlta(float angle, int
     if (hall == HALL_FOLDED_THRESHOLD || !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         allowUseSensorForAlta = SMALLER_BOUNDARY_FLAG;
     } else if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
-        allowUseSensorForAlta = SMALLER_BOUNDARY_FLAG;
+        allowUseSensorForAlta = LARGER_BOUNDARY_FLAG;
     }
 }
 

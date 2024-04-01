@@ -1122,16 +1122,16 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
 {
     switch (state) {
         case ScreenPowerState::POWER_ON: {
-            if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
-                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-            } else {
-                WLOGFI("Duplicate registration posture is not allowed.");
-            }
             if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 status = ScreenPowerStatus::POWER_STATUS_ON_ADVANCED;
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON_ADVANCED");
             } else {
                 status = ScreenPowerStatus::POWER_STATUS_ON;
+                if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
+                    FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+                } else {
+                    WLOGFI("Duplicate registration posture is not allowed.");
+                }
                 WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
             }
             break;
@@ -1165,6 +1165,11 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (status == ScreenPowerStatus::POWER_STATUS_OFF) {
         taskScheduler_->RemoveTask("screenOnTask");
+        if (g_foldScreenFlag && !FoldScreenSensorManager::GetInstance().allowPosture) {
+            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+        } else {
+            WLOGFI("Duplicate unregistration posture is not allowed.");
+        }
     }
 
     // Handling Power Button Conflicts
