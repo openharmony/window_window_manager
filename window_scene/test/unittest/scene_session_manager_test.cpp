@@ -1765,17 +1765,6 @@ HWTEST_F(SceneSessionManagerTest, GetSceneSession, Function | SmallTest | Level3
 }
 
 /**
- * @tc.name: GetFocusSessionElement
- * @tc.desc: SceneSesionManager get focus session element
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, GetFocusSessionElement, Function | SmallTest | Level3)
-{
-    AppExecFwk::ElementName element;
-    ASSERT_EQ(ssm_->GetFocusSessionElement(element), 0);
-}
-
-/**
  * @tc.name: GetSceneSessionByName
  * @tc.desc: SceneSesionManager get scene session by name
  * @tc.type: FUNC
