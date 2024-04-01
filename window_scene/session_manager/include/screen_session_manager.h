@@ -33,7 +33,7 @@
 #include "screen.h"
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
-include "fold_screen_controller/fold_screen_sensor_manager.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
