@@ -1749,8 +1749,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
-    if (SessionPermission::IsStartedByUIExtension() &&
-        property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
+        property->GetExtensionFlag() == true && SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
