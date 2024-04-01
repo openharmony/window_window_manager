@@ -49,7 +49,7 @@ protected:
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
-    
+
     NotifyCallingSessionUpdateRectFunc notifyCallingSessionUpdateRectFunc_;
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
