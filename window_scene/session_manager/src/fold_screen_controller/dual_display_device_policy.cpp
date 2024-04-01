@@ -270,7 +270,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_FULL;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOff, "screenOnMainOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_MAIN, ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
@@ -280,7 +280,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_MAIN;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
             PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOn, "screenOnMainOnTask");
@@ -292,7 +292,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_FULL;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOffMainOff, "screenOffMainOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_MAIN, ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
@@ -322,7 +322,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_MAIN;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOff, "screenOnFullOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
@@ -332,7 +332,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_FULL;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
             PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
@@ -344,7 +344,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             screenId_ = SCREEN_ID_MAIN;
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOffFullOff, "screenOffFullOffTask");
         SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
