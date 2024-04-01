@@ -235,11 +235,9 @@ sptr<Window> WindowImpl::GetMainWindowWithContext(const std::shared_ptr<AbilityR
         WLOGFE("Please create mainWindow First!");
         return nullptr;
     }
-    uint32_t mainWinId = INVALID_WINDOW_ID;
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
         auto win = iter->second.second;
         if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
-            mainWinId = win->GetWindowId();
             WLOGI("GetMainWindow Find MainWinId:%{public}u.", win->GetWindowId());
             return win;
         }
