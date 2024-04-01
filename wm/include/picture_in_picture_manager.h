@@ -20,6 +20,7 @@
 #include "picture_in_picture_controller.h"
 #include "window.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
 
 namespace OHOS {
 namespace Rosen {
