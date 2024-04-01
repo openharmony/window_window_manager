@@ -2038,8 +2038,17 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     while (g_persistentIdSet.count(g_persistentId)) {
         g_persistentId++;
     }
-    persistentId_ = isExtension ? static_cast<uint32_t>(
-        g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+    if (isExtension) {
+        constexpr uint32_t pidLength = 18;
+        constexpr uint32_t pidMask = (1 << pidLength) - 1;
+        constexpr uint32_t persistentIdLength = 12;
+        constexpr uint32_t persistentIdMask = (1 << persistentIdLength) - 1;
+        uint32_t assembledPersistentId = ((static_cast<uint32_t>(getpid()) & pidMask) << persistentIdLength) |
+            (static_cast<uint32_t>(g_persistentId.load()) & persistentIdMask);
+        persistentId_ = assembledPersistentId | 0x40000000;
+    } else {
+        persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+    }
     g_persistentIdSet.insert(g_persistentId);
     WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
