@@ -1011,7 +1011,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionElement(AppExecFwk::ElementName
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    element = reply.ReadRemoteObject();
+    element = reply.ReadParcelable<AppExecFwk::ElementName>();
     if (element == null) {
         WLOGFD("get element null.");
     }
