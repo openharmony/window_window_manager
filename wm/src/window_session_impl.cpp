@@ -545,6 +545,26 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     uiContent_->NotifyRotationAnimationEnd();
 }
 
+void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton,
+    bool &hideSplitButton)
+{
+    if (!isPC) {
+        return;
+    }
+    if (hideMaximizeButton > !windowTitleVisibleFlags_.isMaximizeVisible) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "isMaximizeVisible param INVALID");
+    }
+    hideMaximizeButton = hideMaximizeButton || (!windowTitleVisibleFlags_.isMaximizeVisible);
+    if (hideMinimizeButton > !windowTitleVisibleFlags_.isMinimizeVisible) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "isMinimizeVisible param INVALID");
+    }
+    hideMinimizeButton = hideMinimizeButton || (!windowTitleVisibleFlags_.isMinimizeVisible);
+    if (hideSplitButton > !windowTitleVisibleFlags_.isSplitVisible) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "isSplitVisible param INVALID");
+    }
+    hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible);
+}
+
 void WindowSessionImpl::UpdateDensity()
 {
     auto preRect = GetRect();
@@ -688,8 +708,11 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
-    WLOGFI("[hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
-    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
+    bool hideMinimizeButton = false;
+    GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
+        hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -1557,6 +1580,23 @@ void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventC
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     inputEventConsumer_ = inputEventConsumer;
+}
+
+WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+{
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (uiContent_ == nullptr || !IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (!isPC) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
+    UpdateTitleButtonVisibility();
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
