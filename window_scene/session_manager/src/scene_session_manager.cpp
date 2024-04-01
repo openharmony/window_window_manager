@@ -6036,14 +6036,14 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 
 WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName &element)
 {
-    auto task = [this, &token]() {
+    auto task = [this, &element]() {
         WLOGFD("run GetFocusSessionElement with focusedSessionId: %{public}d", focusedSessionId_);
         auto sceneSession = GetSceneSession(focusedSessionId_);
         if (sceneSession) {
             auto sessionInfo = sceneSession->GetSessionInfo();
             AAFwk::Want want;
             want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-            element = want.getElement();
+            element = want.GetElement();
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;
