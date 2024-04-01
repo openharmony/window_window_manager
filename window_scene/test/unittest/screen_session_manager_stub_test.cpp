@@ -1224,25 +1224,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteBool(false);
     uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest057
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
