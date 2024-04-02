@@ -37,5 +37,10 @@ void WindowManagerAgentLite::UpdateWindowDrawingContentInfo(
     SingletonContainer::Get<WindowManagerLite>().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
 }
 
+void WindowManagerAgentLite::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdateWindowModeTypeInfo(type);
+}
+
 } // namespace Rosen
 } // namespace OHOS

@@ -56,6 +56,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
+    WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
 
 protected:
     SceneSessionManagerLite() = default;
