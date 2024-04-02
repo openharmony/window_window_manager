@@ -54,6 +54,12 @@ ohos_shared_library("screensessionmanager_napi") {
     defines += [ "POWER_MANAGER_ENABLE" ]
   }
 
+  if (is_standard_system) {
+    external_deps += [ "init:libbegetutil" ]
+  } else {
+    external_deps += [ "init_lite:libbegetutil" ]
+  }
+
   relative_install_dir = "module"
   part_name = "window_manager"
   subsystem_name = "window"
