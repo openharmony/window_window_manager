@@ -410,7 +410,7 @@ WMError WindowManagerLite::RegisterWindowModeChangedListener(const sptr<IWindowM
         pImpl_->windowModeListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
     }
     ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
         pImpl_->windowModeListenerAgent_ = nullptr;
@@ -442,7 +442,7 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowModeListeners_.empty() && pImpl_->windowModeListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowModeListenerAgent_ = nullptr;
         }
