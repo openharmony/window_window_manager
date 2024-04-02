@@ -397,6 +397,11 @@ WMError WindowManagerLite::UnregisterDrawingContentChangedListener(const sptr<ID
     return ret;
 }
 
+void WindowManagerLite::UpdateWindowModeTypeInfo(WindowModeType type) const
+{
+    pImpl_->NotifyWindowModeChange(type);
+}
+
 WMError WindowManagerLite::RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
 {
     if (listener == nullptr) {
