@@ -7501,4 +7501,25 @@ void SceneSessionManager::ReportWindowProfileInfos()
             windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode);
     }
 }
+
+WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "GetHostWindowRect permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, hostWindowId, &rect]() {
+        auto sceneSession = GetSceneSession(hostWindowId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        WSRect hostRect = sceneSession->GetSessionRect();
+        rect = {hostRect.posX_, hostRect.posY_, hostRect.width_, hostRect.height_};
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "GetHostWindowRect");
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
