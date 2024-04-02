@@ -69,6 +69,8 @@ public:
     void SetAnimationFlag(uint32_t animationFlag);
     void SetTransform(const Transform& trans);
     void SetWindowFlags(uint32_t flags);
+    void SetTopmost(bool topmost);
+    bool IsTopmost() const;
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
@@ -165,6 +167,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool topmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };

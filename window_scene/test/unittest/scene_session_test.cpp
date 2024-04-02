@@ -17,6 +17,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
+#include "session/host/include/main_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
@@ -1304,6 +1305,27 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     auto result = scensession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetTopmost
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTopmost";
+    info.bundleName_ = "SetTopmost";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
+    EXPECT_NE(scenesession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    scenesession->SetSessionProperty(property);
+    auto result = scenesession->SetTopmost(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(scenesession->IsTopmost());
 }
 
 /**

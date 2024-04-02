@@ -974,6 +974,25 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
+WMError WindowSessionImpl::SetTopmost(bool topmost)
+{
+    WLOGFD("set topmost");
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (!isPC) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetTopmost(topmost);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+}
+
+bool WindowSessionImpl::IsTopmost() const
+{
+    return property_->IsTopmost();
+}
+
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     WLOGFD("set dragEnabled");

@@ -19,6 +19,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
@@ -3023,6 +3024,25 @@ HWTEST_F(SceneSessionManagerTest, NotifyWindowExtensionVisibilityChange, Functio
     bool isVisible = false;
     WSError result = ssm_->NotifyWindowExtensionVisibilityChange(pid, uid, isVisible);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateTopmostProperty
+ * @tc.desc: test UpdateTopmostProperty
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateTopmostProperty";
+    info.bundleName_ = "UpdateTopmostProperty";
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetTopmost(true);
+    property->SetSystemCalling(true);
+    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
+    scenesession->SetSessionProperty(property);
+    WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
+    ASSERT_EQ(WMError::WM_OK, result);
 }
 
 /**
