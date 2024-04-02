@@ -1749,14 +1749,14 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
-    if (SessionPermission::IsStartedByUIExtension() &&
-        property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
+        property->GetExtensionFlag() == true && SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
-            WLOGE("The hostWindow is not thie parentwindow ! parentwindow bundleName: %{public}s, "
+            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
                 "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;

@@ -173,26 +173,26 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
  */
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
-    option_->SetWindowTag(WindowTag::SUB_WINDOW);
-    option_->SetWindowName("ChildWindow0003");
-    option_->SetExtensionTag(true);
-    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
-    ASSERT_NE(nullptr, parentscenesession_);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowTag(WindowTag::SUB_WINDOW);
+    option->SetWindowName("ChildWindow0003");
+    option->SetExtensionTag(true);
+    sptr<WindowSceneSessionImpl> parentSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, parentSceneSession);
     
-    SessionInfo sessionInfo_ = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
-    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
-    ASSERT_NE(nullptr, session_);
-    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, parentSceneSession->Create(abilityContext_, session));
 
-    parentscenesession_->property_->SetParentPersistentId(102);
-    parentscenesession_->property_->SetParentId(102);
-    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    parentscenesession_->hostSession_ = session_;
+    parentSceneSession->property_->SetParentPersistentId(102);
+    parentSceneSession->property_->SetParentId(102);
+    parentSceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentSceneSession->hostSession_ = session;
 
-    parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    parentSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    if (parentSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentSceneSession->CreateAndConnectSpecificSession());
     }
 }
 
