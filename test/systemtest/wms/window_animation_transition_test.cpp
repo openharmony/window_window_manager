@@ -107,7 +107,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | Me
     sptr<TestAnimationTransitionController> testAnimationTransitionListener =
         new TestAnimationTransitionController(window);
     window->RegisterAnimationTransitionController(testAnimationTransitionListener);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WMError::WM_OK, window->Show(0, true));
     usleep(500000); // 500000us = 0.5s
     ASSERT_EQ(WMError::WM_OK, window->Hide(0, true));
     usleep(500000); // 500000us = 0.5s
@@ -128,7 +128,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | Me
     sptr<TestAnimationTransitionController> testAnimationTransitionListener =
         new TestAnimationTransitionController(window);
     window->RegisterAnimationTransitionController(testAnimationTransitionListener);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WMError::WM_OK, window->Show(0, true));
     usleep(500000); // 500000us = 0.5s
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -163,7 +163,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, Function | Me
     sptr<TestAnimationTransitionController> testAnimationTransitionListener =
         new TestAnimationTransitionController(window);
     window->RegisterAnimationTransitionController(testAnimationTransitionListener);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WMError::WM_OK, window->Show(0, true));
     usleep(500000); // 500000us = 0.5s
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
