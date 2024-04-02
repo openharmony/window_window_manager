@@ -23,6 +23,7 @@
 #include "js_screen_utils.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
+#include <parameter.h>
 #include <parameters.h>
 
 #ifdef POWER_MANAGER_ENABLE
