@@ -1199,19 +1199,18 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
             WLOGFI("subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
-            if (g_foldScreenFlag && FoldScreenSensorManager::GetInstance().allowPosture) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
             } else {
-                WLOGFI("Duplicate register posture is not allowed.");
+                WLOGFI("not fold product, switch screen reason, failed register posture.");
             }
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
             WLOGFI("unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
-            if (g_foldScreenFlag && !FoldScreenSensorManager::GetInstance().allowPosture &&
-                reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
             } else {
-                WLOGFI("Duplicate unregister, or not fold product, switch screen reason, failed unregister posture.");
+                WLOGFI("not fold product, switch screen reason, failed unregister posture.");
             }
         } else {
             WLOGFI("SetScreenPower state not support");

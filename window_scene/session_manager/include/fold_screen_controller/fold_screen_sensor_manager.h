@@ -46,8 +46,6 @@ public:
 
     void HandleHallData(const SensorEvent * const event);
 
-    bool allowPosture = true;
-
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
 
@@ -78,6 +76,8 @@ private:
     float globalAngle = -1.0F;
 
     uint16_t globalHall = USHRT_MAX;
+
+    bool allowPosture_ = true;
 
     typedef struct EXTHALLData {
         float flag = 0.0;
