@@ -34,6 +34,8 @@ class FoldScreenSensorManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(FoldScreenSensorManager);
 
 public:
+    void RegisterPostureCallback();
+
     void UnRegisterPostureCallback();
 
     void UnRegisterHallCallback();
@@ -57,8 +59,6 @@ private:
 
     int allowUseSensorForAlta = 0;
 
-    void RegisterPostureCallback();
-
     void RegisterHallCallback();
 
     void HandleSensorData(float, int);
@@ -76,6 +76,8 @@ private:
     float globalAngle = -1.0F;
 
     uint16_t globalHall = USHRT_MAX;
+
+    bool allowPosture_ = true;
 
     typedef struct EXTHALLData {
         float flag = 0.0;
