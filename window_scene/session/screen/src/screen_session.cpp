@@ -146,6 +146,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetDensityInCurResolution(property_.GetDensityInCurResolution());
+    displayInfo->SetDefaultVirtualPixelRatio(property_.GetDefaultDensity());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);

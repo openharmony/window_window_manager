@@ -2007,6 +2007,265 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyPrepareClosePiPWindow01, Function | S
 }
 
 /**
+ * @tc.name: SetDefaultDensityEnabled01
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
+    ASSERT_EQ(true, window->GetDefaultDensityEnabled());
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled02
+ * @tc.desc: window session is invalid
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetDefaultDensityEnabled(true));
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled03
+ * @tc.desc: not app main window
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetDefaultDensityEnabled(true));
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled04
+ * @tc.desc: isDefaultDensityEnabled_ not change
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled04");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(false));
+}
+
+/**
+ * @tc.name: GetDefaultDensityEnabled01
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetDefaultDensityEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetDefaultDensityEnabled01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->isDefaultDensityEnabled_ = true;
+    ASSERT_EQ(true, window->GetDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: GetDefaultDensityEnabled02
+ * @tc.desc: test default value
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetDefaultDensityEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetDefaultDensityEnabled02");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_EQ(false, window->GetDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio01
+ * @tc.desc: main window isDefaultDensityEnabled_ true
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = true;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+    ASSERT_EQ(defautDensity, window->GetVirtualPixelRatio(displayInfo));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio02
+ * @tc.desc: main window isDefaultDensityEnabled_ false
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = false;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+    ASSERT_EQ(density, window->GetVirtualPixelRatio(displayInfo));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio03
+ * @tc.desc: sub window isDefaultDensityEnabled_ true
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = true;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    subOption->SetWindowName("GetVirtualPixelRatio03SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetParentPersistentId(window->GetWindowId());
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio04
+ * @tc.desc: sub window isDefaultDensityEnabled_ false
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio04");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = false;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    subOption->SetWindowName("GetVirtualPixelRatio04SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetParentPersistentId(window->GetWindowId());
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(density, subWindow->GetVirtualPixelRatio(displayInfo));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
  * @tc.name: GetWindowLimits01
  * @tc.desc: GetWindowLimits
  * @tc.type: FUNC
