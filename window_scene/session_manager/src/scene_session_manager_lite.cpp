@@ -158,4 +158,26 @@ void SceneSessionManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     return SceneSessionManager::GetInstance().GetFocusWindowInfo(focusInfo);
 }
+
+WMError SceneSessionManagerLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    return SceneSessionManager::GetInstance().RegisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+WMError SceneSessionManagerLite::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    return SceneSessionManager::GetInstance().UnregisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+WMError SceneSessionManagerLite::CheckWindowId(int32_t windowId, int32_t& pid)
+{
+    return SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
+}
+
+WMError SceneSessionManagerLite::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().GetVisibilityWindowInfo(infos);
+}
 } // namespace OHOS::Rosen

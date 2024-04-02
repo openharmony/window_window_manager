@@ -567,6 +567,28 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
 
+bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
+{
+    if (!parcel.WriteBool(isShaped_)) {
+        return false;
+    }
+    if (isShaped_) {
+        if (!parcel.WriteParcelable(windowMask_)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property)
+{
+    bool isShaped = parcel.ReadBool();
+    property->SetIsShaped(isShaped);
+    if (isShaped) {
+        property->SetWindowMask(parcel.ReadParcelable<Media::PixelMap>());
+    }
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -598,7 +620,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
-        parcel.WriteBool(isExtensionFlag_);
+        parcel.WriteBool(isExtensionFlag_) &&
+        MarshallingWindowMask(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -651,6 +674,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCallingWindow(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
+    UnmarshallingWindowMask(parcel, property);
     return property;
 }
 
@@ -693,6 +717,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     textFieldHeight_ = property->textFieldHeight_;
     isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
+    windowMask_ = property->windowMask_;
+    isShaped_ = property->isShaped_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -748,6 +774,26 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
+}
+
+void WindowSessionProperty::SetWindowMask(const sptr<Media::PixelMap>& windowMask)
+{
+    windowMask_ = windowMask;
+}
+
+sptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
+{
+    return windowMask_;
+}
+
+void WindowSessionProperty::SetIsShaped(bool isShaped)
+{
+    isShaped_ = isShaped;
+}
+
+bool WindowSessionProperty::GetIsShaped() const
+{
+    return isShaped_;
 }
 } // namespace Rosen
 } // namespace OHOS
