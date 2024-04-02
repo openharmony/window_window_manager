@@ -171,6 +171,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, Function | Smal
 }
 
 /**
+ * @tc.name: HandleGetFocusSessionElement
+ * @tc.desc: test HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetFocusSessionElement(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetSessionLabel
  * @tc.desc: test HandleSetSessionLabel
  * @tc.type: FUNC
