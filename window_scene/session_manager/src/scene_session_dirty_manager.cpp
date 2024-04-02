@@ -423,6 +423,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    auto pixelMap = sceneSession->GetSessionProperty()->GetWindowMask().GetRefPtr();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -436,8 +437,15 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
-        .transform = transformData
+        .transform = transformData,
+        .pixelMap = pixelMap
     };
+    auto property = sceneSession->GetSessionProperty();
+    if (property != nullptr && (property->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
+        WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
+    }
     return windowInfo;
 }
 
