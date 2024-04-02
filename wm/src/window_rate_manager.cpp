@@ -35,8 +35,8 @@ void WindowRateManager::FlushFrameRate(int32_t windowId, uint32_t rate,
     if (auto iter = windowRateMap_.find(windowId); iter != windowRateMap_.end() && iter->second != rate) {
         iter->second = rate;
         expectedRate_ = GetExpectedRate();
-        if (vsyncStation_ != nullptr) {
-            vsyncStation_->FlushFrameRate(expectedRate_, false);
+        if (vsyncStation != nullptr) {
+            vsyncStation->FlushFrameRate(expectedRate_, false);
         }
     }
 }
@@ -44,10 +44,10 @@ void WindowRateManager::FlushFrameRate(int32_t windowId, uint32_t rate,
 void WindowRateManager::FlushFrameRateForRootWindow(uint32_t rate, const std::shared_ptr<VsyncStation>& vsyncStation)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if (rate != rootWindowRate_ && vsyncStation_ != nullptr) {
+    if (rate != rootWindowRate_ && vsyncStation != nullptr) {
         rootWindowRate_ = rate;
         expectedRate_ = GetExpectedRate();
-        vsyncStation_->FlushFrameRate(expectedRate_, false);
+        vsyncStation->FlushFrameRate(expectedRate_, false);
     }
 }
 
@@ -68,9 +68,9 @@ void WindowRateManager::RemoveWindowRate(int32_t windowId, const std::shared_ptr
         auto rate = iter->second;
         windowRateMap_.erase(iter);
         WLOGD("WindowRateManager::RemoveWindowRate id: %{public}d", windowId);
-        if (rate == expectedRate_ && vsyncStation_ != nullptr) {
+        if (rate == expectedRate_ && vsyncStation != nullptr) {
             expectedRate_ = GetExpectedRate();
-            vsyncStation_->FlushFrameRate(expectedRate_, true);
+            vsyncStation->FlushFrameRate(expectedRate_, true);
         }
     }
 }
