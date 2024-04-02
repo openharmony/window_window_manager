@@ -261,6 +261,8 @@ public:
     virtual void SetOrientation(Orientation orientation) = 0;
     virtual void SetSize(int32_t width, int32_t height) = 0;
     virtual void SetDensity(float density) = 0;
+    virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual bool GetDefaultDensityEnabled() { return false; }
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
