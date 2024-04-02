@@ -2200,7 +2200,11 @@ WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoIn
     WLOGFD("Start to register window no interaction listener.");
     std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
     WMError ret = RegisterListener(windowNoInteractionListeners_[GetPersistentId()], listener);
-    SubmitNoInteractionMonitorTask(this->lastInteractionEventId_.load(), listener);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("register no interaction listener failed.");
+    } else {
+        SubmitNoInteractionMonitorTask(this->lastInteractionEventId_.load(), listener);
+    }
     return ret;
 }
 
