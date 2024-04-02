@@ -4332,6 +4332,8 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFlo
         return;
     }
     lastWindowModeType_ = type;
+    TLOGI(WmsLogTag::WMS_MAIN, "Notify RSS Window Mode Type Update, type : %{public}d",
+        static_cast<uint8_t>(type));
     SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(type);
 }
 
