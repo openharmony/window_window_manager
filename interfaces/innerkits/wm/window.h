@@ -1827,6 +1827,14 @@ public:
     }
 
     /**
+     * @brief Get the rect of host window.
+     *
+     * @param hostWindowId window Id of the host window.
+     * @return Rect of window.
+     */
+    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
+    
+    /**
      * @brief Set Shaped Window Mask.
      *
      * @param windowMask Mask of the shaped window.
