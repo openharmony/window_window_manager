@@ -52,6 +52,7 @@ public:
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
+    void NotifyWindowModeChange(WindowModeType type);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -64,6 +65,8 @@ public:
     sptr<WindowManagerAgentLite> windowVisibilityListenerAgent_;
     std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
     sptr<WindowManagerAgentLite> windowDrawingContentListenerAgent_;
+    std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
+    sptr<WindowManagerAgentLite> windowModeListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -141,6 +144,20 @@ void WindowManagerLite::Impl::NotifyWindowDrawingContentInfoChanged(
             continue;
         }
         listener->OnWindowDrawingContentChanged(windowDrawingContentInfos);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyWindowModeChange(WindowModeType type)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl UpdateWindowModeTypeInfo type: %{public}d",
+          static_cast<uint8_t>(type));
+    std::vector<sptr<IWindowModeChangedListener>> windowModeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowModeListeners = windowModeListeners_;
+    }
+    for (auto &listener : windowModeListeners) {
+        listener->OnWindowModeUpdate(type);
     }
 }
 
@@ -375,6 +392,59 @@ WMError WindowManagerLite::UnregisterDrawingContentChangedListener(const sptr<ID
             pImpl_->windowDrawingContentListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowDrawingContentListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowModeListenerAgent_ == nullptr) {
+        pImpl_->windowModeListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    }
+    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
+        pImpl_->windowModeListenerAgent_ = nullptr;
+        return ret;
+    }
+    auto iter = std::find(pImpl_->windowModeListeners_.begin(), pImpl_->windowModeListeners_.end(), listener);
+    if (iter != pImpl_->windowModeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Listener is already registered.");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowModeListeners_.push_back(listener);
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowModeListeners_.begin(), pImpl_->windowModeListeners_.end(), listener);
+    if (iter == pImpl_->windowModeListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowModeListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowModeListeners_.empty() && pImpl_->windowModeListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowModeListenerAgent_ = nullptr;
         }
     }
     return ret;

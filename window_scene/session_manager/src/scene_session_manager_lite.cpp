@@ -180,4 +180,10 @@ WMError SceneSessionManagerLite::GetVisibilityWindowInfo(std::vector<sptr<Window
 {
     return SceneSessionManager::GetInstance().GetVisibilityWindowInfo(infos);
 }
+
+WSError SceneSessionManagerLite::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
+{
+    return SceneSessionManager::GetInstance().GetVisibilityWindowInfo(persistentId, windowMode);
+}
+
 } // namespace OHOS::Rosen

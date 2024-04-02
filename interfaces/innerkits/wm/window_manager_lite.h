@@ -98,6 +98,20 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
+    /**
+     * @brief Register window mode listener.
+     *
+     * @param listener IWindowModeChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+    /**
+     * @brief Unregister window mode listener.
+     *
+     * @param listener IWindowModeChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -113,6 +127,7 @@ private:
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
+    void UpdateWindowModeTypeInfo(WindowModeType type) const;
     void OnRemoteDied();
 };
 } // namespace Rosen
