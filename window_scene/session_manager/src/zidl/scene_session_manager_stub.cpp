@@ -846,9 +846,9 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
+    TLOGD(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
     int32_t hostWindowId = data.ReadInt32();
     Rect rect;
     WSError ret = GetHostWindowRect(hostWindowId, rect);
