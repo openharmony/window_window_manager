@@ -1756,7 +1756,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
-            WLOGE("The hostWindow is not thie parentwindow ! parentwindow bundleName: %{public}s, "
+            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
                 "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;
