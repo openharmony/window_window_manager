@@ -23,8 +23,6 @@
 #include "js_screen_utils.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
-#include <parameter.h>
-#include <parameters.h>
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
@@ -416,22 +414,8 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
         return NapiGetUndefined(env);
     }
 
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPC) {
-        std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-            [event](napi_env env, NapiAsyncTask& task, int32_t status) {
-                DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
-            }
-        );
-        napi_ref callback = nullptr;
-        std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-        NapiAsyncTask::Schedule("JsScreenSessionManager::OnNotifyScreenLockEvent", env_,
-            std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-        return NapiGetUndefined(env);
-    } else {
-        DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
-        return NapiGetUndefined(env);
-    }
+    DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
+    return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info)
