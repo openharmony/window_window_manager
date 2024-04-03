@@ -602,7 +602,8 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | Small
  * @tc.desc: RegisterTransferComponentDataForResultListener02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListener02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListener02,
+         Function | SmallTest | Level3)
 {
     NotifyTransferComponentDataForResultFunc func;
     sptr<WindowOption> option = new WindowOption();
