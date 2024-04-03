@@ -33,6 +33,8 @@ public:
     virtual sptr<Window> GetWindow() = 0;
 
     virtual WMError HideNonSecureWindows(bool shouldHide) = 0;
+
+    virtual WMError SetWaterMarkFlag(bool isEnable) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

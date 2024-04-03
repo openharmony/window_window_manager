@@ -219,6 +219,16 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowSessionProperty::SetTopmost(bool topmost)
+{
+    topmost_ = topmost;
+}
+
+bool WindowSessionProperty::IsTopmost() const
+{
+    return topmost_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -567,6 +577,28 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
 
+bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
+{
+    if (!parcel.WriteBool(isShaped_)) {
+        return false;
+    }
+    if (isShaped_) {
+        if (!parcel.WriteParcelable(windowMask_)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property)
+{
+    bool isShaped = parcel.ReadBool();
+    property->SetIsShaped(isShaped);
+    if (isShaped) {
+        property->SetWindowMask(parcel.ReadParcelable<Media::PixelMap>());
+    }
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -585,7 +617,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) && parcel.WriteBool(topmost_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -597,7 +629,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_) &&
-        parcel.WriteBool(isLayoutFullScreen_);
+        parcel.WriteBool(isLayoutFullScreen_) &&
+        parcel.WriteBool(isExtensionFlag_) &&
+        MarshallingWindowMask(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -630,6 +664,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
+    property->SetTopmost(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -649,6 +684,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingWindow(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
+    property->SetExtensionFlag(parcel.ReadBool());
+    UnmarshallingWindowMask(parcel, property);
     return property;
 }
 
@@ -691,6 +728,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     textFieldHeight_ = property->textFieldHeight_;
     isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
+    windowMask_ = property->windowMask_;
+    isShaped_ = property->isShaped_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -736,6 +775,36 @@ bool WindowSessionProperty::IsLayoutFullScreen() const
 void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
 {
     isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
+void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
+{
+    isExtensionFlag_ = isExtensionFlag;
+}
+
+bool WindowSessionProperty::GetExtensionFlag() const
+{
+    return isExtensionFlag_;
+}
+
+void WindowSessionProperty::SetWindowMask(const sptr<Media::PixelMap>& windowMask)
+{
+    windowMask_ = windowMask;
+}
+
+sptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
+{
+    return windowMask_;
+}
+
+void WindowSessionProperty::SetIsShaped(bool isShaped)
+{
+    isShaped_ = isShaped;
+}
+
+bool WindowSessionProperty::GetIsShaped() const
+{
+    return isShaped_;
 }
 } // namespace Rosen
 } // namespace OHOS

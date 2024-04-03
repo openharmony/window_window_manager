@@ -122,7 +122,16 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
     PiPTemplateInfo pipTemplateInfo;
     ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option = new WindowOption();
-    ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    option->SetWindowName("pip_window");
+    ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    } else {
+        ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+    }
 }
 
 /**
@@ -907,6 +916,22 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
     auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
     window->ConsumeKeyEvent(inputEvent);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: PreNotifyKeyEvent
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, PreNotifyKeyEvent, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
+    std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
+    window->PreNotifyKeyEvent(inputEvent);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2265,6 +2290,49 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     uint32_t rate = 120;
     window->FlushFrameRate(rate);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Maximize01
+ * @tc.desc: maximize interface Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    MaximizeLayoutOption option;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
+}
+
+/**
+ * @tc.name: RegisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->RegisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->UnregisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }

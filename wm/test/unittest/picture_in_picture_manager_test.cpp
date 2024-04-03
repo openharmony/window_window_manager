@@ -48,7 +48,7 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: PipWindowState
+ * @tc.name: PiPWindowState
  * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo
  * @tc.type: FUNC
  */

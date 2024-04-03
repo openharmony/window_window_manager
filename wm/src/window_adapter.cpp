@@ -580,11 +580,37 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
         windowManagerServiceProxy_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 
-WMError WindowAdapter::HideNonSecureWindows(bool shouldHide)
+void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+    int32_t parentId)
 {
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(windowManagerServiceProxy_->HideNonSecureWindows(shouldHide));
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId);
 }
 
+WMError WindowAdapter::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->AddOrRemoveSecureSession(persistentId, shouldHide));
+}
+
+WMError WindowAdapter::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->AddOrRemoveSecureExtSession(persistentId,
+        parentId, shouldHide));
+}
+
+WMError WindowAdapter::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->UpdateExtWindowFlags(parentId, persistentId,
+        extWindowFlags));
+}
+
+WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetHostWindowRect(hostWindowId, rect));
+}
 } // namespace Rosen
 } // namespace OHOS

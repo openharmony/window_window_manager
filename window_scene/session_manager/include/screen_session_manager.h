@@ -33,6 +33,7 @@
 #include "screen.h"
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -76,6 +77,7 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    bool IsFastFingerprintReason(PowerStateChangeReason reason);
     bool WakeUpBegin(PowerStateChangeReason reason) override;
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
@@ -95,6 +97,7 @@ public:
                                          const sptr<IRemoteObject>& displayManagerAgent) override;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
+    virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -177,6 +180,7 @@ public:
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);
+    bool BlockSetDisplayState();
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -226,6 +230,8 @@ public:
     void NotifyAvailableAreaChanged(DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
 
+    VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
+    DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -238,13 +244,14 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
-    void RegisterRefreshRateModeChangeListener();
-    void OnHgmRefreshRateModeChange(int32_t refreshRateMode);
+    void RegisterRefreshRateChangeListener();
+    void OnHgmRefreshRateChange(int32_t refreshRateModeName);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
-
+    DMError MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds);
+    void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -253,7 +260,8 @@ private:
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
-    void HandlerSensor(ScreenPowerStatus status);
+    void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
+    bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
@@ -330,6 +338,12 @@ private:
 
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
+
+    std::atomic<PowerStateChangeReason> prePowerStateChangeReason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    std::atomic<PowerStateChangeReason> lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    std::atomic<PowerStateChangeReason> currentWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    std::atomic<bool> buttonBlock_ = false;
+
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;

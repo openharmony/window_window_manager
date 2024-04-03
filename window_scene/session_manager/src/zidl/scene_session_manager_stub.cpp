@@ -65,6 +65,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerStub::HandleGetFocusSessionToken),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT),
+        &SceneSessionManagerStub::HandleGetFocusSessionElement),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CHECK_WINDOW_ID),
         &SceneSessionManagerStub::HandleCheckWindowId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
@@ -132,8 +134,16 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleShiftAppWindowFocus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
         &SceneSessionManagerStub::HandleGetVisibilityWindowInfo),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_HIDE_NON_SECURE_WINDOWS),
-        &SceneSessionManagerStub::HandleHideNonSecureWindows),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB),
+        &SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION),
+        &SceneSessionManagerStub::HandleAddOrRemoveSecureSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION),
+        &SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
+        &SceneSessionManagerStub::HandleUpdateExtWindowFlags),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_RECT),
+        &SceneSessionManagerStub::HandleGetHostWindowRect),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -513,6 +523,16 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetFocusSessionElement!");
+    AppExecFwk::ElementName element;
+    WSError errCode = GetFocusSessionElement(element);
+    reply.WriteParcelable(&element);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleCheckWindowId!");
@@ -798,11 +818,56 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleHideNonSecureWindows(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleHideNonSecureWindows!");
+    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
+    int32_t persistentId = data.ReadInt32();
+    int32_t parentId = data.ReadInt32();
+    AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t persistentId = data.ReadInt32();
     bool shouldHide = data.ReadBool();
-    WSError ret = HideNonSecureWindows(shouldHide);
+    WSError ret = AddOrRemoveSecureSession(persistentId, shouldHide);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    int32_t parentId = data.ReadInt32();
+    bool shouldHide = data.ReadBool();
+    WSError ret = AddOrRemoveSecureExtSession(persistentId, parentId, shouldHide);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "run HandleRemoveExtensionSessionInfo!");
+    int32_t parentId = data.ReadInt32();
+    int32_t persistentId = data.ReadInt32();
+    uint32_t extWindowFlags = data.ReadUint32();
+    WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
+    int32_t hostWindowId = data.ReadInt32();
+    Rect rect;
+    WSError ret = GetHostWindowRect(hostWindowId, rect);
+    reply.WriteInt32(rect.posX_);
+    reply.WriteInt32(rect.posY_);
+    reply.WriteUint32(rect.height_);
+    reply.WriteUint32(rect.width_);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

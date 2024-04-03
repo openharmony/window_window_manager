@@ -24,6 +24,17 @@ public:
     SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SCBSystemSession();
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
+
+    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    void PresentFocusIfPointDown() override;
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void PresentFoucusIfNeed(int32_t pointerAcrion) override;
+    WSError UpdateFocus(bool isFocused) override;
+    WSError UpdateWindowMode(WindowMode mode) override;
+    WSError SetSystemSceneBlockingFocus(bool blocking) override;
+
+protected:
+    void UpdatePointerArea(const WSRect& rect) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H

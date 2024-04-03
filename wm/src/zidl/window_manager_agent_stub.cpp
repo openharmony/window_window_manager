@@ -41,6 +41,11 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
+            WindowModeType type = static_cast<WindowModeType>(data.ReadUint8());
+            UpdateWindowModeTypeInfo(type);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
             DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;

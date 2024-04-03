@@ -136,6 +136,9 @@ public:
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
 
+    VirtualScreenFlag GetVirtualScreenFlag();
+    void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
+
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -164,6 +167,7 @@ public:
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
     void SetFoldScreen(bool isFold);
+    void UpdateRotationAfterBoot(bool foldToExpand);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
 
 private:
@@ -173,10 +177,12 @@ private:
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
+    VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
+    float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
 };

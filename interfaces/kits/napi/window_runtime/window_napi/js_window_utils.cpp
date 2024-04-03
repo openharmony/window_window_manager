@@ -27,6 +27,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+    constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -85,6 +86,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
     napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
+    napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
 
     return objValue;
 }
@@ -495,6 +498,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     napi_set_named_property(env, objValue, "id", CreateJsValue(env, window->GetWindowId()));
     return objValue;
 }
+
 static std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -507,6 +511,31 @@ static std::string GetHexColor(uint32_t color)
     std::string finalColor("#");
     finalColor += tmpColor;
     return finalColor;
+}
+
+napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert SystemBarProperties to jsObject");
+        return nullptr;
+    }
+    SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navi = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    napi_set_named_property(env, objValue, "statusBarColor",
+        CreateJsValue(env, GetHexColor(status.backgroundColor_)));
+    napi_set_named_property(env, objValue, "statusBarContentColor",
+        CreateJsValue(env, GetHexColor(status.contentColor_)));
+    napi_set_named_property(env, objValue, "isStatusBarLightIcon",
+        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    napi_set_named_property(env, objValue, "navigationBarColor",
+        CreateJsValue(env, GetHexColor(navi.backgroundColor_)));
+    napi_set_named_property(env, objValue, "navigationBarContentColor",
+        CreateJsValue(env, GetHexColor(navi.contentColor_)));
+    napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
+        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    return objValue;
 }
 
 static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBarRegionTint& tint)
@@ -599,6 +628,92 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     return true;
+}
+
+bool ParseAndCheckRect(napi_env env, napi_value jsObject,
+    const Rect& windowRect, Rect& touchableRect)
+{
+    int32_t data = 0;
+    if (ParseJsValue(jsObject, env, "left", data)) {
+        touchableRect.posX_ = data;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert object:legt");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "top", data)) {
+        touchableRect.posY_ = data;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert object:top");
+        return false;
+    }
+    uint32_t udata = 0;
+    if (ParseJsValue(jsObject, env, "width", udata)) {
+        touchableRect.width_ = udata;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert object:width");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "height", udata)) {
+        touchableRect.height_ = udata;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert object:height");
+        return false;
+    }
+    if ((touchableRect.posX_ < 0) || (touchableRect.posY_ < 0) ||
+        (touchableRect.posX_ > static_cast<int32_t>(windowRect.width_)) ||
+        (touchableRect.posY_ > static_cast<int32_t>(windowRect.height_)) ||
+        (touchableRect.width_ > (windowRect.width_ - static_cast<uint32_t>(touchableRect.posX_))) ||
+        (touchableRect.height_ > (windowRect.height_ - static_cast<uint32_t>(touchableRect.posY_)))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Outside the window area");
+        return false;
+    }
+    return true;
+}
+
+WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
+    const Rect& windowRect, std::vector<Rect>& touchableAreas)
+{
+    WmErrorCode errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Argc is invalid:%{public}zu", argc);
+        return errCode;
+    }
+    if (GetType(env, argv[0]) != napi_object) {
+        TLOGE(WmsLogTag::WMS_EVENT, "GetType error");
+        return errCode;
+    }
+    napi_value nativeArray = argv[0];
+    if (nativeArray == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter");
+        return errCode;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, nativeArray, &size);
+    if (size > MAX_TOUCHABLE_AREAS) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Exceeded maximum limit");
+        return errCode;
+    }
+    errCode = WmErrorCode::WM_OK;
+    for (uint32_t i = 0; i < size; i++) {
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, nativeArray, i, &getElementValue);
+        if (getElementValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to get element");
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            break;
+        }
+        Rect touchableArea;
+        if (ParseAndCheckRect(env, getElementValue, windowRect, touchableArea)) {
+            touchableAreas.emplace_back(touchableArea);
+        } else {
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            break;
+        }
+    }
+    return errCode;
 }
 
 bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -811,6 +926,30 @@ bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
         return false;
     } else {
         WLOGI("Get ability");
+    }
+    return true;
+}
+bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask)
+{
+    if (jsObject == nullptr) {
+        WLOGFE("Failed to convert parameter to window mask");
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
+    if (size == 0 || size > WINDOW_MAX_WIDTH) {
+        WLOGFE("Invalid window mask");
+        return false;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        std::vector<uint32_t> elementArray;
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, jsObject, i, &getElementValue);
+        if (!ConvertNativeValueToVector(env, getElementValue, elementArray)) {
+            WLOGFE("Failed to convert parameter to window mask");
+            return false;
+        }
+        windowMask.emplace_back(elementArray);
     }
     return true;
 }

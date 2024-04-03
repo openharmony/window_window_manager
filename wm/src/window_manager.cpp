@@ -50,6 +50,7 @@ public:
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifyWindowModeChange(WindowModeType type);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
@@ -66,6 +67,8 @@ public:
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
+    std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
+    sptr<WindowManagerAgent> windowModeListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
     sptr<WindowManagerAgent> systemBarChangedListenerAgent_;
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners_;
@@ -138,6 +141,20 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
     }
 }
 
+void WindowManager::Impl::NotifyWindowModeChange(WindowModeType type)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl UpdateWindowModeTypeInfo type: %{public}d",
+        static_cast<uint8_t>(type));
+    std::vector<sptr<IWindowModeChangedListener>> windowModeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowModeListeners = windowModeListeners_;
+    }
+    for (auto &listener : windowModeListeners) {
+        listener->OnWindowModeUpdate(type);
+    }
+}
+
 void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     for (auto tint : tints) {
@@ -193,7 +210,7 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
         visibilityChangeListeners = windowVisibilityListeners_;
     }
     for (auto& listener : visibilityChangeListeners) {
-        WLOGI("Notify WindowVisibilityInfo to caller");
+        WLOGD("Notify WindowVisibilityInfo to caller");
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
     }
 }
@@ -349,6 +366,59 @@ WMError WindowManager::UnregisterFocusChangedListener(const sptr<IFocusChangedLi
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->focusChangedListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowModeListenerAgent_ == nullptr) {
+        pImpl_->windowModeListenerAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
+        pImpl_->windowModeListenerAgent_ = nullptr;
+        return ret;
+    }
+    auto iter = std::find(pImpl_->windowModeListeners_.begin(), pImpl_->windowModeListeners_.end(), listener);
+    if (iter != pImpl_->windowModeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Listener is already registered.");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowModeListeners_.push_back(listener);
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowModeListeners_.begin(), pImpl_->windowModeListeners_.end(), listener);
+    if (iter == pImpl_->windowModeListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowModeListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowModeListeners_.empty() && pImpl_->windowModeListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowModeListenerAgent_ = nullptr;
         }
     }
     return ret;
@@ -743,12 +813,17 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         WLOGFE("focusChangeInfo is nullptr.");
         return;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    TLOGD(WmsLogTag::WMS_FOCUS, "window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
         pImpl_->NotifyUnfocused(focusChangeInfo);
     }
+}
+
+void WindowManager::UpdateWindowModeTypeInfo(WindowModeType type) const
+{
+    pImpl_->NotifyWindowModeChange(type);
 }
 
 void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,

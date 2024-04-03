@@ -24,7 +24,7 @@ JsWindowRegisterManager::~JsWindowRegisterManager()
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value)
+    CaseType caseType, napi_env env, napi_value value, napi_value parameter)
 {
     return WmErrorCode::WM_OK;
 }

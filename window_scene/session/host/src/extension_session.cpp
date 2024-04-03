@@ -25,6 +25,55 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
 } // namespace
 
+void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(
+    const std::shared_ptr<std::promise<bool>>& isConsumedPromise, const std::shared_ptr<WSError>& retCode)
+{
+    std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
+    isConsumedPromise_ = isConsumedPromise;
+    retCode_ = retCode;
+}
+
+void WindowEventChannelListener::ResetTransferKeyEventForConsumedParams()
+{
+    std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
+    isConsumedPromise_ = nullptr;
+    retCode_ = nullptr;
+}
+
+void WindowEventChannelListener::OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode)
+{
+    std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
+    if (isConsumedPromise_ == nullptr || retCode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Promise or ret is null in WindowEventChannelListener.");
+        return;
+    }
+    isConsumedPromise_->set_value(isConsumed);
+    *retCode_ = retCode;
+}
+
+int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "InterfaceToken check failed");
+        return -1;
+    }
+
+    auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
+    switch (msgId) {
+        case WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC: {
+            bool isConsumed = data.ReadBool();
+            WSError retCode = static_cast<WSError>(data.ReadInt32());
+            OnTransferKeyEventForConsumed(isConsumed, retCode);
+            break;
+        }
+        default:
+            TLOGE(WmsLogTag::WMS_EVENT, "unknown transaction code %{public}d", code);
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    return 0;
+}
+
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
@@ -126,6 +175,49 @@ void ExtensionSession::RegisterExtensionSessionEventCallback(
     const sptr<ExtensionSessionEventCallback>& extSessionEventCallback)
 {
     extSessionEventCallback_ = extSessionEventCallback;
+}
+
+WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+    bool& isTimeout, bool isPreImeEvent)
+{
+    if (!windowEventChannel_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumed in with isConsumed(%{public}d) isTimeout(%{public}d) "
+        "isPreImeEvent(%{public}d), id:%{public}d", isConsumed, isTimeout, isPreImeEvent, keyEvent->GetId());
+
+    sptr<WindowEventChannelListener> listener = new WindowEventChannelListener();
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    std::shared_ptr<WSError> retCode = std::make_shared<WSError>(WSError::WS_OK);
+    bool isAllocedNullptr = (listener == nullptr) || (isConsumedPromise == nullptr) || (retCode == nullptr);
+    if (isAllocedNullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Created WindowEventChannelListener is nullptr.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    listener->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
+    auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
+
+    // Timeout cannot exceed APP_INPUT_BLOCK
+    constexpr int64_t TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS = 4000;
+    auto isConsumedFuture = isConsumedPromise->get_future().share();
+    if (isConsumedFuture.wait_for(std::chrono::milliseconds(TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS)) ==
+            std::future_status::timeout) {
+        // Prevent external variables from being used after the lifecycle ends.
+        listener->ResetTransferKeyEventForConsumedParams();
+        isTimeout = true;
+    } else {
+        isTimeout = false;
+        isConsumed = isConsumedFuture.get();
+        ret = *retCode;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed is %{public}d, Timeout is %{public}d, ret is %{public}d in id:%{public}d.",
+        isConsumed, isTimeout, ret, keyEvent->GetId());
+    return ret;
 }
 
 sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExtensionSessionEventCallback()

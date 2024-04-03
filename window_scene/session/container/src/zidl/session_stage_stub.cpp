@@ -75,6 +75,10 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyDialogStateChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT),
         &SessionStageStub::HandleSetPipActionEvent),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAYID_CHANGE),
+        &SessionStageStub::HandleUpdateDisplayId),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
+        &SessionStageStub::HandleNotifyDisplayMove),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -149,7 +153,7 @@ int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& re
 
 int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("Notify Pip AlreadyExists");
+    TLOGD(WmsLogTag::WMS_PIP, "Notify Pip AlreadyExists");
     WSError errCode = NotifyCloseExistPipWindow();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -332,10 +336,10 @@ int SessionStageStub::HandleNotifyDialogStateChange(MessageParcel& data, Message
 
 int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleSetPipActionEvent");
+    TLOGD(WmsLogTag::WMS_PIP, "HandleSetPipActionEvent");
     std::string action = data.ReadString();
     if (action.empty()) {
-        WLOGFE("SessionStageStub pip action event is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "SessionStageStub pip action event is nullptr");
         return ERR_INVALID_VALUE;
     }
     int32_t status;
@@ -343,6 +347,24 @@ int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     SetPipActionEvent(action, status);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateDisplayId(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("UpdateDisplayId!");
+    uint64_t displayId = data.ReadUint64();
+    WSError errCode = UpdateDisplayId(displayId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyDisplayMove(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleNotifyDisplayMove!");
+    DisplayId from = static_cast<DisplayId>(data.ReadUint64());
+    DisplayId to = static_cast<DisplayId>(data.ReadUint64());
+    NotifyDisplayMove(from, to);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

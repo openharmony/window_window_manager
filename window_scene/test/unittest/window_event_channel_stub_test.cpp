@@ -123,6 +123,21 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent02, Function | SmallT
 }
 
 /**
+ * @tc.name: HandleTransferKeyEventAsync
+ * @tc.desc: test function : HandleTransferKeyEventAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEventAsync, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteBool(true);
+    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_EQ(5, windowEventChannelStub_->HandleTransferKeyEventAsync(data, reply));
+}
+
+/**
  * @tc.name: HandleTransferPointerEvent01
  * @tc.desc: test function : HandleTransferPointerEvent01
  * @tc.type: FUNC

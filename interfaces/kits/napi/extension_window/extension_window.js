@@ -56,6 +56,14 @@ class ExtensionWindow {
   getMainWindowSync() {
     return this.__extension_window__.getMainWindowSync();
   }
+
+  createSubWindowWithOptions(type, callback) {
+    return this.__extension_window__.createSubWindowWithOptions(type, callback);
+  }
+
+  setWaterMarkFlag(type, callback) {
+    return this.__extension_window__.setWaterMarkFlag(type, callback);
+  }
 }
 
 export default ExtensionWindow;

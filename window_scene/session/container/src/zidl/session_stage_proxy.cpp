@@ -53,6 +53,30 @@ WSError SessionStageProxy::SetActive(bool active)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::UpdateDisplayId(uint64_t displayId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAYID_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -606,5 +630,32 @@ WSError SessionStageProxy::SetPipActionEvent(const std::string& action, int32_t 
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+void SessionStageProxy::NotifyDisplayMove(DisplayId from, DisplayId to)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint64(from)) {
+        WLOGFE("Write from id failed");
+        return;
+    }
+
+    if (!data.WriteUint64(to)) {
+        WLOGFE("Write to id failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest notify display move failed");
+        return;
+    }
 }
 } // namespace OHOS::Rosen

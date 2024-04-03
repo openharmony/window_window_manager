@@ -138,6 +138,19 @@ HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: SetTopmost
+ * @tc.desc: SetTopmost test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
+{
+    bool topmost = true;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetTopmost(topmost);
+    ASSERT_TRUE(windowSessionProperty.IsTopmost());
+}
+
+/**
  * @tc.name: GetParentId
  * @tc.desc: GetParentId test
  * @tc.type: FUNC
@@ -169,10 +182,10 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTe
 {
     WindowSessionProperty *property = new WindowSessionProperty();
     PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PipTemplateType::VIDEO_CALL);
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     property->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(property->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PipTemplateType::VIDEO_CALL));
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**

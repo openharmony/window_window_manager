@@ -77,6 +77,8 @@ public:
 
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
 
+    virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
+
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
@@ -142,6 +144,8 @@ public:
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
 
+    VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
+    DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

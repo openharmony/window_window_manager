@@ -24,9 +24,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsEmbeddableWindowStage"};
-} // namespace
 
 JsEmbeddableWindowStage::JsEmbeddableWindowStage(sptr<Rosen::Window> window, sptr<AAFwk::SessionInfo> sessionInfo)
     : windowExtensionSessionImpl_(window), sessionInfo_(sessionInfo),
@@ -40,50 +37,99 @@ JsEmbeddableWindowStage::~JsEmbeddableWindowStage()
 
 void JsEmbeddableWindowStage::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("[NAPI]Finalizer");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Finalizer");
     std::unique_ptr<JsEmbeddableWindowStage>(static_cast<JsEmbeddableWindowStage*>(data));
 }
 
 napi_value JsEmbeddableWindowStage::GetMainWindow(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]GetMainWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetMainWindow");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetMainWindow(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::GetMainWindowSync(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]GetMainWindowSync");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetMainWindowSync");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetMainWindowSync(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::On(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]On");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]On");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnEvent(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::Off(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]Off");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Off");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OffEvent(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]LoadContent");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]LoadContent");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]LoadContentByName");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]LoadContentByName");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::CreateSubWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]CreateSubWindow");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindow(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetSubWindow");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
+{
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        };
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = (argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnGetSubWindow",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsEmbeddableWindowStage::OnCreateSubWindow(napi_env env, napi_callback_info info)
+{
+    std::string windowName;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        };
+    napi_value callback = (argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnCreateSubWindow",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
@@ -94,7 +140,7 @@ napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_
             if (windowImpl != nullptr) {
                 task.Resolve(env, Rosen::JsExtensionWindow::CreateJsExtensionWindowObject(env,
                 windowImpl, sessionInfo));
-                WLOGI("[NAPI]Get main window [%{public}u, %{public}s]",
+                TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Get main window [%{public}u, %{public}s]",
                     windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str());
             } else {
                 task.Reject(env, CreateJsError(env,
@@ -116,7 +162,7 @@ napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_
 napi_value JsEmbeddableWindowStage::OnGetMainWindowSync(napi_env env, napi_callback_info info)
 {
     if (windowExtensionSessionImpl_ == nullptr) {
-        WLOGFE("[NAPI]window is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]window is null");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -129,14 +175,14 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
 {
     sptr<Window> windowImpl = windowExtensionSessionImpl_;
     if (windowImpl == nullptr) {
-        WLOGFE("[NAPI]windowImpl is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]windowImpl is null");
         return NapiGetUndefined(env);
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: minimum param nums
-        WLOGFE("[NAPI]argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -144,13 +190,13 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
     // Parse argv[0] as string
     std::string eventString;
     if (!ConvertFromJsValue(env, argv[0], eventString)) {
-        WLOGFE("[NAPI]Failed to convert parameter to string");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert parameter to string");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
     if (!NapiIsCallable(env, value)) {
-        WLOGFE("[NAPI]Callback(argv[1]) is not callable");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Callback(argv[1]) is not callable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -158,10 +204,10 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
     WmErrorCode ret = extwinRegisterManager_->RegisterListener(windowImpl, eventString,
         CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("[NAPI]RegisterListener fail");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]RegisterListener fail");
         return NapiThrowError(env, ret);
     }
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s",
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Window [%{public}u, %{public}s] register event %{public}s",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), eventString.c_str());
 
     return NapiGetUndefined(env);
@@ -171,7 +217,7 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
 {
     sptr<Window> windowImpl = windowExtensionSessionImpl_;
     if (windowImpl == nullptr) {
-        WLOGFE("[NAPI]windowImpl is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]windowImpl is null");
         return NapiGetUndefined(env);
     }
     size_t argc = 4;
@@ -180,12 +226,12 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
     // Parse argv[0] as string
     std::string eventString;
     if (!ConvertFromJsValue(env, argv[0], eventString)) {
-        WLOGFE("[NAPI]Failed to convert parameter to string");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert parameter to string");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     if (eventString.compare("windowStageEvent") != 0) {
-        WLOGFE("[NAPI]Envent %{public}s is invalid", eventString.c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Envent %{public}s is invalid", eventString.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -204,10 +250,10 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
         }
     }
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("[NAPI]UnregisterListener fail");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]UnregisterListener fail");
         return NapiThrowError(env, ret);
     }
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s",
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), eventString.c_str());
 
     return NapiGetUndefined(env);
@@ -229,7 +275,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window load content failed"));
     }
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
     return;
 }
@@ -242,7 +288,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (!ConvertFromJsValue(env, argv[0], contextUrl)) {
-        WLOGFE("[NAPI]Failed to convert parameter to context url");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert parameter to context url");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     napi_value storage = nullptr;
@@ -258,7 +304,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
         callBack = value2;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        WLOGFE("[NAPI]Window scene is null or get invalid param");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Window scene is null or get invalid param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -276,7 +322,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
             napi_env env, NapiAsyncTask& task, int32_t status) {
             if (window == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                WLOGFE("[NAPI]Get windowExtensionSessionImpl failed");
+                TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Get windowExtensionSessionImpl failed");
                 return;
             }
             LoadContentTask(contentStorage, contextUrl, window, env, task, parentToken, isLoadedByName);
@@ -290,7 +336,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
 napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, sptr<Rosen::Window> window,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    WLOGFD("[NAPI]CreateJsEmbeddableWindowStage");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]CreateJsEmbeddableWindowStage");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -309,6 +355,8 @@ napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, 
         objValue, "getMainWindowSync", moduleName, JsEmbeddableWindowStage::GetMainWindowSync);
     BindNativeFunction(env, objValue, "on", moduleName, JsEmbeddableWindowStage::On);
     BindNativeFunction(env, objValue, "off", moduleName, JsEmbeddableWindowStage::Off);
+    BindNativeFunction(env, objValue, "createSubWindow", moduleName, JsEmbeddableWindowStage::CreateSubWindow);
+    BindNativeFunction(env, objValue, "getSubWindow", moduleName, JsEmbeddableWindowStage::GetSubWindow);
 
     return objValue;
 }

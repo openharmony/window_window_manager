@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "display_manager_agent_controller.h"
-#include "../../dm/include/display_manager_agent_default.h"
+#include "display_manager_agent_default.h"
 #include "scene_board_judgement.h"
 
 using namespace testing;

@@ -43,7 +43,10 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
-    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool isPreImeEvent = false) override;
+    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
+        const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
@@ -56,6 +59,8 @@ public:
         Accessibility::AccessibilityElementInfo& info) override;
     WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t baseParent) override;
+    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -79,7 +84,13 @@ WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 }
 
 WSError TestWindowEventChannel::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+    bool isPreImeEvent, const sptr<IRemoteObject>& listener)
 {
     return WSError::WS_OK;
 }
@@ -120,6 +131,12 @@ WSError TestWindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32
 
 WSError TestWindowEventChannel::TransferExecuteAction(int64_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t baseParent)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
 {
     return WSError::WS_OK;
 }
@@ -1253,6 +1270,20 @@ HWTEST_F(WindowSessionTest, NotifyExtensionDied, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
     session_->NotifyExtensionDied();
+
+    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+/**
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyExtensionTimeout, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyExtensionTimeout(3);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -2879,6 +2910,34 @@ HWTEST_F(WindowSessionTest, IsTerminated49, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     res = session_->IsTerminated();
     ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetSystemActive48
+ * @tc.desc: SetSystemActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 1;
+    };
+    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
+        resultValue = 2;
+    };
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+
+    SessionInfo info;
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 1);
+
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 2);
 }
 
 }

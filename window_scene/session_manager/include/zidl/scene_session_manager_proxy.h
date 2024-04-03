@@ -60,6 +60,7 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -92,7 +93,12 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    WSError HideNonSecureWindows(bool shouldHide) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId) override;
+    WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
+    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override;
+    WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
 
 private:
     template<typename T>
