@@ -248,7 +248,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 void WindowManager::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     WLOGFD("Camera window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
-    std::vector<sptr<ICameraWindowChangedListener>> cameraFloatWindowChangeListeners;
+    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         cameraWindowChangeListeners = cameraWindowChangedListeners_;
@@ -671,7 +671,7 @@ WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWin
         pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
-                              pImpl_->cameraWindowChangedListeners_.end(), listener);
+            pImpl_->cameraWindowChangedListeners_.end(), listener);
         if (iter != pImpl_->cameraWindowChangedListeners_.end()) {
             WLOGFW("Listener is already registered.");
             return WMError::WM_OK;
@@ -719,7 +719,7 @@ WMError WindowManager::UnregisterCameraWindowChangedListener(const sptr<ICameraW
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
-                          pImpl_->cameraWindowChangedListeners_.end(), listener);
+        pImpl_->cameraWindowChangedListeners_.end(), listener);
     if (iter == pImpl_->cameraWindowChangedListeners_.end()) {
         WLOGFE("could not find this listener");
         return WMError::WM_OK;
