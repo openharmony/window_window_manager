@@ -1817,17 +1817,14 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
 
 void WindowController::OnScreenshot(DisplayId displayId)
 {
-    sptr<WindowNode> windowNode;
-    WMError res = GetFocusWindowNode(displayId, windowNode);
-    if (res != WMError::WM_OK) {
-        return;
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowRoot_->GetForegroundNodes(windowNodes);
+    for (auto& windowNode : windowNodes) {
+        auto windowToken = windowNode->GetWindowToken();
+        if (windowToken != nullptr) {
+            windowToken->NotifyScreenshot();
+        }
     }
-    auto windowToken = windowNode->GetWindowToken();
-    if (windowToken == nullptr) {
-        WLOGFE("notify screenshot failed: window token is null.");
-        return;
-    }
-    windowToken->NotifyScreenshot();
 }
 
 void WindowController::SetAnchorOffset(int32_t deltaX, int32_t deltaY)

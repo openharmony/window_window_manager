@@ -6525,9 +6525,16 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
 void SceneSessionManager::OnScreenshot(DisplayId displayId)
 {
     auto task = [this, displayId]() {
-        auto sceneSession = GetSceneSession(focusedSessionId_);
-        if (sceneSession) {
-            sceneSession->NotifyScreenshot();
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto sceneSession = iter.second;
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            auto state = sceneSession->GetSessionState();
+            if (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) {
+                sceneSession->NotifyScreenshot();
+            }
         }
     };
     taskScheduler_->PostAsyncTask(task, "OnScreenshot:PID:" + std::to_string(displayId));
