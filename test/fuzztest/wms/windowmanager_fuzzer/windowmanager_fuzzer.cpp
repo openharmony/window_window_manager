@@ -183,14 +183,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<ICameraFloatWindowChangedListener> cameraFloatWindowChanagedListener = new CameraFloatWindowChangedListener();
     sptr<ICameraWindowChangedListener> cameraWindowChangedListener = new CameraWindowChangedListener();
     windowManager.RegisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
-    windowManager.RegisterCameraWindowChangedListener(cameraWindowChanagedListener);
+    windowManager.RegisterCameraWindowChangedListener(cameraWindowChangedListener);
     windowManager.SetWindowLayoutMode(static_cast<WindowLayoutMode>(data[0]));
     windowManager.UnregisterFocusChangedListener(focusChangedListener);
     windowManager.UnregisterSystemBarChangedListener(systemBarChangedListener);
     windowManager.UnregisterVisibilityChangedListener(visibilityChangedListener);
     windowManager.UnregisterWindowUpdateListener(windowUpdateListener);
     windowManager.UnregisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
-    windowManager.UnregisterCameraWindowChangedListener(cameraWindowChanagedListener);
+    windowManager.UnregisterCameraWindowChangedListener(cameraWindowChangedListener);
     sptr<IWaterMarkFlagChangedListener> waterMarkFlagChangedListener = new WaterMarkFlagChangedListener();
     windowManager.RegisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
     windowManager.UnregisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
