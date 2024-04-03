@@ -79,7 +79,7 @@ public:
     std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
     sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
-    std::vector<sptr<ICameraWindowChangedListener>> cameraFloatWindowChangedListeners_;
+    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     sptr<WindowManagerAgent> cameraWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
