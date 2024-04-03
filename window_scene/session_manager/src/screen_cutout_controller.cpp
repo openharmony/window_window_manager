@@ -91,7 +91,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     return cutoutInfo;
 }
 
-std::vector<DMRect> ScreenCutoutController::GetBoundaryRects(sptr<DisplayInfo> displayInfo)
+std::vector<DMRect> ScreenCutoutController::GetBoundaryRects(sptr<DisplayInfo> displayInfo, DisplayId displayId)
 {
     std::vector<DMRect> displayBoundaryRects;
     if (ScreenSessionManager::GetInstance().IsFoldable() &&
@@ -115,7 +115,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     }
 
     Rotation currentRotation = displayInfo->GetRotation();
-    std::vector<DMRect> displayBoundaryRects = GetBoundaryRects(displayInfo);
+    std::vector<DMRect> displayBoundaryRects = GetBoundaryRects(displayInfo, displayId);
     if (currentRotation == Rotation::ROTATION_0) {
         boundaryRects = std::move(displayBoundaryRects);
         return;
