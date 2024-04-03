@@ -713,11 +713,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-SizeChangeReason Session::GetSizeChangeReason() const
-{
-    return reason_;
-}
-
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {

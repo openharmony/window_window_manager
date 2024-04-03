@@ -191,7 +191,7 @@ public:
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
-    SizeChangeReason GetSizeChangeReason() const;
+    SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
