@@ -76,6 +76,13 @@ public:
     }
 };
 
+class CameraWindowChangedListener : public ICameraWindowChangedListener {
+public:
+    void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) override
+    {
+    }
+};
+
 class WaterMarkFlagChangedListener : public IWaterMarkFlagChangedListener {
 public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override
@@ -174,13 +181,16 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<IWindowUpdateListener> windowUpdateListener = new WindowUpdateListener();
     windowManager.RegisterWindowUpdateListener(windowUpdateListener);
     sptr<ICameraFloatWindowChangedListener> cameraFloatWindowChanagedListener = new CameraFloatWindowChangedListener();
+    sptr<ICameraWindowChangedListener> cameraWindowChangedListener = new CameraWindowChangedListener();
     windowManager.RegisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
+    windowManager.RegisterCameraWindowChangedListener(cameraWindowChanagedListener);
     windowManager.SetWindowLayoutMode(static_cast<WindowLayoutMode>(data[0]));
     windowManager.UnregisterFocusChangedListener(focusChangedListener);
     windowManager.UnregisterSystemBarChangedListener(systemBarChangedListener);
     windowManager.UnregisterVisibilityChangedListener(visibilityChangedListener);
     windowManager.UnregisterWindowUpdateListener(windowUpdateListener);
     windowManager.UnregisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
+    windowManager.UnregisterCameraWindowChangedListener(cameraWindowChanagedListener);
     sptr<IWaterMarkFlagChangedListener> waterMarkFlagChangedListener = new WaterMarkFlagChangedListener();
     windowManager.RegisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
     windowManager.UnregisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
