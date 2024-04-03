@@ -1856,7 +1856,8 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // type is not system
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && SessionPermission::IsStartedByInputMethod()) {
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
+        && SessionPermission::IsStartedByInputMethod()) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
