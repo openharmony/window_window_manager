@@ -69,6 +69,7 @@ void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
 
 void WindowManagerAgent::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
+    SingletonContainer::Get<WindowManager>().UpdateCameraWindowStatus(accessTokenId, isShowing);
 }
 } // namespace Rosen
 } // namespace OHOS
