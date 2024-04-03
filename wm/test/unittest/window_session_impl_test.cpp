@@ -19,6 +19,7 @@
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
+#include "parameters.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -863,6 +864,18 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    sptr<IDisplayMoveListener> listener6 = nullptr;
+    res = window->RegisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowRectChangeListener> listener7 = nullptr;
+    res = window->RegisterWindowRectChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowRectChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
 
@@ -915,6 +928,33 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
+}
+
+/**
+ * @tc.name: NotifyDisplayMove
+ * @tc.desc: NotifyDisplayMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyDisplayMove, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyDisplayMove start";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("NotifyDisplayMove");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    int res = 0;
+    DisplayId from = 0;
+    DisplayId to = 2;
+    window->NotifyDisplayMove(from, to);
+    ASSERT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyDisplayMove end";
 }
 
 /**
@@ -1434,6 +1474,27 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateDisplayIdtest01
+ * @tc.desc: UpdateDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateDisplayId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateDisplayId");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    uint64_t newDisplayId = 2;
+    auto ret = window->UpdateDisplayId(newDisplayId);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    uint64_t displayId = window->property_->GetDisplayId();
+    ASSERT_EQ(newDisplayId, displayId);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDisplayIdtest01 end";
+}
+
+/**
  * @tc.name: IsFloatingWindowAppTypetest01
  * @tc.desc: IsFloatingWindowAppType
  * @tc.type: FUNC
@@ -1547,6 +1608,50 @@ HWTEST_F(WindowSessionImplTest, SetSingleFrameComposerEnabled01, Function | Smal
 }
 
 /**
+ * @tc.name: SetTopmost
+ * @tc.desc: SetTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTopmost");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    WMError res = window->SetTopmost(true);
+    if (!isPC) {
+        ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+        return;
+    }
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    res = window->SetTopmost(true);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, res);
+}
+
+/**
+ * @tc.name: IsTopmost
+ * @tc.desc: IsTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, IsTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("IsTopmost");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool res = window->IsTopmost();
+    ASSERT_FALSE(res);
+}
+
+/**
  * @tc.name: SetDecorVisible
  * @tc.desc: SetDecorVisible and check the retCode
  * @tc.type: FUNC
@@ -1563,6 +1668,25 @@ HWTEST_F(WindowSessionImplTest, SetDecorVisible, Function | SmallTest | Level2)
     WMError res = window->SetDecorVisible(isVisble);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisibletest01 end";
+}
+
+/**
+ * @tc.name: SetSubWindowModal
+ * @tc.desc: SetSubWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetSubWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetSubWindowModal");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool isModal = true;
+    WMError res = window->SetSubWindowModal(isModal);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 end";
 }
 
 /**
@@ -1676,6 +1800,34 @@ HWTEST_F(WindowSessionImplTest, SetPipActionEvent, Function | SmallTest | Level2
     WSError res = window->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetPipActionEvent end";
+}
+
+/**
+ * @tc.name: SetUIContentInner
+ * @tc.desc: SetUIContentInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUIContentInner");
+    option->SetExtensionTag(true);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    std::string url = "";
+    WMError res1 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
+    ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    WMError res2 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
+    ASSERT_EQ(res2, WMError::WM_ERROR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner end";
 }
 }
 } // namespace Rosen

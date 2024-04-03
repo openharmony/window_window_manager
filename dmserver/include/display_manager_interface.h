@@ -119,6 +119,9 @@ public:
         TRANS_ID_GET_AVAILABLE_AREA,
         TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION,
         TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID,
+        TRANS_ID_GET_VIRTUAL_SCREEN_FLAG,
+        TRANS_ID_SET_VIRTUAL_SCREEN_FLAG,
+        TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -132,6 +135,10 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
+    virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
@@ -235,6 +242,15 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
+
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
+    {
+        return VirtualScreenFlag::DEFAULT;
+    }
+    virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 } // namespace OHOS::Rosen
 

@@ -47,7 +47,11 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         WLOGFE("Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    bool isPreImeEvent = false;
+    if (!data.WriteBool(isPreImeEvent)) {
+        WLOGFE("Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -103,7 +107,7 @@ WSError WindowEventChannelProxy::TransferBackpressedEventForConsumed(bool& isCon
 }
 
 WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -117,13 +121,51 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
         WLOGFE("Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteBool(isPreImeEvent)) {
+        WLOGFE("Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     isConsumed = reply.ReadBool();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferKeyEventForConsumedAsync(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent, const sptr<IRemoteObject>& listener)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!keyEvent->WriteToParcel(data)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to write key event");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isPreImeEvent)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write isPreImeEvent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(listener)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteRemoteObject listener failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
@@ -367,6 +409,34 @@ WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(pointX) ||
+        !data.WriteFloat(pointY) ||
+        !data.WriteInt32(sourceType) ||
+        !data.WriteInt32(eventType) ||
+        !data.WriteInt64(timeMs)) {
+        WLOGFE("Write TransferAccessibilityHoverEvent data failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

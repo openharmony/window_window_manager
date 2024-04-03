@@ -168,6 +168,7 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
+        WLOGE("[NAPI]screenConnectionCallback is nullptr");
         return;
     }
 
@@ -413,15 +414,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
         return NapiGetUndefined(env);
     }
 
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [event](napi_env env, NapiAsyncTask& task, int32_t status) {
-            DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
-        }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenSessionManager::OnTakeOverShutdown", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
 }
 
@@ -561,8 +554,11 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     if (pixelMap) {
         nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     }
-    nativeData ? WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight()) :
+    if (nativeData != nullptr) {
+        WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
         WLOGE("[NAPI]create native pixelmap failed");
+    }
     return nativeData;
 }
 } // namespace OHOS::Rosen

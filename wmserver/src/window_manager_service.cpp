@@ -59,6 +59,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
     SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
+const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
     rsInterface_(RSInterfaces::GetInstance()),
@@ -108,7 +109,7 @@ void WindowManagerService::OnStart()
 
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener = new WindowInfoQueriedListener();
     DisplayManagerServiceInner::GetInstance().RegisterWindowInfoQueriedListener(windowInfoQueriedListener);
-
+    system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
@@ -858,7 +859,8 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         // type is not system
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && Permission::IsStartByInputMethod()) {
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
+        && Permission::IsStartByInputMethod()) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT counld be created by input method app
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
@@ -1269,13 +1271,22 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
         action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
         !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!accessTokenIdMaps_.isExist(windowProperty->GetWindowId(), IPCSkeleton::GetCallingTokenID()) &&
+
+    WindowType type = windowProperty->GetWindowType();
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        if (!Permission::IsStartByInputMethod()) {
+            WLOGI("Keyboard only hide by input method it'self, operation rejected.");
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+    } else if (!accessTokenIdMaps_.isExist(windowProperty->GetWindowId(), IPCSkeleton::GetCallingTokenID()) &&
         !Permission::IsSystemCalling()) {
         WLOGI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;

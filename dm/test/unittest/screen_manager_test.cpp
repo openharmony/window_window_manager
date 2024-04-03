@@ -509,6 +509,90 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener02, Function | Sma
     result = ScreenManager::GetInstance().RegisterVirtualScreenGroupListener(listener);
     ASSERT_EQ(DMError::DM_OK, result);
 }
+
+/**
+ * @tc.name: SetVirtualScreenFlag01
+ * @tc.desc: SetVirtualScreenFlag01 cast flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag01, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: SetVirtualScreenFlag02
+ * @tc.desc: SetVirtualScreenFlag02 max flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag02, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::MAX);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: GetVirtualScreenFlag01
+ * @tc.desc: GetVirtualScreenFlag01 get cast
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, GetVirtualScreenFlag01, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    VirtualScreenFlag screenFlag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
+    ASSERT_EQ(VirtualScreenFlag::CAST, screenFlag);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: SetVirtualMirrorScreenScaleMode01
+ * @tc.desc: SetVirtualMirrorScreenScaleMode01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
+        ScreenScaleMode::FILL_MODE);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: SetVirtualMirrorScreenScaleMode02
+ * @tc.desc: SetVirtualMirrorScreenScaleMode02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
+        ScreenScaleMode::UNISCALE_MODE);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

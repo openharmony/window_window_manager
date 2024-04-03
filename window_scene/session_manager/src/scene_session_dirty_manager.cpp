@@ -34,7 +34,7 @@ constexpr float DIRECTION180 = 180 ;
 constexpr float DIRECTION270 = 270 ;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionDirtyManager"};
 constexpr unsigned int POINTER_CHANGE_AREA_COUNT = 8;
-constexpr int POINTER_CHANGE_AREA_SEXTEEN = 16;
+constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr int UPDATE_TASK_DURATION = 10;
@@ -91,7 +91,7 @@ void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sce
     }
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    std::unordered_map<ScreenId, ScreenProperty> screensProperties =
+    std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
@@ -244,7 +244,17 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
 
     for (const auto& elem: sessionMap) {
         const auto& session = elem.second;
-        if (session != nullptr && session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (session == nullptr) {
+            continue;
+        }
+        bool isModalSubWindow = false;
+        auto property = session->GetSessionProperty();
+        if (property != nullptr) {
+            bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
+            bool isModal = property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
+            isModalSubWindow = isSubWindow && isModal;
+        }
+        if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             const auto& parentSession = session->GetParentSession();
             if (parentSession == nullptr) {
                 continue;
@@ -349,28 +359,28 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 vpr = screenSession->GetScreenProperty().GetDensity();
             }
         }
-        int32_t pointerArea_Five_PX = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
-        int32_t pointerArea_Sexteen_PX = static_cast<int32_t>(POINTER_CHANGE_AREA_SEXTEEN * vpr);
+        int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
+        int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
 
         if (sceneSession->GetSessionInfo().isSetPointerAreas_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_PX, pointerArea_Sexteen_PX,
-                pointerArea_Five_PX, pointerArea_Sexteen_PX, pointerArea_Five_PX};
+                POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, pointerAreaSixteenPx,
+                pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
             return;
         }
         auto limits = sceneSession->GetSessionProperty()->GetWindowLimits();
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
-            pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_PX,
+            pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
                 POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                pointerArea_Five_PX, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+                pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
         } else if (limits.minWidth_ != limits.maxWidth_ && limits.minHeight_ == limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_PX, POINTER_CHANGE_AREA_DEFAULT,
-                POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerArea_Five_PX};
+                POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,
+                POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx};
         } else if (limits.minWidth_ != limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
-            pointerChangeAreas = {pointerArea_Sexteen_PX, pointerArea_Five_PX,
-                pointerArea_Sexteen_PX, pointerArea_Five_PX, pointerArea_Sexteen_PX,
-                pointerArea_Five_PX, pointerArea_Sexteen_PX, pointerArea_Five_PX};
+            pointerChangeAreas = {pointerAreaSixteenPx, pointerAreaFivePx,
+                pointerAreaSixteenPx, pointerAreaFivePx, pointerAreaSixteenPx,
+                pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
         WLOGFD("UpdatePointerAreas sceneSession is: %{public}d dragEnabled is false", sceneSession->GetPersistentId());
@@ -413,6 +423,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    auto pixelMap = sceneSession->GetSessionProperty()->GetWindowMask().GetRefPtr();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -426,8 +437,15 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
-        .transform = transformData
+        .transform = transformData,
+        .pixelMap = pixelMap
     };
+    auto property = sceneSession->GetSessionProperty();
+    if (property != nullptr && (property->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
+        WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
+    }
     return windowInfo;
 }
 

@@ -100,6 +100,7 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
+    virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode);
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
@@ -142,6 +143,9 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+    virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

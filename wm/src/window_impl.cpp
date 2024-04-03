@@ -920,8 +920,12 @@ WMError WindowImpl::SetAspectRatio(float ratio)
         WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);
         return WMError::WM_OK;
     }
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
-    return WMError::WM_OK;
+    auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("Set AspectRatio failed. errorCode: %{public}u", ret);
+        return ret;
+    }
+    return ret;
 }
 
 WMError WindowImpl::ResetAspectRatio()
@@ -946,6 +950,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         return;
     }
 
+    WLOGFI("MapFloatingWindowToAppIfNeeded: enter this");
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1168,7 +1173,7 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        WLOGFI("Reset displayId to %{public}llu", defaultDisplayId);
+        WLOGFI("Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -1179,6 +1184,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
+    property_->SetDisplayId(DISPLAY_ID_INVALID);
     SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
@@ -1228,6 +1234,14 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
 }
 
 void WindowImpl::InitAbilityInfo()
@@ -1301,6 +1315,7 @@ void WindowImpl::DestroyDialogWindow()
 void WindowImpl::DestroyFloatingWindow()
 {
     // remove from appFloatingWindowMap_
+    WLOGFI("DestroyFloatingWindow:remove from appFloatingWindowMap_");
     for (auto& floatingWindows: appFloatingWindowMap_) {
         for (auto iter = floatingWindows.second.begin(); iter != floatingWindows.second.end(); ++iter) {
             if ((*iter) == nullptr) {
@@ -1314,6 +1329,7 @@ void WindowImpl::DestroyFloatingWindow()
     }
 
     // Destroy app floating window if exist
+    WLOGFI("DestroyFloatingWindow:Destroy app floating window if exist");
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
         auto& floatingWindows = appFloatingWindowMap_.at(GetWindowId());
         for (auto iter = floatingWindows.begin(); iter != floatingWindows.end(); iter = floatingWindows.begin()) {
@@ -1777,7 +1793,9 @@ WMError WindowImpl::SetBrightness(float brightness)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
+    if ((brightness < MINIMUM_BRIGHTNESS &&
+         std::fabs(brightness - UNDEFINED_BRIGHTNESS) >= std::numeric_limits<float>::min()) ||
+         brightness > MAXIMUM_BRIGHTNESS) {
         WLOGFE("invalid brightness value: %{public}f", brightness);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3803,6 +3821,7 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
 {
     property_->SetTextFieldPositionY(textFieldPositionY);
     property_->SetTextFieldHeight(textFieldHeight);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
 } // namespace Rosen

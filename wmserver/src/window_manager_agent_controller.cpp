@@ -27,19 +27,29 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 WMError WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    return wmAgentContainer_.RegisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
+    return wmAgentContainer_.RegisterAgent(
+        windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
 WMError WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    return wmAgentContainer_.UnregisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
+    return wmAgentContainer_.UnregisterAgent(
+        windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
 void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
     for (auto& agent : wmAgentContainer_.GetAgentsByType(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
         agent->UpdateFocusChangeInfo(focusChangeInfo, focused);
+    }
+}
+
+void WindowManagerAgentController::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE)) {
+        agent->UpdateWindowModeTypeInfo(type);
     }
 }
 

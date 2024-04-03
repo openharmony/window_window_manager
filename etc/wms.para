@@ -12,3 +12,4 @@
 # limitations under the License.
 
 bootevent.wms.fullscreen.ready=false
+bootevent.wms.ready=false

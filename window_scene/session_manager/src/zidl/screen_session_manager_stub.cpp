@@ -27,6 +27,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
                                           "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
+const static uint32_t ERR_INVALID_DATA = -1;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -35,7 +36,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
@@ -46,6 +47,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = RegisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));
@@ -53,6 +57,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = UnregisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));
@@ -108,7 +115,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId dmsScreenId;
             if (!data.ReadUint64(dmsScreenId)) {
                 WLOGFE("fail to read dmsScreenId.");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
@@ -207,6 +214,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool autoRotate = data.ReadBool();
             DMError result = SetVirtualMirrorScreenCanvasRotation(screenId, autoRotate);
+            reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenScaleMode scaleMode = static_cast<ScreenScaleMode>(data.ReadUint32());
+            DMError result = SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
@@ -608,7 +622,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
             if (!info) {
                 WLOGFE("Read DisplayChangeInfo failed");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             NotifyDisplayChangeInfoChanged(info);
             break;
@@ -650,6 +664,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
             bool foldToExpand = data.ReadBool();
             NotifyFoldToExpandCompletion(foldToExpand);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenFlag screenFlag = GetVirtualScreenFlag(screenId);
+            reply.WriteUint32(static_cast<uint32_t>(screenFlag));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenFlag screenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
+            DMError setRet = SetVirtualScreenFlag(screenId, screenFlag);
+            reply.WriteInt32(static_cast<int32_t>(setRet));
             break;
         }
         default:

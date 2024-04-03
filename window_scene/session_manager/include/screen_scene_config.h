@@ -34,18 +34,22 @@ public:
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static const std::map<std::string, std::string>& GetStringConfig();
     static void DumpConfig();
-    static std::vector<DMRect> GetCutoutBoundaryRect();
-    static void SetCutoutSvgPath(const std::string& svgPath);
+    static std::vector<DMRect> GetCutoutBoundaryRect(uint64_t displayId);
+    static std::vector<DMRect> GetSubCutoutBoundaryRect();
+    static void SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath);
+    static void SetSubCutoutSvgPath(const std::string& svgPath);
     static bool IsWaterfallDisplay();
     static void SetCurvedCompressionAreaInLandscape();
     static std::vector<int> GetCurvedScreenBoundaryConfig();
     static uint32_t GetCurvedCompressionAreaInLandscape();
 
 private:
+    static std::map<int32_t, std::string> xmlNodeMap_;
     static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> intNumbersConfig_;
     static std::map<std::string, std::string> stringConfig_;
-    static std::vector<DMRect> cutoutBoundaryRect_;
+    static std::map<uint64_t, std::vector<DMRect>> cutoutBoundaryRectMap_;
+    static std::vector<DMRect> subCutoutBoundaryRect_;
     static bool isWaterfallDisplay_;
     static bool isScreenCompressionEnableInLandscape_;
     static uint32_t curvedAreaInLandscape_;

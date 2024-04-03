@@ -22,7 +22,6 @@ config("libwm_private_config") {
     "../wmserver/include",
     "../wmserver/include/zidl",
     "../window_scene/session/host/include",
-    "//foundation/arkui/napi",  # because of ability_context.h
   ]
 }
 
@@ -41,13 +40,15 @@ ohos_static_library("libwm_static") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
   }
   include_dirs = [
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -104,6 +105,7 @@ ohos_static_library("libwm_static") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -118,6 +120,7 @@ ohos_static_library("libwm_static") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
@@ -186,7 +189,6 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 
   sources = [
@@ -243,6 +245,7 @@ ohos_shared_library("libwm") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
@@ -257,6 +260,7 @@ ohos_shared_library("libwm") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
@@ -309,33 +313,89 @@ ohos_shared_library("libwm") {
 
 ## Build libwm_lite.so
 ohos_shared_library("libwm_lite") {
-  include_dirs = [ "../utils/include" ]
-  sources = [
-    "src/window_adapter_lite.cpp",
-    "src/window_manager_lite.cpp",
-    "src/window_option.cpp",
-  ]
+  defines = []
+  if (scene_board_enabled) {
+    defines += [ "USE_ADAPTER_LITE" ]
+    include_dirs = [
+      "../utils/include",
+      "${accessibility_path}/interfaces/innerkits/common/include/",
+    ]
+    sources = [
+      "src/window_adapter_lite.cpp",
+      "src/window_manager_agent_lite.cpp",
+      "src/window_manager_lite.cpp",
+      "src/window_option.cpp",
+      "src/zidl/window_manager_agent_stub.cpp",
+    ]
 
-  configs = [
-    ":libwm_private_config",
-    "../resources/config/build:coverage_flags",
-  ]
+    configs = [
+      ":libwm_private_config",
+      "../resources/config/build:coverage_flags",
+    ]
+
+    deps = [
+      "${window_base_path}/utils:libwmutil",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+      "${window_base_path}/window_scene/session_manager:session_manager_lite",
+    ]
+
+    public_deps = [ "${window_base_path}/utils:libwmutil_base" ]
+  }
 
   public_configs = [ ":libwm_public_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/session_manager:session_manager_lite",
-  ]
-
   external_deps = [
+    "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+    "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
+
+  if (efficiency_manager_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (defined(global_parts_info)) {
+    if (defined(
+        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
+      defines += [ "FRAME_TRACE_ENABLE" ]
+      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
+    } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
+      defines += [ "FRAME_TRACE_ENABLE" ]
+      external_deps += [ "frame_aware_sched:frame_trace_intf" ]
+    }
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+  }
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.inputmethod_imf)) {
+    imf_enable = true
+  } else {
+    imf_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_power_manager)) {
+    external_deps += [ "power_manager:powermgr_client" ]
+    defines += [ "POWER_MANAGER_ENABLE" ]
+  }
+  print("imf_enable: ", imf_enable)
+
+  if (imf_enable == true) {
+    external_deps += [ "imf:inputmethod_client" ]
+    defines += [ "IMF_ENABLE" ]
+  }
 
   part_name = "window_manager"
   subsystem_name = "window"

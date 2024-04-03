@@ -25,6 +25,7 @@ group("unittest") {
     ":wm_picture_in_picture_manager_test",
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
+    ":wm_window_adapter_test",
     ":wm_window_agent_test",
     ":wm_window_effect_test",
     ":wm_window_extension_session_impl_test",
@@ -126,6 +127,7 @@ ohos_unittest("wm_window_session_impl_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 
@@ -259,6 +261,7 @@ ohos_unittest("wm_window_scene_session_impl_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 
@@ -389,6 +392,16 @@ ohos_unittest("wm_window_manager_agent_proxy_test") {
   external_deps = [ "c_utils:utils" ]
 }
 
+ohos_unittest("wm_window_adapter_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_adapter_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
@@ -439,6 +452,7 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",

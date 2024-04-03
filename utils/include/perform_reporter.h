@@ -26,6 +26,13 @@
 
 namespace OHOS {
 namespace Rosen {
+struct WindowProfileInfo {
+    std::string bundleName = "";
+    int32_t windowVisibleState = -1;
+    int32_t windowLocatedScreen = -1;
+    int32_t windowSceneMode = -1;
+};
+
 class PerformReporter {
 public:
     PerformReporter(const std::string& tag, const std::vector<int64_t>& timeSpiltsMs, uint32_t reportInterval = 50);
@@ -68,6 +75,7 @@ public:
     void ReportStartWindow(const std::string& bundleName, const std::string& windowName);
     void ReportRecordedInfos();
     void ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp);
+    int32_t ReportWindowProfileInfo(const WindowProfileInfo& windowProfileInfo);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,

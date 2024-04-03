@@ -48,14 +48,15 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
+    WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
     void SetDefaultProperty();
-    WSError SetActive(bool active) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
+    WMError Maximize(MaximizeLayoutOption option) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
@@ -82,6 +83,7 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
+    static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
@@ -132,18 +134,22 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    WMError RecoveryPullPiPMainWindow(const Rect& rect) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
+    WMError HideNonSecureWindows(bool shouldHide) override;
+    virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
+    WMError CreateSystemWindow(WindowType type);
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
+    bool isSessionMainWindow(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
@@ -174,8 +180,11 @@ private:
         const MMI::PointerEvent::PointerItem& pointerItem);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
+    std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
+    uint32_t setSameSystembarPropertyCnt_ = 0;
+    uint32_t getAvoidAreaCnt_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

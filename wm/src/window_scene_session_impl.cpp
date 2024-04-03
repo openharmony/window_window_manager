@@ -91,7 +91,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
         type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_SYSTEM_TOAST || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
-        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH)) {
+        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_HANDWRITE)) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid type: %{public}u", type);
         return false;
     }
@@ -101,18 +102,38 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint32_t parentId)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& item : windowSessionMap_) {
         if (item.second.second && item.second.second->GetProperty() &&
-            item.second.second->GetWindowId() == parentId &&
-            WindowHelper::IsMainWindow(item.second.second->GetType())) {
-            WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
-                item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
-            return item.second.second;
+            item.second.second->GetWindowId() == parentId) {
+                if (WindowHelper::IsMainWindow(item.second.second->GetType()) ||
+                    WindowHelper::IsSystemWindow(item.second.second->GetType())) {
+                    WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
+                        item.second.second->GetProperty()->GetWindowName().c_str(), parentId,
+                        GetProperty()->GetPersistentId());
+                    return item.second.second;
+                } else if (WindowHelper::IsSubWindow(item.second.second->GetType()) &&
+                    isSessionMainWindow(item.second.second->GetParentId())) {
+                    // subwindow grandparent is mainwindow
+                    return item.second.second;
+                }
         }
     }
     WLOGFD("[WMSCom] Can not find parent window, id: %{public}d", parentId);
     return nullptr;
+}
+
+bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& item : windowSessionMap_) {
+        if (item.second.second && item.second.second->GetProperty() &&
+            item.second.second->GetWindowId() == parentId &&
+            WindowHelper::IsMainWindow(item.second.second->GetType())) {
+                return true;
+        }
+    }
+    return false;
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
@@ -145,7 +166,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType& type = GetType();
-    if (WindowHelper::IsSubWindow(type)) { // sub window
+    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
@@ -159,20 +180,15 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+    } else if (property_->GetExtensionFlag() == true) {
+        property_->SetParentPersistentId(property_->GetParentId());
+        // creat sub session by parent session
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
-            (type == WindowType::WINDOW_TYPE_TOAST)) {
-            property_->SetParentPersistentId(GetFloatingWindowParentId());
-            TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
-                property_->GetParentPersistentId(), type);
-            auto mainWindow = FindMainWindowWithContext();
-            property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
-        } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
-            auto mainWindow = FindMainWindowWithContext();
-            if (mainWindow != nullptr) {
-                property_->SetParentPersistentId(mainWindow->GetPersistentId());
-                TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
-            }
+        WMError createSystemWindowRet = CreateSystemWindow(type);
+        if (createSystemWindowRet != WMError::WM_OK) {
+            return createSystemWindowRet;
         }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
@@ -191,6 +207,39 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
+{
+    if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
+        (type == WindowType::WINDOW_TYPE_TOAST)) {
+        property_->SetParentPersistentId(GetFloatingWindowParentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "set parentId: %{public}d, type: %{public}d",
+            property_->GetParentPersistentId(), type);
+        auto mainWindow = FindMainWindowWithContext();
+        property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
+    } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr) {
+            property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_DIALOG, "Set parentId, parentId:%{public}d", mainWindow->GetPersistentId());
+        }
+    } else if (WindowHelper::IsSystemSubWindow(type)) {
+        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent of system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (WindowHelper::IsSystemSubWindow(parentSession->GetType())) {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent is system sub window, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(), type);
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        // set parent persistentId
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
+    }
     return WMError::WM_OK;
 }
 
@@ -242,6 +291,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
 {
+    if (isFocused_) {
+        UpdateFocus(false);
+    }
     SessionInfo info;
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
@@ -345,11 +397,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
-            if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
-                TLOGI(WmsLogTag::WMS_SYSTEM, "System sub window is not support");
-                return WMError::WM_ERROR_INVALID_TYPE;
-            }
-
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(type)) {
                 return WMError::WM_OK;
@@ -423,6 +470,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             return;
         }
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+        RefreshNoInteractionTimeoutMonitor(pointerEvent->GetId());
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -438,7 +486,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         pointerEvent->MarkProcessed();
     }
     if (isPointDown || isPointUp) {
-        WLOGFI("[WMSEvent]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
+        TLOGI(WmsLogTag::WMS_EVENT, "windowId:%{public}u, pointId:%{public}d, sourceType:%{public}d, "
             "pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
             "%{public}u]", GetWindowId(), pointerEvent->GetPointerId(), sourceType, pointerItem.GetDisplayX(),
             pointerItem.GetDisplayY(), rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -453,13 +501,13 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     }
 
     if (hostSession_ == nullptr) {
-        WLOGFE("[WMSEvent] hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        WLOGFW("[WMSEvent] invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        TLOGW(WmsLogTag::WMS_EVENT, "invalid pointerEvent, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
         return;
     }
@@ -467,10 +515,22 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     ConsumePointerEventInner(pointerEvent, pointerItem);
 }
 
+void WindowSceneSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    bool isConsumed = false;
+    NotifyKeyEvent(keyEvent, isConsumed, false);
+    RefreshNoInteractionTimeoutMonitor(keyEvent->GetId());
+}
+
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
+    
+    if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        WLOGFI("[WMSRecover] input method window does not need to recover");
+        return;
+    }
 
     wptr<WindowSceneSessionImpl> weakThis = this;
     auto callbackFunc = [weakThis, isSpecificSession] {
@@ -561,6 +621,9 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
                                                  MIN_FLOATING_WIDTH, vpr);
         systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfSubWindow_,
                                                   MIN_FLOATING_HEIGHT, vpr);
+    } else if (WindowHelper::IsSystemWindow(GetType()) && GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+        systemLimits.minWidth_ = 0;
+        systemLimits.minHeight_ = 0;
     } else {
         systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
         systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
@@ -695,6 +758,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             hostSession_->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
+        RefreshNoInteractionTimeoutMonitor(-1);
         return WMError::WM_OK;
     }
 
@@ -734,6 +798,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+        RefreshNoInteractionTimeoutMonitor(-1);
     } else {
         NotifyForegroundFailed(ret);
     }
@@ -745,8 +810,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Window hide failed, property is nullptr");
+    if (property_ == nullptr || hostSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Window hide failed, because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -860,27 +925,6 @@ void WindowSceneSessionImpl::SetDefaultProperty()
     }
 }
 
-WSError WindowSceneSessionImpl::SetActive(bool active)
-{
-    WLOGFI("[WMSCom] active status: %{public}d", active);
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        if (hostSession_ == nullptr) {
-            WLOGFD("hostSession_ nullptr");
-            return WSError::WS_ERROR_INVALID_WINDOW;
-        }
-        WSError ret = hostSession_->UpdateActiveStatus(active);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-    }
-    if (active) {
-        NotifyAfterActive();
-    } else {
-        NotifyAfterInactive();
-    }
-    return WSError::WS_OK;
-}
-
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     const int32_t& parentPersistentId = property_->GetParentPersistentId();
@@ -932,11 +976,13 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType())) {
+        } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        } else if (property_->GetExtensionFlag() == true) {
             SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
@@ -1073,7 +1119,8 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     // get new limit config with the settings of system and app
     const auto& sizeLimits = property_->GetWindowLimits();
     // limit minimum size of floating (not system type) window
-    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    if ((!WindowHelper::IsSystemWindow(property_->GetWindowType())) ||
+        (property_->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
         width = std::max(sizeLimits.minWidth_, width);
         height = std::max(sizeLimits.minHeight_, height);
     }
@@ -1116,6 +1163,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
@@ -1230,8 +1278,6 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     uint32_t windowId = GetWindowId();
-    TLOGI(WmsLogTag::WMS_IMMS,
-        "GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
     WindowMode mode = GetMode();
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
@@ -1245,10 +1291,25 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
             static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
+    if (mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType()))) {
+        TLOGI(WmsLogTag::WMS_IMMS,"Window: %{public}u, avoidAreaType:%{public}u,"
+            "windowMode:%{public}u, return default avoid area for sub window.",
+            GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+        return WMError::WM_OK;
+    }
     if (hostSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "hostSession_ is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
+    getAvoidAreaCnt_++;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
+          "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
+          windowId, GetWindowName().c_str(), type, getAvoidAreaCnt_,
+          avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
+          avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
+          avoidArea.bottomRect_.height_);
     return WMError::WM_OK;
 }
 
@@ -1318,8 +1379,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    TLOGI(WmsLogTag::WMS_IMMS,
-        "winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s status:%{public}d",
+        GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -1367,7 +1428,7 @@ SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType 
 
 WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "windowId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1378,15 +1439,10 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
 
 WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFD("NotifySpecificWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "windowId:%{public}u", GetWindowId());
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if ((state_ == WindowState::STATE_CREATED &&
-         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
-        state_ == WindowState::STATE_HIDDEN) {
-        return WMError::WM_OK;
     }
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
@@ -1398,62 +1454,49 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "SetSystemBarProperty windowId:%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-        GetWindowId(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
-    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty window state is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    } else if (GetSystemBarPropertyByType(type) == property) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty property is same");
-        return WMError::WM_OK;
-    }
-
-    if (property_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    isSystembarPropertiesSet_ = true;
-    property_->SetSystemBarProperty(type, property);
-    WMError ret = NotifyWindowSessionProperty();
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
-            GetWindowId(), static_cast<int32_t>(ret));
-    }
-    return ret;
-}
-
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
-           "enable:%{public}u bgColor:%{public}x Color:%{public}x",
-           GetWindowId(), static_cast<uint32_t>(type),
-           property.enable_, property.backgroundColor_, property.contentColor_);
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property) {
+        setSameSystembarPropertyCnt_++;
+        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set same property %{public}u times, "
+            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x",
+            GetWindowId(), GetWindowName().c_str(), setSameSystembarPropertyCnt_,
+            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_);
         return WMError::WM_OK;
     }
+    setSameSystembarPropertyCnt_ = 0;
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
 
     if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "winId:%{public}u errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }
 
+WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return SetSpecificBarProperty(type, property);
+}
+
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+        "winId:%{public}u %{public}s status:%{public}d",
+        GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -1536,6 +1579,23 @@ WMError WindowSceneSessionImpl::Maximize()
         SetFullScreen(true);
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::Maximize(MaximizeLayoutOption option)
+{
+    if (option.dock != ShowType::HIDE || option.decor == ShowType::FORBIDDEN) {
+        WLOGE("[WMLayout] dock cannot be hide always! dock is not hide: %{public}d", option.dock != ShowType::HIDE);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("maximize fail, not main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetIsLayoutFullScreen(option.decor == ShowType::HIDE);
+    return SetFullScreen(true);
 }
 
 WMError WindowSceneSessionImpl::MaximizeFloating()
@@ -1677,7 +1737,7 @@ WMError WindowSceneSessionImpl::Close()
             hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-    } else if (WindowHelper::IsSubWindow(GetType())) {
+    } else if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType())) {
         WLOGFI("WindowSceneSessionImpl::Close subwindow");
         return Destroy(true);
     }
@@ -1864,6 +1924,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
         WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
@@ -1963,6 +2027,24 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
         return nullptr;
     }
     return FindWindowById(topWinId);
+}
+
+sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Please create mainWindow First!");
+        return nullptr;
+    }
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
+            TLOGI(WmsLogTag::WMS_MAIN, "Find MainWinId:%{public}u.", win->GetWindowId());
+            return win;
+        }
+    }
+    TLOGE(WmsLogTag::WMS_MAIN, "Cannot find Window!");
+    return nullptr;
 }
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)
@@ -2434,7 +2516,10 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling window id failed, property_ is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling window id: %{public}d", callingWindowId);
+    if (callingWindowId != property_->GetCallingWindow()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling window id form %{public}d to: %{public}d",
+            property_->GetCallingWindow(), callingWindowId);
+    }
     property_->SetCallingWindow(callingWindowId);
 
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
@@ -2505,17 +2590,6 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     return static_cast<WSError>(ret);
 }
 
-WMError WindowSceneSessionImpl::RecoveryPullPiPMainWindow(const Rect& rect)
-{
-    WLOGFI("RecoveryPullPiPMainWindow");
-    if (hostSession_ && property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        hostSession_->RecoveryPullPiPMainWindow(GetPersistentId(), rect);
-        return WMError::WM_OK;
-    }
-    WLOGFW("not pip window, nothing to do");
-    return WMError::WM_DO_NOTHING;
-}
-
 WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
 {
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
@@ -2581,7 +2655,7 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
-    WLOGFD("NotifyPrepareClosePiPWindow type: %{public}u", GetType());
+    TLOGD(WmsLogTag::WMS_PIP, "NotifyPrepareClosePiPWindow type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
         return WMError::WM_DO_NOTHING;
     }
@@ -2746,6 +2820,81 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         type, state_, requestState_);
     return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
+{
+    return SingletonContainer::Get<WindowAdapter>().AddOrRemoveSecureSession(property_->GetPersistentId(), shouldHide);
+}
+
+WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
+{
+    property_->SetTextFieldPositionY(textFieldPositionY);
+    property_->SetTextFieldHeight(textFieldHeight);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    return WMError::WM_OK;
+}
+
+std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
+    const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    const Rect& windowRect = GetRect();
+    uint32_t maskHeight = windowMask.size();
+    if (maskHeight <= 0) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    uint32_t maskWidth = windowMask[0].size();
+    if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
+        WLOGFE("WindowMask is invalid");
+        return nullptr;
+    }
+    Media::InitializationOptions opts;
+    opts.size.width = maskWidth;
+    opts.size.height = maskHeight;
+    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    uint32_t length = maskWidth * maskHeight;
+    uint32_t* data = new (std::nothrow) uint32_t[length];
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < maskHeight; i++) {
+        for (uint32_t j = 0; j < maskWidth; j++) {
+            uint32_t idx = i * maskWidth + j;
+            data[idx] = windowMask[i][j];
+        }
+    }
+    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(data, length, opts);
+    delete[] data;
+    return mask;
+}
+
+WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
+{
+    WLOGFI("SetWindowMask, WindowId: %{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    sptr<Media::PixelMap> mask = sptr<Media::PixelMap>(HandleWindowMask(windowMask).release());
+    if (mask == nullptr) {
+        WLOGFE("Failed to create pixelMap of window mask");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
+    surfaceNode_->SetCornerRadius(0.0f);
+    surfaceNode_->SetShadowRadius(0.0f);
+    surfaceNode_->SetMask(rsMask); // RS interface to set mask
+    RSTransaction::FlushImplicitTransaction();
+
+    property_->SetWindowMask(mask);
+    property_->SetIsShaped(true);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 }
 } // namespace Rosen
 } // namespace OHOS

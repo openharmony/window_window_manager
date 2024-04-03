@@ -234,5 +234,37 @@ bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
         return false;
     }
 }
+
+bool SessionPermission::IsStartedByUIExtension()
+{
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
+        WLOGFE("failed to get BundleManagerServiceProxy");
+        return false;
+    }
+
+    int uid = IPCSkeleton::GetCallingUid();
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string bundleName;
+    bundleManagerServiceProxy->GetNameForUid(uid, bundleName);
+    AppExecFwk::BundleInfo bundleInfo;
+    int userId = uid / 200000; // 200000 use uid to caculate userId
+    bool result = bundleManagerServiceProxy->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, userId);
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (!result) {
+        WLOGFE("failed to query extension ability info, bundleName:%{public}s, userId:%{public}d",
+               bundleName.c_str(), userId);
+        return false;
+    }
+
+    auto extensionInfo = std::find_if(bundleInfo.extensionInfos.begin(), bundleInfo.extensionInfos.end(),
+        [](AppExecFwk::ExtensionAbilityInfo extensionInfo) {
+            return (extensionInfo.type == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI);
+        });
+    return extensionInfo != bundleInfo.extensionInfos.end();
+}
 } // namespace Rosen
 } // namespace OHOS

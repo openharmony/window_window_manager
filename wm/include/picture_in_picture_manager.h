@@ -28,6 +28,7 @@ public:
     PictureInPictureManager();
     ~PictureInPictureManager();
     static bool ShouldAbortPipStart();
+    static bool IsSupportPiP();
     static void PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController);
     static void RemovePipControllerInfo(int32_t windowId);
     static void AttachActivePipController(sptr<PictureInPictureController> pipController);
@@ -45,8 +46,6 @@ public:
 
     static void DoRestore();
     static void DoClose(bool destroyWindow, bool needAnim);
-    static void DoStartMove();
-    static void DoScale();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void AutoStartPipWindow(std::string navigationId);
 private:

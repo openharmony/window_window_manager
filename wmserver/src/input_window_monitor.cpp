@@ -124,9 +124,10 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
             .width = static_cast<int32_t>(displayWidth),
             .height = static_cast<int32_t>(displayHeight),
             .dpi = displayInfo->GetDpi(),
-            .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
+            .name = "display " + std::to_string(displayInfo->GetDisplayId()),
             .uniq = "default" + std::to_string(displayInfo->GetDisplayId()),
             .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
+            .displayDirection = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
         };
         auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
             [&display](MMI::DisplayInfo& displayInfoTmp) {

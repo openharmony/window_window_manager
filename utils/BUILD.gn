@@ -36,6 +36,9 @@ ohos_static_library("libwmutil_static") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
   }
   sources = [
     "src/accessibility_window_info.cpp",
@@ -48,7 +51,6 @@ ohos_static_library("libwmutil_static") {
     "src/permission.cpp",
     "src/persistent_storage.cpp",
     "src/pip_report.cpp",
-    "src/pip_util.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/screenshot_info.cpp",
@@ -149,7 +151,6 @@ ohos_shared_library("libwmutil") {
     "src/permission.cpp",
     "src/persistent_storage.cpp",
     "src/pip_report.cpp",
-    "src/pip_util.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/surface_draw.cpp",

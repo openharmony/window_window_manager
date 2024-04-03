@@ -194,6 +194,18 @@ void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vecto
     }
 }
 
+void WindowRoot::GetForegroundNodes(std::vector<sptr<WindowNode>>& windowNodes)
+{
+    for (const auto& it : windowNodeMap_) {
+        if (it.second == nullptr) {
+            continue;
+        }
+        if (it.second->currentVisibility_) {
+            windowNodes.push_back(it.second);
+        }
+    }
+}
+
 sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const
 {
     if (token == nullptr) {
@@ -904,8 +916,20 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
         WLOGW("Only app window support set brightness");
         return;
     }
-    if (windowId == container->GetActiveWindow()) {
-        if (container->GetDisplayBrightness() != brightness) {
+    if (windowId != container->GetActiveWindow()) {
+        WLOGE("Window is not active with windowId:%{public}d", windowId);
+        return;
+    }
+    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) <= std::numeric_limits<float>::min()) {
+        if (std::fabs(container->GetDisplayBrightness() - brightness) > std::numeric_limits<float>::min()) {
+            WLOGFI("value: %{public}f to restore brightness", brightness);
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+#endif
+            container->SetDisplayBrightness(brightness);
+        }
+    } else {
+        if (std::fabs(container->GetDisplayBrightness() - brightness) > std::numeric_limits<float>::min()) {
             WLOGFI("value: %{public}u", container->ToOverrideBrightness(brightness));
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
@@ -913,8 +937,8 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
 #endif
             container->SetDisplayBrightness(brightness);
         }
-        container->SetBrightnessWindow(windowId);
     }
+    container->SetBrightnessWindow(windowId);
 }
 
 void WindowRoot::HandleKeepScreenOn(uint32_t windowId, bool requireLock)

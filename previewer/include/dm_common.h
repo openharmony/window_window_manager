@@ -68,9 +68,9 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_DOUBLE_CLICK = 23,
     STATE_CHANGE_REASON_SWITCH = 25,
     STATE_CHANGE_REASON_PRE_BRIGHT = 26,
-    STATE_CHANGE_REASON_PRE_BRIGHT_ATUH_SUCCESS = 27,
-    STATE_CHANGE_REASON_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON = 28,
-    STATE_CHANGE_REASON_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF = 29,
+    STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS = 27,
+    STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON = 28,
+    STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF = 29,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -217,22 +217,12 @@ enum class ScreenGroupChangeEvent : uint32_t {
 };
 
 /**
- * @brief Enumerates refreshrate modes.
+ * @brief Enumerates max refresh rates.
  */
-enum class RefreshRateMode : int32_t {
-    SMART = -1,
-    NORMAL = 1,
-    MIDDLE = 2,
-    HIGH = 3,
-};
-
-/**
- * @brief Enumerates refreshrates.
- */
-enum class RefreshRate : uint32_t {
-    NORMAL = 60,
-    MIDDLE = 90,
-    HIGH = 120,
+enum class MaxRefreshrate : uint32_t {
+    MAX_REFRESHRATE_60 = 60,
+    MAX_REFRESHRATE_90 = 90,
+    MAX_REFRESHRATE_120 = 120,
 };
 
 /**

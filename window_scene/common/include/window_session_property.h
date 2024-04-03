@@ -25,6 +25,7 @@
 #include "wm_common.h"
 #include "dm_common.h"
 #include <cfloat>
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +69,8 @@ public:
     void SetAnimationFlag(uint32_t animationFlag);
     void SetTransform(const Transform& trans);
     void SetWindowFlags(uint32_t flags);
+    void SetTopmost(bool topmost);
+    bool IsTopmost() const;
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
@@ -76,6 +79,9 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingWindow(uint32_t windowId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
+    void SetExtensionFlag(bool isExtensionFlag);
+    void SetWindowMask(const sptr<Media::PixelMap>& windowMask);
+    void SetIsShaped(bool isShaped);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -117,6 +123,9 @@ public:
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingWindow() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    bool GetExtensionFlag() const;
+    sptr<Media::PixelMap> GetWindowMask() const;
+    bool GetIsShaped() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -126,6 +135,8 @@ public:
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
+    bool MarshallingWindowMask(Parcel& parcel) const;
+    static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -156,6 +167,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool topmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
@@ -195,6 +207,10 @@ private:
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
+    bool isExtensionFlag_ = false;
+
+    bool isShaped_ = false;
+    sptr<Media::PixelMap> windowMask_ = nullptr;
 };
 
 struct SystemSessionConfig : public Parcelable {
