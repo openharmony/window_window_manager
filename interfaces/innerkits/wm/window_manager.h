@@ -391,7 +391,7 @@ public:
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
 
     /**
-    * @brief Register camera float window changed listener.
+    * @brief Register camera window changed listener.
     *
     * @param listener ICameraWindowChangedListener.
     * @return WM_OK means register success, others means register failed.
@@ -407,7 +407,7 @@ public:
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
 
     /**
-   * @brief Unregister camera float window changed listener.
+   * @brief Unregister camera window changed listener.
    *
    * @param listener ICameraWindowChangedListener.
    * @return WM_OK means unregister success, others means unregister failed.
