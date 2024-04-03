@@ -21,6 +21,7 @@
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
+#include "session_manager_lite.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -155,12 +156,7 @@ void SessionManager::InitSessionManagerServiceProxy()
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
     }
 
-    sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
-    if (!remoteObject2) {
-        WLOGFE("Remote object2 is nullptr");
-        return;
-    }
-    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
+    sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
     }
