@@ -533,7 +533,7 @@ uint32_t MoveDragController::GetActiveWindowId() const
     return activeWindowId_;
 }
 
-std::shared_ptr<VsyncStation> GetVsyncStationByWindowId(uint32_t windowId)
+std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint32_t windowId)
 {
     auto iter = vsyncStationMap_.find(windowId);
     if (iter != vsyncStationMap_.end()) {
