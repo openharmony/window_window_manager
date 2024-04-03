@@ -234,7 +234,7 @@ HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, Function | MediumTest | Level
     }
     ASSERT_NE(nullptr, subWindow1);
     activeWindows_.push_back(subWindow1);
-    ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
+    ASSERT_EQ(WMError::WM_OK, subWindow1->Show(0, true));
     sleep(TEST_SLEEP_S);
 
     auto result = subWindow1->RaiseToAppTop();
