@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "session_proxy.h"
 
 #include <transaction/rs_transaction.h>
 #include "accessibility_event_info.h"
