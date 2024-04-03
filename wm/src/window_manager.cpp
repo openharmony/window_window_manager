@@ -664,8 +664,7 @@ WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWin
         pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgent();
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
-            pImpl_->cameraWindowChangedListenerAgent_);
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed!");
         pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
@@ -729,8 +728,8 @@ WMError WindowManager::UnregisterCameraWindowChangedListener(const sptr<ICameraW
     if (pImpl_->cameraWindowChangedListeners_.empty() &&
         pImpl_->cameraWindowChangedListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
-                pImpl_->cameraWindowChangedListenerAgent_);
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
+            pImpl_->cameraWindowChangedListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
         }
