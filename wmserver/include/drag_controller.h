@@ -78,7 +78,7 @@ public:
     uint32_t GetActiveWindowId() const;
     void HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     void SetInputEventConsumer();
-    void SetWindowRoot(const sptr<WindowRoot>& windowRoot)
+    void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
 private:
     void SetDragProperty(const sptr<MoveDragProperty>& moveDragProperty);
