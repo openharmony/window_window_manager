@@ -278,7 +278,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
-    sleep(1); 
+    sleep(1);
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
 }
