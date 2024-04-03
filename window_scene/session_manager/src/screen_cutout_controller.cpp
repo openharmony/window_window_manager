@@ -15,11 +15,10 @@
 
 #include "screen_cutout_controller.h"
 
+#include <functional>
 #include "screen_scene_config.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
-
-#include <functional>
 
 namespace OHOS::Rosen {
 namespace {
