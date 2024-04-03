@@ -56,6 +56,7 @@ ohos_static_library("libwm_static") {
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
     "src/input_transfer_station.cpp",
+    "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
@@ -78,6 +79,8 @@ ohos_static_library("libwm_static") {
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
+    "src/zidl/pattern_detach_callback_proxy.cpp",
+    "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]
@@ -196,6 +199,7 @@ ohos_shared_library("libwm") {
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
     "src/input_transfer_station.cpp",
+    "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
@@ -218,6 +222,8 @@ ohos_shared_library("libwm") {
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
+    "src/zidl/pattern_detach_callback_proxy.cpp",
+    "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]

@@ -21,6 +21,7 @@
 #include "window_manager_agent.h"
 #include "zidl/scene_session_manager_stub.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "pattern_detach_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -113,6 +114,26 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, 
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     data.WriteUint32(static_cast<uint32_t>(type));
+
+    int res = stub_->HandleDestroyAndDisconnectSpcificSession(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
+ * @tc.desc: test HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback,
+    Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<PatternDetachCallback> callback = new PatternDetachCallback();
+    data.WriteRemoteObject(callback->AsObject());
 
     int res = stub_->HandleDestroyAndDisconnectSpcificSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
