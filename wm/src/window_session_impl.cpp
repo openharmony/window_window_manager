@@ -1955,18 +1955,22 @@ void WindowSessionImpl::NotifyScreenshot()
 
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
-    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
-    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
-    for (auto& listener : windowChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnSizeChange(rect, reason);
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+        auto windowChangeListeners = GetListeners<IWindowChangeListener>();
+        for (auto& listener : windowChangeListeners) {
+            if (listener != nullptr) {
+                listener->OnSizeChange(rect, reason);
+            }
         }
     }
-    std::lock_guard<std::mutex> lockRectListener(windowRectChangeListenerMutex_);
-    auto windowRectChangeListeners = GetListeners<IWindowRectChangeListener>();
-    for (auto& listener : windowRectChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnRectChange(rect, reason);
+    {
+        std::lock_guard<std::mutex> lockRectListener(windowRectChangeListenerMutex_);
+        auto windowRectChangeListeners = GetListeners<IWindowRectChangeListener>();
+        for (auto& listener : windowRectChangeListeners) {
+            if (listener != nullptr) {
+                listener->OnRectChange(rect, reason);
+            }
         }
     }
 }
