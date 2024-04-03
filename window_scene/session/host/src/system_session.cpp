@@ -86,7 +86,8 @@ WSError SystemSession::Hide()
 {
     auto type = GetWindowType();
     if (WindowHelper::IsSystemWindow(type) && NeedSystemPermission(type)) {
-        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+            type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
             if (!SessionPermission::IsStartedByInputMethod()) {
                 TLOGE(WmsLogTag::WMS_LIFE, "Hide permission denied, keyboard is not hidden by current input method");
                 return WSError::WS_ERROR_INVALID_PERMISSION;
