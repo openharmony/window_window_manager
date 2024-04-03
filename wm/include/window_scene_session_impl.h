@@ -164,6 +164,7 @@ protected:
 
 private:
     WMError DestroyInner(bool needNotifyServer);
+    void SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
     static uint32_t maxFloatingWindowSize_;

@@ -15,6 +15,8 @@
 
 #include "window_scene_session_impl.h"
 
+#include <chrono>
+#include <limits>
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
@@ -42,7 +44,7 @@
 #include "session_manager_agent_controller.h"
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
-
+#include "pattern_detach_callback.h"
 #include "window_session_impl.h"
 
 namespace OHOS {
@@ -67,6 +69,7 @@ union WSColorParam {
 };
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
+constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
 const std::string PARAM_DUMP_HELP = "-h";
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
@@ -975,15 +978,15 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (property_->GetExtensionFlag() == true) {
-            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
 
@@ -994,6 +997,24 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         }
     }
     return ret;
+}
+
+void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
+{
+    sptr<PatternDetachCallback> callback = new PatternDetachCallback();
+    SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
+        callback->AsObject());
+    auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    callback->GetResult(WINDOW_DETACH_TIMEOUT);
+    auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto waitTime = endTime - startTime;
+    if (waitTime >= WINDOW_DETACH_TIMEOUT) {
+        TLOGW(WmsLogTag::WMS_LIFE, "Destroy window timeout, persistentId:%{public}d", persistentId);
+        callback->GetResult(std::numeric_limits<int>::max());
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroy window persistentId:%{public}d waitTime:%{public}lld", persistentId, waitTime);
 }
 
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)

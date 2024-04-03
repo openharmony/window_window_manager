@@ -21,6 +21,7 @@ config("session_public_config") {
     "${window_base_path}/window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/utils/include",
     "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/wm/include/zidl",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
