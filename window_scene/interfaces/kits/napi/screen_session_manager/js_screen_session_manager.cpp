@@ -425,7 +425,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
         );
         napi_ref callback = nullptr;
         std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-        NapiAsyncTask::Schedule("JsScreenSessionManager::OnTakeOverShutdown", env_,
+        NapiAsyncTask::Schedule("JsScreenSessionManager::OnNotifyScreenLockEvent", env_,
             std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
         return NapiGetUndefined(env);
     } else {
