@@ -49,6 +49,8 @@ constexpr int MIN_ARG_COUNT = 3;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_3 = 3;
+constexpr int32_t RESTYPE_RECLAIM = 100001;
+const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -2080,6 +2082,15 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     mapPayload["srcPid"] = std::to_string(getprocpid());
+    if (resType == RESTYPE_RECLAIM) {
+        std::string reclaimTag = mapPayload[RES_PARAM_RECLAIM_TAG];
+        WLOGFI("handle reclaim type, reclaimTag=%{public}s", reclaimTag.c_str());
+        if (reclaimTag == "true") {
+            auto retId = SceneSessionManager::GetInstance().ReclaimPurgeableCleanMem();
+            WLOGFI("trim ReclaimPurgeableCleanMem finished, retId:%{public}d", retId);
+            return NapiGetUndefined(env);
+        }
+    }
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, value, mapPayload);
 #endif
