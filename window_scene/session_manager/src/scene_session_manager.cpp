@@ -7551,6 +7551,8 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
 
 int32_t SceneSessionManager::ReclaimPurgeableCleanMem()
 {
+#ifdef MEMMGR_WINDOW_ENABLE
     return Memory::MemMgrClient::GetInstance().ReclaimPurgeableCleanMem();
+#endif
 }
 } // namespace OHOS::Rosen
