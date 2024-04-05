@@ -20,7 +20,6 @@
 #include <native_engine/native_value.h>
 
 #include "screen_session_manager_client.h"
-#include "js_screen_utils.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/takeover_shutdown_callback_stub.h"
@@ -31,7 +30,7 @@ class JsScreenSessionManager final : public IScreenConnectionListener,
     public PowerMgr::TakeOverShutdownCallbackStub {
 public:
     explicit JsScreenSessionManager(napi_env env);
-    ~JsScreenSessionManager();
+    virtual ~JsScreenSessionManager() = default;
 
     static napi_value Init(napi_env env, napi_value exportObj);
     static void Finalizer(napi_env env, void* data, void* hint);
@@ -65,12 +64,9 @@ private:
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetScreenSnapshot(napi_env env, const napi_callback_info info);
 
-    void ClearNativeReference();
-
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;
     napi_env env_;
-    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 
