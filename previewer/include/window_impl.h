@@ -21,6 +21,7 @@
 #include <ui_content.h>
 #include "context.h"
 #include "ui/rs_surface_node.h"
+#include "vsync_station.h"
 #include "window.h"
 
 namespace OHOS::AbilityRuntime {
@@ -222,6 +223,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     WindowState state_ { WindowState::STATE_INITIAL };
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;

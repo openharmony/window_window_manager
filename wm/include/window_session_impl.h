@@ -32,6 +32,7 @@
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
 #include "session/host/include/zidl/session_interface.h"
+#include "vsync_station.h"
 #include "window.h"
 #include "window_option.h"
 #include "wm_common.h"
@@ -273,6 +274,7 @@ protected:
     bool isFocused_ { false };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool needRemoveWindowInputChannel_ = false;
     float virtualPixelRatio_ { 1.0f };
