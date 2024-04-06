@@ -113,7 +113,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
-    virtual WMError SetCallingWindow(uint32_t callingWindowId) override;
+    virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;

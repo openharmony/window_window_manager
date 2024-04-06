@@ -134,9 +134,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
 
-        if (property) {
-            weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
-        }
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -2285,13 +2282,6 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
         return;
     }
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-}
-
-WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
-{
-    textFieldPositionY_ = textFieldPositionY;
-    textFieldHeight_ = textFieldHeight;
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)

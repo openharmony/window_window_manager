@@ -123,7 +123,7 @@ private:
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
-    void OnCallingWindowIdChange(const uint32_t callingWindowId);
+    void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
@@ -131,7 +131,7 @@ private:
     void ProcessStartUIAbilityErrorRegister();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
-    void ProcessCallingWindowIdChangeRegister();
+    void ProcessCallingSessionIdChangeRegister();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

@@ -147,7 +147,6 @@ public:
     std::vector<Rect> GetTouchHotAreas() const override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
@@ -238,8 +237,6 @@ public:
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
 
-    double textFieldPositionY_ = 0.0;
-    double textFieldHeight_ = 0.0;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
     static const wptr<SceneSession> GetEnterWindow();
@@ -247,10 +244,6 @@ public:
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-
-    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
-    WSRect callingWindowNewRect_ = {0, 0, 0, 0};
-    bool needUpdateSessionRect_ = false;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);

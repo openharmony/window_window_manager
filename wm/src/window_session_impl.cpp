@@ -143,7 +143,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
-    property_->SetCallingWindow(option->GetCallingWindow());
+    property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
@@ -2573,10 +2573,14 @@ WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t perc
     auto sessionGravity = static_cast<SessionGravity>(gravity);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Set window gravity: %{public}u, percent: %{public}u", sessionGravity, percent);
     if (property_ != nullptr) {
-        property_->SetSessionGravity(sessionGravity, percent);
+        property_->SetKeyboardSessionGravity(sessionGravity, percent);
     }
-    return SingletonContainer::Get<WindowAdapter>().SetSessionGravity(GetPersistentId(),
-        static_cast<SessionGravity>(gravity), percent);
+
+    if (hostSession_ != nullptr) {
+        return static_cast<WMError>(hostSession_->SetKeyboardSessionGravity(
+            static_cast<SessionGravity>(gravity), percent));
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -2589,12 +2593,6 @@ WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemB
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
-{
-    property_->SetTextFieldPositionY(textFieldPositionY);
-    property_->SetTextFieldHeight(textFieldHeight);
-    return WMError::WM_OK;
-}
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {

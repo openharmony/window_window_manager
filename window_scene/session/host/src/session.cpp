@@ -852,9 +852,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         SetSessionState(SessionState::STATE_BACKGROUND);
     }
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionForeground();
-    }
     NotifyForeground();
     return WSError::WS_OK;
 }
@@ -935,13 +932,6 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionBackground();
-        if (property_) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "When the soft keyboard is hidden, set the callingWindowId to 0.");
-            property_->SetCallingWindow(INVALID_WINDOW_ID);
-        }
-    }
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
