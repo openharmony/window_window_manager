@@ -2166,13 +2166,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
         }
         jsCallBack = iter->second;
     }
-    if (WINDOW_ORIENTATION_TO_JS_SESSION_MAP.count(static_cast<Orientation>(orientation)) == 0) {
-        WLOGFE("[NAPI]failed %{public}u since no this type", orientation);
-        return;
-    }
-    uint32_t value = static_cast<uint32_t>(WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(
-        static_cast<Orientation>(orientation)));
-    auto task = [jsCallBack, rotation = value, env = env_]() {
+    auto task = [jsCallBack, rotation = orientation, env = env_]() {
         napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
         napi_value argv[] = {jsSessionRotationObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

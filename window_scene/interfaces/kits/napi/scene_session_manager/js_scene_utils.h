@@ -64,23 +64,6 @@ enum class JsSessionType : uint32_t {
     TYPE_HANDWRITE,
 };
 
-// should same with bundlemanager ability info
-enum class JsSessionOrientation : uint32_t {
-    UNSPECIFIED = 0,
-    LANDSCAPE,
-    PORTRAIT,
-    FOLLOWRECENT,
-    LANDSCAPE_INVERTED,
-    PORTRAIT_INVERTED,
-    AUTO_ROTATION,
-    AUTO_ROTATION_LANDSCAPE,
-    AUTO_ROTATION_PORTRAIT,
-    AUTO_ROTATION_RESTRICTED,
-    AUTO_ROTATION_LANDSCAPE_RESTRICTED,
-    AUTO_ROTATION_PORTRAIT_RESTRICTED,
-    LOCKED,
-};
-
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,          JsSessionType::TYPE_APP                     },
     { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,           JsSessionType::TYPE_SUB_APP                 },
@@ -151,23 +134,6 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_SEARCHING_BAR,            WindowType::WINDOW_TYPE_SEARCHING_BAR           },
     { JsSessionType::TYPE_SYSTEM_SUB_WINDOW,        WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW       },
     { JsSessionType::TYPE_HANDWRITE,                WindowType::WINDOW_TYPE_HANDWRITE               },
-};
-
-const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSION_MAP {
-    {Orientation::UNSPECIFIED,                        JsSessionOrientation::UNSPECIFIED             },
-    {Orientation::VERTICAL,                           JsSessionOrientation::PORTRAIT                },
-    {Orientation::HORIZONTAL,                         JsSessionOrientation::LANDSCAPE               },
-    {Orientation::REVERSE_VERTICAL,                   JsSessionOrientation::PORTRAIT_INVERTED       },
-    {Orientation::REVERSE_HORIZONTAL,                 JsSessionOrientation::LANDSCAPE_INVERTED      },
-    {Orientation::SENSOR,                             JsSessionOrientation::AUTO_ROTATION           },
-    {Orientation::SENSOR_VERTICAL,                    JsSessionOrientation::AUTO_ROTATION_PORTRAIT  },
-    {Orientation::SENSOR_HORIZONTAL,                  JsSessionOrientation::AUTO_ROTATION_LANDSCAPE },
-    {Orientation::AUTO_ROTATION_RESTRICTED,           JsSessionOrientation::AUTO_ROTATION_RESTRICTED},
-    {Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
-        JsSessionOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
-    {Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
-        JsSessionOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
-    {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
 };
 
 JsSessionType GetApiType(WindowType type);
