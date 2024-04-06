@@ -516,6 +516,7 @@ private:
             reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
             reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
     }
+    void InitWindowProperty(const sptr<WindowOption>& option);
     void ClearListenersById(uint32_t winId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
@@ -653,6 +654,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -20,7 +20,6 @@
 #include "window_option.h"
 #include "viewport_config.h"
 #include "singleton_container.h"
-#include "vsync_station.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -56,6 +55,9 @@ void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataC
     rsSurfaceNodeConfig.SurfaceNodeName = name;
     rsSurfaceNodeConfig.additionalData = reinterpret_cast<void*>(callback);
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    if (surfaceNode_ != nullptr) {
+        vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+    }
 }
 
 void WindowImpl::SetContentInfoCallback(const ContentInfoCallback& callback)
@@ -626,7 +628,11 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 
 void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 int64_t WindowImpl::GetVSyncPeriod()
