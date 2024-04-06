@@ -117,6 +117,12 @@ WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token
     return SceneSessionManager::GetInstance().GetFocusSessionToken(token);
 }
 
+WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName& element)
+{
+    WLOGFD("run GetFocusSessionElement");
+    return SceneSessionManager::GetInstance().GetFocusSessionElement(element);
+}
+
 WSError SceneSessionManagerLite::ClearSession(int32_t persistentId)
 {
     WLOGFD("run ClearSession with persistentId: %{public}d", persistentId);

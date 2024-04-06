@@ -39,6 +39,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerLiteStub::HandleGetFocusSessionToken),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT),
+        &SceneSessionManagerLiteStub::HandleGetFocusSessionElement),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
         &SceneSessionManagerLiteStub::HandleRegisterSessionListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER),
@@ -217,6 +219,16 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel &data,
     sptr<IRemoteObject> token = nullptr;
     const WSError& errCode = GetFocusSessionToken(token);
     reply.WriteRemoteObject(token);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetFocusSessionElement!");
+    AppExecFwk::ElementName element;
+    WSError errCode = GetFocusSessionElement(element);
+    reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
