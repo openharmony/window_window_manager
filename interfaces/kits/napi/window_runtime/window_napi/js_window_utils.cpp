@@ -190,29 +190,39 @@ napi_value OrientationInit(napi_env env)
     }
 
     napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::UNSPECIFIED)));
+        static_cast<int32_t>(ApiOrientation::UNSPECIFIED)));
     napi_set_named_property(env, objValue, "PORTRAIT", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::PORTRAIT)));
     napi_set_named_property(env, objValue, "LANDSCAPE", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::LANDSCAPE)));
     napi_set_named_property(env, objValue, "PORTRAIT_INVERTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::REVERSE_VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::PORTRAIT_INVERTED)));
     napi_set_named_property(env, objValue, "LANDSCAPE_INVERTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::REVERSE_HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::LANDSCAPE_INVERTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_PORTRAIT", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR_VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_PORTRAIT)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_LANDSCAPE", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR_HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_LANDSCAPE)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_RESTRICTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_PORTRAIT_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_LANDSCAPE_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
     napi_set_named_property(env, objValue, "LOCKED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::LOCKED)));
+        static_cast<int32_t>(ApiOrientation::LOCKED)));
+    napi_set_named_property(env, objValue, "AUTO_ROTATION_UNSPECIFIED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_UNSPECIFIED)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_PORTRAIT", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_PORTRAIT)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_LANDSCAPE", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_PORTRAIT_INVERTED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_LANDSCAPE_INVERTED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED)));
     return objValue;
 }
 

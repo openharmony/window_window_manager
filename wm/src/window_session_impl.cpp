@@ -1116,7 +1116,8 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation: %{public}u target:%{public}u state_:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (property_->GetRequestedOrientation() == orientation) {
+    bool isUserOrientation = IsUserOrientation(orientation);
+    if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
         return;
     }
     property_->SetRequestedOrientation(orientation);
@@ -2750,6 +2751,17 @@ void WindowSessionImpl::RefreshNoInteractionTimeoutMonitor(int32_t eventId)
     for (const auto& listenerItem : noInteractionListeners) {
         SubmitNoInteractionMonitorTask(eventId, listenerItem);
     }
+}
+
+bool WindowSessionImpl::IsUserOrientation(Orientation orientation) const
+{
+    if (orientation == Orientation::USER_ROTATION_PORTRAIT ||
+        orientation == Orientation::USER_ROTATION_LANDSCAPE ||
+        orientation == Orientation::USER_ROTATION_PORTRAIT_INVERTED ||
+        orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
+        return true;
+    }
+    return false;
 }
 
 } // namespace Rosen

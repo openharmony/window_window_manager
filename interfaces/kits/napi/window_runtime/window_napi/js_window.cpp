@@ -2664,9 +2664,13 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             WLOGFE("Failed to convert parameter to Orientation");
         } else {
             uint32_t resultValue = 0;
-            napi_get_value_uint32(env, argv[0], &resultValue);
+            if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], resultValue)) {
+                WLOGFE("Failed to convert parameter to orientation");
+                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            }
             auto apiOrientation = static_cast<ApiOrientation>(resultValue);
-            if (apiOrientation < ApiOrientation::UNSPECIFIED || apiOrientation > ApiOrientation::LOCKED) {
+            if (apiOrientation < ApiOrientation::UNSPECIFIED ||
+                apiOrientation > ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED) {
                 WLOGFE("Orientation %{public}u invalid!", static_cast<uint32_t>(apiOrientation));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
@@ -2719,7 +2723,8 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     }
     Orientation requestedOrientation = window->GetRequestedOrientation();
     ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
-    if (requestedOrientation >= Orientation::UNSPECIFIED && requestedOrientation <= Orientation::LOCKED) {
+    if (requestedOrientation >= Orientation::UNSPECIFIED &&
+        requestedOrientation <= Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
         apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
     } else {
         WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
