@@ -246,11 +246,14 @@ void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
         return;
     }
 
-    auto iter = vsyncStationMap_.find(windowId);
-    if (iter != vsyncStationMap_.end()) {
-        auto vsyncStation = iter->second;
-        vsyncStation->RemoveCallback();
-        vsyncStationMap_.erase(windowId);
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        auto iter = vsyncStationMap_.find(windowId);
+        if (iter != vsyncStationMap_.end()) {
+            auto vsyncStation = iter->second;
+            vsyncStation->RemoveCallback();
+            vsyncStationMap_.erase(windowId);
+        }
     }
 
     ResetMoveOrDragState();
@@ -535,6 +538,8 @@ uint32_t MoveDragController::GetActiveWindowId() const
 
 std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint32_t windowId)
 {
+    std::lock_guard<std::mutex> lock(mtx_);
+
     auto iter = vsyncStationMap_.find(windowId);
     if (iter != vsyncStationMap_.end()) {
         return iter->second;
@@ -547,6 +552,11 @@ std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint
     }
 
     auto vsyncStation = std::make_shared<VsyncStation>(node->surfaceNode_->GetId());
+    if (vsyncStation == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync station failed, create vsyncStation is nullptr");
+        return nullptr;
+    }
+
     vsyncStation->SetIsMainHandlerAvailable(false);
     vsyncStation->SetVsyncEventHandler(inputEventHandler_);
     vsyncStationMap_.emplace(windowId, vsyncStation);

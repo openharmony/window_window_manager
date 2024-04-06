@@ -106,6 +106,7 @@ private:
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
     std::map<DisplayId, Rect> limitRectMap_;
+	std::mutex mtx_;
     std::map<NodeId, std::shared_ptr<VsyncStation>> vsyncStationMap_;
 
     // event handler for input event
