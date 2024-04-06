@@ -1199,23 +1199,23 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
             WLOGFI("subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
-            #ifdef SENSOR_ENABLE
+#ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
             } else {
                 WLOGFI("not fold product, switch screen reason, failed register posture.");
             }
-            #endif
+#endif
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
             WLOGFI("unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
-            #ifdef SENSOR_ENABLE
+#ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
             } else {
                 WLOGFI("not fold product, switch screen reason, failed unregister posture.");
             }
-            #endif
+#endif
         } else {
             WLOGFI("SetScreenPower state not support");
         }
