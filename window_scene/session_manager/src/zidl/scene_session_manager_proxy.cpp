@@ -478,35 +478,6 @@ WMError SceneSessionManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgen
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        WLOGFE("Write persistentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(gravity))) {
-        WLOGFE("Write gravity failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(percent)) {
-        WLOGFE("Write percent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
-}
-
 WMError SceneSessionManagerProxy::SetGestureNavigaionEnabled(bool enable)
 {
     MessageParcel data;

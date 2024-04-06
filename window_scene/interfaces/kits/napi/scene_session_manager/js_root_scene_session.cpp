@@ -254,7 +254,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]session: %{public}d isNeedBackToOther: %{public}d",
             sceneSession->GetPersistentId(), isNeedBackToOther);
         if (isNeedBackToOther) {
-            int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+            int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
             if (realCallerSessionId == sceneSession->GetPersistentId()) {
                 TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, need back to self caller.");
                 auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);

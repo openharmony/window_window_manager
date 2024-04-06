@@ -31,6 +31,7 @@
 #include "scene_session_converter.h"
 #include "scb_session_handler.h"
 #include "session/host/include/root_scene_session.h"
+#include "session/host/include/keyboard_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
@@ -78,7 +79,7 @@ using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbilityError)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
-using ProcessCallingWindowIdChangeFunc = std::function<void(uint32_t callingWindowId)>;
+using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 
@@ -147,7 +148,7 @@ public:
     void SetShiftFocusListener(const ProcessShiftFocusFunc& func);
     void SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
-    void SetCallingWindowIdChangeListenser(const ProcessCallingWindowIdChangeFunc& func);
+    void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -158,8 +159,8 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
-    WSError SetFocusedSession(int32_t persistentId);
-    int32_t GetFocusedSession() const;
+    WSError SetFocusedSessionId(int32_t persistentId);
+    int32_t GetFocusedSessionId() const;
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
@@ -179,7 +180,6 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
     void NotifySessionMovedToFront(int32_t persistentId);
-    WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
@@ -227,8 +227,6 @@ public:
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
 
-    void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> sceneSession,
-        const WSRect& rect, const WSRect& occupiedArea);
     void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
@@ -322,6 +320,7 @@ private:
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
+    sptr<KeyboardSession::KeyboardSessionCallback> CreateKeyboardSessionCallback();
     void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
@@ -346,12 +345,6 @@ private:
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
 
-    void UpdateCallingWindowIdAndPosition(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession);
-    void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
-    void RestoreCallingSessionSizeIfNeed();
-    void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession, bool isInputUpdated = false);
-
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
     sptr<SceneSession> FindMainWindowWithToken(sptr<IRemoteObject> targetToken);
@@ -366,7 +359,6 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
-    int32_t GetStatusBarHeight(uint64_t displayId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -408,11 +400,6 @@ private:
     void WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
     sptr<SceneSession> SelectSesssionFromMap(const uint64_t& surfaceId);
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
-    void RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession);
-    void OnInputMethodUpdate(const int32_t& persistentId);
-    void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
-    void OnInputMethodShown(const int32_t& persistentId);
-    void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession);
@@ -465,7 +452,7 @@ private:
     ProcessShiftFocusFunc shiftFocusFunc_;
     NotifySCBAfterUpdateFocusFunc notifySCBAfterFocusedFunc_;
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
-    ProcessCallingWindowIdChangeFunc callingWindowIdChangeFunc_;
+    ProcessCallingSessionIdChangeFunc callingSessionIdChangeFunc_;
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
@@ -518,7 +505,6 @@ private:
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
-    sptr<SceneSession> callingSession_ = nullptr;
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
@@ -569,6 +555,7 @@ private:
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
+    bool IsKeyboardForeground();
 };
 } // namespace OHOS::Rosen
 

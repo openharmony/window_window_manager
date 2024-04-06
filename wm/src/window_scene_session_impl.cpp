@@ -2505,24 +2505,26 @@ WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
     return WmErrorCode::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingWindowId)
+WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling window id failed, window session is InValid!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling session id failed, window session is invalid!");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling window id failed, property_ is nullptr!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Set calling session id failed, property_ is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (callingWindowId != property_->GetCallingWindow()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling window id form %{public}d to: %{public}d",
-            property_->GetCallingWindow(), callingWindowId);
+    if (callingSessionId != property_->GetCallingSessionId()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set calling session id form %{public}d to: %{public}d",
+            property_->GetCallingSessionId(), callingSessionId);
     }
-    property_->SetCallingWindow(callingWindowId);
-
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+    if (hostSession_) {
+        hostSession_->SetCallingSessionId(callingSessionId);
+    }
+    property_->SetCallingSessionId(callingSessionId);
+    return WMError::WM_OK;
 }
 
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -2829,6 +2831,8 @@ WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
 
 WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
 {
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set textFieldPositionY: %{public}f, textFieldHeight:%{public}f",
+        textFieldPositionY, textFieldHeight);
     property_->SetTextFieldPositionY(textFieldPositionY);
     property_->SetTextFieldHeight(textFieldHeight);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);

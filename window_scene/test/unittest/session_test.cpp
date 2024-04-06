@@ -1645,21 +1645,6 @@ HWTEST_F(WindowSessionTest, PendingSessionToBackgroundForDelegator, Function | S
 }
 
 /**
- * @tc.name: SetNotifyCallingSessionForegroundFunc
- * @tc.desc: SetNotifyCallingSessionForegroundFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetNotifyCallingSessionForegroundFunc, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyCallingSessionForegroundFunc func = nullptr;
-    session_->SetNotifyCallingSessionForegroundFunc(func);
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
-}
-
-/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot Test
  * @tc.type: FUNC
