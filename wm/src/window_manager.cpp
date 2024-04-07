@@ -664,34 +664,6 @@ WMError WindowManager::UnregisterCameraFloatWindowChangedListener(
     return ret;
 }
 
-WMError WindowManager::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
-{
-    if (listener == nullptr) {
-        WLOGFE("listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
-        pImpl_->cameraWindowChangedListeners_.end(), listener);
-    if (iter == pImpl_->cameraWindowChangedListeners_.end()) {
-        WLOGFE("could not find this listener");
-        return WMError::WM_OK;
-    }
-    pImpl_->cameraWindowChangedListeners_.erase(iter);
-    WMError ret = WMError::WM_OK;
-    if (pImpl_->cameraWindowChangedListeners_.empty() &&
-        pImpl_->cameraWindowChangedListenerAgent_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
-            pImpl_->cameraWindowChangedListenerAgent_);
-        if (ret == WMError::WM_OK) {
-            pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
-        }
-    }
-    return ret;
-}
-
 WMError WindowManager::RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener)
 {
     if (listener == nullptr) {
@@ -935,11 +907,6 @@ WMError WindowManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
     pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
-}
-
-void WindowManager::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const
-{
-    pImpl_->UpdateCameraWindowStatus(accessTokenId, isShowing);
 }
 
 void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
