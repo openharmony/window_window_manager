@@ -41,7 +41,7 @@ public:
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
 
 private:
-    sptr<SceneSession> GetSceneSession(uint32_t persistendId);
+    sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
 
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
