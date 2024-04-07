@@ -180,7 +180,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistendId, bool haveListener)
+    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
     {
         return WSError::WS_OK;
     }

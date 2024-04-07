@@ -2467,11 +2467,11 @@ HWTEST_F(SceneSessionManagerTest, SetFocusedSessionId, Function | SmallTest | Le
 {
     int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
-    int32_t persistendId_ = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSessionId(persistendId_);
+    int32_t persistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
-    persistendId_ = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(persistendId_);
+    persistentId_ = 10086;
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result02, WSError::WS_OK);
     ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }
