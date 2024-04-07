@@ -230,6 +230,35 @@ HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetVsyncStationByWindowId1
+ * @tc.desc: GetVsyncStationByWindowId Test Succ
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | Level2)
+{
+    NodeId nodeId = 0;
+    uint32_t windowId = 1;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    moveDragController_->vsyncStationMap_.emplace(windowId,vsyncStation);
+    std::shared_ptr<VsyncStation> vsyncStationRes = moveDragController_->GetVsyncStationByWindowId(windowId);
+    ASSERT_EQ(vsyncStation, vsyncStationRes);
+}
+
+/**
+ * @tc.name: GetVsyncStationByWindowId2
+ * @tc.desc: GetVsyncStationByWindowId Test Fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 100;
+    moveDragController_->vsyncStationMap_.clear();
+    moveDragController_->SetWindowRoot(windowRoot_);
+    std::shared_ptr<VsyncStation> vsyncStation = moveDragController_->GetVsyncStationByWindowId(windowId);
+    ASSERT_EQ(vsyncStation, nullptr);
+}
+
+/**
  * @tc.name: GetHotZoneRect
  * @tc.desc: GetHotZoneRect
  * @tc.type: FUNC
