@@ -17,6 +17,7 @@
 #include "window_manager.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_session_manager.h"
 
 #include "window_manager.cpp"
 
@@ -55,6 +56,14 @@ public:
     void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) override
     {
         WLOGI("TestWindowUpdateListener");
+    };
+};
+
+class TestWindowModeChangedListener : public IWindowModeChangedListener {
+public:
+    void OnWindowModeUpdate(WindowModeType mode) override
+    {
+        WLOGI("TestWindowModeChangedListener");
     };
 };
 
@@ -363,6 +372,80 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, Function | SmallTe
 
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: RegisterWindowModeChangedListener01
+ * @tc.desc: check RegisterWindowModeChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, Function | SmallTest | Level2)
+{
+    auto &windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowModeListeners_;
+    windowManager.pImpl_->windowModeListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowModeListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListener(nullptr));
+
+    sptr<TestWindowModeChangedListener> listener = new TestWindowModeChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowModeListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowModeListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowModeListeners_.size());
+
+    windowManager.pImpl_->windowModeListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowModeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowModeChangedListener01
+ * @tc.desc: check UnregisterWindowModeChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, Function | SmallTest | Level2)
+{
+    auto &windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowModeListeners_;
+    windowManager.pImpl_->windowModeListenerAgent_ = new WindowManagerAgent();
+    windowManager.pImpl_->windowModeListeners_.clear();
+
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowModeChangedListener(nullptr));
+
+    sptr<TestWindowModeChangedListener> listener1 = new TestWindowModeChangedListener();
+    sptr<TestWindowModeChangedListener> listener2 = new TestWindowModeChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowModeChangedListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowModeChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->windowModeListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->windowModeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowModeListenerAgent_);
+
+    windowManager.pImpl_->windowModeListeners_.emplace_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->windowModeListeners_.size());
+
+    windowManager.pImpl_->windowModeListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowModeListeners_ = oldListeners;
 }
 
 /**

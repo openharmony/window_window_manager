@@ -31,6 +31,7 @@ public:
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override {};
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
+    void UpdateWindowModeTypeInfo(WindowModeType type) override;
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) override;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override {};

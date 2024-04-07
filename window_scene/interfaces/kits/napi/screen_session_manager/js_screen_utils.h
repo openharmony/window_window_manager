@@ -18,7 +18,10 @@
 
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+#include <js_runtime_utils.h>
+#include <pointer_event.h>
 
+#include "hitrace_meter.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_property.h"
 
@@ -34,6 +37,18 @@ public:
     static napi_value CreateJsScreenConnectChangeType(napi_env env);
     static napi_value CreateJsScreenPropertyChangeReason(napi_env env);
     static napi_value CreateJsFoldStatus(napi_env env);
+};
+
+
+class MainThreadScheduler {
+public:
+    using Task = std::function<void()>;
+    explicit MainThreadScheduler(napi_env env);
+    void PostMainThreadTask(Task && localTask, std::string traceInfo = "DefaultDMSTask", int64_t delayTime = 0);
+private:
+    void GetMainEventHandler();
+    napi_env env_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen
 

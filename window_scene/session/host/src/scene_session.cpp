@@ -134,9 +134,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
 
-        if (property) {
-            weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
-        }
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -1454,6 +1451,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
     if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
         rsTransaction->Commit();
     }
 }
@@ -2021,8 +2019,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
-            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64 " uri: %{public}s",
-                info.screenId_, info.want->GetElement().GetURI().c_str());
+            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
         }
 
         TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName %{public}s, moduleName:%{public}s, \
@@ -2285,13 +2282,6 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
         return;
     }
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-}
-
-WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
-{
-    textFieldPositionY_ = textFieldPositionY;
-    textFieldHeight_ = textFieldHeight;
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)

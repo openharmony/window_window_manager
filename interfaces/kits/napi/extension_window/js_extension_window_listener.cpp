@@ -27,7 +27,6 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowListener"};
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
@@ -37,7 +36,7 @@ const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 
 JsExtensionWindowListener::~JsExtensionWindowListener()
 {
-    WLOGI("[NAPI]~JsExtensionWindowListener");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]~JsExtensionWindowListener");
 }
 
 void JsExtensionWindowListener::SetMainEventHandler()
@@ -51,14 +50,14 @@ void JsExtensionWindowListener::SetMainEventHandler()
 
 void JsExtensionWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    WLOGI("[NAPI]CallJsMethod methodName = %{public}s", methodName);
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]CallJsMethod methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]env_ nullptr or jsCallBack_ is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]env_ nullptr or jsCallBack_ is nullptr");
         return;
     }
     napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
-        WLOGFE("[NAPI]Failed to get method callback from object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to get method callback from object");
         return;
     }
     napi_value result = nullptr;
@@ -69,9 +68,10 @@ void JsExtensionWindowListener::CallJsMethod(const char* methodName, napi_value 
 void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("[NAPI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u", rect.width_, rect.height_, reason);
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u",
+        rect.width_, rect.height_, reason);
     if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
-        WLOGFD("[NAPI]no need to change size");
+        TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]no need to change size");
         return;
     }
     // js callback should run in js thread
@@ -79,7 +79,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnSizeChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("[NAPI]this listener or eng is nullptr");
+            TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -87,7 +87,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         napi_value objValue = nullptr;
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
-            WLOGFE("Failed to convert rect to jsObject");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
             return;
         }
         napi_set_named_property(eng, objValue, "width", CreateJsValue(eng, rect.width_));
@@ -100,7 +100,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         jsCallback();
     } else {
         if (!eventHandler_) {
-            WLOGFE("get main event handler failed!");
+            TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnSizeChange", 0,
@@ -112,18 +112,18 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    WLOGI("[NAPI]OnModeChange %{public}u", mode);
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnModeChange %{public}u", mode);
 }
 
 void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFI("[NAPI]OnAvoidAreaChanged");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, avoidArea, type, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]this listener or eng is nullptr");
                 return;
             }
             napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
@@ -137,7 +137,7 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
                 napi_value objValue = nullptr;
                 napi_create_object(env, &objValue);
                 if (objValue == nullptr) {
-                    WLOGFE("Failed to get object");
+                    TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get object");
                     return;
                 }
                 napi_set_named_property(env, objValue, "type",
@@ -158,15 +158,16 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
 void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
                                              const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("[NAPI]OccupiedAreaChangeInfo, type: %{public}d, input rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-          static_cast<uint32_t>(info->type_), info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
-          info->rect_.height_);
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "[NAPI]OccupiedAreaChangeInfo, type: %{public}d, input rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        static_cast<uint32_t>(info->type_), info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
+        info->rect_.height_);
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, info, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]this listener or eng is nullptr");
                 return;
             }
             napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
@@ -183,12 +184,12 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
 static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWindowListener> weakRef,
     napi_env env, std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
-    WLOGI("LifeCycleCallBack, envent type: %{public}u", eventType);
+    TLOGI(WmsLogTag::WMS_UIEXT, "LifeCycleCallBack, envent type: %{public}u", eventType);
     auto task = [self = weakRef, eventType, eng = env] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("this listener or eng is nullptr");
+            TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -198,7 +199,7 @@ static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind
         napi_close_handle_scope(eng, scope);
     };
     if (!eventHandler) {
-        WLOGFE("get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
         return;
     }
     eventHandler->PostTask(task, "wms:JsExtensionWindowListener::LifeCycleCallBack", 0,
@@ -211,7 +212,7 @@ void JsExtensionWindowListener::AfterForeground()
         LifeCycleCallBack(LifeCycleEventType::FOREGROUND, weakRef_, env_, eventHandler_);
         state_ = WindowState::STATE_SHOWN;
     } else {
-        WLOGFD("window is already shown");
+        TLOGD(WmsLogTag::WMS_UIEXT, "window is already shown");
     }
 }
 
@@ -221,7 +222,7 @@ void JsExtensionWindowListener::AfterBackground()
         LifeCycleCallBack(LifeCycleEventType::BACKGROUND, weakRef_, env_, eventHandler_);
         state_ = WindowState::STATE_HIDDEN;
     } else {
-        WLOGFD("window is already hide");
+        TLOGD(WmsLogTag::WMS_UIEXT, "window is already hide");
     }
 }
 

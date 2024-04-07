@@ -66,9 +66,6 @@ using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, b
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
-using NotifyCallingSessionUpdateRectFunc = std::function<void(const int32_t& persistentId)>;
-using NotifyCallingSessionForegroundFunc = std::function<void(const int32_t& persistentId)>;
-using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
@@ -191,7 +188,7 @@ public:
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
-    SizeChangeReason GetSizeChangeReason() const;
+    SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
@@ -323,12 +320,6 @@ public:
     float GetPivotX() const;
     float GetPivotY() const;
 
-    virtual void SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func) { return; };
-    virtual void NotifyCallingSessionUpdateRect() { return; };
-    virtual void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func) { return; };
-    virtual void NotifyCallingSessionForeground() { return; };
-    virtual void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func) { return; };
-    virtual void NotifyCallingSessionBackground() { return; };
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
