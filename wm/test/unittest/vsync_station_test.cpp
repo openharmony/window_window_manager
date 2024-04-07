@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
- #include <vsync_station.h>
- #include <gtest/gtest.h>
+#include <vsync_station.h>
+#include <gtest/gtest.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,7 +48,7 @@ void VsyncStationTest::TearDown()
 namespace {
 /**
  * @tc.name: RequestVsyncOneWindow
- * @tc.desc: RequestVsyncOneWindow test
+ * @tc.desc: RequestVsyncOneWindow Test
  * @tc.type: FUNC
  */
 HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, Function | SmallTest | Level3)
@@ -62,7 +62,7 @@ HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, Function | SmallTest | Level3)
 
 /**
  * @tc.name: RequestVsyncMultiWindow
- * @tc.desc: RequestVsyncMultiWindow test
+ * @tc.desc: RequestVsyncMultiWindow Test
  * @tc.type: FUNC
  */
 HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level3)
