@@ -174,9 +174,6 @@ WSError SystemSession::Disconnect(bool isFromClient)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d", session->GetPersistentId());
         session->SceneSession::Disconnect(isFromClient);
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            session->NotifyCallingSessionBackground();
-        }
         session->UpdateCameraWindowStatus(false);
         return WSError::WS_OK;
     };
