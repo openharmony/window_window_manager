@@ -76,13 +76,6 @@ public:
     }
 };
 
-class CameraWindowChangedListener : public ICameraWindowChangedListener {
-public:
-    void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) override
-    {
-    }
-};
-
 class WaterMarkFlagChangedListener : public IWaterMarkFlagChangedListener {
 public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override
@@ -194,18 +187,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<IGestureNavigationEnabledChangedListener> gestureListener = new GestureNavigationEnabledChangedListener();
     windowManager.RegisterGestureNavigationEnabledChangedListener(gestureListener);
     windowManager.UnregisterGestureNavigationEnabledChangedListener(gestureListener);
-    return true;
-}
-
-bool DoSomethingInterestingWithMyAPI1(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size < DATA_MIN_SIZE) {
-        return false;
-    }
-    WindowManager& windowManager = WindowManager::GetInstance();
-    sptr<ICameraWindowChangedListener> cameraWindowChangedListener = new CameraWindowChangedListener();
-    windowManager.RegisterCameraWindowChangedListener(cameraWindowChangedListener);
-    windowManager.UnregisterCameraWindowChangedListener(cameraWindowChangedListener);
     return true;
 }
 } // namespace.OHOS
