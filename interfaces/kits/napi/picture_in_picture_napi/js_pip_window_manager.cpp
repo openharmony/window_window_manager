@@ -75,24 +75,6 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
             return -1;
         }
     }
-    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL)) {
-        auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
-            static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
-        if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, requires HANG_UP_BUTTON "
-                "when using controlGroups in VIDEO_CALL.");
-            return -1;
-        }
-    }
-    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
-        auto iterator = std::find(controlGroups.begin(), controlGroups.end(),
-            static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
-        if (controlGroups.size() != 0 && iterator == controlGroups.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipoption param error, requires HANG_UP_BUTTON "
-                "when using controlGroups in VIDEO_MEETING.");
-            return -1;
-        }
-    }
     return 0;
 }
 
