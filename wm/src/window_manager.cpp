@@ -58,7 +58,6 @@ public:
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
-    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
 
@@ -79,9 +78,7 @@ public:
     std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
     sptr<WindowManagerAgent> windowDrawingContentListenerAgent_;
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
-    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
-    sptr<WindowManagerAgent> cameraWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
@@ -242,19 +239,6 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
     }
     for (auto& listener : cameraFloatWindowChangeListeners) {
         listener->OnCameraFloatWindowChange(accessTokenId, isShowing);
-    }
-}
-
-void WindowManager::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
-{
-    WLOGFD("Camera window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
-    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        cameraWindowChangeListeners = cameraWindowChangedListeners_;
-    }
-    for (auto& listener : cameraWindowChangeListeners) {
-        listener->OnCameraWindowChange(accessTokenId, isShowing);
     }
 }
 
@@ -647,35 +631,6 @@ WMError WindowManager::RegisterCameraFloatWindowChangedListener(const sptr<ICame
             return WMError::WM_OK;
         }
         pImpl_->cameraFloatWindowChangedListeners_.push_back(listener);
-    }
-    return ret;
-}
-
-WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
-{
-    if (listener == nullptr) {
-        WLOGFE("listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    WMError ret = WMError::WM_OK;
-    if (pImpl_->cameraWindowChangedListenerAgent_ == nullptr) {
-        pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgent();
-    }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
-    if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
-        pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
-    } else {
-        auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
-            pImpl_->cameraWindowChangedListeners_.end(), listener);
-        if (iter != pImpl_->cameraWindowChangedListeners_.end()) {
-            WLOGFW("Listener is already registered.");
-            return WMError::WM_OK;
-        }
-        pImpl_->cameraWindowChangedListeners_.push_back(listener);
     }
     return ret;
 }
