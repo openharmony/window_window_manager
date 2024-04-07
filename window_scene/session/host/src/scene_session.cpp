@@ -1976,8 +1976,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
-            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64 " uri: %{public}s",
-                info.screenId_, info.want->GetElement().GetURI().c_str());
+            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: windowMode %{public}d, \
+                want: sessionAffinity %{public}, want: screenId %{public}",
+                info.windowMode, info.sessionAffinity, info.screenId_);
         }
 
         TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName %{public}s, moduleName:%{public}s, \
