@@ -346,7 +346,7 @@ void WindowManagerLite::UpdateWindowDrawingContentInfo(
     pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
 }
 
-void WindowManagerLite::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+void WindowManagerLite::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
     pImpl_->UpdateCameraWindowStatus(accessTokenId, isShowing);
 }
