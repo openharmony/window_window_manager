@@ -62,6 +62,7 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
+using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1857,6 +1858,32 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Get window by id
+     *
+     * @param windId window id
+     * @return sptr<Window>
+     */
+    static sptr<Window> GetWindowWithId(uint32_t windId);
+
+    /**
+     * @brief register keyEvent filter.
+     *
+     * @param KeyEventFilterFunc callback func when window recieve keyEvent
+     * @return WMError
+     */
+    virtual WMError SetKeyEventFilter(KeyEventFilterFunc KeyEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear keyEvent filter.
+     *
+     * @return WMError
+    */
+    virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 };
 }
 }

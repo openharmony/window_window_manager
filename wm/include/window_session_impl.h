@@ -248,6 +248,7 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
+    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -281,7 +282,8 @@ protected:
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
-
+    virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
+    virtual WMError ClearKeyEventFilter() override;
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -378,6 +380,7 @@ private:
 
     std::string subWindowTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
+    KeyEventFilterFunc keyEventFilter_;
 };
 } // namespace Rosen
 } // namespace OHOS

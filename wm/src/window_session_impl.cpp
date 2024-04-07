@@ -2331,6 +2331,35 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
+WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)
+{
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    keyEventFilter_ = std::move(filter);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::ClearKeyEventFilter()
+{
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    keyEventFilter_ = nullptr;
+    return WMError::WM_OK;
+}
+
+bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (keyEventFilter_ != nullptr) {
+        bool isFilter = keyEventFilter_(*keyEvent.get());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{public}d isFilter:%{public}d",
+            keyEvent->GetKeyCode(), isFilter);
+        if (isFilter) {
+            keyEvent->MarkProcessed();
+            return true;
+        }
+    }
+    return false;
+}
+
 void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
@@ -2361,6 +2390,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
             keyEvent->MarkProcessed();
         }
     } else if (uiContent_) {
+        if (FilterKeyEvent(keyEvent)) return;
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&

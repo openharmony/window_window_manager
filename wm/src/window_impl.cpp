@@ -209,6 +209,11 @@ sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
     return FindWindowById(topWinId);
 }
 
+sptr<Window> WindowImpl::GetWindowWithId(uint32_t WinId)
+{
+    return FindWindowById(WinId);
+}
+
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     if (windowMap_.empty()) {
