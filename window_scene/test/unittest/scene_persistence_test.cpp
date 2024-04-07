@@ -159,9 +159,9 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     info.bundleName_ = "GetPixelMap1";
     Session session(info);
     auto abilityInfo = session.GetSessionInfo();
-    auto persistendId = abilityInfo.persistentId_;
+    auto persistentId = abilityInfo.persistentId_;
     ScenePersistence::CreateSnapshotDir("storage");
-    ScenePersistence scenePersistence(abilityInfo.bundleName_, persistendId);
+    ScenePersistence scenePersistence(abilityInfo.bundleName_, persistentId);
     auto result = scenePersistence.GetLocalSnapshotPixelMap(0.5, 0.5);
     EXPECT_EQ(result, nullptr);
 
