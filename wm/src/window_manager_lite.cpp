@@ -69,7 +69,7 @@ public:
     std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
     sptr<WindowManagerAgentLite> windowModeListenerAgent_;
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
-    sptr<WindowManagerAgent> cameraWindowChangedListenerAgent_;
+    sptr<WindowManagerAgentLite> cameraWindowChangedListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -164,7 +164,7 @@ void WindowManagerLite::Impl::NotifyWindowModeChange(WindowModeType type)
     }
 }
 
-void WindowManager::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     WLOGFD("Camera window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
@@ -346,6 +346,11 @@ void WindowManagerLite::UpdateWindowDrawingContentInfo(
     pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
 }
 
+void WindowManagerLite::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    pImpl_->UpdateCameraWindowStatus(accessTokenId, isShowing);
+}
+
 void WindowManagerLite::OnRemoteDied()
 {
     WLOGI("wms is died");
@@ -471,7 +476,7 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
     return ret;
 }
 
-WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
+WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener could not be null");
@@ -481,7 +486,7 @@ WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWin
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->cameraWindowChangedListenerAgent_ == nullptr) {
-        pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgent();
+        pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgentLite();
     }
     ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
@@ -500,7 +505,7 @@ WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWin
     return ret;
 }
 
-WMError WindowManager::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
+WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener could not be null");
