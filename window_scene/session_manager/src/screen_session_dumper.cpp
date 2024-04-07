@@ -352,7 +352,7 @@ void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
     }
 }
 
-void ScreenSessionManager::ShowIllegalArgsInfo()
+void ScreenSessionDumper::ShowIllegalArgsInfo()
 {
     dumpInfo_.append("The arguments are illegal and you can enter '-h' for help.");
 }
