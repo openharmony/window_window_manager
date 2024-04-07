@@ -46,6 +46,8 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
+    void ShowNotifyFoldStatusChangedInfo();
+    void ShowIllegalArgsInfo();
 
 private:
     int fd_;
