@@ -77,8 +77,6 @@ private:
 
     uint16_t globalHall = USHRT_MAX;
 
-    bool allowPosture_ = true;
-
     typedef struct EXTHALLData {
         float flag = 0.0;
         float hall = 0.0;
