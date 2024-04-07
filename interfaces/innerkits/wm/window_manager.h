@@ -389,7 +389,6 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
-
     /**
      * @brief Unregister camera float window changed listener.
      *
@@ -397,7 +396,6 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
-
     /**
      * @brief Register water mark flag changed listener.
      *
