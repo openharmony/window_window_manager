@@ -53,6 +53,7 @@ public:
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void NotifyWindowModeChange(WindowModeType type);
+    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -67,6 +68,8 @@ public:
     sptr<WindowManagerAgentLite> windowDrawingContentListenerAgent_;
     std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
     sptr<WindowManagerAgentLite> windowModeListenerAgent_;
+    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
+    sptr<WindowManagerAgent> cameraWindowChangedListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -158,6 +161,19 @@ void WindowManagerLite::Impl::NotifyWindowModeChange(WindowModeType type)
     }
     for (auto &listener : windowModeListeners) {
         listener->OnWindowModeUpdate(type);
+    }
+}
+
+void WindowManager::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    WLOGFD("Camera window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        cameraWindowChangeListeners = cameraWindowChangedListeners_;
+    }
+    for (auto& listener : cameraWindowChangeListeners) {
+        listener->OnCameraWindowChange(accessTokenId, isShowing);
     }
 }
 
@@ -455,5 +471,61 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
     return ret;
 }
 
+WMError WindowManager::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->cameraWindowChangedListenerAgent_ == nullptr) {
+        pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        WLOGFW("RegisterWindowManagerAgent failed!");
+        pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
+            pImpl_->cameraWindowChangedListeners_.end(), listener);
+        if (iter != pImpl_->cameraWindowChangedListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->cameraWindowChangedListeners_.push_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
+        pImpl_->cameraWindowChangedListeners_.end(), listener);
+    if (iter == pImpl_->cameraWindowChangedListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->cameraWindowChangedListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->cameraWindowChangedListeners_.empty() &&
+        pImpl_->cameraWindowChangedListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
+            pImpl_->cameraWindowChangedListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS
