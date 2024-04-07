@@ -7273,4 +7273,13 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     taskScheduler_->PostSyncTask(task, "GetHostWindowRect");
     return WSError::WS_OK;
 }
+
+int32_t SceneSessionManager::ReclaimPurgeableCleanMem()
+{
+#ifdef MEMMGR_WINDOW_ENABLE
+    return Memory::MemMgrClient::GetInstance().ReclaimPurgeableCleanMem();
+#else
+    return -1;
+#endif
+}
 } // namespace OHOS::Rosen
