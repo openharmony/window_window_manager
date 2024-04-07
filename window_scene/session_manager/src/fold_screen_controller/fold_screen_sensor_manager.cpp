@@ -70,11 +70,6 @@ void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScr
 
 void FoldScreenSensorManager::RegisterPostureCallback()
 {
-    if (!allowPosture_) {
-        WLOGFI("Duplicate register posture is not allowed.");
-        return;
-    }
-
     postureUser.callback = SensorPostureDataCallback;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
@@ -84,21 +79,17 @@ void FoldScreenSensorManager::RegisterPostureCallback()
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterPostureCallback failed.");
     } else {
-        allowPosture_ = false;
         WLOGFI("FoldScreenSensorManager.RegisterPostureCallback success.");
     }
 }
 
 void FoldScreenSensorManager::UnRegisterPostureCallback()
 {
-    if (allowPosture_) {
-        WLOGFI("Duplicate unregister posture is not allowed.");
-        return;
-    }
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    WLOGFI("UnRegisterPostureCallback, deactivateRet: %{public}d, unsubscribeRet: %{public}d",
+        deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        allowPosture_ = true;
         WLOGFI("FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
