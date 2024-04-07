@@ -85,6 +85,7 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
+    static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 

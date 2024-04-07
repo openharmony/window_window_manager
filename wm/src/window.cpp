@@ -210,6 +210,15 @@ sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRunti
     }
 }
 
+sptr<Window> Window::GetWindowWithId(uint32_t windId)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetWindowWithId(windId);
+    } else {
+        return WindowImpl::GetWindowWithId(windId);
+    }
+}
+
 std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
