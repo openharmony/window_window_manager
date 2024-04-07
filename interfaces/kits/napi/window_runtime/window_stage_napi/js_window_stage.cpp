@@ -613,14 +613,12 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     }
 
     bool enabled = false;
-    napi_value nativeVal = argv[0];
-    if (nativeVal == nullptr) {
+    if (!ConvertFromJsValue(env, argv[0], enabled)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to boolean");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
     }
 
-    napi_get_value_bool(env, nativeVal, &enabled);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
     TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] SetDefaultDensityEnabled=%{public}u, ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
