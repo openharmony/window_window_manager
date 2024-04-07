@@ -104,6 +104,7 @@ void WindowManagerService::OnStart()
     }
     WindowInnerManager::GetInstance().Start(system::GetParameter("persist.window.holder.enable", "0") == "1");
     WindowInnerManager::GetInstance().StartWindowInfoReportLoop();
+    WindowInnerManager::GetInstance().SetWindowRoot(windowRoot_);
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
 
@@ -859,7 +860,8 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         // type is not system
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && Permission::IsStartByInputMethod()) {
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
+        && Permission::IsStartByInputMethod()) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT counld be created by input method app
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
@@ -1270,13 +1272,22 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
         action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
         !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!accessTokenIdMaps_.isExist(windowProperty->GetWindowId(), IPCSkeleton::GetCallingTokenID()) &&
+
+    WindowType type = windowProperty->GetWindowType();
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        if (!Permission::IsStartByInputMethod()) {
+            WLOGI("Keyboard only hide by input method it'self, operation rejected.");
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+    } else if (!accessTokenIdMaps_.isExist(windowProperty->GetWindowId(), IPCSkeleton::GetCallingTokenID()) &&
         !Permission::IsSystemCalling()) {
         WLOGI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;

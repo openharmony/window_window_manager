@@ -657,6 +657,19 @@ public:
      */
     virtual WMError SetWindowMode(WindowMode mode) { return WMError::WM_OK; }
     /**
+     * @brief Set whether the window is topmost
+     *
+     * @param topmost whether window is topmost
+     * @return WMError
+     */
+    virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
+    /**
+     * @brief Get whether window is topmost
+     *
+     * @return True means window is topmost
+     */
+    virtual bool IsTopmost() const { return false; }
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
@@ -1826,6 +1839,14 @@ public:
         return WMError::WM_OK;
     }
 
+    /**
+     * @brief Get the rect of host window.
+     *
+     * @param hostWindowId window Id of the host window.
+     * @return Rect of window.
+     */
+    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
+    
     /**
      * @brief Set Shaped Window Mask.
      *

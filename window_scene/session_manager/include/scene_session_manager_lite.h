@@ -33,6 +33,7 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
@@ -56,6 +57,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
+    WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
 
 protected:
     SceneSessionManagerLite() = default;

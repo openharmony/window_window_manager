@@ -25,7 +25,11 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
+
+VsyncStation::VsyncStation(NodeId nodeId) : nodeId_(nodeId)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "Vsync Constructor");
+}
 
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
@@ -39,7 +43,8 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
         if (!hasInitVsyncReceiver_) {
             auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
             while (receiver_ == nullptr) {
-                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()));
+                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()), nodeId_);
+                TLOGI(WmsLogTag::WMS_MAIN, "Create vsync receiver for nodeId:%{public}" PRIu64"", nodeId_);
             }
             receiver_->Init();
             hasInitVsyncReceiver_ = true;

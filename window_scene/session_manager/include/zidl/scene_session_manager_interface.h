@@ -55,7 +55,6 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_BIND_DIALOG_TARGET,
         TRANS_ID_GET_FOCUS_SESSION_INFO,
-        TRANS_ID_SET_SESSION_GRAVITY,
         TRANS_ID_SET_SESSION_LABEL,
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_IS_VALID_SESSION_IDS,
@@ -101,6 +100,7 @@ public:
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
         TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION,
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
+        TRANS_ID_GET_HOST_WINDOW_RECT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -218,6 +218,10 @@ public:
         return WSError::WS_OK;
     }
     WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override
     {
         return WSError::WS_OK;
     }

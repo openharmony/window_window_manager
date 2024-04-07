@@ -713,11 +713,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-SizeChangeReason Session::GetSizeChangeReason() const
-{
-    return reason_;
-}
-
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -752,9 +747,11 @@ WSError Session::UpdateDensity()
     return WSError::WS_OK;
 }
 
-WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+__attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
+    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d",
         GetPersistentId(), static_cast<uint32_t>(GetSessionState()), isTerminating);
@@ -855,9 +852,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         SetSessionState(SessionState::STATE_BACKGROUND);
     }
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionForeground();
-    }
     NotifyForeground();
     return WSError::WS_OK;
 }
@@ -938,13 +932,6 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionBackground();
-        if (property_) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "When the soft keyboard is hidden, set the callingWindowId to 0.");
-            property_->SetCallingWindow(INVALID_WINDOW_ID);
-        }
-    }
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;

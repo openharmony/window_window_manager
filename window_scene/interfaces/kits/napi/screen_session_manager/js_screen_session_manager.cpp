@@ -39,13 +39,17 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScre
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 } // namespace
 
-JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env) {}
+JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env),
+    taskScheduler_(std::make_shared<MainThreadScheduler>(env))
+{
+    TLOGI(WmsLogTag::DMS, "Create JsScreenSessionManager instance");
+}
 
 napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
 {
     WLOGD("Init.");
     if (env == nullptr || exportObj == nullptr) {
-        WLOGFE("Failed to init, env or exportObj is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to init, env or exportObj is null!");
         return nullptr;
     }
 
@@ -81,6 +85,29 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
     return NapiGetUndefined(env);
+}
+
+JsScreenSessionManager::~JsScreenSessionManager()
+{
+    TLOGI(WmsLogTag::DMS, "Destroy JsScreenSessionManager instance");
+    ClearNativeReference();
+}
+
+void JsScreenSessionManager::ClearNativeReference()
+{
+    auto localScreenConnectionCallback = screenConnectionCallback_;
+    auto localShutdownCallback = shutdownCallback_;
+    // Capture shared_ptr by value to ensure that its life cycle is in the alive state
+    auto task = [localScreenConnectionCallback, localShutdownCallback]() mutable {
+        TLOGI(WmsLogTag::DMS, "Clear NativeReference callback");
+        localScreenConnectionCallback = nullptr;
+        localShutdownCallback = nullptr;
+    };
+    if (taskScheduler_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "taskScheduler instance is nullptr");
+        return;
+    }
+    taskScheduler_->PostMainThreadTask(task, "ClearScreenNativeReference");
 }
 
 void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
@@ -171,14 +198,14 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
         WLOGE("[NAPI]screenConnectionCallback is nullptr");
         return;
     }
-
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenConnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [callback_, screenSession](napi_env env, NapiAsyncTask& task, int32_t status) {
             napi_value objValue = nullptr;
             napi_create_object(env, &objValue);
             if (objValue == nullptr) {
-                WLOGFE("Object is null!");
+                TLOGE(WmsLogTag::DMS, "Object is null!");
                 return;
             }
 
@@ -188,7 +215,7 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
             napi_value argv[] = { objValue };
             napi_value method = callback_->GetNapiValue();
             if (method == nullptr) {
-                WLOGFE("Failed to get method callback from object!");
+                TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
                 return;
             }
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
@@ -205,14 +232,14 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     if (screenConnectionCallback_ == nullptr) {
         return;
     }
-
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenDisconnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [callback_, screenSession](napi_env env, NapiAsyncTask& task, int32_t status) {
             napi_value objValue = nullptr;
             napi_create_object(env, &objValue);
             if (objValue == nullptr) {
-                WLOGFE("Object is null!");
+                TLOGE(WmsLogTag::DMS, "Object is null!");
                 return;
             }
 
@@ -222,7 +249,7 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
             napi_value argv[] = { objValue };
             napi_value method = callback_->GetNapiValue();
             if (method == nullptr) {
-                WLOGFE("Failed to get method callback from object!");
+                TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
                 return;
             }
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
@@ -239,13 +266,14 @@ bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
     if (!shutdownCallback_) {
         return false;
     }
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnTakeOverShutdown");
     std::shared_ptr<NativeReference> callback_ = shutdownCallback_;
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [callback_, isReboot](napi_env env, NapiAsyncTask& task, int32_t status) {
             napi_value argv[] = {CreateJsValue(env, isReboot)};
             napi_value method = callback_->GetNapiValue();
             if (method == nullptr) {
-                WLOGFE("Failed to get method callback from object!");
+                TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
                 return;
             }
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
@@ -260,9 +288,9 @@ bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
 
 napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnRegisterShutdownCallback");
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnRegisterShutdownCallback");
     if (shutdownCallback_ != nullptr) {
-        WLOGFE("Failed to register callback, callback exits");
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback exits");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
         return NapiGetUndefined(env);
     }
@@ -270,14 +298,14 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[0];
     if (!NapiIsCallable(env, value)) {
-        WLOGFE("Failed to register callback, param is not callable");
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, param is not callable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -296,9 +324,9 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
 
 napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnUnRegisterShutdownCallback");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUnRegisterShutdownCallback");
     if (shutdownCallback_ == nullptr) {
-        WLOGFE("Failed to unregister callback, callback is not exits");
+        TLOGE(WmsLogTag::DMS, "Failed to unregister callback, callback is not exits");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_NOT_REGISTER_SYNC_CALLBACK)));
         return NapiGetUndefined(env);
     }
@@ -314,7 +342,7 @@ napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, co
 
 napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_callback_info info)
 {
-    WLOGD("On register callback.");
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnRegisterCallback");
     if (screenConnectionCallback_ != nullptr) {
         return NapiGetUndefined(env);
     }
@@ -322,27 +350,27 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     std::string callbackType;
     if (!ConvertFromJsValue(env, argv[0], callbackType)) {
-        WLOGFE("Failed to convert parameter to callback type.");
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callback type.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     if (callbackType != ON_SCREEN_CONNECTION_CHANGE_CALLBACK) {
-        WLOGFE("Unsupported callback type: %{public}s.", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Unsupported callback type: %{public}s.", callbackType.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     napi_value value = argv[1];
     if (!NapiIsCallable(env, value)) {
-        WLOGFE("Failed to register callback, callback is not callable!");
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is not callable!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -358,18 +386,19 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
 napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     const napi_callback_info info)
 {
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateScreenRotationProperty");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 3) { // 3: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t screenId;
     if (!ConvertFromJsValue(env, argv[0], screenId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -377,15 +406,15 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     RRect bounds;
     napi_value nativeObj = argv[1];
     if (nativeObj == nullptr) {
-        WLOGFE("[NAPI]Failed to convert object to RRect bounds");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert object to RRect bounds");
         return NapiGetUndefined(env);
     } else if (!ConvertRRectFromJs(env, nativeObj, bounds)) {
-        WLOGFE("[NAPI]Failed to get bounds from js object");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to get bounds from js object");
         return NapiGetUndefined(env);
     }
     int rotation;
     if (!ConvertFromJsValue(env, argv[2], rotation)) { // 2: the 3rd argv
-        WLOGFE("[NAPI]Failed to convert parameter to rotation");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to rotation");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -397,38 +426,31 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
 napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
     const napi_callback_info info)
 {
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnNotifyScreenLockEvent");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t event;
     if (!ConvertFromJsValue(env, argv[0], event)) {
-        WLOGFE("[NAPI]Failed to convert parameter to display event");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to display event");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [event](napi_env env, NapiAsyncTask& task, int32_t status) {
-            DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
-        }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenSessionManager::OnTakeOverShutdown", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    DisplayManager::GetInstance().NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetCurvedCompressionArea");
+    WLOGFD("[NAPI]OnGetCurvedCompressionArea");
     napi_value result = nullptr;
     napi_create_uint32(env, ScreenSessionManagerClient::GetInstance().GetCurvedCompressionArea(), &result);
     return result;
@@ -436,19 +458,19 @@ napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, cons
 
 napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetPhyScreenProperty");
+    WLOGFD("[NAPI]OnGetPhyScreenProperty");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t screenId;
     if (!ConvertFromJsValue(env, argv[0], screenId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -459,19 +481,19 @@ napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const na
 
 napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnUpdateAvailableArea");
+    WLOGFD("[NAPI]OnUpdateAvailableArea");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t screenId;
     if (!ConvertFromJsValue(env, argv[0], screenId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -479,10 +501,10 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
     DMRect area;
     napi_value nativeObj = argv[1];
     if (nativeObj == nullptr) {
-        WLOGFE("[NAPI]Failed to convert parameter to DMRect,the param is null");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect,the param is null");
         return NapiGetUndefined(env);
     } else if (!ConvertDMRectFromJs(env, nativeObj, area)) {
-        WLOGFE("[NAPI]Failed to convert parameter to DMRect");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect");
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
@@ -491,19 +513,19 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
 
 napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnNotifyFoldToExpandCompletion");
+    WLOGFD("[NAPI]OnNotifyFoldToExpandCompletion");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool foldToExpand;
     if (!ConvertFromJsValue(env, argv[0], foldToExpand)) {
-        WLOGFE("[NAPI]Failed to convert parameter to foldToExpand");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to foldToExpand");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -514,7 +536,7 @@ napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, 
 
 napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetFoldStatus");
+    WLOGFD("[NAPI]OnGetFoldStatus");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -529,19 +551,19 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
 
 napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetScreenSnapshot");
+    WLOGFD("[NAPI]OnGetScreenSnapshot");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_THREE) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t screenId;
     if (!ConvertFromJsValue(env, argv[0], screenId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -549,7 +571,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     std::array<double, ARGC_TWO> scaleParam;
     for (uint8_t i = 0; i < ARGC_TWO; i++) {
         if (!ConvertFromJsValue(env, argv[i + 1], scaleParam[i])) {
-            WLOGFE("[NAPI]Failed to convert parameter to scale[%d]", i + 1);
+            TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to scale[%d]", i + 1);
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);

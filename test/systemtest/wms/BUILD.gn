@@ -36,6 +36,7 @@ group("systemtest") {
     ":wms_window_mode_support_info_test",
     ":wms_window_move_drag_test",
     ":wms_window_multi_ability_test",
+    ":wms_window_nointeraction_listener_test",
     ":wms_window_occupied_area_change_test",
     ":wms_window_raisetoapptop_test",
     ":wms_window_rotation_test",
@@ -422,6 +423,20 @@ ohos_systemtest("wms_window_water_mark_test") {
   module_out_path = module_out_path
 
   sources = [ "window_water_mark_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "power_manager:powermgr_client",
+  ]
+}
+
+ohos_systemtest("wms_window_nointeraction_listener_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_nointeraction_listener_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
 

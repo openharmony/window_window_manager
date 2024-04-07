@@ -19,6 +19,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
@@ -1823,55 +1824,6 @@ HWTEST_F(SceneSessionManagerTest, ChangeUIAbilityVisibilityBySCB, Function | Sma
 }
 
 /**
- * @tc.name: RegisterInputMethodShownFunc
- * @tc.desc: SceneSesionManager register input method show func
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, RegisterInputMethodShownFunc, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    info.bundleName_ = "SetBrightness1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    int ret = 0;
-    ssm_->RegisterInputMethodShownFunc(nullptr);
-    ASSERT_EQ(ret, 0);
-    ssm_->RegisterInputMethodShownFunc(sceneSession);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: OnInputMethodShown
- * @tc.desc: SceneSesionManager on input method shown
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, OnInputMethodShown, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 65535;
-    int ret = 0;
-    ssm_->OnInputMethodShown(persistentId);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: RegisterInputMethodHideFunc
- * @tc.desc: SceneSesionManager register input method hide func
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, RegisterInputMethodHideFunc, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    info.bundleName_ = "SetBrightness1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    int ret = 0;
-    ssm_->RegisterInputMethodHideFunc(nullptr);
-    ASSERT_EQ(ret, 0);
-    ssm_->RegisterInputMethodHideFunc(sceneSession);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: SetAbilitySessionInfo
  * @tc.desc: SceneSesionManager set ability session info
  * @tc.type: FUNC
@@ -2507,21 +2459,21 @@ HWTEST_F(SceneSessionManagerTest, SetGestureNavigaionEnabled02, Function | Small
 }
 
 /**
- * @tc.name: SetFocusedSession
- * @tc.desc: SceneSesionManager set focused session
+ * @tc.name: SetFocusedSessionId
+ * @tc.desc: SceneSesionManager set focused session id
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SetFocusedSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetFocusedSessionId, Function | SmallTest | Level3)
 {
-    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
-    int32_t persistendId_ = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSession(persistendId_);
+    int32_t persistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
-    persistendId_ = 10086;
-    WSError result02 = ssm_->SetFocusedSession(persistendId_);
+    persistentId_ = 10086;
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result02, WSError::WS_OK);
-    ASSERT_EQ(ssm_->GetFocusedSession(), 10086);
+    ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }
 
 /**
@@ -2531,7 +2483,7 @@ HWTEST_F(SceneSessionManagerTest, SetFocusedSession, Function | SmallTest | Leve
 */
 HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Level3)
 {
-    int32_t focusedSession_ = SceneSessionManager::GetInstance().GetFocusedSession();
+    int32_t focusedSession_ = SceneSessionManager::GetInstance().GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t persistentId_ = INVALID_SESSION_ID;
     WMError result01 = SceneSessionManager::GetInstance().RequestFocusStatus(persistentId_, true);
@@ -2550,7 +2502,7 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 */
 HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level3)
 {
-    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t persistentId_ = INVALID_SESSION_ID;
     WSError result01 = ssm_->RaiseWindowToTop(persistentId_);
@@ -2569,7 +2521,7 @@ HWTEST_F(SceneSessionManagerTest, RaiseWindowToTop, Function | SmallTest | Level
 */
 HWTEST_F(SceneSessionManagerTest, ShiftAppWindowFocus, Function | SmallTest | Level3)
 {
-    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
     int32_t sourcePersistentId_ = INVALID_SESSION_ID;
     int32_t targetPersistentId_ = INVALID_SESSION_ID;
@@ -3023,6 +2975,25 @@ HWTEST_F(SceneSessionManagerTest, NotifyWindowExtensionVisibilityChange, Functio
     bool isVisible = false;
     WSError result = ssm_->NotifyWindowExtensionVisibilityChange(pid, uid, isVisible);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateTopmostProperty
+ * @tc.desc: test UpdateTopmostProperty
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateTopmostProperty";
+    info.bundleName_ = "UpdateTopmostProperty";
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetTopmost(true);
+    property->SetSystemCalling(true);
+    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
+    scenesession->SetSessionProperty(property);
+    WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
+    ASSERT_EQ(WMError::WM_OK, result);
 }
 
 /**

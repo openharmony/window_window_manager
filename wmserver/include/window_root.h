@@ -44,6 +44,7 @@ public:
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
     sptr<WindowNode> GetWindowNodeByMissionId(uint32_t missionId) const;
     void GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes);
+    void GetForegroundNodes(std::vector<sptr<WindowNode>>& windowNodes);
 
     sptr<WindowNode> FindWallpaperWindow();
     WMError SaveWindow(const sptr<WindowNode>& node);

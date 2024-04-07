@@ -606,5 +606,11 @@ WMError WindowAdapter::UpdateExtWindowFlags(int32_t parentId, int32_t persistent
     return static_cast<WMError>(windowManagerServiceProxy_->UpdateExtWindowFlags(parentId, persistentId,
         extWindowFlags));
 }
+
+WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetHostWindowRect(hostWindowId, rect));
+}
 } // namespace Rosen
 } // namespace OHOS
