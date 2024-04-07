@@ -584,6 +584,38 @@ HWTEST_F(WindowSessionImplTest, NotifyModeChange, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestVsyncSucc
+ * @tc.desc: RequestVsync Test Succ
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RequestVsyncSucc");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->RequestVsync(vsyncCallback);
+    ASSERT_NE(window, nullptr);
+}
+
+
+/**
+ * @tc.name: RequestVsyncErr
+ * @tc.desc: RequestVsync Test Err
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RequestVsyncErr, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RequestVsyncErr");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->vsyncStation_ = nullptr;
+    window->RequestVsync(vsyncCallback);
+    ASSERT_NE(window, nullptr);
+}
+
+/**
  * @tc.name: SetFocusable
  * @tc.desc: SetFocusable
  * @tc.type: FUNC

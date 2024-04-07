@@ -43,6 +43,7 @@ group("unittest") {
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
+    ":wm_vsync_station_test",
   ]
   if (!scene_board_enabled) {
     deps += [ ":wm_window_proxy_test" ]
@@ -111,6 +112,19 @@ ohos_unittest("wm_window_scene_effect_test") {
 
   deps = [ ":wm_unittest_common" ]
 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_vsync_station_test") {
+  module_out_path = module_out_path
+
+  sources = [ "vsync_station_test.cpp" ]
+
+  deps = [":wm_unittest_common"]
+  
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
