@@ -777,9 +777,9 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistendId = data.ReadInt32();
+    int32_t persistentId = data.ReadInt32();
     bool haveListener = data.ReadBool();
-    WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
+    WSError ret = UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

@@ -25,6 +25,7 @@ group("unittest") {
     ":ws_extension_session_test",
     ":ws_fold_screen_controller_test",
     ":ws_fold_screen_state_machine_test",
+    ":ws_keyboard_session_test",
     ":ws_move_drag_controller_test",
     ":ws_root_scene_session_test",
     ":ws_scene_persistence_test",
@@ -73,6 +74,19 @@ ohos_unittest("ws_system_session_test") {
   module_out_path = module_out_path
 
   sources = [ "system_session_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_keyboard_session_test") {
+  module_out_path = module_out_path
+
+  sources = [ "keyboard_session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

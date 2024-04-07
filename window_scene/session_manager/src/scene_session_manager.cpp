@@ -5325,7 +5325,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
                 WLOGFW("null scene session");
                 continue;
             }
-            WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
+            WLOGFD("name = %{public}s, isSystem = %{public}d, persistentId = %{public}d, winType = %{public}d, "
                 "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
                 sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
                 sceneSession->GetSessionState(), sceneSession->IsVisibleForAccessibility());
@@ -6185,7 +6185,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
             if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                 scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
                 scnSession->UpdateDensity();
-                WLOGFD("UpdateDensity name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                WLOGFD("UpdateDensity name=%{public}s, persistentId=%{public}d, winType=%{public}d, "
                     "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
                     scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
             }
@@ -6213,7 +6213,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
             if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                 scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
                 scnSession->UpdateRotationAvoidArea();
-                WLOGFD("UpdateRotationAvoidArea name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                WLOGFD("UpdateRotationAvoidArea name=%{public}s, persistentId=%{public}d, winType=%{public}d, "
                     "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
                     scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
             }
@@ -7080,7 +7080,7 @@ void SceneSessionManager::HideNonSecureFloatingWindows(size_t sizeBefore, size_t
         auto session = item.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
+            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
                 "shouldHide=%{public}u", session->GetWindowName().c_str(), item.first, shouldHide);
         }
     }
@@ -7102,7 +7102,7 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
         }
 
         subSession->NotifyForceHideChange(shouldHide);
-        TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistendId=%{public}d, "
+        TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
             "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),
             shouldHide);
     }
