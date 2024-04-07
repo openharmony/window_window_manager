@@ -201,6 +201,7 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
@@ -275,7 +276,6 @@ private:
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
-    int NotifyFoldStatusChanged(const std::string& lockParam);
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
