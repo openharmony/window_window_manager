@@ -219,6 +219,16 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowSessionProperty::SetTopmost(bool topmost)
+{
+    topmost_ = topmost;
+}
+
+bool WindowSessionProperty::IsTopmost() const
+{
+    return topmost_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -343,7 +353,7 @@ void WindowSessionProperty::SetWindowState(WindowState state)
     windowState_ = state;
 }
 
-void WindowSessionProperty::SetSessionGravity(SessionGravity gravity, uint32_t percent)
+void WindowSessionProperty::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
     sessionGravity_ = gravity;
     sessionGravitySizePercent_ = percent;
@@ -413,14 +423,14 @@ bool WindowSessionProperty::GetKeepKeyboardFlag() const
     return keepKeyboardFlag_;
 }
 
-void WindowSessionProperty::SetCallingWindow(uint32_t windowId)
+void WindowSessionProperty::SetCallingSessionId(uint32_t sessionId)
 {
-    callingWindowId_ = windowId;
+    callingSessionId_ = sessionId;
 }
 
-uint32_t WindowSessionProperty::GetCallingWindow() const
+uint32_t WindowSessionProperty::GetCallingSessionId() const
 {
-    return callingWindowId_;
+    return callingSessionId_;
 }
 
 void WindowSessionProperty::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
@@ -607,7 +617,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) && parcel.WriteBool(topmost_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -618,7 +628,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(sessionGravity_)) && parcel.WriteUint32(sessionGravitySizePercent_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
-        parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingWindowId_) &&
+        parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         MarshallingWindowMask(parcel);
@@ -654,6 +664,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
+    property->SetTopmost(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -666,12 +677,12 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetSystemCalling(parcel.ReadBool());
-    property->SetSessionGravity(static_cast<SessionGravity>(parcel.ReadUint32()), parcel.ReadUint32());
+    property->SetKeyboardSessionGravity(static_cast<SessionGravity>(parcel.ReadUint32()), parcel.ReadUint32());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
     property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
-    property->SetCallingWindow(parcel.ReadUint32());
+    property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
     UnmarshallingWindowMask(parcel, property);
@@ -716,6 +727,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     textFieldPositionY_ = property->textFieldPositionY_;
     textFieldHeight_ = property->textFieldHeight_;
     isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
+    callingSessionId_ = property->callingSessionId_;
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;

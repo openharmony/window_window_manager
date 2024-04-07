@@ -657,6 +657,19 @@ public:
      */
     virtual WMError SetWindowMode(WindowMode mode) { return WMError::WM_OK; }
     /**
+     * @brief Set whether the window is topmost
+     *
+     * @param topmost whether window is topmost
+     * @return WMError
+     */
+    virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
+    /**
+     * @brief Get whether window is topmost
+     *
+     * @return True means window is topmost
+     */
+    virtual bool IsTopmost() const { return false; }
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
@@ -1685,6 +1698,19 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set whether to display the maximize, minimize, split buttons of main window.
+     *
+     * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
+     * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
+     * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set decor height of window.
      *
      * @param decorHeight Decor height of window
@@ -1813,6 +1839,14 @@ public:
         return WMError::WM_OK;
     }
 
+    /**
+     * @brief Get the rect of host window.
+     *
+     * @param hostWindowId window Id of the host window.
+     * @return Rect of window.
+     */
+    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
+    
     /**
      * @brief Set Shaped Window Mask.
      *

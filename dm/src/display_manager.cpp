@@ -1465,6 +1465,10 @@ void DisplayManager::Impl::OnRemoteDied()
 
 void DisplayManager::OnRemoteDied()
 {
+    if (pImpl_ == nullptr) {
+        WLOGFE("dms is dying, pImpl_ is nullptr");
+        return;
+    }
     pImpl_->OnRemoteDied();
 }
 

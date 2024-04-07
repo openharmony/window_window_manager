@@ -27,12 +27,13 @@
 
 #include "wm_common.h"
 #include "wm_single_instance.h"
+#include <ui/rs_display_node.h>
 
 namespace OHOS {
 namespace Rosen {
 class VsyncStation {
-WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 public:
+    explicit VsyncStation(NodeId nodeId);
     ~VsyncStation()
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -44,13 +45,13 @@ public:
     void RemoveCallback();
 
 private:
-    VsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
     void Init();
 
     std::mutex mtx_;
+    NodeId nodeId_ = 0;
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
     bool destroyed_ = false;

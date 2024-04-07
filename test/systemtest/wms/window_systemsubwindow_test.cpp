@@ -356,7 +356,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, Function | MediumTest | L
     if (subWindow == nullptr) {
         return;
     }
-    ASSERT_EQ(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }
 } // namespace Rosen

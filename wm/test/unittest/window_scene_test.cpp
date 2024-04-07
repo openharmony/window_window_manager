@@ -80,7 +80,7 @@ HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
-    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener, optionTest));
 }
 
 /**
@@ -97,7 +97,7 @@ HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext, listener, optionTest));
 }
 
 /**
@@ -113,7 +113,7 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
     DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
-    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener, optionTest));
 }
 
 /**
