@@ -309,7 +309,13 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             WLOGFE("GetSceneSession return nullptr");
-            return sceneSession;
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                WLOGFE("retry RequestSceneSession return nullptr");
+                return sceneSession;
+            }
+            info.persistentId_ = sceneSession->GetPersistentId();
+            sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         }
     }
     return sceneSession;
