@@ -713,11 +713,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-SizeChangeReason Session::GetSizeChangeReason() const
-{
-    return reason_;
-}
-
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -752,9 +747,11 @@ WSError Session::UpdateDensity()
     return WSError::WS_OK;
 }
 
-WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+__attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
+    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d",
         GetPersistentId(), static_cast<uint32_t>(GetSessionState()), isTerminating);
@@ -855,9 +852,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
         SetSessionState(SessionState::STATE_BACKGROUND);
     }
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionForeground();
-    }
     NotifyForeground();
     return WSError::WS_OK;
 }
@@ -938,13 +932,6 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        NotifyCallingSessionBackground();
-        if (property_) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "When the soft keyboard is hidden, set the callingWindowId to 0.");
-            property_->SetCallingWindow(INVALID_WINDOW_ID);
-        }
-    }
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
@@ -2038,8 +2025,17 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     while (g_persistentIdSet.count(g_persistentId)) {
         g_persistentId++;
     }
-    persistentId_ = isExtension ? static_cast<uint32_t>(
-        g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+    if (isExtension) {
+        constexpr uint32_t pidLength = 18;
+        constexpr uint32_t pidMask = (1 << pidLength) - 1;
+        constexpr uint32_t persistentIdLength = 12;
+        constexpr uint32_t persistentIdMask = (1 << persistentIdLength) - 1;
+        uint32_t assembledPersistentId = ((static_cast<uint32_t>(getpid()) & pidMask) << persistentIdLength) |
+            (static_cast<uint32_t>(g_persistentId.load()) & persistentIdMask);
+        persistentId_ = assembledPersistentId | 0x40000000;
+    } else {
+        persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+    }
     g_persistentIdSet.insert(g_persistentId);
     WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }

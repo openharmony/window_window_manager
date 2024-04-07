@@ -98,6 +98,21 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, Function | Sm
 }
 
 /**
+ * @tc.name: UpdateWindowModeTypeInfo
+ * @tc.desc: UpdateWindowModeTypeInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, Function | SmallTest | Level3)
+{
+    SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(WindowModeType::WINDOW_MODE_SPLIT);
+
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
  * @tc.name: NotifyAccessibilityWindowInfo
  * @tc.desc: NotifyAccessibilityWindowInfo Test
  * @tc.type: FUNC

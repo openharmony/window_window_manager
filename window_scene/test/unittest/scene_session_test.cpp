@@ -17,6 +17,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
+#include "session/host/include/main_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
@@ -1315,6 +1316,27 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetTopmost
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTopmost";
+    info.bundleName_ = "SetTopmost";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
+    EXPECT_NE(scenesession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    scenesession->SetSessionProperty(property);
+    auto result = scenesession->SetTopmost(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(scenesession->IsTopmost());
+}
+
+/**
  * @tc.name: SetAspectRatio2
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1538,7 +1560,7 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1569,7 +1591,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1599,7 +1621,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1629,7 +1651,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1659,7 +1681,7 @@ HWTEST_F(SceneSessionTest, RaiseAboveTarget, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
     scensession->SetSessionProperty(property);
     WSError result = scensession->RaiseAboveTarget(0);
@@ -1687,7 +1709,7 @@ HWTEST_F(SceneSessionTest, BindDialogSessionTarget, Function | SmallTest | Level
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
     scensession->SetSessionProperty(property);
 
     sptr<SceneSession> sceneSession = nullptr;
@@ -1973,7 +1995,7 @@ HWTEST_F(SceneSessionTest, RequestSessionBack, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
     scensession->SetSessionProperty(property);
 
     WSError result = scensession->RequestSessionBack(true);
@@ -2133,7 +2155,7 @@ HWTEST_F(SceneSessionTest, PendingSessionActivation, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
     scensession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
@@ -2167,7 +2189,7 @@ HWTEST_F(SceneSessionTest, TerminateSession, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
     scensession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
@@ -2201,7 +2223,7 @@ HWTEST_F(SceneSessionTest, NotifySessionException, Function | SmallTest | Level2
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
-    property->SetSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
     scensession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();

@@ -25,6 +25,7 @@
 #include <refbase.h>
 #include <event_handler.h>
 #include <vsync_receiver.h>
+#include <ui/rs_display_node.h>
 
 #include "wm_common.h"
 #include "wm_single_instance.h"
@@ -33,8 +34,8 @@ namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
 class VsyncStation {
-WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 public:
+    explicit VsyncStation(NodeId nodeId);
     ~VsyncStation()
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -55,7 +56,6 @@ public:
     }
 
 private:
-    VsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
@@ -67,6 +67,8 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool destroyed_ = false;
     const std::string VSYNC_THREAD_ID = "VsyncThread";
+    NodeId nodeId_ = 0;
+    std::string vsyncTimeoutTaskName_ = "";
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_;
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;

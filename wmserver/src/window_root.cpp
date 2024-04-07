@@ -194,6 +194,18 @@ void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vecto
     }
 }
 
+void WindowRoot::GetForegroundNodes(std::vector<sptr<WindowNode>>& windowNodes)
+{
+    for (const auto& it : windowNodeMap_) {
+        if (it.second == nullptr) {
+            continue;
+        }
+        if (it.second->currentVisibility_) {
+            windowNodes.push_back(it.second);
+        }
+    }
+}
+
 sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const
 {
     if (token == nullptr) {
