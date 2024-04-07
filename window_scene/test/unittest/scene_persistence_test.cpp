@@ -32,8 +32,6 @@ public:
     void TearDown() override;
 };
 
-std::string ScenePersistence::snapshotDirectory_;
-std::string ScenePersistence::updatedIconDirectory_;
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".png";
 
@@ -64,8 +62,8 @@ HWTEST_F(ScenePersistenceTest, CreateSnapshotDir, Function | SmallTest | Level1)
     std::string directory = "0/Storage";
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    ScenePersistence scenPersistence(bundleName, persistentId);
-    bool result = scenPersistence.CreateSnapshotDir(directory);
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    bool result = scenePersistence->CreateSnapshotDir(directory);
     ASSERT_EQ(result, false);
 }
 
@@ -79,8 +77,8 @@ HWTEST_F(ScenePersistenceTest, CreateUpdatedIconDir, Function | SmallTest | Leve
     std::string directory = "0/Storage";
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    ScenePersistence scenPersistence(bundleName, persistentId);
-    bool result = scenPersistence.CreateUpdatedIconDir(directory);
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    bool result = scenePersistence->CreateUpdatedIconDir(directory);
     ASSERT_EQ(result, false);
 }
 
@@ -95,17 +93,17 @@ HWTEST_F(ScenePersistenceTest, SaveSnapshot, Function | SmallTest | Level1)
     std::string directory = "0/Storage";
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    ScenePersistence scenPersistence(bundleName, persistentId);
-    scenPersistence.SaveSnapshot(pixelMap);
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    scenePersistence->SaveSnapshot(pixelMap);
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    Session session(info);
-    pixelMap = session.GetSnapshot();
-    scenPersistence.SaveSnapshot(pixelMap);
+    sptr<Session> session = new Session(info);
+    pixelMap = session->GetSnapshot();
+    scenePersistence->SaveSnapshot(pixelMap);
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
     std::string test = ScenePersistence::snapshotDirectory_ +
         bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
-    std::pair<uint32_t, uint32_t> sizeResult = scenPersistence.GetSnapshotSize();
+    std::pair<uint32_t, uint32_t> sizeResult = scenePersistence->GetSnapshotSize();
     EXPECT_EQ(sizeResult.first, 0);
     EXPECT_EQ(sizeResult.second, 0);
 }
@@ -121,14 +119,14 @@ HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
     std::string directory = "0/Storage";
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    ScenePersistence scenPersistence(bundleName, persistentId);
-    scenPersistence.SaveUpdatedIcon(pixelMap);
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    scenePersistence->SaveUpdatedIcon(pixelMap);
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    Session session(info);
-    pixelMap = session.GetSnapshot();
-    scenPersistence.SaveUpdatedIcon(pixelMap);
-    std::string result(scenPersistence.GetUpdatedIconPath());
+    sptr<Session> session = new Session(info);
+    pixelMap = session->GetSnapshot();
+    scenePersistence->SaveUpdatedIcon(pixelMap);
+    std::string result(scenePersistence->GetUpdatedIconPath());
     std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
     EXPECT_EQ(result.compare(test), 0);
 }
@@ -142,8 +140,8 @@ HWTEST_F(ScenePersistenceTest, IsSnapshotExisted, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    ScenePersistence scenPersistence(bundleName, persistentId);
-    bool result = scenPersistence.IsSnapshotExisted();
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    bool result = scenePersistence->IsSnapshotExisted();
     ASSERT_EQ(result, false);
 }
 
@@ -157,17 +155,18 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    Session session(info);
-    auto abilityInfo = session.GetSessionInfo();
+    sptr<Session> session = new Session(info);
+    auto abilityInfo = session->GetSessionInfo();
     auto persistendId = abilityInfo.persistentId_;
     ScenePersistence::CreateSnapshotDir("storage");
-    ScenePersistence scenePersistence(abilityInfo.bundleName_, persistendId);
-    auto result = scenePersistence.GetLocalSnapshotPixelMap(0.5, 0.5);
+    sptr<ScenePersistence> scenePersistence = 
+        new ScenePersistence(abilityInfo.bundleName_, persistendId);
+    auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
     EXPECT_EQ(result, nullptr);
 
-    auto pixelMap = session.GetSnapshot();
-    scenePersistence.SaveSnapshot(pixelMap);
-    result = scenePersistence.GetLocalSnapshotPixelMap(0.8, 0.2);
+    auto pixelMap = session->GetSnapshot();
+    scenePersistence->SaveSnapshot(pixelMap);
+    result = scenePersistence->GetLocalSnapshotPixelMap(0.8, 0.2);
     EXPECT_EQ(result, nullptr);
 }
 }
