@@ -2445,7 +2445,6 @@ WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool sho
 
 void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     auto iter = extWindowFlagsMap_.find(extPersistentId);
     if (iter == extWindowFlagsMap_.end()) {
         extWindowFlagsMap_.insert({ extPersistentId, extWindowFlags });
@@ -2456,7 +2455,6 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWin
 bool SceneSession::IsExtWindowHasWaterMarkFlag()
 {
     bool isExtWindowHasWaterMarkFlag = false;
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     for (const auto& iter: extWindowFlagsMap_) {
         auto& extWindowFlags = iter.second;
         if (!extWindowFlags) {
@@ -2481,7 +2479,6 @@ void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
 
 void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     auto iter = extWindowFlagsMap_.find(extPersistentId);
     if (iter != extWindowFlagsMap_.end()) {
         extWindowFlagsMap_.erase(iter);
@@ -2489,7 +2486,6 @@ void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
 }
 void SceneSession::ClearExtWindowFlags()
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     extWindowFlagsMap_.clear();
 }
 
