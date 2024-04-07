@@ -1716,9 +1716,16 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "GetSceneSession return nullptr");
-            return;
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "retry RequestSceneSession return nullptr");
+                return;
+            }
+            info.persistentId_ = sceneSession->GetPersistentId();
+            sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        } else {
+            sceneSession->SetSessionInfo(info);
         }
-        sceneSession->SetSessionInfo(info);
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, sessionInfo]() {
