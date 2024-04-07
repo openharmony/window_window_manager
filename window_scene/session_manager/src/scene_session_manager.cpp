@@ -4965,10 +4965,6 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (!SessionPermission::IsSameBundleNameAsCalling(sceneSession->GetSessionInfo().bundleName_)) {
-            WLOGFE("TerminateSessionNew calling denied!");
-            return WSError::WS_ERROR_INVALID_CALLING;
-        }
         const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
         return errCode;
     };
