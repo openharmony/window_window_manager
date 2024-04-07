@@ -66,5 +66,11 @@ void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
 {
     SingletonContainer::Get<WindowManager>().NotifyGestureNavigationEnabledResult(enable);
 }
+
+void WindowManagerAgent::UpdateVisibleWindowNum(
+    const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo)
+{
+    SingletonContainer::Get<WindowManager>().UpdateVisibleWindowNum(visibleWindowNumInfo);
+}
 } // namespace Rosen
 } // namespace OHOS

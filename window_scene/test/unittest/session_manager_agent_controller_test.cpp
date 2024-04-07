@@ -162,6 +162,22 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, Function
 }
 
 /**
+ * @tc.name: UpdateVisibleWindowNum
+ * @tc.desc: UpdateVisibleWindowNum Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateVisibleWindowNum, Function | SmallTest | Level3)
+{
+    std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+    SessionManagerAgentController::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
+
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
  * @tc.name: UpdateWindowDrawingContentInfo
  * @tc.desc: UpdateWindowDrawingContentInfo Test
  * @tc.type: FUNC
@@ -171,7 +187,6 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowDrawingContentInfo, Func
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
     SessionManagerAgentController::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
 
-     
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
