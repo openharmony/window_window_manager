@@ -1,0 +1,10 @@
+[
+    {
+        "first_instroduced":"12",
+        "name":"OH_NativeWindowManager_RegisterKeyEventFilter"
+    },
+    {
+        "first_instroduced":"12",
+        "name":"OH_NativeWindowManager_UnregisterKeyEventFilter"
+    }
+]
