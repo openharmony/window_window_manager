@@ -340,6 +340,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
 
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
+    WLOGFI("params_: [%{public}s]", params_[0].c_str());
     int errCode = ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(params_[0]);
     if (errCode != 0) {
         ShowIllegalArgsInfo();
