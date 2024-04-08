@@ -17,6 +17,7 @@
 #include <csignal>
 
 #include "unique_fd.h"
+#include "screen_session_manager.h"
 #include "session_permission.h"
 
 namespace OHOS {
@@ -61,6 +62,9 @@ void ScreenSessionDumper::ExcuteDumpCmd()
 {
     const std::string ARG_DUMP_HELP = "-h";
     const std::string ARG_DUMP_ALL = "-a";
+    const std::string STATUS_FOLD_HALF = "-z";
+    const std::string STATUS_EXPAND = "-y";
+    const std::string STATUS_FOLD = "-p";
     if (params_.empty() || params_[0] == ARG_DUMP_HELP) { //help command
         ShowHelpInfo();
     }
@@ -71,6 +75,9 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     }
     if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
         ShowAllScreenInfo();
+    } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
+        params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
+        ShowNotifyFoldStatusChangedInfo();
     }
     OutputDumpInfo();
 }
@@ -81,7 +88,13 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append(" -h                             ")
         .append("|help text for the tool\n")
         .append(" -a                             ")
-        .append("|dump all screen information in the system\n");
+        .append("|dump all screen information in the system\n")
+        .append(" -z                             ")
+        .append("|switch to fold half status\n")
+        .append(" -y                             ")
+        .append("|switch to expand status\n")
+        .append(" -p                             ")
+        .append("|switch to fold status\n");
 }
 
 void ScreenSessionDumper::ShowAllScreenInfo()
@@ -323,6 +336,26 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << screenProperty.GetAvailableArea().width_ << ", "
         << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
     dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
+{
+    WLOGFI("params_: [%{public}s]", params_[0].c_str());
+    int errCode = ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(params_[0]);
+    if (errCode != 0) {
+        ShowIllegalArgsInfo();
+    } else {
+        std::ostringstream oss;
+        oss << "currentFoldStatus is: "
+            << static_cast<uint32_t>(ScreenSessionManager::GetInstance().GetFoldStatus())
+            << std::endl;
+        dumpInfo_.append(oss.str());
+    }
+}
+
+void ScreenSessionDumper::ShowIllegalArgsInfo()
+{
+    dumpInfo_.append("The arguments are illegal and you can enter '-h' for help.");
 }
 } // Rosen
 } // OHOS
