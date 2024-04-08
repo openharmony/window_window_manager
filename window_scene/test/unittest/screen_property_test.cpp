@@ -232,6 +232,7 @@ HWTEST_F(ScreenPropertyTest, SetRotation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotation start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float rotation = 2.0f;
     property->SetRotation(rotation);
     ASSERT_EQ(property->rotation_, rotation);
@@ -248,6 +249,7 @@ HWTEST_F(ScreenPropertyTest, GetRotation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetRotation start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float rotation = property->GetRotation();
     ASSERT_EQ(property->rotation_, rotation);
     delete property;
@@ -263,6 +265,7 @@ HWTEST_F(ScreenPropertyTest, GetBounds, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetBounds start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     RRect bounds = property->GetBounds();
     ASSERT_EQ(property->bounds_, bounds);
     delete property;
@@ -278,6 +281,7 @@ HWTEST_F(ScreenPropertyTest, SetPhyBounds, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPhyBounds start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     RRect phyBounds;
     phyBounds.rect_.width_ = 1344;
     phyBounds.rect_.height_ = 2772;
@@ -296,6 +300,7 @@ HWTEST_F(ScreenPropertyTest, GetPhyBounds, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhyBounds start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     RRect phyBounds = property->GetPhyBounds();
     ASSERT_EQ(property->phyBounds_, phyBounds);
     delete property;
@@ -311,6 +316,7 @@ HWTEST_F(ScreenPropertyTest, GetDensity, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetDensity start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float virtualPixelRatio = 1.0f;
     ASSERT_EQ(property->virtualPixelRatio_, virtualPixelRatio);
     delete property;
@@ -326,6 +332,7 @@ HWTEST_F(ScreenPropertyTest, GetDefaultDensity, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetDefaultDensity start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float defaultDensity = 1.0f;
     ASSERT_EQ(property->GetDefaultDensity(), defaultDensity);
     delete property;
@@ -341,6 +348,7 @@ HWTEST_F(ScreenPropertyTest, SetDefaultDensity, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDefaultDensity start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float defaultDensity = 1.0f;
     property->SetDefaultDensity(defaultDensity);
     ASSERT_EQ(property->defaultDensity_, defaultDensity);
@@ -357,6 +365,7 @@ HWTEST_F(ScreenPropertyTest, GetDensityInCurResolution, Function | SmallTest | L
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetDensityInCurResolution start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float densityInCurResolution = 1.0f;
     ASSERT_EQ(property->GetDensityInCurResolution(), densityInCurResolution);
     delete property;
@@ -372,6 +381,7 @@ HWTEST_F(ScreenPropertyTest, SetDensityInCurResolution, Function | SmallTest | L
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDensityInCurResolution start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
     float densityInCurResolution = 1.0f;
     property->SetDensityInCurResolution(densityInCurResolution);
     ASSERT_EQ(property->densityInCurResolution_, densityInCurResolution);
