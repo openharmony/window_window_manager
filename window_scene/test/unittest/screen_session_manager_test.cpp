@@ -1096,8 +1096,8 @@ HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest
 }
 
 /**
- * @tc.name: SetSpecifiedScreenPower
- * @tc.desc: ScreenSessionManager screen power
+ * @tc.name: NotifyFoldStatusChanged
+ * @tc.desc: ScreenSessionManager notify foldStatus changed
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged, Function | SmallTest | Level3)
