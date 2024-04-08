@@ -182,6 +182,7 @@ public:
     std::string GetUpdatedIconPath() const;
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
+    virtual int32_t GetMissionId() const { return persistentId_; };
     const std::string& GetWindowName() const;
     const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;

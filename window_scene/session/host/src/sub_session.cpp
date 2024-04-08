@@ -139,6 +139,11 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
     return ret;
 }
 
+int32_t SubSession::GetMissionId() const
+{
+    return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
+}
+
 void SubSession::UpdatePointerArea(const WSRect& rect)
 {
     auto property = GetSessionProperty();
