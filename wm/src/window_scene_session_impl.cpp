@@ -2825,23 +2825,23 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
 WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId=%{public}d set default density enabled=%{public}d", GetWindowId(), enabled);
- 
+
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
- 
+
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "must be app main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
- 
+
     if (isDefaultDensityEnabled_ == enabled) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled_ not change");
         return WMError::WM_OK;
     }
     isDefaultDensityEnabled_ = enabled;
- 
+
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
@@ -2854,7 +2854,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
     }
     return WMError::WM_OK;
 }
- 
+
 bool WindowSceneSessionImpl::GetDefaultDensityEnabled()
 {
     return isDefaultDensityEnabled_.load();
