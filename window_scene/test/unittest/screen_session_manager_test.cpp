@@ -1095,6 +1095,22 @@ HWTEST_F(ScreenSessionManagerTest, SetSpecifiedScreenPower, Function | SmallTest
     EXPECT_TRUE(ssm_->SetSpecifiedScreenPower(mainScreenId, state, reason));
 }
 
+/**
+ * @tc.name: NotifyFoldStatusChanged
+ * @tc.desc: ScreenSessionManager notify foldStatus changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged, Function | SmallTest | Level3)
+{
+    const std::string& dumpParam = "-p";
+    if (ssm_ != nullptr)
+    {
+        int errCode = ssm_->NotifyFoldStatusChanged(dumpParam);
+        ASSERT_EQ(errCode, 0);
+    } else {
+        ASSERT_EQ(1, 0);
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS
