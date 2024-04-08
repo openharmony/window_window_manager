@@ -735,7 +735,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent, Function | SmallTest | 
         std::make_unique<WindowExtensionSessionImpl>(option);
     windowExtensionSessionImpl.NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
 
-    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
+    auto ret = windowExtensionSessionImpl->SetPrivacyMode(isPrivacyMode);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
