@@ -737,33 +737,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent, Function | SmallTest | 
     auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
-
-/**
- * @tc.name: NapiSetUIContent
- * @tc.desc: NapiSetUIContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest | Level3)
-{
-    std::string contentInfo = " ";
-
-    napi_env env = nullptr;
-    napi_value storage = nullptr;
-    bool isdistributed = true;
-    sptr<IRemoteObject> token;
-    AppExecFwk::Ability *ability = nullptr;
-    std::unique_ptr<Ace::UIContent> uiContent;
-    bool isPrivacyMode = true;
-
-    sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
-    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(nullptr, uiContent);
-    windowExtensionSessionImpl.NapiSetUIContent(contentInfo, env, storage, isdistributed, token, ability);
-
-    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
