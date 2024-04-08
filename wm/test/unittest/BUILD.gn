@@ -25,6 +25,7 @@ group("unittest") {
     ":wm_picture_in_picture_manager_test",
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
+    ":wm_vsync_station_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
     ":wm_window_effect_test",
@@ -43,7 +44,6 @@ group("unittest") {
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
-    ":wm_vsync_station_test",
   ]
   if (!scene_board_enabled) {
     deps += [ ":wm_window_proxy_test" ]
