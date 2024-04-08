@@ -17,12 +17,14 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
 
 #include <iremote_broker.h>
-#include "interfaces/include/ws_common.h"
-#include "session_info.h"
-#include "mission_listener_interface.h"
-#include "mission_info.h"
-#include "mission_snapshot.h"
+#include "common/include/window_session_property.h"
 #include "iability_manager_collaborator.h"
+#include "interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common_inner.h"
+#include "mission_info.h"
+#include "mission_listener_interface.h"
+#include "mission_snapshot.h"
+#include "session_info.h"
 #include "zidl/window_manager_lite_interface.h"
 namespace OHOS::Media {
 class PixelMap;
@@ -43,6 +45,7 @@ public:
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
         TRANS_ID_GET_FOCUS_SESSION_TOKEN,
+        TRANS_ID_GET_FOCUS_SESSION_ELEMENT,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
@@ -58,6 +61,11 @@ public:
         TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND,
         //window manager message
         TRANS_ID_GET_FOCUS_SESSION_INFO,
+        TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
+        TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
+        TRANS_ID_GET_WINDOW_INFO,
+        TRANS_ID_CHECK_WINDOW_ID,
+        TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -66,6 +74,7 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(const std::string& deviceId,

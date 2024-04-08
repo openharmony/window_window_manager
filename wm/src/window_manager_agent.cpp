@@ -25,6 +25,11 @@ void WindowManagerAgent::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focu
     SingletonContainer::Get<WindowManager>().UpdateFocusChangeInfo(focusChangeInfo, focused);
 }
 
+void WindowManagerAgent::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    SingletonContainer::Get<WindowManager>().UpdateWindowModeTypeInfo(type);
+}
+
 void WindowManagerAgent::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     SingletonContainer::Get<WindowManager>().UpdateSystemBarRegionTints(displayId, tints);

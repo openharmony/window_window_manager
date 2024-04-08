@@ -48,6 +48,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleShow),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
         &SessionStub::HandleHide),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
+        &SessionStub::HandleUpdateRectChangeListenerRegistered),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
@@ -95,6 +97,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleProcessPointDownSession),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG),
         &SessionStub::HandleSendPointerEvenForMoveDrag),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY),
+        &SessionStub::HandleSetKeyboardSessionGravity),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
+        &SessionStub::HandleSetCallingSessionId),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -612,6 +618,34 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = data.ReadBool();
+    WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
+    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
+    uint32_t percent = data.ReadUint32();
+    WSError ret = SetKeyboardSessionGravity(gravity, percent);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetCallingSessionId!");
+    uint32_t callingSessionId = data.ReadUint32();
+
+    SetCallingSessionId(callingSessionId);
+    reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

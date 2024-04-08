@@ -32,6 +32,7 @@ public:
         WindowManagerAgentType type);
 
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void UpdateWindowModeTypeInfo(WindowModeType type);
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);

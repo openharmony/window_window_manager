@@ -37,6 +37,7 @@ const std::string RAISE_TO_TOP_POINT_DOWN_CB = "raiseToTopForPointDown";
 const std::string BACK_PRESSED_CB = "backPressed";
 const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
 const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
+const std::string SESSION_TOP_MOST_CHANGE_CB = "sessionTopmostChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
@@ -188,6 +189,7 @@ void JsSceneSession::InitListenerFuncs()
         { BACK_PRESSED_CB,                       &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionFocusableChangeRegister },
         { SESSION_TOUCHABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionTouchableChangeRegister },
+        { SESSION_TOP_MOST_CHANGE_CB,            &JsSceneSession::ProcessSessionTopmostChangeRegister },
         { CLICK_CB,                              &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,                  &JsSceneSession::ProcessTerminateSessionRegister },
         { TERMINATE_SESSION_CB_NEW,              &JsSceneSession::ProcessTerminateSessionRegisterNew },
@@ -668,6 +670,24 @@ void JsSceneSession::ProcessSessionFocusableChangeRegister()
     }
     session->SetSessionFocusableChangeListener(func);
     TLOGD(WmsLogTag::WMS_FOCUS, "ProcessSessionFocusableChangeRegister success");
+}
+
+void JsSceneSession::ProcessSessionTopmostChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onSessionTopmostChange_ =
+        std::bind(&JsSceneSession::OnSessionTopmostChange, this, std::placeholders::_1);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+        return;
+    }
+    sessionchangeCallback->onSessionTopmostChange_(session->IsTopmost());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "ProcessSessionTopmostChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionTouchableChangeRegister()
@@ -1562,6 +1582,30 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
     taskScheduler_->PostMainThreadTask(task, "OnSessionTouchableChange: state " + std::to_string(touchable));
 }
 
+void JsSceneSession::OnSessionTopmostChange(bool topmost)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]OnSessionTopmostChange, state: %{public}u", topmost);
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(SESSION_TOP_MOST_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    auto task = [topmost, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionTouchableObj = CreateJsValue(env, topmost);
+        napi_value argv[] = {jsSessionTouchableObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnSessionTopmostChange: state " + std::to_string(topmost));
+}
+
 void JsSceneSession::OnClick()
 {
     WLOGFD("[NAPI]OnClick");
@@ -1672,9 +1716,16 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "GetSceneSession return nullptr");
-            return;
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "retry RequestSceneSession return nullptr");
+                return;
+            }
+            info.persistentId_ = sceneSession->GetPersistentId();
+            sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        } else {
+            sceneSession->SetSessionInfo(info);
         }
-        sceneSession->SetSessionInfo(info);
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, sessionInfo]() {
@@ -2122,13 +2173,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
         }
         jsCallBack = iter->second;
     }
-    if (WINDOW_ORIENTATION_TO_JS_SESSION_MAP.count(static_cast<Orientation>(orientation)) == 0) {
-        WLOGFE("[NAPI]failed %{public}u since no this type", orientation);
-        return;
-    }
-    uint32_t value = static_cast<uint32_t>(WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(
-        static_cast<Orientation>(orientation)));
-    auto task = [jsCallBack, rotation = value, env = env_]() {
+    auto task = [jsCallBack, rotation = orientation, env = env_]() {
         napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
         napi_value argv[] = {jsSessionRotationObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

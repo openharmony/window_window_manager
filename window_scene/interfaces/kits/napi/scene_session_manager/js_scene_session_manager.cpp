@@ -47,8 +47,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScen
 constexpr int WAIT_FOR_SECONDS = 2;
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int ARG_INDEX_1 = 1;
-constexpr int ARG_INDEX_2 = 2;
+constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_3 = 3;
+constexpr int32_t RESTYPE_RECLAIM = 100001;
+const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -148,7 +150,7 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
         { START_UI_ABILITY_ERROR,       &JsSceneSessionManager::ProcessStartUIAbilityErrorRegister},
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
-        { CALLING_WINDOW_ID_CHANGE_CB,  &JsSceneSessionManager::ProcessCallingWindowIdChangeRegister},
+        { CALLING_WINDOW_ID_CHANGE_CB,  &JsSceneSessionManager::ProcessCallingSessionIdChangeRegister},
     };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
@@ -322,9 +324,9 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
 }
 
-void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
+void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t windowId)
 {
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingWindowIdChange");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingSessionIdChange");
     auto iter = jsCbMap_.find(CALLING_WINDOW_ID_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -334,7 +336,7 @@ void JsSceneSessionManager::OnCallingWindowIdChange(const uint32_t windowId)
         napi_value argv[] = { CreateJsValue(env, windowId) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnCallingWindowIdChange, windowId:" + std::to_string(windowId));
+    taskScheduler_->PostMainThreadTask(task, "OnCallingSessionIdChange, windowId:" + std::to_string(windowId));
 }
 
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
@@ -420,13 +422,13 @@ void JsSceneSessionManager::ProcessShiftFocus()
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
 }
 
-void JsSceneSessionManager::ProcessCallingWindowIdChangeRegister()
+void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
 {
-    ProcessCallingWindowIdChangeFunc func = [this](uint32_t callingWindowId) {
-        WLOGFD("ProcessCallingWindowIdChangeRegister called, callingWindowId: %{public}d", callingWindowId);
-        this->OnCallingWindowIdChange(callingWindowId);
+    ProcessCallingSessionIdChangeFunc func = [this](uint32_t callingSessionId) {
+        WLOGFD("ProcessCallingSessionIdChangeRegister called, callingSessionId: %{public}d", callingSessionId);
+        this->OnCallingSessionIdChange(callingSessionId);
     };
-    SceneSessionManager::GetInstance().SetCallingWindowIdChangeListenser(func);
+    SceneSessionManager::GetInstance().SetCallingSessionIdSessionListenser(func);
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -1802,7 +1804,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     bool byForeground = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], byForeground)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], byForeground)) {
         WLOGFE("[NAPI]Failed to convert parameter to byForeground");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1934,7 +1936,7 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1954,7 +1956,14 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea);
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(isVisible, barArea, displayId);
     return NapiGetUndefined(env);
 }
 
@@ -2066,13 +2075,22 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     }
 
     std::unordered_map<std::string, std::string> mapPayload;
-    if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_2], mapPayload)) {
+    if (!ConvertStringMapFromJs(env, argv[ARG_INDEX_TWO], mapPayload)) {
         WLOGFE("[NAPI]Failed to convert parameter to pauloadPid");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     mapPayload["srcPid"] = std::to_string(getprocpid());
+    if (resType == RESTYPE_RECLAIM) {
+        std::string reclaimTag = mapPayload[RES_PARAM_RECLAIM_TAG];
+        WLOGFI("handle reclaim type, reclaimTag=%{public}s", reclaimTag.c_str());
+        if (reclaimTag == "true") {
+            auto retId = SceneSessionManager::GetInstance().ReclaimPurgeableCleanMem();
+            WLOGFI("trim ReclaimPurgeableCleanMem finished, retId:%{public}d", retId);
+            return NapiGetUndefined(env);
+        }
+    }
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, value, mapPayload);
 #endif

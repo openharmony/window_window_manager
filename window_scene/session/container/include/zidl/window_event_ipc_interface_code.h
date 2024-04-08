@@ -33,6 +33,7 @@ enum class WindowEventInterfaceCode {
     TRANS_ID_TRANSFER_EXECUTE_ACTION,
     TRANS_ID_TRANSFER_CLEAR_FOCUS,
     TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT,
+    TRANS_ID_TRANSFER_KEY_EVENT_ASYNC,
 };
 }   // namespace Rosen
 }   // namespace OHOS

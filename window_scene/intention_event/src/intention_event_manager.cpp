@@ -262,7 +262,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusedSessionId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_EVENT, "focusedSessionId is invalid");
         keyEvent->MarkProcessed();
@@ -286,8 +286,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         return;
     }
     bool isConsumed = focusedSceneSession->SendKeyEventToUI(keyEvent, true);
-    TLOGI(WmsLogTag::WMS_EVENT, "SendKeyEventToUI isConsumed = %{public}d", static_cast<int>(isConsumed));
     if (isConsumed) {
+        TLOGI(WmsLogTag::WMS_EVENT, "SendKeyEventToUI id:%{public}d isConsumed:%{public}d",
+            keyEvent->GetId(), static_cast<int>(isConsumed));
         return;
     }
 #ifdef IMF_ENABLE

@@ -15,12 +15,29 @@
 
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
+#include <future>
 
+#include "key_event.h"
 #include "want.h"
 
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
+class WindowEventChannelListener : public IRemoteStub<IWindowEventChannelListener> {
+public:
+    explicit WindowEventChannelListener() = default;
+    void SetTransferKeyEventForConsumedParams(const std::shared_ptr<std::promise<bool>>& isConsumedPromise,
+        const std::shared_ptr<WSError>& retCode);
+    void ResetTransferKeyEventForConsumedParams();
+    void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+
+private:
+    std::mutex transferKeyEventForConsumedMutex_;
+    std::shared_ptr<std::promise<bool>> isConsumedPromise_;
+    std::shared_ptr<WSError> retCode_;
+};
+
 using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
 using NotifyTransferExtensionDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyRemoteReadyFunc = std::function<void()>;
@@ -62,6 +79,8 @@ public:
     void NotifyAsyncOn() override;
     void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
+        bool& isTimeOut, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background() override;
 

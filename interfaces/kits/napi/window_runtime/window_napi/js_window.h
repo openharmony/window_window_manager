@@ -85,6 +85,7 @@ public:
     static napi_value SetDimBehind(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value SetWindowFocusable(napi_env env, napi_callback_info info);
+    static napi_value SetTopmost(napi_env env, napi_callback_info info);
     static napi_value SetKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -92,6 +93,7 @@ public:
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetWindowPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value SetTouchableAreas(napi_env env, napi_callback_info info);
     static napi_value SetResizeByDragEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
@@ -141,11 +143,15 @@ public:
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
+    static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
+    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -206,6 +212,7 @@ private:
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
+    napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -221,6 +228,7 @@ private:
     napi_value OnSetDimBehind(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowFocusable(napi_env env, napi_callback_info info);
+    napi_value OnSetTopmost(napi_env env, napi_callback_info info);
     napi_value OnSetKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -228,6 +236,7 @@ private:
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetWindowPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnSetTouchableAreas(napi_env env, napi_callback_info info);
     napi_value OnSetResizeByDragEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetRaiseByClickEnabled(napi_env env, napi_callback_info info);
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
@@ -258,6 +267,8 @@ private:
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
+    napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

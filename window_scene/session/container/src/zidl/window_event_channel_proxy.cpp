@@ -135,6 +135,41 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
     return static_cast<WSError>(ret);
 }
 
+WSError WindowEventChannelProxy::TransferKeyEventForConsumedAsync(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent, const sptr<IRemoteObject>& listener)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!keyEvent->WriteToParcel(data)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to write key event");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isPreImeEvent)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write isPreImeEvent failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(listener)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteRemoteObject listener failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError WindowEventChannelProxy::TransferFocusActiveEvent(bool isFocusActive)
 {
     MessageParcel data;

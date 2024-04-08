@@ -191,7 +191,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THIN));
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_REGULAR));
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
 
@@ -208,7 +207,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
-    const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
+    sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);

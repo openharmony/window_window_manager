@@ -548,6 +548,11 @@ DMError ScreenSessionManagerProxy::RegisterDisplayManagerAgent(const sptr<IDispl
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
+    if (displayManagerAgent == nullptr) {
+        WLOGFE("IDisplayManagerAgent is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         WLOGFE("Write IDisplayManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -575,6 +580,11 @@ DMError ScreenSessionManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDis
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (displayManagerAgent == nullptr) {
+        WLOGFE("IDisplayManagerAgent is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
@@ -1294,7 +1304,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
                                                                                DmErrorCode* errorCode)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
+    WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: remote is nullptr");
@@ -1444,7 +1454,7 @@ sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId)
         return nullptr;
     }
     for (auto& mode : info->GetModes()) {
-        WLOGFI("info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+        WLOGFD("info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
             mode->id_, mode->width_, mode->height_, mode->refreshRate_);
     }
     return info;

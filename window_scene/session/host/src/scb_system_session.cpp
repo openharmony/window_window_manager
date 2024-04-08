@@ -15,6 +15,9 @@
 
 #include "session/host/include/scb_system_session.h"
 
+#include <hisysevent.h>
+#include "key_event.h"
+#include "pointer_event.h"
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
 
@@ -49,5 +52,99 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     WLOGFI("id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
+}
+
+WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
+{
+    auto task = [weakThis = wptr(this), rsTransaction]() {
+        auto session = weakThis.promote();
+        WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
+        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
+            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+        }
+        // clear after use
+        if (session->reason_ != SizeChangeReason::DRAG) {
+            session->reason_ = SizeChangeReason::UNDEFINED;
+            session->isDirty_ = false;
+        }
+        return ret;
+    };
+    PostTask(task, "NotifyClientToUpdateRect");
+    return WSError::WS_OK;
+}
+
+void SCBSystemSession::PresentFocusIfPointDown()
+{
+    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    if (!isFocused_ && GetFocusable()) {
+        NotifyRequestFocusStatusNotifyManager(true, false);
+        NotifyClick();
+    }
+}
+
+WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    WSError ret = Session::TransferKeyEvent(keyEvent);
+    return ret;
+}
+
+void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
+{
+    WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true, false);
+            NotifyClick();
+        }
+    }
+}
+
+WSError SCBSystemSession::UpdateFocus(bool isFocused)
+{
+    if (isFocused_ == isFocused) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "Session focus do not change");
+        return WSError::WS_DO_NOTHING;
+    }
+    isFocused_ = isFocused;
+    // notify scb arkui focus
+    if (isFocused) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "PID", getpid(),
+            "UID", getuid(),
+            "BUNDLE_NAME", sessionInfo_.bundleName_);
+        NotifyUIRequestFocus();
+    } else {
+        NotifyUILostFocus();
+    }
+    return WSError::WS_OK;
+}
+
+WSError SCBSystemSession::UpdateWindowMode(WindowMode mode)
+{
+    WLOGFD("session is system, id: %{public}d, mode: %{public}d, name: %{public}s, state: %{public}u",
+        GetPersistentId(), static_cast<int32_t>(mode), sessionInfo_.bundleName_.c_str(), state_);
+    return WSError::WS_ERROR_INVALID_SESSION;
+}
+
+WSError SCBSystemSession::SetSystemSceneBlockingFocus(bool blocking)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "Session set blocking focus, id: %{public}d, mode: %{public}d",
+        GetPersistentId(), blocking);
+    blockingFocus_ = blocking;
+    return WSError::WS_OK;
+}
+
+void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
+{
+    return;
 }
 } // namespace OHOS::Rosen

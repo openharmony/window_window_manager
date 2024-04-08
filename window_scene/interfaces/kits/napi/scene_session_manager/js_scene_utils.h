@@ -61,23 +61,7 @@ enum class JsSessionType : uint32_t {
     TYPE_NAVIGATION_INDICATOR,
     TYPE_SEARCHING_BAR,
     TYPE_SYSTEM_SUB_WINDOW,
-};
-
-// should same with bundlemanager ability info
-enum class JsSessionOrientation : uint32_t {
-    UNSPECIFIED = 0,
-    LANDSCAPE,
-    PORTRAIT,
-    FOLLOWRECENT,
-    LANDSCAPE_INVERTED,
-    PORTRAIT_INVERTED,
-    AUTO_ROTATION,
-    AUTO_ROTATION_LANDSCAPE,
-    AUTO_ROTATION_PORTRAIT,
-    AUTO_ROTATION_RESTRICTED,
-    AUTO_ROTATION_LANDSCAPE_RESTRICTED,
-    AUTO_ROTATION_PORTRAIT_RESTRICTED,
-    LOCKED,
+    TYPE_HANDWRITE,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -113,6 +97,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,     JsSessionType::TYPE_NAVIGATION_INDICATOR    },
     { WindowType::WINDOW_TYPE_SEARCHING_BAR,            JsSessionType::TYPE_SEARCHING_BAR           },
     { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,        JsSessionType::TYPE_SYSTEM_SUB_WINDOW       },
+    { WindowType::WINDOW_TYPE_HANDWRITE,                JsSessionType::TYPE_HANDWRITE               },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -148,23 +133,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_NAVIGATION_INDICATOR,     WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR    },
     { JsSessionType::TYPE_SEARCHING_BAR,            WindowType::WINDOW_TYPE_SEARCHING_BAR           },
     { JsSessionType::TYPE_SYSTEM_SUB_WINDOW,        WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW       },
-};
-
-const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSION_MAP {
-    {Orientation::UNSPECIFIED,                        JsSessionOrientation::UNSPECIFIED             },
-    {Orientation::VERTICAL,                           JsSessionOrientation::PORTRAIT                },
-    {Orientation::HORIZONTAL,                         JsSessionOrientation::LANDSCAPE               },
-    {Orientation::REVERSE_VERTICAL,                   JsSessionOrientation::PORTRAIT_INVERTED       },
-    {Orientation::REVERSE_HORIZONTAL,                 JsSessionOrientation::LANDSCAPE_INVERTED      },
-    {Orientation::SENSOR,                             JsSessionOrientation::AUTO_ROTATION           },
-    {Orientation::SENSOR_VERTICAL,                    JsSessionOrientation::AUTO_ROTATION_PORTRAIT  },
-    {Orientation::SENSOR_HORIZONTAL,                  JsSessionOrientation::AUTO_ROTATION_LANDSCAPE },
-    {Orientation::AUTO_ROTATION_RESTRICTED,           JsSessionOrientation::AUTO_ROTATION_RESTRICTED},
-    {Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
-        JsSessionOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
-    {Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
-        JsSessionOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
-    {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
+    { JsSessionType::TYPE_HANDWRITE,                WindowType::WINDOW_TYPE_HANDWRITE               },
 };
 
 JsSessionType GetApiType(WindowType type);
@@ -175,7 +144,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
 bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
-bool ConvertStringMapFromJs(napi_env env, napi_value jsObject, std::unordered_map<std::string, std::string> &stringMap);
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);

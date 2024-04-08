@@ -28,6 +28,7 @@ public:
     PictureInPictureManager();
     ~PictureInPictureManager();
     static bool ShouldAbortPipStart();
+    static bool IsSupportPiP();
     static void PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController);
     static void RemovePipControllerInfo(int32_t windowId);
     static void AttachActivePipController(sptr<PictureInPictureController> pipController);
