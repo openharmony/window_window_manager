@@ -636,6 +636,11 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
+float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+{
+    return displayInfo->GetVirtualPixelRatio();
+}
+
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -653,7 +658,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
-    float density = displayInfo->GetVirtualPixelRatio();
+    float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
     config.SetDensity(density);
@@ -1281,7 +1286,7 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
         WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     int32_t decorHeightWithPx = static_cast<int32_t>(decorHeight * vpr);
     uiContent_->SetContainerModalTitleHeight(decorHeightWithPx);
     WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
@@ -1304,7 +1309,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1333,7 +1338,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1370,7 +1375,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
