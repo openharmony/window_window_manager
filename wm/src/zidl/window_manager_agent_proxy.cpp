@@ -256,22 +256,22 @@ void WindowManagerAgentProxy::UpdateCameraWindowStatus(uint32_t accessTokenId, b
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint32(accessTokenId)) {
-        WLOGFE("Write accessTokenId failed");
+        TLOGE(WmsLogTag::WMS_MAIN, "Write accessTokenId failed");
         return;
     }
     if (!data.WriteBool(isShowing)) {
-        WLOGFE("Write isShowing status failed");
+        TLOGE(WmsLogTag::WMS_MAIN, "Write isShowing status failed");
         return;
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
 }
 } // namespace Rosen
