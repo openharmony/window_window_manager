@@ -17,8 +17,8 @@
 #include <csignal>
 
 #include "unique_fd.h"
-#include "session_permission.h"
 #include "screen_session_manager.h"
+#include "session_permission.h"
 
 namespace OHOS {
 namespace Rosen {
