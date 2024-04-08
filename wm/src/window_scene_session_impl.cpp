@@ -138,7 +138,7 @@ bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId)
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -2871,9 +2871,9 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo
     if (WindowHelper::IsMainWindow(GetType())) {
         isDefaultDensityEnabled = GetDefaultDensityEnabled();
     } else {
-        auto parent = FindWindowById(GetParentId());
-        if (parent) {
-            isDefaultDensityEnabled = parent->GetDefaultDensityEnabled();
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow) {
+            isDefaultDensityEnabled = mainWindow->GetDefaultDensityEnabled();
         }
     }
     if (isDefaultDensityEnabled) {
