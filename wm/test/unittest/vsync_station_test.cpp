@@ -81,3 +81,4 @@ HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level
 
 }
 }
+}
