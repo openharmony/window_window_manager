@@ -166,7 +166,8 @@ void WindowManagerLite::Impl::NotifyWindowModeChange(WindowModeType type)
 
 void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    WLOGFD("Camera window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Camera window, accessTokenId = %{public}u, isShowing = %{public}u",
+        accessTokenId, isShowing);
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -479,7 +480,7 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
 WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -491,13 +492,13 @@ WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICamer
     ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
+        TLOGW(WmsLogTag::WMS_SYSTEM, "RegisterWindowManagerAgent failed!");
         pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
             pImpl_->cameraWindowChangedListeners_.end(), listener);
         if (iter != pImpl_->cameraWindowChangedListeners_.end()) {
-            WLOGFW("Listener is already registered.");
+            TLOGW(WmsLogTag::WMS_SYSTEM, "Listener is already registered.");
             return WMError::WM_OK;
         }
         pImpl_->cameraWindowChangedListeners_.push_back(listener);
@@ -508,7 +509,7 @@ WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICamer
 WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -516,7 +517,7 @@ WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICam
     auto iter = std::find(pImpl_->cameraWindowChangedListeners_.begin(),
         pImpl_->cameraWindowChangedListeners_.end(), listener);
     if (iter == pImpl_->cameraWindowChangedListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "could not find this listener");
         return WMError::WM_OK;
     }
     pImpl_->cameraWindowChangedListeners_.erase(iter);
