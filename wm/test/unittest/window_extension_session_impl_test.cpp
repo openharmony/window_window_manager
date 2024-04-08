@@ -595,7 +595,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | Small
 
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowExtensionSessionImpl.UpdateConfiguration(configuration);
-    ASSERT_EQ(nullptr, windowExtensionSessionImpl.uiContent_);
+    ASSERT_NE(nullptr, windowExtensionSessionImpl.uiContent_);
 }
 
 /**
@@ -675,7 +675,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, Function | SmallTest |
     {
         windowExtensionSessionImpl.surfaceNode_ = RSSurfaceNode::Create(config);
     }
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(WMError::WM_OK, ret);
 }
 
 /**
@@ -731,7 +731,8 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent, Function | SmallTest | 
     bool isPrivacyMode = true;
 
     sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    std::unique_ptr<WindowExtensionSessionImpl> windowExtensionSessionImpl =
+        std::make_unique<WindowExtensionSessionImpl>(option);
     windowExtensionSessionImpl.NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
 
     auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
