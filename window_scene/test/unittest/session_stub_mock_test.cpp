@@ -17,7 +17,7 @@
 #include "mock/mock_session_stub.h"
 #include "mock/mock_message_parcel.h"
 #include "session/host/include/zidl/session_stub.h"
-#include "accessibility_event_info_parcel.h"
+#include "parcel/accessibility_event_info_parcel.h"
 #include "window_manager_hilog.h"
 using namespace testing;
 using namespace testing::ext;
