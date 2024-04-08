@@ -1762,6 +1762,21 @@ public:
     }
 
     /**
+     * @brief Set whether to use default density.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether to use default density.
+     *
+     * @return True means use default density, window's layout not follow to system change, false means the opposite.
+     */
+    virtual bool GetDefaultDensityEnabled() { return false; }
+
+    /**
      * @brief Hide None Secure Windows.
      *
      * @param shouldHide bool.

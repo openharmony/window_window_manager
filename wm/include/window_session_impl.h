@@ -240,6 +240,7 @@ protected:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
+    virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);

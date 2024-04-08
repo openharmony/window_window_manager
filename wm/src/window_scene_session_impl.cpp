@@ -138,7 +138,7 @@ bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId)
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -463,7 +463,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
-        float vpr = displayInfo->GetVirtualPixelRatio();
+        float vpr = GetVirtualPixelRatio(displayInfo);
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
             pointerEvent->MarkProcessed();
@@ -646,7 +646,7 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
         return;
     }
 
-    float virtualPixelRatio = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float virtualPixelRatio = GetVirtualPixelRatio(display->GetDisplayInfo());
     const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
     const auto& customizedLimits = property_->GetWindowLimits();
 
@@ -768,7 +768,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
-    float density = displayInfo->GetVirtualPixelRatio();
+    float density = GetVirtualPixelRatio(displayInfo);
     if (virtualPixelRatio_ != density) {
         UpdateDensity();
     }
@@ -1081,7 +1081,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     }
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
         return;
     }
@@ -1090,7 +1090,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-    float vpr = display->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     uint32_t smallWidth = displayHeight <= displayWidth ? displayHeight : displayWidth;
     float hwRatio = static_cast<float>(displayHeight) / static_cast<float>(displayWidth);
     uint32_t minWidth;
@@ -2239,12 +2239,12 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     } else {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-        if (display == nullptr) {
+        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
             return WMError::WM_ERROR_INVALID_PARAM;
         }
-        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
-                                                                         display->GetVirtualPixelRatio()));
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(
+            static_cast<int>(blurStyle), GetVirtualPixelRatio(display->GetDisplayInfo())));
     }
 
     RSTransaction::FlushImplicitTransaction();
@@ -2758,7 +2758,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("SetWindowLimits failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2840,6 +2840,68 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         type, state_, requestState_);
     return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId=%{public}d set default density enabled=%{public}d", GetWindowId(), enabled);
+
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "must be app main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (isDefaultDensityEnabled_ == enabled) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled_ not change");
+        return WMError::WM_OK;
+    }
+    isDefaultDensityEnabled_ = enabled;
+
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_LAYOUT, "windowId=%{public}d UpdateDensity", window->GetWindowId());
+        window->UpdateDensity();
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::GetDefaultDensityEnabled()
+{
+    return isDefaultDensityEnabled_.load();
+}
+
+float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+{
+    float vpr = 1.0f;
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is nullptr");
+        return vpr;
+    }
+    bool isDefaultDensityEnabled = false;
+    if (WindowHelper::IsMainWindow(GetType())) {
+        isDefaultDensityEnabled = GetDefaultDensityEnabled();
+    } else {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow) {
+            isDefaultDensityEnabled = mainWindow->GetDefaultDensityEnabled();
+        }
+    }
+    if (isDefaultDensityEnabled) {
+        vpr = displayInfo->GetDefaultVirtualPixelRatio();
+    } else {
+        vpr = displayInfo->GetVirtualPixelRatio();
+    }
+    return vpr;
 }
 
 WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
