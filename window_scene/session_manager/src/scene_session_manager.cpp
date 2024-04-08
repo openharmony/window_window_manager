@@ -894,6 +894,7 @@ WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSessio
         return WSError::WS_ERROR_NULLPTR;
     }
     auto parentPersistentId = property->GetParentPersistentId();
+    sceneSession->SetParentPersistentId(parentPersistentId);
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
