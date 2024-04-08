@@ -435,6 +435,62 @@ HWTEST_F(MoveDragControllerTest, InitDecorValue01, Function | SmallTest | Level1
     ASSERT_TRUE((moveDragController != nullptr));
     moveDragController->InitDecorValue(property, sysConfig);
 }
+
+/**
+ * @tc.name: ConsumeMoveEvent
+ * @tc.desc: test function : ConsumeMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ConsumeMoveEvent, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(nullptr, originalRect));
+
+    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+}
+
+
+/**
+ * @tc.name: ProcessWindowDragHotAreaFunc
+ * @tc.desc: test function : ProcessWindowDragHotAreaFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallTest | Level1)
+{
+    bool isSendHotAreaMessage = true;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
+    ASSERT_EQ(true, isSendHotAreaMessage);
+}
+
+/**
+ * @tc.name: ConsumeDragEvent
+ * @tc.desc: test function : ConsumeDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    SystemSessionConfig sysConfig;
+    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(nullptr, originalRect, property, sysConfig));
+    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
+    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio
+ * @tc.desc: test function : GetVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetVirtualPixelRatio, Function | SmallTest | Level1)
+{
+    float vpr = 3.5;
+    float vpr01 = moveDragController->GetVirtualPixelRatio();
+    ASSERT_EQ(vpr, vpr01);
+}
 }
 }
 }
