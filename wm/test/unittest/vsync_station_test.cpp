@@ -80,5 +80,5 @@ HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level
 }
 
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS
