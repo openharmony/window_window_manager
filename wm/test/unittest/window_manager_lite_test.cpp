@@ -132,7 +132,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Functio
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraWindowChangedListenerAgent_;
     auto oldListeners = windowManager.pImpl_->cameraWindowChangedListeners_;
-    windowManager.pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgentLite();
+    windowManager.pImpl_->cameraWindowChangedListenerAgent_ = nullptr;
     windowManager.pImpl_->cameraWindowChangedListeners_.clear();
 
     // check nullpter
