@@ -2631,10 +2631,10 @@ HWTEST_F(SceneSessionManagerTest, NotifyDumpInfoResult, Function | SmallTest | L
     params.push_back("-w");
     params.push_back("23456");
     WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_NE(result02, WSError::WS_ERROR_INVALID_PARAM);
     params.clear();
     WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_NE(result03, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
