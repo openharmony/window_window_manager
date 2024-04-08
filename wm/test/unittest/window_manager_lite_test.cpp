@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_manager_lite.h"
 #include "mock_window_adapter_lite.h"
 #include "singleton_mocker.h"
+#include "window_manager_lite.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,10 +25,7 @@ using Mocker = SingletonMocker<WindowAdapterLite, MockWindowAdapterLite>;
 
 class TestCameraWindowChangedListener : public ICameraWindowChangedListener {
 public:
-    void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) override
-    {
-        WLOGI("TestCameraWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
-    };
+    void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) override {};
 };
 
 class WindowManagerLiteTest : public testing::Test {
@@ -130,12 +127,12 @@ HWTEST_F(WindowManagerLiteTest, RegisterCameraWindowChangedListener01, Function 
  * @tc.desc: check UnregisterCameraWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterCameraWindowChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraWindowChangedListenerAgent_;
     auto oldListeners = windowManager.pImpl_->cameraWindowChangedListeners_;
-    windowManager.pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgent();
+    windowManager.pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgentLite();
     windowManager.pImpl_->cameraWindowChangedListeners_.clear();
 
     // check nullpter
