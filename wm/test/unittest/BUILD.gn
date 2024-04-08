@@ -124,7 +124,7 @@ ohos_unittest("wm_vsync_station_test") {
   sources = [ "vsync_station_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
-  
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
