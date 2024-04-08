@@ -650,6 +650,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.persistentId_)));
     napi_set_named_property(env, objValue, "callerPersistentId",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callerPersistentId_)));
+    napi_set_named_property(env, objValue, "callerBundleName", CreateJsValue(env, sessionInfo.callerBundleName_));
+    napi_set_named_property(env, objValue, "callerAbilityName", CreateJsValue(env, sessionInfo.callerAbilityName_));
     napi_set_named_property(env, objValue, "callState",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.callState_)));
     napi_set_named_property(env, objValue, "windowMode",
@@ -660,10 +662,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(static_cast<WindowType>(sessionInfo.windowType_)))));
     napi_set_named_property(env, objValue, "sessionState",
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
-    auto requestOrientation =
-        WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(static_cast<Orientation>(sessionInfo.requestOrientation_));
     napi_set_named_property(env, objValue, "requestOrientation",
-        CreateJsValue(env, static_cast<uint32_t>(requestOrientation)));
+        CreateJsValue(env, sessionInfo.requestOrientation_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
@@ -957,6 +957,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
+    SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
     return objValue;
 }
 

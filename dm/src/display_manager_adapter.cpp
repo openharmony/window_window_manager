@@ -400,7 +400,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    WLOGFI("dms OnRemoteDied");
+    WLOGFD("dms OnRemoteDied");
     adapter_.Clear();
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
@@ -410,14 +410,14 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("BaseAdapter destory!");
+    WLOGFD("BaseAdapter destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerServiceProxy_ = nullptr;
 }
 
 void BaseAdapter::Clear()
 {
-    WLOGFI("BaseAdapter Clear!");
+    WLOGFD("BaseAdapter Clear!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
@@ -502,7 +502,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFI("DisplayManagerAdapter::GetCutoutInfo");
+    WLOGFD("DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;

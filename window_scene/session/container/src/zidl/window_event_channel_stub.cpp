@@ -34,6 +34,8 @@ constexpr int32_t MAX_ARGUMENTS_KEY_SIZE = 1000;
 const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         &WindowEventChannelStub::HandleTransferKeyEvent),
+    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
+        &WindowEventChannelStub::HandleTransferKeyEventAsync),
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT),
         &WindowEventChannelStub::HandleTransferPointerEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
@@ -103,6 +105,33 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
 
     reply.WriteBool(isConsumed);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int WindowEventChannelStub::HandleTransferKeyEventAsync(MessageParcel& data, MessageParcel& reply)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to create key event!");
+        return ERR_INVALID_DATA;
+    }
+    if (!keyEvent->ReadFromParcel(data)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read Key Event failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isPreImeEvent = false;
+    if (!data.ReadBool(isPreImeEvent)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read Key Event failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> listener = data.ReadRemoteObject();
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "ReadRemoteObject failed");
+        return ERR_INVALID_DATA;
+    }
+
+    WSError errCode = TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

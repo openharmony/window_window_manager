@@ -15,6 +15,9 @@
 
 #include "session/host/include/sub_session.h"
 
+#include "key_event.h"
+#include "parameters.h"
+#include "pointer_event.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -84,6 +87,25 @@ WSError SubSession::Hide()
     return WSError::WS_OK;
 }
 
+WSError SubSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+    int32_t pid, int32_t uid)
+{
+    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        if (ret == WSError::WS_OK) {
+            session->isActive_ = true;
+            session->UpdateSessionState(SessionState::STATE_FOREGROUND);
+        }
+        return ret;
+    });
+}
+
 WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
@@ -97,5 +119,47 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
+}
+
+WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+        TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, not transfer pointer event");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
+    WSError ret = Session::TransferKeyEvent(keyEvent);
+    return ret;
+}
+
+void SubSession::UpdatePointerArea(const WSRect& rect)
+{
+    auto property = GetSessionProperty();
+    if (!(property->IsDecorEnable() && GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
+        return;
+    }
+    Session::UpdatePointerArea(rect);
+}
+
+bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    auto sessionState = GetSessionState();
+    int32_t action = pointerEvent->GetPointerAction();
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC && sessionState != SessionState::STATE_FOREGROUND &&
+        sessionState != SessionState::STATE_ACTIVE &&
+        action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        WLOGFW("Current Session Info: [persistentId: %{public}d, "
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

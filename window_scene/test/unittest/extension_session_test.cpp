@@ -18,6 +18,9 @@
 #include "accessibility_event_info.h"
 #include "session_info.h"
 #include "interfaces/include/ws_common.h"
+#include "key_event.h"
+#include "mock/mock_session_stage.h"
+#include "mock/mock_window_event_channel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -246,6 +249,153 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest 
     int64_t uiExtensionIdLevel = 6;
     WSError result = extensionSession_.TransferAccessibilityEvent(info1, uiExtensionIdLevel);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumed01
+ * @tc.desc: TransferKeyEventForConsumed not timeout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
+    extensionSession.windowEventChannel_ = mockEventChannel;
+    EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync)
+        .WillOnce([](const std::shared_ptr<MMI::KeyEvent> &keyEvent,
+                     bool isPreImeEvent,
+                     const sptr<IRemoteObject> &listener) {
+            auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
+            channelListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
+            return WSError::WS_OK;
+        });
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isConsumed = false;
+    bool isTimeout = false;
+    bool isPreImeEvent = false;
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(isTimeout, false);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumed02
+ * @tc.desc: TransferKeyEventForConsumed timeout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
+    extensionSession.windowEventChannel_ = mockEventChannel;
+    EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync);
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isConsumed = false;
+    bool isTimeout = false;
+    bool isPreImeEvent = false;
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(isTimeout, true);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumed03
+ * @tc.desc: TransferKeyEventForConsumed windowEventChannel_ nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isConsumed = false;
+    bool isTimeout = false;
+    bool isPreImeEvent = false;
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumed04
+ * @tc.desc: TransferKeyEventForConsumed keyEvent nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed04, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
+    extensionSession.windowEventChannel_ = mockEventChannel;
+
+    auto keyEvent = nullptr;
+    bool isConsumed = false;
+    bool isTimeout = false;
+    bool isPreImeEvent = false;
+    WSError result = extensionSession.TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: WindowEventChannelListenerOnRemoteRequest01
+ * @tc.desc: WindowEventChannelListenerOnRemoteRequest01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(WindowEventChannelListener::GetDescriptor());
+    data.WriteBool(true);
+    data.WriteInt32(0);
+    uint32_t code = static_cast<uint32_t>(IWindowEventChannelListener::WindowEventChannelListenerMessage::
+        TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC);
+    WindowEventChannelListener listener;
+    ASSERT_EQ(listener.OnRemoteRequest(code, data, reply, option), 0);
+}
+
+/**
+ * @tc.name: WindowEventChannelListenerOnRemoteRequest02
+ * @tc.desc: WindowEventChannelListenerOnRemoteRequest02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(WindowEventChannelListener::GetDescriptor());
+    data.WriteBool(true);
+    data.WriteInt32(0);
+    uint32_t code = static_cast<uint32_t>(10001);
+    WindowEventChannelListener listener;
+    ASSERT_EQ(listener.OnRemoteRequest(code, data, reply, option), IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**

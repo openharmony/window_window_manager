@@ -78,6 +78,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_PIP,
     WINDOW_TYPE_THEME_EDITOR,
     WINDOW_TYPE_NAVIGATION_INDICATOR,
+    WINDOW_TYPE_HANDWRITE,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -100,6 +101,16 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP
+};
+
+/**
+ * @brief Enumerates modeType of window.
+ */
+enum class WindowModeType : uint8_t {
+    WINDOW_MODE_SPLIT_FLOATING = 0,
+    WINDOW_MODE_SPLIT = 1,
+    WINDOW_MODE_FLOATING = 2,
+    WINDOW_MODE_OTHER = 3
 };
 
 /**
@@ -263,7 +274,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_END = 1 << 6,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_END = 1 << 7,
 };
 
 /**

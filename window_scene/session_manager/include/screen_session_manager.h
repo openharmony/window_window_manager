@@ -33,6 +33,7 @@
 #include "screen.h"
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -243,8 +244,8 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
-    void RegisterRefreshRateModeChangeListener();
-    void OnHgmRefreshRateModeChange(int32_t refreshRateMode);
+    void RegisterRefreshRateChangeListener();
+    void OnHgmRefreshRateChange(int32_t refreshRateModeName);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
@@ -259,7 +260,8 @@ private:
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
-    void HandlerSensor(ScreenPowerStatus status);
+    void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
+    bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
 
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);

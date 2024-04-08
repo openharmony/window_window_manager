@@ -47,6 +47,9 @@ namespace {
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
     constexpr int32_t MIN_DECOR_HEIGHT = 37;
     constexpr int32_t MAX_DECOR_HEIGHT = 112;
+    constexpr size_t INDEX_ZERO = 0;
+    constexpr size_t INDEX_ONE = 1;
+    constexpr size_t INDEX_TWO = 2;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -434,6 +437,13 @@ napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowFocusable(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SetTopmost");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WLOGI("SetKeepScreenOn");
@@ -481,6 +491,13 @@ napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
     WLOGI("SetTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetTouchableAreas(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "SetTouchableAreas");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTouchableAreas(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetResizeByDragEnabled(napi_env env, napi_callback_info info)
@@ -686,6 +703,13 @@ napi_value JsWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
+{
+    WLOGI("SetHandwritingFlag");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetHandwritingFlag(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetAspectRatio");
@@ -775,6 +799,20 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]GetTitleButtonsRect");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTitleButtonVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowMask");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowMask(env, info) : nullptr;
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -2626,9 +2664,13 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             WLOGFE("Failed to convert parameter to Orientation");
         } else {
             uint32_t resultValue = 0;
-            napi_get_value_uint32(env, argv[0], &resultValue);
+            if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], resultValue)) {
+                WLOGFE("Failed to convert parameter to orientation");
+                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            }
             auto apiOrientation = static_cast<ApiOrientation>(resultValue);
-            if (apiOrientation < ApiOrientation::UNSPECIFIED || apiOrientation > ApiOrientation::LOCKED) {
+            if (apiOrientation < ApiOrientation::UNSPECIFIED ||
+                apiOrientation > ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED) {
                 WLOGFE("Orientation %{public}u invalid!", static_cast<uint32_t>(apiOrientation));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
@@ -2681,7 +2723,8 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     }
     Orientation requestedOrientation = window->GetRequestedOrientation();
     ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
-    if (requestedOrientation >= Orientation::UNSPECIFIED && requestedOrientation <= Orientation::LOCKED) {
+    if (requestedOrientation >= Orientation::UNSPECIFIED &&
+        requestedOrientation <= Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
         apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
     } else {
         WLOGFE("OnGetPreferredOrientation Orientation %{public}u invalid!",
@@ -3064,6 +3107,53 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTopmost permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    if (windowToken_ == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTopmost is not allowed since window is not main window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool topmost = false;
+    napi_get_value_bool(env, argv[0], &topmost);
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete = [weakToken, topmost](napi_env env, NapiAsyncTask& task, int32_t status) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "Invalidate params."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTopmost(topmost));
+        if (ret == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window set topmost failed"));
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set topmost end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetTopmost",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -3380,6 +3470,48 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTouchable",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Rect windowRect = windowToken_->GetRect();
+    std::vector<Rect> touchableAreas;
+    WmErrorCode errCode = ParseTouchableAreas(env, info, windowRect, touchableAreas);
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, errCode);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, touchableAreas](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                TLOGE(WmsLogTag::WMS_EVENT, "CompleteCallback window is nullptr");
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "OnSetTouchableAreas failed"));
+            }
+            TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] setTouchableAreas end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetTouchableAreas",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -4818,6 +4950,60 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value nativeBool = argv[0];
+    if (nativeBool == nullptr) {
+        WLOGFE("SetHandwritingFlag Invalid window flag");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isAddFlag = false;
+    napi_get_value_bool(env, nativeBool, &isAddFlag);
+    wptr<Window> weakToken(windowToken_);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr]() {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        WMError ret = isAddFlag ? weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING) :
+            weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        WLOGI("Window [%{public}u, %{public}s] set handwriting flag on end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, isAddFlag, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "System abnormal."));
+                return;
+            }
+            if (*errCodePtr == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodePtr), "SetHandwritingFlag failed."));
+            }
+        };
+
+    napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetHandwritingFlag",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
 
 napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
 {
@@ -5334,6 +5520,98 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
+napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 3) { // 3: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMaximizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMaximizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMinimizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isSplitVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], isSplitVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible,
+        isSplitVisible);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::vector<std::vector<uint32_t>> windowMask;
+    if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
+        WLOGFE("GetWindowMaskFromJsValue failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, windowMask](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Invalidate params"));
+                return;
+            }
+            if (!WindowHelper::IsSubWindow(weakWindow->GetType()) &&
+                !WindowHelper::IsAppFloatingWindow(weakWindow->GetType())) {
+                WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Invalidate window type"));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMask(windowMask));
+            if (ret != WmErrorCode::WM_OK) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
+                WLOGFE("Window [%{public}u, %{public}s] set window mask failed",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                return;
+            }
+            task.Resolve(env, NapiGetUndefined(env));
+            WLOGI("Window [%{public}u, %{public}s] set window mask succeed",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowMask",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -5383,6 +5661,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowBackgroundColor", moduleName, JsWindow::SetWindowBackgroundColorSync);
     BindNativeFunction(env, object, "setBrightness", moduleName, JsWindow::SetBrightness);
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
+    BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);
@@ -5393,6 +5672,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setPrivacyMode", moduleName, JsWindow::SetPrivacyMode);
     BindNativeFunction(env, object, "setWindowPrivacyMode", moduleName, JsWindow::SetWindowPrivacyMode);
     BindNativeFunction(env, object, "setTouchable", moduleName, JsWindow::SetTouchable);
+    BindNativeFunction(env, object, "setTouchableAreas", moduleName, JsWindow::SetTouchableAreas);
     BindNativeFunction(env, object, "setWindowTouchable", moduleName, JsWindow::SetWindowTouchable);
     BindNativeFunction(env, object, "setTransparent", moduleName, JsWindow::SetTransparent);
     BindNativeFunction(env, object, "setCallingWindow", moduleName, JsWindow::SetCallingWindow);
@@ -5417,6 +5697,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
     BindNativeFunction(env, object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(env, object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
+    BindNativeFunction(env, object, "setHandwritingFlag", moduleName, JsWindow::SetHandwritingFlag);
     BindNativeFunction(env, object, "minimize", moduleName, JsWindow::Minimize);
     BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
@@ -5437,6 +5718,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
+    BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
+    BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
 }
 }  // namespace Rosen
 }  // namespace OHOS

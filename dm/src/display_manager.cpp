@@ -358,7 +358,7 @@ bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHe
 void DisplayManager::Impl::ClearDisplayStateCallback()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGFI("[UL_POWER]Clear displaystatecallback enter");
+    WLOGFD("[UL_POWER]Clear displaystatecallback enter");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
         WLOGFI("[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
@@ -1142,7 +1142,7 @@ DMError DisplayManager::Impl::RegisterDisplayModeListener(sptr<IDisplayModeListe
         WLOGFW("RegisterDisplayModeListener failed !");
         displayModeListenerAgent_ = nullptr;
     } else {
-        WLOGI("IDisplayModeListener register success");
+        WLOGD("IDisplayModeListener register success");
         displayModeListeners_.insert(listener);
     }
     return ret;
@@ -1453,7 +1453,7 @@ DMError DisplayManager::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
 
 void DisplayManager::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    WLOGFD("dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerListener_ = nullptr;
     displayStateAgent_ = nullptr;
@@ -1465,6 +1465,10 @@ void DisplayManager::Impl::OnRemoteDied()
 
 void DisplayManager::OnRemoteDied()
 {
+    if (pImpl_ == nullptr) {
+        WLOGFE("dms is dying, pImpl_ is nullptr");
+        return;
+    }
     pImpl_->OnRemoteDied();
 }
 

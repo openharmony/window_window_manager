@@ -75,8 +75,9 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         }
     }
     bool isConsumed = window_->PreNotifyKeyEvent(keyEvent);
-    TLOGI(WmsLogTag::WMS_EVENT, "PreNotifyKeyEvent isConsumed = %{public}d", static_cast<int>(isConsumed));
     if (isConsumed) {
+        TLOGI(WmsLogTag::WMS_EVENT, "PreNotifyKeyEvent id:%{public}d isConsumed:%{public}d",
+            keyEvent->GetId(), static_cast<int>(isConsumed));
         return;
     }
 #ifdef IMF_ENABLE

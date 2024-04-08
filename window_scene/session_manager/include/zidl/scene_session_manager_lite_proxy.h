@@ -33,6 +33,7 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
@@ -50,6 +51,12 @@ public:
     WSError ClearAllSessions() override;
  
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
 
 private:
     template<typename T>

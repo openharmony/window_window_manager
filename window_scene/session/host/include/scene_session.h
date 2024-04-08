@@ -34,16 +34,18 @@ using SpecificSessionCreateCallback =
     std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
-using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
+using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
+    WindowType type, uint64_t displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
-using GetAINavigationBarArea = std::function<WSRect()>;
+using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId)>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
+using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -82,6 +84,7 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionRectChangeFunc onRectChange_;
+        NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
@@ -110,7 +113,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1) override;
-    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
@@ -144,7 +147,6 @@ public:
     std::vector<Rect> GetTouchHotAreas() const override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    WSError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
@@ -166,6 +168,8 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     void SetSelfToken(sptr<IRemoteObject> selfToken);
     void SetLastSafeRect(WSRect rect);
+    virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; };
+    virtual bool IsTopmost() const { return false; };
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -233,23 +237,19 @@ public:
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
 
-    double textFieldPositionY_ = 0.0;
-    double textFieldHeight_ = 0.0;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
-
-    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
-    WSRect callingWindowNewRect_ = {0, 0, 0, 0};
-    bool needUpdateSessionRect_ = false;
+    WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
+    WSError NotifyClientToUpdateRectTask(wptr<SceneSession> weakThis, std::shared_ptr<RSTransaction> rsTransaction);
 
     std::string GetRectInfo(const WSRect& rect)
     {

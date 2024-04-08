@@ -79,6 +79,9 @@ int ScreenSessionManagerLiteStub::HandleRegisterDisplayManagerAgent(MessageParce
 {
     WLOGFD("run HandleRegisterDisplayManagerAgent!");
     auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+    if (agent == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
     DMError ret = RegisterDisplayManagerAgent(agent, type);
     reply.WriteInt32(static_cast<int32_t>(ret));
@@ -89,6 +92,9 @@ int ScreenSessionManagerLiteStub::HandleUnRegisterDisplayManagerAgent(MessagePar
 {
     WLOGFD("run HandleUnRegisterDisplayManagerAgent!");
     auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+    if (agent == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
     DMError ret = UnregisterDisplayManagerAgent(agent, type);
     reply.WriteInt32(static_cast<int32_t>(ret));

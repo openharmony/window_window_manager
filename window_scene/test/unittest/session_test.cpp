@@ -45,6 +45,8 @@ public:
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false) override;
+    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
+        const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
@@ -83,6 +85,12 @@ WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 
 WSError TestWindowEventChannel::TransferKeyEventForConsumed(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+    bool isPreImeEvent, const sptr<IRemoteObject>& listener)
 {
     return WSError::WS_OK;
 }
@@ -1634,21 +1642,6 @@ HWTEST_F(WindowSessionTest, PendingSessionToBackgroundForDelegator, Function | S
     ASSERT_NE(session_, nullptr);
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
     ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
-}
-
-/**
- * @tc.name: SetNotifyCallingSessionForegroundFunc
- * @tc.desc: SetNotifyCallingSessionForegroundFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetNotifyCallingSessionForegroundFunc, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyCallingSessionForegroundFunc func = nullptr;
-    session_->SetNotifyCallingSessionForegroundFunc(func);
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
 /**

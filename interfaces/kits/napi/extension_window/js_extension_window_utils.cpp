@@ -22,16 +22,13 @@
 namespace OHOS {
 namespace Rosen {
 using namespace  AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindowUtils"};
-}
 
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "left", CreateJsValue(env, rect.posX_));
@@ -46,7 +43,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert avoidArea to jsObject");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert avoidArea to jsObject");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "visible",
@@ -60,18 +57,18 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
 
 napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window)
 {
-    WLOGI("CreateJsExtensionWindowPropertiesObject is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "CreateJsExtensionWindowPropertiesObject is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert windowProperties to jsObject");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert windowProperties to jsObject");
         return nullptr;
     }
 
     Rect windowRect = window->GetRect();
     napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
     if (windowRectObj == nullptr) {
-        WLOGFE("GetWindowRect Failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "GetWindowRect Failed");
     }
     napi_set_named_property(env, objValue, "uiExtensionHostWindowProxyRect", windowRectObj);
     return objValue;
@@ -79,18 +76,18 @@ napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& w
 
 napi_value CreateJsExtensionWindowProperties(napi_env env, sptr<Window>& window)
 {
-    WLOGI("CreateJsWindowPropertiesObject is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "CreateJsWindowPropertiesObject is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert windowProperties to jsObject");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert windowProperties to jsObject");
         return nullptr;
     }
 
     Rect windowRect = window->GetRect();
     napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
     if (windowRectObj == nullptr) {
-        WLOGFE("GetWindowRect failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "GetWindowRect failed!");
     }
     napi_set_named_property(env, objValue, "windowRect", windowRectObj);
     

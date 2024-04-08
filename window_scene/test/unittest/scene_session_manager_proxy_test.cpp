@@ -75,12 +75,12 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, Function | 
  */
 HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionWindowVisibilityListener001, Function | SmallTest | Level2)
 {
-    int32_t persistendId = 0;
+    int32_t persistentId = 0;
     bool haveListener = true;
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->UpdateSessionWindowVisibilityListener(persistendId,
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->UpdateSessionWindowVisibilityListener(persistentId,
         haveListener));
     sceneSessionManagerProxy_ = nullptr;
 }

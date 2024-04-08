@@ -24,6 +24,7 @@
 #include "event_runner.h"
 #include "input_manager.h"
 #include "pointer_event.h"
+#include "vsync_station.h"
 #include "window_root.h"
 #include "wm_common.h"
 
@@ -77,6 +78,7 @@ public:
     uint32_t GetActiveWindowId() const;
     void HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     void SetInputEventConsumer();
+    void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
 private:
     void SetDragProperty(const sptr<MoveDragProperty>& moveDragProperty);
@@ -94,7 +96,9 @@ private:
     void ResetMoveOrDragState();
     bool CheckWindowRect(DisplayId displayId, float vpr, const Rect& rect);
     void CalculateNewWindowRect(Rect& newRect, DisplayId displayId, int32_t posX, int32_t posY);
+    std::shared_ptr<VsyncStation> GetVsyncStationByWindowId(uint32_t windowId);
 
+    sptr<WindowRoot> windowRoot_;
     sptr<WindowProperty> windowProperty_;
     sptr<MoveDragProperty> moveDragProperty_;
     uint32_t activeWindowId_ = INVALID_WINDOW_ID;
@@ -102,6 +106,8 @@ private:
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
     std::map<DisplayId, Rect> limitRectMap_;
+    std::mutex mtx_;
+    std::map<NodeId, std::shared_ptr<VsyncStation>> vsyncStationMap_;
 
     // event handler for input event
     std::shared_ptr<EventHandler> inputEventHandler_;

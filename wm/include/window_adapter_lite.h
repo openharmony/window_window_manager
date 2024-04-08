@@ -17,7 +17,10 @@
 #define OHOS_WINDOW_ADAPTER_LITE_H
 
 #include <refbase.h>
+#include <zidl/window_manager_agent_interface.h>
 
+#include "singleton_delegator.h"
+#include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_lite_interface.h"
 
@@ -32,9 +35,15 @@ class WindowAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
 public:
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
-
+    virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
+    virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
 private:
+    static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
 
     std::recursive_mutex mutex_;

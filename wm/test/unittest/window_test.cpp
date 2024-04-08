@@ -2305,6 +2305,36 @@ HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
     MaximizeLayoutOption option;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
 }
+
+/**
+ * @tc.name: RegisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->RegisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterWindowRectChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window->UnregisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

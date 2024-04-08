@@ -35,6 +35,7 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void UpdateWindowModeTypeInfo(WindowModeType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type);
     void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);

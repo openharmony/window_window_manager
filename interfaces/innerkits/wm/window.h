@@ -62,6 +62,7 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
+using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -428,6 +429,22 @@ public:
     virtual void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) {}
 };
 
+/**
+ * @class IWindowRectChangeListener
+ *
+ * @brief IWindowRectChangeListener is used to observe the window rect and its changing reason when window changed.
+ */
+class IWindowRectChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rect changed.
+     *
+     * @param Rect Rect of the current window.
+     * @param reason Reason for window size change.
+     */
+    virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -640,6 +657,19 @@ public:
      * @return WMError
      */
     virtual WMError SetWindowMode(WindowMode mode) { return WMError::WM_OK; }
+    /**
+     * @brief Set whether the window is topmost
+     *
+     * @param topmost whether window is topmost
+     * @return WMError
+     */
+    virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
+    /**
+     * @brief Get whether window is topmost
+     *
+     * @return True means window is topmost
+     */
+    virtual bool IsTopmost() const { return false; }
     /**
      * @brief Set alpha of window.
      *
@@ -1669,6 +1699,19 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set whether to display the maximize, minimize, split buttons of main window.
+     *
+     * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
+     * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
+     * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set decor height of window.
      *
      * @param decorHeight Decor height of window
@@ -1717,6 +1760,21 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set whether to use default density.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether to use default density.
+     *
+     * @return True means use default density, window's layout not follow to system change, false means the opposite.
+     */
+    virtual bool GetDefaultDensityEnabled() { return false; }
 
     /**
      * @brief Hide None Secure Windows.
@@ -1774,6 +1832,73 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Register window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get the rect of host window.
+     *
+     * @param hostWindowId window Id of the host window.
+     * @return Rect of window.
+     */
+    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
+    
+    /**
+     * @brief Set Shaped Window Mask.
+     *
+     * @param windowMask Mask of the shaped window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get window by id
+     *
+     * @param windId window id
+     * @return sptr<Window>
+     */
+    static sptr<Window> GetWindowWithId(uint32_t windId);
+
+    /**
+     * @brief register keyEvent filter.
+     *
+     * @param KeyEventFilterFunc callback func when window recieve keyEvent
+     * @return WMError
+     */
+    virtual WMError SetKeyEventFilter(KeyEventFilterFunc KeyEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear keyEvent filter.
+     *
+     * @return WMError
+    */
+    virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 };
 }
 }

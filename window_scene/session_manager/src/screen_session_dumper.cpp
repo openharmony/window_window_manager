@@ -69,7 +69,7 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         WLOGFE("dump permission denied!");
         return;
     }
-    if (params_[0] == ARG_DUMP_ALL) { // dump all info command
+    if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
         ShowAllScreenInfo();
     }
     OutputDumpInfo();

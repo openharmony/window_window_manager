@@ -137,6 +137,13 @@ napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnDisableWindowDecor(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -582,6 +589,43 @@ napi_value JsWindowStage::OnDisableWindowDecor(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+    }
+
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowScene is null");
+        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+    }
+
+    auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+    }
+
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[0], enabled)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to boolean");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] SetDefaultDensityEnabled=%{public}u, ret=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
+
+    return CreateJsValue(env, static_cast<int32_t>(ret));
+}
+
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     std::string windowName;
@@ -697,6 +741,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "setShowOnLockScreen", moduleName, JsWindowStage::SetShowOnLockScreen);
     BindNativeFunction(env,
         objValue, "disableWindowDecor", moduleName, JsWindowStage::DisableWindowDecor);
+    BindNativeFunction(env,
+        objValue, "setDefaultDensityEnabled", moduleName, JsWindowStage::SetDefaultDensityEnabled);
 
     return objValue;
 }

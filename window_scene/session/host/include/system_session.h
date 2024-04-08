@@ -26,11 +26,23 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
+    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WSError ProcessBackEvent() override;
+
+    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+
+protected:
+    bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
+    bool NeedSystemPermission(WindowType type);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H
