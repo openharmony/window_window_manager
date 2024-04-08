@@ -247,6 +247,11 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
     return WSError::WS_OK;
 }
 
+int32_t SystemSession::GetMissionId() const
+{
+    return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
+}
+
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto currentRect = winRect_;
