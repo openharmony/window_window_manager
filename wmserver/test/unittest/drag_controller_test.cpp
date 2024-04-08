@@ -215,6 +215,24 @@ HWTEST_F(DragControllerTest, ConsumePointerEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestVsync
+ * @tc.desc: RequestVsync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, RequestVsync, Function | SmallTest | Level2)
+{
+    NodeId nodeId = 0;
+    uint32_t windowId = 1;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    moveDragController_->vsyncStationMap_.emplace(windowId, vsyncStation);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetAgentWindowId(windowId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    moveDragController_->ConsumePointerEvent(pointerEvent);
+    ASSERT_NE(vsyncStation, nullptr);
+}
+
+/**
  * @tc.name: OnReceiveVsync
  * @tc.desc: OnReceiveVsync
  * @tc.type: FUNC
