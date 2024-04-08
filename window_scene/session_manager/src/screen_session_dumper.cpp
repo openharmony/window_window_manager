@@ -75,8 +75,8 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     }
     if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
         ShowAllScreenInfo();
-    } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND
-        || params_[0] == STATUS_FOLD)) {
+    } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
+        params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
         ShowNotifyFoldStatusChangedInfo();
     }
     OutputDumpInfo();

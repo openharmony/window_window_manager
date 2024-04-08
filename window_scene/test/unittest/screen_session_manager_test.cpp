@@ -1104,7 +1104,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged, Function | SmallTest
 {
     const std::string& dumpParam = "-p";
     int errCode = ssm_->NotifyFoldStatusChanged(dumpParam);
-    ASSERT_EQ(true, errCode == 0);
+    ASSERT_EQ(errCode, 0);
 }
 }
 } // namespace Rosen
