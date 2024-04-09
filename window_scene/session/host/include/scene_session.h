@@ -302,7 +302,6 @@ private:
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
-    std::shared_mutex extWindowFlagsMapMutex_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
 
 };
