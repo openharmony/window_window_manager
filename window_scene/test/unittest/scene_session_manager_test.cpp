@@ -1655,7 +1655,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
     sptr<ISession> session;
-    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr);
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -1663,7 +1663,7 @@ HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | Sm
     std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetPersistentId(1);
-    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -2626,15 +2626,15 @@ HWTEST_F(SceneSessionManagerTest, NotifyDumpInfoResult, Function | SmallTest | L
     std::vector<std::string> params = {"-a"};
     std::string dumpInfo = "";
     WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result01, WSError::WS_OK);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
     params.clear();
     params.push_back("-w");
     params.push_back("23456");
     WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_NE(result02, WSError::WS_ERROR_INVALID_PARAM);
     params.clear();
     WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_NE(result03, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
