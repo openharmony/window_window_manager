@@ -80,6 +80,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
+    BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
+        JsScreenSessionManager::GetDeviceScreenConfig);
     return NapiGetUndefined(env);
 }
 
@@ -163,6 +165,13 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
     WLOGD("[NAPI]GetScreenSnapshot");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]GetDeviceScreenConfig");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetDeviceScreenConfig(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -568,5 +577,18 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
         WLOGE("[NAPI]create native pixelmap failed");
     }
     return nativeData;
+}
+
+napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
+{
+    WLOGD("[NAPI]OnGetDeviceScreenConfig");
+    const DeviceScreenConfig& deviceScreenConfig = ScreenSessionManager::GetInstance().GetDeviceScreenConfig();
+    napi_value jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(env, windowSceneConfig);
+    if (jsWindowSceneConfigObj == nullptr) {
+        WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsWindowSceneConfigObj;
 }
 } // namespace OHOS::Rosen
