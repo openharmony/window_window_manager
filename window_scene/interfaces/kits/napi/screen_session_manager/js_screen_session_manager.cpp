@@ -583,7 +583,7 @@ napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const n
 {
     WLOGD("[NAPI]OnGetDeviceScreenConfig");
     const DeviceScreenConfig& deviceScreenConfig = ScreenSessionManager::GetInstance().GetDeviceScreenConfig();
-    napi_value jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(env, windowSceneConfig);
+    napi_value jsWindowSceneConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
     if (jsWindowSceneConfigObj == nullptr) {
         WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");
         napi_throw(env, CreateJsError(env,

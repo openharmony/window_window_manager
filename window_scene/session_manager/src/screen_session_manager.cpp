@@ -268,6 +268,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         WLOGFD("subDisplayCutoutPath = %{public}s.", subDisplayCutoutPath.c_str());
         ScreenSceneConfig::SetSubCutoutSvgPath(subDisplayCutoutPath);
     }
+    if (stringConfig.count("rotationPolicy") != 0) {
+        std::string rotationPolicy = static_cast<std::string>(stringConfig["rotationPolicy"]);
+        WLOGFD("rotationPolicy = %{public}s.", rotationPolicy.c_str());
+        deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
+    }
     ConfigureWaterfallDisplayCompressionParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
@@ -3697,5 +3702,10 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
         "PID", getpid(),
         "UID", getuid());
     WLOGI("%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
+}
+
+const DeviceScreenConfig& ScreenSessionManager::GetDeviceScreenConfig() const
+{
+    return deviceScreenConfig_;
 }
 } // namespace OHOS::Rosen
