@@ -24,6 +24,7 @@ ohos_shared_library("screensessionmanager_napi") {
     "js_screen_session.cpp",
     "js_screen_session_manager.cpp",
     "js_screen_utils.cpp",
+    "js_device_screen_config.cpp",
     "screen_session_manager_module.cpp",
   ]
 
