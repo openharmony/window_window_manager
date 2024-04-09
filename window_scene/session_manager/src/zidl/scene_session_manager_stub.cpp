@@ -38,6 +38,9 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
+        &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         &SceneSessionManagerStub::HandleUpdateProperty),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
@@ -278,11 +281,22 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleDestroyAndDisconnectSpcificSession!");
+    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSession!");
     auto persistentId = data.ReadInt32();
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data,
+    MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSessionWithDetachCallback!");
+    auto persistentId = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

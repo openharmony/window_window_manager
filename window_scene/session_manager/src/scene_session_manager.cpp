@@ -2258,13 +2258,14 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(sptr<Scene
     return ret;
 }
 
-WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
     const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, callingPid]() {
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session start, id: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
 
@@ -2272,6 +2273,32 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
             TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, not destroy by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
+        return DestroyAndDisconnectSpecificSessionInner(sceneSession);
+    };
+
+    return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
+}
+
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+    const sptr<IRemoteObject>& callback)
+{
+    if (callback == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, callingPid, callback]() {
+        TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session start, id: %{public}d", persistentId);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, not destroy by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        sceneSession->RegisterDetachCallback(iface_cast<IPatternDetachCallback>(callback));
         return DestroyAndDisconnectSpecificSessionInner(sceneSession);
     };
 
