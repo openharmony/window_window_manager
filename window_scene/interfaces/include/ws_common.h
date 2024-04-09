@@ -396,6 +396,10 @@ struct AppWindowSceneConfig {
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
 };
 
+struct DeviceScreenConfig {
+    std::string rotationPolicy_ = "11";
+};
+
 /**
  * @brief Enumerates session gravity.
  */
