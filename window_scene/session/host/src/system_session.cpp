@@ -45,9 +45,15 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
         return;
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        if (!specificCallback_->onCameraFloatSessionChange_) {
+            return;
+        }
         TLOGI(WmsLogTag::WMS_SYSTEM, "CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
         specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_PIP && GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        if (!specificCallback_->onCameraSessionChange_) {
+            return;
+        }
         auto pipType = GetPiPTemplateInfo().pipTemplateType;
         if (pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL) ||
             pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
