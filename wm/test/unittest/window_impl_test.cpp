@@ -375,6 +375,7 @@ HWTEST_F(WindowImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("RequestVsyncSucc");
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -391,6 +392,7 @@ HWTEST_F(WindowImplTest, RequestVsyncErr, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("RequestVsyncErr");
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
     window->vsyncStation_ = nullptr;
     window->RequestVsync(vsyncCallback);
@@ -407,6 +409,7 @@ HWTEST_F(WindowImplTest, InitWindowProperty, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("InitWindowProperty");
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
     window->InitWindowProperty(option);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

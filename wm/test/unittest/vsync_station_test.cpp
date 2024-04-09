@@ -56,8 +56,8 @@ HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, Function | SmallTest | Level3)
     NodeId nodeId = 0;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
-    vsyncStation->RequestVsync(vsyncCallback);
     ASSERT_NE(vsyncStation, nullptr);
+    vsyncStation->RequestVsync(vsyncCallback);
 }
 
 /**
@@ -70,13 +70,13 @@ HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level
     NodeId nodeId0 = 0;
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
     std::shared_ptr<VsyncCallback> vsyncCallback0 = std::make_shared<VsyncCallback>();
-    vsyncStation0->RequestVsync(vsyncCallback0);
     ASSERT_NE(vsyncStation0, nullptr);
+    vsyncStation0->RequestVsync(vsyncCallback0);
     NodeId nodeId1 = 1;
     std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
     std::shared_ptr<VsyncCallback> vsyncCallback1 = std::make_shared<VsyncCallback>();
-    vsyncStation1->RequestVsync(vsyncCallback1);
     ASSERT_NE(vsyncStation1, nullptr);
+    vsyncStation1->RequestVsync(vsyncCallback1);
 }
 
 }
