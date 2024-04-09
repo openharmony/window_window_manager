@@ -158,7 +158,7 @@ bool SessionPermission::IsShellCall()
         WLOGFI("caller tokenType is shell, verify success");
         return true;
     }
-    WLOGFI("Not shell called.");
+    WLOGFI("Not shell called. tokenId:%{public}u, flag:%{public}u", callerToken, tokenType);
     return false;
 }
 
