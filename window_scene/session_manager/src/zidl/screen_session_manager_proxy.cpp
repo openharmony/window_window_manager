@@ -2243,7 +2243,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-const DeviceScreenConfig& ScreenSessionManagerProxy::GetDeviceScreenConfig() const
+DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
 {
     MessageParcel data;
     MessageParcel reply;

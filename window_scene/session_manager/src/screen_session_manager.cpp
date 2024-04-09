@@ -3704,7 +3704,7 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
     WLOGI("%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
 }
 
-const DeviceScreenConfig& ScreenSessionManager::GetDeviceScreenConfig() const
+DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()
 {
     return deviceScreenConfig_;
 }
