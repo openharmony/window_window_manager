@@ -115,6 +115,12 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyGestureNavigationEnabledResult(enbale);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS: {
+            uint32_t accessTokenId = data.ReadUint32();
+            bool isShowing = data.ReadBool();
+            UpdateCameraWindowStatus(accessTokenId, isShowing);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -112,6 +112,22 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
+    /**
+    * @brief Register camera window changed listener.
+    *
+    * @param listener ICameraWindowChangedListener.
+    * @return WM_OK means register success, others means register failed.
+    */
+    WMError RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
+
+    /**
+   * @brief Unregister camera window changed listener.
+   *
+   * @param listener ICameraWindowChangedListener.
+   * @return WM_OK means unregister success, others means unregister failed.
+   */
+    WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -128,6 +144,7 @@ private:
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
+    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void OnRemoteDied();
 };
 } // namespace Rosen

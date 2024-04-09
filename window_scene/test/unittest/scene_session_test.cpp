@@ -1047,15 +1047,15 @@ HWTEST_F(SceneSessionTest, GetAbilityInfo, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateCameraFloatWindowStatus
- * @tc.desc: UpdateCameraFloatWindowStatus
+ * @tc.name: UpdateCameraWindowStatus
+ * @tc.desc: UpdateCameraWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, UpdateCameraWindowStatus, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
-    info.bundleName_ = "UpdateCameraFloatWindowStatus";
+    info.bundleName_ = "UpdateCameraWindowStatus";
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
@@ -1066,17 +1066,25 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     EXPECT_NE(sysSession, nullptr);
     int ret = 1;
     specificCallback_->onCameraFloatSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
+    specificCallback_->onCameraSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
 
-    sysSession->UpdateCameraFloatWindowStatus(false);
+    sysSession->UpdateCameraWindowStatus(false);
     sysSession = new (std::nothrow) SystemSession(info, specificCallback_);
-    sysSession->UpdateCameraFloatWindowStatus(false);
+    sysSession->UpdateCameraWindowStatus(false);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sysSession->property_ = property;
-    sysSession->UpdateCameraFloatWindowStatus(false);
+    sysSession->UpdateCameraWindowStatus(false);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     sysSession->property_ = property;
-    sysSession->UpdateCameraFloatWindowStatus(false);
+    sysSession->UpdateCameraWindowStatus(false);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    PiPTemplateInfo pipType;
+    pipType.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
+    sysSession->SetPiPTemplateInfo(pipType);
+    sysSession->property_ = property;
+    sysSession->UpdateCameraWindowStatus(false);
     ASSERT_EQ(ret, 1);
 }
 
