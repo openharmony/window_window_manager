@@ -122,6 +122,7 @@ public:
         TRANS_ID_GET_VIRTUAL_SCREEN_FLAG,
         TRANS_ID_SET_VIRTUAL_SCREEN_FLAG,
         TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE,
+        TRANS_ID_GET_DEVICE_SCREEN_CONFIG,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;

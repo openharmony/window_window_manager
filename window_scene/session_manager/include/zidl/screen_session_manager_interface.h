@@ -136,6 +136,7 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual const DeviceScreenConfig& GetDeviceScreenConfig() const { return DeviceScreenConfig(); }
 };
 } // namespace Rosen
 } // namespace OHOS

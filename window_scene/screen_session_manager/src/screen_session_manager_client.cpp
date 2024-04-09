@@ -355,10 +355,9 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
 
 const DeviceScreenConfig& ScreenSessionManagerClient::GetDeviceScreenConfig() const
 {
-    DeviceScreenConfig deviceScreenConfig;
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
-        return;
+        return {};
     }
     return screenSessionManager_->GetDeviceScreenConfig();
 }
