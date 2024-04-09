@@ -251,7 +251,9 @@ struct SystemBarPropertyFlag {
     bool enableFlag;
     bool backgroundColorFlag;
     bool contentColorFlag;
-    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false) {}
+    bool enableAnimationFlag;
+    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false),
+        enableAnimationFlag(false) {}
 };
 
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
