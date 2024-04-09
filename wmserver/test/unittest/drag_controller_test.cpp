@@ -221,6 +221,7 @@ HWTEST_F(DragControllerTest, ConsumePointerEvent, Function | SmallTest | Level2)
  */
 HWTEST_F(DragControllerTest, RequestVsync, Function | SmallTest | Level2)
 {
+    ASSERT_TRUE(moveDragController_);
     NodeId nodeId = 0;
     uint32_t windowId = 1;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
@@ -254,6 +255,7 @@ HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
  */
 HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | Level2)
 {
+    ASSERT_TRUE(moveDragController_);
     NodeId nodeId = 0;
     uint32_t windowId = 1;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
@@ -269,6 +271,7 @@ HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | 
  */
 HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, Function | SmallTest | Level2)
 {
+    ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 100;
     moveDragController_->vsyncStationMap_.clear();
     moveDragController_->SetWindowRoot(windowRoot_);
