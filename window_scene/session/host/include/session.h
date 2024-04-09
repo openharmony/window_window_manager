@@ -30,6 +30,7 @@
 #include "wm_common.h"
 #include "occupied_area_change_info.h"
 #include "window_visibility_info.h"
+#include "pattern_detach_callback_interface.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -371,6 +372,8 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
+    void SetAttachState(bool isAttach);
+    void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -547,6 +550,8 @@ private:
     float vpr_ { 1.5f };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
+    bool isAttach_{ false };
+    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

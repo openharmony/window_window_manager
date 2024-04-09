@@ -2026,6 +2026,18 @@ HWTEST_F(SceneSessionManagerTest, DestroyAndDisconnectSpecificSession, Function 
 }
 
 /**
+ * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    WSError result = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: GetWindowSceneConfig
  * @tc.desc: SceneSesionManager get window scene config
  * @tc.type: FUNC

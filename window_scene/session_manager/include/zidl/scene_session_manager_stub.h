@@ -42,6 +42,7 @@ private:
     int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRecoverAndReconnectSceneSession(MessageParcel &data, MessageParcel &reply);
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
     int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);

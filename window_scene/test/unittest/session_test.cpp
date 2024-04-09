@@ -2925,6 +2925,31 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
     ASSERT_EQ(resultValue, 2);
 }
 
+/**
+ * @tc.name: SetAttachState
+ * @tc.desc: SetSystemActive Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetAttachState, Function | SmallTest | Level2)
+{
+    session_->SetAttachState(true);
+    ASSERT_EQ(session_->isAttach_, true);
+    session_->SetAttachState(false);
+    ASSERT_EQ(session_->isAttach_, false);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback
+ * @tc.desc: RegisterDetachCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterDetachCallback, Function | SmallTest | Level2)
+{
+    sptr<IPatternDetachCallback> detachCallback;
+    session_->RegisterDetachCallback(detachCallback);
+    ASSERT_EQ(session_->detachCallback_, detachCallback);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

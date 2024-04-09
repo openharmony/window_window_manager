@@ -1007,6 +1007,36 @@ bool Session::GetForegroundInteractiveStatus() const
     return foregroundInteractiveStatus_.load();
 }
 
+void Session::SetAttachState(bool isAttach)
+{
+    auto task = [weakThis = wptr(this), isAttach]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        TLOGD(WmsLogTag::WMS_LIFE, "SetAttachState:%{public}d persistentId:%{public}d", isAttach,
+            session->GetPersistentId());
+        session->isAttach_ = isAttach;
+        if (!session->isAttach_ && session->detachCallback_ != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
+            session->detachCallback_->OnPatternDetach(session->GetPersistentId());
+            session->detachCallback_ = nullptr;
+        }
+    };
+    PostTask(task, "SetAttachState");
+}
+
+void Session::RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback)
+{
+    detachCallback_ = callback;
+    if (!isAttach_ && detachCallback_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Session detach before register, persistentId:%{public}d", GetPersistentId());
+        detachCallback_->OnPatternDetach(GetPersistentId());
+        detachCallback_ = nullptr;
+    }
+}
+
 void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
     const NotifyChangeSessionVisibilityWithStatusBarFunc& func)
 {

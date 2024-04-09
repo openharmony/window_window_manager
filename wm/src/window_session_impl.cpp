@@ -1740,10 +1740,11 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
-    auto task = [uiContent]() {
+    auto task = [uiContent, persistentId = GetPersistentId()]() {
         if (uiContent != nullptr) {
             uiContent->Destroy();
-            TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success");
+            TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
+                persistentId);
         }
     };
     if (handler_) {

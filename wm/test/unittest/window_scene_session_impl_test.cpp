@@ -2557,6 +2557,34 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleButtonVisible03, Function | SmallTe
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
 }
+
+/**
+ * @tc.name: SyncDestroyAndDisconnectSpecificSession
+ * @tc.desc: SyncDestroyAndDisconnectSpecificSession test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SyncDestroyAndDisconnectSpecificSession start";
+    sptr option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SyncDestroyAndDisconnectSpecificSession");
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
+    if (deviceType == "phone") {
+        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    }
+    if (deviceType == "2in1") {
+        ASSERT_EQ(res, WMError::WM_OK);
+    }
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
