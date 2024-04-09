@@ -295,7 +295,8 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
     }
 
     // check if camera floating window is already exists
-    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA ||
+        property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         for (const auto& item : windowSessionMap_) {
             if (item.second.second && item.second.second->property_ &&
                 item.second.second->property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {

@@ -424,6 +424,7 @@ private:
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void ReportWindowProfileInfos();
 
     sptr<RootSceneSession> rootSceneSession_;

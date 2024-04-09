@@ -38,11 +38,30 @@ SystemSession::~SystemSession()
     TLOGD(WmsLogTag::WMS_LIFE, " ~SystemSession, id: %{public}d", GetPersistentId());
 }
 
-void SystemSession::UpdateCameraFloatWindowStatus(bool isShowing)
+void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 {
-    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
+    TLOGI(WmsLogTag::WMS_SYSTEM, "isShowing: %{public}d", static_cast<int>(isShowing));
+    if (specificCallback_ == nullptr) {
+        return;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        if (!specificCallback_->onCameraFloatSessionChange_) {
+            return;
+        }
         TLOGI(WmsLogTag::WMS_SYSTEM, "CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
         specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_PIP && GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        if (!specificCallback_->onCameraSessionChange_) {
+            return;
+        }
+        auto pipType = GetPiPTemplateInfo().pipTemplateType;
+        if (pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL) ||
+            pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "PiPWindow status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
+            specificCallback_->onCameraSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
+        }
+    } else {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "skip window type");
     }
 }
 
@@ -74,7 +93,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
         }
-        session->UpdateCameraFloatWindowStatus(true);
+        session->UpdateCameraWindowStatus(true);
         auto ret = session->SceneSession::Foreground(property);
         return ret;
     };
@@ -112,7 +131,7 @@ WSError SystemSession::Hide()
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
-        session->UpdateCameraFloatWindowStatus(false);
+        session->UpdateCameraWindowStatus(false);
         ret = session->SceneSession::Background();
         return ret;
     };
@@ -161,7 +180,7 @@ WSError SystemSession::Disconnect(bool isFromClient)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d", session->GetPersistentId());
         session->SceneSession::Disconnect(isFromClient);
-        session->UpdateCameraFloatWindowStatus(false);
+        session->UpdateCameraWindowStatus(false);
         return WSError::WS_OK;
     };
     PostTask(task, "Disconnect");

@@ -926,6 +926,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onHandleSecureSessionShouldHide_ = std::bind(&SceneSessionManager::HandleSecureSessionShouldHide,
         this, std::placeholders::_1);
+    specificCb->onCameraSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraWindowStatus,
+        this, std::placeholders::_1, std::placeholders::_2);
     return specificCb;
 }
 
@@ -5269,6 +5271,11 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
 void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
+
+void SceneSessionManager::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    SessionManagerAgentController::GetInstance().UpdateCameraWindowStatus(accessTokenId, isShowing);
 }
 
 void SceneSessionManager::StartWindowInfoReportLoop()
