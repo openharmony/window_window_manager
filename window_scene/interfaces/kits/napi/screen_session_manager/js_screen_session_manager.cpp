@@ -583,7 +583,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
 napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnGetDeviceScreenConfig");
-    const DeviceScreenConfig& deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
+    DeviceScreenConfig deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
     napi_value jsWindowSceneConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
     if (jsWindowSceneConfigObj == nullptr) {
         WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");

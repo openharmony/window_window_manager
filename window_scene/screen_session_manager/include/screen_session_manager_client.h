@@ -66,7 +66,7 @@ public:
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
-    const DeviceScreenConfig& GetDeviceScreenConfig() const;
+    DeviceScreenConfig GetDeviceScreenConfig();
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
     ScreenId GetDefaultScreenId();
 

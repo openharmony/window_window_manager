@@ -232,7 +232,7 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
 
-    const DeviceScreenConfig& GetDeviceScreenConfig() const;
+    DeviceScreenConfig GetDeviceScreenConfig() override;
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
