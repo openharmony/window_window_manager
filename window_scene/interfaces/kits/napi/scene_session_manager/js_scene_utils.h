@@ -62,6 +62,7 @@ enum class JsSessionType : uint32_t {
     TYPE_SEARCHING_BAR,
     TYPE_SYSTEM_SUB_WINDOW,
     TYPE_HANDWRITE,
+    TYPE_KEYBOARD_PANEL,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -98,6 +99,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SEARCHING_BAR,            JsSessionType::TYPE_SEARCHING_BAR           },
     { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,        JsSessionType::TYPE_SYSTEM_SUB_WINDOW       },
     { WindowType::WINDOW_TYPE_HANDWRITE,                JsSessionType::TYPE_HANDWRITE               },
+    { WindowType::WINDOW_TYPE_KEYBOARD_PANEL,           JsSessionType::TYPE_KEYBOARD_PANEL          },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -134,6 +136,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_SEARCHING_BAR,            WindowType::WINDOW_TYPE_SEARCHING_BAR           },
     { JsSessionType::TYPE_SYSTEM_SUB_WINDOW,        WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW       },
     { JsSessionType::TYPE_HANDWRITE,                WindowType::WINDOW_TYPE_HANDWRITE               },
+    { JsSessionType::TYPE_KEYBOARD_PANEL,           WindowType::WINDOW_TYPE_KEYBOARD_PANEL          },
 };
 
 JsSessionType GetApiType(WindowType type);
@@ -158,6 +161,7 @@ napi_value CreateJsSessionRect(napi_env env, const WSRect& rect);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value SessionTypeInit(napi_env env);
+napi_value KeyboardGravityInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);

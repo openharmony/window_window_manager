@@ -63,6 +63,7 @@ using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
+using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -99,6 +100,7 @@ public:
         ClearCallbackMapFunc clearCallbackFunc_;
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
+        NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
     };
 
     // func for change window scene pattern property
