@@ -364,6 +364,56 @@ HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, WindowImpl::Find("FindWindow05"));
 }
 
+
+/**
+ * @tc.name: RequestVsyncSucc
+ * @tc.desc: RequestVsync Test Succ
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RequestVsyncSucc");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->RequestVsync(vsyncCallback);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+
+/**
+ * @tc.name: RequestVsyncErr
+ * @tc.desc: RequestVsync Test Err
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, RequestVsyncErr, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RequestVsyncErr");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->vsyncStation_ = nullptr;
+    window->RequestVsync(vsyncCallback);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: InitWindowProperty
+ * @tc.desc: InitWindowProperty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, InitWindowProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("InitWindowProperty");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->InitWindowProperty(option);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
 /**
  * @tc.name: FindWindowById01
  * @tc.desc: Find one top window

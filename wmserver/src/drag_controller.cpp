@@ -538,11 +538,17 @@ uint32_t MoveDragController::GetActiveWindowId() const
 
 std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
-
-    auto iter = vsyncStationMap_.find(windowId);
-    if (iter != vsyncStationMap_.end()) {
-        return iter->second;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        auto iter = vsyncStationMap_.find(windowId);
+        if (iter != vsyncStationMap_.end()) {
+            return iter->second;
+        }
+    }
+    
+    if (windowRoot_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync station failed, windowRoot is nullptr");
+        return nullptr;
     }
 
     sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
@@ -559,7 +565,12 @@ std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint
 
     vsyncStation->SetIsMainHandlerAvailable(false);
     vsyncStation->SetVsyncEventHandler(inputEventHandler_);
-    vsyncStationMap_.emplace(windowId, vsyncStation);
+    
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        vsyncStationMap_.emplace(windowId, vsyncStation);
+    }
+    
     return vsyncStation;
 }
 }

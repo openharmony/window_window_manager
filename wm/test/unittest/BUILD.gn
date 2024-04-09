@@ -25,6 +25,7 @@ group("unittest") {
     ":wm_picture_in_picture_manager_test",
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
+    ":wm_vsync_station_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
     ":wm_window_effect_test",
@@ -108,6 +109,19 @@ ohos_unittest("wm_window_scene_effect_test") {
   module_out_path = module_out_path
 
   sources = [ "window_scene_effect_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_vsync_station_test") {
+  module_out_path = module_out_path
+
+  sources = [ "vsync_station_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
