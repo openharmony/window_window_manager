@@ -21,6 +21,7 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+#include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
 
@@ -582,7 +583,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
 napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
 {
     WLOGD("[NAPI]OnGetDeviceScreenConfig");
-    const DeviceScreenConfig& deviceScreenConfig = ScreenSessionManager::GetInstance().GetDeviceScreenConfig();
+    const DeviceScreenConfig& deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
     napi_value jsWindowSceneConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
     if (jsWindowSceneConfigObj == nullptr) {
         WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");

@@ -353,6 +353,16 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
     return screenSession->GetScreenSnapshot(scaleX, scaleY);
 }
 
+const DeviceScreenConfig& ScreenSessionManagerClient::GetDeviceScreenConfig() const
+{
+    DeviceScreenConfig deviceScreenConfig;
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->GetDeviceScreenConfig();
+}
+
 sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const ScreenId id)
 {
     auto iter = screenSessionMap_.find(id);
