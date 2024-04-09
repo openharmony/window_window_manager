@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "session_proxy.h"
 
 #include <transaction/rs_transaction.h>
 #include "accessibility_event_info.h"
@@ -579,6 +580,162 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
         res = 1;
     };
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: UpdateConfiguration02
+ * @tc.desc: UpdateConfiguration Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    windowExtensionSessionImpl.UpdateConfiguration(configuration);
+    ASSERT_NE(nullptr, windowExtensionSessionImpl.uiContent_);
+}
+
+/**
+ * @tc.name: RegisterTransferComponentDataForResultListener02
+ * @tc.desc: RegisterTransferComponentDataForResultListener02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListener02,
+         Function | SmallTest | Level3)
+{
+    NotifyTransferComponentDataForResultFunc func;
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+
+    windowExtensionSessionImpl.RegisterTransferComponentDataForResultListener(func);
+    ASSERT_EQ(true, windowExtensionSessionImpl.IsWindowSessionInvalid());
+}
+
+/**
+ * @tc.name: TriggerBindModalUIExtension
+ * @tc.desc: TriggerBindModalUIExtension Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+
+    windowExtensionSessionImpl.hostSession_ = nullptr;
+
+    auto res = 0;
+    std::function<void()> func1 = [&]()
+    {
+        windowExtensionSessionImpl.TriggerBindModalUIExtension();
+        res = 1;
+    };
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: Destroy01
+ * @tc.desc: Destroy Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    bool needNotifyServer = true;
+    bool needClearListener = true;
+
+    sptr<IRemoteObject> impl;
+    windowExtensionSessionImpl.hostSession_ = new OHOS::Rosen::SessionProxy(impl);
+    windowExtensionSessionImpl.shouldHideNonSecureWindows_ = true;
+    ASSERT_EQ(true, windowExtensionSessionImpl.shouldHideNonSecureWindows_);
+    windowExtensionSessionImpl.Destroy(needNotifyServer, needClearListener);
+
+    ASSERT_NE(nullptr, windowExtensionSessionImpl.hostSession_);
+}
+
+/**
+ * @tc.name: SetPrivacyMode02
+ * @tc.desc: SetPrivacyMod
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, Function | SmallTest | Level3)
+{
+    bool isPrivacyMode = true;
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.surfaceNode_ = nullptr;
+    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
+
+    struct RSSurfaceNodeConfig config;
+
+    if (ret == WMError::WM_ERROR_NULLPTR)
+    {
+        windowExtensionSessionImpl.surfaceNode_ = RSSurfaceNode::Create(config);
+    }
+    ASSERT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyBackpressedEvent
+ * @tc.desc: NotifyBackpressedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent, Function | SmallTest | Level3)
+{
+    bool isPrivacyMode = true;
+    bool isConsumed = true;
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    windowExtensionSessionImpl.NotifyBackpressedEvent(isConsumed);
+
+    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback
+ * @tc.desc: InputMethodKeyEventResultCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    bool consumed = true;
+    std::shared_ptr<std::promise<bool>> isConsumedPromise = nullptr;
+    std::shared_ptr<bool> isTimeout;
+    *isTimeout = true;
+    bool isPrivacyMode = true;
+
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+
+    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyKeyEvent
+ * @tc.desc: NotifyKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    bool isConsumed = true;
+    bool notifyInputMethod = true;
+    bool isPrivacyMode = true;
+
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
+
+    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace Rosen

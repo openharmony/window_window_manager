@@ -416,6 +416,7 @@ config("wm_unittest_common_public_config") {
     "${window_base_path}/utils/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/session/host/include/zidl",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
