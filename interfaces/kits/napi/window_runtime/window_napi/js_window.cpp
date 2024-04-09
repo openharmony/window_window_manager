@@ -2133,6 +2133,40 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
     return ret;
 }
 
+void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
+    wptr<Window> weakToken, std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::shared_ptr<WmErrorCode> errCodePtr)
+{
+    execute = [weakToken, systemBarProperties, errCodePtr] () {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSystemBarProperty(
+            WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSystemBarProperty(
+            WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+        TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set set system bar enalbe end, ret = %{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+    };
+    complete = [weakToken, errCodePtr] (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        if (errCodePtr == nullptr) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(*errCodePtr), "JsWindow::OnSetSystemBarEnable failed"));
+        }
+    };
+}
+
 napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -2151,28 +2185,16 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
-        (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
-                errCode = WMError::WM_ERROR_NULLPTR;
-            }
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
-                return;
-            }
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
-            WMError ret = SetSystemBarPropertiesByFlags(
-                systemBarPropertyFlags, systemBarProperties, weakToken);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(ret), "JsWindow::OnSetSystemBarEnable failed"));
-            }
-        };
+    UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetSystemBarEnableTask(execute, complete, weakToken, systemBarProperties, errCodePtr);
+
     napi_value lastParam = nullptr;
     if (argc > 0 && GetType(env, argv[0]) == napi_function) {
         lastParam = argv[0];
@@ -2181,7 +2203,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetSystemBarEnable",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
