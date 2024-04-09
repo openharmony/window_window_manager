@@ -2242,4 +2242,26 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+const DeviceScreenConfig& ScreenSessionManagerProxy::GetDeviceScreenConfig() const
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return {};
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return {};
+    }
+    DeviceScreenConfig deviceScreenConfig;
+    if (!RSMarshallingHelper::Unmarshalling(reply, deviceScreenConfig)) {
+        WLOGFE("Read deviceScreenConfig failed");
+        return {};
+    }
+    return deviceScreenConfig;
+}
 } // namespace OHOS::Rosen
