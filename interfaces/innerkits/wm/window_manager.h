@@ -257,7 +257,7 @@ public:
 };
 
 /**
- * @class ICameraFloatWindowChangedListener
+ * @class ICameraWindowChangedListener
  *
  * @brief Listener to observe camera window changed.
  */

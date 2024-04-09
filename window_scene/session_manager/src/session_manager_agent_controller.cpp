@@ -27,14 +27,14 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerAgentController)
 WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "RegisterWindowManagerAgent type: %{public}u", static_cast<uint32_t>(type));
+    TLOGI(WmsLogTag::WMS_SYSTEM, "type: %{public}u", static_cast<uint32_t>(type));
     return smAgentContainer_.RegisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
 WMError SessionManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "UnregisterWindowManagerAgent");
+    TLOGI(WmsLogTag::WMS_SYSTEM, "type: %{public}u", static_cast<uint32_t>(type));
     return smAgentContainer_.UnregisterAgent(windowManagerAgent, type) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
 }
 
