@@ -574,7 +574,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     if (pixelMap) {
         nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     }
-    if (nativeData != nullptr) {
+    if (nativeData != nullptr && pixelMap != nullptr) {
         WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGE("[NAPI]create native pixelmap failed");

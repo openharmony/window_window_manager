@@ -109,6 +109,10 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
 WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType startType)
 {
     TLOGD(WmsLogTag::WMS_PIP, "ShowPictureInPictureWindow is called");
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is null when show pip");
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
@@ -117,10 +121,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     }
     if (pipLifeCycleListener_ != nullptr) {
         pipLifeCycleListener_->OnPreparePictureInPictureStart();
-    }
-    if (pipOption_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
@@ -153,6 +153,10 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
 {
     TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture called");
     std::lock_guard<std::mutex> lock(mutex_);
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
     if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
         TLOGW(WmsLogTag::WMS_PIP, "pipWindow is starting, state: %{public}u, id: %{public}u, mainWindow: %{public}u",
             curState_, window_->GetWindowId(), mainWindowId_);
@@ -160,7 +164,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
-    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
+    if (pipOption_->GetContext() == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPictureOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
@@ -177,6 +181,9 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
+            if (window_ == nullptr) {
+                return WMError::WM_ERROR_PIP_CREATE_FAILED;
+            }
             TLOGE(WmsLogTag::WMS_PIP, "Reuse pipWindow: %{public}u as attached to the same mainWindow: %{public}u",
                 window_->GetWindowId(), mainWindowId_);
             PictureInPictureManager::DoClose(false, false);
