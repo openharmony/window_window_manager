@@ -6876,6 +6876,13 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
             return true;
         }
 
+        if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+            if (pair.second->IsVisible()) {
+                return false;
+            }
+            return true;
+        }
+
         if (pair.second->IsSystemInput()) {
             return false;
         } else if (pair.second->IsSystemSession() && pair.second->IsVisible() && pair.second->IsSystemActive()) {
