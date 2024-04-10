@@ -221,7 +221,9 @@ public:
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
-
+    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
+    virtual WMError GetCallingWindowRect(Rect& rect) const override;
+    
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -285,6 +287,8 @@ protected:
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
+    virtual bool IfNotNeedAvoidKeyBoardForSplit();
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
