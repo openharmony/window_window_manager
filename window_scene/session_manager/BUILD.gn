@@ -111,6 +111,7 @@ ohos_shared_library("scene_session_manager") {
     "input:libmmi-util",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_context_native",
