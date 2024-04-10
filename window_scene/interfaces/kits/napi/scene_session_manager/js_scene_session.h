@@ -118,6 +118,7 @@ private:
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
+    void ProcessContextTransparentRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -156,6 +157,7 @@ private:
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
+    void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
 
     napi_env env_;
