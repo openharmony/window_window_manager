@@ -230,6 +230,11 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
                 return;
             }
             sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
+            if (mainWindow == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+                    WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
+                return;
+            }
             sptr<PictureInPictureController> pipController =
                 new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
             task.Resolve(env, CreateJsPipControllerObject(env, pipController));

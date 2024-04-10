@@ -2770,7 +2770,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
+            if (sceneSession->GetSessionProperty() != nullptr && property != nullptr) {
                 std::vector<Rect> touchHotAreas;
                 property->GetTouchHotAreas(touchHotAreas);
                 sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
@@ -4373,6 +4373,10 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             continue;
         }
         auto dialogSession = GetSceneSession(dialog->GetPersistentId());
+        if (dialogSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_DIALOG, "dialogSession is not active");
+            continue;
+        }
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
         if (dialog->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground_) {
             needBlockNotifyUnfocusStatus_ = false;
@@ -6631,6 +6635,10 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         collaborator = iter->second;
     }
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is nullptr");
+        return;
+    }
     sceneSession->SetSelfToken(abilitySessionInfo->sessionToken);
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
