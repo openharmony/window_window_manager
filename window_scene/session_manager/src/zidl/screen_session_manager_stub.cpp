@@ -674,7 +674,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG: {
             if (!RSMarshallingHelper::Marshalling(reply, GetDeviceScreenConfig())) {
-                WLOGFE("Write screenProperty failed");
+                WLOGFE("Write deviceScreenConfig failed");
             }
             break;
         }
