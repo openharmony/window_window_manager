@@ -65,12 +65,9 @@ private:
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetScreenSnapshot(napi_env env, const napi_callback_info info);
 
-    void ClearNativeReference();
-
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;
     napi_env env_;
-    std::shared_ptr<MainThreadScheduler> taskScheduler_;
 };
 } // namespace OHOS::Rosen
 
