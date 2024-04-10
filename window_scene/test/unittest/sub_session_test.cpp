@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,14 @@
  */
 
 #include <gtest/gtest.h>
-#include "session/host/include/system_session.h"
+#include "session/host/include/sub_session.h"
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
 #include "session/host/include/session.h"
+#include "session/host/include/main_session.h"
+#include "session/host/include/system_session.h"
 #include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -132,43 +134,43 @@ WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, fl
     return WSError::WS_OK;
 }
 
-class SystemSessionTest : public testing::Test {
+class SubSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr<SystemSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SystemSession> systemSession_;
+    sptr<SubSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SubSession> subSession_;
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
-void SystemSessionTest::SetUpTestCase()
+void SubSessionTest::SetUpTestCase()
 {
 }
 
-void SystemSessionTest::TearDownTestCase()
+void SubSessionTest::TearDownTestCase()
 {
 }
 
-void SystemSessionTest::SetUp()
+void SubSessionTest::SetUp()
 {
     SessionInfo info;
-    info.abilityName_ = "testSystemSession1";
-    info.moduleName_ = "testSystemSession2";
-    info.bundleName_ = "testSystemSession3";
-    systemSession_ = new SystemSession(info, specificCallback);
-    EXPECT_NE(nullptr, systemSession_);
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testMainSession3";
+    subSession_ = new SubSession(info, specificCallback);
+    EXPECT_NE(nullptr, subSession_);
 }
 
-void SystemSessionTest::TearDown()
+void SubSessionTest::TearDown()
 {
-    systemSession_ = nullptr;
+    subSession_ = nullptr;
 }
 
-RSSurfaceNode::SharedPtr SystemSessionTest::CreateRSSurfaceNode()
+RSSurfaceNode::SharedPtr SubSessionTest::CreateRSSurfaceNode()
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
@@ -178,24 +180,11 @@ RSSurfaceNode::SharedPtr SystemSessionTest::CreateRSSurfaceNode()
 
 namespace {
 /**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-
-    ASSERT_TRUE((systemSession_ != nullptr));
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
  * @tc.name: Reconnect01
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, Reconnect01, Function | SmallTest | Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -205,19 +194,19 @@ HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
     sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
 
-    auto result = systemSession_->Reconnect(nullptr, nullptr, nullptr, property);
+    auto result = subSession_->Reconnect(nullptr, nullptr, nullptr, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = systemSession_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, property);
+    result = subSession_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = systemSession_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
+    result = subSession_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -226,11 +215,11 @@ HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
 {
-    systemSession_->state_ = SessionState::STATE_END;
+    subSession_->state_ = SessionState::STATE_END;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, systemSession_->TransferKeyEvent(nullptr));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, subSession_->TransferKeyEvent(nullptr));
 }
 
 /**
@@ -238,38 +227,12 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
 {
-    systemSession_->state_ = SessionState::STATE_CONNECT;
+    subSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
 
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, systemSession_->TransferKeyEvent(keyEvent));
-}
-
-/**
- * @tc.name: ProcessBackEvent01
- * @tc.desc: check func ProcessBackEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, ProcessBackEvent01, Function | SmallTest | Level1)
-{
-    systemSession_->state_ = SessionState::STATE_END;
-
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, systemSession_->ProcessBackEvent());
-}
-
-/**
- * @tc.name: NotifyClientToUpdateRect01
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level1)
-{
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    ASSERT_NE(mockSessionStage, nullptr);
-    systemSession_->sessionStage_ = mockSessionStage;
-    auto ret = systemSession_->NotifyClientToUpdateRect(nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
 }
 }
 }
