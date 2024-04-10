@@ -518,11 +518,14 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     ConsumePointerEventInner(pointerEvent, pointerItem);
 }
 
-void WindowSceneSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    bool isConsumed = false;
-    NotifyKeyEvent(keyEvent, isConsumed, false);
+    bool ret = false;
+    if (uiContent_ != nullptr) {
+        ret = uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
     RefreshNoInteractionTimeoutMonitor();
+    return ret;
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
