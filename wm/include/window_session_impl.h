@@ -254,7 +254,7 @@ protected:
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
-    void RefreshNoInteractionTimeoutMonitor(int32_t eventId);
+    void RefreshNoInteractionTimeoutMonitor();
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -372,7 +372,7 @@ private:
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
 
-    std::atomic<int32_t> lastInteractionEventId_ { -1 };
+    std::atomic<int32_t> lastInteractionEventId_ { 0 };
 
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
