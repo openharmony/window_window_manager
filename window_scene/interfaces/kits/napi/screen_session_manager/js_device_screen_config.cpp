@@ -14,7 +14,7 @@
  */
 
 #include "js_device_screen_config.h"
-
+#include "js_screen_utils.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
