@@ -2777,13 +2777,14 @@ void WindowSessionImpl::SubmitNoInteractionMonitorTask(int32_t eventId,
     handler_->PostTask(task, listener->GetTimeout());
 }
 
-void WindowSessionImpl::RefreshNoInteractionTimeoutMonitor(int32_t eventId)
+void WindowSessionImpl::RefreshNoInteractionTimeoutMonitor()
 {
     std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
     if (windowNoInteractionListeners_[GetPersistentId()].empty()) {
         return;
     }
-    this->lastInteractionEventId_.store(eventId);
+    this->lastInteractionEventId_.fetch_add(1);
+    int32_t eventId = lastInteractionEventId_.load();
     auto noInteractionListeners = GetListeners<IWindowNoInteractionListener>();
     for (const auto& listenerItem : noInteractionListeners) {
         SubmitNoInteractionMonitorTask(eventId, listenerItem);
