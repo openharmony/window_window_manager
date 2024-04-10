@@ -134,9 +134,12 @@ WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint3
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, gravity: %{public}d, percent: %{public}d",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
             session->GetPersistentId(), gravity, percent);
 
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onKeyboardGravityChange_) {
+            session->sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+        }
         if (session->GetSessionProperty()) {
             session->GetSessionProperty()->SetKeyboardSessionGravity(gravity, percent);
         }
