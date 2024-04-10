@@ -43,7 +43,6 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
 public:
-    explicit Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
