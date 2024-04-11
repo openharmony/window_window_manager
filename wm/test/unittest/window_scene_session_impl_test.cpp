@@ -154,7 +154,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
     sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
     ASSERT_NE(nullptr, session_);
     ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
-
+    parentscenesession_->property_->SetPersistentId(103);
     parentscenesession_->property_->SetParentPersistentId(102);
     parentscenesession_->property_->SetParentId(102);
     parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
@@ -193,6 +193,155 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     parentSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     if (parentSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentSceneSession->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession04
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildSubWindow0004");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle4", "CreateTestModule4", "CreateTestAbility4" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+
+    parentscenesession_->property_->SetPersistentId(104);
+    parentscenesession_->property_->SetParentPersistentId(103);
+    parentscenesession_->property_->SetParentId(103);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession05
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildSubSubWindow0005");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle5", "CreateTestModule5", "CreateTestAbility5" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+
+    parentscenesession_->property_->SetParentPersistentId(104);
+    parentscenesession_->property_->SetParentId(104);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_NE(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession06
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SYSTEM_WINDOW);
+    option_->SetWindowName("ChildWindow0006");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle6", "CreateTestModule6", "CreateTestAbility6" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(105);
+    parentscenesession_->property_->SetParentPersistentId(102);
+    parentscenesession_->property_->SetParentId(102);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession07
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildWindow0007");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle7", "CreateTestModule7", "CreateTestAbility7" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(106);
+    parentscenesession_->property_->SetParentPersistentId(105);
+    parentscenesession_->property_->SetParentId(105);
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession08
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildWindow0008");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle8", "CreateTestModule8", "CreateTestAbility8" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(107);
+    parentscenesession_->property_->SetParentPersistentId(106);
+    parentscenesession_->property_->SetParentId(106);
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_ERROR_INVALID_TYPE) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, parentscenesession_->CreateAndConnectSpecificSession());
     }
 }
 
@@ -530,6 +679,8 @@ HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
     option->SetWindowName("Connect02");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
+    windowscenesession->property_->SetPersistentId(-1);
+    windowscenesession->property_->SetParentPersistentId(-1);
     windowscenesession->property_->SetPersistentId(1);
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1972,7 +2123,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | S
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, parentscenesession);
 
-    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(0));
+    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(-1));
     GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
 }
 
