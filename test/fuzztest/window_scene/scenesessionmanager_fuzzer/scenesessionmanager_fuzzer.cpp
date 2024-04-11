@@ -196,6 +196,8 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
         sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        sendData, reply, option);
 }
 
 void IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
@@ -296,6 +298,10 @@ void ProxyInterfaceFuzzTestPart2(const uint8_t* data, size_t size)
     bool isLowResolution = source.GetObject<bool>();
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     proxy->GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
+
+    std::string continueSessionId = source.GetString();
+    SessionInfoBean sessionInfo2;
+    proxy->GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo2);
 }
 
 void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)

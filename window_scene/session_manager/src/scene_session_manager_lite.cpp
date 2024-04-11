@@ -74,6 +74,13 @@ WSError SceneSessionManagerLite::GetSessionInfo(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionInfo(deviceId, persistentId, sessionInfo);
 }
 
+WSError SceneSessionManagerLite::GetSessionInfoByContinueSessionId(
+    const std::string& continueSessionId, SessionInfoBean& sessionInfo)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "liteProxy -> continueSessionId: %{public}s", continueSessionId.c_str());
+    return SceneSessionManager::GetInstance().GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo);
+}
+
 WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     WLOGFD("run RegisterSessionListener");
