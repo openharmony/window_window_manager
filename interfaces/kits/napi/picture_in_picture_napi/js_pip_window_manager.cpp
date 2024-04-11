@@ -224,15 +224,10 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
             }
             sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
             auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
-            if (context == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                    WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
-                return;
-            }
             sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
-            if (mainWindow == nullptr) {
+            if (context == nullptr || mainWindow == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                    WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
+                    WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context or mainWindow"));
                 return;
             }
             sptr<PictureInPictureController> pipController =
