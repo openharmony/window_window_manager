@@ -275,6 +275,7 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
     virtual WSError SetVisible(bool isVisible);
@@ -548,6 +549,7 @@ private:
     bool isRSDrawing_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };
+    bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
     bool isAttach_{ false };

@@ -447,6 +447,11 @@ bool Session::GetTouchable() const
     return GetSessionProperty()->GetTouchable();
 }
 
+void Session::SetForceTouchable(bool forceTouchable)
+{
+    forceTouchable_ = forceTouchable;
+}
+
 void Session::SetSystemTouchable(bool touchable)
 {
     WLOGFD("SetSystemTouchable id: %{public}d, systemtouchable: %{public}d, propertytouchable: %{public}d",
@@ -457,7 +462,7 @@ void Session::SetSystemTouchable(bool touchable)
 
 bool Session::GetSystemTouchable() const
 {
-    return systemTouchable_ && GetTouchable();
+    return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
 WSError Session::SetVisible(bool isVisible)
