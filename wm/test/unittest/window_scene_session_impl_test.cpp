@@ -810,6 +810,130 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty, Function | SmallTest | L
 }
 
 /*
+ * @tc.name: SystemBarProperty02
+ * @tc.desc: SystemBarProperty02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+
+    property.enableAnimation_ = false;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty03
+ * @tc.desc: SystemBarProperty03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    property.enableAnimation_ = true;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty04
+ * @tc.desc: SystemBarProperty04 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty04, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+}
+
+/*
+ * @tc.name: SystemBarProperty05
+ * @tc.desc: SystemBarProperty05 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty05, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+
+    property.enableAnimation_ = false;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty06
+ * @tc.desc: SystemBarProperty06 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty06, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    property.enableAnimation_ = true;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
  * @tc.name: SpecificBarProperty
  * @tc.desc: SpecificBarProperty01 test
  * @tc.type: FUNC
