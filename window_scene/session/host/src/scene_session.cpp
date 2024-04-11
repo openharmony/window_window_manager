@@ -795,7 +795,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (disfplay == nullptr) {
+        if (display == nullptr) {
             WLOGFE("display is null");
             return;
         }
