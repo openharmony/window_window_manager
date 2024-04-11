@@ -316,12 +316,12 @@ ohos_shared_library("libwm_lite") {
   defines = [ "USE_ADAPTER_LITE" ]
   include_dirs = [ "../utils/include" ]
   sources = [
+    "../utils/src/window_visibility_info.cpp",
     "src/window_adapter_lite.cpp",
     "src/window_manager_agent_lite.cpp",
     "src/window_manager_lite.cpp",
     "src/window_option.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
-    "../utils/src/window_visibility_info.cpp",
   ]
 
   configs = [
