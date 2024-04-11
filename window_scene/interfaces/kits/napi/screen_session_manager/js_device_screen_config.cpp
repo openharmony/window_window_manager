@@ -32,6 +32,7 @@ napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const De
         WLOGFE("[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
+    WLOGI("DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
     napi_set_named_property(env, objValue, "rotationPolicy", CreateJsValue(env, config.rotationPolicy_));
     return objValue;
 }
