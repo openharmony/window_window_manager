@@ -2372,7 +2372,6 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
         errCode = WMError::WM_ERROR_NULLPTR;
-        return;
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
