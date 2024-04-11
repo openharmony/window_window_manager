@@ -1630,8 +1630,8 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     }
     auto posX = reply.ReadInt32();
     auto posY = reply.ReadInt32();
-    auto height = reply.ReadUint32();
     auto width = reply.ReadUint32();
+    auto height = reply.ReadUint32();
     rect = {posX, posY, width, height};
     return static_cast<WSError>(reply.ReadInt32());
 }
