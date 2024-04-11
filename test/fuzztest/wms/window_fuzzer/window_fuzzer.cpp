@@ -348,11 +348,6 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     startPos += GetObject(systemBarProperty, data + startPos, size - startPos);
     window->SetSystemBarProperty(windowType, systemBarProperty);
 
-    SystemBarProperty systemBarProperty1;
-    startPos += GetObject(windowType, data + startPos, size - startPos);
-    startPos += GetObject(systemBarProperty1, data + startPos, size - startPos);
-    window->SetSpecificBarProperty(windowType, systemBarProperty1);
-
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetLayoutFullScreen(boolVal);
 
