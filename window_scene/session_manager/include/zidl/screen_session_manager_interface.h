@@ -136,6 +136,10 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

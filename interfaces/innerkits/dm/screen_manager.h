@@ -321,6 +321,16 @@ public:
      * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
+
+    /**
+     * @brief Set virtual screen refresh rate with a refresh interval relative to the main screen.
+     *
+     * @param screenId virtual screen id.
+     * @param refreshInterval refresh interval: 2 indicates that the virtual screen refreshes 1 frame
+     *     when the main screen refreshes 2 frames, and so on.
+     * @return DM_OK means set success, others means failed.
+     */
+     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 private:
     ScreenManager();
     ~ScreenManager();
