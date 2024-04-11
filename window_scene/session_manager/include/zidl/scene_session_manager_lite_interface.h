@@ -50,6 +50,7 @@ public:
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
         TRANS_ID_GET_MISSION_INFO_BY_ID,
+        TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID,
         TRANS_ID_TERMINATE_SESSION_NEW,
         TRANS_ID_GET_SESSION_SNAPSHOT,
         TRANS_ID_SET_SESSION_CONTINUE_STATE,
@@ -80,6 +81,8 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
+        SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
