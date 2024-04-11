@@ -1156,7 +1156,7 @@ Ace::UIContent* WindowSessionImpl::GetUIContent() const
 
 Ace::UIContent* WindowSessionImpl::GetUIContentWithId(uint32_t winId) const
 {
-    sptr<Window> targetwindow = FindWindowById(winId);
+    sptr<Window> targetWindow = FindWindowById(winId);
     if (targetWindow == nullptr) {
         WLOGE("target window is null");
         return nullptr;
