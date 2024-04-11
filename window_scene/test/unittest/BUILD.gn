@@ -748,6 +748,8 @@ ohos_unittest("ws_session_stub_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
 }
 
 ohos_unittest("ws_session_stub_mock_test") {
@@ -768,6 +770,8 @@ ohos_unittest("ws_session_stub_mock_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
 }
 
 ohos_unittest("ws_distributed_client_test") {
