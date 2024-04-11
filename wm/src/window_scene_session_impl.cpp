@@ -1483,16 +1483,17 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     } else if (GetSystemBarPropertyByType(type) == property) {
         setSameSystembarPropertyCnt_++;
         TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set same property %{public}u times, "
-            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x",
+            "type:%{public}u, enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u",
             GetWindowId(), GetWindowName().c_str(), setSameSystembarPropertyCnt_,
-            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_);
+            static_cast<uint32_t>(type), property.enable_, property.backgroundColor_, property.contentColor_,
+            property.enableAnimation_);
         return WMError::WM_OK;
     }
     setSameSystembarPropertyCnt_ = 0;
     TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u",
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_);
+        property.enable_, property.backgroundColor_, property.contentColor_, property.enableAnimation_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
