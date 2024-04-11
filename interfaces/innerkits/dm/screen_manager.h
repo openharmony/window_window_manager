@@ -330,7 +330,7 @@ public:
      *     when the main screen refreshes 2 frames, and so on.
      * @return DM_OK means set success, others means failed.
      */
-     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 private:
     ScreenManager();
     ~ScreenManager();
