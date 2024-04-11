@@ -2072,12 +2072,12 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     }
     auto screenSession = GetScreenSession(screenId);
     auto defaultScreenSession = GetDefaultScreenSession();
-    if (screenSession == null || defaultScreenSession == null) {
+    if (screenSession == nullptr || defaultScreenSession == nullptr) {
         WLOGFE("SetVirtualScreenRefreshRate, screenSession is null.");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     ScreenId rsScreenId;
-    if (!screenIdManager_.ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
         WLOGFE("SetVirtualScreenRefreshRate, No corresponding rsId.");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
