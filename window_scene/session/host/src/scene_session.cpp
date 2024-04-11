@@ -1820,6 +1820,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
+    SetForceTouchable(!hide);
 }
 
 Orientation SceneSession::GetRequestedOrientation() const
