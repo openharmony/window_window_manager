@@ -2470,6 +2470,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     info.callingTokenId_ = 1;
     info.uiAbilityId_ = 1;
     info.startSetting = nullptr;
+    info.continueSessionId_ = "";
     session_->SetSessionInfo(info);
     ASSERT_EQ(nullptr, session_->sessionInfo_.want);
     ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
@@ -2477,6 +2478,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     ASSERT_EQ(1, session_->sessionInfo_.callerPersistentId_);
     ASSERT_EQ(1, session_->sessionInfo_.callingTokenId_);
     ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
+    ASSERT_EQ("", session_->sessionInfo_.continueSessionId_);
     ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
 }
 

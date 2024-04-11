@@ -47,6 +47,7 @@ ohos_static_library("libwmutil_static") {
     "src/cutout_info.cpp",
     "src/display_change_info.cpp",
     "src/display_info.cpp",
+    "src/dms_report.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
@@ -144,6 +145,7 @@ ohos_shared_library("libwmutil_base") {
 ## Build libwmutil.so
 ohos_shared_library("libwmutil") {
   sources = [
+    "src/dms_report.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
