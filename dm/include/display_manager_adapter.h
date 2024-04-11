@@ -146,6 +146,7 @@ public:
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
+    virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

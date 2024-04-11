@@ -2252,4 +2252,26 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+{
+    WLOGFI("ScreenSessionManagerProxy::SetVirtualScreenRefreshRate: ENTER");
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId) || !date.WriteUint32(refreshInterval)) {
+        WLOGFE("Write screenId or refreshInterval failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE),
+        date, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

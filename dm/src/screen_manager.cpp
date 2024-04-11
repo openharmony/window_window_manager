@@ -578,6 +578,11 @@ DMError ScreenManager::SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenFlag(screenId, screenFlag);
 }
 
+DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenRefreshRate(screenId, refreshInterval);
+}
+
 bool ScreenManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u", screenId, state, reason);
