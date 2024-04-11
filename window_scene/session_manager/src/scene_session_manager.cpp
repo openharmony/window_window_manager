@@ -5662,11 +5662,8 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession, type]() {
-        std::vector<sptr<AccessibilityWindowInfo>> infos;
         auto scnSession = weakSceneSession.promote();
-        if (FillWindowInfo(infos, scnSession)) {
-            SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
-        }
+        NotifyAllAccessibilityInfo();
         if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
             scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             WindowChangedFunc_(scnSession->GetPersistentId(), type);
@@ -5717,13 +5714,16 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
+    info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
+    info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr) {
         info->displayId_ = property->GetDisplayId();
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
-    WLOGFD("wid = %{public}d, inWid = %{public}d, uiNId = %{public}d", info->wid_, info->innerWid_, info->uiNodeId_);
+    TLOGD(WmsLogTag::WMS_MAIN, "wid = %{public}d, inWid = %{public}d, uiNId = %{public}d, bundleName = %{public}s",
+        info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
     return true;
 }
 
@@ -7681,6 +7681,97 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     };
     taskScheduler_->PostSyncTask(task, "GetHostWindowRect");
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (!sceneSession->IsVisibleForAccessibility()) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
+            || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
+            continue;
+        }
+        sceneSessionList.push_back(sceneSession);
+    }
+}
+
+void SceneSessionManager::FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
+    std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo)
+{
+    for (const auto& sceneSession : sceneSessionList) {
+        if (!FillWindowInfo(accessibilityInfo, sceneSession)) {
+            TLOGW(WmsLogTag::WMS_MAIN, "fill accessibilityInfo failed");
+        }
+    }
+}
+
+bool SceneSessionManager::IsCovered(const sptr<SceneSession>& sceneSession,
+                                    const std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid parameter, scene session is nullptr.");
+        return true;
+    }
+
+    WSRect windowWSRect = sceneSession->GetSessionRect();
+    Rect windowRect = {windowWSRect.posX_, windowWSRect.posY_,
+                       windowWSRect.width_, windowWSRect.height_};
+    for (const auto& item : sceneSessionList) {
+        if (item == nullptr) {
+            continue;
+        }
+        if (item->GetWindowId() == sceneSession->GetWindowId()) {
+            continue;
+        }
+        if (sceneSession->GetZOrder() > item->GetZOrder()) {
+            continue;
+        }
+        WSRect itemWSRect = item->GetSessionRect();
+        Rect itemRect = {itemWSRect.posX_, itemWSRect.posY_, itemWSRect.width_, itemWSRect.height_};
+        if (windowRect.IsInsideOf(itemRect) && sceneSession->GetZOrder() < item->GetZOrder()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void SceneSessionManager::FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    for (auto it = sceneSessionList.begin(); it != sceneSessionList.end();) {
+        if (IsCovered(it->GetRefPtr(), sceneSessionList)) {
+            it = sceneSessionList.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+void SceneSessionManager::NotifyAllAccessibilityInfo()
+{
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    GetAllSceneSessionForAccessibility(sceneSessionList);
+    FilterSceneSessionForAccessibility(sceneSessionList);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+
+    for (const auto& item : accessibilityInfo) {
+        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid = %{public}d, inWid = %{public}d, \
+            bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
+            item->wid_, item->innerWid_, item->bundleName_.c_str(),
+            item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
+    }
+
+    SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityInfo,
+        WindowUpdateType::WINDOW_UPDATE_ALL);
 }
 
 int32_t SceneSessionManager::ReclaimPurgeableCleanMem()
