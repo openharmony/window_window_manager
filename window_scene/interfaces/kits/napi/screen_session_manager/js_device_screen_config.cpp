@@ -25,14 +25,13 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDevi
 
 napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const DeviceScreenConfig& config)
 {
-    WLOGI("[NAPI]CreateDeviceScreenConfig");
+    WLOGI("DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
         WLOGFE("[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
-    WLOGI("DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
     napi_set_named_property(env, objValue, "rotationPolicy", CreateJsValue(env, config.rotationPolicy_));
     return objValue;
 }
