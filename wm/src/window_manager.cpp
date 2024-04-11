@@ -286,7 +286,7 @@ int32_t WindowChecker::CheckWindowId(int32_t windowId) const
 
 WindowManager::~WindowManager()
 {
-    std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
 }
 
