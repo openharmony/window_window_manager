@@ -2598,7 +2598,7 @@ HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTes
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     window->property_->SetPersistentId(102);
 
-    SessionInfo sessioninfo = { "CreateTestBundle", "TestGetUIContentWithId" , "CreateTestAbility" };
+    SessionInfo sessioninfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WWM_OK, window->Create(nullptr, session));
