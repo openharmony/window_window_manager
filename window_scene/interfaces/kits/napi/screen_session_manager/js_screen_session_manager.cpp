@@ -584,12 +584,12 @@ napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const n
 {
     WLOGD("[NAPI]OnGetDeviceScreenConfig");
     DeviceScreenConfig deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
-    napi_value jsWindowSceneConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
-    if (jsWindowSceneConfigObj == nullptr) {
-        WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");
+    napi_value jsDeviceScreenConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
+    if (jsDeviceScreenConfigObj == nullptr) {
+        WLOGFE("[NAPI]jsDeviceScreenConfigObj is nullptr");
         napi_throw(env, CreateJsError(env,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
     }
-    return jsWindowSceneConfigObj;
+    return jsDeviceScreenConfigObj;
 }
 } // namespace OHOS::Rosen
