@@ -321,6 +321,7 @@ ohos_shared_library("libwm_lite") {
     "src/window_manager_lite.cpp",
     "src/window_option.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
+    "../utils/src/window_visibility_info.cpp",
   ]
 
   configs = [
@@ -329,11 +330,10 @@ ohos_shared_library("libwm_lite") {
   ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
   ]
-
-  public_deps = []
 
   public_configs = [ ":libwm_public_config" ]
 
@@ -349,12 +349,6 @@ ohos_shared_library("libwm_lite") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
-
-  if (scene_board_enabled) {
-    public_deps += [ "${window_base_path}/utils:libwmutil_base" ]
-  } else {
-    deps += [ "${window_base_path}/utils:libwmutil_base" ]
-  }
 
   if (efficiency_manager_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
