@@ -478,17 +478,12 @@ struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
-    bool enableAnimation_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
-        enableAnimation_(false) {}
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE) {}
     SystemBarProperty(bool enable, uint32_t background, uint32_t content)
-        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(false) {}
-    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
-        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation) {}
+        : enable_(enable), backgroundColor_(background), contentColor_(content) {}
     bool operator == (const SystemBarProperty& a) const
     {
-        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
-            enableAnimation_ == a.enableAnimation_);
+        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
     }
 };
 

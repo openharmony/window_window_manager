@@ -1154,6 +1154,16 @@ Ace::UIContent* WindowSessionImpl::GetUIContent() const
     return uiContent_.get();
 }
 
+Ace::UIContent* WindowSessionImpl::GetUIContentWithId(uint32_t winId) const
+{
+    sptr<Window> targetwindow = FindWindowById(winId);
+    if (targetWindow == nullptr) {
+        WLOGE("target window is null");
+        return nullptr;
+    }
+    return targetWindow->GetUIContent();
+}
+
 void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 {
     WLOGFI("Window [name:%{public}s, id:%{public}d]",

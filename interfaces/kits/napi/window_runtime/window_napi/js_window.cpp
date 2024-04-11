@@ -833,9 +833,6 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
         if (flag.contentColorFlag == false) {
             systemBarProperties[type].contentColor_ = property.contentColor_;
         }
-        if (flag.enableAnimationFlag == false) {
-            systemBarProperties[type].enableAnimation_ = property.enableAnimation_;
-        }
     }
 
     return;
@@ -2124,7 +2121,7 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
     for (auto it : systemBarPropertyFlags) {
         WindowType type = it.first;
         SystemBarPropertyFlag flag = it.second;
-        if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag || flag.enableAnimationFlag) {
+        if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag) {
             err = weakWindow->SetSystemBarProperty(type, systemBarProperties.at(type));
             if (err != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty failed, ret = %{public}d", err);
