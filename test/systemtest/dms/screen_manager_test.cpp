@@ -1179,7 +1179,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate01, Function | MediumTest
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_OK, res);
 
-    ScreenManager::GetInstance.DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
 HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest | Level1)
@@ -1209,7 +1209,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
-    ScreenManager::GetInstance.DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
 HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest | Level1)
@@ -1239,7 +1239,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
-    ScreenManager::GetInstance.DestroyVirtualScreen(virtualScreenId);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
 HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest | Level1)
