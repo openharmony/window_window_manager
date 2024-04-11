@@ -1632,7 +1632,7 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     auto posY = reply.ReadInt32();
     auto height = reply.ReadUint32();
     auto width = reply.ReadUint32();
-    rect = {posX, posY, height, width};
+    rect = {posX, posY, width, height};
     return static_cast<WSError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen
