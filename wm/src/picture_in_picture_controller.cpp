@@ -153,8 +153,8 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
 {
     TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture called");
     std::lock_guard<std::mutex> lock(mutex_);
-    if (pipOption_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
+    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
@@ -163,10 +163,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
-    }
-    if (pipOption_->GetContext() == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPictureOption failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     if (mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Init main window failed");
