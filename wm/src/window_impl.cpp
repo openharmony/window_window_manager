@@ -676,6 +676,11 @@ Ace::UIContent* WindowImpl::GetUIContent() const
     return uiContent_.get();
 }
 
+Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
+{
+    return nullptr;
+}
+
 std::string WindowImpl::GetContentInfo()
 {
     WLOGFD("GetContentInfo");
