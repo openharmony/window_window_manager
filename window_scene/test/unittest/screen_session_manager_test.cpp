@@ -1191,6 +1191,17 @@ HWTEST_F(ScreenSessionManagerTest, GetPixelFormat, Function | SmallTest | Level3
     EXPECT_EQ(DMError::DM_OK, res);
 }
 
+/**
+ * @tc.name: GetDeviceScreenConfig
+ * @tc.desc: GetDeviceScreenConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDeviceScreenConfig, Function | SmallTest | Level3)
+{
+    DeviceScreenConfig deviceScreenConfig = ssm_->GetDeviceScreenConfig();
+    int ret = std::strcmp(deviceScreenConfig.rotationPolicy_, "11");
+    EXPECT_EQ(0, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
