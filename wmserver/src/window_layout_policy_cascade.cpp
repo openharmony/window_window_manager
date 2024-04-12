@@ -831,7 +831,8 @@ void WindowLayoutPolicyCascade::UpdateFloatingWindowSizeBySizeLimits(const sptr<
     // limit minimum size of floating or subWindow (not system type) window
     if ((!WindowHelper::IsSystemWindow(node->GetWindowType()) &&
         (!WindowHelper::IsSubWindow(node->GetWindowType()))) ||
-        node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA ||
+        node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
         winRect.width_ = std::max(sizeLimits.minWidth_, winRect.width_);
         winRect.height_ = std::max(sizeLimits.minHeight_, winRect.height_);
     }
