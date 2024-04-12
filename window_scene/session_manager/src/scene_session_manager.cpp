@@ -1126,6 +1126,57 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
     }
 }
 
+bool SceneSessionManager::CheckAppIsInDisplay(const sptr<SceneSession>& scnSession, DisplayId displayId)
+{
+    if (!scnSession) {
+        WLOGFE("scenesession is null!");
+        return false;
+    }
+    if (!scnSession->IsAppSession()) {
+        WLOGFE("scenesession is not app");
+        return false;
+    }
+    if (!scnSession->GetSessionProperty()) {
+        WLOGFE("property is null");
+        return false;
+    }
+    return scnSession->GetSessionProperty()->GetDisplayId() == displayId;
+}
+
+WSError SceneSessionManager::UpdateConfig(const SessionInfo& sessionInfo, AppExecFwk::Configuration config,
+    bool informAllAPP)
+{
+    auto systemAbility = GetAppManager();
+    if (!systemAbility) {
+        WLOGFE("app manager is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    if (sessionInfo.screenId_ == defScreenId) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA,
+            AppExecFwk::ConfigurationInner::NEED_REMOVE_SET_BY_SA);
+    }
+    config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA,
+        AppExecFwk::ConfigurationInner::IS_SET_BY_SA);
+
+    auto task = [this, sessionInfo, config, informAllAPP, systemAbility]() -> WSError {
+        if (informAllAPP) {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (auto iter : sceneSessionMap_) {
+                auto scnSession = iter.second;
+                if (CheckAppIsInDisplay(scnSession, sessionInfo.screenId_)) {
+                    systemAbility->UpdateConfigurationByBundleName(config, scnSession->GetSessionInfo().bundleName_);
+                }
+            }
+        } else {
+            systemAbility->UpdateConfigurationByBundleName(config, sessionInfo.bundleName_);
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "UpdateConfig");
+    return WSError::WS_OK;
+}
+
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
@@ -2424,6 +2475,23 @@ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
 }
 
+sptr<AppExecFwk::IAppMgr> SceneSessionManager::GetAppManager()
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        WLOGFE("Failed to get SystemAbilityManager.");
+        return nullptr;
+    }
+
+    auto appObject = systemAbilityMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (appObject == nullptr) {
+        WLOGFE("Failed to get AppManagerService.");
+        return nullptr;
+    }
+
+    return iface_cast<AppExecFwk::IAppMgr>(appObject);
+}
+
 std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResourceManager(
     const AppExecFwk::AbilityInfo& abilityInfo)
 {
@@ -2759,6 +2827,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_MODE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
+                ProcessSplitFloating();
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
@@ -4299,10 +4368,15 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
 
 void SceneSessionManager::ProcessSplitFloating()
 {
+    if (isScreenLocked_) {
+        return;
+    }
     bool inSplit = false;
     bool inFloating = false;
     for (const auto& session : sceneSessionMap_) {
-        if (session.second == nullptr || !Rosen::SceneSessionManager::GetInstance().IsSessionVisible(session.second)) {
+        if (session.second == nullptr ||
+            !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
+            !Rosen::SceneSessionManager::GetInstance().IsSessionVisible(session.second)) {
             continue;
         }
         auto mode = session.second->GetWindowMode();
@@ -4545,6 +4619,17 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
         !(abilityInfoPtr->excludeFromMissions)) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
         listenerController_->NotifySessionCreated(persistentId);
+    }
+
+    if (eventHandler_ != nullptr) {
+        auto task = [persistentId]() {
+            AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(persistentId);
+        };
+        WLOGFI("Post CompleteFirstFrameDrawing task.");
+        bool ret = eventHandler_->PostTask(task, "wms:CompleteFirstFrameDrawing", 0);
+        if (!ret) {
+            WLOGFE("Report post first frame task failed. the task name is CompleteFirstFrameDrawing");
+        }
     }
 
     if (taskScheduler_ == nullptr) {
