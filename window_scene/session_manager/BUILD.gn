@@ -101,7 +101,6 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
-    "//third_party/libxml2:libxml2",
   ]
   public_external_deps = [
     "ability_runtime:session_handler",
@@ -137,6 +136,7 @@ ohos_shared_library("scene_session_manager") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
@@ -238,7 +238,6 @@ ohos_shared_library("screen_session_manager") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/wmserver:sms",
-    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
@@ -257,6 +256,7 @@ ohos_shared_library("screen_session_manager") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "ipc:ipc_core",
+    "libxml2:libxml2",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
