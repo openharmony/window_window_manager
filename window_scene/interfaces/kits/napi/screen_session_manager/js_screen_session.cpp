@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
 #include "window_manager_hilog.h"
+#include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -32,6 +33,7 @@ const std::string ON_POWER_STATUS_CHANGE_CALLBACK = "powerStatusChange";
 const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
+constexpr double MIN_DPI = 1e-6;
 } // namespace
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
@@ -55,6 +57,9 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
+    BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
+    BindNativeFunction(env, objValue, "setDensityDpiSystem", moduleName,
+        JsScreenSession::SetDensityDpiSystem);
     return objValue;
 }
 
@@ -66,7 +71,149 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 
 JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
     : env_(env), screenSession_(screenSession)
-{}
+{
+    std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOW";
+    screenScene_ = new(std::nothrow) ScreenScene(name);
+    if (screenScene_) {
+        screenScene_->SetFrameLayoutFinishCallback([]() {
+            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+        });
+    }
+}
+
+napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnLoadContent(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]JsScreenSession::OnLoadContent");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) {  // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string contentUrl;
+    napi_value context = argv[1];
+    napi_value storage = argc < 3 ? nullptr : argv[2];
+    if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
+        WLOGFE("[NAPI]Failed to convert parameter to content url");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    if (context == nullptr) {
+        WLOGFE("[NAPI]Failed to get context object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    void* pointerResult = nullptr;
+    napi_unwrap(env, context, &pointerResult);
+    auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
+    if (contextNativePointer == nullptr) {
+        WLOGFE("[NAPI]Failed to get context pointer from js object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    auto contextWeakPtr = *contextNativePointer;
+
+    std::shared_ptr<NativeReference> contentStorage = nullptr;
+    if (storage != nullptr) {
+        napi_ref ref = nullptr;
+        napi_create_reference(env, storage, 1, &ref);
+        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
+    }
+
+    return ScheduleLoadContentTask(env, contentUrl, contextWeakPtr, contentStorage);
+}
+
+napi_value JsScreenSession::ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
+    std::weak_ptr<Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage)
+{
+    NapiAsyncTask::CompleteCallback complete = [screenScene = screenScene_,
+        contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (screenScene == nullptr) {
+            WLOGFE("[NAPI]screenScene is nullptr");
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
+        screenScene->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
+    };
+    napi_value lastParam = nullptr;
+    napi_value result = NapiGetUndefined(env);
+    NapiAsyncTask::Schedule("JsScreenSession::ScheduleLoadContentTask", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsScreenSession::SetDensityDpiSystem(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnSetDensityDpiSystem(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnSetDensityDpiSystem(napi_env env, napi_callback_info info)
+{
+    WLOGI("JsScreenSession::OnSetDensityDpiSystem is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    double dpi = 1.0;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("ConvertNativeValueTo dpi failed!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    napi_get_value_double(env, nativeVal, &dpi);
+    if (dpi < MIN_DPI) {
+        WLOGFE("Failed to set DensityDpi for system window, dpi is invalid!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    
+    // Calculate display density, Density = Dpi / 160;
+    float density = static_cast<float>(dpi / 160.0); // 160 is the coefficient between density and dpi.
+    return ScheduleSetDensityDpiSystemTask(env, density);
+}
+
+napi_value JsScreenSession::ScheduleSetDensityDpiSystemTask(napi_env env, float density)
+{
+    NapiAsyncTask::CompleteCallback complete = [screenSession = screenSession_, screenScene = screenScene_,
+        density](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (screenSession == nullptr || screenScene == nullptr) {
+            WLOGFE("[NAPI]screenSession or screenScene is nullptr");
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        screenScene->SetDisplayDensity(density);
+        Rect rect = {
+            screenSession->GetScreenProperty().GetOffsetX(), screenSession->GetScreenProperty().GetOffsetY(),
+            screenSession->GetScreenProperty().GetPhyWidth(), screenSession->GetScreenProperty().GetPhyHeight()
+        };
+        screenScene->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+        WLOGFI("SetDensityDpiSystem %{public}f success.", density);
+    };
+    napi_value lastParam = nullptr;
+    napi_value result = NapiGetUndefined(env);
+    NapiAsyncTask::Schedule("JsScreenSession::ScheduleSetDensityDpiSystemTask", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 
 napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
