@@ -36,7 +36,7 @@ public:
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) override;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) override;
-    void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo) override;
+    void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override;
     void NotifyGestureNavigationEnabledResult(bool enable) override;
 };
 } // namespace Rosen
