@@ -21,6 +21,7 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+#include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
 
@@ -89,6 +90,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
+    BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
+        JsScreenSessionManager::GetDeviceScreenConfig);
     return NapiGetUndefined(env);
 }
 
@@ -180,6 +183,13 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
     WLOGD("[NAPI]GetScreenSnapshot");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetDeviceScreenConfig");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetDeviceScreenConfig(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -580,5 +590,18 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
         WLOGE("[NAPI]create native pixelmap failed");
     }
     return nativeData;
+}
+
+napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetDeviceScreenConfig");
+    DeviceScreenConfig deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
+    napi_value jsDeviceScreenConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
+    if (jsDeviceScreenConfigObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]jsDeviceScreenConfigObj is nullptr");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsDeviceScreenConfigObj;
 }
 } // namespace OHOS::Rosen
