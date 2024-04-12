@@ -571,7 +571,7 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     napi_value nativeData = nullptr;
     auto pixelMap = ScreenSessionManagerClient::GetInstance().GetScreenSnapshot(screenId,
         static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]));
-    if(pixelMap == nullptr) {
+    if (pixelMap == nullptr) {
         return nativeData;
     }
     nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
