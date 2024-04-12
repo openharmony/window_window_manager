@@ -295,7 +295,7 @@ void SessionManager::OnFoundationDied()
 
 void FoundationDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died");
+    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died");
     SessionManager::GetInstance().OnFoundationDied();
 }
 
