@@ -43,7 +43,7 @@ public:
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate) override;
 
-    void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
+    void SetFrameLayoutFinishCallback(std::function<void()> && callback);
 
     void SetDisplayDensity(float density)
     {
