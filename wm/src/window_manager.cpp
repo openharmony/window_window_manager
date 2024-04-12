@@ -1012,7 +1012,7 @@ WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
 WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE("listener could not be null");
+        WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
@@ -1024,13 +1024,13 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM,
         pImpl_->visibleWindowNumChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
-        TLOGE("RegisterWindowManagerAgent failed!");
+        WLOGFE("RegisterWindowManagerAgent failed!");
         pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
             pImpl_->visibleWindowNumChangedListeners_.end(), listener);
         if (iter != pImpl_->visibleWindowNumChangedListeners_.end()) {
-            TLOGE("Listener is already registered.");
+            WLOGFE("Listener is already registered.");
             return WMError::WM_OK;
         }
         pImpl_->visibleWindowNumChangedListeners_.emplace_back(listener);
@@ -1041,14 +1041,14 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE("listener could not be null");
+        WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
         pImpl_->visibleWindowNumChangedListeners_.end(), listener);
     if (iter == pImpl_->visibleWindowNumChangedListeners_.end()) {
-        TLOGE("could not find this listener");
+        WLOGFE("could not find this listener");
         return WMError::WM_OK;
     }
 
