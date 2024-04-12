@@ -2252,4 +2252,5 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
 } // namespace OHOS::Rosen
