@@ -2681,11 +2681,11 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
 {
     if(sceneSession == nullptr) {
         WLOGFI("sceneSession is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if(property == nullptr) {
         WLOGFI("property is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
