@@ -2679,6 +2679,14 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
 WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
+    if(sceneSession == nullptr) {
+        WLOGFI("sceneSession is nullptr");
+        return;
+    }
+    if(property == nullptr) {
+        WLOGFI("property is nullptr");
+        return;
+    }
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
             sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
