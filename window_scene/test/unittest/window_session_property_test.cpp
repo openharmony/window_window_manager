@@ -94,9 +94,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
 */
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
-    enum Orientation orientation = Orientation::REVERSE_HORIZONTAL;
+    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetRequestedOrientation(), orientation);
+    property->SetRequestedOrientation(orientation);
+    Orientation ret = property->GetRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+
+    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
+    Orientation ret1 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    Orientation ret2 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
+    Orientation ret3 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    Orientation ret4 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    Orientation ret5 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 }
 
 /**

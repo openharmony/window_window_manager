@@ -20,7 +20,7 @@
 #include "mock/mock_session_stub.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "ability_start_setting.h"
-#include "accessibility_event_info_parcel.h"
+#include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "want.h"
 using namespace testing;
