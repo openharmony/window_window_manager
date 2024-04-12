@@ -54,6 +54,8 @@ namespace {
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
+    constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
+    float oldFoldAngle = 0.0F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -140,6 +142,18 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     WLOGFD("angle value in PostureData is: %{public}f.", globalAngle);
     HandleSensorData(globalAngle, globalHall);
+    notifyFoldAngleChanged(globalAngle);
+}
+
+void FoldScreenSensorManager::notifyFoldAngleChanged(float foldAngle)
+{
+    if (fabs(foldAngle - oldFoldAngle) < MINI_NOTIFY_FOLD_ANGLE) {
+        return;
+    }
+    oldFoldAngle = foldAngle;
+    std::vector<float> foldAngles;
+    foldAngles.push_back(foldAngle);
+    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
 }
 
 void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
