@@ -387,6 +387,13 @@ namespace {
     constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
     constexpr int32_t INVALID_PID = -1;
     constexpr int32_t INVALID_UID = -1;
+    constexpr int32_t SYSTEM_USERID = 0;
+    constexpr int32_t BASE_USER_RANGE = 200000;
+}
+
+inline int32_t GetUserIdByUid(int32_t uid)
+{
+    return uid / BASE_USER_RANGE;
 }
 
 /**

@@ -36,7 +36,7 @@ SessionManagerService::~SessionManagerService()
     if (g_sessionManagerService != nullptr) {
         g_sessionManagerService = nullptr;
     }
-    WLOGFI("[WMSRecover] ~SessionManagerService");
+    WLOGFI("~SessionManagerService");
 }
 
 SessionManagerService* SessionManagerService::GetInstance()
@@ -44,7 +44,7 @@ SessionManagerService* SessionManagerService::GetInstance()
     if (g_sessionManagerService == nullptr) {
         std::lock_guard<std::mutex> lock(g_instanceMutex);
         if (g_sessionManagerService == nullptr) {
-            WLOGFI("[WMSRecover] new SessionManagerService");
+            WLOGFI("new SessionManagerService");
             g_sessionManagerService = new SessionManagerService();
         }
     }
