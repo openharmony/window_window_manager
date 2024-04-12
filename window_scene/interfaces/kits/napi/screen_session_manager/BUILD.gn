@@ -16,7 +16,10 @@ import("../../../../../windowmanager_aafwk.gni")
 
 config("screen_session_manager_napi_public_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "${window_base_path}/window_scene/interfaces/kits/napi" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/interfaces/kits/napi",
+    "${window_base_path}/wm/include",
+  ]
 }
 
 ohos_shared_library("screensessionmanager_napi") {
@@ -34,6 +37,8 @@ ohos_shared_library("screensessionmanager_napi") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
     "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/wm:libwm",
   ]
 
   external_deps = [
@@ -47,6 +52,7 @@ ohos_shared_library("screensessionmanager_napi") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "ability_runtime:app_manager",
   ]
 
   defines = []
