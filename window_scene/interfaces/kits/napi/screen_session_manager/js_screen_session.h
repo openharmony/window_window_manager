@@ -21,6 +21,7 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include "session/screen/include/screen_session.h"
+#include "screen_session.h"
 
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
@@ -32,6 +33,13 @@ public:
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
+    static napi_value LoadContent(napi_env env, napi_callback_info info);
+    napi_value OnLoadContent(napi_env env, napi_callback_info info);
+    napi_value ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
+        std::weak_ptr<AbilityRuntime::Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage);
+    static napi_value SetDensityDpiSystem(napi_env env, napi_callback_info info);
+    napi_value OnSetDensityDpiSystem(napi_env env, napi_callback_info info);
+    napi_value ScheduleSetDensityDpiSystemTask(napi_env env, float density);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     static napi_value SetScreenRotationLocked(napi_env env, napi_callback_info info);
@@ -51,6 +59,7 @@ private:
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;
+    sptr<ScreenScene> screenScene_;
     std::map<std::string, std::shared_ptr<NativeReference>> mCallback_;
 };
 } // namespace OHOS::Rosen
