@@ -62,15 +62,13 @@ ohos_shared_library("libsnapshot_util") {
     "../resources/config/build:coverage_flags",
   ]
 
-  deps = [
-    "../dm:libdm",
-    "//third_party/libjpeg-turbo:turbojpeg_static",
-  ]
+  deps = [ "../dm:libdm" ]
 
   external_deps = [
     "c_utils:utils",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "libjpeg-turbo:turbojpeg",
   ]
 
   part_name = "window_manager"
