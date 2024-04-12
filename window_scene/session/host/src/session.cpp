@@ -1927,16 +1927,10 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property_->SetWindowMode(mode);
         property_->SetIsNeedUpdateWindowMode(true);
-        if (windowModeCallback_) {
-            windowModeCallback_();
-        }
     } else {
         property_->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
-        }
-        if (windowModeCallback_) {
-            windowModeCallback_();
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
