@@ -2202,9 +2202,9 @@ HWTEST_F(WindowSessionTest, UpdateWindowMode01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
-    session_->sessionInfo_.isSystem_ = true;
+    session_->property_ = nullptr;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
