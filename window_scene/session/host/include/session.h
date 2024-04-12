@@ -376,6 +376,7 @@ public:
     void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
     void SetAttachState(bool isAttach);
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

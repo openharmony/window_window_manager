@@ -122,5 +122,11 @@ void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     return windowManagerServiceProxy_->GetFocusWindowInfo(focusInfo);
 }
 
+WMError WindowAdapterLite::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    WLOGFD("get back home status");
+    return windowManagerServiceProxy_->GetWindowBackHomeStatus(isBackHome);
+}
 } // namespace Rosen
 } // namespace OHOS

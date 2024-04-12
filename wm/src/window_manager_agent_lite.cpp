@@ -46,5 +46,10 @@ void WindowManagerAgentLite::UpdateCameraWindowStatus(uint32_t accessTokenId, bo
 {
     SingletonContainer::Get<WindowManagerLite>().UpdateCameraWindowStatus(accessTokenId, isShowing);
 }
+
+void WindowManagerAgentLite::UpdateWindowBackHomeStatus(bool isBackHome)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdateWindowBackHomeStatus(isBackHome);
+}
 } // namespace Rosen
 } // namespace OHOS

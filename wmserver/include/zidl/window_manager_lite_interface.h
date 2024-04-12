@@ -40,6 +40,7 @@ public:
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) { return WMError::WM_OK; };
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
     virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) = 0;
+    virtual WMError GetWindowBackHomeStatus(bool &isBackHome) { return WMError::WM_OK; };
 };
 }
 }
