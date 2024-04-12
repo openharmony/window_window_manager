@@ -7254,8 +7254,8 @@ void SceneSessionManager::ReportWindowProfileInfos()
     }
 }
 
-bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo> lastInfo,
-    const std::vector<VisibleWindowNumInfo> currentInfo)
+bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
+    const std::vector<VisibleWindowNumInfo>& currentInfo)
 {
     if (lastInfo.size() != currentInfo.size()) {
         WLOGFE("last and current info is not Same");
