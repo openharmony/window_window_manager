@@ -94,6 +94,7 @@ private:
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowBackHomeStatus(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

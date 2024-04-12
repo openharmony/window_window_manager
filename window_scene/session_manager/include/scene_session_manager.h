@@ -296,6 +296,7 @@ public:
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
 
 public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
@@ -569,6 +570,8 @@ private:
     bool IsKeyboardForeground();
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
+    void ProcessBackHomeStatus();
+    bool IsBackHomeStatus();
 };
 } // namespace OHOS::Rosen
 

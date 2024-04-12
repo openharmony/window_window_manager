@@ -81,6 +81,18 @@ void SessionManagerAgentController::NotifyAccessibilityWindowInfo(
     }
 }
 
+void SessionManagerAgentController::UpdateWindowBackHomeStatus(bool isBackHome)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "SessionManagerAgentController UpdateWindowBackHomeStatus isBackHome: %{public}d",
+        static_cast<uint8_t>(isBackHome));
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_BACK_HOME_STATE)) {
+        if (agent != nullptr) {
+            agent->UpdateWindowBackHomeStatus(isBackHome);
+        }
+    }
+}
+
 void SessionManagerAgentController::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
     WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}u", static_cast<uint32_t>(hasWaterMark));
