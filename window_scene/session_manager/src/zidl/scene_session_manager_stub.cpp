@@ -38,6 +38,9 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
+        &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         &SceneSessionManagerStub::HandleUpdateProperty),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
@@ -65,6 +68,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerStub::HandleGetFocusSessionToken),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT),
+        &SceneSessionManagerStub::HandleGetFocusSessionElement),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CHECK_WINDOW_ID),
         &SceneSessionManagerStub::HandleCheckWindowId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
@@ -99,8 +104,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
         &SceneSessionManagerStub::HandleSetSessionContinueState),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
-        &SceneSessionManagerStub::HandleSetSessionGravity),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
         &SceneSessionManagerStub::HandleClearSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
@@ -140,6 +143,12 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         &SceneSessionManagerStub::HandleUpdateExtWindowFlags),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_RECT),
+        &SceneSessionManagerStub::HandleGetHostWindowRect),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STATUS),
+        &SceneSessionManagerStub::HandleGetCallingWindowWindowStatus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
+        &SceneSessionManagerStub::HandleGetCallingWindowRect),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -276,11 +285,22 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleDestroyAndDisconnectSpcificSession!");
+    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSession!");
     auto persistentId = data.ReadInt32();
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data,
+    MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSessionWithDetachCallback!");
+    auto persistentId = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -519,6 +539,16 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetFocusSessionElement!");
+    AppExecFwk::ElementName element;
+    WSError errCode = GetFocusSessionElement(element);
+    reply.WriteParcelable(&element);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleCheckWindowId!");
@@ -568,17 +598,6 @@ int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, 
     auto continueState = static_cast<ContinueState>(data.ReadInt32());
     const WSError &ret = SetSessionContinueState(token, continueState);
     reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
-{
-    WLOGFI("run HandleSetSessionGravity!");
-    auto persistentId = data.ReadInt32();
-    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
-    uint32_t percent = data.ReadUint32();
-    WSError ret = SetSessionGravity(persistentId, gravity, percent);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
@@ -776,9 +795,9 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistendId = data.ReadInt32();
+    int32_t persistentId = data.ReadInt32();
     bool haveListener = data.ReadBool();
-    WSError ret = UpdateSessionWindowVisibilityListener(persistendId, haveListener);
+    WSError ret = UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -841,6 +860,53 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, Mes
     uint32_t extWindowFlags = data.ReadUint32();
     WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
+    int32_t hostWindowId = data.ReadInt32();
+    Rect rect;
+    WSError ret = GetHostWindowRect(hostWindowId, rect);
+    reply.WriteInt32(rect.posX_);
+    reply.WriteInt32(rect.posY_);
+    reply.WriteUint32(rect.height_);
+    reply.WriteUint32(rect.width_);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&data, MessageParcel&reply)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "run HandleGetCallingWindowWindowStatus!");
+    int32_t persistentId = data.ReadInt32();
+    WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    WMError ret = GetCallingWindowWindowStatus(persistentId, windowStatus);
+    reply.WriteUint32(static_cast<int32_t>(ret));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowWindowStatus(%{public}d)", persistentId);
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteUint32(static_cast<uint32_t>(windowStatus));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "run HandleGetCallingWindowRect!");
+    int32_t persistentId = data.ReadInt32();
+    Rect rect = {0, 0, 0, 0};
+    WMError ret = GetCallingWindowRect(persistentId, rect);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(rect.posX_);
+    reply.WriteInt32(rect.posY_);
+    reply.WriteUint32(rect.width_);
+    reply.WriteUint32(rect.height_);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

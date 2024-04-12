@@ -81,27 +81,10 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
         WLOGFE("Property is null");
         return;
     }
-    property_->SetWindowName(option->GetWindowName());
-    property_->SetRequestRect(option->GetWindowRect());
-    property_->SetWindowType(option->GetWindowType());
-    if (WindowHelper::IsAppFloatingWindow(option->GetWindowType())) {
-        property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    } else {
-        property_->SetWindowMode(option->GetWindowMode());
-    }
-    property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
-    property_->SetFocusable(option->GetFocusable());
-    property_->SetTouchable(option->GetTouchable());
-    property_->SetDisplayId(option->GetDisplayId());
-    property_->SetCallingWindow(option->GetCallingWindow());
-    property_->SetWindowFlags(option->GetWindowFlags());
-    property_->SetHitOffset(option->GetHitOffset());
-    property_->SetRequestedOrientation(option->GetRequestedOrientation());
+    InitWindowProperty(option);
+
     windowTag_ = option->GetWindowTag();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
-    property_->SetTurnScreenOn(option->IsTurnScreenOn());
-    property_->SetKeepScreenOn(option->IsKeepScreenOn());
-    property_->SetBrightness(option->GetBrightness());
     AdjustWindowAnimationFlag();
     UpdateDecorEnable();
     auto& sysBarPropMap = option->GetSystemBarProperty();
@@ -118,6 +101,9 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
     surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    if (surfaceNode_ != nullptr) {
+        vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+    }
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
     if (moveDragProperty_ == nullptr) {
@@ -125,6 +111,29 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     WLOGFD("constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
+}
+
+void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
+{
+    property_->SetWindowName(option->GetWindowName());
+    property_->SetRequestRect(option->GetWindowRect());
+    property_->SetWindowType(option->GetWindowType());
+    if (WindowHelper::IsAppFloatingWindow(option->GetWindowType())) {
+        property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    } else {
+        property_->SetWindowMode(option->GetWindowMode());
+    }
+    property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    property_->SetFocusable(option->GetFocusable());
+    property_->SetTouchable(option->GetTouchable());
+    property_->SetDisplayId(option->GetDisplayId());
+    property_->SetCallingWindow(option->GetCallingWindow());
+    property_->SetWindowFlags(option->GetWindowFlags());
+    property_->SetHitOffset(option->GetHitOffset());
+    property_->SetRequestedOrientation(option->GetRequestedOrientation());
+    property_->SetTurnScreenOn(option->IsTurnScreenOn());
+    property_->SetKeepScreenOn(option->IsKeepScreenOn());
+    property_->SetBrightness(option->GetBrightness());
 }
 
 RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowType type)
@@ -198,6 +207,11 @@ sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
         return nullptr;
     }
     return FindWindowById(topWinId);
+}
+
+sptr<Window> WindowImpl::GetWindowWithId(uint32_t WinId)
+{
+    return FindWindowById(WinId);
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -2999,16 +3013,17 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
         WLOGFE("[WM] Receive Vsync Request failed, window is destroyed");
         return;
     }
-    if (!SingletonContainer::IsDestroyed()) {
-        VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+
+    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+        vsyncStation_->RequestVsync(vsyncCallback);
     }
 }
 
 int64_t WindowImpl::GetVSyncPeriod()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!SingletonContainer::IsDestroyed()) {
-        return VsyncStation::GetInstance().GetVSyncPeriod();
+    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+        return vsyncStation_->GetVSyncPeriod();
     }
     return 0;
 }

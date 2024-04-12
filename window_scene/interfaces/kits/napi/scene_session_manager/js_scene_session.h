@@ -95,6 +95,7 @@ private:
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
+    void ProcessSessionTopmostChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -117,6 +118,7 @@ private:
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
+    void ProcessKeyboardGravityChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -134,6 +136,7 @@ private:
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
+    void OnSessionTopmostChange(bool topmost);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
@@ -155,6 +158,7 @@ private:
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
+    void OnKeyboardGravityChange(SessionGravity gravity);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

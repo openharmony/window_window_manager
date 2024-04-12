@@ -21,6 +21,7 @@
 #include "window_manager_agent.h"
 #include "zidl/scene_session_manager_stub.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "pattern_detach_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -119,6 +120,26 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, 
 }
 
 /**
+ * @tc.name: HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
+ * @tc.desc: test HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback,
+    Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<PatternDetachCallback> callback = new PatternDetachCallback();
+    data.WriteRemoteObject(callback->AsObject());
+
+    int res = stub_->HandleDestroyAndDisconnectSpcificSession(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleRegisterWindowManagerAgent
  * @tc.desc: test HandleRegisterWindowManagerAgent
  * @tc.type: FUNC
@@ -167,6 +188,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, Function | Smal
     MessageParcel reply;
 
     int res = stub_->HandleGetFocusSessionInfo(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionElement
+ * @tc.desc: test HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -348,24 +382,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState, Function | 
     data.WriteInt32(x);
 
     int res = stub_->HandleSetSessionContinueState(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleSetSessionGravity
- * @tc.desc: test HandleSetSessionGravity
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionGravity, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteInt32(1);
-    data.WriteUint32(0);
-    data.WriteUint32(10);
-
-    int res = stub_->HandleSetSessionGravity(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

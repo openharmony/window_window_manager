@@ -17,7 +17,6 @@
 
 #include <thread>
 #include <event_handler.h>
-#include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 
@@ -73,7 +72,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, "
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, Receive pointerEvent, "
             "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
@@ -127,8 +126,6 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
                 eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(
                     AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
             }
-            VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
-            VsyncStation::GetInstance().SetVsyncEventHandler(eventHandler_);
         }
         MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
         inputListener_ = listener;

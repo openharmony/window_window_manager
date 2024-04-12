@@ -172,16 +172,16 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnInputEvent pointerEvent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return;
     }
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnInputEvent uiContent_ is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
         pointerEvent->MarkProcessed();
         return;
     }
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "OnInputEvent is disabled temporarily");
+        TLOGD(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily");
         pointerEvent->MarkProcessed();
         return;
     }
@@ -195,7 +195,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, wid:%{public}u "
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, wid:%{public}u "
             "windowName:%{public}s action:%{public}d isSystem:%{public}d", pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
@@ -262,7 +262,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusedSessionId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_EVENT, "focusedSessionId is invalid");
         keyEvent->MarkProcessed();

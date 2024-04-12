@@ -1182,7 +1182,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    HandlerSensor(status);
+    HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1196,17 +1196,31 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
     keyguardDrawnDone_ = flag;
 }
 
-void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status)
+void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto isTablet = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
     if (isPhone || isTablet) {
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
-            WLOGFI("subscribe rotation sensor when phone turn on");
+            WLOGFI("subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
+#ifdef SENSOR_ENABLE
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
+                WLOGFI("not fold product, switch screen reason, failed register posture.");
+            }
+#endif
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
-            WLOGFI("unsubscribe rotation sensor when phone turn off");
+            WLOGFI("unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
+#ifdef SENSOR_ENABLE
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+            } else {
+                WLOGFI("not fold product, switch screen reason, failed unregister posture.");
+            }
+#endif
         } else {
             WLOGFI("SetScreenPower state not support");
         }
@@ -3544,10 +3558,6 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
-    } else if (params.size() == 1 && (params[0] == STATUS_FOLD_HALF || params[0] == STATUS_EXPAND
-                || params[0] == STATUS_FOLD)) {
-        int errCode = NotifyFoldStatusChanged(params[0]);
-        ShowFoldStatusChangedInfo(errCode, dumpInfo);
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -3621,17 +3631,6 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
     }
     NotifyFoldStatusChanged(foldStatus);
     return 0;
-}
-
-void ScreenSessionManager::ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo)
-{
-    if (errCode != 0) {
-        ShowIllegalArgsInfo(dumpInfo);
-    } else {
-        std::ostringstream oss;
-        oss << "currentFoldStatus is:" << static_cast<uint32_t>(GetFoldStatus()) << std::endl;
-        dumpInfo.append(oss.str());
-    }
 }
 
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)

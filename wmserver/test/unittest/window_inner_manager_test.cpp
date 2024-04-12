@@ -151,6 +151,21 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowRemovedOrDestroyed, Function | Smal
     windowInnerManager.NotifyWindowRemovedOrDestroyed(windowId);
     ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, INVALID_WINDOW_ID);
 }
+
+/**
+ * @tc.name: SetWindowRoot
+ * @tc.desc: SetWindowRoot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, SetWindowRoot, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
+    sptr<WindowRoot> windowRoot = new WindowRoot(nullptr);
+    windowInnerManager.SetWindowRoot(windowRoot);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
 /**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: test WindowInnerManager ConsumePointerEvent

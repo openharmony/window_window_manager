@@ -38,7 +38,7 @@ namespace {
 }
 static uint32_t GetPipPriority(uint32_t pipTemplateType)
 {
-    if (pipTemplateType < 0 || pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
+    if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
         TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
         return PIP_LOW_PRIORITY;
     }

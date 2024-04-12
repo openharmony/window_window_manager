@@ -190,29 +190,39 @@ napi_value OrientationInit(napi_env env)
     }
 
     napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::UNSPECIFIED)));
+        static_cast<int32_t>(ApiOrientation::UNSPECIFIED)));
     napi_set_named_property(env, objValue, "PORTRAIT", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::PORTRAIT)));
     napi_set_named_property(env, objValue, "LANDSCAPE", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::LANDSCAPE)));
     napi_set_named_property(env, objValue, "PORTRAIT_INVERTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::REVERSE_VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::PORTRAIT_INVERTED)));
     napi_set_named_property(env, objValue, "LANDSCAPE_INVERTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::REVERSE_HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::LANDSCAPE_INVERTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_PORTRAIT", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR_VERTICAL)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_PORTRAIT)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_LANDSCAPE", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::SENSOR_HORIZONTAL)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_LANDSCAPE)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_RESTRICTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_PORTRAIT_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
     napi_set_named_property(env, objValue, "AUTO_ROTATION_LANDSCAPE_RESTRICTED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
     napi_set_named_property(env, objValue, "LOCKED", CreateJsValue(env,
-        static_cast<int32_t>(Orientation::LOCKED)));
+        static_cast<int32_t>(ApiOrientation::LOCKED)));
+    napi_set_named_property(env, objValue, "AUTO_ROTATION_UNSPECIFIED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::AUTO_ROTATION_UNSPECIFIED)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_PORTRAIT", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_PORTRAIT)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_LANDSCAPE", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_PORTRAIT_INVERTED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED)));
+    napi_set_named_property(env, objValue, "USER_ROTATION_LANDSCAPE_INVERTED", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED)));
     return objValue;
 }
 
@@ -734,21 +744,31 @@ bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
     }
     bool enable = false;
     if (!ConvertFromJsValue(env, argv[1], enable)) {
-        WLOGFE("Failed to convert parameter to bool");
+        WLOGFE("Failed to convert enable parameter to bool");
         return NapiGetUndefined(env);
+    }
+    bool enableAnimation = false;
+    if (argc >= 3) {    // 3: min param num when using enableAnimation
+        if (!ConvertFromJsValue(env, argv[2], enableAnimation)) {   // 2: index of param enableAnimation
+            WLOGFE("Failed to convert enableAnimation parameter to bool");
+            return false;
+        }
     }
     if (name.compare("status") == 0) {
         auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableAnimation;
     } else if (name.compare("navigation") == 0) {
         auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableAnimation;
     } else if (name.compare("navigationIndicator") == 0) {
         auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ = enableAnimation;
     }
     return true;
 }
@@ -839,6 +859,16 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
             properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
         }
         propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
+    }
+    bool enableStatusBarAnimation = false;
+    if (ParseJsValue(jsObject, env, "enableStatusBarAnimation", enableStatusBarAnimation)) {
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableStatusBarAnimation;
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag = true;
+    }
+    bool enableNavigationBarAnimation = false;
+    if (ParseJsValue(jsObject, env, "enableNavigationBarAnimation", enableNavigationBarAnimation)) {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableNavigationBarAnimation;
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag = true;
     }
     return true;
 }

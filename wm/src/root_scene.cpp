@@ -29,7 +29,6 @@
 
 #include "anr_manager.h"
 #include "intention_event_manager.h"
-#include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "window_rate_manager.h"
 
@@ -72,6 +71,9 @@ RootScene::RootScene()
     if (!launcherService_->RegisterCallback(new BundleStatusCallback(this))) {
         WLOGFE("Failed to register bundle status callback.");
     }
+
+    NodeId nodeId = 0;
+    vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
 
 RootScene::~RootScene()
@@ -169,8 +171,6 @@ void RootScene::RegisterInputEventListener()
             eventHandler_ =
                 std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
         }
-        VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
-        VsyncStation::GetInstance().SetVsyncEventHandler(eventHandler_);
     }
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
         uiContent_.get(), eventHandler_))) {
@@ -182,19 +182,27 @@ void RootScene::RegisterInputEventListener()
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 int64_t RootScene::GetVSyncPeriod()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    return VsyncStation::GetInstance().GetVSyncPeriod();
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync period failed, vsyncStation is nullptr");
+        return 0;
+    }
+    return vsyncStation_->GetVSyncPeriod();
 }
 
 void RootScene::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate);
+    WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate, vsyncStation_);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)

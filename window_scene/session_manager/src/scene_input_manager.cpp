@@ -254,7 +254,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         return;
     }
 
-    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSession();
+    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = mainScreenWidth,
         .height = mainScreenHeight,
@@ -308,7 +308,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
         TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %s", windowinfolst.c_str());
-        int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSession();
+        int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
         MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
     }
@@ -317,7 +317,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
 bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList)
 {
-    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSession();
+    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusId != lastFocusId_) {
         lastFocusId_ = focusId;
         return true;

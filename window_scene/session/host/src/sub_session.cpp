@@ -14,11 +14,13 @@
  */
 
 #include "session/host/include/sub_session.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 #include "key_event.h"
 #include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
+
 
 namespace OHOS::Rosen {
 namespace {
@@ -139,6 +141,11 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
     return ret;
 }
 
+int32_t SubSession::GetMissionId() const
+{
+    return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
+}
+
 void SubSession::UpdatePointerArea(const WSRect& rect)
 {
     auto property = GetSessionProperty();
@@ -158,6 +165,22 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
             "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+        return false;
+    }
+    return true;
+}
+
+bool SubSession::IfNotNeedAvoidKeyBoardForSplit()
+{
+    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
+            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
+        return false;
+    }
+    if (GetParentSession() != nullptr &&
+            GetParentSession()->GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return false;
+    }
+    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
         return false;
     }
     return true;

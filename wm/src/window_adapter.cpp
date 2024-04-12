@@ -507,10 +507,17 @@ void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& 
         sessionStage, eventChannel, surfaceNode, property, session, token);
 }
 
-void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
+void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId);
+}
+
+void WindowAdapter::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+    const sptr<IRemoteObject>& callback)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
 }
 
 WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
@@ -605,6 +612,24 @@ WMError WindowAdapter::UpdateExtWindowFlags(int32_t parentId, int32_t persistent
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->UpdateExtWindowFlags(parentId, persistentId,
         extWindowFlags));
+}
+
+WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetHostWindowRect(hostWindowId, rect));
+}
+
+WMError WindowAdapter::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowWindowStatus(persistentId, windowStatus));
+}
+
+WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowRect(persistentId, rect));
 }
 } // namespace Rosen
 } // namespace OHOS

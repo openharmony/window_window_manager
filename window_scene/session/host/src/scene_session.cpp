@@ -134,9 +134,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
 
-        if (property) {
-            weakThis->SetTextFieldAvoidInfo(property->GetTextFieldPositionY(), property->GetTextFieldHeight());
-        }
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -665,9 +662,10 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "persistentId():%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnimation:%{public}u",
         GetPersistentId(), static_cast<uint32_t>(type),
-        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_);
+        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_,
+        systemBarProperty.enableAnimation_);
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "property is null");
@@ -827,7 +825,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if (((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
-          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
+          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) ||
+          IfNotNeedAvoidKeyBoardForSplit()) &&
         (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
          system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         return;
@@ -1454,6 +1453,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
     if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
         rsTransaction->Commit();
     }
 }
@@ -1821,6 +1821,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
+    SetForceTouchable(!hide);
 }
 
 Orientation SceneSession::GetRequestedOrientation() const
@@ -2021,8 +2022,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
             info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
-            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64 " uri: %{public}s",
-                info.screenId_, info.want->GetElement().GetURI().c_str());
+            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
         }
 
         TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName %{public}s, moduleName:%{public}s, \
@@ -2287,13 +2287,6 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
-WSError SceneSession::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)
-{
-    textFieldPositionY_ = textFieldPositionY;
-    textFieldHeight_ = textFieldHeight;
-    return WSError::WS_OK;
-}
-
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
@@ -2455,7 +2448,6 @@ WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool sho
 
 void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     auto iter = extWindowFlagsMap_.find(extPersistentId);
     if (iter == extWindowFlagsMap_.end()) {
         extWindowFlagsMap_.insert({ extPersistentId, extWindowFlags });
@@ -2466,7 +2458,6 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWin
 bool SceneSession::IsExtWindowHasWaterMarkFlag()
 {
     bool isExtWindowHasWaterMarkFlag = false;
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     for (const auto& iter: extWindowFlagsMap_) {
         auto& extWindowFlags = iter.second;
         if (!extWindowFlags) {
@@ -2491,7 +2482,6 @@ void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
 
 void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     auto iter = extWindowFlagsMap_.find(extPersistentId);
     if (iter != extWindowFlagsMap_.end()) {
         extWindowFlagsMap_.erase(iter);
@@ -2499,7 +2489,6 @@ void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
 }
 void SceneSession::ClearExtWindowFlags()
 {
-    std::shared_lock<std::shared_mutex> lock(extWindowFlagsMapMutex_);
     extWindowFlagsMap_.clear();
 }
 

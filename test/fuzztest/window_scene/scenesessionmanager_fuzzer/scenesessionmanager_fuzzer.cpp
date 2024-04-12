@@ -180,8 +180,6 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_SET_SESSION_GRAVITY),
-        sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_CLEAR_SESSION),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SSMMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
@@ -313,11 +311,6 @@ void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)
     proxy->NotifyDumpInfoResult(info);
 
     int32_t persistentId = source.GetObject<int32_t>();
-    SessionGravity gravity = source.GetObject<SessionGravity>();
-    uint32_t percent = source.GetObject<uint32_t>();
-    proxy->SetSessionGravity(persistentId, gravity, percent);
-
-    persistentId = source.GetObject<int32_t>();
     proxy->ClearSession(persistentId);
     proxy->ClearAllSessions();
 
