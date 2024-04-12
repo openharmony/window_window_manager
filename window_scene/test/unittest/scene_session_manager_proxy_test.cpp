@@ -130,8 +130,8 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfoByContinueSessionId, Functi
 
     std::string continueSessionId = "test_01";
     SessionInfoBean missionInfo;
-    ASSERT_EQ( WSError::WS_ERROR_INVALID_PERMISSION, sceneSessionManagerProxy_->GetSessionInfoByContinueSessionId(
-        continueSessionId, missionInfo));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
+        sceneSessionManagerProxy_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo));
     sceneSessionManagerProxy_ = nullptr;
 }
 

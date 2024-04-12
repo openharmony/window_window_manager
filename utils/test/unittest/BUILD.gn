@@ -22,7 +22,7 @@ group("unittest") {
     ":utils_all_test",
     ":utils_cutout_info_test",
     ":utils_display_info_test",
-    ":utils_dms_report_test",
+    ":utils_dms_reporter_test",
     ":utils_perform_reporter_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
@@ -63,10 +63,10 @@ ohos_unittest("utils_display_info_test") {
   ]
 }
 
-ohos_unittest("utils_dms_report_test") {
+ohos_unittest("utils_dms_reporter_test") {
   module_out_path = module_out_path
 
-  sources = [ "dms_report_test.cpp" ]
+  sources = [ "dms_reporter_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_WINDOW_MANAGER_DMS_REPORT_H
-#define WINDOW_WINDOW_MANAGER_DMS_REPORT_H
+#ifndef WINDOW_WINDOW_MANAGER_DMS_REPORTER_H
+#define WINDOW_WINDOW_MANAGER_DMS_REPORTER_H
 
 #include <cstdint>
 #include "wm_single_instance.h"
@@ -30,4 +30,4 @@ public:
 };
 } // namespace OHOS::Rosen
 
-#endif // WINDOW_WINDOW_MANAGER_DMS_REPORT_H
+#endif // WINDOW_WINDOW_MANAGER_DMS_REPORTER_H

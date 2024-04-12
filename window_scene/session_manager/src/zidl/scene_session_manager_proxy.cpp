@@ -896,7 +896,7 @@ WSError SceneSessionManagerProxy::GetSessionInfoByContinueSessionId(
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    std::unique_ptr<SessionInfoBean> info(reply.ReadParcelable<SessionInfoBean>());
+    sptr<SessionInfoBean> info(reply.ReadParcelable<SessionInfoBean>());
     if (info == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "read sessioninfo failed.");
         return WSError::WS_ERROR_IPC_FAILED;

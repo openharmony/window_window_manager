@@ -22,7 +22,7 @@
 
 #include "js_scene_utils.h"
 #include "singleton_container.h"
-#include "dms_report.h"
+#include "dms_reporter.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
