@@ -62,7 +62,7 @@ public:
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWaterMarkFlagChangedResult(bool isShowing) = 0;
-    virtual void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo) = 0;
+    virtual void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) = 0;
     virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;
 };
 } // namespace Rosen
