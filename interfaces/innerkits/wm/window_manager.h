@@ -257,7 +257,7 @@ public:
      *
      * @param visibleWindowNum visible window num .
      */
-    virtual void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo) = 0;
+    virtual void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) = 0;
 };
 
 /**
