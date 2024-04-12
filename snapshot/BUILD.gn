@@ -64,13 +64,13 @@ ohos_shared_library("libsnapshot_util") {
 
   deps = [
     "../dm:libdm",
-    "//third_party/libjpeg-turbo:turbojpeg_static",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "libjpeg-turbo:turbojpeg",
   ]
 
   part_name = "window_manager"
