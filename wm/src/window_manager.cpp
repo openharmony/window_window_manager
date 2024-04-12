@@ -60,7 +60,7 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
-    void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo);
+    void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -1064,7 +1064,7 @@ WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVis
     return ret;
 }
 
-void WindowManager::UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo)
+void WindowManager::UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
     pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
