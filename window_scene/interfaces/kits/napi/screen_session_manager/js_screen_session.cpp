@@ -185,8 +185,7 @@ napi_value JsScreenSession::OnSetDensityDpiSystem(napi_env env, napi_callback_in
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    
-    // Calculate display density, Density = Dpi / 160;
+
     float density = static_cast<float>(dpi / 160.0); // 160 is the coefficient between density and dpi.
     return ScheduleSetDensityDpiSystemTask(env, density);
 }
