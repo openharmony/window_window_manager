@@ -393,6 +393,19 @@ HWTEST_F(WindowSessionTest, TransferExecuteAction02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetForceTouchable
+ * @tc.desc: SetForceTouchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetForceTouchable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool touchable = false;
+    session_->SetForceTouchable(touchable);
+    ASSERT_EQ(session_->forceTouchable_, touchable);
+}
+
+/**
  * @tc.name: SetActive01
  * @tc.desc: set session active
  * @tc.type: FUNC

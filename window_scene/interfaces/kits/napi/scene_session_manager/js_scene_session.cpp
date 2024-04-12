@@ -61,6 +61,7 @@ const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateCha
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
+const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 constexpr int SCALE_ARG_COUNT = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
@@ -215,6 +216,7 @@ void JsSceneSession::InitListenerFuncs()
         { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
         { LANDSCAPE_MULTI_WINDOW_CB,             &JsSceneSession::ProcessLandscapeMultiWindowRegister },
         { CONTEXT_TRANSPARENT_CB,                &JsSceneSession::ProcessContextTransparentRegister },
+        { KEYBOARD_GRAVITY_CHANGE_CB,            &JsSceneSession::ProcessKeyboardGravityChangeRegister },
     };
 }
 
@@ -325,6 +327,44 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     };
     taskScheduler_->PostMainThreadTask(task,
         "SetLandscapeMultiWindow, isLandscapeMultiWindow:" + std::to_string(isLandscapeMultiWindow));
+}
+
+void JsSceneSession::ProcessKeyboardGravityChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onKeyboardGravityChange_ = std::bind(&JsSceneSession::OnKeyboardGravityChange,
+                                                                this, std::placeholders::_1);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
+}
+
+void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[NAPI] gravity: %{public}u", gravity);
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(KEYBOARD_GRAVITY_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    auto task = [gravity, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value gravityObj = CreateJsValue(env, gravity);
+        napi_value argv[] = {gravityObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Napi call gravity success, gravity: %{public}u", gravity);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
+        std::to_string(static_cast<int>(gravity)));
 }
 
 void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)

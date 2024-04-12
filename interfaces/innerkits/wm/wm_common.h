@@ -88,7 +88,8 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 
     WINDOW_TYPE_UI_EXTENSION = 3000,
-    WINDOW_TYPE_SCENE_BOARD
+    WINDOW_TYPE_SCENE_BOARD,
+    WINDOW_TYPE_KEYBOARD_PANEL
 };
 
 /**
@@ -477,12 +478,17 @@ struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE) {}
+    bool enableAnimation_;
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
+        enableAnimation_(false) {}
     SystemBarProperty(bool enable, uint32_t background, uint32_t content)
-        : enable_(enable), backgroundColor_(background), contentColor_(content) {}
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(false) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation) {}
     bool operator == (const SystemBarProperty& a) const
     {
-        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
+        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
+            enableAnimation_ == a.enableAnimation_);
     }
 };
 
