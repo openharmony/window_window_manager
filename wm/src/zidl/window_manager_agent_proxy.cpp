@@ -234,7 +234,7 @@ void WindowManagerAgentProxy::NotifyWaterMarkFlagChangedResult(bool showWaterMar
 }
 
 void WindowManagerAgentProxy::UpdateVisibleWindowNum(
-    const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo)
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
