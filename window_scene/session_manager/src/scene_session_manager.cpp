@@ -2827,6 +2827,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_MODE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
+                ProcessSplitFloating();
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
@@ -4367,10 +4368,15 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
 
 void SceneSessionManager::ProcessSplitFloating()
 {
+    if (isScreenLocked_) {
+        return;
+    }
     bool inSplit = false;
     bool inFloating = false;
     for (const auto& session : sceneSessionMap_) {
-        if (session.second == nullptr || !Rosen::SceneSessionManager::GetInstance().IsSessionVisible(session.second)) {
+        if (session.second == nullptr ||
+            !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
+            !Rosen::SceneSessionManager::GetInstance().IsSessionVisible(session.second)) {
             continue;
         }
         auto mode = session.second->GetWindowMode();
