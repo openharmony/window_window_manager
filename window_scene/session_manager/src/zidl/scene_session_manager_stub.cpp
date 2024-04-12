@@ -871,8 +871,8 @@ int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, Messag
     WSError ret = GetHostWindowRect(hostWindowId, rect);
     reply.WriteInt32(rect.posX_);
     reply.WriteInt32(rect.posY_);
-    reply.WriteUint32(rect.height_);
     reply.WriteUint32(rect.width_);
+    reply.WriteUint32(rect.height_);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
