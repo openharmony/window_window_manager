@@ -62,9 +62,7 @@ ohos_shared_library("libsnapshot_util") {
     "../resources/config/build:coverage_flags",
   ]
 
-  deps = [
-    "../dm:libdm",
-  ]
+  deps = [ "../dm:libdm" ]
 
   external_deps = [
     "c_utils:utils",
