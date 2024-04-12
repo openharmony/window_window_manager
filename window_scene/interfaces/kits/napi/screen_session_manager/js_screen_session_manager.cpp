@@ -187,7 +187,7 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
 
 napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetDeviceScreenConfig");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetDeviceScreenConfig(env, info) : nullptr;
 }
@@ -594,11 +594,11 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
 
 napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
 {
-    WLOGD("[NAPI]OnGetDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetDeviceScreenConfig");
     DeviceScreenConfig deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
     napi_value jsDeviceScreenConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
     if (jsDeviceScreenConfigObj == nullptr) {
-        WLOGFE("[NAPI]jsDeviceScreenConfigObj is nullptr");
+        TLOGE(WmsLogTag::DMS, "[NAPI]jsDeviceScreenConfigObj is nullptr");
         napi_throw(env, CreateJsError(env,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
     }

@@ -25,11 +25,11 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDevi
 
 napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const DeviceScreenConfig& config)
 {
-    WLOGI("DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
+    TLOGI(WmsLogTag::DMS, "DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "rotationPolicy", CreateJsValue(env, config.rotationPolicy_));
@@ -38,12 +38,12 @@ napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const De
 
 JsDeviceScreenConfig::JsDeviceScreenConfig()
 {
-    WLOGFD("Construct JsDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "Construct JsDeviceScreenConfig");
 }
 
 JsDeviceScreenConfig::~JsDeviceScreenConfig()
 {
-    WLOGFD("Destroy JsDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "Destroy JsDeviceScreenConfig");
 }
 
 } // namespace OHOS::Rosen

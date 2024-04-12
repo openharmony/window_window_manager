@@ -270,7 +270,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     }
     if (stringConfig.count("rotationPolicy") != 0) {
         std::string rotationPolicy = static_cast<std::string>(stringConfig["rotationPolicy"]);
-        WLOGFD("rotationPolicy = %{public}s.", rotationPolicy.c_str());
+        TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
         deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
     }
     ConfigureWaterfallDisplayCompressionParams();
