@@ -250,10 +250,8 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 
 WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
-    return WMError::WM_OK;
+    return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
 }
 
 void WindowAdapter::WindowManagerAndSessionRecover()
