@@ -1787,6 +1787,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         // create specific session
         SessionInfo info;
         info.windowType_ = static_cast<uint32_t>(type);
+        if (property) {
+            info.bundleName_ = property->GetSessionInfo().bundleName_.c_str();
+        }
+        
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
