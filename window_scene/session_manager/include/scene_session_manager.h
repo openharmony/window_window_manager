@@ -472,7 +472,7 @@ private:
     bool gestureNavigationEnabled_ {true};
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
-    std::mutex lastInfoMutex_;
+    std::shared_mutex lastInfoMutex_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
@@ -558,8 +558,8 @@ private:
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
     void CacVisibleWindowNum();
-    bool IsVectorSame(const std::vector<VisibleWindowNumInfo> lastInfo,
-        const std::vector<VisibleWindowNumInfo> currentInfo);
+    bool IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
+        const std::vector<VisibleWindowNumInfo>& currentInfo);
     bool IsKeyboardForeground();
 };
 } // namespace OHOS::Rosen
