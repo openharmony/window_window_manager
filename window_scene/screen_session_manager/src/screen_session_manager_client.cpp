@@ -356,7 +356,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
 DeviceScreenConfig ScreenSessionManagerClient::GetDeviceScreenConfig()
 {
     if (!screenSessionManager_) {
-        WLOGFE("screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return {};
     }
     return screenSessionManager_->GetDeviceScreenConfig();

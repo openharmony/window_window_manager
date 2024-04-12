@@ -2258,17 +2258,17 @@ DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return {};
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+       TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return {};
     }
     DeviceScreenConfig deviceScreenConfig;
     if (!RSMarshallingHelper::Unmarshalling(reply, deviceScreenConfig)) {
-        WLOGFE("Read deviceScreenConfig failed");
+        TLOGE(WmsLogTag::DMS, "Read deviceScreenConfig failed");
         return {};
     }
     return deviceScreenConfig;
