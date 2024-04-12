@@ -485,10 +485,9 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run query session info");
     SessionInfoBean info;
     std::string continueSessionId = data.ReadString();
-    TLOGD(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
         TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfo error");

@@ -14,34 +14,34 @@
  */
 
 #include <gtest/gtest.h>
-#include "dms_report.h"
+#include "dms_reporter.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class DmsReportTest : public testing::Test {
+class DmsReporterTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
-void DmsReportTest::SetUpTestCase()
+void DmsReporterTest::SetUpTestCase()
 {
 }
 
-void DmsReportTest::TearDownTestCase()
+void DmsReporterTest::TearDownTestCase()
 {
 }
 
-void DmsReportTest::SetUp()
+void DmsReporterTest::SetUp()
 {
 }
 
-void DmsReportTest::TearDown()
+void DmsReporterTest::TearDown()
 {
 }
 
@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: ReportRegisterSessionListener test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReportTest, ReportRegisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportRegisterSessionListener, Function | SmallTest | Level2)
 {
     int res = 0;
     DmsReporter dmsReporter;
@@ -64,7 +64,7 @@ HWTEST_F(DmsReportTest, ReportRegisterSessionListener, Function | SmallTest | Le
  * @tc.desc: ReportQuerySessionInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReportTest, ReportQuerySessionInfo, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportQuerySessionInfo, Function | SmallTest | Level2)
 {
     int res = 0;
     DmsReporter dmsReporter;
@@ -77,7 +77,7 @@ HWTEST_F(DmsReportTest, ReportQuerySessionInfo, Function | SmallTest | Level2)
  * @tc.desc: ReportContinueApp test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReportTest, ReportContinueApp, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportContinueApp, Function | SmallTest | Level2)
 {
     int res = 0;
     DmsReporter dmsReporter;

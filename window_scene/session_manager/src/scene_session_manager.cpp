@@ -92,7 +92,7 @@
 #include "perform_reporter.h"
 #include "focus_change_info.h"
 #include "anr_manager.h"
-#include "dms_report.h"
+#include "dms_reporter.h"
 
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
@@ -4835,14 +4835,17 @@ WSError SceneSessionManager::GetSessionInfoByContinueSessionId(const std::string
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, continueSessionId, &sessionInfo]() {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         WSError ret = WSError::WS_ERROR_INVALID_SESSION;
-        for (auto& [persistentId, sceneSession] : sceneSessionMap_) {
-            if (sceneSession && sceneSession->GetSessionInfo().continueSessionId_ == continueSessionId) {
-                ret = SceneSessionConverter::ConvertToMissionInfo(sceneSession, sessionInfo);
-                break;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (auto& [persistentId, sceneSession] : sceneSessionMap_) {
+                if (sceneSession && sceneSession->GetSessionInfo().continueSessionId_ == continueSessionId) {
+                    ret = SceneSessionConverter::ConvertToMissionInfo(sceneSession, sessionInfo);
+                    break;
+                }
             }
         }
+
         TLOGI(WmsLogTag::WMS_LIFE, "get session info finished with ret code: %{public}d", ret);
         // app continue report for distributed scheduled service
         SingletonContainer::Get<DmsReporter>().ReportQuerySessionInfo(ret == WSError::WS_OK,

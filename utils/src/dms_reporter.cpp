@@ -14,7 +14,7 @@
  */
 
 #include <hisysevent.h>
-#include "dms_report.h"
+#include "dms_reporter.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
