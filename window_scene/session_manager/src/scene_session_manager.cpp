@@ -4615,6 +4615,17 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
         listenerController_->NotifySessionCreated(persistentId);
     }
 
+    if (eventHandler_ != nullptr) {
+        auto task = [persistentId]() {
+            AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(persistentId);
+        };
+        WLOGFI("Post CompleteFirstFrameDrawing task.");
+        bool ret = eventHandler_->PostTask(task, "wms:CompleteFirstFrameDrawing", 0);
+        if (!ret) {
+            WLOGFE("Report post first frame task failed. the task name is CompleteFirstFrameDrawing");
+        }
+    }
+
     if (taskScheduler_ == nullptr) {
         return;
     }
