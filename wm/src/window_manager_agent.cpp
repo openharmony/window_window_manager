@@ -68,7 +68,7 @@ void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
 }
 
 void WindowManagerAgent::UpdateVisibleWindowNum(
-    const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo)
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
     SingletonContainer::Get<WindowManager>().UpdateVisibleWindowNum(visibleWindowNumInfo);
 }
