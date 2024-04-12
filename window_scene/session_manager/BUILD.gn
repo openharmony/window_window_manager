@@ -28,8 +28,6 @@ config("session_manager_public_config") {
     "${window_base_path}/window_scene/session_manager_service/include",
 
     # for session_manager
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-    "${ability_runtime_inner_api_path}/app_manager/include",
     "${window_base_path}/wmserver/include",
     "${window_base_path}/wmserver/include/zidl",
 
@@ -43,8 +41,6 @@ config("session_manager_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wmserver/include",
     "${window_base_path}/window_scene/screen_session_manager/include",
-    "${resourceschedule_path}/ffrt/interfaces/kits",
-    "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
@@ -52,6 +48,18 @@ config("session_manager_public_config") {
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
   ]
+}
+
+config("for_session_manager_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [ "${ability_runtime_inner_api_path}/ability_manager/include" ]
+}
+
+config("for_scene_session_manager_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [ "${resourceschedule_path}/ffrt/interfaces/kits" ]
 }
 
 ohos_shared_library("scene_session_manager") {
@@ -80,7 +88,10 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/session_listener_stub.cpp",
   ]
 
-  public_configs = [ ":session_manager_public_config" ]
+  public_configs = [
+    ":session_manager_public_config",
+    ":for_scene_session_manager_public_config",
+  ]
 
   deps = [
     "${window_base_path}/dm:libdm",
@@ -95,10 +106,12 @@ ohos_shared_library("scene_session_manager") {
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-util",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_context_native",
@@ -117,7 +130,6 @@ ohos_shared_library("scene_session_manager") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_client",
-    "graphic_2d:window_animation",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -299,7 +311,10 @@ ohos_shared_library("session_manager") {
 
   cflags_cc = [ "-std=c++17" ]
 
-  public_configs = [ ":session_manager_public_config" ]
+  public_configs = [
+    ":session_manager_public_config",
+    ":for_session_manager_public_config",
+  ]
 
   deps = [
     ":session_manager_lite",
@@ -308,12 +323,14 @@ ohos_shared_library("session_manager") {
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-util",
   ]
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
@@ -345,10 +362,12 @@ ohos_shared_library("session_manager_lite") {
 
   cflags_cc = [ "-std=c++17" ]
 
-  public_configs = [ ":session_manager_public_config" ]
+  public_configs = [
+    ":session_manager_public_config",
+    ":for_session_manager_public_config",
+  ]
 
   deps = [
-    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
   ]

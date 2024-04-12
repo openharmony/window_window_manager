@@ -119,6 +119,7 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
     void ProcessContextTransparentRegister();
+    void ProcessKeyboardGravityChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -159,6 +160,7 @@ private:
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
+    void OnKeyboardGravityChange(SessionGravity gravity);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
