@@ -173,13 +173,11 @@ WMError SessionManager::InitMockSMSProxy()
         foundationDeath_ = new (std::nothrow) FoundationDeathRecipient();
         if (!foundationDeath_) {
             WLOGFE("Failed to create death Recipient ptr FoundationDeathRecipient");
-            mockSessionManagerServiceProxy_ = nullptr;
             return WMError::WM_ERROR_NO_MEM;
         }
     }
     if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(foundationDeath_)) {
         WLOGFE("Failed to add death recipient");
-        mockSessionManagerServiceProxy_ = nullptr;
         return WMError::WM_ERROR_IPC_FAILED;
     }
     isFoundationListenerRegistered_ = true;
