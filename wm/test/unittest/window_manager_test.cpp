@@ -85,7 +85,7 @@ public:
 
 class TestVisibleWindowNumChangedListener : public IVisibleWindowNumChangedListener {
 public:
-    void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo) override
+    void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override
     {
         WLOGI("TestVisibleWindowNumChangedListener");
     };
