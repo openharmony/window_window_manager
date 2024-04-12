@@ -216,6 +216,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError GetWindowBackHomeStatus(bool &isBackHome)
+    {
+        return WMError::WM_OK;
+    };
 };
 }
 }

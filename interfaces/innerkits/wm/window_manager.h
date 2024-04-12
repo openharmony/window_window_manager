@@ -102,6 +102,21 @@ public:
 };
 
 /**
+ * @class IWindowBackHomeListener
+ *
+ * @brief Listener to observe window back home.
+ */
+class IWindowBackHomeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window mode update.
+     *
+     * @param isBackHome bool.
+     */
+    virtual void OnWindowBackHomeStatus(bool isBackHome) = 0;
+};
+
+/**
  * @class ISystemBarChangedListener
  *
  * @brief Listener to observe systembar changed.
@@ -324,6 +339,27 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+     /**
+     * @brief Register window back to home listener.
+     *
+     * @param listener IWindowBackHomeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
+    /**
+     * @brief Unregister window window back to home listener.
+     *
+     * @param listener IWindowBackHomeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
+    /**
+     * @brief Get if window is back home.
+     *
+     * @param void
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowBackHomeStatus(bool &isBackHome) const;
     /**
      * @brief Register system bar changed listener.
      *
@@ -548,6 +584,7 @@ private:
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
+    void UpdateWindowBackHomeStatus(bool isBackHome) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;

@@ -77,6 +77,27 @@ void WindowManagerAgentProxy::UpdateWindowModeTypeInfo(WindowModeType type)
     }
 }
 
+void WindowManagerAgentProxy::UpdateWindowBackHomeStatus(bool isBackHome)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return;
+    }
+ 
+    if (!data.WriteBool(isBackHome)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write failed, isBackHome:%{public}d", isBackHome);
+        return;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_BACK_HOME_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;

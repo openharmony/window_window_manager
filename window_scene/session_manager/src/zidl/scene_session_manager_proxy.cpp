@@ -1689,4 +1689,21 @@ WMError SceneSessionManagerProxy::GetCallingWindowRect(int32_t persistentId, Rec
     }
     return ret;
 }
+
+WMError SceneSessionManagerProxy::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetWindowBackHomeStatus Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    isBackHome = reply.ReadBool();
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
