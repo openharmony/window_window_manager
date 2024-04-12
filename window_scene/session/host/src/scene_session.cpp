@@ -662,9 +662,10 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "persistentId():%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnimation:%{public}u",
         GetPersistentId(), static_cast<uint32_t>(type),
-        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_);
+        systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_,
+        systemBarProperty.enableAnimation_);
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "property is null");
@@ -824,7 +825,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if (((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
-          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
+          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) ||
+          IfNotNeedAvoidKeyBoardForSplit()) &&
         (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
          system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         return;
@@ -1819,6 +1821,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
+    SetForceTouchable(!hide);
 }
 
 Orientation SceneSession::GetRequestedOrientation() const

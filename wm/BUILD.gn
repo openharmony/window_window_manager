@@ -98,6 +98,7 @@ ohos_static_library("libwm_static") {
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
   ]
@@ -239,6 +240,7 @@ ohos_shared_library("libwm") {
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
@@ -319,34 +321,27 @@ ohos_shared_library("libwm") {
 
 ## Build libwm_lite.so
 ohos_shared_library("libwm_lite") {
-  defines = []
-  if (scene_board_enabled) {
-    defines += [ "USE_ADAPTER_LITE" ]
-    include_dirs = [
-      "../utils/include",
-      "${accessibility_path}/interfaces/innerkits/common/include/",
-    ]
-    sources = [
-      "src/window_adapter_lite.cpp",
-      "src/window_manager_agent_lite.cpp",
-      "src/window_manager_lite.cpp",
-      "src/window_option.cpp",
-      "src/zidl/window_manager_agent_stub.cpp",
-    ]
+  defines = [ "USE_ADAPTER_LITE" ]
+  include_dirs = [ "../utils/include" ]
+  sources = [
+    "../utils/src/window_visibility_info.cpp",
+    "src/window_adapter_lite.cpp",
+    "src/window_manager_agent_lite.cpp",
+    "src/window_manager_lite.cpp",
+    "src/window_option.cpp",
+    "src/zidl/window_manager_agent_stub.cpp",
+  ]
 
-    configs = [
-      ":libwm_private_config",
-      "../resources/config/build:coverage_flags",
-    ]
+  configs = [
+    ":libwm_private_config",
+    "../resources/config/build:coverage_flags",
+  ]
 
-    deps = [
-      "${window_base_path}/utils:libwmutil",
-      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-      "${window_base_path}/window_scene/session_manager:session_manager_lite",
-    ]
-
-    public_deps = [ "${window_base_path}/utils:libwmutil_base" ]
-  }
+  deps = [
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager:session_manager_lite",
+  ]
 
   public_configs = [ ":libwm_public_config" ]
 
@@ -355,6 +350,7 @@ ohos_shared_library("libwm_lite") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",

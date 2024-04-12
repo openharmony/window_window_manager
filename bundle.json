@@ -162,7 +162,6 @@
             }
           },
           {
-            "type": "so",
             "name": "//foundation/window/window_manager/utils:libwmutil_static",
             "header": {
               "header_files": [
