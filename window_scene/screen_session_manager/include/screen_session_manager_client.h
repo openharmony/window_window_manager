@@ -67,6 +67,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
     ScreenId GetDefaultScreenId();
+    bool IsFoldable();
 
 protected:
     ScreenSessionManagerClient() = default;
