@@ -7302,7 +7302,7 @@ void SceneSessionManager::CacVisibleWindowNum()
             }
         }
     }
-    std::lock_guard<std::mutex> lock(lastInfoMutex_);
+    std::unique_lock<std::shared_mutex> lock(lastInfoMutex_);
     if (visibleWindowNumInfo.size() > 0 && !IsVectorSame(lastInfo_, visibleWindowNumInfo)) {
         SessionManagerAgentController::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
         lastInfo_ = visibleWindowNumInfo;
