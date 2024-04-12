@@ -85,6 +85,7 @@ public:
     static napi_value SetDimBehind(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value SetWindowFocusable(napi_env env, napi_callback_info info);
+    static napi_value SetTopmost(napi_env env, napi_callback_info info);
     static napi_value SetKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -148,6 +149,7 @@ public:
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
+    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
 
 private:
@@ -210,6 +212,7 @@ private:
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
+    napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -225,6 +228,7 @@ private:
     napi_value OnSetDimBehind(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowFocusable(napi_env env, napi_callback_info info);
+    napi_value OnSetTopmost(napi_env env, napi_callback_info info);
     napi_value OnSetKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWakeUpScreen(napi_env env, napi_callback_info info);

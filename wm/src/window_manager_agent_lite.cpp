@@ -37,5 +37,14 @@ void WindowManagerAgentLite::UpdateWindowDrawingContentInfo(
     SingletonContainer::Get<WindowManagerLite>().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
 }
 
+void WindowManagerAgentLite::UpdateWindowModeTypeInfo(WindowModeType type)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdateWindowModeTypeInfo(type);
+}
+
+void WindowManagerAgentLite::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdateCameraWindowStatus(accessTokenId, isShowing);
+}
 } // namespace Rosen
 } // namespace OHOS

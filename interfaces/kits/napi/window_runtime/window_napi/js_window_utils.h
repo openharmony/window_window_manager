@@ -169,6 +169,11 @@ enum class ApiOrientation : uint32_t {
     AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
     AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
     LOCKED = 11,
+    AUTO_ROTATION_UNSPECIFIED = 12,
+    USER_ROTATION_PORTRAIT = 13,
+    USER_ROTATION_LANDSCAPE = 14,
+    USER_ROTATION_PORTRAIT_INVERTED = 15,
+    USER_ROTATION_LANDSCAPE_INVERTED = 16,
 };
 
 const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
@@ -184,6 +189,11 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
     {ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
+    {ApiOrientation::AUTO_ROTATION_UNSPECIFIED,             Orientation::AUTO_ROTATION_UNSPECIFIED          },
+    {ApiOrientation::USER_ROTATION_PORTRAIT,                Orientation::USER_ROTATION_PORTRAIT             },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE,               Orientation::USER_ROTATION_LANDSCAPE            },
+    {ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED,       Orientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED,      Orientation::USER_ROTATION_LANDSCAPE_INVERTED   },
 };
 
 const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
@@ -199,6 +209,12 @@ const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
     {Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
     {Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
     {Orientation::LOCKED,                                ApiOrientation::LOCKED                             },
+    {Orientation::FOLLOW_RECENT,                         ApiOrientation::UNSPECIFIED                        },
+    {Orientation::AUTO_ROTATION_UNSPECIFIED,             ApiOrientation::AUTO_ROTATION_UNSPECIFIED          },
+    {Orientation::USER_ROTATION_PORTRAIT,                ApiOrientation::USER_ROTATION_PORTRAIT             },
+    {Orientation::USER_ROTATION_LANDSCAPE,               ApiOrientation::USER_ROTATION_LANDSCAPE            },
+    {Orientation::USER_ROTATION_PORTRAIT_INVERTED,       ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {Orientation::USER_ROTATION_LANDSCAPE_INVERTED,      ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED   },
 };
 
 enum class RectChangeReason : uint32_t {
@@ -235,7 +251,9 @@ struct SystemBarPropertyFlag {
     bool enableFlag;
     bool backgroundColorFlag;
     bool contentColorFlag;
-    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false) {}
+    bool enableAnimationFlag;
+    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false),
+        enableAnimationFlag(false) {}
 };
 
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);

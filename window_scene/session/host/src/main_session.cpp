@@ -22,6 +22,7 @@
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -146,6 +147,49 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
             "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+        return false;
+    }
+    return true;
+}
+
+WSError MainSession::SetTopmost(bool topmost)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SetTopmost id: %{public}d, topmost: %{public}d", GetPersistentId(), topmost);
+    auto task = [weakThis = wptr(this), topmost]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        auto property = session->GetSessionProperty();
+        if (property) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Notify session topmost change, id: %{public}d, topmost: %{public}u",
+                session->GetPersistentId(), topmost);
+            property->SetTopmost(topmost);
+            if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionTopmostChange_) {
+                session->sessionChangeCallback_->onSessionTopmostChange_(topmost);
+            }
+        }
+    };
+    PostTask(task, "SetTopmost");
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsTopmost() const
+{
+    return GetSessionProperty()->IsTopmost();
+}
+
+bool MainSession::IfNotNeedAvoidKeyBoardForSplit()
+{
+    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
+            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
+        return false;
+    }
+    if (Session::GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return false;
+    }
+    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
         return false;
     }
     return true;

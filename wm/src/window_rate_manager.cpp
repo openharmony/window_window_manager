@@ -15,7 +15,6 @@
 
 #include "window_rate_manager.h"
 
-#include "vsync_station.h"
 #include "window_frame_trace.h"
 #include "window_manager_hilog.h"
 #include "ui/rs_frame_rate_linker.h"
@@ -29,23 +28,26 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowRateManager)
 
-void WindowRateManager::FlushFrameRate(int32_t windowId, uint32_t rate)
+void WindowRateManager::FlushFrameRate(int32_t windowId, uint32_t rate,
+    const std::shared_ptr<VsyncStation>& vsyncStation)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (auto iter = windowRateMap_.find(windowId); iter != windowRateMap_.end() && iter->second != rate) {
         iter->second = rate;
         expectedRate_ = GetExpectedRate();
-        VsyncStation::GetInstance().FlushFrameRate(expectedRate_, false);
+        if (vsyncStation != nullptr) {
+            vsyncStation->FlushFrameRate(expectedRate_, false);
+        }
     }
 }
 
-void WindowRateManager::FlushFrameRateForRootWindow(uint32_t rate)
+void WindowRateManager::FlushFrameRateForRootWindow(uint32_t rate, const std::shared_ptr<VsyncStation>& vsyncStation)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if (rate != rootWindowRate_) {
+    if (rate != rootWindowRate_ && vsyncStation != nullptr) {
         rootWindowRate_ = rate;
         expectedRate_ = GetExpectedRate();
-        VsyncStation::GetInstance().FlushFrameRate(expectedRate_, false);
+        vsyncStation->FlushFrameRate(expectedRate_, false);
     }
 }
 
@@ -59,16 +61,16 @@ void WindowRateManager::AddWindowRate(int32_t windowId, uint32_t rate)
     WLOGD("WindowRateManager::AddWindowRate id: %{public}d", windowId);
 }
 
-void WindowRateManager::RemoveWindowRate(int32_t windowId)
+void WindowRateManager::RemoveWindowRate(int32_t windowId, const std::shared_ptr<VsyncStation>& vsyncStation)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (auto iter = windowRateMap_.find(windowId); iter != windowRateMap_.end()) {
         auto rate = iter->second;
         windowRateMap_.erase(iter);
         WLOGD("WindowRateManager::RemoveWindowRate id: %{public}d", windowId);
-        if (rate == expectedRate_) {
+        if (rate == expectedRate_ && vsyncStation != nullptr) {
             expectedRate_ = GetExpectedRate();
-            VsyncStation::GetInstance().FlushFrameRate(expectedRate_, true);
+            vsyncStation->FlushFrameRate(expectedRate_, true);
         }
     }
 }

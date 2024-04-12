@@ -22,7 +22,7 @@
 #include "pointer_event.h"
 #include "key_event.h"
 
-#include "accessibility_event_info_parcel.h"
+#include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
@@ -97,6 +97,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleProcessPointDownSession),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG),
         &SessionStub::HandleSendPointerEvenForMoveDrag),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY),
+        &SessionStub::HandleSetKeyboardSessionGravity),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
+        &SessionStub::HandleSetCallingSessionId),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -622,6 +626,26 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     bool isRegister = data.ReadBool();
     WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
+    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
+    uint32_t percent = data.ReadUint32();
+    WSError ret = SetKeyboardSessionGravity(gravity, percent);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetCallingSessionId!");
+    uint32_t callingSessionId = data.ReadUint32();
+
+    SetCallingSessionId(callingSessionId);
+    reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

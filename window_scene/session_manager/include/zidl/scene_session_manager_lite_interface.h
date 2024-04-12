@@ -45,6 +45,7 @@ public:
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
         TRANS_ID_GET_FOCUS_SESSION_TOKEN,
+        TRANS_ID_GET_FOCUS_SESSION_ELEMENT,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
@@ -73,6 +74,7 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(const std::string& deviceId,

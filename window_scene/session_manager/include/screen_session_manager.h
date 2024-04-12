@@ -33,6 +33,7 @@
 #include "screen.h"
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -200,6 +201,7 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
@@ -261,7 +263,7 @@ private:
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
-    void HandlerSensor(ScreenPowerStatus status);
+    void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
 
     // notify scb virtual screen change
@@ -276,7 +278,6 @@ private:
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
-    int NotifyFoldStatusChanged(const std::string& lockParam);
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     class ScreenIdManager {
     friend class ScreenSessionGroup;

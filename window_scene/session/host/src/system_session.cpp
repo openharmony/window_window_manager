@@ -38,11 +38,30 @@ SystemSession::~SystemSession()
     TLOGD(WmsLogTag::WMS_LIFE, " ~SystemSession, id: %{public}d", GetPersistentId());
 }
 
-void SystemSession::UpdateCameraFloatWindowStatus(bool isShowing)
+void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 {
-    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
+    TLOGI(WmsLogTag::WMS_SYSTEM, "isShowing: %{public}d", static_cast<int>(isShowing));
+    if (specificCallback_ == nullptr) {
+        return;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        if (!specificCallback_->onCameraFloatSessionChange_) {
+            return;
+        }
         TLOGI(WmsLogTag::WMS_SYSTEM, "CameraFloat status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
         specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_PIP && GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        if (!specificCallback_->onCameraSessionChange_) {
+            return;
+        }
+        auto pipType = GetPiPTemplateInfo().pipTemplateType;
+        if (pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL) ||
+            pipType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING)) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "PiPWindow status: %{public}d, id: %{public}d", isShowing, GetPersistentId());
+            specificCallback_->onCameraSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
+        }
+    } else {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "skip window type");
     }
 }
 
@@ -74,7 +93,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
         }
-        session->UpdateCameraFloatWindowStatus(true);
+        session->UpdateCameraWindowStatus(true);
         auto ret = session->SceneSession::Foreground(property);
         return ret;
     };
@@ -85,13 +104,9 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 WSError SystemSession::Hide()
 {
     auto type = GetWindowType();
-    if (WindowHelper::IsSystemWindow(type) && NeedSystemPermission(type)) {
-        if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            if (!SessionPermission::IsStartedByInputMethod()) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Hide permission denied, keyboard is not hidden by current input method");
-                return WSError::WS_ERROR_INVALID_PERMISSION;
-            }
-        } else if (!SessionPermission::IsSystemCalling()) {
+    if (NeedSystemPermission(type)) {
+        // Do not need to verify the permission to hide the input method status bar.
+        if (!SessionPermission::IsSystemCalling() && type != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
             TLOGE(WmsLogTag::WMS_LIFE, "Hide permission denied id: %{public}d type:%{public}u",
                 GetPersistentId(), type);
             return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -116,7 +131,7 @@ WSError SystemSession::Hide()
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
-        session->UpdateCameraFloatWindowStatus(false);
+        session->UpdateCameraWindowStatus(false);
         ret = session->SceneSession::Background();
         return ret;
     };
@@ -165,10 +180,7 @@ WSError SystemSession::Disconnect(bool isFromClient)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d", session->GetPersistentId());
         session->SceneSession::Disconnect(isFromClient);
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            session->NotifyCallingSessionBackground();
-        }
-        session->UpdateCameraFloatWindowStatus(false);
+        session->UpdateCameraWindowStatus(false);
         return WSError::WS_OK;
     };
     PostTask(task, "Disconnect");
@@ -192,45 +204,6 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
-}
-
-void SystemSession::SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func)
-{
-    notifyCallingSessionUpdateRectFunc_ = func;
-}
-
-void SystemSession::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
-{
-    notifyCallingSessionForegroundFunc_ = func;
-}
-
-void SystemSession::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func)
-{
-    notifyCallingSessionBackgroundFunc_ = func;
-}
-
-void SystemSession::NotifyCallingSessionUpdateRect()
-{
-    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionUpdateRectFunc_) {
-        WLOGFI("Notify calling window that input method update rect");
-        notifyCallingSessionUpdateRectFunc_(persistentId_);
-    }
-}
-
-void SystemSession::NotifyCallingSessionForeground()
-{
-    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionForegroundFunc_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method shown");
-        notifyCallingSessionForegroundFunc_(persistentId_);
-    }
-}
-
-void SystemSession::NotifyCallingSessionBackground()
-{
-    if ((GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && notifyCallingSessionBackgroundFunc_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify calling window that input method hide");
-        notifyCallingSessionBackgroundFunc_();
-    }
 }
 
 WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -277,22 +250,25 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
         WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
-        if (ret == WSError::WS_OK) {
-            if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-                session->NotifyCallingSessionUpdateRect();
-            }
-            if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            }
-            if (session->reason_ != SizeChangeReason::DRAG) {
-                session->reason_ = SizeChangeReason::UNDEFINED;
-                session->isDirty_ = false;
-            }
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
+            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+        }
+        if (session->reason_ != SizeChangeReason::DRAG) {
+            session->reason_ = SizeChangeReason::UNDEFINED;
+            session->isDirty_ = false;
         }
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
+}
+
+int32_t SystemSession::GetMissionId() const
+{
+    return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const

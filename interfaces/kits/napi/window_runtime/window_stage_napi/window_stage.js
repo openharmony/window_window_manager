@@ -69,6 +69,10 @@ class WindowStage {
   disableWindowDecor() {
     return this.__window_stage__.disableWindowDecor();
   }
+
+  setDefaultDensityEnabled(enabled) {
+    return this.__window_stage__.setDefaultDensityEnabled(enabled);
+  }
 }
 
 export default WindowStage;

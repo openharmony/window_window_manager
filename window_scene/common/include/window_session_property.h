@@ -64,18 +64,20 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
-    void SetSessionGravity(SessionGravity gravity_, uint32_t percent);
+    void SetKeyboardSessionGravity(SessionGravity gravity_, uint32_t percent);
     void SetDecorEnable(bool isDecorEnable);
     void SetAnimationFlag(uint32_t animationFlag);
     void SetTransform(const Transform& trans);
     void SetWindowFlags(uint32_t flags);
+    void SetTopmost(bool topmost);
+    bool IsTopmost() const;
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
-    void SetCallingWindow(uint32_t windowId);
+    void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetExtensionFlag(bool isExtensionFlag);
     void SetWindowMask(const sptr<Media::PixelMap>& windowMask);
@@ -119,7 +121,7 @@ public:
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     bool GetKeepKeyboardFlag() const;
-    uint32_t GetCallingWindow() const;
+    uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     bool GetExtensionFlag() const;
     sptr<Media::PixelMap> GetWindowMask() const;
@@ -165,6 +167,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool topmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
@@ -197,7 +200,7 @@ private:
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
-    uint32_t callingWindowId_ = INVALID_WINDOW_ID;
+    uint32_t callingSessionId_ = INVALID_SESSION_ID;
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;

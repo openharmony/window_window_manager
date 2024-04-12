@@ -69,6 +69,7 @@ public:
     DeviceScreenConfig GetDeviceScreenConfig();
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
     ScreenId GetDefaultScreenId();
+    bool IsFoldable();
 
 protected:
     ScreenSessionManagerClient() = default;

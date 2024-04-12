@@ -85,6 +85,7 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
+    static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -113,7 +114,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
-    virtual WMError SetCallingWindow(uint32_t callingWindowId) override;
+    virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -137,8 +138,10 @@ public:
     void UpdateSubWindowState(const WindowType& type);
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
+    WMError SetDefaultDensityEnabled(bool enabled) override;
+    bool GetDefaultDensityEnabled() override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
@@ -160,10 +163,13 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    virtual bool IfNotNeedAvoidKeyBoardForSplit() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
+    void SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
     static uint32_t maxFloatingWindowSize_;
@@ -184,6 +190,7 @@ private:
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
+    std::atomic<bool> isDefaultDensityEnabled_ = false;
     uint32_t getAvoidAreaCnt_ = 0;
 };
 } // namespace Rosen

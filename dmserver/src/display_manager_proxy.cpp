@@ -138,7 +138,8 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
     }
     bool res = data.WriteString(virtualOption.name_) && data.WriteUint32(virtualOption.width_) &&
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
-        data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_);
+        data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
+        data.WriteUInt64Vector(virtualOption.missionIds_);
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&

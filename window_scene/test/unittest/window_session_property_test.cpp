@@ -94,9 +94,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
 */
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
-    enum Orientation orientation = Orientation::REVERSE_HORIZONTAL;
+    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetRequestedOrientation(), orientation);
+    property->SetRequestedOrientation(orientation);
+    Orientation ret = property->GetRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+
+    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
+    Orientation ret1 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    Orientation ret2 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
+    Orientation ret3 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    Orientation ret4 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    Orientation ret5 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 }
 
 /**
@@ -135,6 +157,19 @@ HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2
     windowSessionProperty.SetBrightness(brightness);
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_NE(property->GetBrightness(), 0);
+}
+
+/**
+ * @tc.name: SetTopmost
+ * @tc.desc: SetTopmost test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
+{
+    bool topmost = true;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetTopmost(topmost);
+    ASSERT_TRUE(windowSessionProperty.IsTopmost());
 }
 
 /**
@@ -267,16 +302,16 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetSessionGravity
- * @tc.desc: SetSessionGravity test
+ * @tc.name: SetKeyboardSessionGravity
+ * @tc.desc: SetKeyboardSessionGravity test
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSessionPropertyTest, SetSessionGravity, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetKeyboardSessionGravity, Function | SmallTest | Level2)
 {
     SessionGravity sessionGravity = SessionGravity::SESSION_GRAVITY_FLOAT;
     uint32_t percent = 1234567890;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSessionGravity(sessionGravity, percent);
+    windowSessionProperty.SetKeyboardSessionGravity(sessionGravity, percent);
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetTokenState(), false);
 }

@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "vsync_station.h"
 #include "window.h"
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -100,6 +101,7 @@ private:
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
     std::function<void()> frameLayoutFinishCb_ = nullptr;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

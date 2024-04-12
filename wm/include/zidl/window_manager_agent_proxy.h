@@ -38,6 +38,7 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) override;
     void NotifyGestureNavigationEnabledResult(bool enable) override;
+    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

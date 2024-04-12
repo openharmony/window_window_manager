@@ -206,6 +206,37 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
 }
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSession
+ * @tc.desc: WindowAdapter/DestroyAndDisconnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+{
+    uint32_t persistentId = 0;
+    WindowAdapter windowAdapter;
+
+    windowAdapter.DestroyAndDisconnectSpecificSession(persistentId);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.desc: WindowAdapter/DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level2)
+{
+    uint32_t persistentId = 0;
+    WindowAdapter windowAdapter;
+
+    windowAdapter.DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
 }
 }
 }

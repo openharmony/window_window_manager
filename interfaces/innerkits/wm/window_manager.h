@@ -257,6 +257,22 @@ public:
 };
 
 /**
+ * @class ICameraWindowChangedListener
+ *
+ * @brief Listener to observe camera window changed.
+ */
+class ICameraWindowChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when camera window changed.
+     *
+     * @param accessTokenId Token id of camera window.
+     * @param isShowing True means camera is shown, false means the opposite.
+     */
+    virtual void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) = 0;
+};
+
+/**
  * @class WindowManager
  *
  * @brief WindowManager used to manage window.

@@ -379,4 +379,13 @@ ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
     }
     return SCREEN_ID_INVALID;
 }
+
+bool ScreenSessionManagerClient::IsFoldable()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return false;
+    }
+    return screenSessionManager_->IsFoldable();
+}
 } // namespace OHOS::Rosen
