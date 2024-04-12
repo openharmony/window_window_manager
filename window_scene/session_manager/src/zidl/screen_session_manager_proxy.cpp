@@ -2263,7 +2263,7 @@ DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG),
         data, reply, option) != ERR_NONE) {
-       TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return {};
     }
     DeviceScreenConfig deviceScreenConfig;
