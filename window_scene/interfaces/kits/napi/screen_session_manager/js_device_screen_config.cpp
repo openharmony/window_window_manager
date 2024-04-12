@@ -43,7 +43,7 @@ JsDeviceScreenConfig::JsDeviceScreenConfig()
 
 JsDeviceScreenConfig::~JsDeviceScreenConfig()
 {
-    WLOGFD("Destroy  JsDeviceScreenConfig");
+    WLOGFD("Destroy JsDeviceScreenConfig");
 }
 
 } // namespace OHOS::Rosen
