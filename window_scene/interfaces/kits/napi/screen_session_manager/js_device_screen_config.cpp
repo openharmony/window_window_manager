@@ -19,9 +19,6 @@
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDeviceScreenConfig" };
-} // namespace
 
 napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const DeviceScreenConfig& config)
 {
