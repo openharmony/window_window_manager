@@ -21,7 +21,7 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include "session/screen/include/screen_session.h"
-#include "screen_session.h"
+#include "screen_scene.h"
 
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
