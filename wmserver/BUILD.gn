@@ -219,8 +219,8 @@ if (scene_board_enabled) {
       "image_framework:image_native",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "safwk:system_ability_fwk",
       "libxml2:libxml2",
+      "safwk:system_ability_fwk",
     ]
 
     if (defined(global_parts_info) &&
