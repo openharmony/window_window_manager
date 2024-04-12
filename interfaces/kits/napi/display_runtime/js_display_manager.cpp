@@ -282,6 +282,8 @@ DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, n
         ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayModeListener(displayListener);
     } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
+    } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterFoldAngleListener(displayListener);
     } else {
         WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -341,8 +343,7 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
 DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
-            type.c_str());
+        WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = DMError::DM_OK;
@@ -371,9 +372,13 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
                 sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
                 WLOGFD("unregister IDisplayModeListener, ret: %{public}u", ret);
+            } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
+                sptr<DisplayManager::IFoldAngleListener> thisListener(it->second);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldAngleListener(thisListener);
+                WLOGFD("unregister IFoldAngleListener, ret: %{public}u", ret);
             } else {
                 ret = DMError::DM_ERROR_INVALID_PARAM;
-                WLOGFE("unregister displaylistener with type failed, %{public}s not matched", type.c_str());
+                WLOGFE("unregister display listener with type failed, %{public}s not matched", type.c_str());
             }
             jsCbMap_[type].erase(it++);
             break;

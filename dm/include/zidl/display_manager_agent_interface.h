@@ -36,6 +36,7 @@ enum class DisplayManagerAgentType : uint32_t {
     DISPLAY_UPDATE_LISTENER,
     AVAILABLE_AREA_CHANGED_LISTENER,
     DISPLAY_MODE_CHANGED_LISTENER,
+    FOLD_ANGLE_CHANGED_LISTENER,
 };
 
 class IDisplayManagerAgent : public IRemoteBroker {
@@ -58,6 +59,7 @@ public:
         TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED,
         TRANS_ID_ON_AVAILABLE_AREA_CHANGED,
         TRANS_ID_ON_DISPLAY_MODE_CHANGED,
+        TRANS_ID_ON_FOLD_ANGLE_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
@@ -72,6 +74,7 @@ public:
     virtual void OnScreenshot(sptr<ScreenshotInfo>) = 0;
     virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) = 0;
     virtual void NotifyFoldStatusChanged(FoldStatus) = 0;
+    virtual void NotifyFoldAngleChanged(std::vector<float> foldAngles) = 0;
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) = 0;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) = 0;
     virtual void NotifyAvailableAreaChanged(DMRect) = 0;

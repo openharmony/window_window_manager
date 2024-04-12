@@ -69,6 +69,8 @@ private:
 
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
+    void notifyFoldAngleChanged(float foldAngle);
+
     FoldScreenSensorManager();
 
     ~FoldScreenSensorManager() = default;

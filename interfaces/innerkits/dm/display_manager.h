@@ -80,6 +80,16 @@ public:
         virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
     };
 
+    class IFoldAngleListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen fold angles changed.
+         *
+         * @param foldAngles Screen fold angles array.
+         */
+        virtual void OnFoldAngleChanged([[maybe_unused]]std::vector<float> foldAngles) {}
+    };
+
     class IDisplayUpdateListener : public virtual RefBase {
     public:
         /**
@@ -357,6 +367,22 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Register a listener for the event of screen fold angle changed.
+     *
+     * @param listener IFoldAngleListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterFoldAngleListener(sptr<IFoldAngleListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen fold angle changed.
+     *
+     * @param listener IFoldAngleListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener);
 
     /**
      * @brief Register an listener when session changed.
