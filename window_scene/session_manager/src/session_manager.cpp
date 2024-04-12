@@ -283,7 +283,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
 
 void SessionManager::OnFoundationDied()
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died enter");
+    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died enter");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     isFoundationListenerRegistered_ = false;
     isRecoverListenerRegistered_ = false;
@@ -295,7 +295,7 @@ void SessionManager::OnFoundationDied()
 
 void FoundationDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died");
+    TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died");
     SessionManager::GetInstance().OnFoundationDied();
 }
 
