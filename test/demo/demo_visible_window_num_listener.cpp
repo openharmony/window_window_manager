@@ -30,7 +30,7 @@ static constexpr long WAIT_TIME = 20000;
 
 class VisibleWindowNumChangedListenerFuture : public IVisibleWindowNumChangedListener {
 public:
-    void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo) override
+    void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override
     {
         future_.SetValue(visibleWindowNumInfo);
     };
