@@ -55,11 +55,11 @@ ohos_static_library("dm_napi_common") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "bounds_checking_function:libsec_shared",
   ]
 
   subsystem_name = "window"
