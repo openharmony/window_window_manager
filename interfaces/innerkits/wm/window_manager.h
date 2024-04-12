@@ -577,7 +577,7 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;
-    void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo> visibleWindowNumInfo);
+    void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
 };
 } // namespace Rosen
 } // namespace OHOS
