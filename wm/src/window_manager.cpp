@@ -163,7 +163,7 @@ void WindowManager::Impl::NotifyWindowBackHomeStatus(bool isBackHome)
     TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl NotifyWindowBackHomeStatus isBackHome: %{public}d", isBackHome);
     std::vector<sptr<IWindowBackHomeListener>> windowBackHomeListeners;
     {
-        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_); 
         windowBackHomeListeners = windowBackHomeListeners_;
     }
     for (auto &listener : windowBackHomeListeners) {
@@ -448,7 +448,7 @@ WMError WindowManager::RegisterWindowBackHomeListener(const sptr<IWindowBackHome
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::shared_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_)
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowBackHomeListenerAgent_ == nullptr) {
         pImpl_->windowBackHomeListenerAgent_ = new WindowManagerAgent();
@@ -478,7 +478,7 @@ WMError WindowManager::UnregisterWindowBackHomeListener(const sptr<IWindowBackHo
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::shared_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_)
     auto iter = std::find(pImpl_->windowBackHomeListeners_.begin(), pImpl_->windowBackHomeListeners_.end(), listener);
     if (iter == pImpl_->windowBackHomeListeners_.end()) {
         TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
