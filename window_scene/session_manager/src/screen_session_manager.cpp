@@ -195,7 +195,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
-        || type > DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
+        || type > DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER) {
         WLOGFE("DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -3308,6 +3308,18 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
     for (auto& agent : agents) {
         agent->NotifyFoldStatusChanged(foldStatus);
+    }
+}
+
+void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        WLOGI("NotifyFoldAngleChanged agents is empty");
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyFoldAngleChanged(foldAngles);
     }
 }
 
