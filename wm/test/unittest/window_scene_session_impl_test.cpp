@@ -2869,8 +2869,10 @@ HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTes
 {
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId start";
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("TestGetUIContentWithId");
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(102);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
