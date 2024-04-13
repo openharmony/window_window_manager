@@ -346,6 +346,7 @@ ohos_shared_library("libwm_lite") {
   public_configs = [ ":libwm_public_config" ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
