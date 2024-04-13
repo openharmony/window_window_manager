@@ -384,6 +384,7 @@ private:
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
+    std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     KeyEventFilterFunc keyEventFilter_;
 };

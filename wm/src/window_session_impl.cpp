@@ -129,12 +129,13 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("[WMSCom]Property is null");
         return;
     }
+    WindowType optionWindowType = option->GetWindowType();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = option->GetBundleName();
     property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
-    property_->SetWindowType(option->GetWindowType());
+    property_->SetWindowType(optionWindowType);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
@@ -148,15 +149,24 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
+    if (isPC && WindowHelper::IsSubWindow(optionWindowType)) {
         WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
             option->GetSubWindowTitle().c_str(), option->GetSubWindowDecorEnable());
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
         property_->SetDragEnabled(option->GetSubWindowDecorEnable());
         subWindowTitle_ = option->GetSubWindowTitle();
     }
+    bool isDialog = WindowHelper::IsDialogWindow(optionWindowType);
+    if (isPC && isDialog) {
+        bool dialogDecorEnable = option->GetDialogDecorEnable()
+        property_->SetDecorEnable(dialogDecorEnable);
+        property_->SetDragEnabled(dialogDecorEnable);
+        dialogTitle_ = option->GetDialogTitle();
+        WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+            dialogTitle_.c_str(), dialogDecorEnable);
+    }
 
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
@@ -798,7 +808,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
         uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
 
-    if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
+    WindowType winType = GetType();
+    bool isSubWindow = WindowHelper::IsSubWindow(winType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
+    if ((isSubWindow || isDialogWindow) && IsDecorEnable()) {
         SetAPPWindowLabel(subWindowTitle_);
     }
 
