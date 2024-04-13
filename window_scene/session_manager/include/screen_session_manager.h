@@ -233,6 +233,8 @@ public:
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
+
+    DeviceScreenConfig GetDeviceScreenConfig() override;
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -304,6 +306,7 @@ private:
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
+    DeviceScreenConfig deviceScreenConfig_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;

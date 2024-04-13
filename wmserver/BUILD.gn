@@ -202,7 +202,6 @@ if (scene_board_enabled) {
       "../etc:wms_etc",
       "../utils:libwmutil",
       "../wm:libwm",
-      "//third_party/libxml2:libxml2",
     ]
 
     external_deps = [
@@ -221,6 +220,7 @@ if (scene_board_enabled) {
       "image_framework:image_native",
       "input:libmmi-client",
       "ipc:ipc_single",
+      "libxml2:libxml2",
       "safwk:system_ability_fwk",
     ]
 

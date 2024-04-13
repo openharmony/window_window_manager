@@ -1929,6 +1929,53 @@ HWTEST_F(WindowSessionImplTest, TestGetUIContentWithId, Function | SmallTest | L
     GTEST_LOG_(INFO) << "WindowSessionImplTest: TestGetUIContentWithId end";
 }
 
+/**
+ * @tc.name: GetCallingWindowRect
+ * @tc.desc: GetCallingWindowRect Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetCallingWindowRect, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetCallingWindowRect");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    Rect rect = {0, 0, 0, 0};
+    WMError retCode = window->GetCallingWindowRect(rect);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->GetCallingWindowRect(rect);
+    ASSERT_NE(retCode, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetCallingWindowWindowStatus
+ * @tc.desc: GetCallingWindowWindowStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetCallingWindowWindowStatus, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("GetCallingWindowWindowStatus");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    WMError retCode = window->GetCallingWindowWindowStatus(windowStatus);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->GetCallingWindowWindowStatus(windowStatus);
+    ASSERT_NE(retCode, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

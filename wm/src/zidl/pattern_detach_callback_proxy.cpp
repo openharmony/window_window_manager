@@ -27,6 +27,8 @@ namespace Rosen {
 void PatternDetachCallbackProxy::OnPatternDetach(int32_t persisitentId)
 {
     MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return;
@@ -35,10 +37,6 @@ void PatternDetachCallbackProxy::OnPatternDetach(int32_t persisitentId)
         TLOGE(WmsLogTag::WMS_LIFE, "Write persisitentId failed");
         return;
     }
-
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-
     if (Remote()->SendRequest(static_cast<uint32_t>(PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");

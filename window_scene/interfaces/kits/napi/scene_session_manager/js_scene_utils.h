@@ -21,6 +21,7 @@
 #include <native_engine/native_value.h>
 #include <pointer_event.h>
 
+#include "configuration.h"
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_common.h"
@@ -141,6 +142,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
 
 JsSessionType GetApiType(WindowType type);
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
+bool ConvertConfigurationFromJs(napi_env env, napi_value jsObject, AppExecFwk::Configuration& config);
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
