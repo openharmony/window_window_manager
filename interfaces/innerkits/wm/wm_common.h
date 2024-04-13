@@ -387,6 +387,13 @@ namespace {
     constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
     constexpr int32_t INVALID_PID = -1;
     constexpr int32_t INVALID_UID = -1;
+    constexpr int32_t SYSTEM_USERID = 0;
+    constexpr int32_t BASE_USER_RANGE = 200000;
+}
+
+inline int32_t GetUserIdByUid(int32_t uid)
+{
+    return uid / BASE_USER_RANGE;
 }
 
 /**
@@ -478,12 +485,17 @@ struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE) {}
+    bool enableAnimation_;
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
+        enableAnimation_(false) {}
     SystemBarProperty(bool enable, uint32_t background, uint32_t content)
-        : enable_(enable), backgroundColor_(background), contentColor_(content) {}
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(false) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation) {}
     bool operator == (const SystemBarProperty& a) const
     {
-        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
+        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
+            enableAnimation_ == a.enableAnimation_);
     }
 };
 

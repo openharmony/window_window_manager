@@ -54,11 +54,11 @@ ohos_static_library("dm_napi_common") {
   deps = [
     "../../../../utils:libwmutil",
     "../../../../wm:libwm",
-    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "ipc:ipc_single",

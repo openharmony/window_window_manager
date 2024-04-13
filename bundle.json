@@ -70,12 +70,12 @@
           "memmgr_plugin",
           "data_share",
           "accessibility",
-          "security_component_manager"
-        ],
-        "third_party": [
+          "security_component_manager",
           "libjpeg-turbo",
           "libxml2",
           "bounds_checking_function"
+        ],
+        "third_party": [
         ]
       },
       "build": {
@@ -162,7 +162,6 @@
             }
           },
           {
-            "type": "so",
             "name": "//foundation/window/window_manager/utils:libwmutil_static",
             "header": {
               "header_files": [

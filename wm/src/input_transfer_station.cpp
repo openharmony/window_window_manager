@@ -72,7 +72,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputEventListener::OnInputEvent id:%{public}d, Receive pointerEvent, "
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, Receive pointerEvent, "
             "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
