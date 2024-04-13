@@ -2679,11 +2679,11 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
 WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
-    if(sceneSession == nullptr) {
+    if (sceneSession == nullptr) {
         WLOGFI("sceneSession is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if(property == nullptr) {
+    if (property == nullptr) {
         WLOGFI("property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
