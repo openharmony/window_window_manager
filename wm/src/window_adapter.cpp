@@ -250,10 +250,8 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 
 WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
-    return WMError::WM_OK;
+    return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
 }
 
 void WindowAdapter::WindowManagerAndSessionRecover()
@@ -618,6 +616,18 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->GetHostWindowRect(hostWindowId, rect));
+}
+
+WMError WindowAdapter::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowWindowStatus(persistentId, windowStatus));
+}
+
+WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowRect(persistentId, rect));
 }
 } // namespace Rosen
 } // namespace OHOS
