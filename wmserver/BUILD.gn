@@ -22,7 +22,6 @@ config("libwms_config") {
     "include/utils",
     "include/window_snapshot",
     "include/window_group",
-    "//utils/system/safwk/native/include",
     "../interfaces/innerkits/wm",
     "../interfaces/innerkits/dm",
     "../wm/include",
