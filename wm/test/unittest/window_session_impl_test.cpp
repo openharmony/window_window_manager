@@ -82,7 +82,7 @@ namespace {
  */
 HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest | Level2)
 {
-    //sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("CreateWindow01");
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
 
