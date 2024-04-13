@@ -297,8 +297,8 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessagePar
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data,
     MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSessionWithDetachCallback!");
     auto persistentId = data.ReadInt32();
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));

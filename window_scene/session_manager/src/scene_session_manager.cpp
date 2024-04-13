@@ -907,7 +907,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     }
     specificCb->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
         this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
+    specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSessionInner,
         this, std::placeholders::_1);
     specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -1545,7 +1545,7 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
         if (elem != nullptr) {
             const auto& persistentId = elem->GetPersistentId();
             TLOGI(WmsLogTag::WMS_SUB, "DestroySubSession, id: %{public}d", persistentId);
-            DestroyAndDisconnectSpecificSessionInner(elem);
+            DestroyAndDisconnectSpecificSessionInner(persistentId);
         }
     }
 }
@@ -1687,7 +1687,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
             WLOGFW("Remote died, session is nullptr, id: %{public}d", iter->second);
             return;
         }
-        DestroyAndDisconnectSpecificSessionInner(sceneSession);
+        DestroyAndDisconnectSpecificSessionInner(iter->second);
         remoteObjectMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroySpecificSession");
@@ -2270,12 +2270,12 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
-WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession)
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
 {
+    auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    const auto& persistentId = sceneSession->GetPersistentId();
     auto ret = sceneSession->UpdateActiveStatus(false);
     WindowDestroyNotifyVisibility(sceneSession);
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
@@ -2324,7 +2324,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t p
             TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, not destroy by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        return DestroyAndDisconnectSpecificSessionInner(sceneSession);
+        return DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
 
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
@@ -2336,7 +2336,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
     if (callback == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, callingPid, callback]() {
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session start, id: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
@@ -2350,7 +2350,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         sceneSession->RegisterDetachCallback(iface_cast<IPatternDetachCallback>(callback));
-        return DestroyAndDisconnectSpecificSessionInner(sceneSession);
+        return DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
 
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));

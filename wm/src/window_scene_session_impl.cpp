@@ -46,6 +46,7 @@
 #include "surface_capture_future.h"
 #include "pattern_detach_callback.h"
 #include "window_session_impl.h"
+#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1004,6 +1005,11 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 
 void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
 {
+    if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Destroy window is scb window");
+        SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
+        return;
+    }
     sptr<PatternDetachCallback> callback = new PatternDetachCallback();
     SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());

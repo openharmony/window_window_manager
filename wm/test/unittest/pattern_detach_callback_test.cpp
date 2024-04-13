@@ -66,7 +66,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult01, Function | SmallTest | Level2)
     auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     auto waitTime = endTime - startTime;
-    GTEST_LOG_(INFO) << "GetResult waitTime:"<< waitTime;
+    GTEST_LOG_(INFO) << "GetResult waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= maxWaitTime);
 }
 
@@ -79,7 +79,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult02, Function | SmallTest | Level2)
 {
     int32_t maxWaitTime = 300;
     int32_t sleepTime = 200;
-    std::future<void> future = std::async(std::launch::async, [&]() -> void {
+    std::future<void> future = std::async(std::launch::async, [this, sleepTime]() -> void {
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         patternDetachCallback_->OnPatternDetach(0);
     });
@@ -89,7 +89,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult02, Function | SmallTest | Level2)
     auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     auto waitTime = endTime - startTime;
-    GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:"<< waitTime;
+    GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= sleepTime && waitTime < maxWaitTime);
 }
 
@@ -102,7 +102,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult03, Function | SmallTest | Level2)
 {
     int32_t maxWaitTime = 300;
     int32_t sleepTime = 400;
-    std::future<void> future = std::async(std::launch::async, [&]() -> void {
+    std::future<void> future = std::async(std::launch::async, [this, sleepTime]() -> void {
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         patternDetachCallback_->OnPatternDetach(0);
     });
@@ -112,12 +112,11 @@ HWTEST_F(PatternDetachCallbackTest, GetResult03, Function | SmallTest | Level2)
     auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     auto waitTime = endTime - startTime;
-    GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:"<< waitTime;
+    GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= maxWaitTime && waitTime < sleepTime);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [this, &resultValue]() {
         patternDetachCallback_->GetResult(std::numeric_limits<int>::max());
         resultValue = 1;
     };
