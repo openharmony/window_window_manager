@@ -547,7 +547,6 @@ DMError ScreenSessionManagerProxy::RegisterDisplayManagerAgent(const sptr<IDispl
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-
     if (displayManagerAgent == nullptr) {
         WLOGFE("IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -2251,5 +2250,27 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return {};
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return {};
+    }
+    DeviceScreenConfig deviceScreenConfig;
+    if (!RSMarshallingHelper::Unmarshalling(reply, deviceScreenConfig)) {
+        TLOGE(WmsLogTag::DMS, "Read deviceScreenConfig failed");
+        return {};
+    }
+    return deviceScreenConfig;
 }
 } // namespace OHOS::Rosen

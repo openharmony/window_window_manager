@@ -1190,7 +1190,6 @@ HWTEST_F(ScreenSessionManagerTest, GetPixelFormat, Function | SmallTest | Level3
     res = ssm_->GetPixelFormat(screenId, format);
     EXPECT_EQ(DMError::DM_OK, res);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS

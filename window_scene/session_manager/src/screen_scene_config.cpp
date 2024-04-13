@@ -44,7 +44,8 @@ enum XmlNodeElement {
     BUILD_IN_DEFAULT_ORIENTATION,
     DEFAULT_DEVICE_ROTATION_OFFSET,
     DEFAULT_DISPLAY_CUTOUT_PATH,
-    SUB_DISPLAY_CUTOUT_PATH
+    SUB_DISPLAY_CUTOUT_PATH,
+    ROTATION_POLICY,
 };
 }
 
@@ -65,7 +66,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {BUILD_IN_DEFAULT_ORIENTATION, "buildInDefaultOrientation"},
     {DEFAULT_DEVICE_ROTATION_OFFSET, "defaultDeviceRotationOffset"},
     {DEFAULT_DISPLAY_CUTOUT_PATH, "defaultDisplayCutoutPath"},
-    {SUB_DISPLAY_CUTOUT_PATH, "subDisplayCutoutPath"}
+    {SUB_DISPLAY_CUTOUT_PATH, "subDisplayCutoutPath"},
+    {ROTATION_POLICY, "rotationPolicy"},
 };
 
 
@@ -149,7 +151,8 @@ bool ScreenSceneConfig::LoadConfigXml()
             (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName)) {
             ReadIntNumbersConfigInfo(curNodePtr);
         } else if ((xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
-            (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName)) {
+            (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
+            (xmlNodeMap_[ROTATION_POLICY] == nodeName)) {
             ReadStringConfigInfo(curNodePtr);
         } else {
             WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());

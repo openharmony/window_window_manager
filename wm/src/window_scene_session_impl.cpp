@@ -473,7 +473,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             return;
         }
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
-        RefreshNoInteractionTimeoutMonitor(pointerEvent->GetId());
+        RefreshNoInteractionTimeoutMonitor();
     }
 
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -518,11 +518,14 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     ConsumePointerEventInner(pointerEvent, pointerItem);
 }
 
-void WindowSceneSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    bool isConsumed = false;
-    NotifyKeyEvent(keyEvent, isConsumed, false);
-    RefreshNoInteractionTimeoutMonitor(keyEvent->GetId());
+    bool ret = false;
+    if (uiContent_ != nullptr) {
+        ret = uiContent_->ProcessKeyEvent(keyEvent, true);
+    }
+    RefreshNoInteractionTimeoutMonitor();
+    return ret;
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
@@ -761,7 +764,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             hostSession_->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
-        RefreshNoInteractionTimeoutMonitor(-1);
+        RefreshNoInteractionTimeoutMonitor();
         return WMError::WM_OK;
     }
 
@@ -801,7 +804,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
-        RefreshNoInteractionTimeoutMonitor(-1);
+        RefreshNoInteractionTimeoutMonitor();
     } else {
         NotifyForegroundFailed(ret);
     }
@@ -3001,6 +3004,26 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     property_->SetWindowMask(mask);
     property_->SetIsShaped(true);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+}
+
+bool WindowSceneSessionImpl::IfNotNeedAvoidKeyBoardForSplit()
+{
+    if (DisplayManager::GetInstance().IsFoldable() &&
+            DisplayManager::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
+        return false;
+    }
+    if (WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+            property_->GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return false;
+    }
+    if (WindowHelper::IsSubWindow(property_->GetWindowType()) && FindWindowById(GetParentId()) != nullptr &&
+            FindWindowById(GetParentId())->GetMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return false;
+    }
+    if (!IsFocused() || GetRect().posY_ == 0) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
