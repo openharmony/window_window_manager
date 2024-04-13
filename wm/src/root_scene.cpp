@@ -64,6 +64,7 @@ private:
 } // namespace
 
 sptr<RootScene> RootScene::staticRootScene_;
+std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> RootScene::configurationUpdatedCallback_;
 
 RootScene::RootScene()
 {
@@ -155,6 +156,9 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
     WLOGD("notify root scene ace for all");
     if (staticRootScene_) {
         staticRootScene_->UpdateConfiguration(configuration);
+        if (configurationUpdatedCallback_) {
+            configurationUpdatedCallback_(configuration);
+        }
     }
 }
 
@@ -211,6 +215,12 @@ void RootScene::OnBundleUpdated(const std::string& bundleName)
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
+}
+
+void RootScene::SetOnConfigurationUpdatedCallback(
+    const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback)
+{
+    configurationUpdatedCallback_ = callback;
 }
 
 void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
