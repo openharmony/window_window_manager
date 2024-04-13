@@ -1724,6 +1724,7 @@ void Session::UnregisterSessionChangeListeners()
         session->clickFunc_ = nullptr;
         session->jsSceneSessionExceptionFunc_ = nullptr;
         session->sessionExceptionFunc_ = nullptr;
+        session->terminateSessionFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
     };
     PostTask(task, "UnregisterSessionChangeListeners");
