@@ -73,6 +73,8 @@ public:
     DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
     DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+    DMError RegisterFoldAngleListener(sptr<IFoldAngleListener> listener);
+    DMError UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener);
     DMError RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
     DMError UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener);
     DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
@@ -84,6 +86,7 @@ public:
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
+    void ClearFoldAngleCallback();
     void ClearDisplayModeCallback();
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
     void NotifyScreenshot(sptr<ScreenshotInfo> info);
@@ -95,6 +98,7 @@ private:
     void NotifyDisplayChange(sptr<DisplayInfo> displayInfo);
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    void NotifyFoldAngleChanged(std::vector<float> foldAngles);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyAvailableAreaChanged(DMRect rect);
@@ -109,6 +113,7 @@ private:
     std::set<sptr<IScreenshotListener>> screenshotListeners_;
     std::set<sptr<IPrivateWindowListener>> privateWindowListeners_;
     std::set<sptr<IFoldStatusListener>> foldStatusListeners_;
+    std::set<sptr<IFoldAngleListener>> foldAngleListeners_;
     std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners_;
     std::set<sptr<IDisplayModeListener>> displayModeListeners_;
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners_;
@@ -123,6 +128,8 @@ private:
     sptr<DisplayManagerPrivateWindowAgent> privateWindowListenerAgent_;
     class DisplayManagerFoldStatusAgent;
     sptr<DisplayManagerFoldStatusAgent> foldStatusListenerAgent_;
+    class DisplayManagerFoldAngleAgent;
+    sptr<DisplayManagerFoldAngleAgent> foldAngleListenerAgent_;
     class DisplayManagerDisplayUpdateAgent;
     sptr<DisplayManagerDisplayUpdateAgent> displayUpdateListenerAgent_;
     class DisplayManagerDisplayModeAgent;
@@ -269,6 +276,21 @@ private:
     sptr<Impl> pImpl_;
 };
 
+class DisplayManager::Impl::DisplayManagerFoldAngleAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerFoldAngleAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerFoldAngleAgent() = default;
+
+    virtual void NotifyFoldAngleChanged(std::vector<float> foldAngles) override
+    {
+        pImpl_->NotifyFoldAngleChanged(foldAngles);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
 class DisplayManager::Impl::DisplayManagerDisplayUpdateAgent : public DisplayManagerAgentDefault {
 public:
     explicit DisplayManagerDisplayUpdateAgent(sptr<Impl> impl) : pImpl_(impl)
@@ -383,6 +405,22 @@ void DisplayManager::Impl::ClearFoldStatusCallback()
     }
 }
 
+void DisplayManager::Impl::ClearFoldAngleCallback()
+{
+    if (foldAngleListenerAgent_ == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+        foldAngleListenerAgent_, DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
+    foldAngleListenerAgent_ = nullptr;
+    if (res != DMError::DM_OK) {
+        WLOGFE("ClearFoldAngleCallback FOLD_ANGLE_CHANGED_LISTENER failed !");
+    } else {
+        WLOGI("ClearFoldAngleCallback foldAngleListenerAgent_!");
+    }
+}
+
 void DisplayManager::Impl::ClearDisplayModeCallback()
 {
     DMError res = DMError::DM_OK;
@@ -421,6 +459,7 @@ void DisplayManager::Impl::Clear()
     }
     ClearDisplayStateCallback();
     ClearFoldStatusCallback();
+    ClearFoldAngleCallback();
     ClearDisplayModeCallback();
 }
 
@@ -957,6 +996,75 @@ DMError DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> l
     return pImpl_->UnregisterScreenshotListener(listener);
 }
 
+void DisplayManager::Impl::NotifyFoldAngleChanged(std::vector<float> foldAngles)
+{
+    std::set<sptr<IFoldAngleListener>> foldAngleListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        foldAngleListeners = foldAngleListeners_;
+    }
+    for (auto& listener : foldAngleListeners) {
+        listener->OnFoldAngleChanged(foldAngles);
+    }
+}
+
+DMError DisplayManager::RegisterFoldAngleListener(sptr<IFoldAngleListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IFoldAngleListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterFoldAngleListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterFoldAngleListener(sptr<IFoldAngleListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (foldAngleListenerAgent_ == nullptr) {
+        foldAngleListenerAgent_ = new DisplayManagerFoldAngleAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            foldAngleListenerAgent_,
+            DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterFoldAngleListener failed !");
+        foldAngleListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IFoldAngleListener register success");
+        foldAngleListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterFoldAngleListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterFoldAngleListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(foldAngleListeners_.begin(), foldAngleListeners_.end(), listener);
+    if (iter == foldAngleListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    foldAngleListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (foldAngleListeners_.empty() && foldAngleListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            foldAngleListenerAgent_,
+            DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
+        foldAngleListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
 void DisplayManager::Impl::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     std::set<sptr<IFoldStatusListener>> foldStatusListeners;
@@ -1461,6 +1569,7 @@ void DisplayManager::Impl::OnRemoteDied()
     screenshotListenerAgent_ = nullptr;
     privateWindowListenerAgent_ = nullptr;
     foldStatusListenerAgent_ = nullptr;
+    foldAngleListenerAgent_ = nullptr;
 }
 
 void DisplayManager::OnRemoteDied()
