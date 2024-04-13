@@ -20,6 +20,7 @@
 
 #include "display_manager_interface.h"
 #include "dm_common.h"
+#include "interfaces/include/ws_common.h"
 #include "session/screen/include/screen_property.h"
 #include "zidl/screen_session_manager_client_interface.h"
 
@@ -136,6 +137,7 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
 };
 } // namespace Rosen
 } // namespace OHOS
