@@ -285,6 +285,9 @@ friend class SSMDeathRecipient;
 public:
     /**
      * @brief Register WMS connection status changed listener.
+     * @attention Callable only by u0 system user. A process only supports successful registration once.
+     * When the foundation service restarts, you need to re-register the listener.
+     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
      *
      * @param listener IWMSConnectionChangedListener.
      * @return WM_OK means register success, others means register failed.
@@ -292,6 +295,7 @@ public:
     WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
     /**
      * @brief Unregister WMS connection status changed listener.
+     * @attention Callable only by u0 system user.
      *
      * @return WM_OK means unregister success, others means unregister failed.
      */

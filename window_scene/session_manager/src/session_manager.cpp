@@ -90,13 +90,14 @@ SessionManager::~SessionManager()
 
 void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
 {
-    WLOGFD("OnWMSConnectionChanged");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "OnWMSConnectionChanged");
     isWMSConnected_ = isConnected;
     currentUserId_ = userId;
     currentScreenId_ = screenId;
     if (wmsConnectionChangedFunc_ != nullptr) {
-        WLOGFI("WMS connection changed with userId=%{public}d, screenId=%{public}d, isConnected=%{public}d",
-            userId, screenId, isConnected);
+        TLOGI(WmsLogTag::WMS_MULTI_USER,
+            "WMS connection changed with userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
+            screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     }
 }
@@ -132,34 +133,55 @@ void SessionManager::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-            WLOGFE("Failed to get system ability mgr.");
-            return;
-        }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject) {
-        WLOGFI("Remote object is nullptr");
-        return;
-    }
-    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    if (!mockSessionManagerServiceProxy_) {
-        WLOGFW("Get mock session manager service proxy failed, nullptr");
+    if (InitMockSMSProxy() != WMError::WM_OK) {
+        WLOGFE("Init mock session manager service proxy failed");
         return;
     }
 
-    if (!isRecoverListenerRegistered_) {
-        isRecoverListenerRegistered_ = true;
-        WLOGFI("[WMSRecover] Register recover listener");
-        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
-        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
-    }
+    RegisterSMSRecoverListener();
 
     sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
     }
+}
+
+WMError SessionManager::InitMockSMSProxy()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        WLOGFE("Failed to get system ability mgr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
+    if (!remoteObject) {
+        WLOGFE("Remote object is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    if (!mockSessionManagerServiceProxy_) {
+        WLOGFW("Get mock session manager service proxy failed, nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (GetUserIdByUid(getuid()) != SYSTEM_USERID || isFoundationListenerRegistered_) {
+        return WMError::WM_OK;
+    }
+    if (!foundationDeath_) {
+        foundationDeath_ = new (std::nothrow) FoundationDeathRecipient();
+        if (!foundationDeath_) {
+            WLOGFE("Failed to create death Recipient ptr FoundationDeathRecipient");
+            return WMError::WM_ERROR_NO_MEM;
+        }
+    }
+    if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(foundationDeath_)) {
+        WLOGFE("Failed to add death recipient");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    isFoundationListenerRegistered_ = true;
+    return WMError::WM_OK;
 }
 
 __attribute__((no_sanitize("cfi")))
@@ -195,6 +217,20 @@ void SessionManager::InitSceneSessionManagerProxy()
     }
 }
 
+void SessionManager::RegisterSMSRecoverListener()
+{
+    if (!isRecoverListenerRegistered_) {
+        if (!mockSessionManagerServiceProxy_) {
+            WLOGFE("[WMSRecover] mockSessionManagerServiceProxy_ is null");
+            return;
+        }
+        isRecoverListenerRegistered_ = true;
+        WLOGFI("[WMSRecover] Register recover listener");
+        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
+    }
+}
+
 void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc)
 {
     std::lock_guard<std::recursive_mutex> lock(recoverMutex_);
@@ -226,13 +262,41 @@ void SessionManager::Clear()
     }
 }
 
-void SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    WLOGFI("RegisterWMSConnectionChangedListener in");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "RegisterWMSConnectionChangedListener in");
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto ret = InitMockSMSProxy();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Init mock session manager service failed");
+            return ret;
+        }
+        RegisterSMSRecoverListener();
+    }
     wmsConnectionChangedFunc_ = callbackFunc;
     if (isWMSConnected_) {
         OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
     }
+    return WMError::WM_OK;
+}
+
+void SessionManager::OnFoundationDied()
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died enter");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isFoundationListenerRegistered_ = false;
+    isRecoverListenerRegistered_ = false;
+    isWMSConnected_ = false;
+    mockSessionManagerServiceProxy_ = nullptr;
+    sessionManagerServiceProxy_ = nullptr;
+    sceneSessionManagerProxy_ = nullptr;
+}
+
+void FoundationDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died");
+    SessionManager::GetInstance().OnFoundationDied();
 }
 
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

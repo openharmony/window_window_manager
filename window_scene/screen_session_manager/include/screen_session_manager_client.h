@@ -25,6 +25,7 @@
 #include "display_change_info.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_session.h"
+#include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
 #include "zidl/screen_session_manager_interface.h"
@@ -65,8 +66,10 @@ public:
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
+    DeviceScreenConfig GetDeviceScreenConfig();
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
     ScreenId GetDefaultScreenId();
+    bool IsFoldable();
 
 protected:
     ScreenSessionManagerClient() = default;

@@ -679,6 +679,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(setRet));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG: {
+            if (!RSMarshallingHelper::Marshalling(reply, GetDeviceScreenConfig())) {
+                TLOGE(WmsLogTag::DMS, "Write deviceScreenConfig failed");
+            }
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
