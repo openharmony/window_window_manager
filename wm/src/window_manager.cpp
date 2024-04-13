@@ -143,7 +143,7 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
 
 void WindowManager::Impl::NotifyWindowModeChange(WindowModeType type)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "ywx1281675 WindowManager::Impl UpdateWindowModeTypeInfo type: %{public}d",
+    TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl UpdateWindowModeTypeInfo type: %{public}d",
         static_cast<uint8_t>(type));
     std::vector<sptr<IWindowModeChangedListener>> windowModeListeners;
     {
