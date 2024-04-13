@@ -2067,8 +2067,10 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
         WLOGFE("SetVirtualScreenRefreshRate, permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    WLOGFI("SetVirtualScreenRefreshRate, screenId: %{public}" PRIu64", refreshInterval:  %{public}u",
+        screenId, refreshInterval);
     if (screenId == GetDefaultScreenId()) {
-        WLOGFE("cannot set refresh rate of main screen using the interface for virtual screen.");
+        WLOGFE("cannot set refresh rate of main screen, main screen id: %{public}" PRIu64".", GetDefaultScreenId());
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (refreshInterval == 0) {
@@ -2086,8 +2088,9 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
         WLOGFE("SetVirtualScreenRefreshRate, No corresponding rsId.");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    auto res = rsInterface_.SetScreenSkipFrameInterval(rsScreenId, refreshInterval);
+    int32_t res = rsInterface_.SetScreenSkipFrameInterval(rsScreenId, refreshInterval);
     if (res != StatusCode::SUCCESS) {
+        WLOGFE("SetVirtualScreenRefreshRate, rsInterface error: %{public}d", res);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);

@@ -317,8 +317,9 @@ public:
      * @brief Set virtual screen refresh rate with a refresh interval relative to the main screen.
      *
      * @param screenId virtual screen id.
-     * @param refreshInterval refresh interval: 2 indicates that the virtual screen refreshes 1 frame
-     *     when the main screen refreshes 2 frames, and so on.
+     * @param refreshInterval refresh interval: range [1, main screen max refresh rate]. 2 indicates that
+     *     the virtual screen refreshes 1 frame when the main screen refreshes 2 frames, 5 indicates that
+     *     the virtual screen refreshes 1 frame when the main screen refreshes 5 frames, and so on.
      * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
