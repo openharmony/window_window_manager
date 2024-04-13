@@ -60,6 +60,7 @@ const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateChange";
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
+const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 constexpr int SCALE_ARG_COUNT = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -214,6 +215,7 @@ void JsSceneSession::InitListenerFuncs()
         { SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     &JsSceneSession::ProcessSessionInfoLockedStateChangeRegister },
         { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
         { LANDSCAPE_MULTI_WINDOW_CB,             &JsSceneSession::ProcessLandscapeMultiWindowRegister },
+        { CONTEXT_TRANSPARENT_CB,                &JsSceneSession::ProcessContextTransparentRegister },
         { KEYBOARD_GRAVITY_CHANGE_CB,            &JsSceneSession::ProcessKeyboardGravityChangeRegister },
     };
 }
@@ -774,6 +776,20 @@ void JsSceneSession::ProcessClickRegister()
     }
     session->SetClickListener(func);
     WLOGFD("ProcessClickChangeRegister success");
+}
+
+void JsSceneSession::ProcessContextTransparentRegister()
+{
+    NotifyContextTransparentFunc func = [this]() {
+        this->OnContextTransparent();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetContextTransparentFunc(func);
+    WLOGFD("ProcessContextTransparentRegister success");
 }
 
 void JsSceneSession::OnSessionEvent(uint32_t eventId)
@@ -1667,6 +1683,29 @@ void JsSceneSession::OnClick()
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnClick");
+}
+
+void JsSceneSession::OnContextTransparent()
+{
+    WLOGFD("[NAPI]OnContextTransparent");
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(CONTEXT_TRANSPARENT_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnContextTransparent");
 }
 
 void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
