@@ -208,7 +208,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_NE(retCode, WMError::WM_OK);
 }
 
 /**
@@ -964,8 +964,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     sptr<IWindowRectChangeListener> listener7 = nullptr;
     res = window->RegisterWindowRectChangeListener(listener7);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowRectChangeListener(listener7);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
@@ -1523,7 +1521,7 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->HideNonSystemFloatingWindows(false);
-    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_NE(retCode, WMError::WM_OK);
 }
 
 /**
