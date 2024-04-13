@@ -629,5 +629,12 @@ WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowRect(persistentId, rect));
 }
+
+WMError WindowAdapter::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    WLOGFD("get back home status");
+    return windowManagerServiceProxy_->GetWindowBackHomeStatus(isBackHome);
+}
 } // namespace Rosen
 } // namespace OHOS
