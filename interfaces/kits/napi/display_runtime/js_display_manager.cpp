@@ -320,7 +320,7 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
@@ -344,7 +344,7 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
