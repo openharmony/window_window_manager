@@ -2862,7 +2862,7 @@ HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Fu
 
 /**
  * @tc.name: TestGetUIContentWithId
- * @tc.desc: get uicontent with id
+ * @tc.desc: Get uicontent with id
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTest | Level2)
