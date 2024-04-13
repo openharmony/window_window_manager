@@ -163,7 +163,7 @@ void WindowManager::Impl::NotifyWindowBackHomeStatus(bool isBackHome)
     TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl NotifyWindowBackHomeStatus isBackHome: %{public}d", isBackHome);
     std::vector<sptr<IWindowBackHomeListener>> windowBackHomeListeners;
     {
-        std::shared_lock<std::shared_mutex> lock(listenerMutex_); 
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
         windowBackHomeListeners = windowBackHomeListeners_;
     }
     for (auto &listener : windowBackHomeListeners) {
