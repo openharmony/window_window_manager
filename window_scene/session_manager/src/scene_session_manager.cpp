@@ -4166,6 +4166,7 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
+    ProcessBackHomeStatus();
     return sceneSession->UpdateWindowMode(mode);
 }
 
@@ -4359,6 +4360,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionBackground(sceneSession);
             }
+            ProcessBackHomeStatus();
             break;
         default:
             break;
@@ -4413,6 +4415,36 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFlo
     TLOGI(WmsLogTag::WMS_MAIN, "Notify RSS Window Mode Type Update, type : %{public}d",
         static_cast<uint8_t>(type));
     SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(type);
+}
+
+void SceneSessionManager::ProcessBackHomeStatus()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "ProcessBackHomeStatus");
+    if (IsBackHomeStatus()) {
+        SessionManagerAgentController::GetInstance().UpdateWindowBackHomeStatus(true);
+        TLOGI(WmsLogTag::WMS_MAIN, "ProcessBackHomeStatus go back home status");
+    }
+}
+
+bool SceneSessionManager::IsBackHomeStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "IsBackHomeStatus, sceneSession is null");
+            continue;
+        }
+        auto mode = sceneSession->GetWindowMode();
+        auto state = sceneSession->GetSessionState();
+        if ((WindowHelper::IsMainWindow(sceneSession->GetWindowType())) &&
+            (WindowHelper::IsFullScreenWindow(mode) || WindowHelper::IsSplitWindowMode(mode)) &&
+            (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE)) {
+            return false;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "IsBackHomeStatus, true");
+    return true;
 }
 
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
@@ -7534,4 +7566,14 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    if (!SessionPermission::IsSACalling()) {
+        WLOGFE("GetWindowBackHomeStatus permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    isBackHome = IsBackHomeStatus();
+    WLOGFI("Get back home status success, isBackHome: %{public}d", isBackHome);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
