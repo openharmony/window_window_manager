@@ -1278,7 +1278,7 @@ public:
     /**
      * @brief Get ui content object.
      *
-     * @param winId main window id?
+     * @param winId window id.
      *
      * @return UIContent object of ACE.
      */

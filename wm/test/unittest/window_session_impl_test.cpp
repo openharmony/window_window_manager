@@ -1906,7 +1906,7 @@ HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2
 
 /**
  * @tc.name: TestGetUIContentWithId
- * @tc.desc: get uicontent with id
+ * @tc.desc: Get uicontent with id
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest, TestGetUIContentWithId, Function | SmallTest | Level2)
