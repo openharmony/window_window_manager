@@ -1014,6 +1014,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
         SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
     });
+    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
+        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
+    });
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
