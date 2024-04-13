@@ -685,6 +685,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t refreshInterval = data.ReadUint32();
+            DMError ret = SetVirtualScreenRefreshRate(screenId, refreshInterval);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

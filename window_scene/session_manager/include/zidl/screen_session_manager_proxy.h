@@ -147,6 +147,7 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
     DeviceScreenConfig GetDeviceScreenConfig() override;
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

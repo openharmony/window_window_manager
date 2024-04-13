@@ -123,6 +123,7 @@ public:
         TRANS_ID_SET_VIRTUAL_SCREEN_FLAG,
         TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE,
         TRANS_ID_GET_DEVICE_SCREEN_CONFIG,
+        TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -251,6 +252,10 @@ public:
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+    {
+        return DMError::DM_OK;
     }
 };
 } // namespace OHOS::Rosen

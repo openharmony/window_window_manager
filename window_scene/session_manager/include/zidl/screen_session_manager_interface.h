@@ -138,6 +138,10 @@ public:
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

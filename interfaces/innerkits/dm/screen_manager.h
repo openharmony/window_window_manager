@@ -188,15 +188,6 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
 
     /**
-     * @brief Set virtual screen refresh rate.
-     *
-     * @param screenId screen id.
-     * @param refreshRate the new refresh rate.
-     * @return DM_OK means set success, others means set failed.
-     */
-    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshRate);
-
-    /**
      * @brief Set buffer auto rotate
      *
      * @param screenId Screen id.
@@ -321,6 +312,17 @@ public:
      * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
+
+    /**
+     * @brief Set virtual screen refresh rate with a refresh interval relative to the main screen.
+     *
+     * @param screenId virtual screen id.
+     * @param refreshInterval refresh interval: range [1, main screen max refresh rate]. 2 indicates that
+     *     the virtual screen refreshes 1 frame when the main screen refreshes 2 frames, 5 indicates that
+     *     the virtual screen refreshes 1 frame when the main screen refreshes 5 frames, and so on.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 private:
     ScreenManager();
     ~ScreenManager();
