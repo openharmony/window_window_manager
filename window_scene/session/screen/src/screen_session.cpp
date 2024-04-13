@@ -221,6 +221,11 @@ void ScreenSession::UpdateRefreshRate(uint32_t refreshRate)
     property_.SetRefreshRate(refreshRate);
 }
 
+uint32_t ScreenSession::GetRefreshRate()
+{
+    return property_.GetRefreshRate();
+}
+
 void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 {
     auto screenBounds = property_.GetBounds();

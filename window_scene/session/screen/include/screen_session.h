@@ -129,6 +129,7 @@ public:
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
     void UpdateRefreshRate(uint32_t refreshRate);
+    uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);

@@ -235,6 +235,7 @@ public:
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
 
     DeviceScreenConfig GetDeviceScreenConfig() override;
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

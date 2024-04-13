@@ -2061,6 +2061,42 @@ DMError ScreenSessionManager::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SetVirtualScreenRefreshRate, permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SetVirtualScreenRefreshRate, screenId: %{public}" PRIu64", refreshInterval:  %{public}u",
+        screenId, refreshInterval);
+    if (screenId == GetDefaultScreenId()) {
+        WLOGFE("cannot set refresh rate of main screen, main screen id: %{public}" PRIu64".", GetDefaultScreenId());
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (refreshInterval == 0) {
+        WLOGFE("SetVirtualScreenRefreshRate, refresh interval is 0.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(screenId);
+    auto defaultScreenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr || defaultScreenSession == nullptr) {
+        WLOGFE("SetVirtualScreenRefreshRate, screenSession is null.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGFE("SetVirtualScreenRefreshRate, No corresponding rsId.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    int32_t res = rsInterface_.SetScreenSkipFrameInterval(rsScreenId, refreshInterval);
+    if (res != StatusCode::SUCCESS) {
+        WLOGFE("SetVirtualScreenRefreshRate, rsInterface error: %{public}d", res);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds)
 {
     WLOGFI("MirrorUniqueSwitch enter");
