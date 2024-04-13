@@ -19,6 +19,7 @@
 
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_pattern_detach_callback.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
@@ -2939,11 +2940,11 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
 }
 
 /**
- * @tc.name: SetAttachState
- * @tc.desc: SetSystemActive Test
+ * @tc.name: SetAttachState01
+ * @tc.desc: SetAttachState Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetAttachState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetAttachState01, Function | SmallTest | Level2)
 {
     session_->SetAttachState(true);
     ASSERT_EQ(session_->isAttach_, true);
@@ -2952,15 +2953,64 @@ HWTEST_F(WindowSessionTest, SetAttachState, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: RegisterDetachCallback
+ * @tc.name: SetAttachState02
+ * @tc.desc: SetAttachState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 123;
+    sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
+    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
+    session_->persistentId_ = persistentId;
+    session_->SetAttachState(true);
+    session_->RegisterDetachCallback(detachCallback);
+    session_->SetAttachState(false);
+    Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback01
  * @tc.desc: RegisterDetachCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, RegisterDetachCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, RegisterDetachCallback01, Function | SmallTest | Level2)
 {
     sptr<IPatternDetachCallback> detachCallback;
     session_->RegisterDetachCallback(detachCallback);
     ASSERT_EQ(session_->detachCallback_, detachCallback);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback02
+ * @tc.desc: RegisterDetachCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterDetachCallback02, Function | SmallTest | Level2)
+{
+    sptr<IPatternDetachCallback> detachCallback;
+    session_->RegisterDetachCallback(detachCallback);
+    ASSERT_EQ(session_->detachCallback_, detachCallback);
+    sptr<IPatternDetachCallback> detachCallback2;
+    session_->RegisterDetachCallback(detachCallback2);
+    ASSERT_EQ(session_->detachCallback_, detachCallback2);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback03
+ * @tc.desc: RegisterDetachCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterDetachCallback03, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 123;
+    sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
+    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
+    session_->persistentId_ = persistentId;
+    session_->SetAttachState(true);
+    session_->SetAttachState(false);
+    session_->RegisterDetachCallback(detachCallback);
+    Mock::VerifyAndClearExpectations(&detachCallback);
 }
 
 }
