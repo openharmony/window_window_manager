@@ -117,7 +117,6 @@ ExtensionSession::~ExtensionSession()
     remoteObject->RemoveDeathRecipient(channelDeath_);
     channelListener_ = nullptr;
     channelDeath_ = nullptr;
-    windowEventChannel_ = nullptr;
 }
 
 WSError ExtensionSession::Connect(
