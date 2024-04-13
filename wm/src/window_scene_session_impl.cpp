@@ -1580,7 +1580,6 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool enable = isValidWindow &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
-    WLOGFD("get decor enable %{public}d", enable);
     WLOGI("zz IsDecorEnable enable %{public}d", enable);
     return enable;
 }
