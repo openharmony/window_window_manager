@@ -1152,8 +1152,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialog = WindowHelper::IsDialogWindow(windowType);
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR;
-
-    if (isWindowModeFloating && (isMainWindow || isSubWindow || isDialog) && 
+    if (isWindowModeFloating && (isMainWindow || isSubWindow || isDialog) &&
         isMaxModeAvoidSysBar) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();

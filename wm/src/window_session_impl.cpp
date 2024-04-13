@@ -158,7 +158,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
     bool isDialog = WindowHelper::IsDialogWindow(optionWindowType);
     if (isPC && isDialog) {
-        bool dialogDecorEnable = option->GetDialogDecorEnable()
+        bool dialogDecorEnable = option->GetDialogDecorEnable();
         property_->SetDecorEnable(dialogDecorEnable);
         property_->SetDragEnabled(dialogDecorEnable);
         dialogTitle_ = option->GetDialogTitle();

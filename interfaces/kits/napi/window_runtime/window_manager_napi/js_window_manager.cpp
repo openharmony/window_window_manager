@@ -455,6 +455,16 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         return false;
     }
 
+    bool dialogDecorEnable = false;
+    if (ParseJsValue(jsObject, env, "decorEnable", dialogDecorEnable)) {
+        option.SetDialogDecorEnable(dialogDecorEnable);
+    }
+
+    std::string dialogTitle;
+    if (ParseJsValue(jsObject, env, "title", dialogTitle)) {
+        option.SetDialogTitle(dialogTitle);
+    }
+
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (ParseJsValue(jsObject, env, "displayId", displayId)) {
         if (displayId < 0 ||
@@ -469,18 +479,6 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
     int64_t parentId = -1;
     if (ParseJsValue(jsObject, env, "parentId", parentId)) {
         option.SetParentId(parentId);
-    }
-
-    bool dialogDecorEnable = false;
-    if (ParseJsValue(jsObject, env, "decorEnable", dialogDecorEnable)) {
-        option.SetDialogDecorEnable(dialogDecorEnable);
-    }
-
-    std::string dialogTitle;
-    if (ParseJsValue(jsObject, env, "title", dialogTitle)) {
-        option.SetDialogTitle(dialogTitle);
-    } else {
-        return false;
     }
 
     return true;
