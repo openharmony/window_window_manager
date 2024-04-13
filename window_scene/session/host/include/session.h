@@ -76,6 +76,7 @@ using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<M
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
+using NotifyContextTransparentFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -290,6 +291,9 @@ public:
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
+    void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
+    void NotifyContextTransparent();
+    bool NeedCheckContextTransparent() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -471,6 +475,7 @@ protected:
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
+    NotifyContextTransparentFunc contextTransparentFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;

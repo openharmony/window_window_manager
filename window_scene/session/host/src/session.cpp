@@ -2367,6 +2367,31 @@ void Session::NotifySessionInfoChange()
     }
 }
 
+bool Session::NeedCheckContextTransparent() const
+{
+    return contextTransparentFunc_ != nullptr;
+}
+
+void Session::SetContextTransparentFunc(const NotifyContextTransparentFunc& func)
+{
+    contextTransparentFunc_ = func;
+}
+
+void Session::NotifyContextTransparent()
+{
+    if (contextTransparentFunc_) {
+        int32_t eventRet = HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "SESSION_IS_TRANSPARENT",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+            "PERSISTENT_ID", GetPersistentId(),
+            "BUNDLE_NAME", sessionInfo_.bundleName_);
+        WLOGFE("Session context is transparent, persistentId:%{public}d, eventRet:%{public}d",
+            GetPersistentId(), eventRet);
+        contextTransparentFunc_();
+    }
+}
+
 bool Session::IsSystemInput()
 {
     return sessionInfo_.isSystemInput_;
