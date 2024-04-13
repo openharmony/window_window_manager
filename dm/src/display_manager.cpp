@@ -524,7 +524,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
         }
         retryTimes++;
         WLOGFW("Current get display info is null, retry %{public}u times", retryTimes);
-        std::this_thread::sleep_for(std::chrono::microseconds(RETRY_WAIT_MS));
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
     }
     if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
         WLOGFE("Get display info failed, please check whether the onscreenchange event is triggered");
