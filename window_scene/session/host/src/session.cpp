@@ -422,6 +422,11 @@ bool Session::GetFocusable() const
     return true;
 }
 
+bool Session::IsFocused() const
+{
+    return isFocused_;
+}
+
 void Session::SetNeedNotify(bool needNotify)
 {
     needNotify_ = needNotify;
