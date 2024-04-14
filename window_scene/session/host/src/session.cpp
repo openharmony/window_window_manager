@@ -736,6 +736,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
@@ -1977,6 +1978,39 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeigth,
+    uint32_t minWidth, uint32_t minHeigth, uint32_t maxFloatingWindowSize)
+{
+    if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
+        (curHeigth < minHeigth) || (curHeigth > maxFloatingWindowSize)) {
+        WLOGFE("RectSizeCheckProcess sessionId: %{public}d rect %{public}s",
+            GetPersistentId(), GetSessionRect().ToString().c_str());
+    }
+}
+
+void Session::RectCheckProcess()
+{
+    auto displayId = GetSessionProperty()->GetDisplayId();
+    stdmap<ScreenId, ScreenProperty> screenProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().getAllScreenProperties();
+    if (screenProperties.find(displayId) == screenProperties.end) {
+        return;
+    }
+    auto screenProperty = screenProperties[displayId];
+    float density = screenProperty.GetDensity();
+    if (density <= 0) {
+        return;
+    }
+    uint32_t curWidth = static_cast<uint32_t>SetSessionRect().width_ / density;
+    uint32_t curHeigth = static_cast<uint32_t>SetSessionRect().heigth / density;
+    float ratio = GetAspectRatio();
+    float actRatio = static_cast<float>(curWidth) / curHeigth;
+    if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+        WLOGFE("RectCheckProcess ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+    }
+    RectCheck(curWidth, curHeigth);
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -1985,6 +2019,7 @@ void Session::SetSessionRect(const WSRect& rect)
     }
     winRect_ = rect;
     isDirty_ = true;
+    RectCheckProcess();
 }
 
 WSRect Session::GetSessionRect() const
@@ -2029,6 +2064,11 @@ WindowType Session::GetWindowType() const
 void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
 {
     systemConfig_ = systemConfig;
+}
+
+SystemSessionConfig Session::GetSystemConfig()
+{
+    return systemConfig_;
 }
 
 void Session::SetSnapshotScale(const float snapshotScale)

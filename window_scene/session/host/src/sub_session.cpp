@@ -185,4 +185,12 @@ bool SubSession::IfNotNeedAvoidKeyBoardForSplit()
     }
     return true;
 }
+
+void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeigth)
+{
+    uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
+    uint32_t minHeigth = GetSystemConfig().miniHeightOfSubWindow_;
+    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+    RectSizeCheckProcess(curWidth, curHeigth, minWidth, minHeigth, maxFloatingWindowSize);
+}
 } // namespace OHOS::Rosen
