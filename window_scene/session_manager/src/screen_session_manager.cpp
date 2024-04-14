@@ -307,8 +307,8 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
 {
     static bool isRegisterRefreshRateListener = false;
     if (!isRegisterRefreshRateListener) {
-        auto res = rsInterface_.RegisterHgmRefreshRateModeChangeCallback(
-            [this](int32_t refreshRateModeName) { OnHgmRefreshRateChange(refreshRateModeName); });
+        auto res = rsInterface_.RegisterHgmRefreshRateUpdateCallback(
+            [this](uint32_t refreshRate) { OnHgmRefreshRateChange(refreshRate); });
         if (res != StatusCode::SUCCESS) {
             WLOGFE("Register refresh rate mode change listener failed.");
         } else {
@@ -413,17 +413,11 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     }
 }
 
-void ScreenSessionManager::OnHgmRefreshRateChange(int32_t refreshRateModeName)
+void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 {
     GetDefaultScreenId();
-    WLOGFI("Set refreshRateModeName: %{public}d, defaultscreenid: %{public}" PRIu64"",
-        refreshRateModeName, defaultScreenId_);
-    uint32_t refreshRate;
-    if (refreshRateModeName == -1) {
-        refreshRate = static_cast<uint32_t>(MaxRefreshrate::MAX_REFRESHRATE_120);
-    } else {
-        refreshRate = static_cast<uint32_t>(refreshRateModeName);
-    }
+    WLOGFI("Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
+        refreshRate, defaultScreenId_);
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
