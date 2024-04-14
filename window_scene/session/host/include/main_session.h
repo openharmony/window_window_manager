@@ -32,6 +32,7 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
+    void RectCheck(uint32_t curWidth, uint32_t curHeigth) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
