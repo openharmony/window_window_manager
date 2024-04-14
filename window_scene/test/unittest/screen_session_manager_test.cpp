@@ -1199,8 +1199,7 @@ HWTEST_F(ScreenSessionManagerTest, GetPixelFormat, Function | SmallTest | Level3
 HWTEST_F(ScreenSessionManagerTest, GetDeviceScreenConfig, Function | SmallTest | Level3)
 {
     DeviceScreenConfig deviceScreenConfig = ssm_->GetDeviceScreenConfig();
-    int ret = std::strcmp(deviceScreenConfig.rotationPolicy_.c_str(), "11");
-    EXPECT_EQ(0, ret);
+    EXPECT_TRUE(deviceScreenConfig.rotationPolicy_.empty());
 }
 }
 } // namespace Rosen

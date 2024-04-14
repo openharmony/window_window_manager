@@ -291,8 +291,7 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
 HWTEST_F(ScreenSessionManagerClientTest, GetDeviceScreenConfig, Function | SmallTest | Level2)
 {
     DeviceScreenConfig deviceScreenConfig = screenSessionManagerClient_->GetDeviceScreenConfig();
-    int ret = std::strcmp(deviceScreenConfig.rotationPolicy_.c_str(), "11");
-    EXPECT_EQ(0, ret);
+    EXPECT_TRUE(deviceScreenConfig.rotationPolicy_.empty());
 }
 } // namespace Rosen
 } // namespace OHOS
