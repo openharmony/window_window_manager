@@ -4044,8 +4044,7 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
             "", "THAW_BY_FOCUS_CHANGED");
 #endif // EFFICIENCY_MANAGER_ENABLE
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
-    WSError res = WSError::WS_OK;
-    res = sceneSession->NotifyFocusStatus(isFocused);
+    sceneSession->NotifyFocusStatus(isFocused);
     std::string sName = "FoucusWindow:";
     if (sceneSession->GetSessionInfo().isSystem_) {
         sName += sceneSession->GetSessionInfo().abilityName_;
@@ -4057,9 +4056,7 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     } else {
         FinishAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, sName, sceneSession->GetPersistentId());
     }
-    if (res != WSError::WS_OK) {
-        return;
-    }
+
     // notify listenerController
     auto prevSession = GetSceneSession(lastFocusedSessionId_);
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
