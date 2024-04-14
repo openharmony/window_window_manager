@@ -291,7 +291,7 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
 HWTEST_F(ScreenSessionManagerClientTest, GetDeviceScreenConfig, Function | SmallTest | Level2)
 {
     DeviceScreenConfig deviceScreenConfig = screenSessionManagerClient_->GetDeviceScreenConfig();
-    EXPECT_TRUE(deviceScreenConfig.rotationPolicy_.empty());
+    EXPECT_FALSE(deviceScreenConfig.rotationPolicy_.empty());
 }
 } // namespace Rosen
 } // namespace OHOS
