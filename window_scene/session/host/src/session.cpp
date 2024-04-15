@@ -789,15 +789,16 @@ __attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISession
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
-    Rect rect = {
-        winRect_.posX_,
-        winRect_.posY_,
-        static_cast<uint32_t>(winRect_.width_),
-        static_cast<uint32_t>(winRect_.height_)
-    };
-    property->SetWindowRect(rect);
+
     SetSessionProperty(property);
     if (property) {
+        Rect rect = {
+            winRect_.posX_,
+            winRect_.posY_,
+            static_cast<uint32_t>(winRect_.width_),
+            static_cast<uint32_t>(winRect_.height_)
+        };
+        property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
     }
     callingPid_ = pid;
