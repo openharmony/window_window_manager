@@ -845,6 +845,40 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function 
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibleWindowNumChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
 }
+
+/**
+ * @tc.name: RegisterVisibleWindowNumChangedListener
+ * @tc.desc: check RegisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+
+    windowManager.pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
+    windowManager.pImpl_->visibleWindowNumChangedListeners_.clear();
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibleWindowNumChangedListener(nullptr));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<TestVisibleWindowNumChangedListener> listener = new TestVisibleWindowNumChangedListener();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibleWindowNumChangedListener(listener));
+    ASSERT_EQ(0, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->visibleWindowNumChangedListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
+ 
+    std::vector<VisibleWindowNumInfo> visibleWindowNumInfo = {};
+    visibleWindowNumInfo newInfo;
+    newInfo.displayId = 0;
+    newInfo.visibleWindowNum = 2;
+    visibleWindowNumInfo.push_back(newInfo);
+    WindowManager::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
