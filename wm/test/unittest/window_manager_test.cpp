@@ -88,7 +88,7 @@ public:
     void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override
     {
         for (const auto& num : visibleWindowNumInfo) {
-            GTEST_LOG(INFO) << "displayId " << num.displayId << ", visibleWindowNum " << num.visibleWindowNum;
+            GTEST_LOG_(INFO) << "displayId " << num.displayId << ", visibleWindowNum " << num.visibleWindowNum;
         }
     };
 };
