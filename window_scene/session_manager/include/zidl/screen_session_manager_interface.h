@@ -120,6 +120,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
     bool IsFoldable() override { return false; };
+    bool IsCaptured() override { return false; };
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
 

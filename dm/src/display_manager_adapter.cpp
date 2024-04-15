@@ -540,6 +540,12 @@ bool DisplayManagerAdapter::IsFoldable()
     return displayManagerServiceProxy_->IsFoldable();
 }
 
+bool DisplayManagerAdapter::IsCaptured()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->IsCaptured();
+}
+
 FoldStatus DisplayManagerAdapter::GetFoldStatus()
 {
     INIT_PROXY_CHECK_RETURN(FoldStatus::UNKNOWN);

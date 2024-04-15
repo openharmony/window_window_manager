@@ -78,6 +78,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     virtual bool IsFoldable();
+    virtual bool IsCaptured();
 
     virtual FoldStatus GetFoldStatus();
 

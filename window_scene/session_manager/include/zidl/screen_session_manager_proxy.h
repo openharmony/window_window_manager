@@ -124,6 +124,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
+    bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
 
