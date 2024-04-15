@@ -203,6 +203,7 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
+    std::string continueSessionId_ = "";
 };
 
 enum class SessionFlag : uint32_t {

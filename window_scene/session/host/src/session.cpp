@@ -218,6 +218,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.callingTokenId_ = info.callingTokenId_;
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
     sessionInfo_.startSetting = info.startSetting;
+    sessionInfo_.continueSessionId_ = info.continueSessionId_;
 }
 
 void Session::SetScreenId(uint64_t screenId)

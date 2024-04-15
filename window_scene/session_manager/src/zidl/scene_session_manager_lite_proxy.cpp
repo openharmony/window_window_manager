@@ -280,6 +280,36 @@ WSError SceneSessionManagerLiteProxy::GetSessionInfo(const std::string& deviceId
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerLiteProxy::GetSessionInfoByContinueSessionId(
+    const std::string& continueSessionId, SessionInfoBean& sessionInfo)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfoByContinueSessionId write continueSessionId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<SessionInfoBean> info(reply.ReadParcelable<SessionInfoBean>());
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read sessioninfo failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sessionInfo = *info;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 template<typename T>
 WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
 {

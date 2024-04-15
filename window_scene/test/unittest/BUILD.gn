@@ -470,6 +470,7 @@ ohos_unittest("ws_scene_session_manager_proxy_test") {
 
   external_deps = [
     "ability_runtime:app_manager",
+    "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
   ]

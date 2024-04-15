@@ -2091,6 +2091,19 @@ HWTEST_F(SceneSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: GetSessionInfoByContinueSessionId
+ * @tc.desc: SceneSesionManager GetSessionInfoByContinueSessionId
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetSessionInfoByContinueSessionId, Function | SmallTest | Level3)
+{
+    std::string continueSessionId = "";
+    SessionInfoBean missionInfo;
+    EXPECT_EQ(ssm_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo),
+        WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: PreHandleCollaborator
  * @tc.desc: SceneSesionManager prehandle collaborator
  * @tc.type: FUNC

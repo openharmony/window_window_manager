@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
@@ -114,6 +115,23 @@ HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureExtSession001, Function 
     int32_t parentId = 1234;
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->AddOrRemoveSecureExtSession(persistentId, parentId,
         true));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
+/**
+ * @tc.name: GetSessionInfoByContinueSessionId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::string continueSessionId = "test_01";
+    SessionInfoBean missionInfo;
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sceneSessionManagerProxy_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo));
     sceneSessionManagerProxy_ = nullptr;
 }
 
