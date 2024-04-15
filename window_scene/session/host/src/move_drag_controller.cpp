@@ -847,12 +847,12 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     windowDragHotAreaType_ = windowDragHotAreaType;
 }
 
-int32_t GetOriginalPointerPosX()
+int32_t MoveDragController::GetOriginalPointerPosX()
 {
     return moveDragProperty_.originalPointerPosX_;
 }
 
-int32_t GetOriginalPointerPosY()
+int32_t MoveDragController::GetOriginalPointerPosY()
 {
     return moveDragProperty_.originalPointerPosY_;
 }

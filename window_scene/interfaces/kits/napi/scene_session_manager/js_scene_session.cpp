@@ -611,9 +611,9 @@ void JsSceneSession::ProcessSessionEventRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = [weak = weak_from_this()](uint32_t eventId) {
+    sessionchangeCallback->OnSessionEvent_ = [weak = weak_from_this()](uint32_t eventId, SessionEventParam param) {
         auto weakJsSceneSession = weak.lock();
-        if (weakJsSceneSession) weakJsSceneSession->OnSessionEvent(eventId);
+        if (weakJsSceneSession) weakJsSceneSession->OnSessionEvent(eventId, param);
     };
     WLOGFD("ProcessSessionEventRegister success");
 }
