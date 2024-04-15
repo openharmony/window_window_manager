@@ -459,7 +459,7 @@ napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::CheckSceneZOrder(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]CheckSceneZOrder");
+    WLOGD("[NAPI]CheckSceneZOrder");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnCheckSceneZOrder(env, info) : nullptr;
 }

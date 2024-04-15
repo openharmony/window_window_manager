@@ -27,7 +27,7 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
 }
 
-void AnomalyDetection::SceneZorderCheckProcess()
+void AnomalyDetection::SceneZOrderCheckProcess()
 {
     bool keyGuardFlag = false;
     uint32_t curZOrder = 0;
@@ -37,20 +37,20 @@ void AnomalyDetection::SceneZorderCheckProcess()
         }
         // check zorder = 0
         if (session->GetZOrder() == 0) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "ZorderCheck err, zorder 0");
+            TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, zorder 0");
         }
         // repetitive zorder
         if (session->GetZOrder() == curZOrder) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "ZorderCheck err, repetitive zorder %{public}d", session->GetZOrder());
+            TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, repetitive zorder %{public}d", session->GetZOrder());
         }
         curZOrder = session->GetZOrder();
         // callingSession check for input method
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             uint32_t callingWindowId = session->GetSessionProperty()->GetCallingSessionId();
             const auto& callingSession =
-                SceneSessionManager::GetInstance().GetSceneSession(static_cast<uint32_t>(callingWindowId));
+                SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
             if (callingSession->GetZOrder() > session->GetZOrder()) {
-                TLOGE(WmsLogTag::WMS_FOCUS, "ZorderCheck err, callingSession %{public}d curSession %{public}d",
+                TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
                     callingSession->GetZOrder(), session->GetZOrder());
             }
         }
@@ -59,7 +59,7 @@ void AnomalyDetection::SceneZorderCheckProcess()
             session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto mainSession = session->GetParentSession();
             if (session->GetZOrder() < mainSession->GetZOrder()) {
-                TLOGE(WmsLogTag::WMS_FOCUS, "ZorderCheck err, subWindow %{public}d mainSession %{public}d",
+                TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
                     session->GetZOrder(), mainSession->GetZOrder());
             }
         }
@@ -68,18 +68,18 @@ void AnomalyDetection::SceneZorderCheckProcess()
             return false;
         };
         if (keyGuardFlag && session->IsShowWhenLocked()) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "ZorderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
+            TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
         }
         return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
 }
 
-void AnomalyDetection::FocusCheckProcess(int32_t focusId, int32_t nextId)
+void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
 {
     if (nextId == INVALID_SESSION_ID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: invalid id, focusID:%{public}d nextId:%{public}d",
-            focusId, nextId);
+        TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: invalid id, focusedId:%{public}d nextId:%{public}d",
+            focusedId, nextId);
     }
     bool focusSessionFlag = false;
     auto func = [&focusSessionFlag](sptr<SceneSession> session) {
@@ -92,7 +92,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusId, int32_t nextId)
         }
         if (focusSessionFlag && session->GetBlockingFocus() &&
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionID:%{public}d",
+            TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
         }
         return false;

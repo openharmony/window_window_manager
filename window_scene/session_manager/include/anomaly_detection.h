@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ANOMALY_DETECTION
-#define ANOMALY_DETECTION
+#ifndef ANOMALY_DETECTION_H
+#define ANOMALY_DETECTION_H
 
 #include "session/host/include/scene_session.h"
 
@@ -29,9 +29,9 @@ enum class WindowDFXHelperType : uint32_t {
 
 class AnomalyDetection {
 public:
-    static void SceneZorderCheckProcess();
-    static void FocusCheckProcess(int32_t focusId, int32_t nextId);
+    static void SceneZOrderCheckProcess();
+    static void FocusCheckProcess(int32_t focusedId, int32_t nextId);
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // ANOMALY_DETECTION
+#endif // ANOMALY_DETECTION_H
