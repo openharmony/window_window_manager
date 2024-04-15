@@ -41,6 +41,7 @@ public:
     void NotifyPrivateWindowStateChanged(bool hasPrivate) override {};
     void NotifyFoldStatusChanged(FoldStatus foldStatus) override {};
     void NotifyFoldAngleChanged(std::vector<float> foldAngles) override {};
+    void NotifyCaptureStatusChanged(bool isCapture) override {};
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override {};
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
     void NotifyAvailableAreaChanged(DMRect area) override {};
