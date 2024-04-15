@@ -95,7 +95,7 @@
 
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
-#include "session_manager/include/anomaly_detection.h"
+#include "anomaly_detection.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
