@@ -87,7 +87,9 @@ class TestVisibleWindowNumChangedListener : public IVisibleWindowNumChangedListe
 public:
     void OnVisibleWindowNumChange(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override
     {
-        WLOGI("TestVisibleWindowNumChangedListener");
+        for (const auto& num : visibleWindowNumInfo) {
+            GTEST_LOG(INFO) << "displayId " << num.displayId << ", visibleWindowNum " << num.visibleWindowNum;
+        }
     };
 };
 
