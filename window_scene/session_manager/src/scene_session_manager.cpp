@@ -7568,7 +7568,7 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
 void SceneSessionManager::CheckSceneZOrder()
 {
     auto task = [this]() {
-        AnomalyDetection::SceneZorderCheckProcess();
+        AnomalyDetection::SceneZOrderCheckProcess();
     };
     taskScheduler_->PostAsyncTask(task, "CheckSceneZOrder");
 }
