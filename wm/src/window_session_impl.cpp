@@ -811,8 +811,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
-    if ((isSubWindow || isDialogWindow) && IsDecorEnable()) {
-        SetAPPWindowLabel(subWindowTitle_);
+    if (IsDecorEnable()) {
+        if (isSubWindow) {
+            SetAPPWindowLabel(subWindowTitle_);
+        } else if (isDialogWindow){
+            SetAPPWindowLabel(dialogTitle_);
+        }
     }
 
     uint32_t version = 0;
