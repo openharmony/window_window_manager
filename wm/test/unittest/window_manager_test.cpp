@@ -847,11 +847,11 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function 
 }
 
 /**
- * @tc.name: RegisterVisibleWindowNumChangedListener
- * @tc.desc: check RegisterVisibleWindowNumChangedListener
+ * @tc.name: RegisterAndOnVisibleWindowNumChanged
+ * @tc.desc: check RegisterAndOnVisibleWindowNumChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManager::GetInstance();
 
