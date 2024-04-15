@@ -42,6 +42,7 @@ private:
     int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRecoverAndReconnectSceneSession(MessageParcel &data, MessageParcel &reply);
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
     int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
@@ -91,6 +92,9 @@ private:
     int HandleAddOrRemoveSecureExtSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowBackHomeStatus(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

@@ -154,7 +154,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
     sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
     ASSERT_NE(nullptr, session_);
     ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
-
+    parentscenesession_->property_->SetPersistentId(103);
     parentscenesession_->property_->SetParentPersistentId(102);
     parentscenesession_->property_->SetParentId(102);
     parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
@@ -193,6 +193,155 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     parentSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     if (parentSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentSceneSession->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession04
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildSubWindow0004");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle4", "CreateTestModule4", "CreateTestAbility4" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+
+    parentscenesession_->property_->SetPersistentId(104);
+    parentscenesession_->property_->SetParentPersistentId(103);
+    parentscenesession_->property_->SetParentId(103);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession05
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildSubSubWindow0005");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle5", "CreateTestModule5", "CreateTestAbility5" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+
+    parentscenesession_->property_->SetParentPersistentId(104);
+    parentscenesession_->property_->SetParentId(104);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_NE(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession06
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SYSTEM_WINDOW);
+    option_->SetWindowName("ChildWindow0006");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle6", "CreateTestModule6", "CreateTestAbility6" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(105);
+    parentscenesession_->property_->SetParentPersistentId(102);
+    parentscenesession_->property_->SetParentId(102);
+    parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession07
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildWindow0007");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle7", "CreateTestModule7", "CreateTestAbility7" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(106);
+    parentscenesession_->property_->SetParentPersistentId(105);
+    parentscenesession_->property_->SetParentId(105);
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession08
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
+    option_->SetWindowTag(WindowTag::SUB_WINDOW);
+    option_->SetWindowName("ChildWindow0008");
+    sptr<WindowSceneSessionImpl> parentscenesession_ = new (std::nothrow) WindowSceneSessionImpl(option_);
+    ASSERT_NE(nullptr, parentscenesession_);
+    
+    SessionInfo sessionInfo_ = { "CreateTestBundle8", "CreateTestModule8", "CreateTestAbility8" };
+    sptr<SessionMocker> session_ = new (std::nothrow) SessionMocker(sessionInfo_);
+    ASSERT_NE(nullptr, session_);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Create(abilityContext_, session_));
+    
+    parentscenesession_->property_->SetPersistentId(107);
+    parentscenesession_->property_->SetParentPersistentId(106);
+    parentscenesession_->property_->SetParentId(106);
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    parentscenesession_->hostSession_ = session_;
+
+    parentscenesession_->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_ERROR_INVALID_TYPE) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, parentscenesession_->CreateAndConnectSpecificSession());
     }
 }
 
@@ -530,6 +679,8 @@ HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
     option->SetWindowName("Connect02");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
+    windowscenesession->property_->SetPersistentId(-1);
+    windowscenesession->property_->SetParentPersistentId(-1);
     windowscenesession->property_->SetPersistentId(1);
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -807,6 +958,130 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty, Function | SmallTest | L
     SystemBarProperty property = SystemBarProperty();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+}
+
+/*
+ * @tc.name: SystemBarProperty02
+ * @tc.desc: SystemBarProperty02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+
+    property.enableAnimation_ = false;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty03
+ * @tc.desc: SystemBarProperty03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    property.enableAnimation_ = true;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty04
+ * @tc.desc: SystemBarProperty04 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty04, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+}
+
+/*
+ * @tc.name: SystemBarProperty05
+ * @tc.desc: SystemBarProperty05 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty05, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+
+    property.enableAnimation_ = false;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
+}
+
+/*
+ * @tc.name: SystemBarProperty06
+ * @tc.desc: SystemBarProperty06 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty06, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    property.enableAnimation_ = true;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
 }
 
 /*
@@ -1848,7 +2123,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | S
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, parentscenesession);
 
-    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(0));
+    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(-1));
     GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
 }
 
@@ -2004,6 +2279,265 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyPrepareClosePiPWindow01, Function | S
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowscenesession->NotifyPrepareClosePiPWindow());
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled01
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
+    ASSERT_EQ(true, window->GetDefaultDensityEnabled());
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled02
+ * @tc.desc: window session is invalid
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetDefaultDensityEnabled(true));
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled03
+ * @tc.desc: not app main window
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetDefaultDensityEnabled(true));
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled04
+ * @tc.desc: isDefaultDensityEnabled_ not change
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SetDefaultDensityEnabled04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetDefaultDensityEnabled04");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(false));
+}
+
+/**
+ * @tc.name: GetDefaultDensityEnabled01
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetDefaultDensityEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetDefaultDensityEnabled01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->isDefaultDensityEnabled_ = true;
+    ASSERT_EQ(true, window->GetDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: GetDefaultDensityEnabled02
+ * @tc.desc: test default value
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetDefaultDensityEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetDefaultDensityEnabled02");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_EQ(false, window->GetDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio01
+ * @tc.desc: main window isDefaultDensityEnabled_ true
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = true;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+    ASSERT_EQ(defautDensity, window->GetVirtualPixelRatio(displayInfo));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio02
+ * @tc.desc: main window isDefaultDensityEnabled_ false
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = false;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+    ASSERT_EQ(density, window->GetVirtualPixelRatio(displayInfo));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio03
+ * @tc.desc: sub window isDefaultDensityEnabled_ true
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = true;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    subOption->SetWindowName("GetVirtualPixelRatio03SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetParentPersistentId(window->GetWindowId());
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio04
+ * @tc.desc: sub window isDefaultDensityEnabled_ false
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, GetVirtualPixelRatio04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetVirtualPixelRatio04");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetDisplayId(0);
+
+    window->isDefaultDensityEnabled_ = false;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    auto defautDensity = 1.0f;
+    auto density = 2.0f;
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(density);
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    subOption->SetWindowName("GetVirtualPixelRatio04SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetParentPersistentId(window->GetWindowId());
+
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(density, subWindow->GetVirtualPixelRatio(displayInfo));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
 /**
@@ -2298,6 +2832,34 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleButtonVisible03, Function | SmallTe
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
 }
+
+/**
+ * @tc.name: SyncDestroyAndDisconnectSpecificSession
+ * @tc.desc: SyncDestroyAndDisconnectSpecificSession test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SyncDestroyAndDisconnectSpecificSession start";
+    sptr option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SyncDestroyAndDisconnectSpecificSession");
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
+    if (deviceType == "phone") {
+        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    }
+    if (deviceType == "2in1") {
+        ASSERT_EQ(res, WMError::WM_OK);
+    }
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

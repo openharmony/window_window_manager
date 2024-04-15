@@ -112,6 +112,43 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
+    /**
+    * @brief Register camera window changed listener.
+    *
+    * @param listener ICameraWindowChangedListener.
+    * @return WM_OK means register success, others means register failed.
+    */
+    WMError RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
+
+    /**
+   * @brief Unregister camera window changed listener.
+   *
+   * @param listener ICameraWindowChangedListener.
+   * @return WM_OK means unregister success, others means unregister failed.
+   */
+    WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
+    /**
+     * @brief Register window back to home listener.
+     *
+     * @param listener IWindowBackHomeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
+    /**
+     * @brief Unregister window window back to home listener.
+     *
+     * @param listener IWindowBackHomeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
+    /**
+     * @brief Get if window is back home.
+     *
+     * @param void
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowBackHomeStatus(bool &isBackHome) const;
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -128,6 +165,8 @@ private:
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
+    void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
+    void UpdateWindowBackHomeStatus(bool isBackHome) const;
     void OnRemoteDied();
 };
 } // namespace Rosen

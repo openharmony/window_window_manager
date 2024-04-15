@@ -22,6 +22,7 @@
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -177,5 +178,20 @@ WSError MainSession::SetTopmost(bool topmost)
 bool MainSession::IsTopmost() const
 {
     return GetSessionProperty()->IsTopmost();
+}
+
+bool MainSession::IfNotNeedAvoidKeyBoardForSplit()
+{
+    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
+            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
+        return false;
+    }
+    if (Session::GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return false;
+    }
+    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

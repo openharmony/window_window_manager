@@ -62,7 +62,9 @@ using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persist
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
+using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
+using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -78,6 +80,7 @@ public:
         GetAINavigationBarArea onGetAINavigationBarArea_;
         OnOutsideDownEvent onOutsideDownEvent_;
         NotifyAddOrRemoveSecureSessionFunc onHandleSecureSessionShouldHide_;
+        CameraSessionChangeCallback onCameraSessionChange_;
     };
 
     // callback for notify SceneBoard
@@ -99,6 +102,7 @@ public:
         ClearCallbackMapFunc clearCallbackFunc_;
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
+        NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
     };
 
     // func for change window scene pattern property
@@ -182,6 +186,7 @@ public:
     std::string GetUpdatedIconPath() const;
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
+    virtual int32_t GetMissionId() const { return persistentId_; };
     const std::string& GetWindowName() const;
     const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
@@ -284,7 +289,7 @@ private:
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-
+    
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
@@ -299,7 +304,6 @@ private:
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
-    std::shared_mutex extWindowFlagsMapMutex_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
 
 };

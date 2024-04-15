@@ -221,7 +221,9 @@ public:
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
-
+    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
+    virtual WMError GetCallingWindowRect(Rect& rect) const override;
+    
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -240,6 +242,7 @@ protected:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
+    virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
@@ -248,11 +251,12 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
+    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
-    void RefreshNoInteractionTimeoutMonitor(int32_t eventId);
+    void RefreshNoInteractionTimeoutMonitor();
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -281,6 +285,9 @@ protected:
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
+    virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
+    virtual WMError ClearKeyEventFilter() override;
+    virtual bool IfNotNeedAvoidKeyBoardForSplit();
 
 private:
     //Trans between colorGamut and colorSpace
@@ -369,7 +376,7 @@ private:
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
 
-    std::atomic<int32_t> lastInteractionEventId_ { -1 };
+    std::atomic<int32_t> lastInteractionEventId_ { 0 };
 
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
@@ -378,6 +385,7 @@ private:
 
     std::string subWindowTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
+    KeyEventFilterFunc keyEventFilter_;
 };
 } // namespace Rosen
 } // namespace OHOS

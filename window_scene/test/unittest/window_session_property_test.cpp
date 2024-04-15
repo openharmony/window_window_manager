@@ -94,9 +94,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
 */
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
-    enum Orientation orientation = Orientation::REVERSE_HORIZONTAL;
+    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetRequestedOrientation(), orientation);
+    property->SetRequestedOrientation(orientation);
+    Orientation ret = property->GetRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+
+    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
+    Orientation ret1 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    Orientation ret2 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
+    Orientation ret3 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    Orientation ret4 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    Orientation ret5 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 }
 
 /**
@@ -429,6 +451,84 @@ HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
     windowSessionProperty.CopyFrom(property);
     WindowSessionProperty *wproperty = new WindowSessionProperty();
     ASSERT_EQ(wproperty->GetTokenState(), false);
+}
+
+/**
+ * @tc.name: SetFocusable
+ * @tc.desc: SetFocusable and GetFocusable to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetFocusable, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetFocusable(), true);
+    property->SetFocusable(false);
+    ASSERT_EQ(property->GetFocusable(), false);
+}
+
+/**
+ * @tc.name: SetTouchable
+ * @tc.desc: SetTouchable and GetTouchable to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTouchable, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetTouchable(), true);
+    property->SetTouchable(false);
+    ASSERT_EQ(property->GetTouchable(), false);
+}
+
+/**
+ * @tc.name: SetForceHide
+ * @tc.desc: SetForceHide and GetForceHide to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetForceHide, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetForceHide(), false);
+    property->SetForceHide(true);
+    ASSERT_EQ(property->GetForceHide(), true);
+}
+
+/**
+ * @tc.name: SetSystemCalling
+ * @tc.desc: SetSystemCalling and GetSystemCalling to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSystemCalling, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetSystemCalling(), false);
+    property->SetSystemCalling(true);
+    ASSERT_EQ(property->GetSystemCalling(), true);
+}
+
+/**
+ * @tc.name: SetIsNeedUpdateWindowMode
+ * @tc.desc: SetIsNeedUpdateWindowMode and GetIsNeedUpdateWindowMode to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsNeedUpdateWindowMode, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetIsNeedUpdateWindowMode(), false);
+    property->SetIsNeedUpdateWindowMode(true);
+    ASSERT_EQ(property->GetIsNeedUpdateWindowMode(), true);
+}
+
+/**
+ * @tc.name: SetIsShaped
+ * @tc.desc: SetIsShaped and GetIsShaped to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetIsShaped(), false);
+    property->SetIsShaped(true);
+    ASSERT_EQ(property->GetIsShaped(), true);
 }
 } // namespace
 } // namespace Rosen

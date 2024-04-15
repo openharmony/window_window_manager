@@ -134,6 +134,20 @@ HWTEST_F(RootSceneTest, RequestVsync, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: RequestVsyncErr
+ * @tc.desc: RequestVsync Test Err
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    rootScene.vsyncStation_ = nullptr;
+    rootScene.RequestVsync(vsyncCallback);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
  * @tc.name: GetVSyncPeriod
  * @tc.desc: GetVSyncPeriod Test
  * @tc.type: FUNC

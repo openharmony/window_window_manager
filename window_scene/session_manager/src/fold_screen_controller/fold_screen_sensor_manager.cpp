@@ -54,6 +54,8 @@ namespace {
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
+    constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
+    float oldFoldAngle = 0.0F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -70,11 +72,6 @@ void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScr
 
 void FoldScreenSensorManager::RegisterPostureCallback()
 {
-    if (!allowPosture_) {
-        WLOGFI("Duplicate register posture is not allowed.");
-        return;
-    }
-
     postureUser.callback = SensorPostureDataCallback;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
@@ -84,21 +81,17 @@ void FoldScreenSensorManager::RegisterPostureCallback()
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         WLOGFE("RegisterPostureCallback failed.");
     } else {
-        allowPosture_ = false;
         WLOGFI("FoldScreenSensorManager.RegisterPostureCallback success.");
     }
 }
 
 void FoldScreenSensorManager::UnRegisterPostureCallback()
 {
-    if (allowPosture_) {
-        WLOGFI("Duplicate unregister posture is not allowed.");
-        return;
-    }
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+    WLOGFI("UnRegisterPostureCallback, deactivateRet: %{public}d, unsubscribeRet: %{public}d",
+        deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        allowPosture_ = true;
         WLOGFI("FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
@@ -149,6 +142,18 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     WLOGFD("angle value in PostureData is: %{public}f.", globalAngle);
     HandleSensorData(globalAngle, globalHall);
+    notifyFoldAngleChanged(globalAngle);
+}
+
+void FoldScreenSensorManager::notifyFoldAngleChanged(float foldAngle)
+{
+    if (fabs(foldAngle - oldFoldAngle) < MINI_NOTIFY_FOLD_ANGLE) {
+        return;
+    }
+    oldFoldAngle = foldAngle;
+    std::vector<float> foldAngles;
+    foldAngles.push_back(foldAngle);
+    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
 }
 
 void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)

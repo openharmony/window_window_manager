@@ -108,17 +108,19 @@ bool SessionPermission::IsSACalling()
         WLOGFW("SA Called, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
         return true;
     }
-    WLOGFD("Not SA called");
+    WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
     return false;
 }
 
 bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
-    WLOGFI("VerifyCallingPermission permission %{public}s", permissionName.c_str());
     auto callerToken = IPCSkeleton::GetCallingTokenID();
+    WLOGFI("VerifyCallingPermission permission %{public}s, callingTokenID:%{public}u",
+        permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED", permissionName.c_str());
+        WLOGFE("permission %{public}s: PERMISSION_DENIED, CallingTokenID:%{public}u, ret:%{public}d",
+            permissionName.c_str(), callerToken, ret);
         return false;
     }
     WLOGFI("verify AccessToken success");
@@ -156,7 +158,7 @@ bool SessionPermission::IsShellCall()
         WLOGFI("caller tokenType is shell, verify success");
         return true;
     }
-    WLOGFI("Not shell called.");
+    WLOGFI("Not shell called. tokenId:%{public}u, flag:%{public}u", callerToken, tokenType);
     return false;
 }
 

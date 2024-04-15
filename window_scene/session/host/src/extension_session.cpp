@@ -74,11 +74,49 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
     return 0;
 }
 
+void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    if (wptrDeath == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "object is null");
+        return;
+    }
+
+    if (listener_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "listener_ is null");
+        return;
+    }
+    TLOGE(WmsLogTag::WMS_UIEXT, "ChannelDeathRecipient OnRemoteDied");
+    listener_->OnTransferKeyEventForConsumed(false, WSError::WS_ERROR_IPC_FAILED);
+}
+
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
+}
+
+ExtensionSession::~ExtensionSession()
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension session");
+    if (windowEventChannel_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "window event channel is null");
+        return;
+    }
+    sptr<IRemoteObject> remoteObject = windowEventChannel_->AsObject();
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
+        return;
+    }
+    remoteObject->RemoveDeathRecipient(channelDeath_);
+    channelListener_ = nullptr;
+    channelDeath_ = nullptr;
 }
 
 WSError ExtensionSession::Connect(
@@ -92,9 +130,34 @@ WSError ExtensionSession::Connect(
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGE(WmsLogTag::WMS_UIEXT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+
+        if (eventChannel != nullptr) {
+            sptr<IRemoteObject> remoteObject = eventChannel->AsObject();
+            if (remoteObject == nullptr) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
+                return WSError::WS_ERROR_DESTROYED_OBJECT;
+            }
+
+            session->channelListener_ = new WindowEventChannelListener();
+            if (session->channelListener_  == nullptr) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create death Recipient ptr.");
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            session->channelDeath_ = new (std::nothrow) ChannelDeathRecipient(session->channelListener_);
+            if (session->channelDeath_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create listener ptr.");
+                return WSError::WS_ERROR_NULLPTR;
+            }
+
+            if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(session->channelDeath_)) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
+                return WSError::WS_ERROR_INTERNAL_ERROR;
+            }
+        }
+
         return session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
@@ -180,7 +243,7 @@ void ExtensionSession::RegisterExtensionSessionEventCallback(
 WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
     bool& isTimeout, bool isPreImeEvent)
 {
-    if (!windowEventChannel_) {
+    if (windowEventChannel_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -188,34 +251,45 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
         TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "TransferKeyEventForConsumed in with isConsumed(%{public}d) isTimeout(%{public}d) "
-        "isPreImeEvent(%{public}d), id:%{public}d", isConsumed, isTimeout, isPreImeEvent, keyEvent->GetId());
-
-    sptr<WindowEventChannelListener> listener = new WindowEventChannelListener();
-    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
-    std::shared_ptr<WSError> retCode = std::make_shared<WSError>(WSError::WS_OK);
-    bool isAllocedNullptr = (listener == nullptr) || (isConsumedPromise == nullptr) || (retCode == nullptr);
-    if (isAllocedNullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Created WindowEventChannelListener is nullptr.");
+    if (channelListener_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Created channelListener_ is nullptr.");
         return WSError::WS_ERROR_NULLPTR;
     }
-    listener->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
-    auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, listener);
+    TLOGI(WmsLogTag::WMS_EVENT, "In with isConsumed(%{public}d) isTimeout(%{public}d) "
+        "isPreImeEvent(%{public}d), id:%{public}d", isConsumed, isTimeout, isPreImeEvent, keyEvent->GetId());
+
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    std::shared_ptr<WSError> retCode = std::make_shared<WSError>(WSError::WS_OK);
+    bool isAllocedNullptr = (isConsumedPromise == nullptr) || (retCode == nullptr);
+    if (isAllocedNullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Created isConsumedPromise or retCode is nullptr.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    channelListener_->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
+    auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, channelListener_);
+    // if UiExtension was died, return transferKeyEvent before wait for timeout.
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "transfer keyEvent failed with %{public}d in id:%{public}d.",
+              ret, keyEvent->GetId());
+        return ret;
+    }
 
     // Timeout cannot exceed APP_INPUT_BLOCK
     constexpr int64_t TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS = 4000;
     auto isConsumedFuture = isConsumedPromise->get_future().share();
     if (isConsumedFuture.wait_for(std::chrono::milliseconds(TRANSFER_KEY_EVENT_TIMEOUT_TIME_MS)) ==
             std::future_status::timeout) {
-        // Prevent external variables from being used after the lifecycle ends.
-        listener->ResetTransferKeyEventForConsumedParams();
+        // Prevents the pointer from being used by a remote ipc after its lifetime has ended.
+        channelListener_->ResetTransferKeyEventForConsumedParams();
         isTimeout = true;
     } else {
+        // Prevents the pointer from being used by a death recipient after its lifetime has ended.
+        channelListener_->ResetTransferKeyEventForConsumedParams();
         isTimeout = false;
         isConsumed = isConsumedFuture.get();
         ret = *retCode;
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed is %{public}d, Timeout is %{public}d, ret is %{public}d in id:%{public}d.",
+    TLOGI(WmsLogTag::WMS_EVENT, "isConsumed is %{public}d, Timeout is %{public}d, ret is %{public}d in id:%{public}d.",
         isConsumed, isTimeout, ret, keyEvent->GetId());
     return ret;
 }

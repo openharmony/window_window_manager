@@ -62,6 +62,7 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
+using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1355,7 +1356,7 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
-    
+
     /**
      * @brief maximize window with layoutOption.
      *
@@ -1761,6 +1762,21 @@ public:
     }
 
     /**
+     * @brief Set whether to use default density.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether to use default density.
+     *
+     * @return True means use default density, window's layout not follow to system change, false means the opposite.
+     */
+    virtual bool GetDefaultDensityEnabled() { return false; }
+
+    /**
      * @brief Hide None Secure Windows.
      *
      * @param shouldHide bool.
@@ -1856,6 +1872,52 @@ public:
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get window by id
+     *
+     * @param windId window id
+     * @return sptr<Window>
+     */
+    static sptr<Window> GetWindowWithId(uint32_t windId);
+
+    /**
+     * @brief register keyEvent filter.
+     *
+     * @param KeyEventFilterFunc callback func when window recieve keyEvent
+     * @return WMError
+     */
+    virtual WMError SetKeyEventFilter(KeyEventFilterFunc KeyEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear keyEvent filter.
+     *
+     * @return WMError
+    */
+    virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+
+    /**
+     * @brief get callingWindow windowStatus.
+     * @param windowStatus
+     * @return WM_OK means set success, others means set Failed.
+     */
+    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief get callingWindow windowStatus
+     * @param rect.
+     * @return WM_OK means set success, others means set failed
+     */
+    virtual WMError GetCallingWindowRect(Rect& rect) const
+    {
+        return WMError::WM_OK;
     }
 };
 }
