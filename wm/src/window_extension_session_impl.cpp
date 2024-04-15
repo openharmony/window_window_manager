@@ -21,6 +21,7 @@
 #include <input_method_controller.h>
 #endif
 #include "window_manager_hilog.h"
+#include "display_info.h"
 #include "parameters.h"
 #include "anr_handler.h"
 #include "session_permission.h"
@@ -596,6 +597,18 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
             property_->GetParentId(), true);
     }
     CheckAndAddExtWindowFlags();
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WindowExtensionSessionImpl::Show display is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    float density = GetVirtualPixelRatio(displayInfo);
+    if (virtualPixelRatio_ != density) {
+        UpdateDensity();
+    }
+
     return this->WindowSessionImpl::Show(reason, withAnimation);
 }
 
