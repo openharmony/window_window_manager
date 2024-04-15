@@ -16,23 +16,19 @@
 #include "anomaly_detection.h"
 
 #include "dfx_hisysevent.h"
-#include "window_manager_hilog.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "session_helper.h"
 #include "window_helper.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
-#include "session/screen/include/screen_property.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
 }
 
 void AnomalyDetection::SceneZorderCheckProcess()
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "SceneZorderCheckProcess");
     bool keyGuardFlag = false;
     uint32_t curZOrder = 0;
     auto func = [&curZOrder, &keyGuardFlag](sptr<SceneSession> session) {
@@ -81,7 +77,6 @@ void AnomalyDetection::SceneZorderCheckProcess()
 
 void AnomalyDetection::FocusCheckProcess(int32_t focusId, int32_t nextId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "FocusCheckProcess");
     if (nextId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: invalid id, focusID:%{public}d nextId:%{public}d",
             focusId, nextId);
@@ -99,7 +94,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusId, int32_t nextId)
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionID:%{public}d",
                 session->GetPersistentId());
-        };
+        }
         return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
