@@ -293,7 +293,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->moveDragController_->SetStartMoveFlag(true);
             session->moveDragController_->ClacFirstMoveTargetRect(session->winRect_);
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY()})
+                session->moveDragController_->GetOriginalPointerPosY()});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
