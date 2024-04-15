@@ -1787,7 +1787,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         // create specific session
         SessionInfo info;
         info.windowType_ = static_cast<uint32_t>(type);
-        if (property) {
+        if (WindowHelper::IsSystemWindow(type)) {
             info.bundleName_ = property->GetSessionInfo().bundleName_;
         }
         
