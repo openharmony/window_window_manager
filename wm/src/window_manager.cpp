@@ -258,19 +258,6 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     }
 }
 
-void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
-{
-    WLOGFI("Notify gesture navigation enable result, enable = %{public}d", enable);
-    std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        gestureNavigationEnabledListeners = gestureNavigationEnabledListeners_;
-    }
-    for (auto& listener : gestureNavigationEnabledListeners) {
-        listener->OnGestureNavigationEnabledUpdate(enable);
-    }
-}
-
 void WindowManager::Impl::NotifyVisibleWindowNumChanged(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
@@ -281,9 +268,22 @@ void WindowManager::Impl::NotifyVisibleWindowNumChanged(
     }
     for (auto& listener : visibleWindowNumChangedListeners) {
         if (listener == nullptr) {
-            return;
+            continue;
         }
         listener->OnVisibleWindowNumChange(visibleWindowNumInfo);
+    }
+}
+
+void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
+{
+    WLOGFI("Notify gesture navigation enable result, enable = %{public}d", enable);
+    std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        gestureNavigationEnabledListeners = gestureNavigationEnabledListeners_;
+    }
+    for (auto& listener : gestureNavigationEnabledListeners) {
+        listener->OnGestureNavigationEnabledUpdate(enable);
     }
 }
 
