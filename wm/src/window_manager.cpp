@@ -59,8 +59,8 @@ public:
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
-    void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
+    void NotifyGestureNavigationEnabledResult(bool enable);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -245,19 +245,6 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
     }
 }
 
-void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
-{
-    WLOGFI("Notify water mark flag changed result, showWaterMark = %{public}d", showWaterMark);
-    std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        waterMarkFlagChangeListeners = waterMarkFlagChangeListeners_;
-    }
-    for (auto& listener : waterMarkFlagChangeListeners) {
-        listener->OnWaterMarkFlagUpdate(showWaterMark);
-    }
-}
-
 void WindowManager::Impl::NotifyVisibleWindowNumChanged(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
@@ -271,6 +258,19 @@ void WindowManager::Impl::NotifyVisibleWindowNumChanged(
             continue;
         }
         listener->OnVisibleWindowNumChange(visibleWindowNumInfo);
+    }
+}
+
+void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
+{
+    WLOGFI("Notify water mark flag changed result, showWaterMark = %{public}d", showWaterMark);
+    std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        waterMarkFlagChangeListeners = waterMarkFlagChangeListeners_;
+    }
+    for (auto& listener : waterMarkFlagChangeListeners) {
+        listener->OnWaterMarkFlagUpdate(showWaterMark);
     }
 }
 
@@ -1068,6 +1068,5 @@ void WindowManager::UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInf
 {
     pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
-
 } // namespace Rosen
 } // namespace OHOS
