@@ -3013,6 +3013,36 @@ HWTEST_F(WindowSessionTest, RegisterDetachCallback03, Function | SmallTest | Lev
     Mock::VerifyAndClearExpectations(&detachCallback);
 }
 
+/**
+ * @tc.name: SetContextTransparentFunc
+ * @tc.desc: SetContextTransparentFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetContextTransparentFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->contextTransparentFunc_, nullptr);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->contextTransparentFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NeedCheckContextTransparent
+ * @tc.desc: NeedCheckContextTransparent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
