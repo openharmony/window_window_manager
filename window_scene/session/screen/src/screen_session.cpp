@@ -157,6 +157,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     displayInfo->SetHdrFormats(hdrFormats_);
     displayInfo->SetColorSpaces(colorSpaces_);
+    displayInfo->SetDisplayState(property_.GetDisplayState());
     return displayInfo;
 }
 
@@ -214,6 +215,11 @@ void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
 {
     property_.SetBounds(bounds);
     property_.SetPhyBounds(phyBounds);
+}
+
+void ScreenSession::UpdateDisplayState(DisplayState displayState)
+{
+    property_.SetDisplayState(displayState);
 }
 
 void ScreenSession::UpdateRefreshRate(uint32_t refreshRate)

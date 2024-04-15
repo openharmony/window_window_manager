@@ -997,6 +997,23 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         return false;
     }
     WLOGFI("[UL_POWER]SetDisplayState enter");
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]no screen info");
+        return false;
+    }
+
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetDisplayState cannot get ScreenSession, screenId: %{public}" PRIu64"",
+                screenId);
+            continue;
+        }
+        screenSession->UpdateDisplayState(state);
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]set screenSession displayState property: %{public}u",
+            screenSession->GetScreenProperty().GetDisplayState());
+    }
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
