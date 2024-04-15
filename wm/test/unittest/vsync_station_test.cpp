@@ -79,6 +79,60 @@ HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level
     vsyncStation1->RequestVsync(vsyncCallback1);
 }
 
+/**
+ * @tc.name: GetFrameRateLinkerId
+ * @tc.desc: GetFrameRateLinkerId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(VsyncStationTest, GetFrameRateLinkerId, Function | SmallTest | Level3)
+{
+    NodeId nodeId0 = 0;
+    std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
+    ASSERT_NE(vsyncStation0, nullptr);
+    ASSERT_NE(-1, vsyncStation0->GetFrameRateLinkerId());
+    NodeId nodeId1 = 1;
+    std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
+    ASSERT_NE(vsyncStation1, nullptr);
+    ASSERT_NE(-1, vsyncStation1->GetFrameRateLinkerId());
+}
+
+/**
+ * @tc.name: FlushFrameRate
+ * @tc.desc: FlushFrameRate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(VsyncStationTest, FlushFrameRate, Function | SmallTest | Level3)
+{
+    NodeId nodeId0 = 0;
+    std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
+    ASSERT_NE(vsyncStation0, nullptr);
+    uint32_t rate0 = 60;
+    vsyncStation0->FlushFrameRate(rate0);
+    NodeId nodeId1 = 1;
+    std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
+    ASSERT_NE(vsyncStation1, nullptr);
+    uint32_t rate1 = 120;
+    vsyncStation1->FlushFrameRate(rate1);
+}
+
+/**
+ * @tc.name: SetFrameRateLinkerEnable
+ * @tc.desc: SetFrameRateLinkerEnable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, Function | SmallTest | Level3)
+{
+    NodeId nodeId0 = 0;
+    std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
+    ASSERT_NE(vsyncStation0, nullptr);
+    bool enable0 = false;
+    vsyncStation0->SetFrameRateLinkerEnable(enable0);
+    NodeId nodeId1 = 1;
+    std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
+    ASSERT_NE(vsyncStation1, nullptr);
+    bool enable1 = true;
+    vsyncStation1->SetFrameRateLinkerEnable(enable1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

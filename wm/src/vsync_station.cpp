@@ -72,16 +72,34 @@ int64_t VsyncStation::GetVSyncPeriod()
     return period;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate, bool immediate)
+FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
 {
     if (frameRateLinker_) {
-        WLOGD("VsyncStation::FlushFrameRate %{public}d", rate);
+        return frameRateLinker_->GetId();
+    }
+    return 0;
+}
+
+void VsyncStation::FlushFrameRate(uint32_t rate)
+{
+    if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
+        WLOGD("VsyncStation::FlushFrameRate %{public}d, linkerID = %{public}" PRIu64, rate, frameRateLinker_->GetId());
         FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
-        if (immediate) {
-            frameRateLinker_->UpdateFrameRateRangeImme(range);
-        } else {
+        frameRateLinker_->UpdateFrameRateRange(range);
+    }
+}
+
+void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
+{
+    if (frameRateLinker_) {
+        if (!enabled) {
+            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
+            WLOGI("VsyncStation::FlushFrameRateImme %{public}d, linkerID = %{public}" PRIu64,
+                range.preferred_, frameRateLinker_->GetId());
             frameRateLinker_->UpdateFrameRateRange(range);
+            frameRateLinker_->UpdateFrameRateRangeImme(range);
         }
+        frameRateLinker_->SetEnable(enabled);
     }
 }
 
