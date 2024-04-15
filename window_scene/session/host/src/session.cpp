@@ -1999,17 +1999,16 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
-    if (density <= 0) {
-        return;
+    if (!NearZero(density)) {
+        uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
+        uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
+        float ratio = GetAspectRatio();
+        float actRatio = static_cast<float>(curWidth) / curHeight;
+        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+            WLOGFE("RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+        }
+        RectCheck(curWidth, curHeight);
     }
-    uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
-    uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
-    float ratio = GetAspectRatio();
-    float actRatio = static_cast<float>(curWidth) / curHeight;
-    if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
-        WLOGFE("RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
-    }
-    RectCheck(curWidth, curHeight);
 }
 
 void Session::SetSessionRect(const WSRect& rect)
