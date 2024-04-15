@@ -21,6 +21,8 @@
 #include "window_manager_hilog.h"
 
 #include "js_scene_utils.h"
+#include "singleton_container.h"
+#include "dms_reporter.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -266,6 +268,19 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             info.callerPersistentId_ = realCallerSessionId;
         } else {
             info.callerPersistentId_ = 0;
+        }
+
+        std::string continueSessionId = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
+        if (!continueSessionId.empty()) {
+            info.continueSessionId_ = continueSessionId;
+            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]continueSessionId from ability manager: %{public}s",
+                continueSessionId.c_str());
+        }
+
+        // app continue report for distributed scheduled service
+        if (info.want->GetIntParam(Rosen::PARAM_KEY::PARAM_DMS_PERSISTENT_ID_KEY, 0) > 0) {
+            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]continue app with persistentId: %{public}d", info.persistentId_);
+            SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
         }
     }
     sceneSession->SetSessionInfo(info);
