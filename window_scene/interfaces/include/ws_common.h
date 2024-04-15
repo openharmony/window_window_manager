@@ -403,7 +403,7 @@ struct DeviceScreenConfig {
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
-}
+};
 
 /**
  * @brief Enumerates session gravity.
