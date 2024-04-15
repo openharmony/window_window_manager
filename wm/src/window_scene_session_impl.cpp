@@ -435,7 +435,9 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
         sourceType, outside, vpr, rect);
-    if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    WindowType windowType = property_->GetWindowType();
+    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property->IsDecorEnable();
+    if (WindowHelper::IsSystemWindow(windowType) && !isDecorDialog) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
@@ -1573,14 +1575,14 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    bool isValidWindow = isMainWindow || 
+    bool isValidWindow = isMainWindow ||
         ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
         windowSystemConfig_.decorModeSupportInfo_, GetMode());
     bool enable = isValidWindow &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
-    WLOGI("zz IsDecorEnable enable %{public}d", enable);
+    WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
 
