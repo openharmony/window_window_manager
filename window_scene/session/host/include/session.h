@@ -274,6 +274,7 @@ public:
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
+    bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
     void SetForceTouchable(bool touchable);

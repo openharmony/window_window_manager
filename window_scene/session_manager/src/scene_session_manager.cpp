@@ -95,6 +95,7 @@
 
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
+#include "anomaly_detection.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
@@ -3973,6 +3974,7 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
     UpdateFocusStatus(nextSession, true);
     bool scbPrevFocus = focusedSession && focusedSession->GetSessionInfo().isSystem_;
     bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;
+    AnomalyDetection::FocusCheckProcess(focusedId, nextId);
     if (!scbPrevFocus && scbCurrFocus) {
         if (notifySCBAfterFocusedFunc_ != nullptr) {
             notifySCBAfterFocusedFunc_();
@@ -7561,6 +7563,14 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Get Rect persistentId: %{public}d, x: %{public}d, y: %{public}d, "
         "height: %{public}u, width: %{public}u", persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::CheckSceneZOrder()
+{
+    auto task = [this]() {
+        AnomalyDetection::SceneZOrderCheckProcess();
+    };
+    taskScheduler_->PostAsyncTask(task, "CheckSceneZOrder");
 }
 
 WMError SceneSessionManager::GetWindowBackHomeStatus(bool &isBackHome)
