@@ -956,7 +956,7 @@ WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
 WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
@@ -968,13 +968,13 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM,
         pImpl_->visibleWindowNumChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
-        WLOGFE("RegisterWindowManagerAgent failed!");
+        TLOGE(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
         pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
             pImpl_->visibleWindowNumChangedListeners_.end(), listener);
         if (iter != pImpl_->visibleWindowNumChangedListeners_.end()) {
-            WLOGFE("Listener is already registered.");
+            TLOGE(WmsLogTag::WMS_MAIN, "Listener is already registered.");
             return WMError::WM_OK;
         }
         pImpl_->visibleWindowNumChangedListeners_.emplace_back(listener);
@@ -985,14 +985,14 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
         pImpl_->visibleWindowNumChangedListeners_.end(), listener);
     if (iter == pImpl_->visibleWindowNumChangedListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
         return WMError::WM_OK;
     }
 
