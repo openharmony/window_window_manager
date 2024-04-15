@@ -505,17 +505,18 @@ void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& 
         sessionStage, eventChannel, surfaceNode, property, session, token);
 }
 
-void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
+WMError WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
-    INIT_PROXY_CHECK_RETURN();
-    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId));
 }
 
-void WindowAdapter::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+WMError WindowAdapter::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
     const sptr<IRemoteObject>& callback)
 {
-    INIT_PROXY_CHECK_RETURN();
-    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback));
 }
 
 WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
