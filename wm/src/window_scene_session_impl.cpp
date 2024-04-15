@@ -195,8 +195,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         PreProcessCreate();
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext &&
-            abilityContext->GetAbilityInfo()) {
+        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
             auto info = property_->GetSessionInfo();
             info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
             property_->SetSessionInfo(info);
