@@ -533,7 +533,7 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
 {
     WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
-    
+
     if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         WLOGFI("[WMSRecover] input method window does not need to recover");
         return;
@@ -1068,6 +1068,9 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
+    }
+    if (context_) {
+        context_.reset();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;

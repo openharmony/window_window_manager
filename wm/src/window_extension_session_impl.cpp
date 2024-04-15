@@ -126,6 +126,9 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
+    if (context_) {
+        context_.reset();
+    }
     return WMError::WM_OK;
 }
 
