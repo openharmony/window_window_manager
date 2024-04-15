@@ -224,7 +224,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
 
     WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
-    NotifyWindowDragHotAreaFunc func = [weak = weak_from_this()](int32_t type, const SizeChangeReason& reason) {
+    NotifyWindowDragHotAreaFunc func = [weak = weak_from_this()](uint32_t type, const SizeChangeReason& reason) {
         auto weakJsSceneSession = weak.lock();
         if (weakJsSceneSession) weakJsSceneSession->OnWindowDragHotArea(type, reason);
     };
@@ -236,7 +236,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason)
+void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason)
 {
     WLOGFI("[NAPI]OnWindowDragHotArea");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
@@ -792,7 +792,7 @@ void JsSceneSession::ProcessContextTransparentRegister()
     WLOGFD("ProcessContextTransparentRegister success");
 }
 
-void JsSceneSession::OnSessionEvent(uint32_t eventId)
+void JsSceneSession::OnSessionEvent(uint32_t eventId, const SessionEventParam& param)
 {
     WLOGFI("[NAPI]OnSessionEvent, eventId: %{public}d", eventId);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
@@ -804,9 +804,10 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId)
         }
         jsCallBack = iter->second;
     }
-    auto task = [eventId, jsCallBack, env = env_]() {
+    auto task = [eventId, param, jsCallBack, env = env_]() {
         napi_value jsSessionStateObj = CreateJsValue(env, eventId);
-        napi_value argv[] = {jsSessionStateObj};
+        napi_value jsSessionParamObj = CreateJsSessionEventParam(env, param);
+        napi_value argv[] = {jsSessionStateObj, jsSessionParamObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
