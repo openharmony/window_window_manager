@@ -1979,12 +1979,12 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
-void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeigth,
-    uint32_t minWidth, uint32_t minHeigth, uint32_t maxFloatingWindowSize)
+void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+    uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
     if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
-        (curHeigth < minHeigth) || (curHeigth > maxFloatingWindowSize)) {
-        WLOGFE("RectSizeCheckProcess sessionId: %{public}d rect %{public}s",
+        (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
+        WLOGFE("RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
     }
 }
@@ -1992,24 +1992,24 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeigth,
 void Session::RectCheckProcess()
 {
     auto displayId = GetSessionProperty()->GetDisplayId();
-    std::map<ScreenId, ScreenProperty> screenProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().getAllScreenProperties();
-    if (screenProperties.find(displayId) == screenProperties.end) {
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
-    auto screenProperty = screenProperties[displayId];
+    auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
     if (density <= 0) {
         return;
     }
     uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
-    uint32_t curHeigth = static_cast<uint32_t>(GetSessionRect().heigth / density);
+    uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
     float ratio = GetAspectRatio();
-    float actRatio = static_cast<float>(curWidth) / curHeigth;
+    float actRatio = static_cast<float>(curWidth) / curHeight;
     if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
-        WLOGFE("RectCheckProcess ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+        WLOGFE("RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
     }
-    RectCheck(curWidth, curHeigth);
+    RectCheck(curWidth, curHeight);
 }
 
 void Session::SetSessionRect(const WSRect& rect)
@@ -2067,7 +2067,7 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
-SystemSessionConfig Session::GetSystemConfig()
+SystemSessionConfig Session::GetSystemConfig() const
 {
     return systemConfig_;
 }
