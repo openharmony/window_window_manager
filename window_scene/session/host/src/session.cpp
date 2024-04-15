@@ -35,6 +35,7 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1991,7 +1992,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeigth,
 void Session::RectCheckProcess()
 {
     auto displayId = GetSessionProperty()->GetDisplayId();
-    stdmap<ScreenId, ScreenProperty> screenProperties =
+    std::map<ScreenId, ScreenProperty> screenProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().getAllScreenProperties();
     if (screenProperties.find(displayId) == screenProperties.end) {
         return;
@@ -2001,8 +2002,8 @@ void Session::RectCheckProcess()
     if (density <= 0) {
         return;
     }
-    uint32_t curWidth = static_cast<uint32_t>SetSessionRect().width_ / density;
-    uint32_t curHeigth = static_cast<uint32_t>SetSessionRect().heigth / density;
+    uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
+    uint32_t curHeigth = static_cast<uint32_t>(GetSessionRect().heigth / density);
     float ratio = GetAspectRatio();
     float actRatio = static_cast<float>(curWidth) / curHeigth;
     if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
