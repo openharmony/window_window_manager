@@ -877,7 +877,9 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
     newInfo.displayId = 0;
     newInfo.visibleWindowNum = 2;
     visibleWindowNumInfo.push_back(newInfo);
+    auto ret = 0;
     WindowManager::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
+    ASSERT_EQ(0, ret);
 }
 }
 } // namespace Rosen
