@@ -37,11 +37,12 @@ public:
 
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
 
+    int32_t GetMissionId() const override;
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
 
 private:
-    void UpdateCameraFloatWindowStatus(bool isShowing);
+    void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
 };
 } // namespace OHOS::Rosen

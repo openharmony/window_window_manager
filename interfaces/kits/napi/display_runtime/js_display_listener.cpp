@@ -220,6 +220,31 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
             callback, std::move(execute), std::move(complete)));
 }
 
+void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnFoldAngleChanged not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_FOLD_ANGLE_CHANGED) == jsCallBack_.end()) {
+        WLOGE("OnFoldAngleChanged not this event, return");
+        return;
+    }
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, foldAngles] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateNativeArray(env_, foldAngles)};
+            CallJsMethod(EVENT_FOLD_ANGLE_CHANGED, argv, ArraySize(argv));
+        }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnFoldAngleChanged", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
+}
+
 void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
 {
     std::lock_guard<std::mutex> lock(mtx_);

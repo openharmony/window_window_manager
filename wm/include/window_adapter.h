@@ -101,7 +101,9 @@ public:
     virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
-    virtual void DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
+    virtual void DestroyAndDisconnectSpecificSession(const int32_t persistentId);
+    virtual void DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+        const sptr<IRemoteObject>& callback);
     virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
@@ -120,6 +122,9 @@ public:
     virtual WMError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide);
     virtual WMError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags);
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
+    virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
+    virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
+    virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
     
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

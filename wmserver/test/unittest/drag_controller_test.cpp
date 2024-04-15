@@ -215,6 +215,25 @@ HWTEST_F(DragControllerTest, ConsumePointerEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestVsync
+ * @tc.desc: RequestVsync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, RequestVsync, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    NodeId nodeId = 0;
+    uint32_t windowId = 1;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    moveDragController_->vsyncStationMap_.emplace(windowId, vsyncStation);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetAgentWindowId(windowId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    moveDragController_->ConsumePointerEvent(pointerEvent);
+    ASSERT_NE(vsyncStation, nullptr);
+}
+
+/**
  * @tc.name: OnReceiveVsync
  * @tc.desc: OnReceiveVsync
  * @tc.type: FUNC
@@ -227,6 +246,37 @@ HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
     moveDragController_->OnReceiveVsync(0);
     moveDragController_->moveEvent_ = pointerEvent;
     moveDragController_->OnReceiveVsync(0);
+}
+
+/**
+ * @tc.name: GetVsyncStationByWindowId1
+ * @tc.desc: GetVsyncStationByWindowId Test Succ
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    NodeId nodeId = 0;
+    uint32_t windowId = 1;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    moveDragController_->vsyncStationMap_.emplace(windowId, vsyncStation);
+    std::shared_ptr<VsyncStation> vsyncStationRes = moveDragController_->GetVsyncStationByWindowId(windowId);
+    ASSERT_EQ(vsyncStation, vsyncStationRes);
+}
+
+/**
+ * @tc.name: GetVsyncStationByWindowId2
+ * @tc.desc: GetVsyncStationByWindowId Test Fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    uint32_t windowId = 100;
+    moveDragController_->vsyncStationMap_.clear();
+    moveDragController_->SetWindowRoot(windowRoot_);
+    std::shared_ptr<VsyncStation> vsyncStation = moveDragController_->GetVsyncStationByWindowId(windowId);
+    ASSERT_EQ(vsyncStation, nullptr);
 }
 
 /**

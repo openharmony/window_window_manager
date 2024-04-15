@@ -267,6 +267,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTe
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
     extensionSession.windowEventChannel_ = mockEventChannel;
+    extensionSession.channelListener_ = new WindowEventChannelListener();
     EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync)
         .WillOnce([](const std::shared_ptr<MMI::KeyEvent> &keyEvent,
                      bool isPreImeEvent,
@@ -303,6 +304,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
     extensionSession.windowEventChannel_ = mockEventChannel;
     EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync);
+    extensionSession.channelListener_ = new WindowEventChannelListener();
 
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -396,6 +398,40 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Func
     uint32_t code = static_cast<uint32_t>(10001);
     WindowEventChannelListener listener;
     ASSERT_EQ(listener.OnRemoteRequest(code, data, reply, option), IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: ChannelDeathRecipientOnRemoteDied01
+ * @tc.desc: ChannelDeathRecipientOnRemoteDied01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | SmallTest | Level1)
+{
+    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    EXPECT_NE(nullptr, listener);
+    sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
+    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    EXPECT_NE(nullptr, deathRecipient);
+    sptr<IRemoteObject> wptrDeath = nullptr;
+    wptrDeath = new (std::nothrow) WindowEventChannel(nullptr);
+    deathRecipient->OnRemoteDied(wptrDeath);
+    EXPECT_NE(nullptr, deathRecipient);
+}
+
+/**
+ * @tc.name: ChannelDeathRecipientOnRemoteDied02
+ * @tc.desc: ChannelDeathRecipientOnRemoteDied02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | SmallTest | Level1)
+{
+    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    EXPECT_NE(nullptr, listener);
+    sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
+    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    EXPECT_NE(nullptr, deathRecipient);
+    deathRecipient->OnRemoteDied(nullptr);
+    EXPECT_NE(nullptr, deathRecipient);
 }
 
 /**

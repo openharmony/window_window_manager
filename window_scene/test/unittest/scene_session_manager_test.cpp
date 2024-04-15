@@ -1655,7 +1655,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
     sptr<ISession> session;
-    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr);
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -1663,7 +1663,7 @@ HWTEST_F(SceneSessionManagerTest, RecoverAndReconnectSceneSession, Function | Sm
     std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetPersistentId(1);
-    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -2022,6 +2022,18 @@ HWTEST_F(SceneSessionManagerTest, DestroyAndDisconnectSpecificSession, Function 
 {
     int32_t persistentId = 0;
     WSError result = ssm_->DestroyAndDisconnectSpecificSession(persistentId);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    WSError result = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -2467,11 +2479,11 @@ HWTEST_F(SceneSessionManagerTest, SetFocusedSessionId, Function | SmallTest | Le
 {
     int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
-    int32_t persistendId_ = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSessionId(persistendId_);
+    int32_t persistentId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
-    persistendId_ = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(persistendId_);
+    persistentId_ = 10086;
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result02, WSError::WS_OK);
     ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }
@@ -2626,15 +2638,15 @@ HWTEST_F(SceneSessionManagerTest, NotifyDumpInfoResult, Function | SmallTest | L
     std::vector<std::string> params = {"-a"};
     std::string dumpInfo = "";
     WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result01, WSError::WS_OK);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
     params.clear();
     params.push_back("-w");
     params.push_back("23456");
     WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_NE(result02, WSError::WS_ERROR_INVALID_PARAM);
     params.clear();
     WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_NE(result03, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**

@@ -134,9 +134,12 @@ WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint3
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, gravity: %{public}d, percent: %{public}d",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
             session->GetPersistentId(), gravity, percent);
 
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onKeyboardGravityChange_) {
+            session->sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+        }
         if (session->GetSessionProperty()) {
             session->GetSessionProperty()->SetKeyboardSessionGravity(gravity, percent);
         }
@@ -171,13 +174,13 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
     keyboardCallback_->onCallingSessionIdChange_(GetSessionProperty()->GetCallingSessionId());
 }
 
-sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistendId)
+sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistentId)
 {
     if (keyboardCallback_ == nullptr || keyboardCallback_->onGetSceneSession_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get scene session failed, persistendId: %{public}d", persistendId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get scene session failed, persistentId: %{public}d", persistentId);
         return nullptr;
     }
-    return keyboardCallback_->onGetSceneSession_(persistendId);
+    return keyboardCallback_->onGetSceneSession_(persistentId);
 }
 
 int32_t KeyboardSession::GetFocusedSessionId()

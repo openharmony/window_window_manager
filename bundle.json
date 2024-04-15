@@ -70,12 +70,12 @@
           "memmgr_plugin",
           "data_share",
           "accessibility",
-          "security_component_manager"
-        ],
-        "third_party": [
+          "security_component_manager",
           "libjpeg-turbo",
           "libxml2",
           "bounds_checking_function"
+        ],
+        "third_party": [
         ]
       },
       "build": {
@@ -99,6 +99,7 @@
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
             "//foundation/window/window_manager/wm:libwm_lite",
+            "//foundation/window/window_manager/wm:libwm_ndk",
             "//foundation/window/window_manager/utils:libwmutil",
             "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
@@ -161,7 +162,6 @@
             }
           },
           {
-            "type": "so",
             "name": "//foundation/window/window_manager/utils:libwmutil_static",
             "header": {
               "header_files": [

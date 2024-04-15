@@ -195,7 +195,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
-        || type > DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
+        || type > DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER) {
         WLOGFE("DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -268,6 +268,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         WLOGFD("subDisplayCutoutPath = %{public}s.", subDisplayCutoutPath.c_str());
         ScreenSceneConfig::SetSubCutoutSvgPath(subDisplayCutoutPath);
     }
+    if (stringConfig.count("rotationPolicy") != 0) {
+        std::string rotationPolicy = static_cast<std::string>(stringConfig["rotationPolicy"]);
+        TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
+        deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
+    }
     ConfigureWaterfallDisplayCompressionParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
@@ -302,8 +307,8 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
 {
     static bool isRegisterRefreshRateListener = false;
     if (!isRegisterRefreshRateListener) {
-        auto res = rsInterface_.RegisterHgmRefreshRateModeChangeCallback(
-            [this](int32_t refreshRateModeName) { OnHgmRefreshRateChange(refreshRateModeName); });
+        auto res = rsInterface_.RegisterHgmRefreshRateUpdateCallback(
+            [this](uint32_t refreshRate) { OnHgmRefreshRateChange(refreshRate); });
         if (res != StatusCode::SUCCESS) {
             WLOGFE("Register refresh rate mode change listener failed.");
         } else {
@@ -408,17 +413,11 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     }
 }
 
-void ScreenSessionManager::OnHgmRefreshRateChange(int32_t refreshRateModeName)
+void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 {
     GetDefaultScreenId();
-    WLOGFI("Set refreshRateModeName: %{public}d, defaultscreenid: %{public}" PRIu64"",
-        refreshRateModeName, defaultScreenId_);
-    uint32_t refreshRate;
-    if (refreshRateModeName == -1) {
-        refreshRate = static_cast<uint32_t>(MaxRefreshrate::MAX_REFRESHRATE_120);
-    } else {
-        refreshRate = static_cast<uint32_t>(refreshRateModeName);
-    }
+    WLOGFI("Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
+        refreshRate, defaultScreenId_);
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
@@ -998,6 +997,23 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         return false;
     }
     WLOGFI("[UL_POWER]SetDisplayState enter");
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]no screen info");
+        return false;
+    }
+
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetDisplayState cannot get ScreenSession, screenId: %{public}" PRIu64"",
+                screenId);
+            continue;
+        }
+        screenSession->UpdateDisplayState(state);
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]set screenSession displayState property: %{public}u",
+            screenSession->GetScreenProperty().GetDisplayState());
+    }
     return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
@@ -2053,6 +2069,42 @@ DMError ScreenSessionManager::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     screen->SetVirtualScreenFlag(screenFlag);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("SetVirtualScreenRefreshRate, permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SetVirtualScreenRefreshRate, screenId: %{public}" PRIu64", refreshInterval:  %{public}u",
+        screenId, refreshInterval);
+    if (screenId == GetDefaultScreenId()) {
+        WLOGFE("cannot set refresh rate of main screen, main screen id: %{public}" PRIu64".", GetDefaultScreenId());
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (refreshInterval == 0) {
+        WLOGFE("SetVirtualScreenRefreshRate, refresh interval is 0.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(screenId);
+    auto defaultScreenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr || defaultScreenSession == nullptr) {
+        WLOGFE("SetVirtualScreenRefreshRate, screenSession is null.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGFE("SetVirtualScreenRefreshRate, No corresponding rsId.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    int32_t res = rsInterface_.SetScreenSkipFrameInterval(rsScreenId, refreshInterval);
+    if (res != StatusCode::SUCCESS) {
+        WLOGFE("SetVirtualScreenRefreshRate, rsInterface error: %{public}d", res);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
     return DMError::DM_OK;
 }
 
@@ -3270,6 +3322,18 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        WLOGI("NotifyFoldAngleChanged agents is empty");
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyFoldAngleChanged(foldAngles);
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
@@ -3553,10 +3617,6 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
         }
-    } else if (params.size() == 1 && (params[0] == STATUS_FOLD_HALF || params[0] == STATUS_EXPAND
-                || params[0] == STATUS_FOLD)) {
-        int errCode = NotifyFoldStatusChanged(params[0]);
-        ShowFoldStatusChangedInfo(errCode, dumpInfo);
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -3632,17 +3692,6 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
     return 0;
 }
 
-void ScreenSessionManager::ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo)
-{
-    if (errCode != 0) {
-        ShowIllegalArgsInfo(dumpInfo);
-    } else {
-        std::ostringstream oss;
-        oss << "currentFoldStatus is:" << static_cast<uint32_t>(GetFoldStatus()) << std::endl;
-        dumpInfo.append(oss.str());
-    }
-}
-
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
 {
     WLOGI("NotifyAvailableAreaChanged call");
@@ -3711,5 +3760,10 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
         "PID", getpid(),
         "UID", getuid());
     WLOGI("%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
+}
+
+DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()
+{
+    return deviceScreenConfig_;
 }
 } // namespace OHOS::Rosen

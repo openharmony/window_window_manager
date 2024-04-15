@@ -20,7 +20,7 @@
 #include <message_option.h>
 #include <ui/rs_surface_node.h>
 
-#include "accessibility_event_info_parcel.h"
+#include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
 #include "want.h"
 #include "key_event.h"

@@ -21,6 +21,7 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
 #include "js_screen_utils.h"
+#include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
 
@@ -39,8 +40,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScre
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 } // namespace
 
-JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env),
-    taskScheduler_(std::make_shared<MainThreadScheduler>(env))
+JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env)
 {
     TLOGI(WmsLogTag::DMS, "Create JsScreenSessionManager instance");
 }
@@ -53,8 +53,14 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
-    auto jsScreenSessionManager = std::make_unique<JsScreenSessionManager>(env);
-    napi_wrap(env, exportObj, jsScreenSessionManager.release(), JsScreenSessionManager::Finalizer, nullptr, nullptr);
+    sptr<JsScreenSessionManager> jsScreenSessionManager = new (std::nothrow) JsScreenSessionManager(env);
+    if (jsScreenSessionManager == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create, jsScreenSessionManager is null");
+        return nullptr;
+    }
+    jsScreenSessionManager->IncStrongRef(nullptr); // Avoid being released after the function ends
+    napi_wrap(env, exportObj, jsScreenSessionManager.GetRefPtr(), JsScreenSessionManager::Finalizer, nullptr, nullptr);
+
     napi_set_named_property(env, exportObj, "ScreenConnectChangeType",
         JsScreenUtils::CreateJsScreenConnectChangeType(env));
     napi_set_named_property(env, exportObj, "ScreenPropertyChangeReason",
@@ -84,35 +90,22 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
+    BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
+        JsScreenSessionManager::GetDeviceScreenConfig);
     return NapiGetUndefined(env);
 }
 
 JsScreenSessionManager::~JsScreenSessionManager()
 {
     TLOGI(WmsLogTag::DMS, "Destroy JsScreenSessionManager instance");
-    ClearNativeReference();
-}
-
-void JsScreenSessionManager::ClearNativeReference()
-{
-    auto localScreenConnectionCallback = screenConnectionCallback_;
-    auto localShutdownCallback = shutdownCallback_;
-    // Capture shared_ptr by value to ensure that its life cycle is in the alive state
-    auto task = [localScreenConnectionCallback, localShutdownCallback]() mutable {
-        TLOGI(WmsLogTag::DMS, "Clear NativeReference callback");
-        localScreenConnectionCallback = nullptr;
-        localShutdownCallback = nullptr;
-    };
-    if (taskScheduler_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "taskScheduler instance is nullptr");
-        return;
-    }
-    taskScheduler_->PostMainThreadTask(task, "ClearScreenNativeReference");
 }
 
 void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    std::unique_ptr<JsScreenSessionManager>(static_cast<JsScreenSessionManager*>(data));
+    TLOGI(WmsLogTag::DMS, "[NAPI]Finalizer. jsScreenSessionManager refcount before DecStrongRef: %{public}d",
+        static_cast<JsScreenSessionManager*>(data)->GetSptrRefCount());
+    // Expected to release the jsScreenSessionManager object here
+    static_cast<JsScreenSessionManager*>(data)->DecStrongRef(data);
 }
 
 napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -190,6 +183,13 @@ napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback
     WLOGD("[NAPI]GetScreenSnapshot");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetDeviceScreenConfig");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetDeviceScreenConfig(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -590,5 +590,18 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
         WLOGE("[NAPI]create native pixelmap failed");
     }
     return nativeData;
+}
+
+napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetDeviceScreenConfig");
+    DeviceScreenConfig deviceScreenConfig = ScreenSessionManagerClient::GetInstance().GetDeviceScreenConfig();
+    napi_value jsDeviceScreenConfigObj = JsDeviceScreenConfig::CreateDeviceScreenConfig(env, deviceScreenConfig);
+    if (jsDeviceScreenConfigObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]jsDeviceScreenConfigObj is nullptr");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsDeviceScreenConfigObj;
 }
 } // namespace OHOS::Rosen

@@ -22,7 +22,7 @@
 #include <pointer_event.h>
 
 #include "accessibility_element_info.h"
-#include "accessibility_element_info_parcel.h"
+#include "parcel/accessibility_element_info_parcel.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

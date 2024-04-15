@@ -152,7 +152,9 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) { return WSError::WS_OK; };
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) { return WSError::WS_OK; }
+    virtual WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+        const sptr<IRemoteObject>& callback) { return WSError::WS_OK; }
     virtual WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr)
@@ -180,7 +182,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistendId, bool haveListener)
+    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
     {
         return WSError::WS_OK;
     }
@@ -206,6 +208,18 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError GetWindowBackHomeStatus(bool &isBackHome)
+    {
+        return WMError::WM_OK;
+    };
 };
 }
 }

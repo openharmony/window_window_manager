@@ -30,6 +30,7 @@
 #include "wm_common.h"
 #include "occupied_area_change_info.h"
 #include "window_visibility_info.h"
+#include "pattern_detach_callback_interface.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -75,6 +76,7 @@ using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<M
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
+using NotifyContextTransparentFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -274,10 +276,12 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
     virtual WSError SetVisible(bool isVisible);
     bool GetVisible() const;
+    bool GetFocused() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
     WSError SetDrawingContentState(bool isRSDrawing);
@@ -287,6 +291,9 @@ public:
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
+    void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
+    void NotifyContextTransparent();
+    bool NeedCheckContextTransparent() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -371,6 +378,9 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
+    void SetAttachState(bool isAttach);
+    void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -396,6 +406,7 @@ protected:
     virtual bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
+    virtual bool IfNotNeedAvoidKeyBoardForSplit();
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
@@ -465,6 +476,7 @@ protected:
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
+    NotifyContextTransparentFunc contextTransparentFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -545,8 +557,11 @@ private:
     bool isRSDrawing_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
     float vpr_ { 1.5f };
+    bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
+    bool isAttach_{ false };
+    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

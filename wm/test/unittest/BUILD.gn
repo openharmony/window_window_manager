@@ -21,10 +21,13 @@ group("unittest") {
   deps = [
     ":wm_extension_window_impl_test",
     ":wm_input_transfer_station_test",
+    ":wm_pattern_detach_callback_proxy_test",
+    ":wm_pattern_detach_callback_test",
     ":wm_picture_in_picture_controller_test",
     ":wm_picture_in_picture_manager_test",
     ":wm_picture_in_picture_option_test",
     ":wm_root_scene_test",
+    ":wm_vsync_station_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
     ":wm_window_effect_test",
@@ -108,6 +111,19 @@ ohos_unittest("wm_window_scene_effect_test") {
   module_out_path = module_out_path
 
   sources = [ "window_scene_effect_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_vsync_station_test") {
+  module_out_path = module_out_path
+
+  sources = [ "vsync_station_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -402,6 +418,26 @@ ohos_unittest("wm_window_adapter_test") {
   external_deps = [ "c_utils:utils" ]
 }
 
+ohos_unittest("wm_pattern_detach_callback_test") {
+  module_out_path = module_out_path
+
+  sources = [ "pattern_detach_callback_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_unittest("wm_pattern_detach_callback_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "pattern_detach_callback_proxy_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
@@ -416,6 +452,7 @@ config("wm_unittest_common_public_config") {
     "${window_base_path}/utils/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/session/host/include/zidl",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
