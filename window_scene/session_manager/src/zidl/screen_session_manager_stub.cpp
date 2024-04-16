@@ -527,6 +527,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteString(dumpInfo);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_DEVICE_IS_CAPTURE: {
+            reply.WriteBool(IsCaptured());
+            break;
+        }
         //Fold Screen
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());

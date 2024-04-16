@@ -124,6 +124,7 @@ public:
         TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE,
         TRANS_ID_GET_DEVICE_SCREEN_CONFIG,
         TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE,
+        TRANS_ID_DEVICE_IS_CAPTURE,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -229,6 +230,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool IsFoldable() { return false; }
+    virtual bool IsCaptured() { return false; }
 
     virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; }
 
