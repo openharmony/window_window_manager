@@ -35,6 +35,7 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -741,6 +742,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
@@ -1982,6 +1984,38 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+    uint32_t minHeight, uint32_t maxFloatingWindowSize)
+{
+    if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
+        (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
+        WLOGFE("RectCheck err sessionID: %{public}d rect %{public}s",
+            GetPersistentId(), GetSessionRect().ToString().c_str());
+    }
+}
+
+void Session::RectCheckProcess()
+{
+    auto displayId = GetSessionProperty()->GetDisplayId();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
+        return;
+    }
+    auto screenProperty = screensProperties[displayId];
+    float density = screenProperty.GetDensity();
+    if (!NearZero(density)) {
+        uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
+        uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
+        float ratio = GetAspectRatio();
+        float actRatio = static_cast<float>(curWidth) / curHeight;
+        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+            WLOGFE("RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+        }
+        RectCheck(curWidth, curHeight);
+    }
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -1990,6 +2024,7 @@ void Session::SetSessionRect(const WSRect& rect)
     }
     winRect_ = rect;
     isDirty_ = true;
+    RectCheckProcess();
 }
 
 WSRect Session::GetSessionRect() const
@@ -2034,6 +2069,11 @@ WindowType Session::GetWindowType() const
 void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
 {
     systemConfig_ = systemConfig;
+}
+
+SystemSessionConfig Session::GetSystemConfig() const
+{
+    return systemConfig_;
 }
 
 void Session::SetSnapshotScale(const float snapshotScale)

@@ -382,6 +382,11 @@ public:
     void SetAttachState(bool isAttach);
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
     void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
+    SystemSessionConfig GetSystemConfig() const;
+    void RectCheckProcess();
+    virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
+    void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+        uint32_t minHeight, uint32_t maxFloatingWindowSize);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

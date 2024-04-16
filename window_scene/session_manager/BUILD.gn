@@ -65,6 +65,7 @@ ohos_shared_library("scene_session_manager") {
   }
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
+    "src/anomaly_detection.cpp",
     "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
     "src/scb_session_handler.cpp",
@@ -80,7 +81,6 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_stub.cpp",
     "src/zidl/session_listener_proxy.cpp",
     "src/zidl/session_listener_stub.cpp",
-    "src/anomaly_detection.cpp",
   ]
 
   public_configs = [
