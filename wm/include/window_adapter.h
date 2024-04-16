@@ -101,8 +101,8 @@ public:
     virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
-    virtual void DestroyAndDisconnectSpecificSession(const int32_t persistentId);
-    virtual void DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+    virtual WMError DestroyAndDisconnectSpecificSession(const int32_t persistentId);
+    virtual WMError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback);
     virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,

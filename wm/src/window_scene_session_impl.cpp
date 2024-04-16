@@ -986,22 +986,26 @@ void WindowSceneSessionImpl::DestroySubWindow()
 
 WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 {
+    WMError ret = WMError::WM_OK;
     if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (property_->GetExtensionFlag() == true) {
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "DestroyInner fail, ret:%{public}d", ret);
+        return ret;
+    }
 
-    WMError ret = WMError::WM_OK;
     if (WindowHelper::IsMainWindow(GetType())) {
         if (hostSession_ != nullptr) {
             ret = static_cast<WMError>(hostSession_->Disconnect(true));
@@ -1010,16 +1014,20 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     return ret;
 }
 
-void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
+WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
 {
+    WMError ret = WMError::WM_OK;
     if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window is scb window");
-        SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
-        return;
+        ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
+        return ret;
     }
     sptr<PatternDetachCallback> callback = new PatternDetachCallback();
-    SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
+    ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
     auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     callback->GetResult(WINDOW_DETACH_TIMEOUT);
@@ -1031,6 +1039,7 @@ void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t per
         callback->GetResult(std::numeric_limits<int>::max());
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy window persistentId:%{public}d waitTime:%{public}lld", persistentId, waitTime);
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
