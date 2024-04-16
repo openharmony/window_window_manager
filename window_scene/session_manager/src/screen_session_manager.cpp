@@ -195,7 +195,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
-        || type > DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER) {
+        || type >= DisplayManagerAgentType::DISPLAY_MANAGER_MAX_AGENT_TYPE) {
         WLOGFE("DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -351,6 +351,8 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
     if (displayNode == nullptr) {
         return;
     }
+    isHdmiScreen_ = false;
+    NotifyCaptureStatusChanged();
     displayNode->RemoveFromTree();
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
@@ -777,6 +779,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         session->SetName("CastEngine");
         session->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         NotifyScreenChanged(session->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
+        isHdmiScreen_ = true;
+        NotifyCaptureStatusChanged();
     } else {
         session = new ScreenSession(screenId, property, defScreenId);
     }
@@ -1748,6 +1752,8 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                 new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
         }
         if (displayManagerAgent == nullptr) {
+            isVirtualScreen_ = true;
+            NotifyCaptureStatusChanged();
             return smsScreenId;
         }
         auto agIter = screenAgentMap_.find(displayManagerAgent);
@@ -1758,6 +1764,8 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     } else {
         WLOGFI("CreateVirtualScreen id: %{public}" PRIu64" in screenIdManager_", rsId);
     }
+    isVirtualScreen_ = true;
+    NotifyCaptureStatusChanged();
     return smsScreenId;
 }
 
@@ -1904,6 +1912,8 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
+    isVirtualScreen_ = false;
+    NotifyCaptureStatusChanged();
     return DMError::DM_OK;
 }
 
@@ -2814,6 +2824,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
             NotifyScreenshot(displayId);
             CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
         }
+        isScreenShot_= true;
+        NotifyCaptureStatusChanged();
         return res;
     } else if (errorCode) {
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
@@ -3275,6 +3287,11 @@ bool ScreenSessionManager::IsFoldable()
     return foldScreenController_->IsFoldable();
 }
 
+bool ScreenSessionManager::IsCaptured()
+{
+    return isScreenShot_ || isVirtualScreen_ || isHdmiScreen_;
+}
+
 bool ScreenSessionManager::IsMultiScreenCollaboration()
 {
     return isMultiScreenCollaboration_;
@@ -3332,6 +3349,19 @@ void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
     for (auto& agent : agents) {
         agent->NotifyFoldAngleChanged(foldAngles);
     }
+}
+
+void ScreenSessionManager::NotifyCaptureStatusChanged()
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
+    if (agents.empty()) {
+        WLOGI("agents is empty");
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyCaptureStatusChanged(IsCaptured());
+    }
+    isScreenShot_ = false;
 }
 
 void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)

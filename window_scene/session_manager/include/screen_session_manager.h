@@ -191,6 +191,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
+    bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
 
@@ -261,6 +262,7 @@ private:
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+    void NotifyCaptureStatusChanged();
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
@@ -324,6 +326,9 @@ private:
 
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
+    bool isScreenShot_ = false;
+    bool isHdmiScreen_ = false;
+    bool isVirtualScreen_ = false;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
