@@ -780,10 +780,6 @@ void WindowLayoutPolicy::FixWindowRectWithinDisplay(const sptr<WindowNode>& node
 {
     auto displayId = node->GetDisplayId();
     const Rect& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
-    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
-    if (displayInfo == nullptr) {
-        return;
-    }
     auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
     switch (type) {
@@ -795,6 +791,11 @@ void WindowLayoutPolicy::FixWindowRectWithinDisplay(const sptr<WindowNode>& node
                 static_cast<int32_t>(rect.height_);
             break;
         default:
+            auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
+            if (displayInfo == nullptr) {
+                WLOGE("displayInfo is nullptr");
+                return;
+            }
             if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
                 return;
             }

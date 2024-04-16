@@ -816,10 +816,8 @@ napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
+    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> weakWindow)
 {
-    auto weakWindow = weakToken.promote();
-
     for (auto it : systemBarPropertyFlags) {
         WindowType type = it.first;
         SystemBarPropertyFlag flag = it.second;
@@ -2115,9 +2113,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
 }
 
 static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties, wptr<Window> weakToken)
+    std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> weakWindow)
 {
-    auto weakWindow = weakToken.promote();
     WMError ret = WMError::WM_OK;
     WMError err = WMError::WM_OK;
 
@@ -2236,9 +2233,9 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
             }
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakToken));
+                SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakWindow));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -2398,13 +2395,15 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+            auto weakWindow = weakToken.promote();
+            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
             }
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
             WMError ret = SetSystemBarPropertiesByFlags(
-                systemBarPropertyFlags, systemBarProperties, weakToken);
+                systemBarPropertyFlags, systemBarProperties, weakWindow);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -2455,9 +2454,9 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
             }
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakToken));
+                SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakWindow));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
