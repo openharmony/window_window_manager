@@ -870,9 +870,13 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         Permission::CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         // WINDOW_TYPE_FLOAT counld be created by normal app with the corresponding permission
         WLOGFD("check create permission success, normal app create float window with request permission.");
-        return true;
+        if (isPC) {
+            WLOGFD("check create float window permission success on 2in1 device.");
+            return true;
+        }
     }
     if (Permission::IsSystemCalling() || Permission::IsStartByHdcd()) {
         WLOGFD("check create permission success, create with system calling.");
