@@ -99,7 +99,7 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
 void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "SetActiveController called");
-    std::unique_lock<std::shared_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(controllerMapMutex_);
     activeController_ = pipController;
 }
 
