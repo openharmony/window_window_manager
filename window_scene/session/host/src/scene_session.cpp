@@ -1267,12 +1267,10 @@ bool SceneSession::IsDecorEnable() const
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isValidWindow = isMainWindow ||
-        ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
+        ((isSubWindow || isDialogWindow) && property->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
         systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
-    bool enable = isValidWindow &&
-        systemConfig_.isSystemDecorEnable_ &&
-        isWindowModeSupported;
+    bool enable = isValidWindow && systemConfig_.isSystemDecorEnable_ && isWindowModeSupported;
     return enable;
 }
 
