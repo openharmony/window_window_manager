@@ -436,7 +436,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
         sourceType, outside, vpr, rect);
     WindowType windowType = property_->GetWindowType();
-    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property->IsDecorEnable();
+    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
     if (WindowHelper::IsSystemWindow(windowType) && !isDecorDialog) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
@@ -1729,8 +1729,14 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
+    WindowType windowType = GetType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
+    bool isValidWindow = isMainWindow || (isPC && (isSubWindow || isDecorDialog));
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if ((WindowHelper::IsMainWindow(GetType()) || (isPC && WindowHelper::IsSubWindow(GetType()))) && hostSession_) {
+    if (isValidWindow && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
