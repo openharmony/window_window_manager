@@ -2189,7 +2189,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     auto weakWindow = weakToken.promote();
-    errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_INVALID_PARAM : errCode;
+    errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_NULLPTR : errCode;
     if (errCode != WMError::WM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
     }
@@ -2398,7 +2398,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_INVALID_PARAM : errCode;
+            errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_NULLPTR : errCode;
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
