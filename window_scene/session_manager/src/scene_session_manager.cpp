@@ -5662,6 +5662,7 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
         }
         if (visibilityChangeInfos.size() != 0) {
             DealwithVisibilityChange(visibilityChangeInfos);
+            CacVisibleWindowNum();
         }
 
         std::vector<std::pair<uint64_t, bool>> drawingContentChangeInfos;
@@ -7475,6 +7476,61 @@ void SceneSessionManager::ReportWindowProfileInfos()
             "windowLocatedScreen:%{public}d, windowSceneMode:%{public}d",
             windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
             windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode);
+    }
+}
+
+bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
+    const std::vector<VisibleWindowNumInfo>& currentInfo)
+{
+    if (lastInfo.size() != currentInfo.size()) {
+        WLOGFE("last and current info is not Same");
+        return false;
+    }
+    for (int i = 0; i < lastInfo.size(); i++) {
+        if (lastInfo[i].displayId != currentInfo[i].displayId ||
+            lastInfo[i].visibleWindowNum != currentInfo[i].visibleWindowNum) {
+            WLOGFE("last and current visible window num is not Same");
+            return false;
+        }
+    }
+    return true;
+}
+
+void SceneSessionManager::CacVisibleWindowNum()
+{
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        bool isTargetWindow = (WindowHelper::IsMainWindow(curSession->GetWindowType()) ||
+            curSession->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER);
+        if (curSession == nullptr || !isTargetWindow ||
+            curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+            continue;
+        }
+
+        bool isWindowVisible = curSession->GetVisible();
+        if (isWindowVisible) {
+            int32_t displayId = static_cast<int32_t>(curSession->GetSessionProperty()->GetDisplayId());
+            auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
+                [=](const VisibleWindowNumInfo& info) {
+                    return info.displayId == displayId;
+            });
+            if (it == visibleWindowNumInfo.end()) {
+                visibleWindowNumInfo.push_back({displayId, 1});
+            } else {
+                it->visibleWindowNum++;
+            }
+        }
+    }
+    std::unique_lock<std::shared_mutex> lock(lastInfoMutex_);
+    if (visibleWindowNumInfo.size() > 0 && !IsVectorSame(lastInfo_, visibleWindowNumInfo)) {
+        SessionManagerAgentController::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
+        lastInfo_ = visibleWindowNumInfo;
     }
 }
 
