@@ -53,7 +53,8 @@ const std::string SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD = "OS_ScreenSession
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const int32_t SLEEP_10_MS = 10 * 1000; // 10ms
-const int32_t CV_WAIT_MS = 300;
+const int32_t CV_WAIT_SCREENON_MS = 300;
+const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const std::u16string DEFAULT_USTRING = u"error";
 const std::string DEFAULT_STRING = "error";
 const std::string ARG_DUMP_HELP = "-h";
@@ -906,10 +907,8 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         return false;
     }
     currentWakeUpReason_ = reason;
-    WLOGFI("[UL_POWER]WakeUpBegin remove suspend begin task, reason: %{public}u", static_cast<uint32_t>(reason));
+    WLOGFI("[UL_POWER]WakeUpBegin reason: %{public}u", static_cast<uint32_t>(reason));
 
-    blockScreenPowerChange_ = false;
-    taskScheduler_->RemoveTask("suspendBeginTask");
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
         return true;
@@ -949,21 +948,13 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         WLOGFE("SuspendBegin permission denied!");
         return false;
     }
-    WLOGFI("[UL_POWER]SuspendBegin block screen power change is true, reason: %{public}u",
-        static_cast<uint32_t>(reason));
+    WLOGFI("[UL_POWER]SuspendBegin  reason: %{public}u", static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
-        sessionDisplayPowerController_->SuspendBegin(reason);
         lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-        return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
     }
-    blockScreenPowerChange_ = true;
-    auto suspendBeginTask = [this]() {
-        WLOGFI("[UL_POWER]SuspendBegin delay task start");
-        blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-    };
-    taskScheduler_->PostTask(suspendBeginTask, "suspendBeginTask", 1500);
+
+    gotScreenOffNotify_  = false;
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
@@ -980,7 +971,6 @@ bool ScreenSessionManager::SuspendEnd()
     }
     WLOGFI("[UL_POWER]SuspendEnd enter");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendEnd");
-    blockScreenPowerChange_ = false;
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
         return true;
@@ -989,9 +979,15 @@ bool ScreenSessionManager::SuspendEnd()
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
-bool ScreenSessionManager::BlockSetDisplayState()
+bool ScreenSessionManager::IsPreBrightAuthFail(void)
 {
-    return prePowerStateChangeReason == PowerStateChangeReason::POWER_BUTTON;
+    return lastWakeUpReason_ == PowerStateChangeReason::
+        STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+}
+
+bool ScreenSessionManager::BlockSetDisplayState(void)
+{
+    return prePowerStateChangeReason_ == PowerStateChangeReason::POWER_BUTTON;
 }
 
 bool ScreenSessionManager::SetDisplayState(DisplayState state)
@@ -1054,10 +1050,27 @@ void ScreenSessionManager::BlockScreenOnByCV(void)
         WLOGFI("[UL_POWER]screenOnCV_ set");
         needScreenOnWhenKeyguardNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOnMutex_);
-        if (screenOnCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_MS)) == std::cv_status::timeout) {
+        if (screenOnCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_SCREENON_MS)) == std::cv_status::timeout) {
             WLOGFI("[UL_POWER]wait ScreenOnCV_ timeout");
         }
     }
+}
+
+void ScreenSessionManager::BlockScreenOffByCV(void)
+{
+    if (gotScreenOffNotify_  == false) {
+        WLOGFI("[UL_POWER]screenOffCV_ set");
+        needScreenOffNotify_ = true;
+        std::unique_lock<std::mutex> lock(screenOffMutex_);
+        if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_SCREENOFF_MS)) == std::cv_status::timeout) {
+            WLOGFI("[UL_POWER]wait ScreenOffCV_ timeout");
+        }
+    }
+}
+
+bool ScreenSessionManager::IsScreenLockSuspend(void)
+{
+    return isScreenLockSuspend_;
 }
 
 void ScreenSessionManager::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -1116,10 +1129,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     WLOGFI("[UL_POWER]state: %{public}u, reason: %{public}u",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
     ScreenPowerStatus status;
-    if (blockScreenPowerChange_) {
-        WLOGFI("[UL_POWER]SetScreenPowerForAll block screen power change");
-        return true;
-    }
+
     // Handling Power Button Conflicts
     if (buttonBlock_ && reason != PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY &&
             state == ScreenPowerState::POWER_ON) {
@@ -1131,9 +1141,10 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     if (!GetPowerStatus(state, reason, status)) {
         return false;
     }
+    gotScreenOffNotify_  = false;
     keyguardDrawnDone_ = false;
     WLOGFI("[UL_POWER]SetScreenPowerForAll keyguardDrawnDone_ is false");
-    prePowerStateChangeReason = reason;
+    prePowerStateChangeReason_ = reason;
     return SetScreenPower(status, reason);
 }
 
@@ -1161,6 +1172,11 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
             }
             break;
         }
+        case ScreenPowerState::POWER_SUSPEND: {
+            status = ScreenPowerStatus::POWER_STATUS_SUSPEND;
+            WLOGFI("[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            break;
+        }
         default: {
             WLOGFW("[UL_POWER]SetScreenPowerStatus state not support");
             return false;
@@ -1176,10 +1192,6 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (screenIds.empty()) {
         WLOGFI("[UL_POWER]SetScreenPower screenIds empty");
         return false;
-    }
-
-    if (status == ScreenPowerStatus::POWER_STATUS_OFF) {
-        taskScheduler_->RemoveTask("screenOnTask");
     }
 
     // Handling Power Button Conflicts
@@ -1307,7 +1319,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         keyguardDrawnDone_ = true;
-        WLOGFI("[UL_POWER]NotifyDisplayEvent keyguardDrawnDone_ is true");
+        WLOGFI("[UL_POWER]keyguardDrawnDone_ is true");
         if (needScreenOnWhenKeyguardNotify_) {
             std::unique_lock <std::mutex> lock(screenOnMutex_);
             screenOnCV_.notify_all();
@@ -1317,17 +1329,29 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
-        WLOGFI("[UL_POWER]NotifyDisplayEvent screen lock suspend");
-        taskScheduler_->RemoveTask("suspendBeginTask");
-        blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_SUSPEND, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        WLOGFI("[UL_POWER]screen lock suspend");
+        gotScreenOffNotify_ = true;
+        isScreenLockSuspend_ = true;
+        WLOGFI("[UL_POWER]isScreenLockSuspend_  is true");
+        if (needScreenOffNotify_) {
+            std::unique_lock <std::mutex> lock(screenOffMutex_);
+            screenOffCV_.notify_all();
+            needScreenOffNotify_ = false;
+            WLOGFI("[UL_POWER]screenOffCV_ notify one");
+        }
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
-        WLOGFI("[UL_POWER]NotifyDisplayEvent screen lock off");
-        taskScheduler_->RemoveTask("suspendBeginTask");
-        blockScreenPowerChange_ = false;
-        SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        WLOGFI("[UL_POWER]screen lock off");
+        gotScreenOffNotify_ = true;
+        isScreenLockSuspend_ = false;
+        WLOGFI("[UL_POWER]isScreenLockSuspend__  is false");
+        if (needScreenOffNotify_) {
+            std::unique_lock <std::mutex> lock(screenOffMutex_);
+            screenOffCV_.notify_all();
+            needScreenOffNotify_ = false;
+            WLOGFI("[UL_POWER]screenOffCV_ notify one");
+        }
     }
 }
 

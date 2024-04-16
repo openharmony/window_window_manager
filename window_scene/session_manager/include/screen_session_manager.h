@@ -180,7 +180,10 @@ public:
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);
-    bool BlockSetDisplayState();
+    void BlockScreenOffByCV(void);
+    bool BlockSetDisplayState(void);
+    bool IsScreenLockSuspend(void);
+    bool IsPreBrightAuthFail(void);
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -344,15 +347,20 @@ private:
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
-    bool blockScreenPowerChange_ = false;
+    bool gotScreenOffNotify_ = false;
+    bool needScreenOffNotify_ = false;
 
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
+    std::mutex screenOffMutex_;
+    std::condition_variable screenOffCV_;
 
-    std::atomic<PowerStateChangeReason> prePowerStateChangeReason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    std::atomic<PowerStateChangeReason> prePowerStateChangeReason_ =
+        PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     std::atomic<PowerStateChangeReason> lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     std::atomic<PowerStateChangeReason> currentWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     std::atomic<bool> buttonBlock_ = false;
+    std::atomic<bool> isScreenLockSuspend_ = false;
 
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
