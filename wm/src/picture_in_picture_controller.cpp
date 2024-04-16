@@ -159,7 +159,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     }
     if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
         TLOGW(WmsLogTag::WMS_PIP, "pipWindow is starting, state: %{public}u, id: %{public}u, mainWindow: %{public}u",
-            curState_, window_->GetWindowId(), mainWindowId_);
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
@@ -178,9 +178,11 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
             if (window_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_PIP, "Reuse pipWindow failed");
+                curState_ = PiPWindowState::STATE_UNDEFINED;
                 return WMError::WM_ERROR_PIP_CREATE_FAILED;
             }
-            TLOGE(WmsLogTag::WMS_PIP, "Reuse pipWindow: %{public}u as attached to the same mainWindow: %{public}u",
+            TLOGI(WmsLogTag::WMS_PIP, "Reuse pipWindow: %{public}u as attached to the same mainWindow: %{public}u",
                 window_->GetWindowId(), mainWindowId_);
             PictureInPictureManager::DoClose(false, false);
             mainWindowXComponentController_ = pipOption_->GetXComponentController();
@@ -332,7 +334,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     return WMError::WM_OK;
 }
 
-sptr<Window> PictureInPictureController::GetPipWindow()
+sptr<Window> PictureInPictureController::GetPipWindow() const
 {
     return window_;
 }
@@ -484,6 +486,10 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 
 void PictureInPictureController::UpdateXComponentPositionAndSize()
 {
+    if (!mainWindowXComponentController_) {
+        TLOGE(WmsLogTag::WMS_PIP, "main window xComponent not set");
+        return;
+    }
     float posX = 0;
     float posY = 0;
     float width = 0;
