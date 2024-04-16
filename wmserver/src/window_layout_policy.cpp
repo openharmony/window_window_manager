@@ -781,6 +781,9 @@ void WindowLayoutPolicy::FixWindowRectWithinDisplay(const sptr<WindowNode>& node
     auto displayId = node->GetDisplayId();
     const Rect& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
+    if (displayInfo == nullptr) {
+        return;
+    }
     auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
     switch (type) {
