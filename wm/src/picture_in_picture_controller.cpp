@@ -178,6 +178,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
             window_ = PictureInPictureManager::GetCurrentWindow();
             if (window_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_PIP, "window is nullptr");
                 return WMError::WM_ERROR_PIP_CREATE_FAILED;
             }
             TLOGE(WmsLogTag::WMS_PIP, "Reuse pipWindow: %{public}u as attached to the same mainWindow: %{public}u",
