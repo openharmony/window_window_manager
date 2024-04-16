@@ -28,6 +28,7 @@
 #include <ability_info.h>
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
+#include <bundlemgr/launcher_service.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <hisysevent.h>
@@ -172,6 +173,30 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
     }
     return false;
 }
+
+class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
+public:
+    BundleStatusCallback() = default;
+    virtual ~BundleStatusCallback() = default;
+
+    void OnBundleStateChanged(const uint8_t installType,
+        const int32_t resultCode, const std::string& resultMsg, const std::string& bundleName) override {}
+
+    void OnBundleAdded(const std::string& bundleName, const int userId) override
+    {
+        SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
+    }
+
+    void OnBundleUpdated(const std::string& bundleName, const int userId) override
+    {
+        SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
+    }
+
+    void OnBundleRemoved(const std::string& bundleName, const int userId) override
+    {
+        SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
+    }
+};
 } // namespace
 
 SceneSessionManager& SceneSessionManager::GetInstance()
@@ -189,6 +214,10 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     currentUserId_ = DEFAULT_USERID;
+    launcherService_ = new AppExecFwk::LauncherService();
+    if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
+        WLOGFE("Failed to register bundle status callback.");
+    }
 }
 
 void SceneSessionManager::Init()
@@ -2533,32 +2562,34 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
     return resourceMgr;
 }
 
-void SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
+bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
     auto resourceMgr = GetResourceManager(abilityInfo);
     if (!resourceMgr) {
         WLOGFE("resourceMgr is nullptr.");
-        return;
+        return false;
     }
 
     if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId, bgColor) != Global::Resource::RState::SUCCESS) {
-        WLOGFW("Failed to get background color id %{public}d.", abilityInfo.startWindowBackgroundId);
+        WLOGFE("Failed to get background color, id %{public}d.", abilityInfo.startWindowBackgroundId);
+        return false;
     }
 
     if (resourceMgr->GetMediaById(abilityInfo.startWindowIconId, path) != Global::Resource::RState::SUCCESS) {
-        WLOGFE("Failed to get icon id %{public}d.", abilityInfo.startWindowIconId);
-        return;
+        WLOGFE("Failed to get icon, id %{public}d.", abilityInfo.startWindowIconId);
+        return false;
     }
 
     if (!abilityInfo.hapPath.empty()) { // zipped hap
         auto pos = path.find_last_of('.');
         if (pos == std::string::npos) {
             WLOGFE("Format error, path %{private}s.", path.c_str());
-            return;
+            return false;
         }
         path = "resource:///" + std::to_string(abilityInfo.startWindowIconId) + path.substr(pos);
     }
+    return true;
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
@@ -2568,6 +2599,10 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::st
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
+    if (GetStartingWindowInfoFromCache(sessionInfo, path, bgColor)) {
+        WLOGFI("Found in cache: %{public}s, %{public}x", path.c_str(), bgColor);
+        return;
+    }
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
@@ -2577,9 +2612,77 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::st
         return;
     }
 
-    GetStartupPageFromResource(abilityInfo, path, bgColor);
+    if (GetStartupPageFromResource(abilityInfo, path, bgColor)) {
+        CacheStartingWindowInfo(abilityInfo, path, bgColor);
+    }
     WLOGFI("%{public}d, %{public}d, %{public}s, %{public}x",
         abilityInfo.startWindowIconId, abilityInfo.startWindowBackgroundId, path.c_str(), bgColor);
+}
+
+bool SceneSessionManager::GetStartingWindowInfoFromCache(
+    const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartingWindowInfoFromCache");
+    std::shared_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+    auto iter = startingWindowMap_.find(sessionInfo.bundleName_);
+    if (iter == startingWindowMap_.end()) {
+        return false;
+    }
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    const auto& infoMap = iter->second;
+    auto infoMapIter = infoMap.find(key);
+    if (infoMapIter == infoMap.end()) {
+        return false;
+    }
+    path = infoMapIter->second.startingWindowIconPath_;
+    bgColor = infoMapIter->second.startingWindowBackgroundColor_;
+    return true;
+}
+
+void SceneSessionManager::CacheStartingWindowInfo(
+    const AppExecFwk::AbilityInfo& abilityInfo, const std::string& path, const uint32_t& bgColor)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CacheStartingWindowInfo");
+    auto key = abilityInfo.moduleName + abilityInfo.name;
+    StartingWindowInfo info = {
+        .startingWindowBackgroundId_ = abilityInfo.startWindowBackgroundId,
+        .startingWindowIconId_ = abilityInfo.startWindowIconId,
+        .startingWindowBackgroundColor_ = bgColor,
+        .startingWindowIconPath_ = path,
+    };
+    std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+    auto iter = startingWindowMap_.find(abilityInfo.bundleName);
+    if (iter != startingWindowMap_.end()) {
+        auto& infoMap = iter->second;
+        infoMap.emplace(key, info);
+        return;
+    }
+    if (startingWindowMap_.size() >= MAX_CACHE_COUNT) {
+        startingWindowMap_.erase(startingWindowMap_.begin());
+    }
+    std::map<std::string, StartingWindowInfo> infoMap({{ key, info }});
+    startingWindowMap_.emplace(abilityInfo.bundleName, infoMap);
+}
+
+void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)
+{
+    taskScheduler_->PostAsyncTask([this, bundleName]() {
+        std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+        auto iter = startingWindowMap_.find(bundleName);
+        if (iter != startingWindowMap_.end()) {
+            startingWindowMap_.erase(iter);
+        }
+    },
+        "OnBundleUpdated");
+}
+
+void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    taskScheduler_->PostAsyncTask([this]() {
+        std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+        startingWindowMap_.clear();
+    },
+        "OnConfigurationUpdated");
 }
 
 void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
