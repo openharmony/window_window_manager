@@ -2398,11 +2398,6 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
-                errCode = WMError::WM_ERROR_NULLPTR;
-            }
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
