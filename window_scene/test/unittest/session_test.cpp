@@ -1845,6 +1845,23 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent05, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: TransferKeyEvent01
+ * @tc.desc: !IsSystemSession() && !IsSessionVaild() is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: TransferKeyEvent02
  * @tc.desc: keyEvent is nullptr
  * @tc.type: FUNC
