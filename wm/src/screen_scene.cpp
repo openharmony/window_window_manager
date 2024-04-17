@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "singleton_container.h"
 
 #include "anr_manager.h"
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "window_rate_manager.h"
 
@@ -30,10 +31,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenScene" };
+constexpr float MIN_DPI = 1e-6;
 } // namespace
 
 ScreenScene::ScreenScene(std::string name) : name_(name)
 {
+    orientation_ = static_cast<int32_t>(DisplayOrientation::PORTRAIT);
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
@@ -47,12 +50,12 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     AbilityRuntime::Context* context)
 {
     if (context == nullptr) {
-        WLOGFE("context is nullptr!");
+        TLOGE(WmsLogTag::WMS_MAIN, "context is nullptr!");
         return;
     }
     uiContent_ = Ace::UIContent::Create(context, reinterpret_cast<NativeEngine*>(env));
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::WMS_MAIN, "uiContent_ is nullptr!");
         return;
     }
 
@@ -61,7 +64,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     DelayedSingleton<ANRManager>::GetInstance()->Init();
     DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
-        WLOGFD("Receive anr notice enter");
+        TLOGD(WmsLogTag::WMS_MAIN, "Receive anr notice enter");
         AppExecFwk::AppFaultDataBySA faultData;
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
         faultData.pid = pid;
@@ -70,16 +73,16 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
         faultData.errorObject.stack = "";
         if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
             ret != 0) {
-            WLOGFE("NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+            TLOGE(WmsLogTag::WMS_MAIN, "NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
         }
-        WLOGFD("Receive anr notice leave");
+        TLOGD(WmsLogTag::WMS_MAIN, "Receive anr notice leave");
     }));
     DelayedSingleton<ANRManager>::GetInstance()->SetAppInfoGetter(
         [](int32_t pid, std::string& bundleName, int32_t uid) {
             int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetBundleNameByPid(
                 pid, bundleName, uid);
             if (ret != 0) {
-                WLOGFE("GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+                TLOGE(WmsLogTag::WMS_MAIN, "GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
             }
         });
 }
@@ -87,7 +90,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::WMS_MAIN, "uiContent_ is nullptr!");
         return;
     }
     Ace::ViewportConfig config;
@@ -101,7 +104,7 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
 void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_) {
-        WLOGFD("notify root scene ace");
+        TLOGD(WmsLogTag::WMS_MAIN, "notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
     }
 }
@@ -132,6 +135,14 @@ void ScreenScene::FlushFrameRate(uint32_t rate)
     WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate, vsyncStation_);
 }
 
+void ScreenScene::OnBundleUpdated(const std::string& bundleName)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "bundle %{public}s updated", bundleName.c_str());
+    if (uiContent_) {
+        uiContent_->UpdateResource();
+    }
+}
+
 void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
 {
     frameLayoutFinishCb_ = callback;
@@ -139,6 +150,25 @@ void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetFrameLayoutFinishCallback end");
+}
+
+void ScreenScene::SetDisplayDensity(float density)
+{
+    if (density < MIN_DPI) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid density");
+        return;
+    }
+    density_ = density;
+}
+
+void ScreenScene::SetDisplayOrientation(int32_t orientation)
+{
+    if (orientation < static_cast<int32_t>(DisplayOrientation::PORTRAIT) ||
+        orientation > static_cast<int32_t>(DisplayOrientation::UNKNOWN)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid orientation");
+        return;
+    }
+    orientation_ = orientation;
 }
 } // namespace Rosen
 } // namespace OHOS
