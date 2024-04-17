@@ -27,6 +27,63 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION, "ScreenSession" };
 }
 
+ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
+    : name_(config.name), screenId_(config.screenId), rsId_(config.rsId), defaultScreenId_(config.defaultScreenId),
+    property_(config.property), displayNode_(config.displayNode)
+{
+    TLOGI(WmsLogTag::DMS,
+        "[DPNODE]Create Session, reason: %{public}d, screenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
+        reason, screenId_, rsId_);
+    TLOGI(WmsLogTag::DMS,
+        "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
+        name_.c_str(), defaultScreenId_, config.mirrorNodeId);
+    Rosen::RSDisplayNodeConfig rsConfig;
+    switch (reason) {
+        case ScreenSessionReason::CREATE_SESSION_FOR_CLIENT: {
+            TLOGI(WmsLogTag::DMS, "create screen session for client. noting to do.");
+            return;
+        }
+        case ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL: {
+            // create virtual screen should use rsid
+            rsConfig.screenId = rsId_;
+            break;
+        }
+        case ScreenSessionReason::CREATE_SESSION_FOR_MIRROR: {
+            rsConfig.screenId = screenId_;
+            rsConfig.isMirrored = true;
+            rsConfig.mirrorNodeId = config.mirrorNodeId;
+            break;
+        }
+        case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
+            rsConfig.screenId = screenId_;
+            break;
+        }
+        default : {
+            TLOGE(WmsLogTag::DMS, "INVALID invalid screen session config.");
+            break;
+        }
+    }
+    CreateDisplayNode(rsConfig);
+}
+
+void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
+{
+    TLOGI(WmsLogTag::DMS, "[DPNODE]config screenId: %{public}d, isMirrored: %{public}d, mirrorNodeId: %{public}d ",
+        static_cast<int32_t>(config.screenId),
+        static_cast<int32_t>(config.isMirrored),
+        static_cast<int32_t>(config.mirrorNodeId));
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    if (displayNode_) {
+        displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+    } else {
+        TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
     const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
     : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)

@@ -774,7 +774,13 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
             nodeId = sIt->second->GetDisplayNode()->GetId();
         }
         WLOGFI("GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
-        session = new ScreenSession(screenId, property, nodeId, defScreenId);
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .property = property,
+            .mirrorNodeId = nodeId,
+            .defaultScreenId = defScreenId,
+        };
+        session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
         session->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         session->SetName("CastEngine");
         session->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
@@ -782,7 +788,12 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         isHdmiScreen_ = true;
         NotifyCaptureStatusChanged();
     } else {
-        session = new ScreenSession(screenId, property, defScreenId);
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .property = property,
+            .defaultScreenId = defScreenId,
+        };
+        session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     }
     return session;
 }
@@ -2389,8 +2400,14 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     VirtualScreenOption option)
 {
     WLOGFI("InitVirtualScreen: Enter");
+    ScreenSessionConfig config = {
+        .name = option.name_,
+        .screenId = smsScreenId,
+        .rsId = rsId,
+        .defaultScreenId = GetDefaultScreenId(),
+    };
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(option.name_, smsScreenId, rsId, GetDefaultScreenId());
+        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (screenSession == nullptr || info == nullptr) {
         WLOGFI("InitVirtualScreen: new screenSession or info failed");
@@ -2453,8 +2470,14 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     RSScreenCapability screenCapability = rsInterface_.GetScreenCapability(rsScreenId);
     WLOGFI("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
+    ScreenSessionConfig config = {
+        .name = screenCapability.GetName(),
+        .screenId = smsScreenId,
+        .rsId = rsScreenId,
+        .defaultScreenId = GetDefaultScreenId(),
+    };
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(screenCapability.GetName(), smsScreenId, rsScreenId, GetDefaultScreenId());
+        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     if (screenSession == nullptr) {
         WLOGFE("InitAndGetScreen: screenSession == nullptr.");
         screenIdManager_.DeleteScreenId(smsScreenId);
