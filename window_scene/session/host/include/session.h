@@ -495,7 +495,7 @@ protected:
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
-    mutable std::mutex dialogVecMutex_;
+    mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
