@@ -80,6 +80,26 @@ public:
         virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
     };
 
+    class IFoldAngleListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen fold angles changed.
+         *
+         * @param foldAngles Screen fold angles array.
+         */
+        virtual void OnFoldAngleChanged([[maybe_unused]]std::vector<float> foldAngles) {}
+    };
+
+    class ICaptureStatusListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen capture status changed.
+         *
+         * @param isCapture Screen capture status.
+         */
+        virtual void OnCaptureStatusChanged([[maybe_unused]]bool isCapture) {}
+    };
+
     class IDisplayUpdateListener : public virtual RefBase {
     public:
         /**
@@ -359,6 +379,38 @@ public:
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
 
     /**
+     * @brief Register a listener for the event of screen fold angle changed.
+     *
+     * @param listener IFoldAngleListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterFoldAngleListener(sptr<IFoldAngleListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen fold angle changed.
+     *
+     * @param listener IFoldAngleListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener);
+
+    /**
+     * @brief Register a listener for the event of screen capture status changed.
+     *
+     * @param listener ICaptureStatusListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterCaptureStatusListener(sptr<ICaptureStatusListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen capture status changed.
+     *
+     * @param listener ICaptureStatusListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterCaptureStatusListener(sptr<ICaptureStatusListener> listener);
+
+    /**
      * @brief Register an listener when session changed.
      *
      * @param listener IDisplayUpdateListener.
@@ -430,6 +482,13 @@ public:
      * @return true means the device is foldable.
      */
     bool IsFoldable();
+
+    /**
+     * @brief Check whether the device is capture.
+     *
+     * @return true means the device is capture.
+     */
+    bool IsCaptured();
 
     /**
      * @brief Get the current fold status of the foldable device.

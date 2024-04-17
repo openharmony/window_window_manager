@@ -44,7 +44,6 @@
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
-#include "window_rate_manager.h"
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
@@ -457,6 +456,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
+    }
+    if (context_) {
+        context_.reset();
     }
     return WMError::WM_OK;
 }
@@ -1182,6 +1184,16 @@ Ace::UIContent* WindowSessionImpl::GetUIContent() const
     return uiContent_.get();
 }
 
+Ace::UIContent* WindowSessionImpl::GetUIContentWithId(uint32_t winId) const
+{
+    sptr<Window> targetWindow = FindWindowById(winId);
+    if (targetWindow == nullptr) {
+        WLOGE("target window is null");
+        return nullptr;
+    }
+    return targetWindow->GetUIContent();
+}
+
 void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 {
     WLOGFI("Window [name:%{public}s, id:%{public}d]",
@@ -1666,7 +1678,13 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
-    WindowRateManager::GetInstance().AddWindowRate(GetPersistentId());
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable ture failed, vsyncStation is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: ture, linkerId = %{public}" PRIu64,
+        vsyncStation_->GetFrameRateLinkerId());
+    vsyncStation_->SetFrameRateLinkerEnable(true);
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1679,7 +1697,13 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
-    WindowRateManager::GetInstance().RemoveWindowRate(GetPersistentId(), vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable false failed, vsyncStation is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: false, linkerId = %{public}" PRIu64,
+        vsyncStation_->GetFrameRateLinkerId());
+    vsyncStation_->SetFrameRateLinkerEnable(false);
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
@@ -2525,7 +2549,11 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 void WindowSessionImpl::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WindowRateManager::GetInstance().FlushFrameRate(GetPersistentId(), rate, vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->FlushFrameRate(rate);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)

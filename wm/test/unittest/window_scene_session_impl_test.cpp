@@ -2860,6 +2860,31 @@ HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Fu
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
 }
 
+/**
+ * @tc.name: TestGetUIContentWithId
+ * @tc.desc: Get uicontent with id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("TestGetUIContentWithId");
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(102);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    
+    ASSERT_NE(nullptr, window->GetUIContentWithId(102));
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId end";
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

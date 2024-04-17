@@ -110,6 +110,25 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyWaterMarkFlagChangedResult(showWaterMark);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM: {
+            std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+            bool res = MarshallingHelper::UnmarshallingVectorObj<VisibleWindowNumInfo>(
+                data, visibleWindowNumInfo, [](Parcel& parcel, VisibleWindowNumInfo& num) {
+                    uint32_t displayId = -1;
+                    uint32_t visibleWindowNum = -1;
+                    bool res = parcel.ReadUint32(displayId) && parcel.ReadUint32(visibleWindowNum);
+                    num.displayId = displayId;
+                    num.visibleWindowNum = visibleWindowNum;
+                    return res;
+                }
+            );
+            if (!res) {
+                WLOGFE("fail to read VisibleWindowNumInfo.");
+                break;
+            }
+            UpdateVisibleWindowNum(visibleWindowNumInfo);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED: {
             bool enbale = data.ReadBool();
             NotifyGestureNavigationEnabledResult(enbale);

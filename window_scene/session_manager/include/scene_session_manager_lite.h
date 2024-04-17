@@ -39,6 +39,8 @@ public:
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
+    WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
+        SessionInfoBean& sessionInfo) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
@@ -58,6 +60,7 @@ public:
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
+    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
 
 protected:
     SceneSessionManagerLite() = default;

@@ -49,6 +49,9 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleGetSessionInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         &SceneSessionManagerLiteStub::HandleGetSessionInfo),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        &SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
         &SceneSessionManagerLiteStub::HandleTerminateSessionNew),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
@@ -78,6 +81,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
                    &SceneSessionManagerLiteStub::HandleCheckWindowId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
                    &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
+        &SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -198,6 +203,24 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         WLOGFE("GetSessionInfo result error");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
+{
+    SessionInfoBean info;
+    std::string continueSessionId = data.ReadString();
+    TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
+    if (!reply.WriteParcelable(&info)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId error");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -348,8 +371,8 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel &data, Messag
 
 int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleRegisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -360,8 +383,8 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel 
 
 int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleUnregisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -382,4 +405,16 @@ int SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(MessageParcel& da
     return ERR_NONE;
 }
 
+int SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(MessageParcel &data, MessageParcel &reply)
+{
+    bool isBackHome = false;
+    WMError errCode = GetWindowBackHomeStatus(isBackHome);
+    WLOGFI("run HandleGetWindowBackHomeStatus, isBackHome:%{public}d!", isBackHome);
+    if (!reply.WriteBool(isBackHome)) {
+        WLOGE("Failed to WriteBool");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

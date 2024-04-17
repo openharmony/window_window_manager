@@ -26,6 +26,9 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
 } // namespace
 
+constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 5;
+constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 5;
+
 SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
@@ -330,5 +333,13 @@ void SubSession::UpdatePointerArea(const WSRect& rect)
         return;
     }
     Session::UpdatePointerArea(rect);
+}
+
+void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+{
+    uint32_t minWidth = MIN_SYSTEM_WINDOW_WIDTH;
+    uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
+    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
 }
 } // namespace OHOS::Rosen

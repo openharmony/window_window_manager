@@ -19,6 +19,7 @@
 
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_pattern_detach_callback.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
@@ -425,7 +426,10 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockEventChannel);
     auto surfaceNode = CreateRSSurfaceNode();
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, surfaceNode, sessionConfig, property));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -453,7 +457,10 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -494,21 +501,23 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
     SystemSessionConfig systemConfig;
-    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
-    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
-    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1838,6 +1847,23 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent05, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: TransferKeyEvent01
+ * @tc.desc: !IsSystemSession() && !IsSessionVaild() is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: TransferKeyEvent02
  * @tc.desc: keyEvent is nullptr
  * @tc.type: FUNC
@@ -1848,7 +1874,8 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent02, Function | SmallTest | Level2)
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
@@ -1878,7 +1905,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent03, Function | SmallTest | Level2)
     dialogSession->state_ = SessionState::STATE_ACTIVE;
     session_->dialogVec_.push_back(dialogSession);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -1908,7 +1935,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent04, Function | SmallTest | Level2)
     session_->dialogVec_.push_back(dialogSession);
     session_->parentSession_ = session_;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -2202,9 +2229,9 @@ HWTEST_F(WindowSessionTest, UpdateWindowMode01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
-    session_->sessionInfo_.isSystem_ = true;
+    session_->property_ = nullptr;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
@@ -2483,6 +2510,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     info.callingTokenId_ = 1;
     info.uiAbilityId_ = 1;
     info.startSetting = nullptr;
+    info.continueSessionId_ = "";
     session_->SetSessionInfo(info);
     ASSERT_EQ(nullptr, session_->sessionInfo_.want);
     ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
@@ -2490,6 +2518,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     ASSERT_EQ(1, session_->sessionInfo_.callerPersistentId_);
     ASSERT_EQ(1, session_->sessionInfo_.callingTokenId_);
     ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
+    ASSERT_EQ("", session_->sessionInfo_.continueSessionId_);
     ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
 }
 
@@ -2939,11 +2968,11 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
 }
 
 /**
- * @tc.name: SetAttachState
- * @tc.desc: SetSystemActive Test
+ * @tc.name: SetAttachState01
+ * @tc.desc: SetAttachState Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetAttachState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetAttachState01, Function | SmallTest | Level2)
 {
     session_->SetAttachState(true);
     ASSERT_EQ(session_->isAttach_, true);
@@ -2952,15 +2981,94 @@ HWTEST_F(WindowSessionTest, SetAttachState, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: RegisterDetachCallback
+ * @tc.name: SetAttachState02
+ * @tc.desc: SetAttachState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 123;
+    sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
+    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
+    session_->persistentId_ = persistentId;
+    session_->SetAttachState(true);
+    session_->RegisterDetachCallback(detachCallback);
+    session_->SetAttachState(false);
+    Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback01
  * @tc.desc: RegisterDetachCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, RegisterDetachCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, RegisterDetachCallback01, Function | SmallTest | Level2)
 {
     sptr<IPatternDetachCallback> detachCallback;
     session_->RegisterDetachCallback(detachCallback);
     ASSERT_EQ(session_->detachCallback_, detachCallback);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback02
+ * @tc.desc: RegisterDetachCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterDetachCallback02, Function | SmallTest | Level2)
+{
+    sptr<IPatternDetachCallback> detachCallback;
+    session_->RegisterDetachCallback(detachCallback);
+    ASSERT_EQ(session_->detachCallback_, detachCallback);
+    sptr<IPatternDetachCallback> detachCallback2;
+    session_->RegisterDetachCallback(detachCallback2);
+    ASSERT_EQ(session_->detachCallback_, detachCallback2);
+}
+
+/**
+ * @tc.name: RegisterDetachCallback03
+ * @tc.desc: RegisterDetachCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RegisterDetachCallback03, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 123;
+    sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
+    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
+    session_->persistentId_ = persistentId;
+    session_->SetAttachState(true);
+    session_->SetAttachState(false);
+    session_->RegisterDetachCallback(detachCallback);
+    Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: SetContextTransparentFunc
+ * @tc.desc: SetContextTransparentFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetContextTransparentFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->contextTransparentFunc_, nullptr);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->contextTransparentFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NeedCheckContextTransparent
+ * @tc.desc: NeedCheckContextTransparent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
 }
 
 }

@@ -56,7 +56,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, OffsetX, offsetX, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, OffsetY, offsetY, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayOrientation, DisplayOrientation, displayOrientation,
         DisplayOrientation::UNKNOWN);

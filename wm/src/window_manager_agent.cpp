@@ -62,9 +62,20 @@ void WindowManagerAgent::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     SingletonContainer::Get<WindowManager>().NotifyWaterMarkFlagChangedResult(showWaterMark);
 }
 
+void WindowManagerAgent::UpdateVisibleWindowNum(
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
+{
+    SingletonContainer::Get<WindowManager>().UpdateVisibleWindowNum(visibleWindowNumInfo);
+}
+
 void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
 {
     SingletonContainer::Get<WindowManager>().NotifyGestureNavigationEnabledResult(enable);
+}
+
+void WindowManagerAgent::UpdateWindowBackHomeStatus(bool isBackHome)
+{
+    SingletonContainer::Get<WindowManager>().UpdateWindowBackHomeStatus(isBackHome);
 }
 } // namespace Rosen
 } // namespace OHOS

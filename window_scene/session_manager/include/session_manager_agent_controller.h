@@ -40,8 +40,11 @@ public:
         WindowUpdateType type);
     void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     void UpdateWindowDrawingContentInfo(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void UpdateWindowBackHomeStatus(bool isBackHome);
+
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;

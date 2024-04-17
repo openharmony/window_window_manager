@@ -20,6 +20,7 @@
 
 #include "display_manager_interface.h"
 #include "dm_common.h"
+#include "interfaces/include/ws_common.h"
 #include "session/screen/include/screen_property.h"
 #include "zidl/screen_session_manager_client_interface.h"
 
@@ -119,6 +120,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
     bool IsFoldable() override { return false; };
+    bool IsCaptured() override { return false; };
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
 
@@ -136,6 +138,11 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
+    DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

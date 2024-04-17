@@ -216,7 +216,6 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSession, Function | Smal
 {
     uint32_t persistentId = 0;
     WindowAdapter windowAdapter;
-
     windowAdapter.DestroyAndDisconnectSpecificSession(persistentId);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
@@ -231,7 +230,6 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallbac
 {
     uint32_t persistentId = 0;
     WindowAdapter windowAdapter;
-
     windowAdapter.DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);

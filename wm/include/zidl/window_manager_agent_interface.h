@@ -30,9 +30,11 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
     WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
+    WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM,
     WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_BACK_HOME_STATE,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
@@ -47,9 +49,11 @@ public:
         TRANS_ID_UPDATE_WINDOW_DRAWING_STATE,
         TRANS_ID_UPDATE_CAMERA_FLOAT,
         TRANS_ID_UPDATE_WATER_MARK_FLAG,
+        TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM,
         TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_MODE_TYPE,
+        TRANS_ID_UPDATE_WINDOW_BACK_HOME_STATUS,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -62,8 +66,10 @@ public:
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWaterMarkFlagChangedResult(bool isShowing) = 0;
+    virtual void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) = 0;
     virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;
     virtual void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
+    virtual void UpdateWindowBackHomeStatus(bool isBackHome) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

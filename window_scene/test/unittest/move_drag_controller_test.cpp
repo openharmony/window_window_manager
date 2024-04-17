@@ -487,7 +487,7 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
  */
 HWTEST_F(MoveDragControllerTest, GetVirtualPixelRatio, Function | SmallTest | Level1)
 {
-    float vpr = 3.5;
+    float vpr = 1.5;
     float vpr01 = moveDragController->GetVirtualPixelRatio();
     ASSERT_EQ(vpr, vpr01);
 }

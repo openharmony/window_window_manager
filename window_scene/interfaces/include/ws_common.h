@@ -203,6 +203,7 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
+    std::string continueSessionId_ = "";
 };
 
 enum class SessionFlag : uint32_t {
@@ -377,6 +378,13 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
+struct StartingWindowInfo {
+    int32_t startingWindowBackgroundId_;
+    int32_t startingWindowIconId_;
+    uint32_t startingWindowBackgroundColor_;
+    std::string startingWindowIconPath_;
+};
+
 struct StartingWindowAnimationConfig {
     bool enabled_ = true;
     int duration_ = 200;
@@ -394,6 +402,10 @@ struct AppWindowSceneConfig {
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
+};
+
+struct DeviceScreenConfig {
+    std::string rotationPolicy_ = "11"; // default use phone policy
 };
 
 /**

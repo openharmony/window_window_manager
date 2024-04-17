@@ -250,10 +250,8 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 
 WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     WLOGFI("RegisterWMSConnectionChangedListener in");
-    SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
-    return WMError::WM_OK;
+    return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
 }
 
 void WindowAdapter::WindowManagerAndSessionRecover()
@@ -507,17 +505,18 @@ void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& 
         sessionStage, eventChannel, surfaceNode, property, session, token);
 }
 
-void WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
+WMError WindowAdapter::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
-    INIT_PROXY_CHECK_RETURN();
-    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->DestroyAndDisconnectSpecificSession(persistentId));
 }
 
-void WindowAdapter::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+WMError WindowAdapter::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
     const sptr<IRemoteObject>& callback)
 {
-    INIT_PROXY_CHECK_RETURN();
-    windowManagerServiceProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        windowManagerServiceProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback));
 }
 
 WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
@@ -630,6 +629,13 @@ WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowRect(persistentId, rect));
+}
+
+WMError WindowAdapter::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    WLOGFD("get back home status");
+    return windowManagerServiceProxy_->GetWindowBackHomeStatus(isBackHome);
 }
 } // namespace Rosen
 } // namespace OHOS

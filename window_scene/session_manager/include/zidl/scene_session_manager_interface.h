@@ -71,6 +71,7 @@ public:
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
         TRANS_ID_GET_MISSION_INFO_BY_ID,
+        TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID,
         TRANS_ID_DUMP_SESSION_ALL,
         TRANS_ID_DUMP_SESSION_WITH_ID,
         TRANS_ID_TERMINATE_SESSION_NEW,
@@ -104,6 +105,7 @@ public:
         TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK,
         TRANS_ID_GET_WINDOW_STATUS,
         TRANS_ID_GET_WINDOW_RECT,
+        TRANS_ID_GET_WINDOW_BACK_HOME_STATUS,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -121,6 +123,8 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
+        SessionInfoBean& sessionInfo) = 0;
     virtual WSError DumpSessionAll(std::vector<std::string> &infos) override { return WSError::WS_OK; }
     virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override
     {
@@ -236,6 +240,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError GetWindowBackHomeStatus(bool &isBackHome) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

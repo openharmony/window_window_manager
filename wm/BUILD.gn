@@ -75,7 +75,6 @@ ohos_static_library("libwm_static") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_prepare_terminate.cpp",
-    "src/window_rate_manager.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -219,7 +218,6 @@ ohos_shared_library("libwm") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_prepare_terminate.cpp",
-    "src/window_rate_manager.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -346,6 +344,7 @@ ohos_shared_library("libwm_lite") {
   public_configs = [ ":libwm_public_config" ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
