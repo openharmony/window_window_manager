@@ -53,9 +53,28 @@ enum class ScreenState : int32_t {
     DISCONNECTION,
 };
 
+struct ScreenSessionConfig {
+    ScreenId screenId {0};
+    ScreenId rsId {0};
+    ScreenId defaultScreenId {0};
+    ScreenId mirrorNodeId {0};
+    std::string name = "UNKNOWN";
+    ScreenProperty property;
+    std::shared_ptr<RSDisplayNode> displayNode;
+};
+
+enum class ScreenSessionReason : int32_t {
+    CREATE_SESSION_FOR_CLIENT,
+    CREATE_SESSION_FOR_VIRTUAL,
+    CREATE_SESSION_FOR_MIRROR,
+    CREATE_SESSION_FOR_REAL,
+    INVALID,
+};
+
 class ScreenSession : public RefBase {
 public:
     ScreenSession() = default;
+    ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason);
     ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
         const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode);
     ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
@@ -63,6 +82,7 @@ public:
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
     virtual ~ScreenSession() = default;
 
+    void CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config);
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
