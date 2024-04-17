@@ -139,9 +139,10 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
             return ret;
         }
         auto sessionProperty = session->GetSessionProperty();
-        if (session->leashWinSurfaceNode_ && sessionProperty) {
+        auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+        if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
-            session->leashWinSurfaceNode_->SetSecurityLayer(lastPrivacyMode);
+            leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
@@ -1203,8 +1204,9 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             if (rsTransaction) {
                 rsTransaction->Begin();
             }
-            if (session->leashWinSurfaceNode_) {
-                session->leashWinSurfaceNode_->SetForceUIFirst(true);
+            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode) {
+                leashWinSurfaceNode->SetForceUIFirst(true);
                 WLOGFI("leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!", session->GetPersistentId());
             } else {
                 WLOGFI("failed, leashWinSurfaceNode_ null id:%{public}u", session->GetPersistentId());
@@ -1438,9 +1440,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
     if (rsTransaction) {
         rsTransaction->Begin();
     }
-    if (surfaceNode_ && leashWinSurfaceNode_) {
-        leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        leashWinSurfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (surfaceNode_ && leashWinSurfaceNode) {
+        leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        leashWinSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
     } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
@@ -1631,8 +1634,9 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property->SetPrivacyMode(isPrivacy);
     property->SetSystemPrivacyMode(isPrivacy);
     surfaceNode_->SetSecurityLayer(isPrivacy);
-    if (leashWinSurfaceNode_ != nullptr) {
-        leashWinSurfaceNode_->SetSecurityLayer(isPrivacy);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetSecurityLayer(isPrivacy);
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -1655,8 +1659,9 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("surfaceNode SetAbilityBGAlpha=%{public}u.", alpha8bit);
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
-    if (leashWinSurfaceNode_ != nullptr) {
-        leashWinSurfaceNode_->SetAbilityBGAlpha(alpha8bit);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
     RSTransaction::FlushImplicitTransaction();
 }
