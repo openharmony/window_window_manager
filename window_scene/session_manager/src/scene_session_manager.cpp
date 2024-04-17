@@ -2269,6 +2269,12 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             if (sceneSession == nullptr) {
                 continue;
             }
+            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+                sceneSession->GetSessionProperty() != nullptr) {
+                callingSessionId = sceneSession->GetSessionProperty()->GetCallingSessionId();
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
+                    persistentId, callingSessionId);
+            }
             if (!(sceneSession->IsVisible() ||
                 sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                 sceneSession->GetSessionState() == SessionState::STATE_ACTIVE)) {
@@ -2279,12 +2285,6 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 (touchOutsideListenerSessionSet_.find(sessionId) == touchOutsideListenerSessionSet_.end())) {
                 WLOGFD("id: %{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
                 continue;
-            }
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-                sceneSession->GetSessionProperty() != nullptr) {
-                callingSessionId = sceneSession->GetSessionProperty()->GetCallingSessionId();
-                TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
-                    persistentId, callingSessionId);
             }
             if (sessionId == callingSessionId || sessionId == persistentId) {
                 WLOGFD("No need to notify touch window, id: %{public}d", sessionId);
