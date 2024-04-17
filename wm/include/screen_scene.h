@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,17 +43,12 @@ public:
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate) override;
 
+    void OnBundleUpdated(const std::string& bundleName);
     void SetFrameLayoutFinishCallback(std::function<void()> && callback);
 
-    void SetDisplayDensity(float density)
-    {
-        density_ = density;
-    }
+    void SetDisplayDensity(float density);
 
-    void SetDisplayOrientation(int32_t orientation)
-    {
-        orientation_ = orientation;
-    }
+    void SetDisplayOrientation(int32_t orientation);
 
     WindowState GetWindowState() const override
     {
