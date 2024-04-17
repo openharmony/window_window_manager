@@ -289,9 +289,9 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(Display
     }
 
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
-    DmErrorCode replyErreoCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     if (errorCode) {
-        *errorCode = replyErreoCode;
+        *errorCode = replyErrorCode;
     }
     if (pixelMap == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDisplaySnapshot SendRequest nullptr.");

@@ -62,6 +62,12 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode);
 }
 
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetSnapshotByPicker(rect, errorCode);
+}
+
 DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
