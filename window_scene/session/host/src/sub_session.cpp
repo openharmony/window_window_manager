@@ -30,8 +30,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    std::unique_lock<std::shared_mutex> lock(moveDragControllerMutex_);
-    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    {
+        std::unique_lock<std::shared_mutex> lock(moveDragControllerMutex_);
+        moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    }
     SetMoveDragCallback();
     TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
 }
