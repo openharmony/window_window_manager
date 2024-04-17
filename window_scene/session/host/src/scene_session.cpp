@@ -305,7 +305,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
     sessionChangeCallback)
 {
-    std::unique_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::unique_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
@@ -652,7 +652,7 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
         TLOGE(WmsLogTag::WMS_DIALOG, "dialog session is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "id: %{public}d", sceneSession->GetPersistentId());
         sessionChangeCallback_->onBindDialogTarget_(sceneSession);
@@ -673,7 +673,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
@@ -731,7 +731,7 @@ WSError SceneSession::OnNeedAvoid(bool status)
 WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 {
     WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnShowWhenLocked_) {
         sessionChangeCallback_->OnShowWhenLocked_(showWhenLocked);
     }
@@ -1684,7 +1684,7 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 void SceneSession::SetWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     needDefaultAnimationFlag_ = needDefaultAnimationFlag;
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ && sessionChangeCallback_->onWindowAnimationFlagChange_) {
         sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
     }
@@ -1710,7 +1710,7 @@ bool SceneSession::IsAppSession() const
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
         sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
     }
@@ -1784,7 +1784,7 @@ void SceneSession::NotifyTouchOutside()
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
     }
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
         WLOGFD("Notify sessionChangeCallback TouchOutside");
         sessionChangeCallback_->OnTouchOutside_();
@@ -1802,7 +1802,7 @@ void SceneSession::NotifyWindowVisibility()
 
 bool SceneSession::CheckOutTouchOutsideRegister()
 {
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
         return true;
     }
@@ -1813,7 +1813,7 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
     GetSessionProperty()->SetRequestedOrientation(orientation);
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
         sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
@@ -1828,7 +1828,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
         return;
     }
     property->SetForceHide(hide);
-    std::shared_lock<std::shared_mutex> lock(sessionChangeCbMutex_);
+    std::shared_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
