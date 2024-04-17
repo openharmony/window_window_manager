@@ -36,6 +36,8 @@
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
+#include "singleton_container.h"
+#include "perform_reporter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1987,6 +1989,18 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
+        std::ostringstream oss;
+        oss << "RectCheck err size ";
+        oss << " cur persistentId: " << GetPersistentId << ",";
+        oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+        oss << " curWidth: " << curWidth << ",";
+        oss << " curHeight: " << curHeight << ",";
+        oss << " minWidth: " << minWidth << ",";
+        oss << " minHeight: " << minHeight << ",";
+        oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
+        oss << " sessionRect: " << GetSessionRect().ToString() << ";";
+        WindowInfoReporter::GetInstance().ReportWindowExcetion(
+            static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
     }
 }
 
@@ -2010,6 +2024,16 @@ void Session::RectCheckProcess()
         float actRatio = static_cast<float>(curWidth) / curHeight;
         if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+            std::ostringstream oss;
+            oss << " RectCheck err ratio ";
+            oss << " cur persistentId: " << GetPersistentId << ",";
+            oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+            oss << " curWidth: " << curWidth << ",";
+            oss << " curHeight: " << curHeight << ",";
+            oss << " ratio: " << ratio << ",";
+            oss << " sessionRect: " << GetSessionRect().ToString() << ";";
+            WindowInfoReporter::GetInstance().ReportWindowExcetion(
+                static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
         }
         RectCheck(curWidth, curHeight);
     }
