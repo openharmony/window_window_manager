@@ -426,7 +426,10 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockEventChannel);
     auto surfaceNode = CreateRSSurfaceNode();
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, surfaceNode, sessionConfig, property));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -454,7 +457,10 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -495,21 +501,23 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
     SystemSessionConfig systemConfig;
-    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
-    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
-    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1839,6 +1847,23 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent05, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: TransferKeyEvent01
+ * @tc.desc: !IsSystemSession() && !IsSessionVaild() is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: TransferKeyEvent02
  * @tc.desc: keyEvent is nullptr
  * @tc.type: FUNC
@@ -1849,7 +1874,8 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent02, Function | SmallTest | Level2)
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
@@ -1879,7 +1905,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent03, Function | SmallTest | Level2)
     dialogSession->state_ = SessionState::STATE_ACTIVE;
     session_->dialogVec_.push_back(dialogSession);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -1909,7 +1935,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent04, Function | SmallTest | Level2)
     session_->dialogVec_.push_back(dialogSession);
     session_->parentSession_ = session_;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
