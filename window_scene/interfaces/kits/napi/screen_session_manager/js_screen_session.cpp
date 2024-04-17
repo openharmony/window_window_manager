@@ -33,7 +33,6 @@ const std::string ON_POWER_STATUS_CHANGE_CALLBACK = "powerStatusChange";
 const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
-constexpr double MIN_DPI = 1e-6;
 } // namespace
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
@@ -58,8 +57,6 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
-    BindNativeFunction(env, objValue, "setDensityDpiSystem", moduleName,
-        JsScreenSession::SetDensityDpiSystem);
     return objValue;
 }
 
@@ -151,65 +148,6 @@ napi_value JsScreenSession::ScheduleLoadContentTask(napi_env env, const std::str
     napi_value lastParam = nullptr;
     napi_value result = NapiGetUndefined(env);
     NapiAsyncTask::Schedule("JsScreenSession::ScheduleLoadContentTask", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
-}
-
-napi_value JsScreenSession::SetDensityDpiSystem(napi_env env, napi_callback_info info)
-{
-    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
-    return (me != nullptr) ? me->OnSetDensityDpiSystem(env, info) : nullptr;
-}
-
-napi_value JsScreenSession::OnSetDensityDpiSystem(napi_env env, napi_callback_info info)
-{
-    WLOGI("JsScreenSession::OnSetDensityDpiSystem is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
-    double dpi = 1.0;
-    napi_value nativeVal = argv[0];
-    if (nativeVal == nullptr) {
-        WLOGFE("ConvertNativeValueTo dpi failed!");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
-    napi_get_value_double(env, nativeVal, &dpi);
-    if (dpi < MIN_DPI) {
-        WLOGFE("Failed to set DensityDpi for system window, dpi is invalid!");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
-
-    float density = static_cast<float>(dpi / 160.0); // 160 is the coefficient between density and dpi.
-    return ScheduleSetDensityDpiSystemTask(env, density);
-}
-
-napi_value JsScreenSession::ScheduleSetDensityDpiSystemTask(napi_env env, float density)
-{
-    NapiAsyncTask::CompleteCallback complete = [screenSession = screenSession_, screenScene = screenScene_,
-        density](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (screenSession == nullptr || screenScene == nullptr) {
-            WLOGFE("[NAPI]screenSession or screenScene is nullptr");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        screenScene->SetDisplayDensity(density);
-        Rect rect = {
-            screenSession->GetScreenProperty().GetOffsetX(), screenSession->GetScreenProperty().GetOffsetY(),
-            screenSession->GetScreenProperty().GetPhyWidth(), screenSession->GetScreenProperty().GetPhyHeight()
-        };
-        screenScene->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
-        WLOGFI("SetDensityDpiSystem %{public}f success.", density);
-    };
-    napi_value lastParam = nullptr;
-    napi_value result = NapiGetUndefined(env);
-    NapiAsyncTask::Schedule("JsScreenSession::ScheduleSetDensityDpiSystemTask", env,
         CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
