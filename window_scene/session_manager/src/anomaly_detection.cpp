@@ -49,7 +49,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             uint32_t callingWindowId = session->GetSessionProperty()->GetCallingSessionId();
             const auto& callingSession =
                 SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
-            if (callingSession->GetZOrder() > session->GetZOrder()) {
+            if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
                     callingSession->GetZOrder(), session->GetZOrder());
             }
@@ -58,7 +58,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
             session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto mainSession = session->GetParentSession();
-            if (session->GetZOrder() < mainSession->GetZOrder()) {
+            if ((mainSession != nullptr) && (session->GetZOrder() < mainSession->GetZOrder())) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
                     session->GetZOrder(), mainSession->GetZOrder());
             }
@@ -66,8 +66,8 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
             keyGuardFlag = true;
             return false;
-        };
-        if (keyGuardFlag && session->IsShowWhenLocked()) {
+        }
+        if (keyGuardFlag && (!session->IsShowWhenLocked())) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
         }
         return false;

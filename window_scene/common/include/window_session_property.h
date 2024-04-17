@@ -219,10 +219,15 @@ struct SystemSessionConfig : public Parcelable {
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
+    // 1920: default max window size
     uint32_t maxFloatingWindowSize_ = 1920;
+    // 320: default minWidth main window size
     uint32_t miniWidthOfMainWindow_ = 320;
+    // 240: default minHeight main window size
     uint32_t miniHeightOfMainWindow_ = 240;
+    // 320: default minWidth sub window size
     uint32_t miniWidthOfSubWindow_ = 320;
+    // 240: default minHeight sub window size
     uint32_t miniHeightOfSubWindow_ = 240;
     bool backgroundswitch = false;
 
