@@ -428,7 +428,8 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     SystemSessionConfig sessionConfig;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, sessionConfig, property));
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, surfaceNode, sessionConfig, property));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -458,7 +459,8 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     SystemSessionConfig sessionConfig;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, sessionConfig, property));
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
