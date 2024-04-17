@@ -24,6 +24,7 @@
 #include "configuration.h"
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
+#include "common/include/window_session_property.h"
 #include "wm_common.h"
 #include "hitrace_meter.h"
 
@@ -152,6 +153,8 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
 bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+napi_value CreateJsSessionRecoverInfo(
+    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);
