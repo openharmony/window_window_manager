@@ -48,12 +48,12 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     AbilityRuntime::Context* context)
 {
     if (context == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "context is nullptr!");
+        TLOGE(WmsLogTag::DMS, "context is nullptr!");
         return;
     }
     uiContent_ = Ace::UIContent::Create(context, reinterpret_cast<NativeEngine*>(env));
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return;
     }
 
@@ -62,7 +62,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     DelayedSingleton<ANRManager>::GetInstance()->Init();
     DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
-        TLOGD(WmsLogTag::WMS_MAIN, "Receive anr notice enter");
+        TLOGD(WmsLogTag::DMS, "Receive anr notice enter");
         AppExecFwk::AppFaultDataBySA faultData;
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
         faultData.pid = pid;
@@ -71,16 +71,16 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
         faultData.errorObject.stack = "";
         if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
             ret != 0) {
-            TLOGE(WmsLogTag::WMS_MAIN, "NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+            TLOGE(WmsLogTag::DMS, "NotifyAppFaultBySA failed, errcode:%{public}d", ret);
         }
-        TLOGD(WmsLogTag::WMS_MAIN, "Receive anr notice leave");
+        TLOGD(WmsLogTag::DMS, "Receive anr notice leave");
     }));
     DelayedSingleton<ANRManager>::GetInstance()->SetAppInfoGetter(
         [](int32_t pid, std::string& bundleName, int32_t uid) {
             int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetBundleNameByPid(
                 pid, bundleName, uid);
             if (ret != 0) {
-                TLOGE(WmsLogTag::WMS_MAIN, "GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+                TLOGE(WmsLogTag::DMS, "GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
             }
         });
 }
@@ -88,7 +88,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return;
     }
     Ace::ViewportConfig config;
@@ -102,7 +102,7 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
 void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_) {
-        TLOGD(WmsLogTag::WMS_MAIN, "notify root scene ace");
+        TLOGD(WmsLogTag::DMS, "notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
     }
 }
@@ -111,7 +111,7 @@ void ScreenScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallba
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::DMS, "Receive vsync request failed, vsyncStation is nullptr");
         return;
     }
     vsyncStation_->RequestVsync(vsyncCallback);
@@ -121,7 +121,7 @@ int64_t ScreenScene::GetVSyncPeriod()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync period failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::DMS, "Get vsync period failed, vsyncStation is nullptr");
         return 0;
     }
     return vsyncStation_->GetVSyncPeriod();
@@ -131,7 +131,7 @@ void ScreenScene::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::DMS, "FlushFrameRate failed, vsyncStation is nullptr");
         return;
     }
     vsyncStation_->FlushFrameRate(rate);
@@ -139,7 +139,7 @@ void ScreenScene::FlushFrameRate(uint32_t rate)
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "bundle %{public}s updated", bundleName.c_str());
+    TLOGD(WmsLogTag::DMS, "bundle %{public}s updated", bundleName.c_str());
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
@@ -157,7 +157,7 @@ void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
 void ScreenScene::SetDisplayDensity(float density)
 {
     if (density < MIN_DPI) {
-        TLOGE(WmsLogTag::WMS_MAIN, "invalid density");
+        TLOGE(WmsLogTag::DMS, "invalid density");
         return;
     }
     density_ = density;
@@ -167,7 +167,7 @@ void ScreenScene::SetDisplayOrientation(int32_t orientation)
 {
     if (orientation < static_cast<int32_t>(DisplayOrientation::PORTRAIT) ||
         orientation > static_cast<int32_t>(DisplayOrientation::UNKNOWN)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "invalid orientation");
+        TLOGE(WmsLogTag::DMS, "invalid orientation");
         return;
     }
     orientation_ = orientation;
