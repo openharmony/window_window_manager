@@ -272,6 +272,29 @@ void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
     }
 }
 
+void DisplayManagerAgentProxy::NotifyPrivateStateWindowListChanged(DisplayId id,
+    std::vector<std::string> privacyWindowList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
+    if (!data.WriteStringVector(privacyWindowList)) {
+        WLOGFE("Write privacyWindowList failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW_LIST, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     MessageParcel data;
