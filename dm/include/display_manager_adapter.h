@@ -78,6 +78,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     virtual bool IsFoldable();
+    virtual bool IsCaptured();
 
     virtual FoldStatus GetFoldStatus();
 
@@ -146,6 +147,7 @@ public:
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
+    virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

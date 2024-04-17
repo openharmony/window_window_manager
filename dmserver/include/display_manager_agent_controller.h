@@ -46,6 +46,8 @@ public:
     void OnScreenshot(sptr<ScreenshotInfo>);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
     void NotifyFoldStatusChanged(FoldStatus);
+    void NotifyFoldAngleChanged(std::vector<float> foldAngles);
+    void NotifyCaptureStatusChanged(bool isCapture);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode);
     void NotifyAvailableRectChanged(DMRect);

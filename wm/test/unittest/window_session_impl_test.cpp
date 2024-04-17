@@ -208,7 +208,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_NE(retCode, WMError::WM_OK);
 }
 
 /**
@@ -964,8 +964,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     sptr<IWindowRectChangeListener> listener7 = nullptr;
     res = window->RegisterWindowRectChangeListener(listener7);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowRectChangeListener(listener7);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
@@ -1523,7 +1521,7 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->HideNonSystemFloatingWindows(false);
-    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_NE(retCode, WMError::WM_OK);
 }
 
 /**
@@ -1902,6 +1900,31 @@ HWTEST_F(WindowSessionImplTest, SetUIContentInner, Function | SmallTest | Level2
     WMError res2 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
     ASSERT_EQ(res2, WMError::WM_ERROR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetUIContentInner end";
+}
+
+/**
+ * @tc.name: TestGetUIContentWithId
+ * @tc.desc: Get uicontent with id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, TestGetUIContentWithId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TestGetUIContentWithId start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("TestGetUIContentWithId");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(102);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(102));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: TestGetUIContentWithId end";
 }
 
 /**

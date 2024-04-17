@@ -290,6 +290,42 @@ void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+void DisplayManagerAgentProxy::NotifyFoldAngleChanged(std::vector<float> foldAngles)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteFloatVector(foldAngles)) {
+        WLOGFE("Write foldAngles failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_FOLD_ANGLE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::NotifyCaptureStatusChanged(bool isCapture)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(isCapture)) {
+        WLOGFE("Write isCapture failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_CAPTURE_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void DisplayManagerAgentProxy::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
 {
     MessageParcel data;

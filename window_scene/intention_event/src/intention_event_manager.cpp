@@ -332,6 +332,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 {
     if (axisEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "axisEvent is nullptr");
+        return;
     }
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");

@@ -82,11 +82,35 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_AVAILABLE_AREA_CHANGED: {
             return ProcAvailableAreaChanged(data);
         }
+        case TRANS_ID_ON_FOLD_ANGLE_CHANGED: {
+            return ProcFoldAngleChanged(data);
+        }
+        case TRANS_ID_ON_CAPTURE_STATUS_CHANGED: {
+            return ProcCaptureStatusChanged(data);
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcFoldAngleChanged(MessageParcel& data)
+{
+    std::vector<float> foldAngles;
+    if (!data.ReadFloatVector(&foldAngles)) {
+        WLOGFE("Read foldAngles failed");
+        return -1;
+    }
+    NotifyFoldAngleChanged(foldAngles);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcCaptureStatusChanged(MessageParcel& data)
+{
+    bool isCapture = data.ReadBool();
+    NotifyCaptureStatusChanged(isCapture);
     return 0;
 }
 

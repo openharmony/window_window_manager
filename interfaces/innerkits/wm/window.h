@@ -1276,6 +1276,14 @@ public:
      */
     virtual Ace::UIContent* GetUIContent() const { return nullptr; }
     /**
+     * @brief Get ui content object.
+     *
+     * @param winId window id.
+     *
+     * @return UIContent object of ACE.
+     */
+    virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const { return nullptr; }
+    /**
      * @brief Window handle new want.
      *
      * @param want Want object of AAFwk.

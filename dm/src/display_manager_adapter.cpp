@@ -540,6 +540,12 @@ bool DisplayManagerAdapter::IsFoldable()
     return displayManagerServiceProxy_->IsFoldable();
 }
 
+bool DisplayManagerAdapter::IsCaptured()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->IsCaptured();
+}
+
 FoldStatus DisplayManagerAdapter::GetFoldStatus()
 {
     INIT_PROXY_CHECK_RETURN(FoldStatus::UNKNOWN);
@@ -691,5 +697,12 @@ DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return displayManagerServiceProxy_->SetVirtualScreenFlag(screenId, screenFlag);
+}
+
+DMError ScreenManagerAdapter::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetVirtualScreenRefreshRate(screenId, refreshInterval);
 }
 } // namespace OHOS::Rosen

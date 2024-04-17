@@ -76,6 +76,7 @@ using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<M
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
+using NotifyContextTransparentFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -273,6 +274,7 @@ public:
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
+    bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
     void SetForceTouchable(bool touchable);
@@ -290,6 +292,9 @@ public:
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
+    void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
+    void NotifyContextTransparent();
+    bool NeedCheckContextTransparent() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -376,6 +381,12 @@ public:
     void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
     void SetAttachState(bool isAttach);
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
+    SystemSessionConfig GetSystemConfig() const;
+    void RectCheckProcess();
+    virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
+    void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+        uint32_t minHeight, uint32_t maxFloatingWindowSize);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -429,7 +440,6 @@ protected:
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
@@ -471,6 +481,7 @@ protected:
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
+    NotifyContextTransparentFunc contextTransparentFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -489,7 +500,7 @@ protected:
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
-    mutable std::mutex dialogVecMutex_;
+    mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
@@ -556,6 +567,9 @@ private:
     std::atomic_bool foregroundInteractiveStatus_ { true };
     bool isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
+
+    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
+    mutable std::mutex leashWinSurfaceNodeMutex;
 };
 } // namespace OHOS::Rosen
 

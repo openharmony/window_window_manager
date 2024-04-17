@@ -85,6 +85,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         &SceneSessionManagerStub::HandleGetSessionInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        &SceneSessionManagerStub::HandleGetSessionInfoByContinueSessionId),
 
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_ALL),
         &SceneSessionManagerStub::HandleDumpSessionAll),
@@ -149,6 +151,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetCallingWindowWindowStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
         &SceneSessionManagerStub::HandleGetCallingWindowRect),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
+        &SceneSessionManagerStub::HandleGetWindowBackHomeStatus),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -297,8 +301,8 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessagePar
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data,
     MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSessionWithDetachCallback!");
     auto persistentId = data.ReadInt32();
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -332,8 +336,8 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, Messa
 
 int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleRegisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -344,8 +348,8 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel &dat
 
 int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleUnregisterWindowManagerAgent!");
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -479,6 +483,25 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         WLOGFE("GetSessionInfo result error");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+
+int SceneSessionManagerStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
+{
+    SessionInfoBean info;
+    std::string continueSessionId = data.ReadString();
+    TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
+    if (!reply.WriteParcelable(&info)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfo error");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfo result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -907,6 +930,19 @@ int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, Mess
     reply.WriteInt32(rect.posY_);
     reply.WriteUint32(rect.width_);
     reply.WriteUint32(rect.height_);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowBackHomeStatus(MessageParcel &data, MessageParcel &reply)
+{
+    bool isBackHome = false;
+    WMError errCode = GetWindowBackHomeStatus(isBackHome);
+    WLOGFI("run HandleGetWindowBackHomeStatus, isBackHome:%{public}d!", isBackHome);
+    if (!reply.WriteBool(isBackHome)) {
+        WLOGE("Failed to WriteBool");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -49,6 +49,8 @@ public:
     void FlushFrameRate(uint32_t rate) override;
 
     void OnBundleUpdated(const std::string& bundleName);
+    static void SetOnConfigurationUpdatedCallback(
+        const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
     void SetDisplayDensity(float density)
@@ -89,6 +91,7 @@ public:
     }
 
     static sptr<RootScene> staticRootScene_;
+
 private:
     void RegisterInputEventListener();
 
@@ -100,6 +103,8 @@ private:
     int32_t orientation_;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
+
+    static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 };

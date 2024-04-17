@@ -875,6 +875,36 @@ WSError SceneSessionManagerProxy::GetSessionInfo(const std::string& deviceId, in
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::GetSessionInfoByContinueSessionId(
+    const std::string& continueSessionId, SessionInfoBean& sessionInfo)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "run query session info");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfoByContinueSessionId write continueSessionId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<SessionInfoBean> info(reply.ReadParcelable<SessionInfoBean>());
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read sessioninfo failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sessionInfo = *info;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::DumpSessionAll(std::vector<std::string> &infos)
 {
     WLOGFI("run SceneSessionManagerProxy::DumpSessionAll");
@@ -1688,5 +1718,22 @@ WMError SceneSessionManagerProxy::GetCallingWindowRect(int32_t persistentId, Rec
         rect.height_ = reply.ReadUint32();
     }
     return ret;
+}
+
+WMError SceneSessionManagerProxy::GetWindowBackHomeStatus(bool &isBackHome)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetWindowBackHomeStatus Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    isBackHome = reply.ReadBool();
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

@@ -282,5 +282,16 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
     std::shared_ptr<Media::PixelMap> res = screenSessionManagerClient_->GetScreenSnapshot(screenId, scaleX, scaleY);
     EXPECT_EQ(nullptr, res);
 }
+
+/**
+ * @tc.name: GetDeviceScreenConfig
+ * @tc.desc: GetDeviceScreenConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetDeviceScreenConfig, Function | SmallTest | Level2)
+{
+    DeviceScreenConfig deviceScreenConfig = screenSessionManagerClient_->GetDeviceScreenConfig();
+    EXPECT_FALSE(deviceScreenConfig.rotationPolicy_.empty());
+}
 } // namespace Rosen
 } // namespace OHOS

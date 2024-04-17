@@ -23,6 +23,7 @@ group("demo") {
     ":demo_screenshot_listener",
     ":demo_snapshot_virtual_screen",
     ":demo_system_sub_window",
+    ":demo_visible_window_num_listener",
     ":demo_water_mark_listener",
   ]
 }
@@ -79,11 +80,11 @@ ohos_executable("demo_snapshot_virtual_screen") {
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
     "../../snapshot:libsnapshot_util",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 
@@ -127,6 +128,26 @@ ohos_executable("demo_freeze_display") {
 
 ohos_executable("demo_water_mark_listener") {
   sources = [ "demo_water_mark_listener.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/test/common/utils/include",
+  ]
+
+  deps = [ "${window_base_path}/wm:libwm" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "hilog:libhilog",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_visible_window_num_listener") {
+  sources = [ "demo_visible_window_num_listener.cpp" ]
 
   include_dirs = [
     "${window_base_path}/interfaces/innerkits/wm",

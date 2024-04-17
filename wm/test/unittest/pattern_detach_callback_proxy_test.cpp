@@ -60,8 +60,7 @@ HWTEST_F(PatternDetachCallbackProxyTest, OnPatternDetach, Function | SmallTest |
 {
     int32_t persisitentId = 0;
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [this, &resultValue, persisitentId]() {
         proxy_->OnPatternDetach(persisitentId);
         resultValue = 1;
     };

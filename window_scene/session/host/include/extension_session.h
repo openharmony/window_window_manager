@@ -34,8 +34,16 @@ public:
 
 private:
     std::mutex transferKeyEventForConsumedMutex_;
-    std::shared_ptr<std::promise<bool>> isConsumedPromise_;
-    std::shared_ptr<WSError> retCode_;
+    std::shared_ptr<std::promise<bool>> isConsumedPromise_ = nullptr;
+    std::shared_ptr<WSError> retCode_ = nullptr;
+};
+
+class ChannelDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit ChannelDeathRecipient(const sptr<WindowEventChannelListener>& listener): listener_(listener) {}
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+private:
+    sptr<WindowEventChannelListener> listener_ = nullptr;
 };
 
 using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
@@ -58,7 +66,7 @@ public:
     };
 
     explicit ExtensionSession(const SessionInfo& info);
-    virtual ~ExtensionSession() = default;
+    virtual ~ExtensionSession();
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -87,6 +95,8 @@ public:
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
     bool isFirstTriggerBindModal_ = true;
+    sptr<ChannelDeathRecipient> channelDeath_ = nullptr;
+    sptr<WindowEventChannelListener> channelListener_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

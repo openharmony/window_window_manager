@@ -152,9 +152,9 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) { return WSError::WS_OK; };
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) { return WSError::WS_OK; }
     virtual WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
-        const sptr<IRemoteObject>& callback) { return WSError::WS_OK; };
+        const sptr<IRemoteObject>& callback) { return WSError::WS_OK; }
     virtual WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr)
@@ -216,6 +216,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError GetWindowBackHomeStatus(bool &isBackHome)
+    {
+        return WMError::WM_OK;
+    };
 };
 }
 }

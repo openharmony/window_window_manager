@@ -81,6 +81,18 @@ void SessionManagerAgentController::NotifyAccessibilityWindowInfo(
     }
 }
 
+void SessionManagerAgentController::UpdateWindowBackHomeStatus(bool isBackHome)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "SessionManagerAgentController UpdateWindowBackHomeStatus isBackHome: %{public}d",
+        static_cast<uint8_t>(isBackHome));
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_BACK_HOME_STATE)) {
+        if (agent != nullptr) {
+            agent->UpdateWindowBackHomeStatus(isBackHome);
+        }
+    }
+}
+
 void SessionManagerAgentController::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
     WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}u", static_cast<uint32_t>(hasWaterMark));
@@ -98,6 +110,21 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY)) {
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    }
+}
+
+void SessionManagerAgentController::UpdateVisibleWindowNum(
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
+{
+    for (const auto& num : visibleWindowNumInfo) {
+        TLOGI(WmsLogTag::WMS_MAIN, "displayId = %{public}d, visibleWindowNum = %{public}d",
+            num.displayId, num.visibleWindowNum);
+    }
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM)) {
+        if (agent != nullptr) {
+            agent->UpdateVisibleWindowNum(visibleWindowNumInfo);
+        }
     }
 }
 

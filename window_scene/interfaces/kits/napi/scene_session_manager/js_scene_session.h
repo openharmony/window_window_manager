@@ -118,6 +118,7 @@ private:
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
+    void ProcessContextTransparentRegister();
     void ProcessKeyboardGravityChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
@@ -157,6 +158,7 @@ private:
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
+    void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
     void OnKeyboardGravityChange(SessionGravity gravity);
 

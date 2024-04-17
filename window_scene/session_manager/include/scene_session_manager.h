@@ -49,6 +49,7 @@ namespace OHOS::AppExecFwk {
 class IBundleMgr;
 struct AbilityInfo;
 struct BundleInfo;
+class LauncherService;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Global::Resource {
@@ -103,6 +104,7 @@ public:
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
+    friend class AnomalyDetection;
     bool IsSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
@@ -199,6 +201,8 @@ public:
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
+    WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
+        SessionInfoBean& sessionInfo) override;
     WSError DumpSessionAll(std::vector<std::string> &infos) override;
     WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
@@ -288,6 +292,7 @@ public:
         int32_t parentId) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
     WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
+    void CheckSceneZOrder();
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
@@ -296,9 +301,13 @@ public:
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
 
-public:
+    void OnBundleUpdated(const std::string& bundleName, int userId);
+    void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -371,7 +380,10 @@ private:
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     static sptr<AppExecFwk::IAppMgr> GetAppManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
-    void GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+    void CacheStartingWindowInfo(
+        const AppExecFwk::AbilityInfo& abilityInfo, const std::string& path, const uint32_t& bgColor);
 
     bool CheckAppIsInDisplay(const sptr<SceneSession>& scnSession, DisplayId displayId);
     bool CheckIsRemote(const std::string& deviceId);
@@ -431,7 +443,7 @@ private:
                                        const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
-    WSError DestroyAndDisconnectSpecificSessionInner(sptr<SceneSession> sceneSession);
+    WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void ReportWindowProfileInfos();
 
@@ -482,10 +494,16 @@ private:
     std::atomic<bool> enableInputEvent_ = true;
     bool gestureNavigationEnabled_ {true};
     std::vector<int32_t> alivePersistentIds_ = {};
+    std::vector<VisibleWindowNumInfo> lastInfo_ = {};
+    std::shared_mutex lastInfoMutex_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;
+    sptr<AppExecFwk::LauncherService> launcherService_;
+    std::shared_mutex startingWindowMapMutex_;
+    const size_t MAX_CACHE_COUNT = 100;
+    std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
 
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
@@ -566,9 +584,14 @@ private:
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
+    void CacVisibleWindowNum();
+    bool IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
+        const std::vector<VisibleWindowNumInfo>& currentInfo);
     bool IsKeyboardForeground();
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
+    void ProcessBackHomeStatus();
+    bool IsBackHomeStatus();
 };
 } // namespace OHOS::Rosen
 

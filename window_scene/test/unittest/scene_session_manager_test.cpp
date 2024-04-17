@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <bundle_mgr_interface.h>
+#include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
@@ -2088,6 +2089,19 @@ HWTEST_F(SceneSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
     oldUserId = ssm_->GetCurrentUserId();
     WSError result02 = ssm_->SwitchUser(oldUserId, newUserId, fileDir);
     ASSERT_EQ(result02, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetSessionInfoByContinueSessionId
+ * @tc.desc: SceneSesionManager GetSessionInfoByContinueSessionId
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetSessionInfoByContinueSessionId, Function | SmallTest | Level3)
+{
+    std::string continueSessionId = "";
+    SessionInfoBean missionInfo;
+    EXPECT_EQ(ssm_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo),
+        WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**
