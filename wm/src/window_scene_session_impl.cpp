@@ -917,13 +917,18 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
         case WindowType::WINDOW_TYPE_DIALOG:
-        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
+        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
+        case WindowType::WINDOW_TYPE_PANEL:
+        case WindowType::WINDOW_TYPE_LAUNCHER_DOCK: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
+        case WindowType::WINDOW_TYPE_DOCK_SLICE:
+        case WindowType::WINDOW_TYPE_STATUS_BAR:
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
@@ -931,6 +936,10 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
             break;
         }
@@ -1210,6 +1219,13 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    if (property_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT &&
+        property_->GetWindowType() != WindowType::WINDOW_TYPE_PANEL &&
+        GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
