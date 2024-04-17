@@ -265,10 +265,10 @@ protected:
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
 
-    mutable std::shared_mutex sessionChangeCbMutex_;
+    mutable std::shared_mutex sessionChangeCallbackMutex_;
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    std::shared_mutex moveDragControllerMutex_;
+    mutable std::shared_mutex moveDragControllerMutex_;
     sptr<MoveDragController> moveDragController_ = nullptr;
 
 private:
