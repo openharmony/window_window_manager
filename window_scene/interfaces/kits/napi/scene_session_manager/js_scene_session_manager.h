@@ -50,6 +50,7 @@ public:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
+    static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
     static napi_value SwitchUser(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
@@ -89,6 +90,7 @@ private:
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
+    napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
     napi_value OnSwitchUser(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);

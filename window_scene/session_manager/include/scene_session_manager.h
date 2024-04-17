@@ -104,6 +104,7 @@ public:
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
+    friend class AnomalyDetection;
     bool IsSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
@@ -291,6 +292,7 @@ public:
         int32_t parentId) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
     WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
+    void CheckSceneZOrder();
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
