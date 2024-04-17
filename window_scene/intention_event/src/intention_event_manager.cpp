@@ -26,6 +26,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
+constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
@@ -168,21 +169,30 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     }
 }
 
-void IntentionEventManager::InputEventListener::OnInputEvent(
-    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+bool IntentionEventManager::InputEventListener::CheckPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
-        return;
+        return false;
     }
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
         pointerEvent->MarkProcessed();
-        return;
+        return false;
     }
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         TLOGD(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily");
         pointerEvent->MarkProcessed();
+        return false;
+    }
+    return true;
+}
+
+void IntentionEventManager::InputEventListener::OnInputEvent(
+    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    if (!CheckPointerEvent(pointerEvent)) {
         return;
     }
     LogPointInfo(pointerEvent);
@@ -193,6 +203,16 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "The scene session is nullptr");
         pointerEvent->MarkProcessed();
         return;
+    }
+    auto dispatchTimes = pointerEvent->GetDispatchTimes();
+    if (dispatchTimes > 0) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        auto pointerId = pointerEvent->GetPointerId();
+        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+        }
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, wid:%{public}u "
