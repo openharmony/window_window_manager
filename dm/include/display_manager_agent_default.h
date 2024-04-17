@@ -39,6 +39,7 @@ public:
     void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override {};
     void OnScreenshot(sptr<ScreenshotInfo>) override {};
     void NotifyPrivateWindowStateChanged(bool hasPrivate) override {};
+    void NotifyPrivateStateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList) override {};
     void NotifyFoldStatusChanged(FoldStatus foldStatus) override {};
     void NotifyFoldAngleChanged(std::vector<float> foldAngles) override {};
     void NotifyCaptureStatusChanged(bool isCapture) override {};
