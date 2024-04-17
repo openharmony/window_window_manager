@@ -434,7 +434,6 @@ protected:
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
@@ -562,6 +561,9 @@ private:
     std::atomic_bool foregroundInteractiveStatus_ { true };
     bool isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
+
+    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
+    mutable std::mutex leashWinSurfaceNodeMutex;
 };
 } // namespace OHOS::Rosen
 
