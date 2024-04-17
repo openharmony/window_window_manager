@@ -481,10 +481,12 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         RefreshNoInteractionTimeoutMonitor();
     }
 
+    bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    if (isPointUp) {
+    if (isPointUp || (isPointMove && isDialogWindow)) {
         hostSession_->SendPointEventForMoveDrag(pointerEvent);
     }
 
