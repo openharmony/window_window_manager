@@ -128,21 +128,13 @@ napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
 napi_value JsScreenSession::ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
     std::weak_ptr<Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage)
 {
-    NapiAsyncTask::CompleteCallback complete = [screenScene = screenScene_,
-        contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (screenScene == nullptr) {
-            WLOGFE("[NAPI]screenScene is nullptr");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
-        screenScene->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
-    };
-    napi_value lastParam = nullptr;
-    napi_value result = NapiGetUndefined(env);
-    NapiAsyncTask::Schedule("JsScreenSession::ScheduleLoadContentTask", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    if (screenScene_ == nullptr) {
+        WLOGFE("[NAPI]screenScene is nullptr");
+        return NapiGetUndefined(env);
+    }
+    napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
+    screenScene_->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
+    return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
