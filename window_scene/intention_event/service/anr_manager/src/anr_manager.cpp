@@ -140,6 +140,7 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 
 ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 {
+    std::lock_guard<std::mutex> guard(mtx_);
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
         WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
             persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
@@ -162,6 +163,7 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 void ANRManager::RemovePersistentId(int32_t persistentId)
 {
     WLOGFD("RemovePersistentId:%{public}d", persistentId);
+    std::lock_guard<std::mutex> guard(mtx_);
     applicationMap_.erase(persistentId);
     DelayedSingleton<EventStage>::GetInstance()->OnSessionLost(persistentId);
 }
