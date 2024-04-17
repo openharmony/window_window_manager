@@ -98,6 +98,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getWindowSceneConfig", moduleName,
         JsSceneSessionManager::GetWindowSceneConfig);
     BindNativeFunction(env, exportObj, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
+    BindNativeFunction(env, exportObj, "checkSceneZOrder", moduleName, JsSceneSessionManager::CheckSceneZOrder);
     BindNativeFunction(env, exportObj, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
     BindNativeFunction(env, exportObj, "switchUser", moduleName, JsSceneSessionManager::SwitchUser);
     BindNativeFunction(env, exportObj, "requestSceneSessionByCall", moduleName,
@@ -457,6 +458,13 @@ napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnProcessBackEvent(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::CheckSceneZOrder(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]CheckSceneZOrder");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnCheckSceneZOrder(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::SwitchUser(napi_env env, napi_callback_info info)
 {
     WLOGFI("[NAPI]SwitchUser");
@@ -799,6 +807,12 @@ napi_value JsSceneSessionManager::OnUpdateFocus(napi_env env, napi_callback_info
 napi_value JsSceneSessionManager::OnProcessBackEvent(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ProcessBackEvent();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnCheckSceneZOrder(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().CheckSceneZOrder();
     return NapiGetUndefined(env);
 }
 
