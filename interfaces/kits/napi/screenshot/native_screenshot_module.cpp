@@ -50,6 +50,8 @@ struct Param {
     bool useInputOption;
     bool validInputParam;
     std::shared_ptr<Media::PixelMap> image;
+    Media::Rect imageRect;
+    bool isPick;
 };
 
 static napi_valuetype GetType(napi_env env, napi_value root)
@@ -121,7 +123,7 @@ static void GetScreenRect(napi_env env, std::unique_ptr<Param> &param, napi_valu
         } else {
             GNAPI_LOG("get ScreenRect.width failed, invalid param, use default width = 0");
         }
-        
+
         napi_value height;
         NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, screenRect, "height", &height));
         if (height != nullptr && GetType(env, height) == napi_number) {
@@ -186,6 +188,9 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         GNAPI_LOG("Get Screenshot by input option");
         param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
             param->option.rect, param->option.size, param->option.rotation, &param->wret);
+    } else if (param->isPick) {
+        GNAPI_LOG("Get Screenshot by picker");
+        param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
     } else {
         GNAPI_LOG("Get Screenshot by default option");
         param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
@@ -196,6 +201,40 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         param->errMessage = "Get Screenshot failed: Screenshot image is nullptr";
         return;
     }
+}
+
+napi_value CreateJsNumber(napi_env env, int32_t value)
+{
+    napi_value valRet = nullptr;
+    napi_create_int32(env, value, &valRet);
+    return valRet;
+}
+
+napi_value CreateJsRectObject(napi_env env, Media::Rect imageRect)
+{
+    napi_value objValue = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &objValue));
+    napi_set_named_property(env, objValue, "left", CreateJsNumber(env, imageRect.left));
+    napi_set_named_property(env, objValue, "top", CreateJsNumber(env, imageRect.top));
+    napi_set_named_property(env, objValue, "width", CreateJsNumber(env, imageRect.width));
+    napi_set_named_property(env, objValue, "height", CreateJsNumber(env, imageRect.height));
+    return objValue;
+}
+
+napi_value CreateJsPickerObject(napi_env env, std::unique_ptr<Param> &param)
+{
+    napi_value objValue = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &objValue));
+    if (param == nullptr) {
+        napi_value result;
+        WLOGFE("param nullptr.");
+        NAPI_CALL(env, napi_get_undefined(env, &result));
+        return result;
+    }
+    napi_set_named_property(env, objValue, "pixelMap", OHOS::Media::PixelMapNapi::CreatePixelMap(env, param->image));
+    napi_set_named_property(env, objValue, "pickRect", CreateJsRectObject(env, param->imageRect));
+    WLOGFI("pick end");
+    return objValue;
 }
 
 napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
@@ -213,11 +252,42 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
         NAPI_CALL(env, napi_get_undefined(env, &result));
         return result;
     }
-
+    if (param->isPick) {
+        GNAPI_LOG("Resolve Screenshot by picker");
+        return CreateJsPickerObject(env, param);
+    }
     GNAPI_LOG("Screenshot image Width %{public}d, Height %{public}d",
         param->image->GetWidth(), param->image->GetHeight());
     napi_value jsImage = OHOS::Media::PixelMapNapi::CreatePixelMap(env, param->image);
     return jsImage;
+}
+
+napi_value PickFunc(napi_env env, napi_callback_info info)
+{
+    GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
+    napi_value argv[1] = { nullptr };  // the max number of input parameters is 1
+    size_t argc = 1;  // the max number of input parameters is 1
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+
+    auto param = std::make_unique<Param>();
+    if (param == nullptr) {
+        WLOGFE("Create param failed.");
+        return nullptr;
+    }
+    napi_ref ref = nullptr;
+    if (argc == 0) {  // 0 valid parameters
+        GNAPI_LOG("argc == 0");
+        param->validInputParam = true;
+    } else if (GetType(env, argv[0]) == napi_function) {  // 1 valid parameters napi_function
+        GNAPI_LOG("argc >= 1, argv[0]'s type is napi_function");
+        param->validInputParam = true;
+        NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
+    } else {  // 0 valid parameters
+        GNAPI_LOG("argc == 0");
+        param->validInputParam = true;
+    }
+    param->isPick = true;
+    return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -258,7 +328,7 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
         GNAPI_LOG("argc == 0");
         param->validInputParam = true;
     }
-
+    param->isPick = false;
     return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
 } // namespace save
@@ -321,6 +391,7 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
 
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
+        DECLARE_NAPI_FUNCTION("pick", save::PickFunc),
         DECLARE_NAPI_PROPERTY("DMError", errorCode),
         DECLARE_NAPI_PROPERTY("DmErrorCode", dmErrorCode),
     };

@@ -111,6 +111,7 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds() override;

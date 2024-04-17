@@ -1337,6 +1337,41 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
     return pixelMap;
 }
 
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(Media::Rect &rect,
+    DmErrorCode* errorCode)
+{
+    WLOGFD("enter");
+    sptr<IRemoteObject> remote = Remote();
+    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    if (pixelMap == nullptr) {
+        WLOGFW("SendRequest nullptr.");
+        return nullptr;
+    }
+    *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    rect.left = reply.ReadInt32();
+    rect.top = reply.ReadInt32();
+    rect.width = reply.ReadInt32();
+    rect.height = reply.ReadInt32();
+    return pixelMap;
+}
+
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();

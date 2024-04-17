@@ -2824,13 +2824,49 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
             NotifyScreenshot(displayId);
             CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
         }
-        isScreenShot_= true;
+        isScreenShot_ = true;
         NotifyCaptureStatusChanged();
         return res;
     } else if (errorCode) {
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return nullptr;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
+{
+    WLOGFD("ENTER!");
+    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        WLOGFI("snapshot was disabled by edm!");
+        return nullptr;
+    }
+    ScreenId screenId = GetDefaultScreenId();
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get screen session");
+        return nullptr;
+    }
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("can not get default display");
+        return nullptr;
+    }
+    DisplayId displayId = displayInfo->GetDisplayId();
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSnapshotByPicker(%" PRIu64")", displayId);
+    auto pixelMap = GetScreenSnapshot(displayId);
+    if (pixelMap != nullptr) {
+        CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
+    }
+    rect.left = 0;
+    rect.top = 0;
+    rect.width = displayInfo->GetWidth();
+    rect.height = displayInfo->GetHeight();
+    isScreenShot_ = true;
+    NotifyCaptureStatusChanged();
+    *errorCode = DmErrorCode::DM_OK;
+    return pixelMap;
 }
 
 bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
