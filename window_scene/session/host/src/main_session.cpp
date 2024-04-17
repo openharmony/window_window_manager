@@ -37,8 +37,11 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
-    std::unique_lock<std::shared_mutex> lock(moveDragControllerMutex_);
-    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    {
+        std::unique_lock<std::shared_mutex> lock(moveDragControllerMutex_);
+        moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    }
+    std::shared_lock<std::shared_mutex> lock(moveDragControllerMutex_);
     if (moveDragController_  != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
