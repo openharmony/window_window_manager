@@ -34,6 +34,7 @@ namespace {
     const static uint32_t RETRY_WAIT_MS = 500;
     const static uint32_t MAX_DISPLAY_SIZE = 32;
     const static uint32_t MAX_INTERVAL_US = 5000;
+    std::atomic<bool> g_dmIsDestroyed = false;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -510,12 +511,14 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
+    WLOGFI("Create displaymanager instance");
+    g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    destroyed_ = true;
+    WLOGFI("Destroy displaymanager instance");
+    g_dmIsDestroyed = true;
 }
 
 DisplayId DisplayManager::GetDefaultDisplayId()
@@ -596,10 +599,11 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (destroyed_) {
+    if (g_dmIsDestroyed) {
+        WLOGFI("DM has been destructed");
         return nullptr;
     }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pImpl_->GetDisplayById(displayId);
 }
 
@@ -1680,7 +1684,11 @@ DMError DisplayManager::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
 
 void DisplayManager::Impl::OnRemoteDied()
 {
-    WLOGFD("dms is died");
+    WLOGFI("dms is died");
+    if (g_dmIsDestroyed) {
+        WLOGFE("dm has been destructed, mutex_ is invalid");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerListener_ = nullptr;
     displayStateAgent_ = nullptr;
@@ -1694,7 +1702,7 @@ void DisplayManager::Impl::OnRemoteDied()
 
 void DisplayManager::OnRemoteDied()
 {
-    if (pImpl_ == nullptr) {
+    if (g_dmIsDestroyed) {
         WLOGFE("dms is dying, pImpl_ is nullptr");
         return;
     }
