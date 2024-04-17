@@ -313,5 +313,19 @@ int32_t WindowInfoReporter::ReportWindowProfileInfo(const WindowProfileInfo& win
     }
     return ret;
 }
+
+void WindowInfoReporter::ReportWindowExcetion(int32_t detectionType, int32_t pid, const std::string& windowInfo)
+{
+    std::string eventName = "WINDOW_EXCEPTION_DETECTION";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "DETECTION_TYPE", detectionType,
+        "PID", pid,
+        "MSG", windowInfo);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
 }
 }
