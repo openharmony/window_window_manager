@@ -1996,6 +1996,9 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
 
 void Session::RectCheckProcess()
 {
+    if (!IsSessionForeground()) {
+        return;
+    }
     auto displayId = GetSessionProperty()->GetDisplayId();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
