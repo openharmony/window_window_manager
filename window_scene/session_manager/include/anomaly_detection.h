@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ANOMALY_DETECTION_H
-#define ANOMALY_DETECTION_H
+#ifndef OHOS_ROSEN_WINDOW_ANOMALY_DETECTION_H
+#define OHOS_ROSEN_WINDOW_ANOMALY_DETECTION_H
 
 #include "session/host/include/scene_session.h"
 
@@ -34,4 +34,4 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // ANOMALY_DETECTION_H
+#endif // OHOS_ROSEN_WINDOW_ANOMALY_DETECTION_H

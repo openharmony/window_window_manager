@@ -1989,7 +1989,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
 {
     if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
         (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
-        WLOGFE("RectCheck err sessionID: %{public}d rect %{public}s",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
     }
 }
@@ -2007,13 +2007,13 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
-    if (!NearZero(density)) {
+    if (!NearZero(density) && (GetSessionRect().height_ != 0)) {
         uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
         uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
         float ratio = GetAspectRatio();
         float actRatio = static_cast<float>(curWidth) / curHeight;
         if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
-            WLOGFE("RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
+            TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
         }
         RectCheck(curWidth, curHeight);
     }
