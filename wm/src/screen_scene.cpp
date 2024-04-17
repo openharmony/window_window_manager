@@ -29,7 +29,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenScene" };
 constexpr float MIN_DPI = 1e-6;
 } // namespace
 
