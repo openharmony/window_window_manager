@@ -56,7 +56,7 @@ private:
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;
-    sptr<ScreenScene> screenScene_;
+    sptr<ScreenScene> screenScene_ = nullptr;
     std::map<std::string, std::shared_ptr<NativeReference>> mCallback_;
 };
 } // namespace OHOS::Rosen
