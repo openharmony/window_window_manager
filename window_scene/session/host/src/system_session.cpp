@@ -20,7 +20,8 @@
 #include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-
+#include "parameters.h"
+#include "pointer_event.h"
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
@@ -33,6 +34,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     SetMoveDragCallback();
 }
 
