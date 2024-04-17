@@ -558,8 +558,11 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
     const SystemSessionConfig& sysConfig)
 {
     auto windowType = property->GetWindowType();
-    isDecorEnable_ = (WindowHelper::IsMainWindow(windowType) ||
-            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    isDecorEnable_ = (isMainWindow ||
+            ((isSubWindow || isDialogWindow) && property->IsDecorEnable())) &&
         sysConfig.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
 }
