@@ -816,12 +816,12 @@ napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> weakWindow)
+    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
 {
     for (auto it : systemBarPropertyFlags) {
         WindowType type = it.first;
         SystemBarPropertyFlag flag = it.second;
-        auto property = weakWindow->GetSystemBarPropertyByType(type);
+        auto property = windowToken->GetSystemBarPropertyByType(type);
         if (flag.enableFlag == false) {
             systemBarProperties[type].enable_ = property.enable_;
         }
