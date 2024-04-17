@@ -2113,7 +2113,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
 }
 
 static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> weakWindow)
+    std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken)
 {
     WMError ret = WMError::WM_OK;
     WMError err = WMError::WM_OK;
@@ -2122,7 +2122,7 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
         WindowType type = it.first;
         SystemBarPropertyFlag flag = it.second;
         if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag || flag.enableAnimationFlag) {
-            err = weakWindow->SetSystemBarProperty(type, systemBarProperties.at(type));
+            err = WindowToken->SetSystemBarProperty(type, systemBarProperties.at(type));
             if (err != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty failed, ret = %{public}d", err);
                 ret = err;
@@ -2188,12 +2188,10 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     wptr<Window> weakToken(windowToken_);
-    auto weakWindow = weakToken.promote();
-    errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_NULLPTR : errCode;
     if (errCode != WMError::WM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
     }
-    UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
+    UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken_);
     std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
@@ -2397,15 +2395,15 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
         (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WMError::WM_ERROR_NULLPTR : errCode;
+            auto windowToken = weakToken.promote();
+            errCode = (windowToken == nullptr) ? WMError::WM_ERROR_NULLPTR : errCode;
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(errCode)));
                 return;
             }
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken);
             WMError ret = SetSystemBarPropertiesByFlags(
-                systemBarPropertyFlags, systemBarProperties, weakWindow);
+                systemBarPropertyFlags, systemBarProperties, windowToken);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
