@@ -25,7 +25,6 @@
 #include "anr_manager.h"
 #include "dm_common.h"
 #include "window_manager_hilog.h"
-#include "window_rate_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -132,7 +131,11 @@ int64_t ScreenScene::GetVSyncPeriod()
 void ScreenScene::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate, vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->FlushFrameRate(rate);
 }
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)
