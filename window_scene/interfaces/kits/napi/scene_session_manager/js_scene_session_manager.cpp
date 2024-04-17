@@ -226,13 +226,14 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
             WLOGFE("[NAPI]sessionInfo is nullptr");
             return;
         }
-        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-        if (jsSessionInfo == nullptr) {
+        napi_value jsSessionRecoverInfo =
+            CreateJsSessionRecoverInfo(env, *sessionInfo, sceneSession->GetSessionProperty());
+        if (jsSessionRecoverInfo == nullptr) {
             WLOGFE("[NAPI]this target session info is nullptr");
             return;
         }
 
-        napi_value argv[] = { jsSceneSessionObj, jsSessionInfo };
+        napi_value argv[] = { jsSceneSessionObj, jsSessionRecoverInfo };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     WLOGFI("[NAPI]OnRecoverSceneSession post task");
