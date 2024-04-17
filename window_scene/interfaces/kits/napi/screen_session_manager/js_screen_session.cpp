@@ -71,12 +71,6 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
 {
     std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOW";
     screenScene_ = new(std::nothrow) ScreenScene(name);
-    if (screenScene_) {
-        screenScene_->SetFrameLayoutFinishCallback([]() {
-            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
-            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
-        });
-    }
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
