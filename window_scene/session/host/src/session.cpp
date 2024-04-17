@@ -880,11 +880,7 @@ void Session::HandleDialogBackground()
         return;
     }
 
-    std::vector<sptr<Session>> dialogVec;
-    {
-        std::unique_lock<std::mutex> lock(dialogVecMutex_);
-        dialogVec = dialogVec_;
-    }
+    auto dialogVec = GetDialogVector();
     for (const auto& dialog : dialogVec) {
         if (dialog == nullptr) {
             continue;
@@ -909,11 +905,7 @@ void Session::HandleDialogForeground()
         return;
     }
 
-    std::vector<sptr<Session>> dialogVec;
-    {
-        std::unique_lock<std::mutex> lock(dialogVecMutex_);
-        dialogVec = dialogVec_;
-    }
+    auto dialogVec = GetDialogVector();
     for (const auto& dialog : dialogVec) {
         if (dialog == nullptr) {
             continue;
@@ -1353,7 +1345,7 @@ sptr<Session> Session::GetParentSession() const
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
-    std::unique_lock<std::mutex> lock(dialogVecMutex_);
+    std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
         TLOGW(WmsLogTag::WMS_DIALOG, "Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
@@ -1367,7 +1359,7 @@ void Session::BindDialogToParentSession(const sptr<Session>& session)
 
 void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 {
-    std::unique_lock<std::mutex> lock(dialogVecMutex_);
+    std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Remove dialog success, id: %{public}d, parentId: %{public}d",
@@ -1380,13 +1372,13 @@ void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 
 std::vector<sptr<Session>> Session::GetDialogVector() const
 {
-    std::unique_lock<std::mutex> lock(dialogVecMutex_);
+    std::shared_lock<std::shared_mutex> lock(dialogVecMutex_);
     return dialogVec_;
 }
 
 void Session::ClearDialogVector()
 {
-    std::unique_lock<std::mutex> lock(dialogVecMutex_);
+    std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
     dialogVec_.clear();
     TLOGD(WmsLogTag::WMS_DIALOG, "parentId: %{public}d", GetPersistentId());
     return;
@@ -1394,12 +1386,12 @@ void Session::ClearDialogVector()
 
 bool Session::CheckDialogOnForeground()
 {
-    std::unique_lock<std::mutex> lock(dialogVecMutex_);
-    if (dialogVec_.empty()) {
+    auto dialogVec = GetDialogVector();
+    if (dialogVec.empty()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Dialog is empty, id: %{public}d", GetPersistentId());
         return false;
     }
-    for (auto iter = dialogVec_.rbegin(); iter != dialogVec_.rend(); iter++) {
+    for (auto iter = dialogVec.rbegin(); iter != dialogVec.rend(); iter++) {
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
@@ -1423,11 +1415,10 @@ bool Session::IsTopDialog() const
         TLOGW(WmsLogTag::WMS_DIALOG, "Dialog's Parent is NULL. id: %{public}d", currentPersistentId);
         return false;
     }
-    std::unique_lock<std::mutex> lock(parentSession->dialogVecMutex_);
-    if (parentSession->dialogVec_.size() <= 1) {
+    auto parentDialogVec = parentSession->GetDialogVector();
+    if (parentDialogVec.size() <= 1) {
         return true;
     }
-    auto parentDialogVec = parentSession->dialogVec_;
     for (auto iter = parentDialogVec.rbegin(); iter != parentDialogVec.rend(); iter++) {
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
@@ -1484,7 +1475,8 @@ bool Session::IfNotNeedAvoidKeyBoardForSplit()
 
 void Session::HandlePointDownDialog()
 {
-    for (auto dialog : dialogVec_) {
+    auto dialogVec = GetDialogVector();
+    for (auto dialog : dialogVec) {
         if (dialog && (dialog->GetSessionState() == SessionState::STATE_FOREGROUND ||
             dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
             dialog->RaiseToAppTopForPointDown();
