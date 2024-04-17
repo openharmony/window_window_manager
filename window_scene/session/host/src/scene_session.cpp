@@ -916,6 +916,19 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
+
+        WindowMode mode = session->GetWindowMode();
+        WindowType winType = session->GetWindowType();
+        if (type != AvoidAreaType::TYPE_KEYBOARD && mode == WindowMode::WINDOW_MODE_FLOATING &&
+            (!WindowHelper::IsMainWindow(winType) ||
+            (system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
+            system::GetParameter("const.product.devicetype", "unknown") != "tablet"))) {
+            TLOGI(WmsLogTag::WMS_IMMS,
+                "Id: %{public}d, avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+                session->GetPersistentId(), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+            return {};
+        }
+
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
         TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType avoidAreaType:%{public}u", type);

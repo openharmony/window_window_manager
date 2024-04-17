@@ -1350,23 +1350,14 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
 {
     uint32_t windowId = GetWindowId();
     WindowMode mode = GetMode();
-    if (type != AvoidAreaType::TYPE_KEYBOARD &&
-        mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
-        !(mode == WindowMode::WINDOW_MODE_FLOATING &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
+    WindowType winType = GetType();
+    if (type != AvoidAreaType::TYPE_KEYBOARD && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (!WindowHelper::IsMainWindow(winType) ||
+        (system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
+        system::GetParameter("const.product.devicetype", "unknown") != "tablet"))) {
         TLOGI(WmsLogTag::WMS_IMMS,
-            "avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
-            static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
-        return WMError::WM_OK;
-    }
-    if (mode == WindowMode::WINDOW_MODE_FLOATING &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType()))) {
-        TLOGI(WmsLogTag::WMS_IMMS,"Window: %{public}u, avoidAreaType:%{public}u,"
-            "windowMode:%{public}u, return default avoid area for sub window.",
-            GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+            "Id: %{public}d, avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+            windowId, static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
