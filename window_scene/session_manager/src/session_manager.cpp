@@ -17,6 +17,7 @@
 
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
+#include <ipc_skeleton.h>
 
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
@@ -83,6 +84,7 @@ SessionManager::~SessionManager()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
     if (mockSessionManagerServiceProxy_ != nullptr) {
+        IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
         mockSessionManagerServiceProxy_ = nullptr;
     }
@@ -227,6 +229,7 @@ void SessionManager::RegisterSMSRecoverListener()
         isRecoverListenerRegistered_ = true;
         WLOGFI("[WMSRecover] Register recover listener");
         smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
     }
 }

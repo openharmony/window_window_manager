@@ -218,7 +218,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
         return;
     }
 
-    int64_t pid = IPCSkeleton::GetCallingPid();
+    int64_t pid = IPCSkeleton::GetCallingRealPid();
     WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
 
     std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
@@ -234,7 +234,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
 
 void MockSessionManagerService::UnregisterSMSRecoverListener()
 {
-    int64_t pid = IPCSkeleton::GetCallingPid();
+    int64_t pid = IPCSkeleton::GetCallingRealPid();
     WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
     UnregisterSMSRecoverListener(pid);
 }
@@ -278,7 +278,7 @@ void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemot
         return;
     }
 
-    int64_t pid = IPCSkeleton::GetCallingPid();
+    int64_t pid = IPCSkeleton::GetCallingRealPid();
     WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
 
     std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
@@ -290,7 +290,7 @@ void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemot
 
 void MockSessionManagerService::UnregisterSMSLiteRecoverListener()
 {
-    int64_t pid = IPCSkeleton::GetCallingPid();
+    int64_t pid = IPCSkeleton::GetCallingRealPid();
     WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
     UnregisterSMSLiteRecoverListener(pid);
 }
