@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "screen_scene.h"
 #include <ui_content.h>
 #include <viewport_config.h>
 
@@ -22,6 +21,7 @@
 #include "singleton.h"
 #include "singleton_container.h"
 
+#include "screen_scene.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 
