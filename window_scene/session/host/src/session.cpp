@@ -1996,7 +1996,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
 
 void Session::RectCheckProcess()
 {
-    if (!IsSessionForeground()) {
+    if (!(IsSessionForeground() || isVisible_)) {
         return;
     }
     auto displayId = GetSessionProperty()->GetDisplayId();
