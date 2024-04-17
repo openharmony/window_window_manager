@@ -20,7 +20,6 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
 #include "window_manager_hilog.h"
-#include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
