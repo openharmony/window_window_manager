@@ -306,4 +306,29 @@ bool SystemSession::NeedSystemPermission(WindowType type)
         type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
         type == WindowType::WINDOW_TYPE_PIP);
 }
+
+bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    auto sessionState = GetSessionState();
+    int32_t action = pointerEvent->GetPointerAction();
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
+    if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
+        sessionState != SessionState::STATE_ACTIVE &&
+        action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        WLOGFW("CheckPointerEventDispatch false, Current Session Info: [persistentId: %{public}d, "
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+        return false;
+    }
+    return true;
+}
+
+void SubSession::UpdatePointerArea(const WSRect& rect)
+{
+    auto property = GetSessionProperty();
+    if (!(property->IsDecorEnable() && GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
+        return;
+    }
+    Session::UpdatePointerArea(rect);
+}
 } // namespace OHOS::Rosen

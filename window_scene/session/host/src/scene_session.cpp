@@ -989,10 +989,12 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     }
 
     auto windowType = Session::GetWindowType();
+    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
+    bool isValidWindow = windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+        WindowHelper::IsSubWindow(windowType) || isDecorDialog;
     auto iter = Session::windowAreas_.cend();
-    if (!IsSystemSession() &&
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
+    if (!Session::IsSystemSession() &&
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && isValidWindow) {
         iter = Session::windowAreas_.cbegin();
         for (;iter != Session::windowAreas_.cend(); ++iter) {
             WSRectF rect = iter->second;
@@ -1006,8 +1008,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     if (iter == Session::windowAreas_.cend()) {
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
-        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && isValidWindow) {
             WSRectF rectF = Session::UpdateHotRect(rect);
             isInRegion = rectF.IsInRegion(displayX, displayY);
         } else {
@@ -1456,6 +1457,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
         WLOGFD("subwindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
+        WLOGFD("dialogWindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
