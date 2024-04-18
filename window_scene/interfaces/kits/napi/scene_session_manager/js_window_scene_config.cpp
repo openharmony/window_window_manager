@@ -43,7 +43,7 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
         CreateKeyboardAnimationValue(env, config.keyboardAnimationOut_));
     napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
     napi_set_named_property(env, objValue, "systemUIStatusBar", CreateSystemUIStatusBarValue(env,
-       config.systemUIStatusBarConfig_));
+        config.systemUIStatusBarConfig_));
     return objValue;
 }
 
