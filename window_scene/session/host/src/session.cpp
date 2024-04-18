@@ -1995,7 +1995,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
         if (property_) {
             oss << " windowName: " << property_->GetWindowName() << ",";
-            oss << " windowState: " << property_->GetWindowState() << ",";
+            oss << " windowState: " << static_cast<uint32_t>(property_->GetWindowState()) << ",";
         }
         oss << " curWidth: " << curWidth << ",";
         oss << " curHeight: " << curHeight << ",";
@@ -2034,7 +2034,7 @@ void Session::RectCheckProcess()
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
             if (property_) {
                 oss << " windowName: " << property_->GetWindowName() << ",";
-                oss << " windowState: " << property_->GetWindowState() << ",";
+                oss << " windowState: " << static_cast<uint32_t>(property_->GetWindowState()) << ",";
             }
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
