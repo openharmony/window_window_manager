@@ -1061,7 +1061,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto windowModeCallback = [this]() {
             ProcessSplitFloating();
         };
+        auto isScreenLockedCallback = [this]() {
+            return IsScreenLocked();
+        };
         sceneSession->RegisterWindowModeChangedCallback(windowModeCallback);
+        sceneSession->RegisterIsScreenLockedCallback(isScreenLockedCallback);
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
@@ -4333,6 +4337,22 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
 {
     isScreenLocked_ = isScreenLocked;
+    DeleteStateDetectTask();
+}
+
+void SceneSessionManager::DeleteStateDetectTask()
+{
+    if (!IsScreenLocked()) {
+        return;
+    }
+    for (auto iter : sceneSessionMap_) {
+        auto &session = iter.second;
+        if (session->GetDetectTaskInfo().taskState != DetectTaskState::NO_TASK) {
+            taskScheduler_->GetEventHandler()->RemoveTask(session->GetWindowDetectTaskName());
+            DetectTaskInfo detectTaskInfo;
+            session->SetDetectTaskInfo(detectTaskInfo);
+        }
+    }
 }
 
 bool SceneSessionManager::IsScreenLocked() const
