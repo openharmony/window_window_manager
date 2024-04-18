@@ -33,8 +33,8 @@ public:
     static void FocusCheckProcess(int32_t focusedId, int32_t nextId);
 
 private:
-    static void ReportZOrderExcetion(const std::string& errorReason, sptr<SessionSession> session);
-    static void ReportFocusExcetion(const std::string& errorReason, int32_t focusedId, 
+    static void ReportZOrderException(const std::string& errorReason, sptr<SessionSession> session);
+    static void ReportFocusException(const std::string& errorReason, int32_t focusedId, 
         int32_t nextId, sptr<SessionSession> session);
 };
 } // namespace Rosen
