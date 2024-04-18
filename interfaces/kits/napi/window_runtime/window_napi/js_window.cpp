@@ -2187,11 +2187,11 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    wptr<Window> weakToken(windowToken_);
     if (errCode != WMError::WM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
     }
     UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken_);
+    wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
