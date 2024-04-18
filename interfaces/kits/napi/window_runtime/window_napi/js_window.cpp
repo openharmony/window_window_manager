@@ -1613,12 +1613,12 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
         WLOGFE("Window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    constexpr size_t ARGC_MIN = 2;
-    constexpr size_t ARGC_MAX = 3;
+    constexpr size_t argcMin = 2;
+    constexpr size_t argcMax = 3;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_MIN || argc > ARGC_MAX) {
+    if (argc < argcMin || argc > argcMax) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -1635,7 +1635,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     }
 
     napi_value parameter = nullptr;
-    if (argc > ARGC_MIN) {
+    if (argc > argcMin) {
         parameter = argv[cbIndex - 1];
     }
 
