@@ -308,6 +308,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER: {
+            ProcGetSnapshotByPicker(reply);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
@@ -671,16 +675,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
-            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            VirtualScreenFlag screenFlag = GetVirtualScreenFlag(screenId);
-            reply.WriteUint32(static_cast<uint32_t>(screenFlag));
+            ProcGetVirtualScreenFlag(data, reply);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_FLAG: {
-            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            VirtualScreenFlag screenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
-            DMError setRet = SetVirtualScreenFlag(screenId, screenFlag);
-            reply.WriteInt32(static_cast<int32_t>(setRet));
+            ProcSetVirtualScreenFlag(data, reply);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DEVICE_SCREEN_CONFIG: {
@@ -701,5 +700,33 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return 0;
+}
+
+void ScreenSessionManagerStub::ProcGetSnapshotByPicker(MessageParcel& reply)
+{
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    Media::Rect imgRect { 0, 0, 0, 0 };
+    std::shared_ptr<Media::PixelMap> snapshot = GetSnapshotByPicker(imgRect, &errCode);
+    reply.WriteParcelable(snapshot == nullptr ? nullptr : snapshot.get());
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    reply.WriteInt32(imgRect.left);
+    reply.WriteInt32(imgRect.top);
+    reply.WriteInt32(imgRect.width);
+    reply.WriteInt32(imgRect.height);
+}
+
+void ScreenSessionManagerStub::ProcSetVirtualScreenFlag(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+    VirtualScreenFlag screenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
+    DMError setRet = SetVirtualScreenFlag(screenId, screenFlag);
+    reply.WriteInt32(static_cast<int32_t>(setRet));
+}
+
+void ScreenSessionManagerStub::ProcGetVirtualScreenFlag(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+    VirtualScreenFlag screenFlag = GetVirtualScreenFlag(screenId);
+    reply.WriteUint32(static_cast<uint32_t>(screenFlag));
 }
 } // namespace OHOS::Rosen

@@ -125,6 +125,7 @@ public:
         TRANS_ID_GET_DEVICE_SCREEN_CONFIG,
         TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE,
         TRANS_ID_DEVICE_IS_CAPTURE,
+        TRANS_ID_GET_SNAPSHOT_BY_PICKER,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -145,6 +146,11 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr)
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
