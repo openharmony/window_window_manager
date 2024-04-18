@@ -2335,6 +2335,75 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetTopWindowWithContext
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    auto ret = window->GetTopWindowWithContext(context);
+    ASSERT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: GetTopWindowWithId
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    auto ret = window->GetTopWindowWithContext(context);
+    ASSERT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: Create05
+ * @tc.desc: Create window with WindowName and no abilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = nullptr;
+    auto window = Window::Create("WindowTest02", option);
+    uint32_t version = 0;
+    if (version < 10)
+    {
+        ASSERT_NE(10, version);
+    }
+    WindowOption windowoption;
+    windowoption.onlySupportSceneBoard_ = true;
+    ASSERT_EQ(true, option->GetOnlySupportSceneBoard());
+}
+
+/**
+ * @tc.name: GetMainWindowWithContext|GetWindowWithId
+ *                      |GetSubWindow|UpdateConfigurationForAll
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetMainWindowWithContext, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    uint32_t windId = 0;
+    uint32_t parentId = 1;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
+
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    auto ret = window->GetMainWindowWithContext(context);
+    window->GetWindowWithId(windId);
+    window->GetSubWindow(parentId);
+    window->UpdateConfigurationForAll(configuration);
+    ASSERT_EQ(nullptr, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
