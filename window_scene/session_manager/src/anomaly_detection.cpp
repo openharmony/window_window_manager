@@ -66,7 +66,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             if ((mainSession != nullptr) && (session->GetZOrder() < mainSession->GetZOrder())) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
                     session->GetZOrder(), mainSession->GetZOrder());
-            ReportZOrderException("check subWindow and dialogWindow", session);
+                ReportZOrderException("check subWindow and dialogWindow", session);
             }
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
