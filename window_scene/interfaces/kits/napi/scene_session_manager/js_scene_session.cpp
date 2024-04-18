@@ -144,11 +144,8 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session)
 {
     InitListenerFuncs();
-    {
-        std::unique_lock<std::shared_mutex> lock(sessionChangeCallbackMutex_);
-        sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
-            SceneSession::SessionChangeCallback();
-    }
+    sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
+        SceneSession::SessionChangeCallback();
     if (sessionchangeCallback != nullptr) {
         if (session != nullptr) {
             session->RegisterSessionChangeCallback(sessionchangeCallback);
