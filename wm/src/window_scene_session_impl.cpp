@@ -1040,7 +1040,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     if (IsWindowSessionInvalid()) {
         TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id: %{public}d", GetPersistentId());
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
 
