@@ -1993,6 +1993,10 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
         oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+        if (property_) {
+            oss << " windowName: " << property_->GetWindowName() << ",";
+            oss << " windowState: " << property_->GetWindowState() << ",";
+        }
         oss << " curWidth: " << curWidth << ",";
         oss << " curHeight: " << curHeight << ",";
         oss << " minWidth: " << minWidth << ",";
@@ -2028,6 +2032,10 @@ void Session::RectCheckProcess()
             oss << " RectCheck err ratio ";
             oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+            if (property_) {
+                oss << " windowName: " << property_->GetWindowName() << ",";
+                oss << " windowState: " << property_->GetWindowState() << ",";
+            }
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
             oss << " setting ratio: " << ratio << ",";
