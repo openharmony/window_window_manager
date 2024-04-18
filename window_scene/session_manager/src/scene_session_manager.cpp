@@ -376,6 +376,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
     }
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
+
+    item = config["systemUIStatusBar"];
+    if (item.IsMap()) {
+        ConfigSystemUIStatusBar(item);
+    }
 }
 
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
@@ -829,6 +834,41 @@ void SceneSessionManager::ConfigSnapshotScale()
             return;
         }
         snapshotScale_ = snapshotScale[0];
+    }
+}
+
+void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::ConfigItem& statusBarConfig)
+{
+    WLOGI("load ConfigSystemUIStatusBar");
+    WindowSceneConfig::ConfigItem item = config["showInLandscapeMode"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = (*item.intsValue_)[0];
+        WLOGI("ConfigSystemUIStatusBar showInLandscapeMode:%{public}d",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_);
+    }
+
+    item = config["immersiveStatusBarBgColor"];
+    if (item.IsStrings()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return false;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_ = color;
+        WLOGI("ConfigSystemUIStatusBar immersiveStatusBarBgColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str());
+    }
+
+    item = config["immersiveStatusBarContentColor"];
+    if (item.IsStrings()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return false;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_ = color;
+        WLOGI("ConfigSystemUIStatusBar immersiveStatusBarContentColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
 }
 
