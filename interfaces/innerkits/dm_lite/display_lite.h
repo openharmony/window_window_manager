@@ -67,6 +67,13 @@ public:
      * @return Cutout info of the display.
      */
     sptr<CutoutInfo> GetCutoutInfo() const;
+
+    /**
+     * @brief Get the rotation of the display.
+     *
+     * @return Rotation of the display..
+     */
+    Rotation GetRotation() const;
 protected:
     // No more methods or variables can be defined here.
     DisplayLite(const std::string& name, sptr<DisplayInfo> info);
