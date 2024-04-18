@@ -443,7 +443,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     if (screenSessionMap_.empty()) {
-        screenEventTracker_.LogWarnninAllInfos();
+        screenEventTracker_.LogWarningAllInfos();
     }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
