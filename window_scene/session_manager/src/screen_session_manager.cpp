@@ -431,6 +431,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::UPDATE_REFRESHRATE);
     } else {
         WLOGFE("Get default screen session failed.");
     }
