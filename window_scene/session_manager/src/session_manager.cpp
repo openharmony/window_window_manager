@@ -72,6 +72,8 @@ public:
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override
     {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
+            screenId, isConnected);
         SessionManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
     }
 };
@@ -80,7 +82,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
 SessionManager::~SessionManager()
 {
-    WLOGFI("SessionManager destory!");
+    WLOGFI("SessionManager destroy!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
     if (mockSessionManagerServiceProxy_ != nullptr) {
@@ -90,18 +92,29 @@ SessionManager::~SessionManager()
     }
 }
 
-void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+void SessionManager::OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "OnWMSConnectionChanged");
-    isWMSConnected_ = isConnected;
-    currentUserId_ = userId;
-    currentScreenId_ = screenId;
     if (wmsConnectionChangedFunc_ != nullptr) {
         TLOGI(WmsLogTag::WMS_MULTI_USER,
             "WMS connection changed with userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
             screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     }
+}
+
+void SessionManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connection changed enter");
+    if (isConnected && currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
+        OnUserSwitch();
+        // Notify the user that the old wms has been disconnected.
+        OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, false);
+    }
+    isWMSConnected_ = isConnected;
+    currentWMSUserId_ = userId;
+    currentScreenId_ = screenId;
+    // Notify the user that the current wms connection has changed.
+    OnWMSConnectionChangedCallback(userId, screenId, isConnected);
 }
 
 void SessionManager::ClearSessionManagerProxy()
@@ -257,6 +270,26 @@ void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerServ
     }
 }
 
+void SessionManager::OnUserSwitch()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched");
+    Clear();
+    ClearSessionManagerProxy();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        InitSessionManagerServiceProxy();
+        InitSceneSessionManagerProxy();
+        if (!sceneSessionManagerProxy_) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "sceneSessionManagerProxy_ is null");
+            return;
+        }
+    }
+    if (userSwitchCallbackFunc_) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "User switch callback.");
+        userSwitchCallbackFunc_();
+    }
+}
+
 void SessionManager::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -278,10 +311,16 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
         RegisterSMSRecoverListener();
     }
     wmsConnectionChangedFunc_ = callbackFunc;
-    if (isWMSConnected_) {
-        OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    if (isWMSConnected_ && currentWMSUserId_ > INVALID_USER_ID) {
+        OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, true);
     }
     return WMError::WM_OK;
+}
+
+void SessionManager::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register user switch listener enter");
+    userSwitchCallbackFunc_ = callbackFunc;
 }
 
 void SessionManager::OnFoundationDied()
@@ -298,6 +337,16 @@ void SessionManager::OnFoundationDied()
 
 void FoundationDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
+    if (wptrDeath == nullptr) {
+        WLOGFE("FoundationDeathRecipient wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("FoundationDeathRecipient object is null");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died");
     SessionManager::GetInstance().OnFoundationDied();
 }
