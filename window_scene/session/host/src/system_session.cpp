@@ -328,7 +328,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
     return true;
 }
 
-void SubSession::UpdatePointerArea(const WSRect& rect)
+void SystemSession::UpdatePointerArea(const WSRect& rect)
 {
     auto property = GetSessionProperty();
     if (!(property->IsDecorEnable() && GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
