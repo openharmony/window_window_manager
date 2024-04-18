@@ -2956,7 +2956,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
-            if (sceneSession->GetSessionProperty() != nullptr && property != nullptr) {
+            if (sceneSession->GetSessionProperty() != nullptr) {
                 std::vector<Rect> touchHotAreas;
                 property->GetTouchHotAreas(touchHotAreas);
                 sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
@@ -4598,7 +4598,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         auto dialogSession = GetSceneSession(dialog->GetPersistentId());
         if (dialogSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_DIALOG, "dialogSession is not active");
+            TLOGD(WmsLogTag::WMS_DIALOG, "dialogSession is null");
             continue;
         }
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
