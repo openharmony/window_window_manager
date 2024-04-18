@@ -87,7 +87,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
     if (nextId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: invalid id, focusedId:%{public}d nextId:%{public}d",
             focusedId, nextId);
-        ReportFocusException("invalid id", focusedId, nextId, nullptr);   
+        ReportFocusException("invalid id", focusedId, nextId, nullptr);
     }
     bool focusSessionFlag = false;
     auto func = [&focusSessionFlag, focusedId, nextId](sptr<SceneSession> session) {
@@ -102,7 +102,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
-            ReportFocusException("check blockingFocus", focusedId, nextId, session);   
+            ReportFocusException("check blockingFocus", focusedId, nextId, session);
         }
         return false;
     };
