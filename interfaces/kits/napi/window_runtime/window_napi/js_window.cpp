@@ -3893,7 +3893,7 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
         WLOGFE("Failed to get parameter keepKeyboardFlag");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     } else {
-        wmErrorCode errCode = wmErrorCode::WM_OK;
+        WmErrorCode errCode = WmErrorCode::WM_OK;
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
             napi_get_value_bool(env, nativeVal, &keepKeyboardFlag));
         if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -4124,7 +4124,7 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     } else {
         napi_value nativeType = argv[0];
-        CheckColorSpaceParam(env, nativeVal, errCode, colorSpace);
+        CheckColorSpaceParam(env, nativeType, errCode, colorSpace);
         if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
@@ -4490,7 +4490,7 @@ napi_value JsWindow::OnOpacity(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double alpha = 0.0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_double(env, nativeVal, &alpha));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -4802,7 +4802,7 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_double(env, nativeVal, &radius));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -4899,7 +4899,7 @@ napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_double(env, nativeVal, &radius));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -4942,7 +4942,7 @@ napi_value JsWindow::OnSetBackdropBlur(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_double(env, nativeVal, &radius));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -4986,7 +4986,7 @@ napi_value JsWindow::OnSetBackdropBlurStyle(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t resultValue = 0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_uint32(env, nativeMode, &resultValue));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -5127,8 +5127,7 @@ static void CheckAspectRatioParam(napi_env env, napi_value nativeVal, WMError& e
             CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
                 napi_get_value_double(env, nativeVal, &aspectRatio));
         }
-    }  
-
+    } 
 }
 
 napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
@@ -5498,7 +5497,7 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isVisible = true;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_bool(env, nativeVal, &isVisible));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -5588,7 +5587,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t height = 0;
-    wmErrorCode errCode = wmErrorCode::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
         napi_get_value_int32(env, nativeVal, &height));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
