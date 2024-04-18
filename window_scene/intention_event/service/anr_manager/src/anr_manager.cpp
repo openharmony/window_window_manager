@@ -177,7 +177,6 @@ void ANRManager::RemovePersistentId(int32_t persistentId)
     WLOGFD("RemovePersistentId:%{public}d", persistentId);
     {
         std::unique_lock<std::shared_mutex> lock(applicationMapMutex_);
-        WLOGFD("RemovePersistentId:%{public}d", persistentId);
         applicationMap_.erase(persistentId);
     }
     DelayedSingleton<EventStage>::GetInstance()->OnSessionLost(persistentId);
