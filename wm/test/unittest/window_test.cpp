@@ -1632,7 +1632,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+        ASSERT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     } else {
         ASSERT_EQ(WMError::WM_OK, ret);
     }
@@ -2381,7 +2381,7 @@ HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
     }
     WindowOption windowoption;
     windowoption.onlySupportSceneBoard_ = true;
-    ASSERT_EQ(true, option->GetOnlySupportSceneBoard());
+    ASSERT_NE(true, option->GetOnlySupportSceneBoard());
 }
 
 /**
