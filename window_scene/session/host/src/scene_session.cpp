@@ -1381,6 +1381,11 @@ void SceneSession::SetMoveDragCallback()
 
 void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 {
+    std::shared_lock<std::shared_mutex> lock(moveDragControllerMutex_);
+    if (!moveDragController_) {
+        WLOGE("moveDragController_ is null");
+         return;
+    }
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
