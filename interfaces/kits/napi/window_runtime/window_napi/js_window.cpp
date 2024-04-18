@@ -5127,7 +5127,7 @@ static void CheckAspectRatioParam(napi_env env, napi_value nativeVal, WMError& e
             CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
                 napi_get_value_double(env, nativeVal, &aspectRatio));
         }
-    } 
+    }
 }
 
 napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
