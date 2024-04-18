@@ -530,6 +530,69 @@ HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
     property->SetIsShaped(true);
     ASSERT_EQ(property->GetIsShaped(), true);
 }
+
+/**
+ * @tc.name: SetHideNonSystemFloatingWindows
+ * @tc.desc: SetHideNonSystemFloatingWindows and GetHideNonSystemFloatingWindows to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), false);
+    property->SetHideNonSystemFloatingWindows(true);
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), true);
+}
+
+/**
+ * @tc.name: KeepKeyboardOnFocus
+ * @tc.desc: KeepKeyboardOnFocus and GetKeepKeyboardFlag to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, KeepKeyboardOnFocus, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->GetKeepKeyboardFlag(), false);
+    property->KeepKeyboardOnFocus(true);
+    ASSERT_EQ(property->GetKeepKeyboardFlag(), true);
+}
+
+/**
+ * @tc.name: SetTextFieldPositionY
+ * @tc.desc: SetTextFieldPositionY and GetTextFieldPositionY to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTextFieldPositionY, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    property->SetTextFieldPositionY(5.5);
+    ASSERT_EQ(property->GetTextFieldPositionY(), 5.5);
+}
+
+/**
+ * @tc.name: SetTextFieldHeight
+ * @tc.desc: SetTextFieldHeight and GetTextFieldHeight to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTextFieldHeight, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    property->SetTextFieldHeight(5.5);
+    ASSERT_EQ(property->GetTextFieldHeight(), 5.5);
+}
+
+/**
+ * @tc.name: SetIsLayoutFullScreen
+ * @tc.desc: SetIsLayoutFullScreen and IsLayoutFullScreen to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_EQ(property->IsLayoutFullScreen(), false);
+    property->SetIsLayoutFullScreen(true);
+    ASSERT_EQ(property->IsLayoutFullScreen(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
