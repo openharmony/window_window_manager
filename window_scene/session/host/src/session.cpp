@@ -1999,7 +1999,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " minHeight: " << minHeight << ",";
         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
-        WindowInfoReporter::GetInstance().ReportWindowExcetion(
+        WindowInfoReporter::GetInstance().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
     }
 }
@@ -2032,7 +2032,7 @@ void Session::RectCheckProcess()
             oss << " curHeight: " << curHeight << ",";
             oss << " ratio: " << ratio << ",";
             oss << " sessionRect: " << GetSessionRect().ToString() << ";";
-            WindowInfoReporter::GetInstance().ReportWindowExcetion(
+            WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
         }
         RectCheck(curWidth, curHeight);

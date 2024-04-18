@@ -40,12 +40,12 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         // check zorder = 0
         if (session->GetZOrder() == 0) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, zorder 0");
-            ReportZOrderExcetion("check zorder 0", session);
+            ReportZOrderException("check zorder 0", session);
         }
         // repetitive zorder
         if (session->GetZOrder() == curZOrder) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, repetitive zorder %{public}d", session->GetZOrder());
-            ReportZOrderExcetion("check repetitive zorder", session);
+            ReportZOrderException("check repetitive zorder", session);
         }
         curZOrder = session->GetZOrder();
         // callingSession check for input method
@@ -56,7 +56,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
                     callingSession->GetZOrder(), session->GetZOrder());
-                ReportZOrderExcetion("check callingSession check for input", session);
+                ReportZOrderException("check callingSession check for input", session);
             }
         }
         // subWindow/dialogWindow
@@ -66,7 +66,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             if ((mainSession != nullptr) && (session->GetZOrder() < mainSession->GetZOrder())) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
                     session->GetZOrder(), mainSession->GetZOrder());
-            ReportZOrderExcetion("check subWindow and dialogWindow", session);
+            ReportZOrderException("check subWindow and dialogWindow", session);
             }
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
@@ -75,7 +75,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         if (keyGuardFlag && (!session->IsShowWhenLocked())) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
-            ReportZOrderExcetion("isShowWhenLocked", session);
+            ReportZOrderException("isShowWhenLocked", session);
         }
         return false;
     };
@@ -87,7 +87,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
     if (nextId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: invalid id, focusedId:%{public}d nextId:%{public}d",
             focusedId, nextId);
-        ReportFocusExcetion("invalid id", focusedId, nextId, nullptr);   
+        ReportFocusException("invalid id", focusedId, nextId, nullptr);   
     }
     bool focusSessionFlag = false;
     auto func = [&focusSessionFlag, focusedId, nextId](sptr<SceneSession> session) {
@@ -102,14 +102,14 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
-            ReportFocusExcetion("blockingFocus", focusedId, nextId, session);   
+            ReportFocusException("blockingFocus", focusedId, nextId, session);   
         }
         return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
 }
 
-void AnomalyDetection::ReportZOrderExcetion(const std::string& errorReason, sptr<SessionSession> session){
+void AnomalyDetection::ReportZOrderException(const std::string& errorReason, sptr<SceneSession> session){
     if (Session == nullptr) {
         return;
     }
@@ -117,12 +117,12 @@ void AnomalyDetection::ReportZOrderExcetion(const std::string& errorReason, sptr
     oss << " cur persistentId: " << session->GetPersistentId << ",";
     oss << " windowType: " << static_cast<uint32_t>(session->GetWindowType()) << ",";
     oss << " cur ZOrder: " << session->GetZOrder() << ";";
-    WindowInfoReporter::GetInstance().ReportWindowExcetion(
+    WindowInfoReporter::GetInstance().ReportWindowException(
         static_cast<int32_t>(WindowDFXHelperType.WINDOW_ZORDER_CHECK), getpid(), oss.str());
 }
 
-void AnomalyDetection::ReportFocusExcetion(const std::string& errorReason, int32_t focusedId, 
-        int32_t nextId, sptr<SessionSession> session)
+void AnomalyDetection::ReportFocusException(const std::string& errorReason, int32_t focusedId, 
+        int32_t nextId, sptr<SceneSession> session)
 {
     std::ostringstream oss;
     oss << " FocusCheck err " << errorReason;
@@ -133,7 +133,7 @@ void AnomalyDetection::ReportFocusExcetion(const std::string& errorReason, int32
     oss << " focusedId: " << focusedId << ",";
     oss << " nextId: " << nextId << ",";
     oss << " ratio: " << ratio << ";";
-    WindowInfoReporter::GetInstance().ReportWindowExcetion(
+    WindowInfoReporter::GetInstance().ReportWindowException(
         static_cast<int32_t>(WindowDFXHelperType.WINDOW_FOCUS_CHECK), getpid(), oss.str());
 }
 } // namespace Rosen
