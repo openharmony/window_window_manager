@@ -1818,9 +1818,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         // create specific session
         SessionInfo info;
         info.windowType_ = static_cast<uint32_t>(type);
-        if (WindowHelper::IsSystemWindow(type) || WindowHelper::IsSubWindow(type)) {
-            info.bundleName_ = property->GetSessionInfo().bundleName_;
-        }
+        info.bundleName_ = property->GetSessionInfo().bundleName_;
+        info.abilityName_ = property->GetSessionInfo().abilityName_;
+        info.moduleName_ = property->GetSessionInfo().moduleName_;
         
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
