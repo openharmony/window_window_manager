@@ -393,6 +393,12 @@ struct StartingWindowAnimationConfig {
     float opacityEnd_ = 0;
 };
 
+struct SystemUIStatusBarConfig {
+    int showInLandscapeMode_ = 0;
+    std::string immersiveStatusBarBgColor_ = "#4c000000";
+    std::string immersiveStatusBarContentColor_ = "#ffffff";
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
 
@@ -402,6 +408,7 @@ struct AppWindowSceneConfig {
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
+    SystemUIStatusBarConfig systemUIStatusBarConfig_;
 };
 
 struct DeviceScreenConfig {
