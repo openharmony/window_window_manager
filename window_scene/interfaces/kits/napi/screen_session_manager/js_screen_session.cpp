@@ -55,6 +55,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
+    BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
     return objValue;
 }
 
@@ -66,7 +67,75 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 
 JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
     : env_(env), screenSession_(screenSession)
-{}
+{
+    std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOW";
+    screenScene_ = new(std::nothrow) ScreenScene(name);
+}
+
+napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnLoadContent(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]JsScreenSession::OnLoadContent");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) {  // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string contentUrl;
+    napi_value context = argv[1];
+    napi_value storage = argc < 3 ? nullptr : argv[2];
+    if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
+        WLOGFE("[NAPI]Failed to convert parameter to content url");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    if (context == nullptr) {
+        WLOGFE("[NAPI]Failed to get context object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    void* pointerResult = nullptr;
+    napi_unwrap(env, context, &pointerResult);
+    auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
+    if (contextNativePointer == nullptr) {
+        WLOGFE("[NAPI]Failed to get context pointer from js object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    auto contextWeakPtr = *contextNativePointer;
+
+    std::shared_ptr<NativeReference> contentStorage = nullptr;
+    if (storage != nullptr) {
+        napi_ref ref = nullptr;
+        napi_create_reference(env, storage, 1, &ref);
+        contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
+    }
+
+    return ScheduleLoadContentTask(env, contentUrl, contextWeakPtr, contentStorage);
+}
+
+napi_value JsScreenSession::ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
+    std::weak_ptr<Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage)
+{
+    if (screenScene_ == nullptr) {
+        WLOGFE("[NAPI]screenScene is nullptr");
+        return NapiGetUndefined(env);
+    }
+    napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
+    screenScene_->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
+    return NapiGetUndefined(env);
+}
 
 napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
