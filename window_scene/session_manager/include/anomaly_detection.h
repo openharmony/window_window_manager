@@ -20,13 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-
-enum class WindowDFXHelperType : uint32_t {
-    WINDOW_RECT_CHECK,
-    WINDOW_ZORDER_CHECK,
-    WINDOW_FOCUS_CHECK,
-};
-
 class AnomalyDetection {
 public:
     static void SceneZOrderCheckProcess();
