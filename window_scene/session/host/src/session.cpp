@@ -50,6 +50,7 @@ constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
+std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -59,8 +60,10 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         property_ = new WindowSessionProperty();
         property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
-    auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
-    mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (!g_mainHandler) {
+        auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
+        g_mainHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
 
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
@@ -964,8 +967,8 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+    if (g_mainHandler) {
+        g_mainHandler->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
         });
     }
@@ -1678,6 +1681,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 
 std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%s]", sessionInfo_.bundleName_.c_str());
     if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
         return nullptr;
     }
@@ -1690,14 +1694,14 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
     }
     auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
-        WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFI("Save snapshot WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
         if (notifySessionSnapshotFunc_) {
             notifySessionSnapshotFunc_(persistentId_);
         }
-    } else {
-        WLOGFE("Failed to get pixelMap, return nullptr");
+        return pixelMap;
     }
-    return pixelMap;
+    WLOGFE("Save snapshot failed");
+    return nullptr;
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)

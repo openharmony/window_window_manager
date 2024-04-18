@@ -540,7 +540,6 @@ private:
     std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<void()> windowModeCallback_;
 
