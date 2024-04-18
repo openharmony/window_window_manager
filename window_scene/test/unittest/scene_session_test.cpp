@@ -987,19 +987,21 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: TransferPointerEvent01
- * @tc.desc: TransferPointerEvent01
+ * @tc.name: TransferPointerEventDecorDialog
+ * @tc.desc: TransferPointerEventDecorDialog
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "TransferPointerEvent01";
-    info.bundleName_ = "TransferPointerEvent01Bundle";
-    info.windowType_ = 1;
+    info.abilityName_ = "TransferPointerEventDecorDialog";
+    info.bundleName_ = "TransferPointerEventDecorDialogBundle";
+    info.windowType_ = 2122;
     
     sptr<SceneSession> scensession =
         new (std::nothrow) SceneSession(info, specificCallback_);
+    scensession->moveDragController_ = new MoveDragController(12);
+    scensession->SetSessionState(SessionState::STATE_ACTIVE);
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
