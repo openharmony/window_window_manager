@@ -100,9 +100,14 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             WLOGFE("There is no need to connect the screen");
             return;
         }
-        auto screenProperty = screenSessionManager_->GetScreenProperty(screenId);
-        auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
-        sptr<ScreenSession> screenSession = new ScreenSession(screenId, rsId, name, screenProperty, displayNode);
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = rsId,
+            .name = name,
+        };
+        config.property = screenSessionManager_->GetScreenProperty(screenId);
+        config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
