@@ -98,6 +98,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getWindowSceneConfig", moduleName,
         JsSceneSessionManager::GetWindowSceneConfig);
     BindNativeFunction(env, exportObj, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
+    BindNativeFunction(env, exportObj, "checkSceneZOrder", moduleName, JsSceneSessionManager::CheckSceneZOrder);
     BindNativeFunction(env, exportObj, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
     BindNativeFunction(env, exportObj, "switchUser", moduleName, JsSceneSessionManager::SwitchUser);
     BindNativeFunction(env, exportObj, "requestSceneSessionByCall", moduleName,
@@ -226,13 +227,14 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
             WLOGFE("[NAPI]sessionInfo is nullptr");
             return;
         }
-        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
-        if (jsSessionInfo == nullptr) {
+        napi_value jsSessionRecoverInfo =
+            CreateJsSessionRecoverInfo(env, *sessionInfo, sceneSession->GetSessionProperty());
+        if (jsSessionRecoverInfo == nullptr) {
             WLOGFE("[NAPI]this target session info is nullptr");
             return;
         }
 
-        napi_value argv[] = { jsSceneSessionObj, jsSessionInfo };
+        napi_value argv[] = { jsSceneSessionObj, jsSessionRecoverInfo };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     WLOGFI("[NAPI]OnRecoverSceneSession post task");
@@ -454,6 +456,13 @@ napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_i
     WLOGFI("[NAPI]ProcessBackEvent");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnProcessBackEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::CheckSceneZOrder(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]CheckSceneZOrder");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnCheckSceneZOrder(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SwitchUser(napi_env env, napi_callback_info info)
@@ -801,6 +810,12 @@ napi_value JsSceneSessionManager::OnProcessBackEvent(napi_env env, napi_callback
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnCheckSceneZOrder(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().CheckSceneZOrder();
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1013,6 +1028,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     rootScene_->SetFrameLayoutFinishCallback([]() {
         SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
         SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+    });
+    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
+        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
     });
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {

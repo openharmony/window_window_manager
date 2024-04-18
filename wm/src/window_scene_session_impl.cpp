@@ -177,6 +177,12 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
                 property_->GetWindowName().c_str(), type);
             return WMError::WM_ERROR_NULLPTR;
         }
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
+            auto info = property_->GetSessionInfo();
+            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+            property_->SetSessionInfo(info);
+        }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         // creat sub session by parent session
@@ -195,6 +201,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             return createSystemWindowRet;
         }
         PreProcessCreate();
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
+            auto info = property_->GetSessionInfo();
+            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+            property_->SetSessionInfo(info);
+        }
+
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
@@ -910,13 +923,18 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
         case WindowType::WINDOW_TYPE_DIALOG:
-        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
+        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
+        case WindowType::WINDOW_TYPE_PANEL:
+        case WindowType::WINDOW_TYPE_LAUNCHER_DOCK: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
+        case WindowType::WINDOW_TYPE_DOCK_SLICE:
+        case WindowType::WINDOW_TYPE_STATUS_BAR:
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
@@ -924,6 +942,10 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
             break;
         }
@@ -979,22 +1001,26 @@ void WindowSceneSessionImpl::DestroySubWindow()
 
 WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 {
+    WMError ret = WMError::WM_OK;
     if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (property_->GetExtensionFlag() == true) {
-            SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "DestroyInner fail, ret:%{public}d", ret);
+        return ret;
+    }
 
-    WMError ret = WMError::WM_OK;
     if (WindowHelper::IsMainWindow(GetType())) {
         if (hostSession_ != nullptr) {
             ret = static_cast<WMError>(hostSession_->Disconnect(true));
@@ -1003,16 +1029,20 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     return ret;
 }
 
-void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
+WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t persistentId)
 {
+    WMError ret = WMError::WM_OK;
     if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window is scb window");
-        SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
-        return;
+        ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
+        return ret;
     }
     sptr<PatternDetachCallback> callback = new PatternDetachCallback();
-    SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
+    ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
     auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     callback->GetResult(WINDOW_DETACH_TIMEOUT);
@@ -1024,6 +1054,7 @@ void WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t per
         callback->GetResult(std::numeric_limits<int>::max());
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy window persistentId:%{public}d waitTime:%{public}lld", persistentId, waitTime);
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
@@ -1040,7 +1071,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     if (IsWindowSessionInvalid()) {
         TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id: %{public}d", GetPersistentId());
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
 
@@ -1197,6 +1228,13 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
+    if (property_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT &&
+        property_->GetWindowType() != WindowType::WINDOW_TYPE_PANEL &&
+        GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
@@ -1312,23 +1350,14 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
 {
     uint32_t windowId = GetWindowId();
     WindowMode mode = GetMode();
-    if (type != AvoidAreaType::TYPE_KEYBOARD &&
-        mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
-        !(mode == WindowMode::WINDOW_MODE_FLOATING &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
+    WindowType winType = GetType();
+    if (type != AvoidAreaType::TYPE_KEYBOARD && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (!WindowHelper::IsMainWindow(winType) ||
+        (system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
+        system::GetParameter("const.product.devicetype", "unknown") != "tablet"))) {
         TLOGI(WmsLogTag::WMS_IMMS,
-            "avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
-            static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
-        return WMError::WM_OK;
-    }
-    if (mode == WindowMode::WINDOW_MODE_FLOATING &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType()))) {
-        TLOGI(WmsLogTag::WMS_IMMS,"Window: %{public}u, avoidAreaType:%{public}u,"
-            "windowMode:%{public}u, return default avoid area for sub window.",
-            GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+            "Id: %{public}d, avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+            windowId, static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
