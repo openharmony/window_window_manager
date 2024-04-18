@@ -55,7 +55,7 @@ public:
         recordMap_.clear();
     }
 
-    void LogWarnninAllInfos() const
+    void LogWarningAllInfos() const
     {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::seconds>(now - lastOutputTime_).count() < OUTPUT_FREQ) {
