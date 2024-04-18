@@ -23,6 +23,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
+#include "event_tracker.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -309,6 +310,7 @@ private:
         mutable std::shared_mutex screenIdMapMutex_;
     };
 
+    EventTracker screenEventTracker_;
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

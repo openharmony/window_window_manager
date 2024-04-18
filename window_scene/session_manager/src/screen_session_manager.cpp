@@ -95,6 +95,7 @@ const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false
 ScreenSessionManager::ScreenSessionManager()
     : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true), rsInterface_(RSInterfaces::GetInstance())
 {
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CONSTRUCTION, "Dms construct.");
     LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
@@ -172,6 +173,7 @@ void ScreenSessionManager::Init()
     } else {
         SetSensorSubscriptionEnabled();
     }
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_ONSTART, "Dms init end.");
 }
 
 void ScreenSessionManager::OnStart()
@@ -185,6 +187,7 @@ void ScreenSessionManager::OnStart()
         return;
     }
     WLOGFI("DMS SA OnStart end");
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_ONSTART, "Dms onstart end.");
 }
 
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
@@ -302,6 +305,7 @@ void ScreenSessionManager::RegisterScreenChangeListener()
         auto task = [this]() { RegisterScreenChangeListener(); };
         taskScheduler_->PostAsyncTask(task, "RegisterScreenChangeListener", 50); // Retry after 50 ms.
     }
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_REGISTER_STATUS, "Dms ScreenChange register success.");
 }
 
 void ScreenSessionManager::RegisterRefreshRateChangeListener()
@@ -314,6 +318,8 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
             WLOGFE("Register refresh rate mode change listener failed.");
         } else {
             isRegisterRefreshRateListener = true;
+            screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_REGISTER_STATUS,
+                "Dms RefreshRateChange register success.");
         }
     }
 }
@@ -365,6 +371,7 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "Dms OnScreenChange triggered.");
     bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
@@ -433,6 +440,9 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    if (screenSessionMap_.empty()) {
+        screenEventTracker_.LogWarnninAllInfos();
+    }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
         WLOGFI("Error found screen session with id: %{public}" PRIu64"", screenId);
@@ -841,7 +851,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
 
     ScreenProperty property;
     CreateScreenProperty(screenId, property);
-
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "CreateScreenProperty by rsInterface success.");
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
         phyScreenPropMap_[screenId] = property;
@@ -864,6 +874,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[screenId] = session;
     }
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
     RegisterRefreshRateChangeListener();
