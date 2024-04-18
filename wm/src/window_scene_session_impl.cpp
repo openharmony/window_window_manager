@@ -1119,6 +1119,16 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
+    if (WindowHelper::IsSubWindow(GetType())) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr && (mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+                                      mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+            if (requestRect.posX_ == x && requestRect.posX_ == y) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same position in multiWindow will not update");
+                return WMError::WM_OK;
+            }
+        }
+    }
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
@@ -1242,6 +1252,18 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
+
+    if (WindowHelper::IsSubWindow(GetType())) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr && (mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+                                      mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+            if (width == requestRect.width_ && height == requestRect.height_) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same size in multiWindow will not update, return");
+                return WMError::WM_OK;
+            }
+        }
+    }
+
     Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
