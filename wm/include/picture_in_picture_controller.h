@@ -30,6 +30,7 @@
 #include "pip_report.h"
 #include "navigation_controller.h"
 #include "display_manager.h"
+#include "errors.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -86,6 +87,8 @@ public:
     };
 
 private:
+    static sptr<IRemoteObject> remoteObj_;
+    static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
     WMError CreatePictureInPictureWindow();
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);

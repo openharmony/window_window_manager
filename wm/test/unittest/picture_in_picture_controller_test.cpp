@@ -18,6 +18,7 @@
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
+#include "errors.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -229,6 +230,27 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
 
     pipControl->UpdateContentSize(width, height);
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
+}
+
+/**
+ * @tc.name: getSettingsAutoStartStatus
+ * @tc.desc: getSettingsAutoStartStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus, Function | SmallTest | Level2)
+{
+    std::string key = " ";
+    std::string value = " ";
+    sptr<MockWindow> mw = new MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+
+    ASSERT_NE(ERR_NO_INIT,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_NE(ERR_INVALID_OPERATION,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_EQ(ERR_NAME_NOT_FOUND,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_NE(ERR_INVALID_VALUE,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_NE(ERR_OK,  pipControl->getSettingsAutoStartStatus(key, value));
 }
 
 /**
