@@ -378,6 +378,13 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
+struct StartingWindowInfo {
+    int32_t startingWindowBackgroundId_;
+    int32_t startingWindowIconId_;
+    uint32_t startingWindowBackgroundColor_;
+    std::string startingWindowIconPath_;
+};
+
 struct StartingWindowAnimationConfig {
     bool enabled_ = true;
     int duration_ = 200;

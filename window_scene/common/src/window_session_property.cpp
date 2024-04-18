@@ -702,6 +702,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
     forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
+    topmost_ = property->topmost_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;

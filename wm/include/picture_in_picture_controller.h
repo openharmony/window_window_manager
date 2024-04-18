@@ -56,7 +56,7 @@ public:
     WMError StartPictureInPicture(StartPipType startType);
     WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
     WMError StopPictureInPictureFromClient();
-    sptr<Window> GetPipWindow();
+    sptr<Window> GetPipWindow() const;
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
     void SetAutoStartEnabled(bool enable);
