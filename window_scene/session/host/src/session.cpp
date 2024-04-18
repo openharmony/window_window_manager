@@ -1990,8 +1990,8 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
-        oss << "RectCheck err size ";
-        oss << " cur persistentId: " << GetPersistentId << ",";
+        oss << " RectCheck err size ";
+        oss << " cur persistentId: " << GetPersistentId() << ",";
         oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
         oss << " curWidth: " << curWidth << ",";
         oss << " curHeight: " << curHeight << ",";
@@ -2000,7 +2000,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
         WindowInfoReporter::GetInstance().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
     }
 }
 
@@ -2026,14 +2026,14 @@ void Session::RectCheckProcess()
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;
             oss << " RectCheck err ratio ";
-            oss << " cur persistentId: " << GetPersistentId << ",";
+            oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
             oss << " ratio: " << ratio << ",";
             oss << " sessionRect: " << GetSessionRect().ToString() << ";";
             WindowInfoReporter::GetInstance().ReportWindowException(
-                static_cast<int32_t>(WindowDFXHelperType.WINDOW_RECT_CHECK), getpid(), oss.str());
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
         RectCheck(curWidth, curHeight);
     }

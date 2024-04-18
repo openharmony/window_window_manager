@@ -75,7 +75,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         if (keyGuardFlag && (!session->IsShowWhenLocked())) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
-            ReportZOrderException("isShowWhenLocked", session);
+            ReportZOrderException("check isShowWhenLocked", session);
         }
         return false;
     };
@@ -102,39 +102,40 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
-            ReportFocusException("blockingFocus", focusedId, nextId, session);   
+            ReportFocusException("check blockingFocus", focusedId, nextId, session);   
         }
         return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
 }
 
-void AnomalyDetection::ReportZOrderException(const std::string& errorReason, sptr<SceneSession> session){
-    if (Session == nullptr) {
+void AnomalyDetection::ReportZOrderException(const std::string& errorReason, sptr<SceneSession> session)
+{
+    if (session == nullptr) {
         return;
     }
+    std::ostringstream oss;
     oss << " ZOrderCheck err " << errorReason;
-    oss << " cur persistentId: " << session->GetPersistentId << ",";
+    oss << " cur persistentId: " << session->GetPersistentId() << ",";
     oss << " windowType: " << static_cast<uint32_t>(session->GetWindowType()) << ",";
     oss << " cur ZOrder: " << session->GetZOrder() << ";";
     WindowInfoReporter::GetInstance().ReportWindowException(
-        static_cast<int32_t>(WindowDFXHelperType.WINDOW_ZORDER_CHECK), getpid(), oss.str());
+        static_cast<int32_t>(WindowDFXHelperType::WINDOW_ZORDER_CHECK), getpid(), oss.str());
 }
 
-void AnomalyDetection::ReportFocusException(const std::string& errorReason, int32_t focusedId, 
-        int32_t nextId, sptr<SceneSession> session)
+void AnomalyDetection::ReportFocusException(const std::string& errorReason, int32_t focusedId, int32_t nextId,
+    sptr<SceneSession> session)
 {
     std::ostringstream oss;
     oss << " FocusCheck err " << errorReason;
-    if (session!=nullptr) {
-        oss << " cur persistentId: " << session->GetPersistentId << ",";
+    if (session != nullptr) {
+        oss << " cur persistentId: " << session->GetPersistentId() << ",";
         oss << " windowType: " << static_cast<uint32_t>(session->GetWindowType()) << ",";
     }
     oss << " focusedId: " << focusedId << ",";
-    oss << " nextId: " << nextId << ",";
-    oss << " ratio: " << ratio << ";";
+    oss << " nextId: " << nextId << ";";
     WindowInfoReporter::GetInstance().ReportWindowException(
-        static_cast<int32_t>(WindowDFXHelperType.WINDOW_FOCUS_CHECK), getpid(), oss.str());
+        static_cast<int32_t>(WindowDFXHelperType::WINDOW_FOCUS_CHECK), getpid(), oss.str());
 }
 } // namespace Rosen
 } // namespace OHOS
