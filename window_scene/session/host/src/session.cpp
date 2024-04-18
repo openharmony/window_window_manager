@@ -2030,7 +2030,7 @@ void Session::RectCheckProcess()
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
-            oss << " ratio: " << ratio << ",";
+            oss << " setting ratio: " << ratio << ",";
             oss << " sessionRect: " << GetSessionRect().ToString() << ";";
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
