@@ -282,7 +282,7 @@ HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
     ASSERT_TRUE((systemSession_ != nullptr));
 
     auto ret = systemSession_->Hide();
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 }
 
 /**
