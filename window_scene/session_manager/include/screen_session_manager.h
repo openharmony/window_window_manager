@@ -264,6 +264,7 @@ private:
     DMError MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
+    void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
