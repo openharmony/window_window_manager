@@ -29,7 +29,6 @@
 #include "datashare_result_set.h"
 #include "datashare_helper.h"
 #include "iservice_registry.h"
-#include "errors.h"
 #include "result_set.h"
 #include "system_ability_definition.h"
 #include "uri.h"
@@ -458,6 +457,7 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
     }
     std::string value;
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
+    TLOGE(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
         return;
