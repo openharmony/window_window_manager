@@ -96,6 +96,17 @@ enum class LifeCycleTaskType : uint32_t {
     STOP
 };
 
+enum class DetectTaskState : uint32_t {
+    NO_TASK,
+    ATTACH_TASK,
+    DETACH_TASK
+};
+
+struct DetectTaskInfo {
+    WindowMode taskWindowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    DetectTaskState taskState = DetectTaskState::NO_TASK;
+};
+
 class Session : public SessionStub {
 public:
     using Task = std::function<void()>;
@@ -379,7 +390,8 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
-    void SetAttachState(bool isAttach);
+    void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINE);
+    bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
     void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
     SystemSessionConfig GetSystemConfig() const;
@@ -387,6 +399,12 @@ public:
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
     void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
         uint32_t minHeight, uint32_t maxFloatingWindowSize);
+    DetectTaskInfo GetDetectTaskInfo() const;
+    void SetDetectTaskInfo(DetectTaskInfo& detectTaskInfo);
+    void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
+    void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
+    std::string GetWindowDetectTaskName() const;
+
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -520,7 +538,11 @@ private:
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
     template<typename T>
     bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
-
+    bool IsStateMatch(bool isAttach) const;
+    bool IsSupportDetectWindow(bool isAttach) const;
+    bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
+    bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
+    void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
@@ -542,6 +564,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<void()> windowModeCallback_;
+    std::function<bool()> isScreenLockedCallback_;
 
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
@@ -570,6 +593,7 @@ private:
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex;
+    DetectTaskInfo detectTaskInfo_;
 };
 } // namespace OHOS::Rosen
 
