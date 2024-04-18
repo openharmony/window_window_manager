@@ -314,7 +314,7 @@ int32_t WindowInfoReporter::ReportWindowProfileInfo(const WindowProfileInfo& win
     return ret;
 }
 
-void WindowInfoReporter::ReportWindowExcetion(int32_t detectionType, int32_t pid, const std::string& windowInfo)
+void WindowInfoReporter::ReportWindowException(int32_t detectionType, int32_t pid, const std::string& windowInfo)
 {
     std::string eventName = "WINDOW_EXCEPTION_DETECTION";
     int32_t ret = HiSysEventWrite(

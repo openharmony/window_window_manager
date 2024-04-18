@@ -83,7 +83,7 @@ public:
     void ReportRecordedInfos();
     void ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp);
     int32_t ReportWindowProfileInfo(const WindowProfileInfo& windowProfileInfo);
-    void ReportWindowExcetion(int32_t detectionType, int32_t pid, const std::string& windowInfo);
+    void ReportWindowException(int32_t detectionType, int32_t pid, const std::string& windowInfo);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
