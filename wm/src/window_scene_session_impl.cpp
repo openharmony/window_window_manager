@@ -496,7 +496,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
 
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
-    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(GetType());
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
