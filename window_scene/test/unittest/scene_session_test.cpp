@@ -997,7 +997,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
     info.abilityName_ = "TransferPointerEventDecorDialog";
     info.bundleName_ = "TransferPointerEventDecorDialogBundle";
     info.windowType_ = 2122;
-    
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
     sptr<SceneSession> scensession =
         new (std::nothrow) SceneSession(info, specificCallback_);
     scensession->moveDragController_ = new MoveDragController(12);
