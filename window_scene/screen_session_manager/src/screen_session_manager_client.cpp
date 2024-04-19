@@ -393,4 +393,18 @@ bool ScreenSessionManagerClient::IsFoldable()
     }
     return screenSessionManager_->IsFoldable();
 }
+
+void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    if (screenSession->isScreenGroup_) {
+        WLOGFE("cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64, screenId);
+        return;
+    }
+    screenSession->SetScreenSceneDpi(virtualPixelRatio);
+}
 } // namespace OHOS::Rosen

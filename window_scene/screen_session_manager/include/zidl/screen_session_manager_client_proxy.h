@@ -44,6 +44,7 @@ public:
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
+    void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

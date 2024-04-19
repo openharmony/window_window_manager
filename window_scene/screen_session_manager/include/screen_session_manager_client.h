@@ -70,6 +70,7 @@ public:
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
     ScreenId GetDefaultScreenId();
     bool IsFoldable();
+    void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
 
 protected:
     ScreenSessionManagerClient() = default;
