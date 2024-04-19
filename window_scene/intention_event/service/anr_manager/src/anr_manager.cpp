@@ -93,13 +93,11 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 
 bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
-    {
-        std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
-        if (DelayedSingleton<EventStage>::GetInstance()->CheckAnrStatus(persistentId)) {
-            WLOGFE("Application not respond, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
-                persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
-            return true;
-        }
+    std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
+    if (DelayedSingleton<EventStage>::GetInstance()->CheckAnrStatus(persistentId)) {
+        WLOGFE("Application not respond, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
+        return true;
     }
     return false;
 }
