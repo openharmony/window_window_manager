@@ -3081,21 +3081,6 @@ HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | 
 }
 
 /**
- * @tc.name:
- * @tc.desc: NeedCheckContextTransparent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetContextTransparentFunc(nullptr);
-    ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
-    NotifyContextTransparentFunc func = [](){};
-    session_->SetContextTransparentFunc(func);
-    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
-}
-
-/**
  * @tc.name: SetShowRecent001
  * @tc.desc: Exist detect task when in recent.
  * @tc.type: FUNC

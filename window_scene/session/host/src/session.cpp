@@ -2370,7 +2370,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
             if (!session->IsStateMatch(isAttach)) {
                 WLOGFE("Window attach state and session state mismatch, "
-                    "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s", 
+                    "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
             }
