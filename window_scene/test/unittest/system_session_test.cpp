@@ -279,7 +279,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
  */
 HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
 {
-    ASSERT_TRUE((systemSession_ != nullptr));
+    ASSERT_TRUE(systemSession_ != nullptr);
 
     auto ret = systemSession_->Hide();
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -292,7 +292,7 @@ HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionTest, Disconnect, Function | SmallTest | Level1)
 {
-    ASSERT_TRUE((systemSession_ != nullptr));
+    ASSERT_TRUE(systemSession_ != nullptr);
 
     bool isFromClient = true;
     auto ret = systemSession_->Disconnect(isFromClient);
@@ -306,7 +306,7 @@ HWTEST_F(SystemSessionTest, Disconnect, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level1)
 {
-    ASSERT_TRUE((systemSession_ != nullptr));
+    ASSERT_TRUE(systemSession_ != nullptr);
 
     int32_t posX = 2;
     int32_t posY = 3;
