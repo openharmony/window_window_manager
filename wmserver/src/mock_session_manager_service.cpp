@@ -622,7 +622,7 @@ void MockSessionManagerService::ShowAceDumpHelp(std::string& dumpInfo)
 {
 }
 
-bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode() 
+bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
 {
     if (!OHOS::system::GetBoolParameter(KEY_SCENE_BOARD_TEST_ENABLE, false)) {
         WLOGFD("SceneBoard testmode is disabled.");
