@@ -141,6 +141,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSystemAnimatedScenes);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMap", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMap);
+    BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
+        JsSceneSessionManager::GetIsLayoutFullScreen);
     return NapiGetUndefined(env);
 }
 
@@ -714,6 +716,13 @@ napi_value JsSceneSessionManager::GetSessionSnapshotPixelMap(napi_env env, napi_
     WLOGI("[NAPI]GetSessionSnapshotPixelMap");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSessionSnapshotPixelMap(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]GetIsLayoutFullScreen");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2209,6 +2218,15 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     napi_value lastParam = argv[1];
     NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info)
+{
+    bool isLayoutFullScreen = false;
+    SceneSessionManager::GetInstance().GetIsLayoutFullScreen(isLayoutFullScreen);
+    napi_value result = nullptr;
+    napi_get_boolean(env, isLayoutFullScreen, &result);
     return result;
 }
 } // namespace OHOS::Rosen
