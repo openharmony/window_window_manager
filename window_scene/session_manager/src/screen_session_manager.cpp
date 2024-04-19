@@ -371,9 +371,11 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
+    std::ostringstream oss;
+    oss << "OnScreenChange triggered. screenId: " << static_cast<int32_t>(screenId)
+        << "  screenEvent: " << static_cast<int32_t>(screenEvent);
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, oss.str());
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "Dms OnScreenChange triggered.");
-    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is nullptr");
@@ -383,7 +385,13 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (foldScreenController_ != nullptr) {
         screenSession->SetFoldScreen(true);
     }
+    HandleScreenEvent(screenSession, screenId, screenEvent);
+}
 
+void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
+    ScreenId screenId, ScreenEvent screenEvent)
+{
+    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
