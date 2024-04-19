@@ -3271,7 +3271,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLoacked001, Function | SmallTest | Le
 {
     sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
-    info.bundleName = "bundleName";
+    info.bundleName_ = "bundleName";
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
@@ -3290,7 +3290,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLoacked001, Function | SmallTest | Le
     auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
         return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
     };
-    bool hasEvent = sceneSession->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvnet(filter);
+    bool hasEvent = sceneSession->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
     ASSERT_EQ(false, hasEvent);
     ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, sceneSession->detectTaskInfo_.taskWindowMode);
