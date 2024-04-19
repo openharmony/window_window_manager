@@ -211,6 +211,7 @@ private:
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {
