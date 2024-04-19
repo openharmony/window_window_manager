@@ -249,7 +249,7 @@ DMError Screen::SetDensityDpi(uint32_t dpi) const
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
 }
 
-DMError Screen::SetDensityDpi(uint32_t dpi) const
+DMError Screen::SetDensityDpiSystem(uint32_t dpi) const
 {
     if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
         WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
