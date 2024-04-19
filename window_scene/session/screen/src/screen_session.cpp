@@ -566,6 +566,21 @@ void ScreenSession::SetVirtualPixelRatio(float virtualPixelRatio)
     property_.SetVirtualPixelRatio(virtualPixelRatio);
 }
 
+void ScreenSession::SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func)
+{
+    SetScreenSceneDpiCallback_ = func;
+    WLOGFI("SetScreenSceneDpiChangeListener");
+}
+
+void ScreenSession::SetScreenSceneDpi(float density)
+{
+    if (SetScreenSceneDpiCallback_ == nullptr) {
+        WLOGFI("SetScreenSceneDpiCallback_ is nullptr");
+        return;
+    }
+    SetScreenSceneDpiCallback_(density);
+}
+
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
 {
     property_.SetDensityInCurResolution(densityInCurResolution);
