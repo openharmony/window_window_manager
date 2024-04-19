@@ -262,21 +262,39 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (const auto& it : windowManagerAgentMap_) {
-        WLOGFI("[WMSRecover] RecoverWindowManagerAgents type = %{public}" PRIu32 ", size = %{public}" PRIu64, it.first,
-            static_cast<uint64_t>(it.second.size()));
-        for (auto& agent : it.second) {
-            if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
-                WLOGFE("[WMSRecover] RecoverWindowManagerAgent failed");
-            }
-        }
-    }
+    ReregisterWindowManagerAgent();
 
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (const auto& it : sessionRecoverCallbackFuncMap_) {
         WLOGFD("[WMSRecover] Session recover callback, persistentId = %{public}" PRId32, it.first);
         it.second();
     }
+}
+
+void WindowAdapter::ReregisterWindowManagerAgent()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if ((!windowManagerServiceProxy_) || (!windowManagerServiceProxy_->AsObject())) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "windowManagerServiceProxy_ is null");
+        return;
+    }
+    for (const auto& it : windowManagerAgentMap_) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "Window manager agent type = %{public}" PRIu32 ", size = %{public}" PRIu64,
+            it.first, static_cast<uint64_t>(it.second.size()));
+        for (auto& agent : it.second) {
+            if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_RECOVER, "Reregister window manager agent failed");
+            }
+        }
+    }
+}
+
+void WindowAdapter::OnUserSwitch()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched");
+    ClearWindowAdapter();
+    InitSSMProxy();
+    ReregisterWindowManagerAgent();
 }
 
 bool WindowAdapter::InitSSMProxy()
@@ -288,7 +306,6 @@ bool WindowAdapter::InitSSMProxy()
             WLOGFE("Failed to get system scene session manager services");
             return false;
         }
-
         wmsDeath_ = new (std::nothrow) WMSDeathRecipient();
         if (!wmsDeath_) {
             WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
@@ -303,6 +320,12 @@ bool WindowAdapter::InitSSMProxy()
             SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFunc(
                 std::bind(&WindowAdapter::WindowManagerAndSessionRecover, this));
             recoverInitialized = true;
+        }
+        // U0 system user needs to subscribe OnUserSwitch event
+        int32_t clientUserId = GetUserIdByUid(getuid());
+        if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
+            SessionManager::GetInstance().RegisterUserSwitchListener(std::bind(&WindowAdapter::OnUserSwitch, this));
+            isRegisteredUserSwitchListener_ = true;
         }
         isProxyValid_ = true;
     }

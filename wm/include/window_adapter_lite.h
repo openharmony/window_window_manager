@@ -47,11 +47,13 @@ public:
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
+    void OnUserSwitch();
 
     std::recursive_mutex mutex_;
     sptr<IWindowManagerLite> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ { false };
+    bool isRegisteredUserSwitchListener_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
