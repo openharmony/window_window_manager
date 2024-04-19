@@ -252,7 +252,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  */
 HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus01, Function | SmallTest | Level2)
 {
-    std::string key = "AUTO_START_PIP_STATUS";
+    std::string key = "auto_start_pip_status";
     std::string value;
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
@@ -285,7 +285,7 @@ HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus02, Function 
  */
 HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus03, Function | SmallTest | Level2)
 {
-    std::string key = "AUTO_START_PIP_STATUS";
+    std::string key = "auto_start_pip_status";
     std::string value;
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
