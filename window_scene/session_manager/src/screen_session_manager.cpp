@@ -653,6 +653,19 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("set virtual pixel permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if (clientProxy_) {
+        clientProxy_->SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio)
 {
     WLOGI("SetResolution ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",

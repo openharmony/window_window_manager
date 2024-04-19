@@ -34,6 +34,8 @@
 #include "session_manager/include/screen_rotation_property.h"
 
 namespace OHOS::Rosen {
+using SetScreenSceneDpiFunc = std::function<void(float density)>;
+
 class IScreenChangeListener {
 public:
     virtual void OnConnect(ScreenId screenId) = 0;
@@ -103,6 +105,8 @@ public:
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
+    void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
+    void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
 
@@ -207,6 +211,7 @@ private:
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {
