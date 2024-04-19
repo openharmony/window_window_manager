@@ -65,6 +65,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
+static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -2292,9 +2293,8 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach) const
 {
-    std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    bool isPc = deviceType == "2in1";
-    bool isPhone = deviceType == "phone";
+    bool isPc = g_deviceType == "2in1";
+    bool isPhone = g_deviceType == "phone";
     if (!isPc && !isPhone) {
         WLOGFI("Window state detect not support: device type not support, persistentId:%{public}d", persistentId_);
         return false;
