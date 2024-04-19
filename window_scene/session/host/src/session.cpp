@@ -54,9 +54,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = new WindowSessionProperty();
-    }
-    {
-        std::shared_lock<std::shared_mutex> lock(propertyMutex_);
         property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
     auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
