@@ -82,7 +82,7 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
                 screenBounds.rect_.width_, screenBounds.rect_.height_ };
             screenScene_->SetDisplayDensity(density);
             screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
-        }
+        };
         screenSession_->SetScreenSceneDpiChangeListener(func);
     }
 }
