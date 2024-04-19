@@ -43,7 +43,7 @@ namespace {
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
     constexpr uint32_t PIP_HIGH_PRIORITY = 1;
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
-    const std::string KEY = "AUTO_START_PIP_STATUS";
+    const std::string KEY = "auto_start_pip_status";
     const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
     const std::string SETTING_COLUMN_VALUE = "VALUE";
     const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
@@ -79,7 +79,7 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
     auto remoteObj = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     if (remoteObj == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbility return nullptr, systemAbilityId=%{public}d",
-              WINDOW_MANAGER_SERVICE_ID);
+            WINDOW_MANAGER_SERVICE_ID);
         return;
     }
     remoteObj_ = remoteObj;
@@ -457,7 +457,7 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
     }
     std::string value;
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
-    TLOGE(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
+    TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
         return;
