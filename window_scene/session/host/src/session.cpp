@@ -2304,7 +2304,8 @@ bool Session::IsSupportDetectWindow(bool isAttach) const
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType()) || showRecent_) {
-        WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, persistentId:%{public}d", persistentId_);
+        WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, "
+            "persistentId:%{public}d", persistentId_);
         return false;
     }
     // Only detecting cold start scenarios on PC
@@ -2369,9 +2370,9 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
             if (!session->IsStateMatch(isAttach)) {
                 WLOGFE("Window attach state and session state mismatch, "
-                "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s", 
-                isAttach, static_cast<uint32_t>(session->GetSessionState()),
-                session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+                    "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s", 
+                    isAttach, static_cast<uint32_t>(session->GetSessionState()),
+                    session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
             }
         }
         session->detectTaskInfo_.taskState = DetectTaskState::NO_TASK;
