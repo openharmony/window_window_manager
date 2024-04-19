@@ -642,7 +642,7 @@ DMError ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virt
     return displayManagerServiceProxy_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
 }
 
-DMError ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+DMError ScreenManagerAdapter::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
