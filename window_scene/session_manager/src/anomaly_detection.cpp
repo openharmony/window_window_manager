@@ -73,7 +73,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             keyGuardFlag = true;
             return false;
         }
-        if (keyGuardFlag && (!session->IsShowWhenLocked())) {
+        if (keyGuardFlag && (!session->IsShowWhenLocked()) && (session->IsAppSession())) {
             TLOGE(WmsLogTag::WMS_FOCUS, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
             ReportZOrderException("check isShowWhenLocked", session);
         }
