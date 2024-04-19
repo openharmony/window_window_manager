@@ -1842,6 +1842,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
     SetForceTouchable(!hide);
+    SetForceHideState(hide);
 }
 
 Orientation SceneSession::GetRequestedOrientation() const
@@ -2525,5 +2526,15 @@ WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
     };
     PostTask(task, "UpdateRectChangeListenerRegistered");
     return WSError::WS_OK;
+}
+
+void SceneSession::SetForceHideState(bool hideFlag)
+{
+    forceHideState_ = hideFlag;
+}
+
+bool SceneSession::GetForceHideState() const
+{
+    return forceHideState_
 }
 } // namespace OHOS::Rosen
