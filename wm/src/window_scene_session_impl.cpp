@@ -3007,36 +3007,43 @@ WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY,
 std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     const std::vector<std::vector<uint32_t>>& windowMask)
 {
-    const Rect& windowRect = GetRect();
+    const Rect& windowRect = GetRequestRect();
     uint32_t maskHeight = windowMask.size();
     if (maskHeight <= 0) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
     uint32_t maskWidth = windowMask[0].size();
-    if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
+    if ((windowRect.height_ > 0 && windowRect.height_ != maskHeight) ||
+        (windowRect.width_ > 0 && windowRect.width_ != maskWidth)) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
+    const uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
     opts.size.width = maskWidth;
     opts.size.height = maskHeight;
-    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
-    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-    uint32_t length = maskWidth * maskHeight;
-    uint32_t* data = new (std::nothrow) uint32_t[length];
+    uint32_t length = maskWidth * maskHeight * bgraChannel;
+    uint8_t* data = static_cast<uint8_t*>(malloc(length));
     if (data == nullptr) {
         WLOGFE("data is nullptr");
         return nullptr;
     }
+    const uint32_t fullChannel = 255;
+    const uint32_t greenChannel = 1;
+    const uint32_t redChannel = 2;
+    const uint32_t alphaChannel = 3;
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
-            data[idx] = windowMask[i][j];
+            uint32_t channelIndex = idx * bgraChannel;
+            data[channelIndex] = 0; // blue channel
+            data[channelIndex + greenChannel] = 0;
+            data[channelIndex + redChannel] = fullChannel;
+            data[channelIndex + alphaChannel] = windowMask[i][j] > 0 ? fullChannel : 0;
         }
     }
-    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(data, length, opts);
+    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
     delete[] data;
     return mask;
 }
