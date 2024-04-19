@@ -208,6 +208,7 @@ public:
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
+    WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
