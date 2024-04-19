@@ -3626,7 +3626,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
     return result;
 }
 
-static void CheckWindowKeepScreenOnParam(napi_env env, napi_value nativeVal, WMError& errCode, bool& raiseEnabled)
+static void CheckRaiseByClickEnabledParam(napi_env env, napi_value nativeVal, WMError& errCode, bool& raiseEnabled)
 {
     if (errCode == WMError::WM_OK) {
         if (nativeVal == nullptr) {
@@ -3651,7 +3651,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
     }
     bool raiseEnabled = true;
     napi_value nativeVal = argv[0];
-    CheckWindowKeepScreenOnParam(env, nativeVal, errCode, raiseEnabled);
+    CheckRaiseByClickEnabledParam(env, nativeVal, errCode, raiseEnabled);
     
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
