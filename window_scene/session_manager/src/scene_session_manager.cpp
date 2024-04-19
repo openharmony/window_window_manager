@@ -2980,13 +2980,13 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
     if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr) {
         bool setBrightnessRet = false;
         if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-            auto task = [this]() {
+            auto task = []() {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             };
             setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
         } else {
-            auto task = [this, brightness]() {
+            auto task = [brightness]() {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
             };
