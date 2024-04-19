@@ -170,18 +170,20 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType& type = GetType();
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
+        auto info = property_->GetSessionInfo();
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+        property_->SetSessionInfo(info);
+    }
     if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);
             return WMError::WM_ERROR_NULLPTR;
-        }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-            auto info = property_->GetSessionInfo();
-            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-            property_->SetSessionInfo(info);
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -201,13 +203,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             return createSystemWindowRet;
         }
         PreProcessCreate();
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-            auto info = property_->GetSessionInfo();
-            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-            property_->SetSessionInfo(info);
-        }
-
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
