@@ -2535,6 +2535,6 @@ void SceneSession::SetForceHideState(bool hideFlag)
 
 bool SceneSession::GetForceHideState() const
 {
-    return forceHideState_
+    return forceHideState_;
 }
 } // namespace OHOS::Rosen
