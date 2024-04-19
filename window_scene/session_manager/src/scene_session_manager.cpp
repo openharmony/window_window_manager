@@ -848,7 +848,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
     }
 
     item = statusBarConfig["immersiveStatusBarBgColor"];
-    if (item.IsStrings()) {
+    if (item.IsString()) {
         auto color = item.stringValue_;
         uint32_t colorValue;
         if (!ColorParser::Parse(color, colorValue)) {
@@ -860,7 +860,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
     }
 
     item = statusBarConfig["immersiveStatusBarContentColor"];
-    if (item.IsStrings()) {
+    if (item.IsString()) {
         auto color = item.stringValue_;
         uint32_t colorValue;
         if (!ColorParser::Parse(color, colorValue)) {
