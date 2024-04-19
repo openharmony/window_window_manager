@@ -836,6 +836,19 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
         if (flag.enableAnimationFlag == false) {
             systemBarProperties[type].enableAnimation_ = property.enableAnimation_;
         }
+        if (flag.enableFlag == true) {
+            systemBarProperties[type].settingFlag_ = 
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_)) | 
+                static_cast<SystemBarSettingFlag>(SystemBarSettingFlag::ENABLE_SETTING);
+        }
+        if (flag.backgroundColorFlag == true || flag.contentColorFlag == true) {
+            systemBarProperties[type].settingFlag_ = 
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_)) | 
+                static_cast<SystemBarSettingFlag>(SystemBarSettingFlag::COLOR_SETTING);
+        }
+        WLOGI("[NAPI]SystemBarProperty type:%{public}u enable:%{public}u bgColor:%{public}x settingFlag:%{public}u", 
+            type, systemBarProperties[type].enable_, systemBarProperties[type].backgroundColor_, 
+            systemBarProperties[type].settingFlag_);
     }
 
     return;
