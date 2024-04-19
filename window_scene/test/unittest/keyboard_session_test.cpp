@@ -410,6 +410,7 @@ HWTEST_F(KeyboardSessionTest, IsStatusBarVisible, Function | SmallTest | Level1)
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
     sptr<SceneSession> statusBarSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(statusBarSession, nullptr);
     bool res1 = keyboardSession->IsStatusBarVisible(statusBarSession);
     ASSERT_EQ(res1, false);
 }
