@@ -649,6 +649,7 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
     WINDOW_UPDATE_PROPERTY,
+    WINDOW_UPDATE_ALL,
 };
 
 /**

@@ -431,6 +431,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::UPDATE_REFRESHRATE);
     } else {
         WLOGFE("Get default screen session failed.");
     }
@@ -441,7 +443,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     if (screenSessionMap_.empty()) {
-        screenEventTracker_.LogWarnninAllInfos();
+        screenEventTracker_.LogWarningAllInfos();
     }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
@@ -3719,6 +3721,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         WLOGFE("dumper is nullptr");
         return -1;
     }
+    dumper->DumpEventTracker(screenEventTracker_);
     dumper->ExcuteDumpCmd();
 
     std::vector<std::string> params;
