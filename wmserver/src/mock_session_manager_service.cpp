@@ -357,7 +357,7 @@ void MockSessionManagerService::UnregisterSMSRecoverListener()
 }
 
 void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId, int32_t pid)
- {
+{
     TLOGD(WmsLogTag::WMS_RECOVER, "userId = %{public}d, pid = %{public}d", userId, pid);
     std::unique_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
@@ -373,7 +373,7 @@ void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId, int
 }
 
 void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId)
- {
+{
     std::shared_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
         GetSMSRecoverListenerMap(userId);
