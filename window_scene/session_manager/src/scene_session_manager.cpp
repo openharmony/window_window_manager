@@ -2913,6 +2913,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+                sceneSession->GetSessionProperty()->SetIsLayoutFullScreen(property->IsLayoutFullScreen());
             }
             break;
         }
@@ -7071,6 +7072,48 @@ WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMax
         return WSError::WS_OK;
     };
     taskScheduler_->PostAsyncTask(task, "UpdateMaximizeMode:PID:" + std::to_string(persistentId));
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
+{
+    auto task = [this, &isLayoutFullScreen]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
+            auto sceneSession = item->second;
+            if (sceneSession == nullptr) {
+                WLOGFE("Session is nullptr");
+                continue;
+            }
+            if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            auto state = sceneSession->GetSessionState();
+            if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+                continue;
+            }
+            if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+                continue;
+            }
+            auto property = sceneSession->GetSessionProperty();
+            if (property == nullptr) {
+                WLOGFE("Property is nullptr");
+                continue;
+            }
+            isLayoutFullScreen = property->IsLayoutFullScreen();
+            auto persistentId = sceneSession->GetPersistentId();
+            if (isLayoutFullScreen) {
+                WLOGFD("Current window is immersive, persistentId:%{public}d", persistentId);
+                return WSError::WS_OK;
+            } else {
+                WLOGFD("Current window is not immersive, persistentId:%{public}d", persistentId);
+            }
+        }
+        WLOGFD("No immersive window");
+        return WSError::WS_OK;
+    };
+
+    taskScheduler_->PostSyncTask(task, "GetIsLayoutFullScreen");
     return WSError::WS_OK;
 }
 
