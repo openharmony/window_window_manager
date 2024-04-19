@@ -3004,10 +3004,10 @@ HWTEST_F(SceneSessionTest, SetForceHideState, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->SetForceHideState(true);
-    bool hide = scensession->GetForceHideState()
+    bool hide = scensession->GetForceHideState();
     ASSERT_EQ(hide, true);
     scensession->SetForceHideState(false);
-    bool hide = scensession->GetForceHideState();
+    hide = scensession->GetForceHideState();
     ASSERT_EQ(hide, false);
 }
 }
