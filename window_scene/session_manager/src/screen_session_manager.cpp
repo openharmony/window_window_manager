@@ -3721,6 +3721,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         WLOGFE("dumper is nullptr");
         return -1;
     }
+    dumper->DumpEventTracker(screenEventTracker_);
     dumper->ExcuteDumpCmd();
 
     std::vector<std::string> params;
