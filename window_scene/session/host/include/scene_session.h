@@ -251,6 +251,8 @@ public:
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    void SetForceHideState(bool hideFlag);
+    bool GetForceHideState() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -307,7 +309,7 @@ private:
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
-
+    bool forceHideState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
