@@ -280,11 +280,10 @@ void KeyboardSession::RaiseCallingSession(bool isKeyboardUpdated)
 
     WSRect callingSessionRect = callingSession->GetSessionRect();
     bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
-    bool isParentFloating = WindowHelper::IsSubWindow(callingSession->GetWindowType()) &&
-                            callingSession->GetParentSession() != nullptr &&
-                            callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (isCallingSessionFloating && 
-        (WindowHelper::IsMainWindow(callingSession->GetWindowType()) || isParentFloating) &&
+    bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
+        (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
+         callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    if (isCallingSessionFloating && isMainOrParentFloating &&
         (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
          system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
         return;
