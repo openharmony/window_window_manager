@@ -3239,19 +3239,6 @@ napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void CheckWindowKeepScreenOnParam(napi_env env, napi_value nativeVal, WmErrorCode& errCode, bool& keepScreenOn)
-{
-    if (errCode == WmErrorCode::WM_OK) {
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to keepScreenOn");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &keepScreenOn));
-        }
-    }
-}
-
 napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -3263,9 +3250,16 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool keepScreenOn = true;
-    napi_value nativeVal = argv[0];
-    CheckWindowKeepScreenOnParam(env, nativeVal, errCode, keepScreenOn);
-    
+    if (errCode == WmErrorCode::WM_OK) {
+        napi_value nativeVal = argv[0];
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to keepScreenOn");
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                napi_get_value_bool(env, nativeVal, &keepScreenOn));
+        }
+    }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -3410,19 +3404,6 @@ napi_value JsWindow::OnSetPrivacyMode(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void CheckWindowPrivacyModeParam(napi_env env, napi_value nativeVal, WmErrorCode& errCode, bool& isPrivacyMode)
-{
-    if (errCode == WmErrorCode::WM_OK) {
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to isPrivacyMode");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &isPrivacyMode));
-        }
-    }
-}
-
 napi_value JsWindow::OnSetWindowPrivacyMode(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -3434,8 +3415,16 @@ napi_value JsWindow::OnSetWindowPrivacyMode(napi_env env, napi_callback_info inf
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool isPrivacyMode = false;
-    napi_value nativeVal = argv[0];
-    CheckWindowPrivacyModeParam(env, nativeVal, errCode, isPrivacyMode);
+    if (errCode == WmErrorCode::WM_OK) {
+        napi_value nativeVal = argv[0];
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to isPrivacyMode");
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                napi_get_value_bool(env, nativeVal, &isPrivacyMode));
+        }
+    }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -3565,19 +3554,6 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void CheckResizeByDragEnabledParam(napi_env env, napi_value nativeVal, WMError& errCode, bool& dragEnabled)
-{
-    if (errCode == WMError::WM_OK) {
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to dragEnabled");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &dragEnabled));
-        }
-    }
-}
-
 napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -3589,8 +3565,15 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     bool dragEnabled = true;
-    napi_value nativeVal = argv[0];
-    CheckResizeByDragEnabledParam(env, nativeVal, errCode, dragEnabled);
+    if (errCode == WMError::WM_OK) {
+        if (argv[0] == nullptr) {
+            WLOGFE("Failed to convert parameter to dragEnabled");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
+                napi_get_value_bool(env, argv[0], &dragEnabled));
+        }
+    }
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -3626,19 +3609,6 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
     return result;
 }
 
-static void CheckRaiseByClickEnabledParam(napi_env env, napi_value nativeVal, WMError& errCode, bool& raiseEnabled)
-{
-    if (errCode == WMError::WM_OK) {
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to raiseEnabled");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &raiseEnabled));
-        }
-    }
-}
-
 napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -3650,8 +3620,15 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     bool raiseEnabled = true;
-    napi_value nativeVal = argv[0];
-    CheckRaiseByClickEnabledParam(env, nativeVal, errCode, raiseEnabled);
+    if (errCode == WMError::WM_OK) {
+        if (argv[0] == nullptr) {
+            WLOGFE("Failed to convert parameter to raiseEnabled");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
+                napi_get_value_bool(env, argv[0], &raiseEnabled));
+        }
+    }
     
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -4095,23 +4072,6 @@ napi_value JsWindow::OnDisableWindowDecor(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
-static void CheckColorSpaceParam(napi_env env, napi_value nativeType, WMError& errCode, ColorSpace& colorSpace)
-{
-    if (nativeType == nullptr) {
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
-        WLOGFE("Failed to convert parameter to ColorSpace");
-    } else {
-        uint32_t resultValue = 0;
-        CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
-            napi_get_value_uint32(env, nativeType, &resultValue));
-        colorSpace = static_cast<ColorSpace>(resultValue);
-        if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
-            WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        }
-    }
-}
-
 napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -4124,9 +4084,18 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     } else {
         napi_value nativeType = argv[0];
-        CheckColorSpaceParam(env, nativeType, errCode, colorSpace);
-        if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        if (nativeType == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            WLOGFE("Failed to convert parameter to ColorSpace");
+        } else {
+            uint32_t resultValue = 0;
+            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
+                napi_get_value_uint32(env, nativeType, &resultValue));
+            colorSpace = static_cast<ColorSpace>(resultValue);
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
+                WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
         }
     }
 
@@ -5118,18 +5087,6 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void CheckAspectRatioParam(napi_env env, napi_value nativeVal, WMError& errCode, double& aspectRatio)
-{
-    if (errCode == WMError::WM_OK) {
-        if (nativeVal == nullptr) {
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
-                napi_get_value_double(env, nativeVal, &aspectRatio));
-        }
-    }
-}
-
 napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -5147,8 +5104,16 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
     }
 
     double aspectRatio = 0.0;
-    napi_value nativeVal = argv[0];
-    CheckAspectRatioParam(env, nativeVal, errCode, aspectRatio);
+    if (errCode == WMError::WM_OK) {
+        napi_value nativeVal = argv[0];
+        if (nativeVal == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
+                napi_get_value_double(env, nativeVal, &aspectRatio));
+        }
+    }
+
     if (errCode == WMError::WM_ERROR_INVALID_PARAM || aspectRatio <= 0.0) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
