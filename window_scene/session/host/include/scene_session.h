@@ -189,11 +189,10 @@ public:
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     virtual int32_t GetMissionId() const { return persistentId_; };
-    const std::string& GetWindowName() const;
-    const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
+    const std::string& GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
 
     bool IsVisible() const;

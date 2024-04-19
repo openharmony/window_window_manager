@@ -2112,6 +2112,12 @@ WindowType Session::GetWindowType() const
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
+std::string Session::GetWindowName() const
+{
+    auto property = GetSessionProperty();
+    return property ? property->GetWindowName() : "";
+}
+
 void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
 {
     systemConfig_ = systemConfig;
