@@ -7799,7 +7799,6 @@ bool SceneSessionManager::IsCovered(const sptr<SceneSession>& sceneSession,
     return false;
 }
 
-
 void SceneSessionManager::FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
     for (auto it = sceneSessionList.begin(); it != sceneSessionList.end();) {
@@ -7825,6 +7824,10 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
             bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
             item->wid_, item->innerWid_, item->bundleName_.c_str(),
             item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
+        for (const auto& rect : item->touchHotAreas_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d," \
+            "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 
     SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityInfo,

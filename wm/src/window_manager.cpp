@@ -201,13 +201,17 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         return;
     }
     for (auto& info : infos) {
-        WLOGFD("NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u], uiNodeId_[%{public}u]," \
-            "rect[%{public}d %{public}d %{public}d %{public}d]," \
+        TLOGD(WmsLogTag::WMS_MAIN, "NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u]," \
+            "uiNodeId_[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
             "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
-            "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
+            "mode[%{public}u], type[%{public}u, updateType[%{public}d], bundle[%{public}s]",
             info->wid_, info->innerWid_, info->uiNodeId_, info->windowRect_.width_, info->windowRect_.height_,
             info->windowRect_.posX_, info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_,
-            info->layer_, info->mode_, info->type_, type);
+            info->layer_, info->mode_, info->type_, type, info->bundleName_.c_str());
+        for (const auto& rect : info->touchHotAreas_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d," \
+            "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
