@@ -396,11 +396,11 @@ HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetDensityDpi01
- * @tc.desc: SetDensityDpi
+ * @tc.name: SetDensityDpiSystem01
+ * @tc.desc: SetDensityDpiSystem
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
 {
     auto res = screen_->SetDensityDpiSystem(1000);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
