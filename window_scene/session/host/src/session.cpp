@@ -2292,7 +2292,7 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach) const
 {
-    std::string deviceType = system::GetParameter("const.product.deviceType", "unknow");
+    std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
     bool isPc = deviceType == "2in1";
     bool isPhone = deviceType == "phone";
     if (!isPc && !isPhone) {
