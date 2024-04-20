@@ -811,9 +811,9 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         WLOGFI("GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
-            .mirrorNodeId = nodeId,
             .defaultScreenId = defScreenId,
+            .mirrorNodeId = nodeId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
         session->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
@@ -825,8 +825,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     } else {
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
             .defaultScreenId = defScreenId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     }
@@ -2460,9 +2460,9 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
 {
     WLOGFI("InitVirtualScreen: Enter");
     ScreenSessionConfig config = {
-        .name = option.name_,
         .screenId = smsScreenId,
         .rsId = rsId,
+        .name = option.name_,
         .defaultScreenId = GetDefaultScreenId(),
     };
     sptr<ScreenSession> screenSession =
@@ -2530,10 +2530,10 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     WLOGFI("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
     ScreenSessionConfig config = {
-        .name = screenCapability.GetName(),
         .screenId = smsScreenId,
         .rsId = rsScreenId,
         .defaultScreenId = GetDefaultScreenId(),
+        .name = screenCapability.GetName(),
     };
     sptr<ScreenSession> screenSession =
         new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
