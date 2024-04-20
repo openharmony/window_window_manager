@@ -187,6 +187,7 @@ public:
     WSRect GetSessionRect() const;
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    std::string GetWindowName() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -540,7 +541,6 @@ private:
     std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<void()> windowModeCallback_;
 
