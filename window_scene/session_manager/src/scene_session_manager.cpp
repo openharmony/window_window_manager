@@ -4345,8 +4345,9 @@ void SceneSessionManager::DeleteStateDetectTask()
     if (!IsScreenLocked()) {
         return;
     }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto iter : sceneSessionMap_) {
-        auto &session = iter.second;
+        auto& session = iter.second;
         if (session->GetDetectTaskInfo().taskState != DetectTaskState::NO_TASK) {
             taskScheduler_->GetEventHandler()->RemoveTask(session->GetWindowDetectTaskName());
             DetectTaskInfo detectTaskInfo;

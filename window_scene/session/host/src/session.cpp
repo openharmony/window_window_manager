@@ -2281,7 +2281,7 @@ DetectTaskInfo Session::GetDetectTaskInfo() const
     return detectTaskInfo_;
 }
 
-void Session::SetDetectTaskInfo(DetectTaskInfo& detectTaskInfo)
+void Session::SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo)
 {
     detectTaskInfo_ = detectTaskInfo;
 }
