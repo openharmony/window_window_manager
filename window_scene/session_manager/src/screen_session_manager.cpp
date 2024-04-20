@@ -3886,6 +3886,10 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     WLOGFI("NotifyFoldToExpandCompletion ENTER");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("notify permission denied");
+        return;
+    }
     SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {
