@@ -19,6 +19,7 @@
 #include "display_manager.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session_helper.h"
+#include <parameters.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -279,6 +280,15 @@ void KeyboardSession::RaiseCallingSession(bool isKeyboardUpdated)
 
     WSRect callingSessionRect = callingSession->GetSessionRect();
     bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
+        (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
+         callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    if (isCallingSessionFloating && isMainOrParentFloating &&
+        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
+        return;
+    }
+    
     if (isKeyboardUpdated && isCallingSessionFloating) {
         callingSessionRect = callingSessionRestoringRect_;
     }

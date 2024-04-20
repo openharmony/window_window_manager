@@ -118,6 +118,7 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio);
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio);
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio);
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);

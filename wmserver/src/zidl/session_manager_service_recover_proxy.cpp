@@ -46,8 +46,7 @@ void SessionManagerServiceRecoverProxy::OnSessionManagerServiceRecover(
     }
 }
 
-void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(
-    int32_t userId, int32_t screenId, bool isConnected)
+void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -65,7 +65,7 @@ namespace {
 HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Level2)
 {
     WLOGI("OnRemoteDied");
-    MockSessionManagerService::SMSDeathRecipient smsDeathRecipient;
+    MockSessionManagerService::SMSDeathRecipient smsDeathRecipient(100);
     auto res = WMError::WM_OK;
     wptr<IRemoteObject> object = nullptr;
     smsDeathRecipient.OnRemoteDied(object);
@@ -81,7 +81,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, Function | SmallTest | Le
 {
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 start";
     WLOGI("OnRemoteDied");
-    MockSessionManagerService::SMSDeathRecipient* mService = new MockSessionManagerService::SMSDeathRecipient();
+    MockSessionManagerService::SMSDeathRecipient* mService = new MockSessionManagerService::SMSDeathRecipient(100);
     auto res = WMError::WM_OK;
     wptr<IRemoteObject> object = nullptr;
     mService->OnRemoteDied(object);
