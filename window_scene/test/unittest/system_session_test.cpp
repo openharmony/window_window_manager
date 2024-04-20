@@ -271,6 +271,62 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
     auto ret = systemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
+
+/**
+ * @tc.name: CheckPointerEventDispatch
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    SessionInfo info;
+    info.abilityName_ = "CheckPointerEventDispatch";
+    info.bundleName_ = "CheckPointerEventDispatchBundleName";
+    info.windowType_ = 2122;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SystemSession> sysSession =
+        new (std::nothrow) SystemSession(info, specificCallback_);
+    sysSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    bool ret1 = sysSession->CheckPointerEventDispatch(pointerEvent_);
+    ASSERT_EQ(true, ret1);
+
+    sysSession->SetSessionState(SessionState::STATE_END);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sysSession->property_ = property;
+    bool ret2 = sysSession->CheckPointerEventDispatch(pointerEvent_);
+    ASSERT_EQ(false, ret2);
+}
+
+/**
+ * @tc.name: UpdatePointerArea
+ * @tc.desc: check func UpdatePointerArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
+{
+    WSRect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.abilityName_ = "UpdatePointerArea";
+    info.bundleName_ = "UpdatePointerAreaBundleName";
+    info.windowType_ = 2122;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SystemSession> sysSession =
+        new (std::nothrow) SystemSession(info, specificCallback_);
+    sysSession->UpdatePointerArea(rect);
+    ASSERT_NE(sysSession->preRect, rect);
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetDecorEnable(true);
+    sysSession->UpdatePointerArea(rect);
+    ASSERT_EQ(sysSession->preRect, rect);
+}
+
 }
 }
 }
