@@ -664,10 +664,10 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "persistentId():%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnimation:%{public}u",
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnimation:%{public}u settingFlag:%{public}u",
         GetPersistentId(), static_cast<uint32_t>(type),
         systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_,
-        systemBarProperty.enableAnimation_);
+        systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "property is null");

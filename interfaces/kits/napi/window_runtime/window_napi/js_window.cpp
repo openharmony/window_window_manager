@@ -834,6 +834,16 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
         if (flag.enableAnimationFlag == false) {
             systemBarProperties[type].enableAnimation_ = property.enableAnimation_;
         }
+        if (flag.enableFlag == true) {
+            systemBarProperties[type].settingFlag_ =
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
+                static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
+        }
+        if (flag.backgroundColorFlag == true || flag.contentColorFlag == true) {
+            systemBarProperties[type].settingFlag_ =
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
+                static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        }
     }
 
     return;
