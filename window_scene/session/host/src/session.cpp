@@ -414,13 +414,11 @@ void Session::SetSessionState(SessionState state)
 
 void Session::UpdateSessionState(SessionState state)
 {
-    // Resolve session state changes during the execution of window state detection tasks.
+    // Remove unexecuted detection tasks when the window state changes to background or destroyed.
     if (state == SessionState::STATE_DISCONNECT ||
         state == SessionState::STATE_INACTIVE ||
         state == SessionState::STATE_BACKGROUND) {
-        if (handler_) {
-            handler_->RemoveTask(GetWindowDetectTaskName());
-        }
+        RemoveWindowDetectTask();
     }
     state_ = state;
     NotifySessionStateChange(state);
@@ -1051,7 +1049,7 @@ bool Session::GetForegroundInteractiveStatus() const
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
-    auto task = [weakThis = wptr(this), isAttach, windowMode]() {
+    auto task = [weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGD(WmsLogTag::WMS_LIFE, "session is null");
@@ -1060,16 +1058,23 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         TLOGD(WmsLogTag::WMS_LIFE, "SetAttachState:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
         session->isAttach_ = isAttach;
-        session->CreateDetectStateTask(isAttach, windowMode);
         if (!session->isAttach_ && session->detachCallback_ != nullptr) {
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
         }
     };
-    if (handler_) {
-        handler_->PostSyncTask(task, "SetAttachState");
-    }
+    PostSyncTask(task, "SetAttachState");
+    
+    auto createDetectTask = [weakThis = wptr(this), isAttach, windowMode]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->CreateDetectStateTask(isAttach, windowMode);
+    };
+    PostTask(createDetectTask, "CreateDetectStateTask");
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -1078,11 +1083,9 @@ void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
         return;
     }
     if (!ShouldCreateDetectTask(isAttach, windowMode)) {
-        if (handler_) {
-            handler_->RemoveTask(GetWindowDetectTaskName());
-        }
-        detectTaskInfo_.taskWindowMode = WindowMode::WINDOW_MODE_UNDEFINED;
-        detectTaskInfo_.taskState = DetectTaskState::NO_TASK;
+        RemoveWindowDetectTask();
+        DetectTaskInfo detectTaskInfo;
+        SetDetectTaskInfo(detectTaskInfo);
         return;
     }
     CreateWindowStateDetectTask(isAttach, windowMode);
@@ -2278,11 +2281,13 @@ bool Session::GetAttachState() const
 
 DetectTaskInfo Session::GetDetectTaskInfo() const
 {
+    std::shared_lock<std::shared_mutex> lock(detectTaskInfoMutex_);
     return detectTaskInfo_;
 }
 
 void Session::SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo)
 {
+    std::unique_lock<std::shared_mutex> lock(detectTaskInfoMutex_);
     detectTaskInfo_ = detectTaskInfo;
 }
 
@@ -2306,29 +2311,38 @@ bool Session::IsSupportDetectWindow(bool isAttach) const
     if (!SessionHelper::IsMainWindow(GetWindowType()) || showRecent_) {
         WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, "
             "persistentId:%{public}d", persistentId_);
+        RemoveWindowDetectTask();
         return false;
     }
     // Only detecting cold start scenarios on PC
     if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
-        handler_->RemoveTask(GetWindowDetectTaskName());
+        RemoveWindowDetectTask();
         return false;
     }
     return true;
 }
 
+void Session::RemoveWindowDetectTask()
+{
+    if (handler_) {
+        handler_->RemoveTask("wms:CreateDetectStateTask");
+        handler_->RemoveTask(GetWindowDetectTaskName());
+    }
+}
+
 bool Session::ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const
 {
     // Create detect task directy without pre-exiting tasks.
-    if (detectTaskInfo_.taskState == DetectTaskState::NO_TASK) {
+    if (GetDetectTaskInfo().taskState == DetectTaskState::NO_TASK) {
         return true;
     }
     // If the taskState matches the attach detach state, it will be create detect task directly.
-    if ((detectTaskInfo_.taskState == DetectTaskState::ATTACH_TASK && isAttach) ||
-        (detectTaskInfo_.taskState == DetectTaskState::DETACH_TASK && !isAttach)) {
+    if ((GetDetectTaskInfo().taskState == DetectTaskState::ATTACH_TASK && isAttach) ||
+        (GetDetectTaskInfo().taskState == DetectTaskState::DETACH_TASK && !isAttach)) {
         return true;
     } else {
         // Do not create detect task if the windowMode changes.
-        return detectTaskInfo_.taskWindowMode == windowMode;
+        return GetDetectTaskInfo().taskWindowMode == windowMode;
     }
 }
 
@@ -2356,7 +2370,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         return;
     }
     std::string taskName = GetWindowDetectTaskName();
-    handler_->RemoveTask(taskName);
+    RemoveWindowDetectTask();
     auto detectTask = [weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -2375,12 +2389,14 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
             }
         }
-        session->detectTaskInfo_.taskState = DetectTaskState::NO_TASK;
-        session->detectTaskInfo_.taskWindowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+        DetectTaskInfo detectTaskInfo;
+        SetDetectTaskInfo(detectTaskInfo);
     };
     handler_->PostTask(detectTask, taskName, STATE_DETECT_DELAYTIME);
-    detectTaskInfo_.taskWindowMode = windowMode;
-    detectTaskInfo_.taskState = isAttach ? DetectTaskState::ATTACH_TASK : DetectTaskState::DETACH_TASK;
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskWindowMode = windowMode;
+    detectTaskInfo.taskState = isAttach ? DetectTaskState::ATTACH_TASK : DetectTaskState::DETACH_TASK;
+    SetDetectTaskInfo(detectTaskInfo);
 }
 
 void Session::SetBufferAvailable(bool bufferAvailable)

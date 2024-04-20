@@ -404,6 +404,7 @@ public:
     void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
+    void RemoveWindowDetectTask();
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -538,7 +539,7 @@ private:
     template<typename T>
     bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
     bool IsStateMatch(bool isAttach) const;
-    bool IsSupportDetectWindow(bool isAttach) const;
+    bool IsSupportDetectWindow(bool isAttach);
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
@@ -593,6 +594,7 @@ private:
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex;
     DetectTaskInfo detectTaskInfo_;
+    mutable std::shared_mutex detectTaskInfoMutex_;
 };
 } // namespace OHOS::Rosen
 
