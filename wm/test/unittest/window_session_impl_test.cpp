@@ -2016,7 +2016,6 @@ HWTEST_F(WindowSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionImplTest, UpdateRectForRotation, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRectForRotation start";
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window =
@@ -2062,7 +2061,6 @@ HWTEST_F(WindowSessionImplTest, NotifyRotationAnimationEnd, Function | SmallTest
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->NotifyRotationAnimationEnd();
-
 }
 
 /**
@@ -2134,7 +2132,6 @@ HWTEST_F(WindowSessionImplTest, NapiSetUIContent, Function | SmallTest | Level2)
     window->SetUIContentByAbc(url, nullptr, nullptr, nullptr);
     WMError res1 = window->NapiSetUIContent(url, nullptr, nullptr, true, nullptr, ability);
     ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
-
 }
 
 /**
@@ -2220,7 +2217,6 @@ HWTEST_F(WindowSessionImplTest, Notify03, Function | SmallTest | Level2)
     AAFwk::WantParams wantParams;
     WSError ret = window->NotifyTransferComponentData(wantParams);
     ASSERT_EQ(ret, WSError::WS_OK);
-
 }
 
 /**
