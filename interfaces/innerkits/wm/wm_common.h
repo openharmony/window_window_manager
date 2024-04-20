@@ -504,7 +504,8 @@ struct SystemBarProperty {
     SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
         : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
           settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
-    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation, SystemBarSettingFlag settingFlag)
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content,
+                      bool enableAnimation, SystemBarSettingFlag settingFlag)
         : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
           settingFlag_(settingFlag) {}
     bool operator == (const SystemBarProperty& a) const

@@ -1106,26 +1106,26 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest |
 
     SystemBarProperty property;
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
-    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING, 
+    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING,
         window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
     
     property.enable_ = false;
     property.settingFlag_ = SystemBarSettingFlag::ENABLE_SETTING;
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
-    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING, 
+    ASSERT_EQ(SystemBarSettingFlag::ENABLE_SETTING,
         window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
     
     property.backgroundColor_ = 0xB3000000;
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
-    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING, 
+    ASSERT_EQ(SystemBarSettingFlag::COLOR_SETTING,
         window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
     
     property.enable_ = true;
     property.backgroundColor_ = 0x4C000000;
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
-    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING, 
+    ASSERT_EQ(SystemBarSettingFlag::ALL_SETTING,
         window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
 }
 
