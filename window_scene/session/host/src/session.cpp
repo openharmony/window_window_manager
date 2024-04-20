@@ -1083,7 +1083,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
         session->CreateDetectStateTask(isAttach, windowMode);
     };
-    PostTask(createDetectTask, "CreateDetectStateTask");
+    PostSyncTask(createDetectTask, "CreateDetectStateTask");
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -2379,7 +2379,6 @@ bool Session::IsSupportDetectWindow(bool isAttach) const
 void Session::RemoveWindowDetectTask()
 {
     if (handler_) {
-        handler_->RemoveTask("wms:CreateDetectStateTask");
         handler_->RemoveTask(GetWindowDetectTaskName());
     }
 }
