@@ -156,6 +156,19 @@ bool IsJsCallStateUndefind(napi_env env, napi_value jsCallState, SessionInfo& se
     return true;
 }
 
+bool IsJsWindowInputTypeUndefind(napi_env env, napi_value jsWindowInputType, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsWindowInputType) != napi_undefined) {
+        uint32_t windowInputType = 0;
+        if (!ConvertFromJsValue(env, jsWindowInputType, windowInputType)) {
+            WLOGFE("[NAPI]Failed to convert parameter to windowInputType");
+            return false;
+        }
+        sessionInfo.windowInputType_ = static_cast<uint32_t>(windowInputType);
+    }
+    return true;
+}
+
 bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsSessionType) != napi_undefined) {
@@ -262,6 +275,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
+    napi_value jsWindowInputType = nullptr;
+    napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -275,6 +290,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
         return false;
     }
     return true;

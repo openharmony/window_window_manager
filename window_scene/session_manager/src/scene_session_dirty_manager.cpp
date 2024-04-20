@@ -439,7 +439,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
         .transform = transformData,
-        .pixelMap = pixelMap
+        .pixelMap = pixelMap,
+        .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr && (property->GetWindowFlags() &
