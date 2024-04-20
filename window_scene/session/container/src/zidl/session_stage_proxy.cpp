@@ -155,6 +155,28 @@ WSError SessionStageProxy::HandleBackEvent()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write enable failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionStageProxy::MarkProcessed(int32_t eventId)
 {
     return WSError::WS_DO_NOTHING;
@@ -658,4 +680,5 @@ void SessionStageProxy::NotifyDisplayMove(DisplayId from, DisplayId to)
         return;
     }
 }
+
 } // namespace OHOS::Rosen

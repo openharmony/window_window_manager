@@ -144,7 +144,7 @@ public:
     bool GetDefaultDensityEnabled() override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
-
+    WSError SwitchFreeMultiWindow(bool enable) override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
