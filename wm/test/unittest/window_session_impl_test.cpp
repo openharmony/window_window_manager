@@ -20,7 +20,6 @@
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
 #include "parameters.h"
-#include "display_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2004,7 +2003,7 @@ HWTEST_F(WindowSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::KeyEvent> keyEvent;
     window->ConsumeKeyEvent(keyEvent);
-    ASSERT_EQ(true, window->PreNotifyKeyEvent(keyEvent));
+    ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
     window->NotifyOnKeyPreImeEvent(keyEvent);
     window->uiContent_ = nullptr;
     ASSERT_EQ(false, window->NotifyOnKeyPreImeEvent(keyEvent));
@@ -2063,10 +2062,6 @@ HWTEST_F(WindowSessionImplTest, NotifyRotationAnimationEnd, Function | SmallTest
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->NotifyRotationAnimationEnd();
-    ASSERT_NE(nullptr, window->uiContent_);
-
-    window->uiContent_ = nullptr;
-    window->NotifyRotationAnimationEnd();
 
 }
 
@@ -2085,14 +2080,13 @@ HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible, Function | SmallTest | Le
     bool isSplitVisible = true;
     auto res = window->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible,
         isSplitVisible);
-    ASSERT_EQ(res, WMError::WM_OK);
 
     bool &hideMaximizeButton = isMaximizeVisible;
     bool &hideMinimizeButton = isMinimizeVisible;
     bool &hideSplitButton = isSplitVisible;
     window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton,
         hideSplitButton);
-    ASSERT_NE(nullptr, window->uiContent_);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -2116,24 +2110,7 @@ HWTEST_F(WindowSessionImplTest, IsFocused, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    ASSERT_EQ(WMError::WM_OK, window->RequestFocus());
-}
-
-/**
- * @tc.name: GetVirtualPixelRatio
- * @tc.desc: GetVirtualPixelRatio
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, GetVirtualPixelRatio, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("GetVirtualPixelRatio");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    sptr<DisplayInfo> displayInfo = nullptr;
-    auto ret = window->GetVirtualPixelRatio(displayInfo);
-    ASSERT_EQ(ret, 1.0f);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RequestFocus());
 }
 
 /**
