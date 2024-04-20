@@ -45,6 +45,7 @@ public:
     DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     void OnRemoteDied();
+    sptr<DisplayLite> GetDisplayById(DisplayId displayId);
 private:
     void NotifyDisplayCreate(sptr<DisplayInfo> info);
     void NotifyDisplayDestroy(DisplayId);
@@ -407,5 +408,26 @@ void DisplayManagerLite::Impl::OnRemoteDied()
 void DisplayManagerLite::OnRemoteDied()
 {
     pImpl_->OnRemoteDied();
+}
+
+sptr<DisplayLite> DisplayManagerLite::Impl::GetDisplayById(DisplayId displayId)
+{
+    WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDisplayInfo(displayId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateDisplayInfoLocked(displayInfo)) {
+        displayMap_.erase(displayId);
+        return nullptr;
+    }
+    return displayMap_[displayId];
+}
+
+sptr<DisplayLite> DisplayManagerLite::GetDisplayById(DisplayId displayId)
+{
+    if (destroyed_) {
+        return nullptr;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return pImpl_->GetDisplayById(displayId);
 }
 } // namespace OHOS::Rosen

@@ -63,6 +63,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+                WaitScreenOffNotify(state);
             }
             break;
         }
@@ -74,6 +75,17 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
     ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID, state);
     return true;
 }
+
+void SessionDisplayPowerController::WaitScreenOffNotify(DisplayState& state)
+{
+    if (!ScreenSessionManager::GetInstance().IsPreBrightAuthFail()) {
+        ScreenSessionManager::GetInstance().BlockScreenOffByCV();
+        if (ScreenSessionManager::GetInstance().IsScreenLockSuspend()) {
+            state = DisplayState::ON_SUSPEND;
+        }
+    }
+}
+
 
 DisplayState SessionDisplayPowerController::GetDisplayState(DisplayId displayId)
 {

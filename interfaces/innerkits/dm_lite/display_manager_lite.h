@@ -116,6 +116,14 @@ public:
      * @return display mode of the foldable device.
      */
     FoldDisplayMode GetFoldDisplayMode();
+
+    /**
+     * @brief Get the display object by id.
+     *
+     * @param displayId Id of the target display.
+     * @return Default display object.
+     */
+    sptr<DisplayLite> GetDisplayById(DisplayId displayId);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

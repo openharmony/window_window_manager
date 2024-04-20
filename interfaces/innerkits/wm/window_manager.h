@@ -227,6 +227,8 @@ public:
     float scaleVal_;
     float scaleX_;
     float scaleY_;
+    std::string bundleName_;
+    std::vector<Rect> touchHotAreas_;
 };
 
 /**

@@ -262,13 +262,13 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
     for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", DumpDisplayInfo(displayInfo).c_str());
     }
     std::string windowinfolst = "windowinfo  ";
     for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
         windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", windowinfolst.c_str());
+    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 } 
 
@@ -307,7 +307,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
         for (auto& windowInfo : windowInfos) {
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %s", windowinfolst.c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %{public}s", windowinfolst.c_str());
         int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
         MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
@@ -346,6 +346,27 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
     return false;
 }
 
+void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
+{
+    int windowListSize = static_cast<int>(windowInfoList.size());
+    std::string idList;
+    static std::string lastIdList;
+    static uint32_t windowEventID = 0;
+    if (windowEventID == UINT32_MAX) {
+        windowEventID = 0;
+    }
+    for (auto& e : windowInfoList) {
+        idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
+            std::to_string(static_cast<int>(e.zOrder)) + " ";
+    }
+    if (lastIdList != idList) {
+        windowEventID++;
+        TLOGI(WmsLogTag::WMS_EVENT, "EventID:%{public}d ListSize:%{public}d idList:%{public}s",
+            windowEventID, windowListSize, idList.c_str());
+        lastIdList = idList;
+    }
+}
+
 void SceneInputManager::FlushDisplayInfoToMMI()
 {
     auto task = [this]() {
@@ -360,8 +381,7 @@ void SceneInputManager::FlushDisplayInfoToMMI()
         if (!CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - windowInfo:windowList = %{public}d",
-            static_cast<int>(windowInfoList.size()));
+        PrintWindowInfo(windowInfoList);
         if (windowInfoList.size() == 0) {
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;

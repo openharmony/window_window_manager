@@ -23,6 +23,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
+#include "event_tracker.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -50,6 +51,7 @@ public:
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event);
@@ -111,6 +113,7 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds() override;
@@ -180,7 +183,10 @@ public:
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);
-    bool BlockSetDisplayState();
+    void BlockScreenOffByCV(void);
+    bool BlockSetDisplayState(void);
+    bool IsScreenLockSuspend(void);
+    bool IsPreBrightAuthFail(void);
 
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -259,6 +265,7 @@ private:
     DMError MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
+    void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -305,6 +312,7 @@ private:
         mutable std::shared_mutex screenIdMapMutex_;
     };
 
+    EventTracker screenEventTracker_;
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
@@ -344,15 +352,20 @@ private:
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
-    bool blockScreenPowerChange_ = false;
+    bool gotScreenOffNotify_ = false;
+    bool needScreenOffNotify_ = false;
 
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
+    std::mutex screenOffMutex_;
+    std::condition_variable screenOffCV_;
 
-    std::atomic<PowerStateChangeReason> prePowerStateChangeReason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    std::atomic<PowerStateChangeReason> prePowerStateChangeReason_ =
+        PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     std::atomic<PowerStateChangeReason> lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     std::atomic<PowerStateChangeReason> currentWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     std::atomic<bool> buttonBlock_ = false;
+    std::atomic<bool> isScreenLockSuspend_ = false;
 
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
