@@ -327,6 +327,7 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     ASSERT_EQ(sysSession->preRect, rect);
 }
 
+/**
  * @tc.name: Hide
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
