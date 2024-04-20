@@ -23,6 +23,7 @@
 #include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "pointer_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -289,7 +290,6 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Le
     sptr<SystemSession> sysSession =
         new (std::nothrow) SystemSession(info, specificCallback_);
     sysSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
     bool ret1 = sysSession->CheckPointerEventDispatch(pointerEvent_);
     ASSERT_EQ(true, ret1);
 
@@ -318,13 +318,13 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     sptr<SystemSession> sysSession =
         new (std::nothrow) SystemSession(info, specificCallback_);
     sysSession->UpdatePointerArea(rect);
-    ASSERT_NE(sysSession->preRect, rect);
+    ASSERT_NE(sysSession->preRect_, rect);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetDecorEnable(true);
     sysSession->UpdatePointerArea(rect);
-    ASSERT_EQ(sysSession->preRect, rect);
+    ASSERT_EQ(sysSession->preRect_, rect);
 }
 
 /**
