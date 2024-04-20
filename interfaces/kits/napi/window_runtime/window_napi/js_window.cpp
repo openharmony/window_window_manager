@@ -846,9 +846,6 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
                 static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
                 static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
         }
-        WLOGI("[NAPI]SystemBarProperty type:%{public}u enable:%{public}u bgColor:%{public}x settingFlag:%{public}u",
-            type, systemBarProperties[type].enable_, systemBarProperties[type].backgroundColor_,
-            systemBarProperties[type].settingFlag_);
     }
 
     return;
