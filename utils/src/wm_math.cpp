@@ -118,13 +118,13 @@ void Matrix4::SwapRow(int row1, int row2)
     p[1] = q[1];
     q[1] = tmp;
 
-    tmp = p[2];
-    p[2] = q[2];
-    q[2] = tmp;
+    tmp = p[2]; // 2: row2
+    p[2] = q[2]; // 2: row2
+    q[2] = tmp; // 2: row2
 
-    tmp = p[3];
-    p[3] = q[3];
-    q[3] = tmp;
+    tmp = p[3]; // 3: row3
+    p[3] = q[3]; // 3: row3
+    q[3] = tmp; // 3: row3
 }
 
 void Matrix4::Invert()
@@ -171,15 +171,15 @@ void Matrix4::Invert()
 Vector3 Matrix4::GetScale() const
 {
     Vector3 retVal;
-    retVal.x_ = Vector3(mat_[0][0], mat_[0][1], mat_[0][2]).Length();
-    retVal.y_ = Vector3(mat_[1][0], mat_[1][1], mat_[1][2]).Length();
-    retVal.z_ = Vector3(mat_[2][0], mat_[2][1], mat_[2][2]).Length();
+    retVal.x_ = Vector3(mat_[0][0], mat_[0][1], mat_[0][2]).Length(); // 2: column2
+    retVal.y_ = Vector3(mat_[1][0], mat_[1][1], mat_[1][2]).Length(); // 2: column2
+    retVal.z_ = Vector3(mat_[2][0], mat_[2][1], mat_[2][2]).Length(); // 2: row2
     return retVal;
 }
 
 Vector3 Matrix4::GetTranslation() const
 {
-    return Vector3(mat_[3][0], mat_[3][1], mat_[3][2]);
+    return Vector3(mat_[3][0], mat_[3][1], mat_[3][2]); // 3: row3, 2: column2
 }
 
 // Create a scale matrix with x and y scales
@@ -303,8 +303,8 @@ Matrix4 CreatePerspective(const Vector3& camera)
 Vector2 Transform(const Vector2& vec, const Matrix3& mat)
 {
     Vector2 retVal;
-    retVal.x_ = vec.x_ * mat.mat_[0][0] + vec.y_ * mat.mat_[1][0] + mat.mat_[2][0];
-    retVal.y_ = vec.x_ * mat.mat_[0][1] + vec.y_ * mat.mat_[1][1] + mat.mat_[2][1];
+    retVal.x_ = vec.x_ * mat.mat_[0][0] + vec.y_ * mat.mat_[1][0] + mat.mat_[2][0]; // 2: row2
+    retVal.y_ = vec.x_ * mat.mat_[0][1] + vec.y_ * mat.mat_[1][1] + mat.mat_[2][1]; // 2: row2
     return retVal;
 }
 
