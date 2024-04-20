@@ -7761,7 +7761,8 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
         WLOGFE("last and current info is not Same");
         return false;
     }
-    for (int i = 0; i < lastInfo.size(); i++) {
+    int sizeOfLastInfo = static_cast<int>(lastInfo.size());
+    for (int i = 0; i < sizeOfLastInfo; i++) {
         if (lastInfo[i].displayId != currentInfo[i].displayId ||
             lastInfo[i].visibleWindowNum != currentInfo[i].visibleWindowNum) {
             WLOGFE("last and current visible window num is not Same");
@@ -7793,7 +7794,7 @@ void SceneSessionManager::CacVisibleWindowNum()
             int32_t displayId = static_cast<int32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
-                    return info.displayId == displayId;
+                    return (static_cast<int32_t>(info.displayId)) == displayId;
             });
             if (it == visibleWindowNumInfo.end()) {
                 visibleWindowNumInfo.push_back({displayId, 1});
