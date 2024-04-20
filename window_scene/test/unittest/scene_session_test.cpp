@@ -3050,7 +3050,7 @@ HWTEST_F(SceneSessionTest, ClearSpecificSessionCbMap01, Function | SmallTest | L
     EXPECT_NE(nullptr, scensession);
     sptr<Session> session;
     session = new (std::nothrow) Session(info);
-    scensession->sessionChangeCallback_ = new MainSession::SessionChangeCallback();
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     scensession->ClearSpecificSessionCbMap();
 
     bool isFromClient = true;
@@ -3245,8 +3245,6 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent03, Function | SmallTest | Level2
     float vpr = 0.0;
     sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
-
-    sceneSession->SendPointEventForMoveDrag(pointerEvent);
 }
 }
 }
