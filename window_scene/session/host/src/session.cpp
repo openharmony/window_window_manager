@@ -1064,7 +1064,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             session->detachCallback_ = nullptr;
         }
     };
-    PostSyncTask(task, "SetAttachState");
+    PostTask(task, "SetAttachState");
     
     auto createDetectTask = [weakThis = wptr(this), isAttach, windowMode]() {
         auto session = weakThis.promote();
