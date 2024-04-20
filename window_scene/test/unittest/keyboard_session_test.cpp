@@ -375,6 +375,79 @@ HWTEST_F(KeyboardSessionTest, RelayoutKeyBoard, Function | SmallTest | Level1)
 
     keyboardSession->RelayoutKeyBoard();
 }
+
+/**
+ * @tc.name: GetFocusedSessionId
+ * @tc.desc: GetFocusedSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    ASSERT_EQ(INVALID_WINDOW_ID, keyboardSession->GetFocusedSessionId());
+}
+
+/**
+ * @tc.name: IsStatusBarVisible
+ * @tc.desc: IsStatusBarVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, IsStatusBarVisible, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    bool res = keyboardSession->IsStatusBarVisible(nullptr);
+    ASSERT_EQ(res, false);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> statusBarSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(statusBarSession, nullptr);
+    bool res1 = keyboardSession->IsStatusBarVisible(statusBarSession);
+    ASSERT_EQ(res1, false);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    int32_t statusBarHeight = keyboardSession->GetStatusBarHeight();
+    ASSERT_EQ(statusBarHeight, 0);
+}
+
+/**
+ * @tc.name: GetCallingSession
+ * @tc.desc: GetCallingSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetCallingSession, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    sptr<SceneSession> callingSession = keyboardSession->GetCallingSession();
+    ASSERT_EQ(callingSession, nullptr);
+}
 }
 }
 }

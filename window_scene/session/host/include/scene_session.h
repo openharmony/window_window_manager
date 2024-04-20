@@ -189,11 +189,10 @@ public:
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     virtual int32_t GetMissionId() const { return persistentId_; };
-    const std::string& GetWindowName() const;
-    const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
+    const std::string& GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
 
     bool IsVisible() const;
@@ -251,6 +250,8 @@ public:
     static MaximizeMode maximizeMode_;
     static std::map<int32_t, WSRect> windowDragHotAreaMap_;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    void SetForceHideState(bool hideFlag);
+    bool GetForceHideState() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -265,8 +266,10 @@ protected:
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
 
+    mutable std::shared_mutex sessionChangeCallbackMutex_;
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
+    mutable std::shared_mutex moveDragControllerMutex_;
     sptr<MoveDragController> moveDragController_ = nullptr;
 
 private:
@@ -295,8 +298,8 @@ private:
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
-    mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    mutable std::shared_mutex selfTokenMutex_;
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
@@ -307,7 +310,7 @@ private:
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
-
+    bool forceHideState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

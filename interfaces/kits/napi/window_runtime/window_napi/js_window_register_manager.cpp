@@ -246,15 +246,15 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsW
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
-    constexpr int64_t S_TO_MS_RATIO = 1000;
-    constexpr int64_t NO_INTERACTION_MAX = LLONG_MAX / S_TO_MS_RATIO;
-    if (timeout <= 0 || (timeout > NO_INTERACTION_MAX)) {
+    constexpr int64_t secToMicrosecRatio = 1000;
+    constexpr int64_t noInteractionMax = LLONG_MAX / secToMicrosecRatio;
+    if (timeout <= 0 || (timeout > noInteractionMax)) {
         WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
-            timeout, NO_INTERACTION_MAX);
+            timeout, noInteractionMax);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
-    thisListener->SetTimeout(timeout * S_TO_MS_RATIO);
+    thisListener->SetTimeout(timeout * secToMicrosecRatio);
 
     return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
 }
