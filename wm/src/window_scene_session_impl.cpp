@@ -1550,9 +1550,9 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     }
     setSameSystembarPropertyCnt_ = 0;
     TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_, property.enableAnimation_);
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u settingFlag:%{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
