@@ -400,7 +400,7 @@ public:
     void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
         uint32_t minHeight, uint32_t maxFloatingWindowSize);
     DetectTaskInfo GetDetectTaskInfo() const;
-    void SetDetectTaskInfo(DetectTaskInfo& detectTaskInfo);
+    void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
     void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
