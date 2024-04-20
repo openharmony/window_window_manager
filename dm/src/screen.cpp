@@ -249,6 +249,17 @@ DMError Screen::SetDensityDpi(uint32_t dpi) const
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
 }
 
+DMError Screen::SetDensityDpiSystem(uint32_t dpi) const
+{
+    if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
+        WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+            DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatioSystem(GetId(), density);
+}
+
 DMError Screen::SetResolution(uint32_t width, uint32_t height, uint32_t dpi) const
 {
     if (width <= 0 || height <= 0 || dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {

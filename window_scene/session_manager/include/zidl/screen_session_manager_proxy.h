@@ -32,6 +32,7 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
 

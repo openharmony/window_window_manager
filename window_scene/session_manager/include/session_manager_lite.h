@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_H
 
+#include <functional>
 #include <shared_mutex>
 
 #include "session_manager_service_interface.h"
@@ -34,6 +35,7 @@ public:
 class SessionManagerLite {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
 public:
+    using UserSwitchCallbackFunc = std::function<void()>;
     void ClearSessionManagerProxy();
     void Clear();
 
@@ -45,6 +47,8 @@ public:
     void SaveSessionListener(const sptr<ISessionListener>& listener);
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
+    void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
 
 protected:
     SessionManagerLite() = default;
@@ -54,9 +58,11 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
-
+    void OnUserSwitch();
     void DeleteAllSessionListeners();
+    void ReregisterSessionListener() const;
 
+    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManagerLite> sceneSessionManagerLiteProxy_ = nullptr;
@@ -68,6 +74,7 @@ private:
     std::vector<sptr<ISessionListener>> sessionListeners_;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
+    int32_t currentWMSUserId_ = INVALID_USER_ID;
 };
 } // namespace OHOS::Rosen
 
