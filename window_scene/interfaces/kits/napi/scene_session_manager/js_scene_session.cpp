@@ -274,7 +274,7 @@ void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& r
             WLOGFE("[NAPI]jsHotAreaRect is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsHotAreaType, [1] = jsHotAreaReason, [2] = jsHotAreaRect};
+        napi_value argv[] = {jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnWindowDragHotArea");
@@ -1584,7 +1584,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
             WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = CreateJsError(env, 0), [1] = jsSceneSessionObj};
+        napi_value argv[] = {CreateJsError(env, 0), jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnRaiseAboveTarget: " + std::to_string(subWindowId));
@@ -2079,7 +2079,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsSessionInfo, [1] = jsNeedRemoveSession};
+        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);
