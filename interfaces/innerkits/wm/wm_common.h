@@ -238,7 +238,7 @@ enum class SystemBarSettingFlag : uint32_t {
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
     ALL_SETTING = 0b11
-}
+};
 
 /**
  * @brief Used to map from WMError to WmErrorCode.
