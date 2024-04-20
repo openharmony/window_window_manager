@@ -33,7 +33,7 @@ VsyncStation::VsyncStation(NodeId nodeId) : nodeId_(nodeId)
 
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    {  
+    {
         std::lock_guard<std::mutex> lock(mtx_);
         if (destroyed_) {
             return;

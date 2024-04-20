@@ -32,11 +32,11 @@ bool ColorParser::Parse(const std::string& colorStr, uint32_t& colorValue)
         }
         constexpr int HEX = 16;
         colorValue = std::strtoul(color.c_str(), 0, HEX); // convert hex string to number
-        if (colorStr.size() == 7) { // #RRGGBB: RRGGBB -> AARRGGBB
+        if (colorStr.size() == 7) { // 7 is color string length.#RRGGBB: RRGGBB -> AARRGGBB
             colorValue |= 0xff000000;
             return true;
         }
-        if (colorStr.size() == 9) { // #AARRGGBB
+        if (colorStr.size() == 9) { // 9 is color string length.#AARRGGBB
             return true;
         }
     }

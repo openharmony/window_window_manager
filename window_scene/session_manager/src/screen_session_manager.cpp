@@ -3283,17 +3283,18 @@ void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
         std::string screenType = TransferTypeToString(screenInfo->GetType());
         NodeId nodeId = (screenSession->GetDisplayNode() == nullptr) ?
             SCREEN_ID_INVALID : screenSession->GetDisplayNode()->GetId();
-        oss << std::left << std::setw(21) << screenInfo->GetName()
-            << std::left << std::setw(9) << screenType
-            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false")
-            << std::left << std::setw(6) << screenSession->screenId_
-            << std::left << std::setw(21) << screenSession->rsId_
-            << std::left << std::setw(10) << screenSession->activeIdx_
-            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio()
-            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation())
-            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation())
-            << std::left << std::setw(19) << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
-            << std::left << std::setw(21) << nodeId
+        oss << std::left << std::setw(21) << screenInfo->GetName() // 21 is width
+            << std::left << std::setw(9) << screenType // 9 is width
+            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false") // 8 is width
+            << std::left << std::setw(6) << screenSession->screenId_ // 6 is width
+            << std::left << std::setw(21) << screenSession->rsId_ // 21 is width
+            << std::left << std::setw(10) << screenSession->activeIdx_ // 10 is width
+            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio() // 4 is width
+            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation()) // 9 is width
+            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation()) // 12 is width
+            << std::left << std::setw(19) // 19 is width
+                << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
+            << std::left << std::setw(21) << nodeId // 21 is width
             << std::endl;
     }
     oss << "total screen num: " << screenSessionMap_.size() << std::endl;
