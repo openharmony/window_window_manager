@@ -394,6 +394,20 @@ HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
     res = screen_->SetResolution(1, 1, 100);
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, res);
 }
+
+/**
+ * @tc.name: SetDensityDpiSystem01
+ * @tc.desc: SetDensityDpiSystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
+{
+    auto res = screen_->SetDensityDpiSystem(1000);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetDensityDpiSystem(100);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
