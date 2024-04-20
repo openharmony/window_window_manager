@@ -2447,6 +2447,15 @@ WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
     return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
 
+WSError Session::SwitchFreeMultiWindow(bool enable)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->SwitchFreeMultiWindow(enable);
+}
+
 void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);

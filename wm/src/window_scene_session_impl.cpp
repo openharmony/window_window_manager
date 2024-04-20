@@ -1586,11 +1586,13 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     }
 
     WindowMode mode = GetMode();
-    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
+    bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
+    if (isSwitchFreeMultiWindow || !((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-          WindowHelper::IsMainWindow(GetType()) &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           WindowHelper::IsMainWindow(GetType()) &&
+           (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
            system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1624,6 +1626,11 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         /* FloatingWindow skip for Phone*/
         return false;
+    }
+    if (windowSystemConfig_.freeMultiWindowSupport_) {
+        return (WindowHelper::IsMainWindow(GetType())
+            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
+        windowSystemConfig_.isSystemDecorEnable_;
     }
     bool enable = (WindowHelper::IsMainWindow(GetType())
             || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
@@ -2751,6 +2758,15 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     uiContent_->UpdateTitleInTargetPos(isShow, height);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
     return WSError::WS_OK;
 }
 

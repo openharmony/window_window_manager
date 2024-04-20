@@ -388,6 +388,7 @@ public:
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
     void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
         uint32_t minHeight, uint32_t maxFloatingWindowSize);
+    WSError SwitchFreeMultiWindow(bool enable);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
