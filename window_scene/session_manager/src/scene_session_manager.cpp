@@ -374,8 +374,87 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
+    ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
+}
+
+void SceneSessionManager::ConfigFreeMultiWindow()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem freeMultiWindowConfig = config["freeMultiWindow"];
+    if (freeMultiWindowConfig.IsMap()) {
+        auto supportItem = freeMultiWindowConfig.GetProp("enable");
+        if (supportItem.IsBool()) {
+            systemConfig_.freeMultiWindowSupport_ = supportItem.boolValue_;
+        }
+        auto item = freeMultiWindowConfig["decor"];
+        if (item.IsMap()) {
+            ConfigDecor(item, false);
+        }
+        int32_t param = -1;
+        item = freeMultiWindowConfig["defaultWindowMode"];
+        if (GetSingleIntItem(item, param) &&
+            (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.freeMultiWindowConfig_.defaultWindowMode_ =
+                static_cast<WindowMode>(static_cast<uint32_t>(param));
+        }
+        item = freeMultiWindowConfig["maxMainFloatingWindowNumber"];
+        if (GetSingleIntItem(item, param) && (param > 0)) {
+            systemConfig_.freeMultiWindowConfig_.maxMainFloatingWindowNumber_ = param;
+        }
+    }
+}
+
+void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
+{
+    FreeMultiWindowConfig freeMultiWindowConfig = systemConfig_.freeMultiWindowConfig_;
+    if (enable) {
+        systemConfig_.defaultWindowMode_ = freeMultiWindowConfig.defaultWindowMode_;
+        systemConfig_.decorModeSupportInfo_ = freeMultiWindowConfig.decorModeSupportInfo_;
+        systemConfig_.isSystemDecorEnable_ = freeMultiWindowConfig.isSystemDecorEnable_;
+    } else {
+        const auto& config = WindowSceneConfig::GetConfig();
+        auto item = config["decor"];
+        if (item.IsMap()) {
+            ConfigDecor(item, true);
+        }
+        int32_t param = -1;
+        item = config["defaultWindowMode"];
+        if (GetSingleIntItem(item, param) &&
+            (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
+        }
+    }
+    systemConfig_.freeMultiWindowEnable_ = enable;
+}
+
+const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
+{
+    return systemConfig_;
+}
+
+WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
+{
+    if (!systemConfig_.freeMultiWindowSupport_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    LoadFreeMultiWindowConfig(enable);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
+        auto sceneSession = item->second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            continue;
+        }
+        sceneSession->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
@@ -399,32 +478,43 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
     return taskScheduler_->PostSyncTask(task, "SetSessionContinueState");
 }
 
-void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
+void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig)
 {
     WindowSceneConfig::ConfigItem item = decorConfig.GetProp("enable");
     if (item.IsBool()) {
-        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        if (mainConfig) {
+            systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        } else {
+            systemConfig_.freeMultiWindowConfig_.isSystemDecorEnable_ = item.boolValue_;
+        }
+        bool decorEnable = item.boolValue_;
+        uint32_t support = 0;
         std::vector<std::string> supportedModes;
         item = decorConfig["supportedMode"];
         if (item.IsStrings()) {
-            systemConfig_.decorModeSupportInfo_ = 0;
             supportedModes = *item.stringsValue_;
         }
         for (auto mode : supportedModes) {
             if (mode == "fullscreen") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
             } else if (mode == "floating") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
             } else if (mode == "pip") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
             } else if (mode == "split") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
             } else {
                 WLOGFW("Invalid supporedMode");
-                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                support = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
                 break;
             }
+        }
+        if (mainConfig && item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = support;
+        }
+        if (!mainConfig && item.IsStrings()) {
+            systemConfig_.freeMultiWindowConfig_.decorModeSupportInfo_ = support;
         }
     }
 }
