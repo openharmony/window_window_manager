@@ -73,6 +73,12 @@ WINDOW_BOOT_ANIMATION_DONE:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Boot animation done}
   MSG: {type: STRING, desc: windowmanager event message}
 
+WINDOW_EXCEPTION_DETECTION:
+  __BASE: {type: FAULT, level: MINOR, desc: The event is window change begin}
+  DETECTION_TYPE: {type: INT32, desc: detection type}
+  PID: {type: INT32, desc: pid}
+  MSG: {type: STRING, desc: detects abnormal information}
+
 SHOW_WINDOW_TIME:
   __BASE: {type: STATISTIC, level: MINOR, desc: Sow window time performance}
   MSG: {type: STRING, desc: windowmanager event message}

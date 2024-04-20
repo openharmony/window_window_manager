@@ -69,6 +69,8 @@ public:
 
     void TearDown() override;
 
+    static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
+
     static bool gestureNavigationEnabled_;
     static bool statusBarEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
@@ -115,6 +117,15 @@ void SceneSessionManagerTest::SetUp()
 void SceneSessionManagerTest::TearDown()
 {
     ssm_ = nullptr;
+}
+
+void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)
+{
+    sceneSession->SetTouchable(true);
+    sceneSession->forceTouchable_ = true;
+    sceneSession->systemTouchable_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->foregroundInteractiveStatus_.store(true);
 }
 
 namespace {
@@ -3249,6 +3260,343 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureExtSession, Function | SmallT
     int32_t parentId = 1234;
     auto ret = ssm_->AddOrRemoveSecureExtSession(persistentId, parentId, true);
     EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: AccessibilityFillEmptySceneSessionListToNotifyList
+ * @tc.desc: SceneSesionManager fill empty scene session list to accessibilityList;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillEmptySceneSessionListToNotifyList, Function | SmallTest | Level3)
+{
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    EXPECT_EQ(accessibilityInfo.size(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityFillOneSceneSessionListToNotifyList
+ * @tc.desc: SceneSesionManager fill one sceneSession to accessibilityList;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillOneSceneSessionListToNotifyList, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+}
+
+/**
+ * @tc.name: AccessibilityFillTwoSceneSessionListToNotifyList
+ * @tc.desc: SceneSesionManager fill two sceneSessions to accessibilityList;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillTwoSceneSessionListToNotifyList, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
+    SetVisibleForAccessibility(sceneSessionFirst);
+
+    sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
+    SetVisibleForAccessibility(sceneSessionSecond);
+
+    ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
+    ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 2);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 2);
+}
+
+/**
+ * @tc.name: AccessibilityFillEmptyBundleName
+ * @tc.desc: SceneSesionManager fill empty bundle name to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillEmptyBundleName, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, "");
+    ASSERT_EQ(sceneSessionList.at(0)->GetSessionInfo().bundleName_, "");
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, sceneSessionList.at(0)->GetSessionInfo().bundleName_);
+}
+
+/**
+ * @tc.name: AccessibilityFillBundleName
+ * @tc.desc: SceneSesionManager fill bundle name to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillBundleName, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, "accessibilityNotifyTesterBundleName");
+    ASSERT_EQ(sceneSessionList.at(0)->GetSessionInfo().bundleName_, "accessibilityNotifyTesterBundleName");
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, sceneSessionList.at(0)->GetSessionInfo().bundleName_);
+}
+
+/**
+ * @tc.name: AccessibilityFillEmptyHotAreas
+ * @tc.desc: SceneSesionManager fill empty hot areas to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillEmptyHotAreas, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), sceneSessionList.at(0)->GetTouchHotAreas().size());
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityFillOneHotAreas
+ * @tc.desc: SceneSesionManager fill one hot areas to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillOneHotAreas, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    Rect rect = {100, 200, 100, 200};
+    std::vector<Rect> hotAreas;
+    hotAreas.push_back(rect);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetTouchHotAreas(hotAreas);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), sceneSessionList.at(0)->GetTouchHotAreas().size());
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), 1);
+
+    ASSERT_EQ(rect.posX_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).posX_);
+    ASSERT_EQ(rect.posY_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).posY_);
+    ASSERT_EQ(rect.width_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).width_);
+    ASSERT_EQ(rect.height_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).height_);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posX_, rect.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posY_, rect.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).width_, rect.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).height_, rect.height_);
+}
+
+/**
+ * @tc.name: AccessibilityFillTwoHotAreas
+ * @tc.desc: SceneSesionManager fill two hot areas to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillTwoHotAreas, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    std::vector<Rect> hotAreas;
+    Rect rectFitst = {100, 200, 100, 200};
+    Rect rectSecond = {50, 50, 20, 30};
+    hotAreas.push_back(rectFitst);
+    hotAreas.push_back(rectSecond);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetTouchHotAreas(hotAreas);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), sceneSessionList.at(0)->GetTouchHotAreas().size());
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), 2);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posX_, rectFitst.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posY_, rectFitst.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).width_, rectFitst.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).height_, rectFitst.height_);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).posX_, rectSecond.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).posY_, rectSecond.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).width_, rectSecond.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).height_, rectSecond.height_);
+}
+
+/**
+ * @tc.name: AccessibilityFilterEmptySceneSessionList
+ * @tc.desc: SceneSesionManager filter empty scene session list;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFilterEmptySceneSessionList, Function | SmallTest | Level3)
+{
+    std::vector<sptr<SceneSession>> sceneSessionList;
+
+    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityFilterOneWindow
+ * @tc.desc: SceneSesionManager filter one window;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFilterOneWindow, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetSessionRect({100, 100, 200, 200});
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+}
+
+/**
+ * @tc.name: AccessibilityFilterTwoWindowNotCovered
+ * @tc.desc: SceneSesionManager filter two windows that not covered each other;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowNotCovered, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
+    SetVisibleForAccessibility(sceneSessionFirst);
+    ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
+
+    sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sceneSessionSecond->SetSessionRect({300, 300, 200, 200});
+    SetVisibleForAccessibility(sceneSessionSecond);
+    ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 2);
+}
+
+/**
+ * @tc.name: AccessibilityFilterTwoWindowCovered
+ * @tc.desc: SceneSesionManager filter two windows that covered each other;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
+    SetVisibleForAccessibility(sceneSessionFirst);
+    sceneSessionFirst->SetZOrder(20);
+    ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
+
+    sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sceneSessionSecond->SetSessionRect({50, 50, 50, 50});
+    SetVisibleForAccessibility(sceneSessionSecond);
+    sceneSessionFirst->SetZOrder(10);
+    ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
 }
 
 }

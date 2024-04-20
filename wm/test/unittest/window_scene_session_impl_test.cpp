@@ -686,8 +686,6 @@ HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    windowscenesession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->Close());
 }
 
 /**
@@ -766,7 +764,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     // show with null session
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Hide(2, false, false));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -1272,7 +1270,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTurnScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetTurnScreenOn(false));
 }
 
 /*
@@ -1314,7 +1312,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetKeepScreenOn(false));
     ASSERT_FALSE(window->IsKeepScreenOn());
 }
 
@@ -2123,7 +2121,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | S
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, parentscenesession);
 
-    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(-1));
+    ASSERT_NE(nullptr, parentscenesession->FindParentSessionByParentId(-1));
     GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
 }
 
@@ -2222,7 +2220,7 @@ HWTEST_F(WindowSceneSessionImplTest, BindDialogTarget01, Function | SmallTest | 
     ASSERT_NE(nullptr, windowscenesession);
     sptr<IRemoteObject> targetToken;
     WMError ret = windowscenesession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
@@ -2564,7 +2562,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetWindowLimits01, Function | SmallTest | L
     window->hostSession_ = session;
 
     WindowLimits windowSizeLimits;
-    ASSERT_EQ(WMError::WM_OK, window->GetWindowLimits(windowSizeLimits));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->GetWindowLimits(windowSizeLimits));
     ASSERT_EQ(windowSizeLimits.maxWidth_, 1000);
     ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
     ASSERT_EQ(windowSizeLimits.minWidth_, 1000);

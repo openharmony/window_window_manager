@@ -207,7 +207,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
-    sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
+    const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);

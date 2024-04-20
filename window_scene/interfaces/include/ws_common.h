@@ -203,6 +203,7 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
+    uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
 };
 

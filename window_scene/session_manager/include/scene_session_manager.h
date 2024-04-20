@@ -208,6 +208,7 @@ public:
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
+    WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
@@ -446,6 +447,12 @@ private:
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void ReportWindowProfileInfos();
+    void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
+    bool IsCovered(const sptr<SceneSession>& session, const std::vector<sptr<SceneSession>>& sceneSessionList);
+    void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
+        std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
+    void FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
+    void NotifyAllAccessibilityInfo();
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;

@@ -46,6 +46,13 @@ public:
                 OnSessionManagerServiceRecover(sessionManagerService);
                 break;
             }
+            case SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED: {
+                int32_t userId = data.ReadInt32();
+                int32_t screenId = data.ReadInt32();
+                bool isConnected = data.ReadBool();
+                OnWMSConnectionChanged(userId, screenId, isConnected);
+                break;
+            }
             default:
                 WLOGFW("[WMSRecover] unknown transaction code %{public}d", code);
                 return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -64,7 +71,9 @@ public:
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) override
     {
-        WLOGFD("OnWMSConnectionChanged lite: %{public}d, %{public}d, %{public}d", userId, screenId, isConnected);
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "lite: userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
+            screenId, isConnected);
+        SessionManagerLite::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
     }
 };
 
@@ -185,6 +194,11 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
         sessionManagerServiceProxy_ = sessionManagerService;
     }
     GetSceneSessionManagerLiteProxy();
+    ReregisterSessionListener();
+}
+
+void SessionManagerLite::ReregisterSessionListener() const
+{
     if (sceneSessionManagerLiteProxy_ == nullptr) {
         WLOGFE("[WMSRecover] sceneSessionManagerLiteProxy_ is null");
         return;
@@ -192,11 +206,48 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
 
     WLOGFI("[WMSRecover] RecoverSessionListeners, listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
-    for (const auto& listener: sessionListeners_) {
+    for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
             WLOGFW("[WMSRecover] RegisterSessionListener failed, ret = %{public}" PRId32, ret);
         }
+    }
+}
+
+void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register user switch listener enter");
+    userSwitchCallbackFunc_ = callbackFunc;
+}
+
+void SessionManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connection changed Lite enter");
+    if (isConnected && currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
+        OnUserSwitch();
+    }
+    currentWMSUserId_ = userId;
+}
+
+void SessionManagerLite::OnUserSwitch()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched Lite");
+    {
+        Clear();
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        sceneSessionManagerLiteProxy_ = nullptr;
+        sessionManagerServiceProxy_ = nullptr;
+        InitSessionManagerServiceProxy();
+        InitSceneSessionManagerLiteProxy();
+        if (!sceneSessionManagerLiteProxy_) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "sceneSessionManagerLiteProxy_ is null");
+            return;
+        }
+    }
+    ReregisterSessionListener();
+    if (userSwitchCallbackFunc_) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "User switch Lite callback.");
+        userSwitchCallbackFunc_();
     }
 }
 

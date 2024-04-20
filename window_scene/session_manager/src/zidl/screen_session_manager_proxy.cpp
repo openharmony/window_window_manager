@@ -91,6 +91,27 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError ScreenSessionManagerProxy::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
+        WLOGFE("write screenId/modeId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError ScreenSessionManagerProxy::SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
     float virtualPixelRatio)
 {
@@ -1334,6 +1355,41 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: SendRequest nullptr.");
         return nullptr;
     }
+    return pixelMap;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(Media::Rect &rect,
+    DmErrorCode* errorCode)
+{
+    WLOGFD("enter");
+    sptr<IRemoteObject> remote = Remote();
+    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    if (pixelMap == nullptr) {
+        WLOGFW("SendRequest nullptr.");
+        return nullptr;
+    }
+    *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    rect.left = reply.ReadInt32();
+    rect.top = reply.ReadInt32();
+    rect.width = reply.ReadInt32();
+    rect.height = reply.ReadInt32();
     return pixelMap;
 }
 
