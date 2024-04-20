@@ -14,7 +14,9 @@
  */
 
 #include "zidl/display_manager_agent_proxy.h"
+
 #include <ipc_types.h>
+
 #include "dm_common.h"
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
