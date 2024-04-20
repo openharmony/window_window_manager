@@ -50,20 +50,13 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
-
     bool IsFoldable();
     bool IsCaptured();
-
     FoldStatus GetFoldStatus();
-
     FoldDisplayMode GetFoldDisplayMode();
-
     void SetFoldDisplayMode(const FoldDisplayMode);
-
     void SetFoldStatusLocked(bool locked);
-
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
-
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
