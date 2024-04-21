@@ -125,6 +125,11 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect(bool isFromClient = false) override;
+    virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
+    virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
+    virtual void BindKeyboardSession(sptr<SceneSession> session) {};
+    virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
+    virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -253,6 +258,7 @@ public:
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
 
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -271,6 +277,8 @@ protected:
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     mutable std::shared_mutex moveDragControllerMutex_;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    sptr<SceneSession> keyboardPanelSession_ = nullptr;
+    sptr<SceneSession> keyboardSession_ = nullptr;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -294,7 +302,8 @@ private:
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    
+    void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
+
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
