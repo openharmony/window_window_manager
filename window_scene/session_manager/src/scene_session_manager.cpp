@@ -839,11 +839,12 @@ void SceneSessionManager::ConfigSnapshotScale()
 
 void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::ConfigItem& statusBarConfig)
 {
-    WLOGI("load ConfigSystemUIStatusBar");
+    TLOGI(WmsLogTag::WMS_IMMS, "load ConfigSystemUIStatusBar");
     WindowSceneConfig::ConfigItem item = statusBarConfig["showInLandscapeMode"];
     if (item.IsInts() && item.intsValue_->size() == 1) {
-        appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = (*item.intsValue_)[0];
-        WLOGI("ConfigSystemUIStatusBar showInLandscapeMode:%{public}d",
+        bool showInLandscapeMode = (*item.intsValue_)[0] > 0;
+        appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = showInLandscapeMode;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar showInLandscapeMode:%{public}d",
             appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_);
     }
 
@@ -855,7 +856,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
             return;
         }
         appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_ = color;
-        WLOGI("ConfigSystemUIStatusBar immersiveStatusBarBgColor:%{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarBgColor:%{public}s",
             appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str());
     }
 
@@ -867,7 +868,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
             return;
         }
         appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_ = color;
-        WLOGI("ConfigSystemUIStatusBar immersiveStatusBarContentColor:%{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarContentColor:%{public}s",
             appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
 }

@@ -394,7 +394,7 @@ struct StartingWindowAnimationConfig {
 };
 
 struct SystemUIStatusBarConfig {
-    int showInLandscapeMode_ = 0;
+    bool showInLandscapeMode_ = false;
     std::string immersiveStatusBarBgColor_ = "#4c000000";
     std::string immersiveStatusBarContentColor_ = "#ffffff";
 };
