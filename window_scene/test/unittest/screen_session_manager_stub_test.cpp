@@ -1246,6 +1246,49 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, Function | SmallTest 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest58
+ * @tc.desc: normal function, TRANS_ID_SET_SCREENID_PRIVACY_STATE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest58, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest59
+ * @tc.desc: normal function, TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest59, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    std::vector<std::string> privacyWindowList{"win0", "win1"};
+    data.WriteStringVector(privacyWindowList);
+    uint32_t code = static_cast<uint32_t>(
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }
