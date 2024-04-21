@@ -289,6 +289,30 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, Function
 }
 
 /**
+ * @tc.name: NotifyPrivateStateWindowListChanged
+ * @tc.desc: NotifyPrivateStateWindowListChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    DisplayId id = 0;
+    std::vector<std::string> privacyWindowList{"win0", "win1"};
+    
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: NotifyFoldStatusChanged
  * @tc.desc: NotifyFoldStatusChanged
  * @tc.type: FUNC

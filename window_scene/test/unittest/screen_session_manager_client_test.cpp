@@ -18,12 +18,42 @@
 #include "iremote_object_mocker.h"
 #include "screen_session_manager_client.h"
 #include "zidl/screen_session_manager_proxy.h"
+#include "display_manager.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
+}
+class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
+public:
+    void OnPrivateWindow(bool hasPrivate) {WLOGFI("IPrivateWindowListener hasPrivatewindow: %{public}u", hasPrivate);}
+};
+class DmPrivateWindowListChangeListener : public DisplayManager::IPrivateWindowListChangeListener {
+public:
+    void OnPrivateWindowListChange(DisplayId displayId, std::vector<std::string> privacyWindowList)
+    {
+        WLOGFI("IPrivateWindowListChangeListener displayId: %{public}" PRIu64".", displayId);
+        std::string concatenatedString;
+        std::vector<std::string> result = privacyWindowList;
+        for (const auto& window : result) {
+            concatenatedString.append(window);
+            concatenatedString.append("  ");
+        }
+        WLOGFI("privacyWindowList: %{public}s", concatenatedString.c_str());
+        callback_(privacyWindowList);
+    }
+    void setCallback(std::function<void(std::vector<std::string>)> callback)
+    {
+        callback_ = callback;
+    }
+private:
+    std::function<void(std::vector<std::string>)> callback_;
+};
 class ScreenSessionManagerClientTest : public testing::Test {
 public:
     void SetUp() override;
@@ -198,6 +228,74 @@ HWTEST_F(ScreenSessionManagerClientTest, GetAllScreensProperties, Function | Sma
     sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     EXPECT_EQ(1, screenSessionManagerClient_->GetAllScreensProperties().size());
+}
+
+/**
+ * @tc.name: SetPrivacyStateByDisplayId01
+ * @tc.desc: SetPrivacyStateByDisplayId01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId01, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    EXPECT_EQ(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->ConnectToServer();
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    sptr<DisplayManager::IPrivateWindowListener> displayListener_ = new DmPrivateWindowListener();
+    DisplayManager::GetInstance().RegisterPrivateWindowListener(displayListener_);
+    
+    DisplayId id = 0;
+    bool hasPrivate = true;
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+
+    bool result = false;
+    screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SetPrivacyStateByDisplayId02
+ * @tc.desc: SetPrivacyStateByDisplayId02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId02, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    DisplayId id = 0;
+    bool hasPrivate = false;
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    bool result = true;
+    screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowList
+ * @tc.desc: SetScreenPrivacyWindowList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, Function | SmallTest | Level2)
+{
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    EXPECT_EQ(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->ConnectToServer();
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    DisplayId id = 0;
+    std::vector<std::string> privacyWindowList{"win0", "win1"};
+    std::vector<std::string> privacyWindowList2{"win0"};
+    sptr<DisplayManager::IPrivateWindowListChangeListener> listener_ = new DmPrivateWindowListChangeListener();
+    listener_->setCallback([privacyWindowList, privacyWindowList2](std::vector<std::string> windowList)
+    {
+        EXPECT_EQ(windowList, privacyWindowList);
+        EXPECT_NE(windowList, privacyWindowList2);
+    });
+    DisplayManager::GetInstance().RegisterPrivateWindowListChangeListener(listener_);
+
+    screenSessionManagerClient_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /**
