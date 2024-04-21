@@ -2848,7 +2848,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog, Function | Small
     parentInfo.abilityName_ = "ParentWindows";
     parentInfo.bundleName_ = "ParentWindows";
 
-    int32_t = persistentId = 1005;
+    int32_t persistentId = 1005;
     sptr<SceneSession> parentSession = new (std::nothrow) MainSession(parentInfo, nullptr);
     EXPECT_NE(parentSession, nullptr);
     ssm_->sceneSessionMap_.insert({ persistentId, parentSession });
