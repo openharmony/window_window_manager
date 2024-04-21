@@ -21,7 +21,7 @@
 #include <native_engine/native_value.h>
 
 #include "interfaces/include/ws_common.h"
-
+#include "window_session_property.h"
 namespace OHOS::Rosen {
 
 class JsWindowSceneConfig {
@@ -29,6 +29,7 @@ public:
     JsWindowSceneConfig();
     ~JsWindowSceneConfig();
     static napi_value CreateWindowSceneConfig(napi_env env, const AppWindowSceneConfig& config);
+    static napi_value CreateFreeMultiWindowConfig(napi_env env, const SystemSessionConfig& config);
 
 private:
     static napi_value CreateShadowValue(napi_env env, const AppWindowSceneConfig& config, bool focused);

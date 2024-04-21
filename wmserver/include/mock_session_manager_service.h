@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_MOCK_SESSION_MANAGER_SERVICE_H
 #define OHOS_ROSEN_MOCK_SESSION_MANAGER_SERVICE_H
 
+#include <shared_mutex>
 #include <system_ability.h>
 
 #include "wm_single_instance.h"
@@ -35,29 +36,44 @@ public:
     sptr<IRemoteObject> GetSceneSessionManager();
     void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSRecoverListener() override;
-    void UnregisterSMSRecoverListener(int64_t pid);
+    void UnregisterSMSRecoverListener(int32_t userId, int32_t pid);
     void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSLiteRecoverListener() override;
-    void UnregisterSMSLiteRecoverListener(int64_t pid);
+    void UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid);
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
-    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
-    void NotifyWMSConnected(int32_t userId, int32_t screenId);
-    void NotifyNotKillService()
-    {
-        if (smsDeathRecipient_ != nullptr) {
-            smsDeathRecipient_->needKillService_ = false;
-        }
-    }
+    void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
+    void NotifyNotKillService() {}
 
 protected:
     MockSessionManagerService();
     virtual ~MockSessionManagerService() = default;
 
 private:
+    class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit SMSDeathRecipient(int32_t userId);
+        void OnRemoteDied(const wptr<IRemoteObject>& object) override;
+        bool IsSceneBoardTestMode();
+        void SetScreenId(int32_t screenId);
+        bool needKillService_ { true };
+
+    private:
+        int32_t userId_;
+        int32_t screenId_;
+    };
+    sptr<SMSDeathRecipient> GetSMSDeathRecipientByUserId(int32_t userId);
+    void RemoveSMSDeathRecipientByUserId(int32_t userId);
+    sptr<IRemoteObject> GetSessionManagerServiceByUserId(int32_t userId);
+    void RemoveSessionManagerServiceByUserId(int32_t userId);
     bool RegisterMockSessionManagerService();
-    void NotifySceneBoardAvailableToClient();
-    void NotifySceneBoardAvailableToLiteClient();
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMap(int32_t userId);
+    void NotifySceneBoardAvailableToClient(int32_t userId);
+    void NotifySceneBoardAvailableToLiteClient(int32_t userId);
+    void NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected);
+    void NotifyWMSConnectionChangedToClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
+    void NotifyWMSConnectionChangedToLiteClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
@@ -65,32 +81,24 @@ private:
 
     static void WriteStringToFile(int32_t pid, const char* str);
 
-    class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
-    public:
-        void OnRemoteDied(const wptr<IRemoteObject>& object) override;
-        bool IsSceneBoardTestMode();
-        void SetId(int32_t userId, int32_t screenId);
-        bool needKillService_ { true };
-
-    private:
-        int32_t userId_ = 0;
-        int32_t screenId_ = 0;
-    };
-
     sptr<IRemoteObject> sessionManagerService_;
     sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
-    sptr<SMSDeathRecipient> smsDeathRecipient_;
 
-    std::recursive_mutex smsRecoverListenerLock_;
-    std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsRecoverListenerMap_;
+    std::shared_mutex smsDeathRecipientMapLock_;
+    std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
 
-    std::recursive_mutex smsLiteRecoverListenerLock_;
-    std::map<int64_t, sptr<ISessionManagerServiceRecoverListener>> smsLiteRecoverListenerMap_;
+    std::shared_mutex sessionManagerServiceMapLock_;
+    std::map<int32_t, sptr<IRemoteObject>> sessionManagerServiceMap_;
 
-    int32_t currentUserId_ = 0;
-    int32_t currentScreenId_ = 0;
-    bool isWMSConnected_ = false;
+    std::shared_mutex smsRecoverListenerLock_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMap_;
+
+    std::shared_mutex smsLiteRecoverListenerLock_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
+
+    int32_t currentWMSUserId_;
+    int32_t currentScreenId_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -60,55 +60,73 @@ const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
 } // namespace
 
+inline int32_t GetUserIdByCallingUid()
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    WLOGFD("get calling uid(%{public}d)", uid);
+    if (uid <= INVALID_UID) {
+        WLOGFE("uid is illegal: %{public}d", uid);
+        return INVALID_USER_ID;
+    }
+    return GetUserIdByUid(uid);
+}
+
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit ClientListenerDeathRecipient(int64_t pid, bool isLite)
-        : pid_(pid), isLite_(isLite) {}
- 
-    void OnRemoteDied(const wptr<IRemoteObject> &wptrDeath) override
+    explicit ClientListenerDeathRecipient(int32_t userId, int32_t pid, bool isLite)
+        : userId_(userId), pid_(pid), isLite_(isLite)
+    {}
+
+    void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override
     {
-        WLOGFD("[WMSRecover] OnRemoteDied, pid = %{public}" PRId64 ", isLite = %{public}" PRId32, pid_, isLite_);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         if (isLite_) {
-            MockSessionManagerService::GetInstance().UnregisterSMSLiteRecoverListener(pid_);
+            MockSessionManagerService::GetInstance().UnregisterSMSLiteRecoverListener(userId_, pid_);
         } else {
-            MockSessionManagerService::GetInstance().UnregisterSMSRecoverListener(pid_);
+            MockSessionManagerService::GetInstance().UnregisterSMSRecoverListener(userId_, pid_);
         }
     }
 
 private:
-    int64_t pid_ = -1;
-    bool isLite_ = false;
+    int32_t userId_;
+    int32_t pid_;
+    bool isLite_;
 };
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
+MockSessionManagerService::SMSDeathRecipient::SMSDeathRecipient(int32_t userId)
+    : userId_(userId), screenId_(DEFAULT_SCREEN_ID)
+{}
 
 void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 {
-    WLOGFI("OnRemoteDied with userId_=%{public}d, screenId_=%{public}d", userId_, screenId_);
-    MockSessionManagerService::GetInstance().OnWMSConnectionChanged(userId_, screenId_, false);
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Scb died with userId_=%{public}d, screenId_=%{public}d", userId_, screenId_);
+    MockSessionManagerService::GetInstance().NotifyWMSConnectionChanged(userId_, screenId_, false);
+    MockSessionManagerService::GetInstance().RemoveSMSDeathRecipientByUserId(userId_);
+    MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(userId_);
     auto sessionManagerService = object.promote();
     if (!sessionManagerService) {
-        WLOGFE("sessionManagerService is null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "sessionManagerService is null");
         return;
     }
 
     if (IsSceneBoardTestMode()) {
-        WLOGFI("SceneBoard is testing, do not kill foundation.");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "SceneBoard is testing, do not kill foundation.");
         return;
     }
-    WLOGFW("SessionManagerService died!");
+    TLOGW(WmsLogTag::WMS_MULTI_USER, "SessionManagerService died!");
 }
 
-void MockSessionManagerService::SMSDeathRecipient::SetId(int32_t userId, int32_t screenId)
+void MockSessionManagerService::SMSDeathRecipient::SetScreenId(int32_t screenId)
 {
-    WLOGFI("SetId with userId=%{public}d, screenId=%{public}d", userId, screenId);
-    userId_ = userId;
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "screenId=%{public}d", screenId);
     screenId_ = screenId;
 }
 
-MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
-{
-}
+MockSessionManagerService::MockSessionManagerService()
+    : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true), currentWMSUserId_(INVALID_USER_ID),
+      currentScreenId_(DEFAULT_SCREEN_ID)
+{}
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
 {
@@ -178,177 +196,349 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
         WLOGFE("sessionManagerService is nullptr");
         return false;
     }
-    sessionManagerService_ = sessionManagerService;
-
-    smsDeathRecipient_ = new SMSDeathRecipient();
-    if (sessionManagerService_->IsProxyObject() && !sessionManagerService_->AddDeathRecipient(smsDeathRecipient_)) {
-        WLOGFE("Failed to add death recipient");
+    currentWMSUserId_ = GetUserIdByCallingUid();
+    if (currentWMSUserId_ <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", currentWMSUserId_);
         return false;
     }
-
+    {
+        std::unique_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
+        sessionManagerServiceMap_[currentWMSUserId_] = sessionManagerService;
+    }
+    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
+    if (!smsDeathRecipient) {
+        smsDeathRecipient = new SMSDeathRecipient(currentWMSUserId_);
+        std::unique_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
+        if (!smsDeathRecipient) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to create death Recipient ptr smsDeathRecipient");
+            return false;
+        }
+        smsDeathRecipientMap_[currentWMSUserId_] = smsDeathRecipient;
+    }
+    if (sessionManagerService->IsProxyObject() && !sessionManagerService->AddDeathRecipient(smsDeathRecipient)) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to add death recipient");
+        return false;
+    }
     RegisterMockSessionManagerService();
-    WLOGFI("sessionManagerService set success!");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "sessionManagerService set success!");
     system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
     GetSceneSessionManager();
 
     return true;
 }
 
-sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
+sptr<MockSessionManagerService::SMSDeathRecipient> MockSessionManagerService::GetSMSDeathRecipientByUserId(
+    int32_t userId)
 {
-    if (!sessionManagerService_) {
-        WLOGFE("sessionManagerService is nullptr");
+    std::shared_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
+    auto iter = smsDeathRecipientMap_.find(userId);
+    if (iter != smsDeathRecipientMap_.end()) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Get SMS death recipient with userId=%{public}d", userId);
+        return iter->second;
+    } else {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "Get SMS death recipient failed with userId=%{public}d", userId);
         return nullptr;
     }
-    WLOGFD("Get session manager service success");
-    return sessionManagerService_;
+}
+
+void MockSessionManagerService::RemoveSMSDeathRecipientByUserId(int32_t userId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userId: %{public}d", userId);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    std::unique_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
+    auto iter = smsDeathRecipientMap_.find(userId);
+    if (iter != smsDeathRecipientMap_.end() && iter->second) {
+        if (sessionManagerService != nullptr) {
+            sessionManagerService->RemoveDeathRecipient(iter->second);
+        }
+    }
+}
+
+sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
+{
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
+        return nullptr;
+    }
+    if (clientUserId == SYSTEM_USERID) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService");
+        clientUserId = currentWMSUserId_;
+    }
+    return GetSessionManagerServiceByUserId(clientUserId);
+}
+
+sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId)
+{
+    std::shared_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
+    auto iter = sessionManagerServiceMap_.find(userId);
+    if (iter != sessionManagerServiceMap_.end()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Get session manager service success with userId=%{public}d", userId);
+        return iter->second;
+    } else {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Get session manager service failed with userId=%{public}d", userId);
+        return nullptr;
+    }
+}
+
+void MockSessionManagerService::RemoveSessionManagerServiceByUserId(int32_t userId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userId: %{public}d", userId);
+    std::unique_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
+    auto iter = sessionManagerServiceMap_.find(userId);
+    if (iter != sessionManagerServiceMap_.end()) {
+        sessionManagerServiceMap_.erase(iter);
+    }
 }
 
 void MockSessionManagerService::NotifySceneBoardAvailable()
 {
-    WLOGFI("[WMSRecover] scene board is available");
-    NotifySceneBoardAvailableToLiteClient();
-    NotifySceneBoardAvailableToClient();
+    int32_t userId = GetUserIdByCallingUid();
+    if (userId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "scene board is available with userId=%{public}d", userId);
+
+    NotifySceneBoardAvailableToLiteClient(SYSTEM_USERID);
+    NotifySceneBoardAvailableToLiteClient(userId);
+
+    NotifySceneBoardAvailableToClient(SYSTEM_USERID);
+    NotifySceneBoardAvailableToClient(userId);
 }
 
 void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("[WMSRecover] listener is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "listener is nullptr");
         return;
     }
 
-    int64_t pid = IPCSkeleton::GetCallingRealPid();
-    WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
-
-    std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
-
-    sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient(pid, false);
-    listener->AddDeathRecipient(clientDeathLisntener);
-    auto smsListener = iface_cast<ISessionManagerServiceRecoverListener>(listener);
-    smsRecoverListenerMap_[pid] = smsListener;
-    if (smsListener && isWMSConnected_) {
-        smsListener->OnWMSConnectionChanged(currentUserId_, currentScreenId_, true);
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
+        return;
     }
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
+    sptr<ClientListenerDeathRecipient> clientDeathListener = new ClientListenerDeathRecipient(clientUserId, pid, false);
+    listener->AddDeathRecipient(clientDeathListener);
+    sptr<ISessionManagerServiceRecoverListener> smsListener;
+    {
+        std::unique_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
+        smsListener = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+        smsRecoverListenerMap_[clientUserId][pid] = smsListener;
+    }
+    if (clientUserId == SYSTEM_USERID && smsListener && currentWMSUserId_ > INVALID_USER_ID) {
+        smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true);
+    }
+}
+
+std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSRecoverListenerMap(
+    int32_t userId)
+{
+    auto iter = smsRecoverListenerMap_.find(userId);
+    if (iter != smsRecoverListenerMap_.end()) {
+        return &iter->second;
+    }
+    return nullptr;
 }
 
 void MockSessionManagerService::UnregisterSMSRecoverListener()
 {
-    int64_t pid = IPCSkeleton::GetCallingRealPid();
-    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
-    UnregisterSMSRecoverListener(pid);
-}
-
-void MockSessionManagerService::UnregisterSMSRecoverListener(int64_t pid)
-{
-    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
-    std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
-    auto it = smsRecoverListenerMap_.find(pid);
-    if (it != smsRecoverListenerMap_.end()) {
-        smsRecoverListenerMap_.erase(it);
-    }
-}
-
-void MockSessionManagerService::NotifySceneBoardAvailableToClient()
-{
-    if (sessionManagerService_ == nullptr) {
-        WLOGFE("[WMSRecover] SessionManagerService is null");
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
         return;
     }
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
+    UnregisterSMSRecoverListener(clientUserId, pid);
+}
 
-    WLOGFI("[WMSRecover] Remote process count = %{public}" PRIu64,
-        static_cast<uint64_t>(smsRecoverListenerMap_.size()));
+void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId, int32_t pid)
+{
+    TLOGD(WmsLogTag::WMS_RECOVER, "userId = %{public}d, pid = %{public}d", userId, pid);
+    std::unique_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
+        GetSMSRecoverListenerMap(userId);
+    if (!smsRecoverListenerMap) {
+        TLOGW(WmsLogTag::WMS_RECOVER, "smsRecoverListenerMap is null");
+        return;
+    }
+    auto iter = smsRecoverListenerMap->find(pid);
+    if (iter != smsRecoverListenerMap->end()) {
+        smsRecoverListenerMap->erase(iter);
+    }
+}
 
-    std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
-    for (auto& it: smsRecoverListenerMap_) {
-        if (it.second == nullptr) {
-            continue;
+void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId)
+{
+    std::shared_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
+        GetSMSRecoverListenerMap(userId);
+    if (!smsRecoverListenerMap) {
+        TLOGW(WmsLogTag::WMS_RECOVER, "smsRecoverListenerMap is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
+        static_cast<uint64_t>(smsRecoverListenerMap->size()));
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+        return;
+    }
+    for (auto& iter : *smsRecoverListenerMap) {
+        if (iter.second != nullptr) {
+            TLOGI(WmsLogTag::WMS_RECOVER, "Call OnSessionManagerServiceRecover pid = %{public}d", iter.first);
+            iter.second->OnSessionManagerServiceRecover(sessionManagerService);
         }
-        
-        WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover pid = %{public}" PRId64
-            ", ref count = %{public}" PRId32, it.first, it.second->GetSptrRefCount());
-        it.second->OnSessionManagerServiceRecover(sessionManagerService_);
     }
 }
 
 void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("[WMSRecover] listener is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Lite listener is nullptr");
         return;
     }
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
+        return;
+    }
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
+    sptr<ClientListenerDeathRecipient> clientDeathListener = new ClientListenerDeathRecipient(clientUserId, pid, true);
+    listener->AddDeathRecipient(clientDeathListener);
+    std::unique_lock<std::shared_mutex> lock(smsLiteRecoverListenerLock_);
+    smsLiteRecoverListenerMap_[clientUserId][pid] = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+}
 
-    int64_t pid = IPCSkeleton::GetCallingRealPid();
-    WLOGFI("[WMSRecover] pid = %{public}" PRId64, pid);
-
-    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
-
-    sptr<ClientListenerDeathRecipient> clientDeathLisntener = new ClientListenerDeathRecipient(pid, true);
-    listener->AddDeathRecipient(clientDeathLisntener);
-    smsLiteRecoverListenerMap_[pid] = iface_cast<ISessionManagerServiceRecoverListener>(listener);
+std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSLiteRecoverListenerMap(
+    int32_t userId)
+{
+    auto iter = smsLiteRecoverListenerMap_.find(userId);
+    if (iter != smsLiteRecoverListenerMap_.end()) {
+        return &iter->second;
+    }
+    return nullptr;
 }
 
 void MockSessionManagerService::UnregisterSMSLiteRecoverListener()
 {
-    int64_t pid = IPCSkeleton::GetCallingRealPid();
-    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
-    UnregisterSMSLiteRecoverListener(pid);
-}
-
-void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int64_t pid)
-{
-    WLOGFD("[WMSRecover] pid = %{public}" PRId64, pid);
-    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
-    auto it = smsLiteRecoverListenerMap_.find(pid);
-    if (it != smsLiteRecoverListenerMap_.end()) {
-        smsLiteRecoverListenerMap_.erase(it);
-    }
-}
-
-void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient()
-{
-    if (sessionManagerService_ == nullptr) {
-        WLOGFE("[WMSRecover] SessionManagerService is null");
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
         return;
     }
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
+    UnregisterSMSLiteRecoverListener(clientUserId, pid);
+}
 
-    WLOGFI("[WMSRecover] Remote lite process count = %{public}" PRIu64,
-        static_cast<uint64_t>(smsLiteRecoverListenerMap_.size()));
+void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid)
+{
+    TLOGD(WmsLogTag::WMS_RECOVER, "userId = %{public}d, pid = %{public}d", userId, pid);
+    std::unique_lock<std::shared_mutex> lock(smsLiteRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsLiteRecoverListenerMap =
+        GetSMSLiteRecoverListenerMap(userId);
+    if (!smsLiteRecoverListenerMap) {
+        return;
+    }
+    auto iter = smsLiteRecoverListenerMap->find(pid);
+    if (iter != smsLiteRecoverListenerMap->end()) {
+        smsLiteRecoverListenerMap->erase(iter);
+    }
+}
 
-    std::lock_guard<std::recursive_mutex> lock(smsLiteRecoverListenerLock_);
-    for (auto& it: smsLiteRecoverListenerMap_) {
-        if (it.second == nullptr) {
-            continue;
+void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t userId)
+{
+    std::shared_lock<std::shared_mutex> lock(smsLiteRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsLiteRecoverListenerMap =
+        GetSMSLiteRecoverListenerMap(userId);
+    if (!smsLiteRecoverListenerMap) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
+        static_cast<uint64_t>(smsLiteRecoverListenerMap->size()));
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+        return;
+    }
+    for (auto& iter : *smsLiteRecoverListenerMap) {
+        if (iter.second != nullptr) {
+            TLOGI(WmsLogTag::WMS_RECOVER,
+                "Call OnSessionManagerServiceRecover Lite pid = %{public}d, ref count = %{public}" PRId32, iter.first,
+                iter.second->GetSptrRefCount());
+            iter.second->OnSessionManagerServiceRecover(sessionManagerService);
         }
-
-        WLOGFI("[WMSRecover] Call OnSessionManagerServiceRecover Lite pid = %{public}" PRId64
-            ", ref count = %{public}" PRId32, it.first, it.second->GetSptrRefCount());
-        it.second->OnSessionManagerServiceRecover(sessionManagerService_);
     }
 }
 
-void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t screenId)
+void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart)
 {
-    WLOGFI("NotifyWMSConnected with userId = %{public}d, screenId = %{public}d", userId, screenId);
-    if (smsDeathRecipient_ == nullptr) {
-        WLOGFE("smsDeathRecipient_ is null, do nothing");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userId = %{public}d, screenId = %{public}d, isColdStart = %{public}d", userId,
+        screenId, isColdStart);
+    currentScreenId_ = screenId;
+    currentWMSUserId_ = userId;
+    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
+    if (smsDeathRecipient != nullptr) {
+        smsDeathRecipient->SetScreenId(screenId);
+    }
+    if (!isColdStart) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched");
+        GetSceneSessionManager();
+    }
+    NotifyWMSConnectionChanged(userId, screenId, true);
+}
+
+void MockSessionManagerService::NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
+    NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnected);
+    NotifyWMSConnectionChangedToLiteClient(wmsUserId, screenId, isConnected);
+}
+
+void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
+    int32_t wmsUserId, int32_t screenId, bool isConnected)
+{
+    std::shared_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
+        GetSMSRecoverListenerMap(SYSTEM_USERID);
+    if (!smsRecoverListenerMap) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "smsRecoverListenerMap is null");
         return;
     }
-    currentUserId_ = userId;
-    currentScreenId_ = screenId;
-    smsDeathRecipient_->SetId(userId, screenId);
-    OnWMSConnectionChanged(userId, screenId, true);
+    TLOGD(WmsLogTag::WMS_MULTI_USER,
+        "wmsUserId = %{public}d, isConnected = %{public}d, remote process count = "
+        "%{public}" PRIu64,
+        wmsUserId, isConnected, static_cast<uint64_t>(smsRecoverListenerMap->size()));
+    for (auto& iter : *smsRecoverListenerMap) {
+        if (iter.second != nullptr) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Call OnWMSConnectionChanged pid = %{public}d", iter.first);
+            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected);
+        }
+    }
 }
 
-void MockSessionManagerService::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+void MockSessionManagerService::NotifyWMSConnectionChangedToLiteClient(
+    int32_t wmsUserId, int32_t screenId, bool isConnected)
 {
-    isWMSConnected_ = isConnected;
-    std::lock_guard<std::recursive_mutex> lock(smsRecoverListenerLock_);
-    WLOGFD("Remote process count = %{public}" PRIu64, static_cast<uint64_t>(smsRecoverListenerMap_.size()));
-    for (auto& it : smsRecoverListenerMap_) {
-        if (it.second != nullptr) {
-            WLOGFI("Call OnWMSConnectionChanged pid = %{public}" PRId64, it.first);
-            it.second->OnWMSConnectionChanged(userId, screenId, isConnected);
+    std::shared_lock<std::shared_mutex> lock(smsLiteRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsLiteRecoverListenerMap =
+        GetSMSLiteRecoverListenerMap(SYSTEM_USERID);
+    if (!smsLiteRecoverListenerMap) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
+    for (auto& iter : *smsLiteRecoverListenerMap) {
+        if (iter.second != nullptr) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER,
+                "Call OnWMSConnectionChanged Lite pid = %{public}d, ref count = %{public}d", iter.first,
+                iter.second->GetSptrRefCount());
+            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected);
         }
     }
 }
@@ -369,8 +559,12 @@ void MockSessionManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
 
 sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
 {
-    sptr<ISessionManagerService> sessionManagerServiceProxy =
-        iface_cast<ISessionManagerService>(sessionManagerService_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        WLOGFE("SessionManagerService is null");
+        return nullptr;
+    }
+    sptr<ISessionManagerService> sessionManagerServiceProxy = iface_cast<ISessionManagerService>(sessionManagerService);
     if (!sessionManagerServiceProxy) {
         WLOGFE("sessionManagerServiceProxy is nullptr");
         return nullptr;
@@ -389,7 +583,8 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     if (args.empty()) {
         return -1;  // WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (!sessionManagerService_) {
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
         WLOGFE("sessionManagerService is nullptr");
         return -1;
     }
@@ -427,7 +622,7 @@ void MockSessionManagerService::ShowAceDumpHelp(std::string& dumpInfo)
 {
 }
 
-bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode() 
+bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
 {
     if (!OHOS::system::GetBoolParameter(KEY_SCENE_BOARD_TEST_ENABLE, false)) {
         WLOGFD("SceneBoard testmode is disabled.");

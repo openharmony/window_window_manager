@@ -2986,6 +2986,30 @@ HWTEST_F(SceneSessionTest, ChangeSessionVisibilityWithStatusBar, Function | Smal
     delete sceneSession;
 }
 
+/**
+ * @tc.name: SetForceHideState
+ * @tc.desc: SetForceHideState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetForceHideState, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetForceHideState";
+    info.bundleName_ = "SetForceHideState";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->SetForceHideState(true);
+    bool hide = scensession->GetForceHideState();
+    ASSERT_EQ(hide, true);
+    scensession->SetForceHideState(false);
+    hide = scensession->GetForceHideState();
+    ASSERT_EQ(hide, false);
+}
 }
 }
 }

@@ -69,8 +69,9 @@ const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+const ScreenId DEFAULT_SCREEN_ID = 0;
 constexpr int32_t INVALID_UID = -1;
-constexpr int32_t INVALID_USERID = -1;
+constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
 } // namespace
@@ -82,7 +83,7 @@ inline int32_t GetUserIdByCallingUid()
     WLOGFD("get calling uid(%{public}d)", uid);
     if (uid <= INVALID_UID) {
         WLOGFE("uid is illegal: %{public}d", uid);
-        return INVALID_USERID;
+        return INVALID_USER_ID;
     }
     return uid / BASE_USER_RANGE;
 }
@@ -370,9 +371,11 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
+    std::ostringstream oss;
+    oss << "OnScreenChange triggered. screenId: " << static_cast<int32_t>(screenId)
+        << "  screenEvent: " << static_cast<int32_t>(screenEvent);
+    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, oss.str());
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "Dms OnScreenChange triggered.");
-    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is nullptr");
@@ -382,7 +385,13 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (foldScreenController_ != nullptr) {
         screenSession->SetFoldScreen(true);
     }
+    HandleScreenEvent(screenSession, screenId, screenEvent);
+}
 
+void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
+    ScreenId screenId, ScreenEvent screenEvent)
+{
+    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
@@ -431,6 +440,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::UPDATE_REFRESHRATE);
     } else {
         WLOGFE("Get default screen session failed.");
     }
@@ -441,7 +452,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     if (screenSessionMap_.empty()) {
-        screenEventTracker_.LogWarnninAllInfos();
+        screenEventTracker_.LogWarningAllInfos();
     }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
@@ -642,6 +653,19 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("set virtual pixel permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if (clientProxy_) {
+        clientProxy_->SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio)
 {
     WLOGI("SetResolution ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
@@ -787,9 +811,9 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         WLOGFI("GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
-            .mirrorNodeId = nodeId,
             .defaultScreenId = defScreenId,
+            .mirrorNodeId = nodeId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
         session->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
@@ -801,8 +825,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     } else {
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
             .defaultScreenId = defScreenId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     }
@@ -2436,9 +2460,9 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
 {
     WLOGFI("InitVirtualScreen: Enter");
     ScreenSessionConfig config = {
-        .name = option.name_,
         .screenId = smsScreenId,
         .rsId = rsId,
+        .name = option.name_,
         .defaultScreenId = GetDefaultScreenId(),
     };
     sptr<ScreenSession> screenSession =
@@ -2506,10 +2530,10 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     WLOGFI("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
     ScreenSessionConfig config = {
-        .name = screenCapability.GetName(),
         .screenId = smsScreenId,
         .rsId = rsScreenId,
         .defaultScreenId = GetDefaultScreenId(),
+        .name = screenCapability.GetName(),
     };
     sptr<ScreenSession> screenSession =
         new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -3259,17 +3283,18 @@ void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
         std::string screenType = TransferTypeToString(screenInfo->GetType());
         NodeId nodeId = (screenSession->GetDisplayNode() == nullptr) ?
             SCREEN_ID_INVALID : screenSession->GetDisplayNode()->GetId();
-        oss << std::left << std::setw(21) << screenInfo->GetName()
-            << std::left << std::setw(9) << screenType
-            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false")
-            << std::left << std::setw(6) << screenSession->screenId_
-            << std::left << std::setw(21) << screenSession->rsId_
-            << std::left << std::setw(10) << screenSession->activeIdx_
-            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio()
-            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation())
-            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation())
-            << std::left << std::setw(19) << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
-            << std::left << std::setw(21) << nodeId
+        oss << std::left << std::setw(21) << screenInfo->GetName() // 21 is width
+            << std::left << std::setw(9) << screenType // 9 is width
+            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false") // 8 is width
+            << std::left << std::setw(6) << screenSession->screenId_ // 6 is width
+            << std::left << std::setw(21) << screenSession->rsId_ // 21 is width
+            << std::left << std::setw(10) << screenSession->activeIdx_ // 10 is width
+            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio() // 4 is width
+            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation()) // 9 is width
+            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation()) // 12 is width
+            << std::left << std::setw(19) // 19 is width
+                << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
+            << std::left << std::setw(21) << nodeId // 21 is width
             << std::endl;
     }
     oss << "total screen num: " << screenSessionMap_.size() << std::endl;
@@ -3564,7 +3589,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     }
     auto userId = GetUserIdByCallingUid();
     WLOGFI("SetClient userId= %{public}d", userId);
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, 0);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, DEFAULT_SCREEN_ID, true);
     clientProxy_ = client;
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -3719,6 +3744,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         WLOGFE("dumper is nullptr");
         return -1;
     }
+    dumper->DumpEventTracker(screenEventTracker_);
     dumper->ExcuteDumpCmd();
 
     std::vector<std::string> params;
@@ -3861,6 +3887,10 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     WLOGFI("NotifyFoldToExpandCompletion ENTER");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("notify permission denied");
+        return;
+    }
     SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {

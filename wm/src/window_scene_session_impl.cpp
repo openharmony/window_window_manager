@@ -170,18 +170,20 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType& type = GetType();
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
+        auto info = property_->GetSessionInfo();
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+        property_->SetSessionInfo(info);
+    }
     if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);
             return WMError::WM_ERROR_NULLPTR;
-        }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-            auto info = property_->GetSessionInfo();
-            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-            property_->SetSessionInfo(info);
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -201,13 +203,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             return createSystemWindowRet;
         }
         PreProcessCreate();
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-            auto info = property_->GetSessionInfo();
-            info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-            property_->SetSessionInfo(info);
-        }
-
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
@@ -1474,6 +1469,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(status);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     WindowMode mode = GetMode();
     if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
@@ -1554,9 +1550,9 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     }
     setSameSystembarPropertyCnt_ = 0;
     TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_, property.enableAnimation_);
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u settingFlag:%{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
@@ -1590,11 +1586,13 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     }
 
     WindowMode mode = GetMode();
-    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
+    bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
+    if (isSwitchFreeMultiWindow || !((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-          WindowHelper::IsMainWindow(GetType()) &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           WindowHelper::IsMainWindow(GetType()) &&
+           (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
            system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1628,6 +1626,11 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
         /* FloatingWindow skip for Phone*/
         return false;
+    }
+    if (windowSystemConfig_.freeMultiWindowSupport_) {
+        return (WindowHelper::IsMainWindow(GetType())
+            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
+        windowSystemConfig_.isSystemDecorEnable_;
     }
     bool enable = (WindowHelper::IsMainWindow(GetType())
             || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
@@ -2758,6 +2761,15 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
     return WSError::WS_OK;
 }
 
+WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    return WSError::WS_OK;
+}
+
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
     TLOGD(WmsLogTag::WMS_PIP, "NotifyPrepareClosePiPWindow type: %{public}u", GetType());
@@ -3007,36 +3019,43 @@ WMError WindowSceneSessionImpl::SetTextFieldAvoidInfo(double textFieldPositionY,
 std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     const std::vector<std::vector<uint32_t>>& windowMask)
 {
-    const Rect& windowRect = GetRect();
+    const Rect& windowRect = GetRequestRect();
     uint32_t maskHeight = windowMask.size();
     if (maskHeight <= 0) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
     uint32_t maskWidth = windowMask[0].size();
-    if (windowRect.height_ != maskHeight || windowRect.width_ != maskWidth) {
+    if ((windowRect.height_ > 0 && windowRect.height_ != maskHeight) ||
+        (windowRect.width_ > 0 && windowRect.width_ != maskWidth)) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
+    const uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
     opts.size.width = maskWidth;
     opts.size.height = maskHeight;
-    opts.pixelFormat = Media::PixelFormat::ALPHA_8;
-    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-    uint32_t length = maskWidth * maskHeight;
-    uint32_t* data = new (std::nothrow) uint32_t[length];
+    uint32_t length = maskWidth * maskHeight * bgraChannel;
+    uint8_t* data = static_cast<uint8_t*>(malloc(length));
     if (data == nullptr) {
         WLOGFE("data is nullptr");
         return nullptr;
     }
+    const uint32_t fullChannel = 255;
+    const uint32_t greenChannel = 1;
+    const uint32_t redChannel = 2;
+    const uint32_t alphaChannel = 3;
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
-            data[idx] = windowMask[i][j];
+            uint32_t channelIndex = idx * bgraChannel;
+            data[channelIndex] = 0; // blue channel
+            data[channelIndex + greenChannel] = 0;
+            data[channelIndex + redChannel] = fullChannel;
+            data[channelIndex + alphaChannel] = windowMask[i][j] > 0 ? fullChannel : 0;
         }
     }
-    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(data, length, opts);
+    std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
     delete[] data;
     return mask;
 }

@@ -335,8 +335,9 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         if (iter != dialogMap.end() && iter->second != nullptr) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-            WLOGFI("Change agentId, dialogId: %{public}d, parentId: %{public}d",
-                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"
+                " CallingPid: %{public}d",
+                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
         windowIDLstLog.append(std::to_string(windowInfo.id).append(", "));
@@ -438,7 +439,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
         .transform = transformData,
-        .pixelMap = pixelMap
+        .pixelMap = pixelMap,
+        .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr && (property->GetWindowFlags() &

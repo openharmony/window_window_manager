@@ -43,6 +43,7 @@ private:
     int HandleOnSetDisplayNodeScreenId(MessageParcel& data, MessageParcel& reply);
     int HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply);
 
     using StubFunc = int(ScreenSessionManagerClientStub::*)(MessageParcel& data, MessageParcel& reply);
     static const std::map<uint32_t, StubFunc> stubFuncMap_;

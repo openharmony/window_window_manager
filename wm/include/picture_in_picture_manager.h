@@ -59,7 +59,7 @@ private:
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
     static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
     static std::shared_mutex controllerMapMutex_;
-    static std::shared_mutex mutex_;
+    static std::recursive_mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

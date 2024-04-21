@@ -79,6 +79,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateDisplayId),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
         &SessionStageStub::HandleNotifyDisplayMove),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
+        &SessionStageStub::HandleSwitchFreeMultiWindow),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -365,6 +367,15 @@ int SessionStageStub::HandleNotifyDisplayMove(MessageParcel& data, MessageParcel
     DisplayId from = static_cast<DisplayId>(data.ReadUint64());
     DisplayId to = static_cast<DisplayId>(data.ReadUint64());
     NotifyDisplayMove(from, to);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSwitchFreeMultiWindow!");
+    bool enable = data.ReadBool();
+    WSError errCode = SwitchFreeMultiWindow(enable);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

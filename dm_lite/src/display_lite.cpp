@@ -112,4 +112,14 @@ void DisplayLite::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
     }
     pImpl_->SetDisplayInfo(displayInfo);
 }
+
+Rotation DisplayLite::GetRotation() const
+{
+    UpdateDisplayInfo();
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return Rotation::ROTATION_0;
+    }
+    return pImpl_->GetDisplayInfo()->GetRotation();
+}
 } // namespace OHOS::Rosen
