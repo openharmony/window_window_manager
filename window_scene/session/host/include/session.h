@@ -187,6 +187,7 @@ public:
     WSRect GetSessionRect() const;
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    std::string GetWindowName() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -387,6 +388,7 @@ public:
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
     void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
         uint32_t minHeight, uint32_t maxFloatingWindowSize);
+    WSError SwitchFreeMultiWindow(bool enable);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -502,6 +504,7 @@ protected:
     float pivotY_ = 0.0f;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
+    mutable std::shared_mutex parentSessionMutex_;
     sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
 
@@ -539,7 +542,6 @@ private:
     std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<void()> windowModeCallback_;
 

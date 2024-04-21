@@ -82,6 +82,21 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     OutputDumpInfo();
 }
 
+void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
+{
+    std::ostringstream oss;
+    std::map<TrackSupportEvent, std::vector<TrackInfo>> recordMap = tracker.GetRecordMap();
+    oss << "-------------- DMS KEY EVENTS LIST  --------------" << std::endl;
+    for (const auto& [event, Infos] : recordMap) {
+        for (const auto& info : Infos) {
+            oss << std::left << "[EventId: " << static_cast<int32_t>(event) << "]"
+                << "[" << tracker.formatTimestamp(info.timestamp).c_str() << "]: "
+                << info.info.c_str() << std::endl;
+        }
+    }
+    dumpInfo_.append(oss.str());
+}
+
 void ScreenSessionDumper::ShowHelpInfo()
 {
     dumpInfo_.append("Usage:\n")

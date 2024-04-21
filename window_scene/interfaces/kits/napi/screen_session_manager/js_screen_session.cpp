@@ -70,6 +70,21 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
 {
     std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOW";
     screenScene_ = new(std::nothrow) ScreenScene(name);
+    if (screenSession_) {
+        SetScreenSceneDpiFunc func = [this](float density) {
+            WLOGI("Screen Scene Dpi change, new density = %{public}f", density);
+            if (!screenScene_ || !screenSession_) {
+                WLOGFE("[NAPI]screenScene or screenSession is nullptr");
+                return;
+            }
+            auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
+            Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
+                screenBounds.rect_.width_, screenBounds.rect_.height_ };
+            screenScene_->SetDisplayDensity(density);
+            screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+        };
+        screenSession_->SetScreenSceneDpiChangeListener(func);
+    }
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)

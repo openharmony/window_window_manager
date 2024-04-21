@@ -112,7 +112,8 @@ bool operator!=(const std::vector<float>& a, const std::vector<float>& b)
     if (a.size() != b.size()) {
         return true;
     }
-    for (int index = 0; index < a.size(); index++) {
+    int sizeOfA = static_cast<int>(a.size());
+    for (int index = 0; index < sizeOfA; index++) {
         if (a[index] != b[index]) {
             return true;
         }
@@ -132,19 +133,20 @@ bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
         return false;
     }
 
-    for (int index = 0; index < a.defaultHotAreas.size(); index++) {
+    int sizeOfDefaultHotAreas = static_cast<int>(a.defaultHotAreas.size());
+    for (int index = 0; index < sizeOfDefaultHotAreas; index++) {
         if (a.defaultHotAreas[index] != b.defaultHotAreas[index]) {
             return false;
         }
     }
-
-    for (int index = 0; index < a.pointerHotAreas.size(); index++) {
+    int sizeOfPointerHotAreas = static_cast<int>(a.pointerHotAreas.size());
+    for (int index = 0; index < sizeOfPointerHotAreas; index++) {
         if (a.pointerHotAreas[index] != b.pointerHotAreas[index]) {
             return false;
         }
     }
-
-    for (int index = 0; index < a.pointerChangeAreas.size(); index++) {
+    int sizeOfPointerChangeAreas = static_cast<int>(a.pointerChangeAreas.size());
+    for (int index = 0; index < sizeOfPointerChangeAreas; index++) {
         if (a.pointerChangeAreas[index] != b.pointerChangeAreas[index]) {
             return false;
         }
@@ -262,13 +264,13 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
     for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", DumpDisplayInfo(displayInfo).c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", DumpDisplayInfo(displayInfo).c_str());
     }
     std::string windowinfolst = "windowinfo  ";
     for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
         windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %s", windowinfolst.c_str());
+    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 } 
 
@@ -307,7 +309,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
         for (auto& windowInfo : windowInfos) {
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %s", windowinfolst.c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %{public}s", windowinfolst.c_str());
         int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
         MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
@@ -329,7 +331,8 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
         return true;
     }
 
-    for (int index = 0; index < displayInfos.size(); index++) {
+    int sizeOfDisplayInfos = static_cast<int>(displayInfos.size());
+    for (int index = 0; index < sizeOfDisplayInfos; index++) {
         if (!(displayInfos[index] == lastDisplayInfos_[index])) {
             lastDisplayInfos_ = displayInfos;
             lastWindowInfoList_ = windowInfoList;
@@ -337,13 +340,35 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
         }
     }
 
-    for (int index = 0; index < windowInfoList.size(); index++) {
+    int sizeOfWindowInfoList = static_cast<int>(windowInfoList.size());
+    for (int index = 0; index < sizeOfWindowInfoList; index++) {
         if (!(windowInfoList[index] == lastWindowInfoList_[index])) {
             lastWindowInfoList_ = windowInfoList;
             return true;
         }
     }
     return false;
+}
+
+void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
+{
+    int windowListSize = static_cast<int>(windowInfoList.size());
+    std::string idList;
+    static std::string lastIdList;
+    static uint32_t windowEventID = 0;
+    if (windowEventID == UINT32_MAX) {
+        windowEventID = 0;
+    }
+    for (auto& e : windowInfoList) {
+        idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
+            std::to_string(static_cast<int>(e.zOrder)) + " ";
+    }
+    if (lastIdList != idList) {
+        windowEventID++;
+        TLOGI(WmsLogTag::WMS_EVENT, "EventID:%{public}d ListSize:%{public}d idList:%{public}s",
+            windowEventID, windowListSize, idList.c_str());
+        lastIdList = idList;
+    }
 }
 
 void SceneInputManager::FlushDisplayInfoToMMI()
@@ -360,8 +385,7 @@ void SceneInputManager::FlushDisplayInfoToMMI()
         if (!CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - windowInfo:windowList = %{public}d",
-            static_cast<int>(windowInfoList.size()));
+        PrintWindowInfo(windowInfoList);
         if (windowInfoList.size() == 0) {
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;

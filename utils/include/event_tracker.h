@@ -55,7 +55,7 @@ public:
         recordMap_.clear();
     }
 
-    void LogWarnninAllInfos() const
+    void LogWarningAllInfos() const
     {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::seconds>(now - lastOutputTime_).count() < OUTPUT_FREQ) {
@@ -72,7 +72,6 @@ public:
         }
     }
 
-private:
     std::string formatTimestamp(const std::chrono::system_clock::time_point& timePoint) const
     {
         std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);
@@ -80,6 +79,12 @@ private:
         std::stringstream ss;
         ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
         return ss.str();
+    }
+
+    const std::map<TrackSupportEvent, std::vector<TrackInfo>>& GetRecordMap() const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return recordMap_;
     }
 
 private:

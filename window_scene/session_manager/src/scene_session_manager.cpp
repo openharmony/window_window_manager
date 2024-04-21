@@ -374,6 +374,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
+    ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
 
@@ -381,6 +382,84 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigSystemUIStatusBar(item);
     }
+}
+
+void SceneSessionManager::ConfigFreeMultiWindow()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem freeMultiWindowConfig = config["freeMultiWindow"];
+    if (freeMultiWindowConfig.IsMap()) {
+        auto supportItem = freeMultiWindowConfig.GetProp("enable");
+        if (supportItem.IsBool()) {
+            systemConfig_.freeMultiWindowSupport_ = supportItem.boolValue_;
+        }
+        auto item = freeMultiWindowConfig["decor"];
+        if (item.IsMap()) {
+            ConfigDecor(item, false);
+        }
+        int32_t param = -1;
+        item = freeMultiWindowConfig["defaultWindowMode"];
+        if (GetSingleIntItem(item, param) &&
+            (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.freeMultiWindowConfig_.defaultWindowMode_ =
+                static_cast<WindowMode>(static_cast<uint32_t>(param));
+        }
+        item = freeMultiWindowConfig["maxMainFloatingWindowNumber"];
+        if (GetSingleIntItem(item, param) && (param > 0)) {
+            systemConfig_.freeMultiWindowConfig_.maxMainFloatingWindowNumber_ = param;
+        }
+    }
+}
+
+void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
+{
+    FreeMultiWindowConfig freeMultiWindowConfig = systemConfig_.freeMultiWindowConfig_;
+    if (enable) {
+        systemConfig_.defaultWindowMode_ = freeMultiWindowConfig.defaultWindowMode_;
+        systemConfig_.decorModeSupportInfo_ = freeMultiWindowConfig.decorModeSupportInfo_;
+        systemConfig_.isSystemDecorEnable_ = freeMultiWindowConfig.isSystemDecorEnable_;
+    } else {
+        const auto& config = WindowSceneConfig::GetConfig();
+        auto item = config["decor"];
+        if (item.IsMap()) {
+            ConfigDecor(item, true);
+        }
+        int32_t param = -1;
+        item = config["defaultWindowMode"];
+        if (GetSingleIntItem(item, param) &&
+            (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
+        }
+    }
+    systemConfig_.freeMultiWindowEnable_ = enable;
+}
+
+const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
+{
+    return systemConfig_;
+}
+
+WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
+{
+    if (!systemConfig_.freeMultiWindowSupport_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    LoadFreeMultiWindowConfig(enable);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
+        auto sceneSession = item->second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            continue;
+        }
+        sceneSession->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
@@ -404,32 +483,43 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
     return taskScheduler_->PostSyncTask(task, "SetSessionContinueState");
 }
 
-void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
+void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig)
 {
     WindowSceneConfig::ConfigItem item = decorConfig.GetProp("enable");
     if (item.IsBool()) {
-        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        if (mainConfig) {
+            systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        } else {
+            systemConfig_.freeMultiWindowConfig_.isSystemDecorEnable_ = item.boolValue_;
+        }
+        bool decorEnable = item.boolValue_;
+        uint32_t support = 0;
         std::vector<std::string> supportedModes;
         item = decorConfig["supportedMode"];
         if (item.IsStrings()) {
-            systemConfig_.decorModeSupportInfo_ = 0;
             supportedModes = *item.stringsValue_;
         }
         for (auto mode : supportedModes) {
             if (mode == "fullscreen") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
             } else if (mode == "floating") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
             } else if (mode == "pip") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
             } else if (mode == "split") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
             } else {
                 WLOGFW("Invalid supporedMode");
-                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                support = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
                 break;
             }
+        }
+        if (mainConfig && item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = support;
+        }
+        if (!mainConfig && item.IsStrings()) {
+            systemConfig_.freeMultiWindowConfig_.decorModeSupportInfo_ = support;
         }
     }
 }
@@ -1859,9 +1949,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         // create specific session
         SessionInfo info;
         info.windowType_ = static_cast<uint32_t>(type);
-        if (WindowHelper::IsSystemWindow(type) || WindowHelper::IsSubWindow(type)) {
-            info.bundleName_ = property->GetSessionInfo().bundleName_;
-        }
+        info.bundleName_ = property->GetSessionInfo().bundleName_;
+        info.abilityName_ = property->GetSessionInfo().abilityName_;
+        info.moduleName_ = property->GetSessionInfo().moduleName_;
         
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
@@ -2954,6 +3044,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+                sceneSession->GetSessionProperty()->SetIsLayoutFullScreen(property->IsLayoutFullScreen());
             }
             break;
         }
@@ -3221,14 +3312,24 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
     }
     sceneSession->SetBrightness(brightness);
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
-    if (GetDisplayBrightness() != brightness) {
+    if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr) {
+        bool setBrightnessRet = false;
         if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            auto task = []() {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            };
+            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
         } else {
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            auto task = [brightness]() {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            };
+            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
             SetDisplayBrightness(brightness);
+        }
+        if (!setBrightnessRet) {
+            WLOGFE("Report post listener callback task failed. the task name is SetBrightness");
         }
     }
 #else
@@ -4041,6 +4142,10 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
     sptr<SceneSession> ret = nullptr;
     auto func = [this, persistentId, &previousFocusedSessionFound, &ret](sptr<SceneSession> session) {
         if (session == nullptr) {
+            return false;
+        }
+        if (session->GetForceHideState()) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
         bool parentVisible = true;
@@ -5703,11 +5808,8 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession, type]() {
-        std::vector<sptr<AccessibilityWindowInfo>> infos;
         auto scnSession = weakSceneSession.promote();
-        if (FillWindowInfo(infos, scnSession)) {
-            SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
-        }
+        NotifyAllAccessibilityInfo();
         if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
             scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             WindowChangedFunc_(scnSession->GetPersistentId(), type);
@@ -5758,13 +5860,16 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
+    info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
+    info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr) {
         info->displayId_ = property->GetDisplayId();
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
-    WLOGFD("wid = %{public}d, inWid = %{public}d, uiNId = %{public}d", info->wid_, info->innerWid_, info->uiNodeId_);
+    TLOGD(WmsLogTag::WMS_MAIN, "wid = %{public}d, inWid = %{public}d, uiNId = %{public}d, bundleName = %{public}s",
+        info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
     return true;
 }
 
@@ -7105,6 +7210,48 @@ WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMax
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
+{
+    auto task = [this, &isLayoutFullScreen]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
+            auto sceneSession = item->second;
+            if (sceneSession == nullptr) {
+                WLOGFE("Session is nullptr");
+                continue;
+            }
+            if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            auto state = sceneSession->GetSessionState();
+            if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+                continue;
+            }
+            if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+                continue;
+            }
+            auto property = sceneSession->GetSessionProperty();
+            if (property == nullptr) {
+                WLOGFE("Property is nullptr");
+                continue;
+            }
+            isLayoutFullScreen = property->IsLayoutFullScreen();
+            auto persistentId = sceneSession->GetPersistentId();
+            if (isLayoutFullScreen) {
+                WLOGFD("Current window is immersive, persistentId:%{public}d", persistentId);
+                return WSError::WS_OK;
+            } else {
+                WLOGFD("Current window is not immersive, persistentId:%{public}d", persistentId);
+            }
+        }
+        WLOGFD("No immersive window");
+        return WSError::WS_OK;
+    };
+
+    taskScheduler_->PostSyncTask(task, "GetIsLayoutFullScreen");
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId)
 {
     auto scnSession = GetSceneSession(persistentId);
@@ -7655,7 +7802,8 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
         WLOGFE("last and current info is not Same");
         return false;
     }
-    for (int i = 0; i < lastInfo.size(); i++) {
+    int sizeOfLastInfo = static_cast<int>(lastInfo.size());
+    for (int i = 0; i < sizeOfLastInfo; i++) {
         if (lastInfo[i].displayId != currentInfo[i].displayId ||
             lastInfo[i].visibleWindowNum != currentInfo[i].visibleWindowNum) {
             WLOGFE("last and current visible window num is not Same");
@@ -7687,7 +7835,7 @@ void SceneSessionManager::CacVisibleWindowNum()
             int32_t displayId = static_cast<int32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
-                    return info.displayId == displayId;
+                    return (static_cast<int32_t>(info.displayId)) == displayId;
             });
             if (it == visibleWindowNumInfo.end()) {
                 visibleWindowNumInfo.push_back({displayId, 1});
@@ -7722,6 +7870,97 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     };
     taskScheduler_->PostSyncTask(task, "GetHostWindowRect");
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (!sceneSession->IsVisibleForAccessibility()) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
+            || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
+            continue;
+        }
+        sceneSessionList.push_back(sceneSession);
+    }
+}
+
+void SceneSessionManager::FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
+    std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo)
+{
+    for (const auto& sceneSession : sceneSessionList) {
+        if (!FillWindowInfo(accessibilityInfo, sceneSession)) {
+            TLOGW(WmsLogTag::WMS_MAIN, "fill accessibilityInfo failed");
+        }
+    }
+}
+
+bool SceneSessionManager::IsCovered(const sptr<SceneSession>& sceneSession,
+                                    const std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid parameter, scene session is nullptr.");
+        return true;
+    }
+
+    WSRect windowWSRect = sceneSession->GetSessionRect();
+    Rect windowRect = {windowWSRect.posX_, windowWSRect.posY_,
+                       windowWSRect.width_, windowWSRect.height_};
+    for (const auto& item : sceneSessionList) {
+        if (item == nullptr) {
+            continue;
+        }
+        if (item->GetWindowId() == sceneSession->GetWindowId()) {
+            continue;
+        }
+        if (sceneSession->GetZOrder() > item->GetZOrder()) {
+            continue;
+        }
+        WSRect itemWSRect = item->GetSessionRect();
+        Rect itemRect = {itemWSRect.posX_, itemWSRect.posY_, itemWSRect.width_, itemWSRect.height_};
+        if (windowRect.IsInsideOf(itemRect) && sceneSession->GetZOrder() < item->GetZOrder()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void SceneSessionManager::FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
+{
+    for (auto it = sceneSessionList.begin(); it != sceneSessionList.end();) {
+        if (IsCovered(it->GetRefPtr(), sceneSessionList)) {
+            it = sceneSessionList.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+void SceneSessionManager::NotifyAllAccessibilityInfo()
+{
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    GetAllSceneSessionForAccessibility(sceneSessionList);
+    FilterSceneSessionForAccessibility(sceneSessionList);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+
+    for (const auto& item : accessibilityInfo) {
+        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid = %{public}d, inWid = %{public}d, \
+            bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
+            item->wid_, item->innerWid_, item->bundleName_.c_str(),
+            item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
+    }
+
+    SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityInfo,
+        WindowUpdateType::WINDOW_UPDATE_ALL);
 }
 
 int32_t SceneSessionManager::ReclaimPurgeableCleanMem()

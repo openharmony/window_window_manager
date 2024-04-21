@@ -271,6 +271,48 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
     auto ret = systemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
+
+/**
+ * @tc.name: Hide
+ * @tc.desc: test function : Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+
+    auto ret = systemSession_->Hide();
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: Disconnect
+ * @tc.desc: test function : Disconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Disconnect, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+
+    bool isFromClient = true;
+    auto ret = systemSession_->Disconnect(isFromClient);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ProcessPointDownSession
+ * @tc.desc: test function : ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+
+    int32_t posX = 2;
+    int32_t posY = 3;
+    auto ret = systemSession_->ProcessPointDownSession(posX, posY);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
 }
 }
 }

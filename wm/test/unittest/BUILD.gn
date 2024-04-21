@@ -368,8 +368,11 @@ ohos_unittest("wm_picture_in_picture_controller_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_base:zuri",
     "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "hilog:libhilog",
   ]
 }

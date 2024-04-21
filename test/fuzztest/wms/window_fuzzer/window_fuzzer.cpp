@@ -37,6 +37,7 @@ using namespace OHOS::Rosen;
 namespace OHOS {
 namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
+    constexpr size_t DATA_MAX_SIZE = 1024;
 }
 class FocusChangedListener : public IFocusChangedListener {
 public:
@@ -229,6 +230,26 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
+/* 调用该接口后, 需要释放内存 */
+char *CopyDataToString(const uint8_t *data, size_t size)
+{
+    if (size > DATA_MAX_SIZE) {
+        return nullptr;
+    }
+    char *string = (char *)malloc(size);
+    if (string == nullptr) {
+        std::cout << "malloc failed." << std::endl;
+        return nullptr;
+    }
+
+    if (memcpy_s(string, size, data, size) != EOK) {
+        std::cout << "copy failed." << std::endl;
+        free(string);
+        return nullptr;
+    }
+    return string;
+}
+
 bool DoSomethingInterestingWithMyAPI1(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -270,8 +291,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::string windowName = "window test";
     window->Find(windowName);
     size_t startPos = 0;
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    startPos += GetObject(context, data + startPos, size - startPos);
+    std::shared_ptr<AbilityRuntime::Context> context;
     window->GetTopWindowWithContext(context);
     uint32_t mainWinId = 1;
     startPos += GetObject<uint32_t>(mainWinId, data + startPos, size - startPos);
@@ -279,8 +299,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     uint32_t parentId = 1;
     startPos += GetObject<uint32_t>(parentId, data + startPos, size - startPos);
     window->GetSubWindow(parentId);
-    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
-    startPos += GetObject(configuration, data + startPos, size - startPos);
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     window->UpdateConfigurationForAll(configuration);
     window->Show(0);
     window->SetRequestedOrientation(static_cast<Orientation>(data[0]));
@@ -615,6 +634,18 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
     iWindowExtensionCallback->OnBackPress();
 }
 
+void CheckShadowColor(sptr<WindowImpl> window, const uint8_t* data, size_t size)
+{
+    char *str = CopyDataToString(data, size);
+    if (str == nullptr) {
+        return;
+    }
+    std::string color(str, size);
+    window->SetShadowColor(color);
+    free(str);
+    return;
+}
+
 void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
     if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
@@ -661,9 +692,7 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
     window->SetWindowGravity(gravity, invalidGravityPercent);
     sptr<IRemoteObject> targetToken;
     window->BindDialogTarget(targetToken);
-    std::string color = "ff22ee44";
-    startPos += GetObject<std::string>(color, data + startPos, size - startPos);
-    window->SetShadowColor(color);
+    CheckShadowColor(window, data, size);
 }
 
 void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data, size_t size)
@@ -715,7 +744,7 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     window->SetInputEventConsumer(iInputEventConsumer);
     std::shared_ptr<VsyncCallback> callback;
     window->RequestVsync(callback);
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     window->UpdateConfiguration(configuration);
     sptr<IWindowLifeCycle> windowLifeCycleListener = new IWindowLifeCycle();
     window->RegisterLifeCycleListener(windowLifeCycleListener);
@@ -758,8 +787,7 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     startPos += GetObject(reason, data + startPos, size - startPos);
     startPos += GetObject(withAnimation, data + startPos, size - startPos);
     window->Show(reason, withAnimation);
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    startPos += GetObject(context, data + startPos, size - startPos);
+    std::shared_ptr<AbilityRuntime::Context> context;
     window->GetTopWindowWithContext(context);
 
     OHOS::CheckWindowImplFunctionsPart1(window, data, size);
@@ -797,7 +825,7 @@ void WindowImplFuzzTest01(const uint8_t* data, size_t size)
     uint32_t parentId = 1;
     startPos += GetObject<uint32_t>(parentId, data + startPos, size - startPos);
     window->GetSubWindow(parentId);
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     window->UpdateConfigurationForAll(configuration);
     int32_t x;
     int32_t y;

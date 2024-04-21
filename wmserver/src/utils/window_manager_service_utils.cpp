@@ -72,7 +72,8 @@ bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
     if (disOrientation == currentOrientation) {
         return false;
     }
-    if (restricted && (static_cast<int32_t>(disOrientation) - static_cast<int32_t>(currentOrientation)) % 2 == 0) {
+    if (restricted && (static_cast<int32_t>(disOrientation) -
+        static_cast<int32_t>(currentOrientation)) % 2 == 0) { // Divided by 2
         return false;
     }
     return true;
