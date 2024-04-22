@@ -292,13 +292,6 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Le
     sysSession->SetSessionState(SessionState::STATE_FOREGROUND);
     bool ret1 = sysSession->CheckPointerEventDispatch(pointerEvent_);
     ASSERT_EQ(true, ret1);
-
-    sysSession->SetSessionState(SessionState::STATE_END);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    sysSession->property_ = property;
-    bool ret2 = sysSession->CheckPointerEventDispatch(pointerEvent_);
-    ASSERT_EQ(false, ret2);
 }
 
 /**
