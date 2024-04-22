@@ -144,7 +144,7 @@ ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
         WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
             persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
         return applicationMap_[persistentId];
-    } 
+    }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
     return ANRManager::AppInfo();
 }
