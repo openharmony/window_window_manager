@@ -581,6 +581,38 @@ HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, Function | SmallT
     ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
     ASSERT_EQ(DMError::DM_OK, ret);
 }
+
+/**
+ * @tc.name: IsCaptured02
+ * @tc.desc: IsCaptured02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, IsCaptured02, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    bool isCapture = DisplayManager::GetInstance().IsCaptured();
+    ASSERT_TRUE(isCapture);
+    auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: IsCaptured03
+ * @tc.desc: IsCaptured03 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, IsCaptured03, Function | SmallTest | Level1)
+{
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    bool isCapture = DisplayManager::GetInstance().IsCaptured();
+    ASSERT_FALSE(isCapture);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
