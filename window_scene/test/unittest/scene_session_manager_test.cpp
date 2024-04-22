@@ -1313,6 +1313,32 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale05, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: ConfigSystemUIStatusBar01
+ * @tc.desc: call ConfigSystemUIStatusBar default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSystemUIStatusBar01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<systemUIStatusBar>"
+                "<showInLandscapeMode>1</showInLandscapeMode>"
+                "<immersiveStatusBarBgColor>#4c000000</immersiveStatusBarBgColor>"
+                "<immersiveStatusBarContentColor>#ffffee</immersiveStatusBarContentColor>"
+            "</systemUIStatusBar>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
+    ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
+        "#4c000000");
+    ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
+        immersiveStatusBarContentColor_.c_str(), "#ffffee");
+    delete sceneSessionManager;
+}
+
+/**
  * @tc.name: DumpSessionAll
  * @tc.desc: ScreenSesionManager dump all session info
  * @tc.type: FUNC

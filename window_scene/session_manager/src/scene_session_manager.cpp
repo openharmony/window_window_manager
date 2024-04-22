@@ -377,6 +377,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
+
+    item = config["systemUIStatusBar"];
+    if (item.IsMap()) {
+        ConfigSystemUIStatusBar(item);
+    }
 }
 
 void SceneSessionManager::ConfigFreeMultiWindow()
@@ -919,6 +924,42 @@ void SceneSessionManager::ConfigSnapshotScale()
             return;
         }
         snapshotScale_ = snapshotScale[0];
+    }
+}
+
+void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::ConfigItem& statusBarConfig)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "load ConfigSystemUIStatusBar");
+    WindowSceneConfig::ConfigItem item = statusBarConfig["showInLandscapeMode"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        bool showInLandscapeMode = (*item.intsValue_)[0] > 0;
+        appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = showInLandscapeMode;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar showInLandscapeMode:%{public}d",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_);
+    }
+
+    item = statusBarConfig["immersiveStatusBarBgColor"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_ = color;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarBgColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str());
+    }
+
+    item = statusBarConfig["immersiveStatusBarContentColor"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_ = color;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarContentColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
 }
 
