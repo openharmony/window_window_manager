@@ -349,7 +349,8 @@ void WindowSceneSessionImpl::UpdateWindowState()
     }
     state_ = WindowState::STATE_CREATED;
     requestState_ = WindowState::STATE_CREATED;
-    if (WindowHelper::IsMainWindow(GetType())) {
+    WindowType windowType = GetType();
+    if (WindowHelper::IsMainWindow(windowType)) {
         if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
             maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
         }
@@ -364,8 +365,10 @@ void WindowSceneSessionImpl::UpdateWindowState()
             (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
         GetConfigurationFromAbilityInfo();
     } else {
+        bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+        bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
         UpdateWindowSizeLimits();
-        if (WindowHelper::IsSubWindow(GetType()) && property_->GetDragEnabled()) {
+        if ((isSubWindow || isDialogWindow) && property_->GetDragEnabled()) {
             WLOGFD("sync window limits to server side in order to make size limits work while resizing");
             UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         }
@@ -437,14 +440,16 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
 {
     bool needNotifyEvent = true;
     uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
-    bool isMoveArea = (0 <= pointerItem.GetWindowX() &&
-        pointerItem.GetWindowX() <= static_cast<int32_t>(rect.width_)) &&
-        (0 <= pointerItem.GetWindowY() && pointerItem.GetWindowY() <= static_cast<int32_t>(titleBarHeight));
+    int32_t winX = pointerItem.GetWindowX();
+    int32_t winY = pointerItem.GetWindowY();
+    bool isMoveArea = (0 <= winX && winX <= static_cast<int32_t>(rect.width_)) &&
+        (0 <= winY && winY <= static_cast<int32_t>(titleBarHeight));
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
-    auto dragType = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
-        sourceType, outside, vpr, rect);
-    if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    auto dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    WindowType windowType = property_->GetWindowType();
+    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
+    if (WindowHelper::IsSystemWindow(windowType) && !isDecorDialog) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
@@ -484,7 +489,6 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
         RefreshNoInteractionTimeoutMonitor();
     }
-
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
@@ -1647,15 +1651,19 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         /* FloatingWindow skip for Phone*/
         return false;
     }
+    WindowType windowType = GetType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isValidWindow = isMainWindow ||
+        ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
+    bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
+        windowSystemConfig_.decorModeSupportInfo_, GetMode());
     if (windowSystemConfig_.freeMultiWindowSupport_) {
-        return (WindowHelper::IsMainWindow(GetType())
-            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
-        windowSystemConfig_.isSystemDecorEnable_;
+        return isValidWindow && windowSystemConfig_.isSystemDecorEnable_;
     }
-    bool enable = (WindowHelper::IsMainWindow(GetType())
-            || (WindowHelper::IsSubWindow(GetType()) && property_->IsDecorEnable())) &&
-        windowSystemConfig_.isSystemDecorEnable_ &&
-        WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
+    bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
+        isWindowModeSupported;
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
@@ -1803,8 +1811,14 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
+    WindowType windowType = GetType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if ((WindowHelper::IsMainWindow(GetType()) || (isPC && WindowHelper::IsSubWindow(GetType()))) && hostSession_) {
+    bool isValidWindow = isMainWindow || (isPC && (isSubWindow || isDecorDialog));
+    if (isValidWindow && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -1817,7 +1831,11 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    WindowType windowType = GetType();
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    if (WindowHelper::IsMainWindow(windowType)) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
         if (!abilityContext) {
             return Destroy(true);
@@ -1845,8 +1863,8 @@ WMError WindowSceneSessionImpl::Close()
             hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-    } else if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemSubWindow(GetType())) {
-        WLOGFI("WindowSceneSessionImpl::Close subwindow");
+    } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
+        WLOGFI("WindowSceneSessionImpl::Close subwindow or dialog");
         return Destroy(true);
     }
 

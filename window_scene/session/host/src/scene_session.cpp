@@ -1166,9 +1166,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 
     auto windowType = property->GetWindowType();
-    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        (WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
-        property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    bool isWindowModeFloating = property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialog = WindowHelper::IsDialogWindow(windowType);
+    bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    if (isWindowModeFloating && (isMainWindow || isSubWindow || isDialog) &&
+        !isMaxModeAvoidSysBar) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             pointerEvent->MarkProcessed();
@@ -1283,10 +1287,15 @@ bool SceneSession::IsDecorEnable() const
         return false;
     }
     auto windowType = property->GetWindowType();
-    return (WindowHelper::IsMainWindow(windowType) ||
-            (WindowHelper::IsSubWindow(windowType) && property->IsDecorEnable())) &&
-        systemConfig_.isSystemDecorEnable_ &&
-        WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isValidWindow = isMainWindow ||
+        ((isSubWindow || isDialogWindow) && property->IsDecorEnable());
+    bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
+        systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
+    bool enable = isValidWindow && systemConfig_.isSystemDecorEnable_ && isWindowModeSupported;
+    return enable;
 }
 
 std::string SceneSession::GetRatioPreferenceKey()
@@ -1478,6 +1487,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
         WLOGFD("subwindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
+        TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {

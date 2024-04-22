@@ -60,6 +60,8 @@ private:
     static napi_value OnSetGestureNavigationEnabled(napi_env env, napi_callback_info info);
     static napi_value OnSetWaterMarkImage(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowFocus(napi_env env, napi_callback_info info);
+    static bool ParseRequiredConfigOption(
+        napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
