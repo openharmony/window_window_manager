@@ -201,7 +201,6 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     const auto& id = GetPersistentId();
     const auto& type = GetWindowType();
     WLOGFI("id: %{public}d, type: %{public}d", id, type);
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
         WLOGFI("Parent has dialog foreground, id: %{public}d, type: %{public}d", id, type);
         parentSession_->HandlePointDownDialog();
@@ -229,7 +228,6 @@ WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& ke
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
         if (parentSession_ && parentSession_->CheckDialogOnForeground() &&
             !IsTopDialog()) {
             return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -279,7 +277,6 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
 
 int32_t SystemSession::GetMissionId() const
 {
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
 }
 
