@@ -396,7 +396,7 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
     auto preRect = GetRect();
-    if (rect.width_ == preRect.width_ && rect.height_ == preRect.height_) {
+    if (rect.width_ == static_cast<int>(preRect.width_) && rect.height_ == static_cast<int>(preRect.height_)) {
         WLOGFD("WindowExtensionSessionImpl Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
             rect.height_, static_cast<int>(reason));
     } else {

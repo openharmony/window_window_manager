@@ -811,9 +811,9 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         WLOGFI("GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
-            .mirrorNodeId = nodeId,
             .defaultScreenId = defScreenId,
+            .mirrorNodeId = nodeId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
         session->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
@@ -825,8 +825,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     } else {
         ScreenSessionConfig config = {
             .screenId = screenId,
-            .property = property,
             .defaultScreenId = defScreenId,
+            .property = property,
         };
         session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     }
@@ -2460,9 +2460,9 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
 {
     WLOGFI("InitVirtualScreen: Enter");
     ScreenSessionConfig config = {
-        .name = option.name_,
         .screenId = smsScreenId,
         .rsId = rsId,
+        .name = option.name_,
         .defaultScreenId = GetDefaultScreenId(),
     };
     sptr<ScreenSession> screenSession =
@@ -2530,10 +2530,10 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     WLOGFI("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
     ScreenSessionConfig config = {
-        .name = screenCapability.GetName(),
         .screenId = smsScreenId,
         .rsId = rsScreenId,
         .defaultScreenId = GetDefaultScreenId(),
+        .name = screenCapability.GetName(),
     };
     sptr<ScreenSession> screenSession =
         new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -3283,17 +3283,18 @@ void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
         std::string screenType = TransferTypeToString(screenInfo->GetType());
         NodeId nodeId = (screenSession->GetDisplayNode() == nullptr) ?
             SCREEN_ID_INVALID : screenSession->GetDisplayNode()->GetId();
-        oss << std::left << std::setw(21) << screenInfo->GetName()
-            << std::left << std::setw(9) << screenType
-            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false")
-            << std::left << std::setw(6) << screenSession->screenId_
-            << std::left << std::setw(21) << screenSession->rsId_
-            << std::left << std::setw(10) << screenSession->activeIdx_
-            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio()
-            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation())
-            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation())
-            << std::left << std::setw(19) << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
-            << std::left << std::setw(21) << nodeId
+        oss << std::left << std::setw(21) << screenInfo->GetName() // 21 is width
+            << std::left << std::setw(9) << screenType // 9 is width
+            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false") // 8 is width
+            << std::left << std::setw(6) << screenSession->screenId_ // 6 is width
+            << std::left << std::setw(21) << screenSession->rsId_ // 21 is width
+            << std::left << std::setw(10) << screenSession->activeIdx_ // 10 is width
+            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio() // 4 is width
+            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation()) // 9 is width
+            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation()) // 12 is width
+            << std::left << std::setw(19) // 19 is width
+                << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
+            << std::left << std::setw(21) << nodeId // 21 is width
             << std::endl;
     }
     oss << "total screen num: " << screenSessionMap_.size() << std::endl;
@@ -3886,6 +3887,10 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     WLOGFI("NotifyFoldToExpandCompletion ENTER");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("notify permission denied");
+        return;
+    }
     SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {
