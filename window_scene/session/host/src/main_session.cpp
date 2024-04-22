@@ -149,7 +149,7 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
-            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }
     return true;

@@ -456,7 +456,7 @@ protected:
     }
 
     int32_t persistentId_ = INVALID_SESSION_ID;
-    SessionState state_ = SessionState::STATE_DISCONNECT;
+    std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
