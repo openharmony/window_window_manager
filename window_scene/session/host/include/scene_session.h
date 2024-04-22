@@ -266,10 +266,8 @@ protected:
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
 
-    mutable std::shared_mutex sessionChangeCallbackMutex_;
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    mutable std::shared_mutex moveDragControllerMutex_;
     sptr<MoveDragController> moveDragController_ = nullptr;
 
 private:
@@ -298,8 +296,8 @@ private:
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
+    mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    mutable std::shared_mutex selfTokenMutex_;
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
