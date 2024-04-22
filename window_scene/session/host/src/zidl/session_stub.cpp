@@ -601,8 +601,8 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleProcessPointDownSession!");
-    uint32_t posX = data.ReadInt32();
-    uint32_t posY = data.ReadInt32();
+    int32_t posX = data.ReadInt32();
+    int32_t posY = data.ReadInt32();
     WSError errCode = ProcessPointDownSession(posX, posY);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

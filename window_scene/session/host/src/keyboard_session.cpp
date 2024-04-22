@@ -349,7 +349,7 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     if (GetCallingSession() != nullptr) {
         return;
     }
-    uint32_t focusedSessionId = GetFocusedSessionId();
+    int32_t focusedSessionId = GetFocusedSessionId();
     if (GetSceneSession(focusedSessionId) == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Focused session is null, id: %{public}d", focusedSessionId);
     } else {
@@ -419,7 +419,7 @@ void KeyboardSession::RelayoutKeyBoard()
         requestRect.posX_ = 0;
         if (percent != 0) {
             // 100: for calc percent.
-            requestRect.height_ = static_cast<uint32_t>(screenHeight) * percent / 100u;
+            requestRect.height_ = static_cast<uint32_t>(screenHeight * percent / 100u);
         }
     }
     requestRect.posY_ = screenHeight - static_cast<int32_t>(requestRect.height_);
