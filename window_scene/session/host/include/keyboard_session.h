@@ -39,6 +39,9 @@ public:
     WSError Hide() override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    void BindKeyboardPanelSession(sptr<SceneSession> panelSession) override;
+    sptr<SceneSession> GetKeyboardPanelSession() const override;
+    SessionGravity GetKeyboardGravity() const override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
