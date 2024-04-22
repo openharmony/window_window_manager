@@ -603,14 +603,14 @@ bool Session::IsSessionValid() const
 {
     if (sessionInfo_.isSystem_) {
         WLOGFD("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
-            GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
+            GetPersistentId(), sessionInfo_.bundleName_.c_str(), GetSessionState());
         return false;
     }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
         if (state_ == SessionState::STATE_DISCONNECT && sessionStage_) {
             WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
-                GetPersistentId(), state_);
+                GetPersistentId(), GetSessionState());
         }
     }
     return res;
@@ -1074,18 +1074,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
     };
     PostTask(task, "SetAttachState");
-    
-    auto createDetectTask = [weakThis = wptr(this), isAttach, windowMode]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
-            return;
-        }
-        session->CreateDetectStateTask(isAttach, windowMode);
-    };
-    if (handler_) {
-        handler_->PostSyncTask(createDetectTask, "CreateDetectStateTask");
-    }
+    CreateDetectStateTask(isAttach, windowMode);
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -1757,7 +1746,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
     sessionStateChangeFunc_ = func;
-    auto changedState = state_;
+    auto changedState = GetSessionState();
     if (changedState == SessionState::STATE_ACTIVE) {
         changedState = SessionState::STATE_FOREGROUND;
     } else if (changedState == SessionState::STATE_INACTIVE) {
@@ -1767,7 +1756,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     }
     NotifySessionStateChange(changedState);
     WLOGFD("SetSessionStateChangeListenser, id: %{public}d, state_: %{public}d, changedState: %{public}d",
-        GetPersistentId(), state_, changedState);
+        GetPersistentId(), GetSessionState(), changedState);
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
@@ -1993,7 +1982,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
     if (state_ == SessionState::STATE_END) {
         WLOGFI("session is already destroyed or property is nullptr! id: %{public}d state: %{public}u",
-            GetPersistentId(), state_);
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property_->SetWindowMode(mode);
@@ -2369,7 +2358,6 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     if (!SessionHelper::IsMainWindow(GetWindowType()) || showRecent_) {
         WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, "
             "persistentId:%{public}d", persistentId_);
-        RemoveWindowDetectTask();
         return false;
     }
     // Only detecting cold start scenarios on PC

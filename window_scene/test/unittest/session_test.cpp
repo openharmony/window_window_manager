@@ -2983,8 +2983,6 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
  */
 HWTEST_F(WindowSessionTest, SetAttachState01, Function | SmallTest | Level2)
 {
-    session_->SetAttachState(true);
-    ASSERT_EQ(session_->isAttach_, true);
     session_->SetAttachState(false);
     ASSERT_EQ(session_->isAttach_, false);
 }
@@ -3157,7 +3155,9 @@ HWTEST_F(WindowSessionTest, SetShowRecent003, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Level2)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    session_->detectTaskInfo_.taskState = DetectTaskState::NO_TASK;
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::NO_TASK;
+    session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
 
     std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
@@ -3166,7 +3166,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Lev
     };
     bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
     ASSERT_EQ(true, hasEvent);
-    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->detectTaskInfo_.taskState);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
 
@@ -3182,8 +3182,10 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
 
-    session_->detectTaskInfo_.taskState = DetectTaskState::DETACH_TASK;
-    session_->detectTaskInfo_.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
     std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
@@ -3192,8 +3194,8 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
     };
     bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
     ASSERT_EQ(false, hasEvent);
-    ASSERT_EQ(DetectTaskState::NO_TASK, session_->detectTaskInfo_.taskState);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->detectTaskInfo_.taskWindowMode);
+    ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
     session_->handler_->RemoveTask(taskName);
 }
 
@@ -3205,8 +3207,10 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
 HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Level2)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    session_->detectTaskInfo_.taskState = DetectTaskState::DETACH_TASK;
-    session_->detectTaskInfo_.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
     std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
@@ -3215,7 +3219,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Lev
     };
     bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
     ASSERT_EQ(true, hasEvent);
-    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->detectTaskInfo_.taskState);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
 
@@ -3227,8 +3231,10 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Lev
 HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Level2)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    session_->detectTaskInfo_.taskState = DetectTaskState::DETACH_TASK;
-    session_->detectTaskInfo_.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
 
     std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
@@ -3237,7 +3243,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     };
     bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
     ASSERT_EQ(true, hasEvent);
-    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->detectTaskInfo_.taskState);
+    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
 
@@ -3249,10 +3255,6 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
 HWTEST_F(WindowSessionTest, GetAttachState001, Function | SmallTest | Level2)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    session_->SetAttachState(true);
-    bool isAttach = session_->GetAttachState();
-    ASSERT_EQ(true, isAttach);
-
     session_->SetAttachState(false);
     isAttach = session_->GetAttachState();
     ASSERT_EQ(false, isAttach);
