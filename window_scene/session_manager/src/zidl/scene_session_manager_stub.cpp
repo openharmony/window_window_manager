@@ -141,8 +141,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION),
         &SceneSessionManagerStub::HandleAddOrRemoveSecureSession),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION),
-        &SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         &SceneSessionManagerStub::HandleUpdateExtWindowFlags),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_RECT),
@@ -855,7 +853,7 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
@@ -868,7 +866,7 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel &d
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply)
 {
     int32_t persistentId = data.ReadInt32();
     bool shouldHide = data.ReadBool();
@@ -877,23 +875,13 @@ int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel &data,
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleAddOrRemoveSecureExtSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
-    int32_t parentId = data.ReadInt32();
-    bool shouldHide = data.ReadBool();
-    WSError ret = AddOrRemoveSecureExtSession(persistentId, parentId, shouldHide);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel &data, MessageParcel &reply)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "run HandleRemoveExtensionSessionInfo!");
     int32_t parentId = data.ReadInt32();
     int32_t persistentId = data.ReadInt32();
     uint32_t extWindowFlags = data.ReadUint32();
-    WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags);
+    uint32_t extWindowActions = data.ReadUint32();
+    WSError ret = UpdateExtWindowFlags(parentId, persistentId, extWindowFlags, extWindowActions);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

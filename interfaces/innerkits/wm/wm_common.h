@@ -289,11 +289,19 @@ enum class WindowFlag : uint32_t {
 };
 
 /**
- * @brief Enumerates flag of uiextension window.
+ * @brief Flag of uiextension window.
  */
-enum class ExtensionWindowFlag : uint32_t {
-    EXTENSION_WINDOW_FLAG_WATER_MARK = 1,
-    EXTENSION_WINDOW_FLAG_END = 1 << 1,
+union ExtensionWindowFlags {
+    uint32_t bitData;
+    struct {
+        // Each flag should be false default, true when active
+        bool hideNonSecureWindowsFlag : 1;
+        bool waterMarkFlag : 1;
+        bool privacyModeFlag : 1;
+    };
+    ExtensionWindowFlags() : bitData(0) {}
+    ExtensionWindowFlags(uint32_t bits) : bitData(bits) {}
+    ~ExtensionWindowFlags() {}
 };
 
 /**
