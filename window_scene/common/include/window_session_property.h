@@ -68,6 +68,7 @@ public:
     void SetLastLimitsVpr(float vpr);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetKeyboardSessionGravity(SessionGravity gravity_, uint32_t percent);
+    void SetKeyboardLayoutParams(const KeyboardLayoutParams& params);
     void SetDecorEnable(bool isDecorEnable);
     void SetAnimationFlag(uint32_t animationFlag);
     void SetTransform(const Transform& trans);
@@ -195,6 +196,7 @@ private:
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_;
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
+    KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

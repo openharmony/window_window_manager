@@ -3262,5 +3262,21 @@ void WindowSceneSessionImpl::UpdateDensity()
     WLOGFI("WindowSceneSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
+
+WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
+        "PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
+        static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
+        params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
+        params.PortraitPanelRect_.ToString().c_str());
+    if (property_ != nullptr) {
+        property_->SetKeyboardLayoutParams(params);
+    }
+    if (hostSession_ != nullptr) {
+        return static_cast<WMError>(hostSession_->AdjustKeyboardLayout(params));
+    }
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
