@@ -3192,6 +3192,40 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureExtSession, Function | SmallT
 }
 
 /**
+ * @tc.name: SetScreenLoacked001
+ * @tc.desc: SetScreenLoacked001
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetScreenLoacked001, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::ATTACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    sceneSession->SetDetectTaskInfo(detectTaskInfo);
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(sceneSession->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    sceneSession->handler_->PostTask(task, taskName, delayTime);
+
+    ssm_->SetScreenLocked(true);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(sceneSession->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = sceneSession->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(false, hasEvent);
+    ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, sceneSession->detectTaskInfo_.taskWindowMode);
+}
+
+/**
  * @tc.name: AccessibilityFillEmptySceneSessionListToNotifyList
  * @tc.desc: SceneSesionManager fill empty scene session list to accessibilityList;
  * @tc.type: FUNC

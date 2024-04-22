@@ -609,6 +609,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void ProcessBackHomeStatus();
     bool IsBackHomeStatus();
+    void DeleteStateDetectTask();
 };
 } // namespace OHOS::Rosen
 
