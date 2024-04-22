@@ -658,7 +658,7 @@ std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::strin
     begin = file.tellg();
     file.seekg(0, std::ios::end);
     end = file.tellg();
-    size_t len = end - begin;
+    size_t len = static_cast<uint32_t>(end - begin);
     WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
 
     if (len <= 0) {

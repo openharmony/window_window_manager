@@ -155,6 +155,9 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
 {
     WLOGFD("run HandleRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    if (listener == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -164,6 +167,9 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
 {
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    if (listener == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UnRegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
