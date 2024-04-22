@@ -53,6 +53,7 @@ constexpr int ARG_INDEX_3 = 3;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
+const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
@@ -156,7 +157,8 @@ JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
     listenerFunc_ = {
         { CREATE_SYSTEM_SESSION_CB,     &JsSceneSessionManager::ProcessCreateSystemSessionRegister },
-        { RECOVER_SCENE_SESSION_CB, &JsSceneSessionManager::ProcessRecoverSceneSessionRegister },
+        { CREATE_KEYBOARD_SESSION_CB,   &JsSceneSessionManager::ProcessCreateKeyboardSessionRegister },
+        { RECOVER_SCENE_SESSION_CB,     &JsSceneSessionManager::ProcessRecoverSceneSessionRegister },
         { STATUS_BAR_ENABLED_CHANGE_CB, &JsSceneSessionManager::ProcessStatusBarEnabledChangeListener},
         { OUTSIDE_DOWN_EVENT_CB,        &JsSceneSessionManager::ProcessOutsideDownEvent },
         { SHIFT_FOCUS_CB,               &JsSceneSessionManager::ProcessShiftFocus },
@@ -198,6 +200,51 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnCreateSystemSession");
+}
+
+void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession,
+    const sptr<SceneSession>& panelSession)
+{
+    if (keyboardSession == nullptr || panelSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]keyboard or panel session is nullptr");
+        return;
+    }
+    auto iter = jsCbMap_.find(CREATE_KEYBOARD_SESSION_CB);
+    if (iter == jsCbMap_.end()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]Can't find callback, id: %{public}d", keyboardSession->GetPersistentId());
+        return;
+    }
+
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[NAPI]keyboardId: %{public}d, panelId: %{public}d",
+        keyboardSession->GetPersistentId(), panelSession->GetPersistentId());
+    auto jsCallBack = iter->second;
+    wptr<SceneSession> weakKeyboardSession(keyboardSession);
+    wptr<SceneSession> weakPanelSession(panelSession);
+    auto task = [this, weakKeyboardSession, weakPanelSession, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        auto keyboardSession = weakKeyboardSession.promote();
+        auto panelSession = weakPanelSession.promote();
+        if (keyboardSession == nullptr || panelSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]keyboard or panel session is nullptr");
+            return;
+        }
+        napi_value keyboardSessionObj = JsSceneSession::Create(env, keyboardSession);
+        if (keyboardSessionObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]keyboardSessionObj is nullptr");
+            return;
+        }
+        napi_value panelSessionObj = JsSceneSession::Create(env, panelSession);
+        if (panelSessionObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[NAPI]panelSessionObj is nullptr");
+            return;
+        }
+        napi_value argv[] = { keyboardSessionObj, panelSessionObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnCreateKeyboardSession");
 }
 
 void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& info)
@@ -360,6 +407,15 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessCreateKeyboardSessionRegister()
+{
+    NotifyCreateKeyboardSessionFunc func = [this](const sptr<SceneSession>& keyboardSession,
+        const sptr<SceneSession>& panelSession) {
+        this->OnCreateKeyboardSession(keyboardSession, panelSession);
+    };
+    SceneSessionManager::GetInstance().SetCreateKeyboardSessionListener(func);
 }
 
 void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()

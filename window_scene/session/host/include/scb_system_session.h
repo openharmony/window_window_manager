@@ -32,6 +32,8 @@ public:
     WSError UpdateFocus(bool isFocused) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError SetSystemSceneBlockingFocus(bool blocking) override;
+    void BindKeyboardSession(sptr<SceneSession> session) override;
+    sptr<SceneSession> GetKeyboardSession() const override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

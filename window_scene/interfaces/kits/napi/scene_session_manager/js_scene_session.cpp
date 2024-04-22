@@ -110,6 +110,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     napi_set_named_property(env, objValue, "isAppType", CreateJsValue(env, session->IsFloatingWindowAppType()));
     napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
+    napi_set_named_property(env, objValue, "keyboardGravity",
+        CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
 
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsSceneSession::RegisterCallback);
