@@ -42,6 +42,8 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "keyboardAnimationOut",
         CreateKeyboardAnimationValue(env, config.keyboardAnimationOut_));
     napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
+    napi_set_named_property(env, objValue, "systemUIStatusBar", CreateSystemUIStatusBarValue(env,
+        config.systemUIStatusBarConfig_));
     return objValue;
 }
 
@@ -110,6 +112,23 @@ napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
     napi_set_named_property(env, objValue, "ctrlY2", CreateJsValue(env, config.ctrlY2_));
     napi_set_named_property(env, objValue, "duration", CreateJsValue(env, config.duration_));
 
+    return objValue;
+}
+
+napi_value JsWindowSceneConfig::CreateSystemUIStatusBarValue(napi_env env,
+    const SystemUIStatusBarConfig& config)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("[NAPI]Object is null!");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "showInLandscapeMode", CreateJsValue(env, config.showInLandscapeMode_));
+    napi_set_named_property(env, objValue, "immersiveStatusBarBgColor",
+        CreateJsValue(env, config.immersiveStatusBarBgColor_));
+    napi_set_named_property(env, objValue, "immersiveStatusBarContentColor",
+        CreateJsValue(env, config.immersiveStatusBarContentColor_));
     return objValue;
 }
 
