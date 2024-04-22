@@ -2322,7 +2322,10 @@ void Session::SetShowRecent(bool showRecent)
             session->CreateWindowStateDetectTask(isAttach, windowMode);
         }
     };
-    PostTask(task, "CreateDetectStateTask");
+    if (handler_) {
+        handler_->PostSyncTask(task, "CreateDetectStateTask");
+    }
+    
 }
 
 bool Session::GetShowRecent() const
