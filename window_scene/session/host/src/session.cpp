@@ -1083,7 +1083,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
         session->CreateDetectStateTask(isAttach, windowMode);
     };
-    PostSyncTask(createDetectTask, "CreateDetectStateTask");
+    if (handler_) {
+        handler_->PostSyncTask(createDetectTask, "CreateDetectStateTask");
+    }
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -2350,7 +2352,7 @@ bool Session::IsStateMatch(bool isAttach) const
     return isAttach ? ATTACH_MAP.at(GetSessionState()) : DETACH_MAP.at(GetSessionState());
 }
 
-bool Session::IsSupportDetectWindow(bool isAttach) const
+bool Session::IsSupportDetectWindow(bool isAttach)
 {
     bool isPc = g_deviceType == "2in1";
     bool isPhone = g_deviceType == "phone";
@@ -2443,7 +2445,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
             }
         }
         DetectTaskInfo detectTaskInfo;
-        SetDetectTaskInfo(detectTaskInfo);
+        session->SetDetectTaskInfo(detectTaskInfo);
     };
     handler_->PostTask(detectTask, taskName, STATE_DETECT_DELAYTIME);
     DetectTaskInfo detectTaskInfo;
