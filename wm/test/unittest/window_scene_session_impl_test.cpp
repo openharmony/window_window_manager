@@ -2678,6 +2678,36 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowLimits01, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: AdjustKeyboardLayout01
+ * @tc.desc: adjust keyboard layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, AdjustKeyboardLayout01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("AdjustKeyboardLayout01");
+    option->SetDisplayId(0);
+
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(123);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    KeyboardLayoutParams params;
+    params.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    params.LandscapeKeyboardRect_ = {1, 2, 3, 4};
+    params.PortraitKeyboardRect_ = {1, 2, 3, 4};
+    params.LandscapePanelRect_ = {1, 2, 3, 4};
+    params.PortraitPanelRect_ = {1, 2, 3, 4};
+    ASSERT_EQ(WMError::WM_OK, window->AdjustKeyboardLayout(params));
+}
+/**
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows
  * @tc.type: FUNC

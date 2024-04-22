@@ -1966,6 +1966,13 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief adjust keyboard layout
+     * @param params
+     * @return WM_OK means set success, others means set failed
+     */
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
 };
 }
 }

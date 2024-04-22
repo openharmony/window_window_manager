@@ -742,7 +742,6 @@ struct MaximizeLayoutOption {
     ShowType decor = ShowType::HIDE;
     ShowType dock = ShowType::HIDE;
 };
-
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
