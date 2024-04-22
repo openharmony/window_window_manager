@@ -279,6 +279,25 @@ bool WindowOption::GetExtensionTag() const
     return isExtensionTag_;
 }
 
+void WindowOption::SetDialogDecorEnable(bool decorEnable)
+{
+    dialogDecorEnable_ = decorEnable;
+}
+
+bool WindowOption::GetDialogDecorEnable() const
+{
+    return dialogDecorEnable_;
+}
+
+void WindowOption::SetDialogTitle(const std::string& dialogTitle)
+{
+    dialogTitle_ = dialogTitle;
+}
+
+std::string WindowOption::GetDialogTitle() const
+{
+    return dialogTitle_;
+}
 
 } // namespace Rosen
 } // namespace OHOS

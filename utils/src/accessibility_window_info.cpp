@@ -24,13 +24,27 @@ namespace OHOS {
 namespace Rosen {
 bool AccessibilityWindowInfo::Marshalling(Parcel& parcel) const
 {
-    return parcel.WriteInt32(wid_) && parcel.WriteInt32(innerWid_) && parcel.WriteInt32(uiNodeId_) &&
+    auto touchHotAreas = touchHotAreas_;
+    bool res = parcel.WriteInt32(wid_) && parcel.WriteInt32(innerWid_) && parcel.WriteInt32(uiNodeId_) &&
         parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint32(layer_) && parcel.WriteFloat(scaleVal_) &&
         parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
+        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
+        parcel.WriteString(bundleName_) && parcel.WriteUint32(touchHotAreas.size());
+    if (!res) {
+        return false;
+    }
+
+    for (const auto& rect : touchHotAreas) {
+        res = parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+        if (!res) {
+            return false;
+        }
+    }
+    return res;
 }
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
@@ -52,6 +66,12 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
     }
     info->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
     info->type_ = static_cast<WindowType>(parcel.ReadUint32());
+    info->bundleName_ = parcel.ReadString();
+    size_t touchHotAreasCnt = parcel.ReadUint32();
+    for (size_t i = 0; i < touchHotAreasCnt; i++) {
+        info->touchHotAreas_.push_back({.posX_ = parcel.ReadInt32(), .posY_ = parcel.ReadInt32(),
+                                        .width_ = parcel.ReadUint32(), .height_ = parcel.ReadUint32()});
+    }
     return info;
 }
 }

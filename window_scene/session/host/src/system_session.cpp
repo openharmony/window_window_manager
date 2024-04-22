@@ -20,7 +20,8 @@
 #include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-
+#include "parameters.h"
+#include "pointer_event.h"
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
@@ -33,6 +34,11 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+    }
     SetMoveDragCallback();
 }
 
@@ -311,6 +317,31 @@ bool SystemSession::NeedSystemPermission(WindowType type)
         type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
         type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
         type == WindowType::WINDOW_TYPE_PIP);
+}
+
+bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    auto sessionState = GetSessionState();
+    int32_t action = pointerEvent->GetPointerAction();
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
+    if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
+        sessionState != SessionState::STATE_ACTIVE &&
+        action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        WLOGFW("CheckPointerEventDispatch false, Current Session Info: [persistentId: %{public}d, "
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+        return false;
+    }
+    return true;
+}
+
+void SystemSession::UpdatePointerArea(const WSRect& rect)
+{
+    auto property = GetSessionProperty();
+    if (!(property->IsDecorEnable() && GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) {
+        return;
+    }
+    Session::UpdatePointerArea(rect);
 }
 
 void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)

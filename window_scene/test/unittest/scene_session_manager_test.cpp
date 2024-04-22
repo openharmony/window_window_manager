@@ -1313,6 +1313,32 @@ HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale05, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: ConfigSystemUIStatusBar01
+ * @tc.desc: call ConfigSystemUIStatusBar default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSystemUIStatusBar01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<systemUIStatusBar>"
+                "<showInLandscapeMode>1</showInLandscapeMode>"
+                "<immersiveStatusBarBgColor>#4c000000</immersiveStatusBarBgColor>"
+                "<immersiveStatusBarContentColor>#ffffee</immersiveStatusBarContentColor>"
+            "</systemUIStatusBar>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
+    ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
+        "#4c000000");
+    ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
+        immersiveStatusBarContentColor_.c_str(), "#ffffee");
+    delete sceneSessionManager;
+}
+
+/**
  * @tc.name: DumpSessionAll
  * @tc.desc: ScreenSesionManager dump all session info
  * @tc.type: FUNC
@@ -3488,11 +3514,13 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowNotCovered, Functi
     sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
 
     sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
     sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
     SetVisibleForAccessibility(sceneSessionFirst);
     ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
 
     sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
     sceneSessionSecond->SetSessionRect({300, 300, 200, 200});
     SetVisibleForAccessibility(sceneSessionSecond);
     ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
@@ -3517,15 +3545,17 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
     sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
 
     sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
     sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
     SetVisibleForAccessibility(sceneSessionFirst);
     sceneSessionFirst->SetZOrder(20);
     ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
 
     sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
     sceneSessionSecond->SetSessionRect({50, 50, 50, 50});
     SetVisibleForAccessibility(sceneSessionSecond);
-    sceneSessionFirst->SetZOrder(10);
+    sceneSessionSecond->SetZOrder(10);
     ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
 
     std::vector<sptr<SceneSession>> sceneSessionList;

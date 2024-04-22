@@ -297,11 +297,13 @@ void SceneSessionManager::RegisterAppListener()
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
     } else {
-        auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
-        if (flag != ERR_OK) {
-            WLOGFE("Register app debug listener failed.");
-        } else {
-            WLOGFI("Register app debug listener success.");
+        if (appAnrListener_ != nullptr) {
+            auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
+            if (flag != ERR_OK) {
+                WLOGFE("Register app debug listener failed.");
+            } else {
+                WLOGFI("Register app debug listener success.");
+            }
         }
     }
 }
@@ -377,6 +379,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
+
+    item = config["systemUIStatusBar"];
+    if (item.IsMap()) {
+        ConfigSystemUIStatusBar(item);
+    }
 }
 
 void SceneSessionManager::ConfigFreeMultiWindow()
@@ -919,6 +926,42 @@ void SceneSessionManager::ConfigSnapshotScale()
             return;
         }
         snapshotScale_ = snapshotScale[0];
+    }
+}
+
+void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::ConfigItem& statusBarConfig)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "load ConfigSystemUIStatusBar");
+    WindowSceneConfig::ConfigItem item = statusBarConfig["showInLandscapeMode"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        bool showInLandscapeMode = (*item.intsValue_)[0] > 0;
+        appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = showInLandscapeMode;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar showInLandscapeMode:%{public}d",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_);
+    }
+
+    item = statusBarConfig["immersiveStatusBarBgColor"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_ = color;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarBgColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str());
+    }
+
+    item = statusBarConfig["immersiveStatusBarContentColor"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return;
+        }
+        appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_ = color;
+        TLOGI(WmsLogTag::WMS_IMMS, "ConfigSystemUIStatusBar immersiveStatusBarContentColor:%{public}s",
+            appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
 }
 
@@ -2366,7 +2409,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             }
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
                 sceneSession->GetSessionProperty() != nullptr) {
-                callingSessionId = sceneSession->GetSessionProperty()->GetCallingSessionId();
+                callingSessionId = static_cast<int32_t>(sceneSession->GetSessionProperty()->GetCallingSessionId());
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
                     persistentId, callingSessionId);
             }
@@ -2854,7 +2897,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
         for (const auto& subSession : subVec) {
             if (subSession != nullptr && (subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                 subSession->GetSessionState() == SessionState::STATE_ACTIVE) && subSession->GetZOrder() > zOrder) {
-                topWinId = subSession->GetPersistentId();
+                topWinId = static_cast<uint32_t>(subSession->GetPersistentId());
                 zOrder = subSession->GetZOrder();
                 WLOGFD("[GetTopWin] Current zorder is larger than mainWin, mainId: %{public}d, topWinId: %{public}d, "
                     "zOrder: %{public}d", mainWinId, topWinId, zOrder);
@@ -4485,8 +4528,9 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount()
         bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
         if (isForeground && sceneSession->GetParentSession() != nullptr) {
-            isForeground &= sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
-            sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE;
+            isForeground = isForeground &&
+                            (sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                                sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE);
         }
         bool isPrivate = sceneSession->GetSessionProperty() != nullptr &&
             sceneSession->GetSessionProperty()->GetPrivacyMode();
@@ -7911,7 +7955,6 @@ bool SceneSessionManager::IsCovered(const sptr<SceneSession>& sceneSession,
     return false;
 }
 
-
 void SceneSessionManager::FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
     for (auto it = sceneSessionList.begin(); it != sceneSessionList.end();) {
@@ -7937,6 +7980,10 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
             bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
             item->wid_, item->innerWid_, item->bundleName_.c_str(),
             item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
+        for (const auto& rect : item->touchHotAreas_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d," \
+            "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 
     SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityInfo,
