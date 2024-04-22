@@ -2569,7 +2569,7 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
     isDisplayStatusBarTemporarily_.store(isTemporary);
 }
 
-bool SceneSession::GetIsDisplayStatusBarTemporarily()
+bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
 }
