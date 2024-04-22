@@ -213,6 +213,40 @@ private:
     sptr<Media::PixelMap> windowMask_ = nullptr;
 };
 
+struct FreeMultiWindowConfig : public Parcelable {
+    bool isSystemDecorEnable_ = true;
+    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    uint32_t maxMainFloatingWindowNumber_ = 0;
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(isSystemDecorEnable_) ||
+            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
+            !parcel.WriteUint32(maxMainFloatingWindowNumber_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static FreeMultiWindowConfig* Unmarshalling(Parcel& parcel)
+    {
+        FreeMultiWindowConfig* config = new (std::nothrow) FreeMultiWindowConfig();
+        if (config == nullptr) {
+            return nullptr;
+        }
+        config->isSystemDecorEnable_ = parcel.ReadBool();
+        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
+        config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
+        return config;
+    }
+};
+
 struct SystemSessionConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
@@ -230,6 +264,9 @@ struct SystemSessionConfig : public Parcelable {
     // 240: default minHeight sub window size
     uint32_t miniHeightOfSubWindow_ = 240;
     bool backgroundswitch = false;
+    bool freeMultiWindowEnable_ = false;
+    bool freeMultiWindowSupport_ = false;
+    FreeMultiWindowConfig freeMultiWindowConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -250,6 +287,17 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteBool(backgroundswitch)) {
+            return false;
+        }
+        
+        if (!parcel.WriteBool(freeMultiWindowEnable_)) {
+            return false;
+        }
+        
+        if (!parcel.WriteBool(freeMultiWindowSupport_)) {
+            return false;
+        }
+        if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
         return true;
@@ -273,6 +321,9 @@ struct SystemSessionConfig : public Parcelable {
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
         config->backgroundswitch = parcel.ReadBool();
+        config->freeMultiWindowEnable_ = parcel.ReadBool();
+        config->freeMultiWindowSupport_ = parcel.ReadBool();
+        config->freeMultiWindowConfig_ = *parcel.ReadParcelable<FreeMultiWindowConfig>();
         return config;
     }
 };

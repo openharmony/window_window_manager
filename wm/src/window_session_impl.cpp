@@ -876,6 +876,9 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
                 || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
         WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
+        if (windowSystemConfig_.freeMultiWindowSupport_) {
+                decorVisible = decorVisible && windowSystemConfig_.freeMultiWindowEnable_;
+        }
         uiContent_->UpdateDecorVisible(decorVisible, isDecorEnable);
     } else {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
@@ -898,6 +901,9 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
                 || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+            if (windowSystemConfig_.freeMultiWindowSupport_) {
+                decorVisible = decorVisible && windowSystemConfig_.freeMultiWindowEnable_;
+            }
             WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
             uiContent_->UpdateDecorVisible(decorVisible, IsDecorEnable());
         }
@@ -2733,6 +2739,11 @@ void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimat
 }
 
 WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable)
 {
     return WSError::WS_OK;
 }

@@ -308,7 +308,8 @@ public:
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
-
+    WSError SwitchFreeMultiWindow(bool enable);
+    const SystemSessionConfig& GetSystemSessionConfig() const;
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -325,13 +326,15 @@ private:
     void ConfigDefaultKeyboardAnimation();
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
-    void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
     void ConfigSnapshotScale();
+    void ConfigFreeMultiWindow();
+    void LoadFreeMultiWindowConfig(bool enable);
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);

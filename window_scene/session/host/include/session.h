@@ -406,6 +406,7 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
+    WSError SwitchFreeMultiWindow(bool enable);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

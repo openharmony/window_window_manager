@@ -112,7 +112,8 @@ bool operator!=(const std::vector<float>& a, const std::vector<float>& b)
     if (a.size() != b.size()) {
         return true;
     }
-    for (int index = 0; index < a.size(); index++) {
+    int sizeOfA = static_cast<int>(a.size());
+    for (int index = 0; index < sizeOfA; index++) {
         if (a[index] != b[index]) {
             return true;
         }
@@ -132,19 +133,20 @@ bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
         return false;
     }
 
-    for (int index = 0; index < a.defaultHotAreas.size(); index++) {
+    int sizeOfDefaultHotAreas = static_cast<int>(a.defaultHotAreas.size());
+    for (int index = 0; index < sizeOfDefaultHotAreas; index++) {
         if (a.defaultHotAreas[index] != b.defaultHotAreas[index]) {
             return false;
         }
     }
-
-    for (int index = 0; index < a.pointerHotAreas.size(); index++) {
+    int sizeOfPointerHotAreas = static_cast<int>(a.pointerHotAreas.size());
+    for (int index = 0; index < sizeOfPointerHotAreas; index++) {
         if (a.pointerHotAreas[index] != b.pointerHotAreas[index]) {
             return false;
         }
     }
-
-    for (int index = 0; index < a.pointerChangeAreas.size(); index++) {
+    int sizeOfPointerChangeAreas = static_cast<int>(a.pointerChangeAreas.size());
+    for (int index = 0; index < sizeOfPointerChangeAreas; index++) {
         if (a.pointerChangeAreas[index] != b.pointerChangeAreas[index]) {
             return false;
         }
@@ -329,7 +331,8 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
         return true;
     }
 
-    for (int index = 0; index < displayInfos.size(); index++) {
+    int sizeOfDisplayInfos = static_cast<int>(displayInfos.size());
+    for (int index = 0; index < sizeOfDisplayInfos; index++) {
         if (!(displayInfos[index] == lastDisplayInfos_[index])) {
             lastDisplayInfos_ = displayInfos;
             lastWindowInfoList_ = windowInfoList;
@@ -337,7 +340,8 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
         }
     }
 
-    for (int index = 0; index < windowInfoList.size(); index++) {
+    int sizeOfWindowInfoList = static_cast<int>(windowInfoList.size());
+    for (int index = 0; index < sizeOfWindowInfoList; index++) {
         if (!(windowInfoList[index] == lastWindowInfoList_[index])) {
             lastWindowInfoList_ = windowInfoList;
             return true;
