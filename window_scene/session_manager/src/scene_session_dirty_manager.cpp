@@ -332,7 +332,8 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         auto iter = (sceneSessionValue->GetParentPersistentId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetParentPersistentId());
-        if (iter != dialogMap.end() && iter->second != nullptr) {
+        if (iter != dialogMap.end() && iter->second != nullptr &&
+            sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
             TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"

@@ -41,7 +41,8 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
-
+    void UpdatePointerArea(const WSRect& rect) override;
+    bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);

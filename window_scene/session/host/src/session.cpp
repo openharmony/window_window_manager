@@ -1496,14 +1496,18 @@ bool Session::IfNotNeedAvoidKeyBoardForSplit()
 void Session::HandlePointDownDialog()
 {
     auto dialogVec = GetDialogVector();
+    sptr<Session> lastValidDialog = nullptr;
     for (auto dialog : dialogVec) {
         if (dialog && (dialog->GetSessionState() == SessionState::STATE_FOREGROUND ||
             dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
             dialog->RaiseToAppTopForPointDown();
-            dialog->PresentFocusIfPointDown();
+            lastValidDialog = dialog;
             TLOGD(WmsLogTag::WMS_DIALOG, "Point main window, raise to top and dialog need focus, "
                 "id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
         }
+    }
+    if (lastValidDialog != nullptr) {
+        lastValidDialog->PresentFocusIfPointDown();
     }
 }
 

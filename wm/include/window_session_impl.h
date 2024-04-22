@@ -333,6 +333,8 @@ private:
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
+    WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType type, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
@@ -385,6 +387,7 @@ private:
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
+    std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     KeyEventFilterFunc keyEventFilter_;
 };

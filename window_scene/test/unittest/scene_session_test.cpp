@@ -990,6 +990,35 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: TransferPointerEventDecorDialog
+ * @tc.desc: TransferPointerEventDecorDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "TransferPointerEventDecorDialog";
+    info.bundleName_ = "TransferPointerEventDecorDialogBundle";
+    info.windowType_ = 2122;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> scensession =
+        new (std::nothrow) SceneSession(info, specificCallback_);
+    scensession->moveDragController_ = new MoveDragController(12);
+    scensession->SetSessionState(SessionState::STATE_ACTIVE);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    property->SetDecorEnable(true);
+    property->SetDragEnabled(true);
+    property->SetPersistentId(12);
+    scensession->property_ = property;
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+}
+
+/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
