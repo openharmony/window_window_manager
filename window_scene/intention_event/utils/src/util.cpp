@@ -35,7 +35,7 @@ int64_t GetSysClockTime()
         WLOGFE("clock_gettime failed:%{public}d", errno);
         return 0;
     }
-    return (ts.tv_sec * 1000 * 1000) + (ts.tv_nsec / 1000);
+    return (ts.tv_sec * 1000 * 1000) + (ts.tv_nsec / 1000); // 1000 is for convert time units.
 }
 
 int64_t GetMillisTime()

@@ -42,7 +42,7 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     for (auto& appNodes: needMinimizeAppNodes_) {
         auto windowId = node->GetWindowId();
         auto iter = std::find_if(appNodes.second.begin(), appNodes.second.end(),
-                                [windowId](wptr<WindowNode> srcNode) {
+                                    [windowId](wptr<WindowNode> srcNode) {
                                     auto weakSrcNode = srcNode.promote();
                                     if (weakSrcNode == nullptr) {
                                         return false;

@@ -653,7 +653,8 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     return systemLimits;
 }
 
-void WindowSceneSessionImpl::UpdateWindowSizeLimits()
+void WindowSceneSessionImpl::calculateNewLimitsBySystemLimits(
+    WindowLimits& newLimits, const WindowLimits& customizedLimits)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
@@ -667,9 +668,8 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
 
     float virtualPixelRatio = GetVirtualPixelRatio(display->GetDisplayInfo());
     const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
-    const auto& customizedLimits = property_->GetWindowLimits();
 
-    WindowLimits newLimits = systemLimits;
+    newLimits = systemLimits;
 
     // configured limits of floating window
     uint32_t configuredMaxWidth = static_cast<uint32_t>(customizedLimits.maxWidth_ * virtualPixelRatio);
@@ -690,10 +690,18 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     if (systemLimits.minHeight_ <= configuredMinHeight && configuredMinHeight <= newLimits.maxHeight_) {
         newLimits.minHeight_ = configuredMinHeight;
     }
+}
 
+void WindowSceneSessionImpl::calculateNewLimitsByRatio(
+    WindowLimits& newLimits, const WindowLimits& customizedLimits)
+{
     // calculate new limit ratio
-    newLimits.maxRatio_ = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
-    newLimits.minRatio_ = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
+    if (newLimits.minHeight_ != 0) {
+        newLimits.maxRatio_ = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
+    }
+    if (newLimits.maxHeight_ != 0) {
+        newLimits.minRatio_ = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
+    }
     if (!MathHelper::GreatNotEqual(newLimits.minRatio_, customizedLimits.maxRatio_) &&
         !MathHelper::GreatNotEqual(customizedLimits.maxRatio_, newLimits.maxRatio_)) {
         newLimits.maxRatio_ = customizedLimits.maxRatio_;
@@ -708,12 +716,24 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     newLimits.maxWidth_ = std::min(newMaxWidth, newLimits.maxWidth_);
     uint32_t newMinWidth = static_cast<uint32_t>(static_cast<float>(newLimits.minHeight_) * newLimits.minRatio_);
     newLimits.minWidth_ = std::max(newMinWidth, newLimits.minWidth_);
-    uint32_t newMaxHeight = static_cast<uint32_t>(static_cast<float>(newLimits.maxWidth_) / newLimits.minRatio_);
+    uint32_t newMaxHeight = MathHelper::NearZero(newLimits.minRatio_) ? UINT32_MAX :
+        static_cast<uint32_t>(static_cast<float>(newLimits.maxWidth_) / newLimits.minRatio_);
     newLimits.maxHeight_ = std::min(newMaxHeight, newLimits.maxHeight_);
-    uint32_t newMinHeight = static_cast<uint32_t>(static_cast<float>(newLimits.minWidth_) / newLimits.maxRatio_);
+    uint32_t newMinHeight = MathHelper::NearZero(newLimits.maxRatio_) ? UINT32_MAX :
+        static_cast<uint32_t>(static_cast<float>(newLimits.minWidth_) / newLimits.maxRatio_);
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 
     property_->SetWindowLimits(newLimits);
+}
+
+void WindowSceneSessionImpl::UpdateWindowSizeLimits()
+{
+    const auto& customizedLimits = property_->GetWindowLimits();
+    WindowLimits newLimits;
+
+    calculateNewLimitsBySystemLimits(newLimits, customizedLimits);
+
+    calculateNewLimitsByRatio(newLimits, customizedLimits);
 }
 
 void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState)
@@ -1554,9 +1574,9 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     }
     setSameSystembarPropertyCnt_ = 0;
     TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property.enable_, property.backgroundColor_, property.contentColor_, property.enableAnimation_);
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u settingFlag:%{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "property_ is null");
@@ -1590,11 +1610,13 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     }
 
     WindowMode mode = GetMode();
-    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
+    bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
+    if (isSwitchFreeMultiWindow || !((mode == WindowMode::WINDOW_MODE_FLOATING ||
            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-          WindowHelper::IsMainWindow(GetType()) &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
+           WindowHelper::IsMainWindow(GetType()) &&
+           (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
            system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1637,8 +1659,10 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
         windowSystemConfig_.decorModeSupportInfo_, GetMode());
-    bool enable = isValidWindow &&
-        windowSystemConfig_.isSystemDecorEnable_ &&
+    if (windowSystemConfig_.freeMultiWindowSupport_) {
+        return isValidWindow && windowSystemConfig_.isSystemDecorEnable_;
+    }
+    bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
@@ -2772,6 +2796,15 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     uiContent_->UpdateTitleInTargetPos(isShow, height);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
     return WSError::WS_OK;
 }
 

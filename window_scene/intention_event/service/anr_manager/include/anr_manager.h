@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 
@@ -59,6 +60,7 @@ private:
     std::atomic_int32_t anrTimerCount_ { 0 };
     std::mutex mtx_;
     std::unordered_map<int32_t, AppInfo> applicationMap_;
+    std::shared_mutex applicationMapMutex_;
     std::function<void(int32_t)> anrObserver_;
     std::function<void(int32_t, std::string&, int32_t)> appInfoGetter_;
 };
