@@ -1182,7 +1182,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if (property->GetDragEnabled()) {
             auto is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-            if (is2in1 && moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+            bool freeMultiWindowSupportDevices = systemConfig_.freeMultiWindowSupport_ &&
+                systemConfig_.freeMultiWindowEnable_;
+            if ((is2in1 || freeMultiWindowSupportDevices) &&
+                moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 pointerEvent->MarkProcessed();
