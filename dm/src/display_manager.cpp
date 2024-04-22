@@ -511,13 +511,13 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
-    WLOGFI("Create displaymanager instance");
+    WLOGFD("Create displaymanager instance");
     g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFI("Destroy displaymanager instance");
+    WLOGFD("Destroy displaymanager instance");
     g_dmIsDestroyed = true;
 }
 
