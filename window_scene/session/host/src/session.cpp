@@ -50,6 +50,24 @@ constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
+constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+const std::map<SessionState, bool> ATTACH_MAP = {
+    { SessionState::STATE_DISCONNECT, false },
+    { SessionState::STATE_CONNECT, false },
+    { SessionState::STATE_FOREGROUND, true },
+    { SessionState::STATE_ACTIVE, true },
+    { SessionState::STATE_INACTIVE, false },
+    { SessionState::STATE_BACKGROUND, false },
+};
+const std::map<SessionState, bool> DETACH_MAP = {
+    { SessionState::STATE_DISCONNECT, true },
+    { SessionState::STATE_CONNECT, false },
+    { SessionState::STATE_FOREGROUND, false },
+    { SessionState::STATE_ACTIVE, false },
+    { SessionState::STATE_INACTIVE, true },
+    { SessionState::STATE_BACKGROUND, true },
+};
+static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
 std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 } // namespace
 
@@ -404,6 +422,12 @@ void Session::SetSessionState(SessionState state)
 
 void Session::UpdateSessionState(SessionState state)
 {
+    // Remove unexecuted detection tasks when the window state changes to background or destroyed.
+    if (state == SessionState::STATE_DISCONNECT ||
+        state == SessionState::STATE_INACTIVE ||
+        state == SessionState::STATE_BACKGROUND) {
+        RemoveWindowDetectTask();
+    }
     state_ = state;
     NotifySessionStateChange(state);
 }
@@ -579,14 +603,14 @@ bool Session::IsSessionValid() const
 {
     if (sessionInfo_.isSystem_) {
         WLOGFD("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
-            GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
+            GetPersistentId(), sessionInfo_.bundleName_.c_str(), GetSessionState());
         return false;
     }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
         if (state_ == SessionState::STATE_DISCONNECT && sessionStage_) {
             WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
-                GetPersistentId(), state_);
+                GetPersistentId(), GetSessionState());
         }
     }
     return res;
@@ -1032,7 +1056,7 @@ bool Session::GetForegroundInteractiveStatus() const
     return foregroundInteractiveStatus_.load();
 }
 
-void Session::SetAttachState(bool isAttach)
+void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
     auto task = [weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
@@ -1050,6 +1074,21 @@ void Session::SetAttachState(bool isAttach)
         }
     };
     PostTask(task, "SetAttachState");
+    CreateDetectStateTask(isAttach, windowMode);
+}
+
+void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
+{
+    if (!IsSupportDetectWindow(isAttach)) {
+        return;
+    }
+    if (!ShouldCreateDetectTask(isAttach, windowMode)) {
+        RemoveWindowDetectTask();
+        DetectTaskInfo detectTaskInfo;
+        SetDetectTaskInfo(detectTaskInfo);
+        return;
+    }
+    CreateWindowStateDetectTask(isAttach, windowMode);
 }
 
 void Session::RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback)
@@ -1711,7 +1750,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
     sessionStateChangeFunc_ = func;
-    auto changedState = state_;
+    auto changedState = GetSessionState();
     if (changedState == SessionState::STATE_ACTIVE) {
         changedState = SessionState::STATE_FOREGROUND;
     } else if (changedState == SessionState::STATE_INACTIVE) {
@@ -1721,7 +1760,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     }
     NotifySessionStateChange(changedState);
     WLOGFD("SetSessionStateChangeListenser, id: %{public}d, state_: %{public}d, changedState: %{public}d",
-        GetPersistentId(), state_, changedState);
+        GetPersistentId(), GetSessionState(), changedState);
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
@@ -1947,7 +1986,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
     if (state_ == SessionState::STATE_END) {
         WLOGFI("session is already destroyed or property is nullptr! id: %{public}d state: %{public}u",
-            GetPersistentId(), state_);
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property_->SetWindowMode(mode);
@@ -2258,12 +2297,145 @@ uint32_t Session::GetUINodeId() const
 
 void Session::SetShowRecent(bool showRecent)
 {
+    bool isAttach = GetAttachState();
+    if (!IsSupportDetectWindow(isAttach) ||
+        !ShouldCreateDetectTaskInRecent(showRecent, showRecent_, isAttach)) {
+        showRecent_ = showRecent;
+        return;
+    }
     showRecent_ = showRecent;
+    WindowMode windowMode = GetWindowMode();
+    if (ShouldCreateDetectTask(isAttach, windowMode)) {
+        CreateWindowStateDetectTask(isAttach, windowMode);
+    }
 }
 
 bool Session::GetShowRecent() const
 {
     return showRecent_;
+}
+
+bool Session::GetAttachState() const
+{
+    return isAttach_;
+}
+
+DetectTaskInfo Session::GetDetectTaskInfo() const
+{
+    std::shared_lock<std::shared_mutex> lock(detectTaskInfoMutex_);
+    return detectTaskInfo_;
+}
+
+void Session::SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo)
+{
+    std::unique_lock<std::shared_mutex> lock(detectTaskInfoMutex_);
+    detectTaskInfo_ = detectTaskInfo;
+}
+
+bool Session::IsStateMatch(bool isAttach) const
+{
+    return isAttach ? ATTACH_MAP.at(GetSessionState()) : DETACH_MAP.at(GetSessionState());
+}
+
+bool Session::IsSupportDetectWindow(bool isAttach)
+{
+    bool isPc = g_deviceType == "2in1";
+    bool isPhone = g_deviceType == "phone";
+    if (!isPc && !isPhone) {
+        WLOGFI("Window state detect not support: device type not support, persistentId:%{public}d", persistentId_);
+        return false;
+    }
+    if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
+        WLOGFI("Window state detect not support: Screen is locked, persistentId:%{public}d", persistentId_);
+        return false;
+    }
+    if (!SessionHelper::IsMainWindow(GetWindowType()) || showRecent_) {
+        WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, "
+            "persistentId:%{public}d", persistentId_);
+        return false;
+    }
+    // Only detecting cold start scenarios on PC
+    if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
+        RemoveWindowDetectTask();
+        return false;
+    }
+    return true;
+}
+
+void Session::RemoveWindowDetectTask()
+{
+    if (handler_) {
+        handler_->RemoveTask(GetWindowDetectTaskName());
+    }
+}
+
+bool Session::ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const
+{
+    // Create detect task directy without pre-exiting tasks.
+    if (GetDetectTaskInfo().taskState == DetectTaskState::NO_TASK) {
+        return true;
+    }
+    // If the taskState matches the attach detach state, it will be create detect task directly.
+    if ((GetDetectTaskInfo().taskState == DetectTaskState::ATTACH_TASK && isAttach) ||
+        (GetDetectTaskInfo().taskState == DetectTaskState::DETACH_TASK && !isAttach)) {
+        return true;
+    } else {
+        // Do not create detect task if the windowMode changes.
+        return GetDetectTaskInfo().taskWindowMode == windowMode;
+    }
+}
+
+bool Session::ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const
+{
+    if (newShowRecent) {
+        return false;
+    }
+    return oldShowRecent ? isAttach : false;
+}
+
+void Session::RegisterIsScreenLockedCallback(const std::function<bool()>& callback)
+{
+    isScreenLockedCallback_ = callback;
+}
+
+std::string Session::GetWindowDetectTaskName() const
+{
+    return "wms:WindowStateDetect" + std::to_string(persistentId_);
+}
+
+void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
+{
+    if (!handler_) {
+        return;
+    }
+    std::string taskName = GetWindowDetectTaskName();
+    RemoveWindowDetectTask();
+    auto detectTask = [weakThis = wptr(this), isAttach]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            if (isAttach) {
+                WLOGFE("Window attach state and session"
+                    "state mismatch, session is nullptr, attach:%{public}d", isAttach);
+            }
+            return;
+        }
+        // Skip state detect when screen locked.
+        if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
+            if (!session->IsStateMatch(isAttach)) {
+                WLOGFE("Window attach state and session state mismatch, "
+                    "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
+                    isAttach, static_cast<uint32_t>(session->GetSessionState()),
+                    session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+            }
+        }
+        DetectTaskInfo detectTaskInfo;
+        session->SetDetectTaskInfo(detectTaskInfo);
+    };
+    handler_->PostTask(detectTask, taskName, STATE_DETECT_DELAYTIME);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskWindowMode = windowMode;
+    detectTaskInfo.taskState = isAttach ? DetectTaskState::ATTACH_TASK : DetectTaskState::DETACH_TASK;
+    SetDetectTaskInfo(detectTaskInfo);
 }
 
 void Session::SetBufferAvailable(bool bufferAvailable)
