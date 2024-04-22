@@ -3999,13 +3999,15 @@ void SceneSessionManager::TraverseSessionTreeFromBottomToTop(TraverseFunc func)
     return;
 }
 
-WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground)
+WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
+    FocusChangeReason reason)
 {
-    auto task = [this, persistentId, isFocused, byForeground]() {
+    TLOGI(WmsLogTag::WMS_FOCUS,"RequestFocusStatus ,id: %{public}d , reason: %{public}d", persistentId, reason);
+    auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
-            RequestSessionFocus(persistentId, byForeground);
+            RequestSessionFocus(persistentId, byForeground, reason);
         } else {
-            RequestSessionUnfocus(persistentId);
+            RequestSessionUnfocus(persistentId, reason);
         }
     };
     taskScheduler_->PostAsyncTask(task, "RequestFocusStatus" + std::to_string(persistentId));
@@ -4052,14 +4054,14 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     if (!IsSessionVisible(sceneSession)) {
         needBlockNotifyFocusStatusUntilForeground_ = true;
     }
-    ShiftFocus(sceneSession);
+    ShiftFocus(sceneSession, FocusChangeReason::SCB_START_APP);
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground)
+WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground, FocusChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "RequestSessionFocus, id: %{public}d, by foreground: %{public}d",
-        persistentId, byForeground);
+    TLOGD(WmsLogTag::WMS_FOCUS, "RequestSessionFocus, id: %{public}d, by foreground: %{public}d , reason: %{public}d",
+        persistentId, byForeground, reason);
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
     if (basicCheckRet != WSError::WS_OK) {
         return basicCheckRet;
@@ -4090,11 +4092,11 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
-    ShiftFocus(sceneSession);
+    ShiftFocus(sceneSession, reason);
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
+WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "RequestSessionUnfocus, id: %{public}d", persistentId);
     if (persistentId == INVALID_SESSION_ID) {
@@ -4119,7 +4121,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId)
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
-    return ShiftFocus(nextSession);
+    return ShiftFocus(nextSession, reason);
 }
 
 WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
@@ -4273,7 +4275,7 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
     startUIAbilityErrorFunc_ = func;
 }
 
-WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
+WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
 {
     // unfocus
     int32_t focusedId = focusedSessionId_;
@@ -4301,7 +4303,8 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession)
             notifySCBAfterUnfocusedFunc_();
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "ShiftFocus, focusedId: %{public}d, nextId: %{public}d", focusedId, nextId);
+    TLOGI(WmsLogTag::WMS_FOCUS, "ShiftFocus, focusedId: %{public}d, nextId: %{public}d, reason: %{public}d",
+        focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -4607,7 +4610,8 @@ void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<Scene
 {
     NotifyRequestFocusStatusNotifyManagerFunc func =
     [this](int32_t persistentId, const bool isFocused, const bool byForeground) {
-        this->RequestFocusStatus(persistentId, isFocused, byForeground);
+        FocusChangeReason reason = FocusChangeReason::CLICK;
+        this->RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
@@ -4658,7 +4662,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
                     NotifyFocusStatus(sceneSession, true);
                 }
             } else {
-                RequestSessionFocus(persistentId, true);
+                RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
             }
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
@@ -4669,7 +4673,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_BACKGROUND:
-            RequestSessionUnfocus(persistentId);
+            RequestSessionUnfocus(persistentId, FocusChangeReason::APP_BACKGROUND);
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
@@ -7462,7 +7466,8 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
             WLOGFD("session is not visible!");
             return WSError::WS_DO_NOTHING;
         }
-        RequestSessionFocus(persistentId, true);
+       FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+        RequestSessionFocus(persistentId, true, reason);
         if (WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
             sceneSession->RaiseToAppTop();
         }
@@ -7517,7 +7522,8 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     targetSession->NotifyClick();
-    return RequestSessionFocus(targetPersistentId, false);
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    return RequestSessionFocus(targetPersistentId, false, reason);
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)

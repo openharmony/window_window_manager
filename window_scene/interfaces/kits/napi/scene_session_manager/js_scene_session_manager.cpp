@@ -1962,12 +1962,25 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground);
+    FocusChangeReason reason = FocusChangeReason::DEFAULT;
+    if (argc > MIN_ARG_COUNT){
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], reason)) {
+            WLOGFE("[NAPI]Failed to convert parameter to reason");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]OnRequestFocusStatus persistentId: %{public}d, isFocused: %{public}d,\
+        byForeground: %{public}d, reason: %{public}d", persistentId, isFocused, byForeground, reason);
+
+    SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
 {
+    TLOGI(WmsLogTag::WMS_FOCUS, "OnRequestAllAppSessionUnfocus");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
