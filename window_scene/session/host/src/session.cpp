@@ -2325,7 +2325,6 @@ void Session::SetShowRecent(bool showRecent)
     if (handler_) {
         handler_->PostSyncTask(task, "CreateDetectStateTask");
     }
-    
 }
 
 bool Session::GetShowRecent() const
