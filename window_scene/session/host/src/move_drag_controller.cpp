@@ -391,9 +391,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     }
     if ((static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) ||
         (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT))) {
-        targetRect.height_ = static_cast<uint32_t>(static_cast<float>(targetRect.width_) / newRatio);
+        targetRect.height_ = static_cast<int32_t>(static_cast<float>(targetRect.width_) / newRatio);
     } else {
-        targetRect.width_ = static_cast<uint32_t>(static_cast<float>(targetRect.height_) * newRatio);
+        targetRect.width_ = static_cast<int32_t>(static_cast<float>(targetRect.height_) * newRatio);
     }
     return targetRect;
 }

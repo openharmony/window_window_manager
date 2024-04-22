@@ -520,7 +520,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
             defaultDisplayInfo->GetWidth() : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
         newWinRect.height_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0) ?
-            static_cast<int32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u : rect.height_;
+            static_cast<int32_t>(defaultDisplayInfo->GetHeight() * percent / 100u) : rect.height_;
         newRequestRect.height_ = newWinRect.height_;
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : newRequestRect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
@@ -807,7 +807,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         vpr = display->GetVirtualPixelRatio();
         int32_t floatingBarHeight = 32; // 32: floating windowBar Height
         avoidArea.topRect_.height_ = vpr * floatingBarHeight;
-        avoidArea.topRect_.width_ = display->GetWidth();
+        avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector;
