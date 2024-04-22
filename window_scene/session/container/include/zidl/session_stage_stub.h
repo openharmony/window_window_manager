@@ -64,6 +64,7 @@ private:
     int HandleUpdateDisplayId(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDisplayMove(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H
