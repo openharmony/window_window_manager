@@ -3480,11 +3480,13 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowNotCovered, Functi
     sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
 
     sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
     sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
     SetVisibleForAccessibility(sceneSessionFirst);
     ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
 
     sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
     sceneSessionSecond->SetSessionRect({300, 300, 200, 200});
     SetVisibleForAccessibility(sceneSessionSecond);
     ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
@@ -3509,15 +3511,17 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
     sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
 
     sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
     sceneSessionFirst->SetSessionRect({0, 0, 200, 200});
     SetVisibleForAccessibility(sceneSessionFirst);
     sceneSessionFirst->SetZOrder(20);
     ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
 
     sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
     sceneSessionSecond->SetSessionRect({50, 50, 50, 50});
     SetVisibleForAccessibility(sceneSessionSecond);
-    sceneSessionFirst->SetZOrder(10);
+    sceneSessionSecond->SetZOrder(10);
     ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
 
     std::vector<sptr<SceneSession>> sceneSessionList;
