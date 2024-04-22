@@ -373,6 +373,7 @@ enum class WindowSessionType : uint32_t {
 enum class WindowGravity : uint32_t {
     WINDOW_GRAVITY_FLOAT = 0,
     WINDOW_GRAVITY_BOTTOM,
+    WINDOW_GRAVITY_DEFAULT,
 };
 
 /**
@@ -555,6 +556,44 @@ struct Rect {
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+};
+
+/**
+ * @struct KeyboardPanelInfo
+ *
+ * @brief Info of keyboard panel
+ */
+struct KeyboardPanelInfo : public Parcelable {
+    Rect rect_ = {0, 0, 0, 0};
+    WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    bool isShowing_ = false;
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
+               parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+               parcel.WriteBool(isShowing_);
+    }
+
+    static KeyboardPanelInfo* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardPanelInfo* keyboardPanelInfo = new(std::nothrow)KeyboardPanelInfo;
+        if (keyboardPanelInfo == nullptr) {
+            return nullptr;
+        }
+        bool res = parcel.ReadInt32(keyboardPanelInfo->rect_.posX_) &&
+            parcel.ReadInt32(keyboardPanelInfo->rect_.posY_) && parcel.ReadUint32(keyboardPanelInfo->rect_.width_) &&
+            parcel.ReadUint32(keyboardPanelInfo->rect_.height_);
+        if (!res) {
+            delete keyboardPanelInfo;
+            return nullptr;
+        }
+        keyboardPanelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        keyboardPanelInfo->isShowing_ = parcel.ReadBool();
+
+        return keyboardPanelInfo;
     }
 };
 
