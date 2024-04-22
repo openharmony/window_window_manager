@@ -3256,7 +3256,7 @@ HWTEST_F(WindowSessionTest, GetAttachState001, Function | SmallTest | Level2)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
     session_->SetAttachState(false);
-    isAttach = session_->GetAttachState();
+    bool isAttach = session_->GetAttachState();
     ASSERT_EQ(false, isAttach);
     session_->handler_->RemoveTask(taskName);
 }
