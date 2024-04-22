@@ -1577,37 +1577,8 @@ WSError SceneSessionManagerProxy::AddOrRemoveSecureSession(int32_t persistentId,
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write persistentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(parentId)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write parentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(shouldHide)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write shouldHide failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
-                              SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION),
-                              data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
-}
-
-WSError SceneSessionManagerProxy::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+WSError SceneSessionManagerProxy::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    uint32_t extWindowActions)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "run SceneSessionManagerProxy::UpdateExtWindowFlags");
     MessageParcel data;
@@ -1626,7 +1597,11 @@ WSError SceneSessionManagerProxy::UpdateExtWindowFlags(int32_t parentId, int32_t
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(extWindowFlags)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write persistentId failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write extWindowFlags failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(extWindowActions)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write extWindowActions failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(
