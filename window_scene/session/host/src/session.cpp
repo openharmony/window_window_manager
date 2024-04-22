@@ -2301,18 +2301,8 @@ void Session::SetShowRecent(bool showRecent)
     }
     showRecent_ = showRecent;
     WindowMode windowMode = GetWindowMode();
-    auto task = [weakThis = wptr(this), isAttach, windowMode]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            WLOGFW("session is nullptr");
-            return;
-        }
-        if (session->ShouldCreateDetectTask(isAttach, windowMode)) {
-            session->CreateWindowStateDetectTask(isAttach, windowMode);
-        }
-    };
-    if (handler_) {
-        handler_->PostSyncTask(task, "CreateDetectStateTask");
+    if (ShouldCreateDetectTask(isAttach, windowMode)) {
+        CreateWindowStateDetectTask(isAttach, windowMode);
     }
 }
 
