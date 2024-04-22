@@ -2449,7 +2449,7 @@ HWTEST_F(WindowTest, TriggerBindModalUIExtension, Function | SmallTest | Level2)
     winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<WindowOption> option = new WindowOption();
     sptr<Window> window = Window::Create("TriggerBindModalUIExtension", option);
-    if(window != nullptr){
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
         window->TriggerBindModalUIExtension();
     }
