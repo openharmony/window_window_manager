@@ -4403,8 +4403,11 @@ void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession>& prevSes
 
 bool SceneSessionManager::MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession)
 {
-    if (prevSession == nullptr || currSession == nullptr) {
+    if (prevSession == nullptr && currSession == nullptr) {
         return false;
+    }
+    if (prevSession == nullptr || currSession == nullptr) {
+        return true;
     }
     return prevSession->GetMissionId() != currSession->GetMissionId();
 }
