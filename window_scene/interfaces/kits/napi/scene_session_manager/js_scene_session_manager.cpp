@@ -145,6 +145,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetSessionSnapshotPixelMap);
     BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
         JsSceneSessionManager::GetIsLayoutFullScreen);
+    BindNativeFunction(env, exportObj, "switchFreeMultiWindow", moduleName,
+        JsSceneSessionManager::SwitchFreeMultiWindow);
+    BindNativeFunction(env, exportObj, "getFreeMultiWindowConfig", moduleName,
+        JsSceneSessionManager::GetFreeMultiWindowConfig);
     return NapiGetUndefined(env);
 }
 
@@ -732,6 +736,20 @@ napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callb
     WLOGI("[NAPI]GetIsLayoutFullScreen");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SwitchFreeMultiWindow(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSwitchFreeMultiWindow(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetFreeMultiWindowConfig(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2268,5 +2286,33 @@ napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_cal
     napi_value result = nullptr;
     napi_get_boolean(env, isLayoutFullScreen, &result);
     return result;
+}
+
+napi_value JsSceneSessionManager::OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enable;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to convert parameter to intoFreeMultiWindow bool value");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SwitchFreeMultiWindow(enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
+{
+    auto systemConfig = SceneSessionManager::GetInstance().GetSystemSessionConfig();
+    return JsWindowSceneConfig::CreateFreeMultiWindowConfig(env, systemConfig);
 }
 } // namespace OHOS::Rosen

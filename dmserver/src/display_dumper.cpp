@@ -35,6 +35,31 @@ namespace {
     const std::string ARG_DUMP_ALL = "-a";
     const std::string ARG_DUMP_SCREEN = "-s";
     const std::string ARG_DUMP_DISPLAY = "-d";
+    // set the output width of screen
+    constexpr int W_SCREEN_NAME = 21;
+    constexpr int W_SCREEN_TYPE = 9;
+    constexpr int W_GROUP_TYPE = 8;
+    constexpr int W_DMS_ID = 6;
+    constexpr int W_RS_ID = 21;
+    constexpr int W_ACTIVE_IDX = 10;
+    constexpr int W_VIR_PIXEL_RATIO = 4;
+    constexpr int W_SCREEN_ROTATION = 9;
+    constexpr int W_ORIENTATION = 12;
+    constexpr int W_REQUESTED_ORIENTATION = 19;
+    constexpr int W_NODE_ID = 21;
+    constexpr int W_MIRROR_TYPE = 11;
+    constexpr int W_MIRROR_NODE_ID = 13;
+    // set the output width of display
+    constexpr int W_DISPLAY_ID = 10;
+    constexpr int W_ABSTR_SCREEN_ID = 9;
+    constexpr int W_REFRESH_RATE = 12;
+    constexpr int W_DISPLAY_ROTATION = 9;
+    constexpr int W_DISPLAY_ORIENTATION = 18;
+    constexpr int W_DISPLAY_FREEZE_FLAG = 11;
+    constexpr int W_DISPLAY_OFFSET_X = 5;
+    constexpr int W_DISPLAY_OFFSET_Y = 5;
+    constexpr int W_DISPLAY_WIDTH = 5;
+    constexpr int W_DISPLAY_HEITHT = 5;
 }
 
 DisplayDumper::DisplayDumper(const sptr<AbstractDisplayController>& abstractDisplayController,
@@ -314,19 +339,19 @@ void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostri
     std::string isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
     NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
     // std::setw is used to set the output width and different width values are set to keep the format aligned.
-    oss << std::left << std::setw(21) << screenName
-        << std::left << std::setw(9) << screenType
-        << std::left << std::setw(8) << isGroup
-        << std::left << std::setw(6) << screen->dmsId_
-        << std::left << std::setw(21) << screen->rsId_
-        << std::left << std::setw(10) << screen->activeIdx_
-        << std::left << std::setw(4) << screen->virtualPixelRatio_
-        << std::left << std::setw(9) << static_cast<uint32_t>(screen->rotation_)
-        << std::left << std::setw(12) << static_cast<uint32_t>(screen->orientation_)
-        << std::left << std::setw(19) << static_cast<uint32_t>(screen->screenRequestedOrientation_)
-        << std::left << std::setw(21) << nodeId
-        << std::left << std::setw(11) << isMirrored
-        << std::left << std::setw(13) << screen->rSDisplayNodeConfig_.mirrorNodeId
+    oss << std::left << std::setw(W_SCREEN_NAME) << screenName
+        << std::left << std::setw(W_SCREEN_TYPE) << screenType
+        << std::left << std::setw(W_GROUP_TYPE) << isGroup
+        << std::left << std::setw(W_DMS_ID) << screen->dmsId_
+        << std::left << std::setw(W_RS_ID) << screen->rsId_
+        << std::left << std::setw(W_ACTIVE_IDX) << screen->activeIdx_
+        << std::left << std::setw(W_VIR_PIXEL_RATIO) << screen->virtualPixelRatio_
+        << std::left << std::setw(W_SCREEN_ROTATION) << static_cast<uint32_t>(screen->rotation_)
+        << std::left << std::setw(W_ORIENTATION) << static_cast<uint32_t>(screen->orientation_)
+        << std::left << std::setw(W_REQUESTED_ORIENTATION) << static_cast<uint32_t>(screen->screenRequestedOrientation_)
+        << std::left << std::setw(W_NODE_ID) << nodeId
+        << std::left << std::setw(W_MIRROR_TYPE) << isMirrored
+        << std::left << std::setw(W_MIRROR_NODE_ID) << screen->rSDisplayNodeConfig_.mirrorNodeId
         << std::endl;
 }
 
@@ -337,19 +362,19 @@ void DisplayDumper::GetDisplayInfo(const sptr<AbstractDisplay>& display, std::os
         return;
     }
     // std::setw is used to set the output width and different width values are set to keep the format aligned.
-    oss << std::left << std::setw(10) << display->GetId()
-        << std::left << std::setw(9) << display->GetAbstractScreenId()
-        << std::left << std::setw(12) << display->GetRefreshRate()
-        << std::left << std::setw(4) << display->GetVirtualPixelRatio()
-        << std::left << std::setw(9) << static_cast<uint32_t>(display->GetRotation())
-        << std::left << std::setw(12) << static_cast<uint32_t>(display->GetOrientation())
-        << std::left << std::setw(18) << static_cast<uint32_t>(display->GetDisplayOrientation())
-        << std::left << std::setw(11) << static_cast<uint32_t>(display->GetFreezeFlag())
+    oss << std::left << std::setw(W_DISPLAY_ID) << display->GetId()
+        << std::left << std::setw(W_ABSTR_SCREEN_ID) << display->GetAbstractScreenId()
+        << std::left << std::setw(W_REFRESH_RATE) << display->GetRefreshRate()
+        << std::left << std::setw(W_VIR_PIXEL_RATIO) << display->GetVirtualPixelRatio()
+        << std::left << std::setw(W_DISPLAY_ROTATION) << static_cast<uint32_t>(display->GetRotation())
+        << std::left << std::setw(W_ORIENTATION) << static_cast<uint32_t>(display->GetOrientation())
+        << std::left << std::setw(W_DISPLAY_ORIENTATION) << static_cast<uint32_t>(display->GetDisplayOrientation())
+        << std::left << std::setw(W_DISPLAY_FREEZE_FLAG) << static_cast<uint32_t>(display->GetFreezeFlag())
         << "[ "
-        << std::left << std::setw(5) << display->GetOffsetX()
-        << std::left << std::setw(5) << display->GetOffsetY()
-        << std::left << std::setw(5) << display->GetWidth()
-        << std::left << std::setw(5) << display->GetHeight()
+        << std::left << std::setw(W_DISPLAY_OFFSET_X) << display->GetOffsetX()
+        << std::left << std::setw(W_DISPLAY_OFFSET_Y) << display->GetOffsetY()
+        << std::left << std::setw(W_DISPLAY_WIDTH) << display->GetWidth()
+        << std::left << std::setw(W_DISPLAY_HEITHT) << display->GetHeight()
         << "]"
         << std::endl;
 }

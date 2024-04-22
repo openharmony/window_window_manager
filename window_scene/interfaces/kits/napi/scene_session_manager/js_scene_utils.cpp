@@ -969,6 +969,8 @@ static napi_value CreateJsSystemBarPropertyObject(
     std::string contentColor = GetHexColor(property.contentColor_);
     napi_set_named_property(env, objValue, "contentcolor", CreateJsValue(env, contentColor));
     napi_set_named_property(env, objValue, "enableAnimation", CreateJsValue(env, property.enableAnimation_));
+    napi_set_named_property(
+        env, objValue, "settingFlag", CreateJsValue(env, static_cast<uint32_t>(property.settingFlag_)));
 
     return objValue;
 }
