@@ -1054,6 +1054,7 @@ bool Session::GetForegroundInteractiveStatus() const
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
+    isAttach_ = isAttach;
     auto task = [weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -1062,8 +1063,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
         TLOGD(WmsLogTag::WMS_LIFE, "SetAttachState:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
-        session->isAttach_ = isAttach;
-        if (!session->isAttach_ && session->detachCallback_ != nullptr) {
+        if (isAttach && session->detachCallback_ != nullptr) {
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
@@ -1076,6 +1076,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
 {
     if (!IsSupportDetectWindow(isAttach)) {
+        return;
+    }
+    if (showRecent_) {
         return;
     }
     if (!ShouldCreateDetectTask(isAttach, windowMode)) {
@@ -2292,7 +2295,7 @@ void Session::SetShowRecent(bool showRecent)
     }
     showRecent_ = showRecent;
     WindowMode windowMode = GetWindowMode();
-    if (ShouldCreateDetectTask(isAttach, windowMode)) {
+    if (!showRecent_ && ShouldCreateDetectTask(isAttach, windowMode)) {
         CreateWindowStateDetectTask(isAttach, windowMode);
     }
 }
@@ -2336,8 +2339,8 @@ bool Session::IsSupportDetectWindow(bool isAttach)
         WLOGFI("Window state detect not support: Screen is locked, persistentId:%{public}d", persistentId_);
         return false;
     }
-    if (!SessionHelper::IsMainWindow(GetWindowType()) || showRecent_) {
-        WLOGFI("Window state detect not support: Only support mainwindow which is not in recent, "
+    if (!SessionHelper::IsMainWindow(GetWindowType())) {
+        WLOGFI("Window state detect not support: Only support mainwindow, "
             "persistentId:%{public}d", persistentId_);
         return false;
     }
