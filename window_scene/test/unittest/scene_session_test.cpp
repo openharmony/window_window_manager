@@ -2519,7 +2519,7 @@ HWTEST_F(SceneSessionTest, SetIsDisplayStatusBarTemporarily, Function | SmallTes
     SessionInfo info;
     info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
     info.bundleName_ = "SetIsDisplayStatusBarTemporarily";
-    sptr<Rosen::ISession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetIsDisplayStatusBarTemporarily(true);
     ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
