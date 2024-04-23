@@ -345,10 +345,10 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value, napi_value parameter)
+    CaseType caseType, napi_env env, napi_value callback, napi_value parameter)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if (IsCallbackRegistered(env, type, value)) {
+    if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
@@ -356,7 +356,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
+    napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef);
     if (windowManagerListener == nullptr) {
