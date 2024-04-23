@@ -309,8 +309,8 @@ private:
     PiPTemplateInfo pipTemplateInfo_;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
-    std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
+    std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
     bool forceHideState_ = false;
