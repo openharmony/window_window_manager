@@ -354,7 +354,7 @@ private:
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
-    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true, 
+    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
