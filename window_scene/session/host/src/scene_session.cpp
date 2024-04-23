@@ -2539,7 +2539,7 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const Extension
 {
     auto iter = extWindowFlagsMap_.find(extPersistentId);
     // Each flag is false when inactive, 0 means all flags are inactive
-    auto oldFlags = iter != extWindowFlagsMap_.end() ? iter->second : ExtensionWindowFlags(0);
+    auto oldFlags = iter != extWindowFlagsMap_.end() ? iter->second : ExtensionWindowFlags();
     ExtensionWindowFlags newFlags((extWindowFlags.bitData & extWindowActions.bitData) |
         (oldFlags.bitData & ~extWindowActions.bitData));
     if (newFlags.bitData == 0) {
@@ -2576,6 +2576,7 @@ void SceneSession::RemoveExtWindowFlags(int32_t extPersistentId)
 void SceneSession::ClearExtWindowFlags()
 {
     extWindowFlagsMap_.clear();
+    combinedExtWindowFlags_.bitData = 0;
 }
 
 WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
