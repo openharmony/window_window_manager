@@ -150,6 +150,8 @@ public:
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
     bool IsLayoutFullScreen() const;
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
+    int32_t GetCollaboratorType() const;
+    void SetCollaboratorType(int32_t collaboratorType);
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -211,6 +213,7 @@ private:
 
     bool isShaped_ = false;
     sptr<Media::PixelMap> windowMask_ = nullptr;
+    int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

@@ -1595,19 +1595,18 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         agent->NotifyDisplayPowerEvent(event, status);
     }
 
-    auto screenIds = GetAllScreenIds();
-    if (screenIds.empty()) {
-        WLOGFI("[UL_POWER]NotifyDisplayPowerEvent no screen info");
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    if (screenSessionMap_.empty()) {
+        WLOGFE("[UL_POWER]screenSessionMap is empty");
         return false;
     }
-
-    for (auto screenId : screenIds) {
-        sptr<ScreenSession> screen = GetScreenSession(screenId);
-        if (screen == nullptr) {
-            WLOGFW("[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+    for (const auto& iter : screenSessionMap_) {
+        WLOGFI("[UL_POWER]PowerStatusChange to screenID: %{public}" PRIu64, iter.first);
+        if (!iter.second) {
+            WLOGFE("[UL_POWER]screensession is nullptr");
             continue;
         }
-        screen->PowerStatusChange(event, status, reason);
+        iter.second->PowerStatusChange(event, status, reason);
     }
     return true;
 }
