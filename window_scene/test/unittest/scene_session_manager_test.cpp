@@ -3235,6 +3235,19 @@ HWTEST_F(SceneSessionManagerTest, ClearUnrecoveredSessions, Function | SmallTest
 }
 
 /**
+ * @tc.name: RecoverSessionInfo
+ * @tc.desc: test func RecoverSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Level1)
+{
+    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    info = ssm_->RecoverSessionInfo(property);
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: SceneSesionManager hide non-secure windows by scene session
  * @tc.type: FUNC
