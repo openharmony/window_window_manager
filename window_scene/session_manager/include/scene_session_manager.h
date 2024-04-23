@@ -172,7 +172,7 @@ public:
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
-    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true, 
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
