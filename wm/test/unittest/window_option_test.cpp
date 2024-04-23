@@ -418,7 +418,7 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
     ASSERT_EQ(true, ret1);
     option->SetOnlySupportSceneBoard(true);
     bool ret2 = option->GetOnlySupportSceneBoard();
-    ASSERT_EQ(true,ret2);
+    ASSERT_EQ(true, ret2);
 }
 }
 } // namespace Rosen
