@@ -24,7 +24,7 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
-#include "../../proxy/include/window_info.h"
+#include "proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "session_helper.h"
