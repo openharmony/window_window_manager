@@ -77,9 +77,7 @@ ohos_shared_library("libdms") {
   ]
 
   if (defined(use_new_skia) && use_new_skia) {
-    include_dirs = [ "//third_party/skia/src" ]
-  } else {
-    include_dirs = [ "//third_party/flutter/skia/src" ]
+    include_dirs = [ "../../../../third_party/skia/src" ]
   }
 
   defines = []
