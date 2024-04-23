@@ -2943,7 +2943,7 @@ HWTEST_F(WindowSceneSessionImplTest, Test01, Function | SmallTest | Level3)
     TitleButtonRect titleButtonRect = {3, 3, 3, 3};
     TitleButtonRect titleButtonRect1 = {3, 3, 3, 3};
     ASSERT_EQ(titleButtonRect.IsUninitializedRect(), false);
-    ASSERT_EQ(titleButtonRect.IsInsideOf(titleButtonRect1 ), true);
+    ASSERT_EQ(titleButtonRect.IsInsideOf(titleButtonRect1), true);
     AvoidArea avoidArea;
     AvoidArea avoidArea1;
     ASSERT_EQ((avoidArea != avoidArea1), false);
