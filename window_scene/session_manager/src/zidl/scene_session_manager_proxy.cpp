@@ -285,7 +285,7 @@ WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSession
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground, 
+WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
     WLOGFD("SceneSessionManagerProxy::RequestFocusStatus id: %{public}d , focusState: %{public}u , byForeground:\
