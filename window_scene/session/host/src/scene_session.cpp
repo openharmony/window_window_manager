@@ -627,7 +627,9 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             newWinRect.posY_ = rect.posY_;
             newRequestRect.posX_ = rect.posX_;
             newRequestRect.posY_ = rect.posY_;
-            session->SetSessionRect(newWinRect);
+            if (!WindowHelper::IsMainWindow(session->GetWindowType())) {
+                session->SetSessionRect(newWinRect);
+            }
             session->SetSessionRequestRect(newRequestRect);
             session->NotifySessionRectChange(newRequestRect, reason);
         } else if (reason == SizeChangeReason::RESIZE) {

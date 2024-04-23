@@ -1435,7 +1435,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
-    if (rect.IsEmpty()) {
+    if (reason != SizeChangeReason::MOVE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
