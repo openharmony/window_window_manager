@@ -550,6 +550,11 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         WLOGFI("[WMSRecover] input method window does not need to recover");
         return;
     }
+    if (property_ != nullptr && property_->GetCollaboratorType() != CollaboratorType::DEFAULT_TYPE) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "collaboratorType is %{public}" PRId32 ", not need to recover",
+            property_->GetCollaboratorType());
+        return;
+    }
 
     wptr<WindowSceneSessionImpl> weakThis = this;
     auto callbackFunc = [weakThis, isSpecificSession] {
