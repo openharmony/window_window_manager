@@ -72,6 +72,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
 const std::string PARAM_DUMP_HELP = "-h";
+constexpr float MIN_GRAY_SCALE = 0.0f;
+constexpr float MAX_GRAY_SCALE = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 
@@ -2008,6 +2010,28 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetGrayScale(float grayScale)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    constexpr float eps = 1e-6f;
+    if (grayScale < (MIN_GRAY_SCALE - eps) || grayScale > (MAX_GRAY_SCALE + eps)) {
+        WLOGFE("invalid grayScale value: %{public}f", grayScale);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    uiContent_->SetContentNodeGrayScale(grayScale);
+
+    WLOGI("Set window gray scale success, grayScale: %{public}f", grayScale);
     return WMError::WM_OK;
 }
 
