@@ -235,6 +235,9 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
         extensionWindowFlags_.privacyModeFlag = isPrivacyMode;
         return WMError::WM_OK;
     }
+    if (isPrivacyMode == extensionWindowFlags_.privacyModeFlag) {
+        return WMError::WM_OK;
+    }
 
     auto updateFlags = extensionWindowFlags_;
     updateFlags.privacyModeFlag = isPrivacyMode;
@@ -655,6 +658,9 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
         extensionWindowFlags_.hideNonSecureWindowsFlag = shouldHide;
         return WMError::WM_OK;
     }
+    if (shouldHide == extensionWindowFlags_.hideNonSecureWindowsFlag) {
+        return WMError::WM_OK;
+    }
 
     auto updateFlags = extensionWindowFlags_;
     updateFlags.hideNonSecureWindowsFlag = shouldHide;
@@ -671,6 +677,9 @@ WMError WindowExtensionSessionImpl::SetWaterMarkFlag(bool isEnable)
 {
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.waterMarkFlag = isEnable;
+        return WMError::WM_OK;
+    }
+    if (isEnable == extensionWindowFlags_.waterMarkFlag) {
         return WMError::WM_OK;
     }
 
@@ -697,7 +706,7 @@ void WindowExtensionSessionImpl::CheckAndRemoveExtWindowFlags()
 {
     if (extensionWindowFlags_.bitData != 0) {
         // If flag is true, make it inactive when background
-        UpdateExtWindowFlags(0, extensionWindowFlags_);
+        UpdateExtWindowFlags(ExtensionWindowFlags(), extensionWindowFlags_);
     }
 }
 
