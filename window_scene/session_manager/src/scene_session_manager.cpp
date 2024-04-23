@@ -1926,9 +1926,14 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     return false;
 }
 
-inline SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property)
+SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& property)
 {
-    SessionInfo sessionInfo = property->GetSessionInfo();
+    SessionInfo sessionInfo;
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
+        return sessionInfo;
+    }
+    sessionInfo = property->GetSessionInfo();
     sessionInfo.persistentId_ = property->GetPersistentId();
     sessionInfo.windowMode = static_cast<int32_t>(property->GetWindowMode());
     sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
