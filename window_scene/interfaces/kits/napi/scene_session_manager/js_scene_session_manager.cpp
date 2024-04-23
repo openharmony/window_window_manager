@@ -2161,7 +2161,7 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
     size_t argc = 4;
     napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) {
+    if (argc != ARGC_TWO) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                             "Input parameter is missing or invalid"));
@@ -2185,14 +2185,8 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
     }
     if (!isRecovering) {
         // Sceneboard recover finished
-        if (argc != ARGC_TWO) {
-            WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                "Recovered persistentId List not received"));
-            return NapiGetUndefined(env);
-        }
-        SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
         SceneSessionManager::GetInstance().NotifyRecoveringFinished();
+        SceneSessionManager::GetInstance().UpdateRecoveredSessionInfo(recoveredPersistentIds);
     } else {
         SceneSessionManager::GetInstance().SetAlivePersistentIds(recoveredPersistentIds);
     }
