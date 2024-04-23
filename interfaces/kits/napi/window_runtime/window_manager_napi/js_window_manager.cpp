@@ -416,8 +416,8 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
     return result;
 }
 
-bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
-    WindowOption& option, void*& contextPtr)
+bool JsWindowManager::ParseRequiredConfigOption(napi_env env, napi_value jsObject,
+    WindowOption& option)
 {
     std::string windowName;
     if (ParseJsValue(jsObject, env, "name", windowName)) {
@@ -439,11 +439,18 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         WLOGFE("Failed to convert parameter to winType");
         return false;
     }
+    return true;
+}
 
+bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
+    WindowOption& option, void*& contextPtr)
+{
+    if (!ParseRequiredConfigOption(env, jsObject, option)) {
+        return false;
+    }
     if (!isConfigOptionWindowTypeValid(env, option)) {
         return false;
     }
-
     napi_value value = nullptr;
     napi_get_named_property(env, jsObject, "ctx", &value);
     if (GetType(env, value) == napi_undefined) {
@@ -453,6 +460,16 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
     GetNativeContext(env, value, contextPtr, errCode);
     if (errCode != WMError::WM_OK) {
         return false;
+    }
+
+    bool dialogDecorEnable = false;
+    if (ParseJsValue(jsObject, env, "decorEnable", dialogDecorEnable)) {
+        option.SetDialogDecorEnable(dialogDecorEnable);
+    }
+
+    std::string dialogTitle;
+    if (ParseJsValue(jsObject, env, "title", dialogTitle)) {
+        option.SetDialogTitle(dialogTitle);
     }
 
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);

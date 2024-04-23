@@ -60,6 +60,7 @@ public:
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
+    void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     void NotifyGestureNavigationEnabledResult(bool enable);
 
     static inline SingletonDelegator<WindowManager> delegator_;
@@ -86,6 +87,8 @@ public:
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
+    std::vector<sptr<IVisibleWindowNumChangedListener>> visibleWindowNumChangedListeners_;
+    sptr<WindowManagerAgent> visibleWindowNumChangedListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -198,13 +201,17 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         return;
     }
     for (auto& info : infos) {
-        WLOGFD("NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u], uiNodeId_[%{public}u]," \
-            "rect[%{public}d %{public}d %{public}d %{public}d]," \
+        TLOGD(WmsLogTag::WMS_MAIN, "NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u]," \
+            "uiNodeId_[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
             "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
-            "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
+            "mode[%{public}u], type[%{public}u, updateType[%{public}d], bundle[%{public}s]",
             info->wid_, info->innerWid_, info->uiNodeId_, info->windowRect_.width_, info->windowRect_.height_,
             info->windowRect_.posX_, info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_,
-            info->layer_, info->mode_, info->type_, type);
+            info->layer_, info->mode_, info->type_, type, info->bundleName_.c_str());
+        for (const auto& rect : info->touchHotAreas_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d," \
+            "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
@@ -281,6 +288,22 @@ void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
     }
     for (auto& listener : gestureNavigationEnabledListeners) {
         listener->OnGestureNavigationEnabledUpdate(enable);
+    }
+}
+
+void WindowManager::Impl::NotifyVisibleWindowNumChanged(
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
+{
+    std::vector<sptr<IVisibleWindowNumChangedListener>> visibleWindowNumChangedListeners;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        visibleWindowNumChangedListeners = visibleWindowNumChangedListeners_;
+    }
+    for (auto& listener : visibleWindowNumChangedListeners) {
+        if (listener == nullptr) {
+            continue;
+        }
+        listener->OnVisibleWindowNumChange(visibleWindowNumInfo);
     }
 }
 
@@ -1086,5 +1109,64 @@ WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
     return ret;
 }
 
+WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->visibleWindowNumChangedListenerAgent_ == nullptr) {
+        pImpl_->visibleWindowNumChangedListenerAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM,
+        pImpl_->visibleWindowNumChangedListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
+        pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
+            pImpl_->visibleWindowNumChangedListeners_.end(), listener);
+        if (iter != pImpl_->visibleWindowNumChangedListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->visibleWindowNumChangedListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    auto iter = std::find(pImpl_->visibleWindowNumChangedListeners_.begin(),
+        pImpl_->visibleWindowNumChangedListeners_.end(), listener);
+    if (iter == pImpl_->visibleWindowNumChangedListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
+        return WMError::WM_OK;
+    }
+
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->visibleWindowNumChangedListeners_.empty() && pImpl_->visibleWindowNumChangedListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM,
+            pImpl_->visibleWindowNumChangedListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+void WindowManager::UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
+{
+    pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+}
 } // namespace Rosen
 } // namespace OHOS

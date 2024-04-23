@@ -48,6 +48,7 @@ ohos_static_library("libwm_static") {
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
+    "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/window_scene/intention_event/include",
   ]
 
@@ -61,6 +62,7 @@ ohos_static_library("libwm_static") {
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
+    "src/screen_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
     "src/window.cpp",
@@ -75,7 +77,6 @@ ohos_static_library("libwm_static") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_prepare_terminate.cpp",
-    "src/window_rate_manager.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -192,6 +193,7 @@ ohos_shared_library("libwm") {
     "../utils/include",
     "../window_scene/intention_event/service/anr_manager/include",
     "../window_scene/intention_event/framework/anr_handler/include",
+    "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/window_scene/intention_event/include",
   ]
 
@@ -205,6 +207,7 @@ ohos_shared_library("libwm") {
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
+    "src/screen_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
     "src/window.cpp",
@@ -219,7 +222,6 @@ ohos_shared_library("libwm") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_prepare_terminate.cpp",
-    "src/window_rate_manager.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -250,6 +252,7 @@ ohos_shared_library("libwm") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
@@ -258,6 +261,8 @@ ohos_shared_library("libwm") {
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",

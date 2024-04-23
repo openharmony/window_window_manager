@@ -40,7 +40,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     if (moveDragController_  != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
-        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
     SetMoveDragCallback();
     std::string key = GetRatioPreferenceKey();
@@ -146,7 +146,7 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
-            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }
     return true;
@@ -193,5 +193,13 @@ bool MainSession::IfNotNeedAvoidKeyBoardForSplit()
         return false;
     }
     return true;
+}
+
+void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+{
+    uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
+    uint32_t minHeight = GetSystemConfig().miniHeightOfMainWindow_;
+    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
 }
 } // namespace OHOS::Rosen

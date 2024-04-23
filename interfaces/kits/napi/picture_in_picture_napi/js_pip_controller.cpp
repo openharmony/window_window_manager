@@ -188,6 +188,7 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]OnSetAutoStartEnabled error, controller is nullptr");
         return NapiGetUndefined(env);
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     pipController_->SetAutoStartEnabled(enable);
     return NapiGetUndefined(env);
 }
@@ -222,6 +223,7 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_PIP, "OnUpdateContentSize error, controller is nullptr");
         return NapiThrowInvalidParam(env);
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     pipController_->UpdateContentSize(width, height);
     return NapiGetUndefined(env);
 }

@@ -437,6 +437,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureExtSession, Functio
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleGetSessionInfoByContinueSessionId
+ * @tc.desc: test HandleGetSessionInfoByContinueSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString("test_01");
+
+    int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
 }
 }
 }

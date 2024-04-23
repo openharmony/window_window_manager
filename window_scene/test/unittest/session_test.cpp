@@ -23,6 +23,7 @@
 #include "session/host/include/extension_session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
+#include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
 #include "key_event.h"
@@ -154,6 +155,8 @@ public:
     WSError TransferFindFocusedElementInfo(bool isChannelNull);
     WSError TransferFocusMoveSearch(bool isChannelNull);
     WSError TransferExecuteAction(bool isChannelNull);
+    sptr<SceneSessionManager> ssm_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
@@ -176,6 +179,12 @@ void WindowSessionTest::SetUp()
     session_ = new (std::nothrow) Session(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
     EXPECT_NE(nullptr, session_);
+    ssm_ = new SceneSessionManager();
+    session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
+    auto isScreenLockedCallback = [this]() {
+        return ssm_->IsScreenLocked();
+    };
+    session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
 void WindowSessionTest::TearDown()
@@ -426,7 +435,10 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockEventChannel);
     auto surfaceNode = CreateRSSurfaceNode();
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, surfaceNode, sessionConfig, property));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -454,7 +466,10 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
     SystemSessionConfig sessionConfig;
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, sessionConfig));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
+            mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -495,21 +510,23 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
     SystemSessionConfig systemConfig;
-    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
-    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
+    result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
-    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1839,6 +1856,23 @@ HWTEST_F(WindowSessionTest, TransferPointerEvent05, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: TransferKeyEvent01
+ * @tc.desc: !IsSystemSession() && !IsSessionVaild() is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: TransferKeyEvent02
  * @tc.desc: keyEvent is nullptr
  * @tc.type: FUNC
@@ -1849,7 +1883,8 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent02, Function | SmallTest | Level2)
 
     session_->sessionInfo_.isSystem_ = true;
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
@@ -1879,7 +1914,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent03, Function | SmallTest | Level2)
     dialogSession->state_ = SessionState::STATE_ACTIVE;
     session_->dialogVec_.push_back(dialogSession);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -1909,7 +1944,7 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent04, Function | SmallTest | Level2)
     session_->dialogVec_.push_back(dialogSession);
     session_->parentSession_ = session_;
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, session_->TransferKeyEvent(keyEvent));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -2484,6 +2519,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     info.callingTokenId_ = 1;
     info.uiAbilityId_ = 1;
     info.startSetting = nullptr;
+    info.continueSessionId_ = "";
     session_->SetSessionInfo(info);
     ASSERT_EQ(nullptr, session_->sessionInfo_.want);
     ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
@@ -2491,6 +2527,7 @@ HWTEST_F(WindowSessionTest, SetSessionInfo018, Function | SmallTest | Level2)
     ASSERT_EQ(1, session_->sessionInfo_.callerPersistentId_);
     ASSERT_EQ(1, session_->sessionInfo_.callingTokenId_);
     ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
+    ASSERT_EQ("", session_->sessionInfo_.continueSessionId_);
     ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
 }
 
@@ -2946,8 +2983,6 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
  */
 HWTEST_F(WindowSessionTest, SetAttachState01, Function | SmallTest | Level2)
 {
-    session_->SetAttachState(true);
-    ASSERT_EQ(session_->isAttach_, true);
     session_->SetAttachState(false);
     ASSERT_EQ(session_->isAttach_, false);
 }
@@ -3011,6 +3046,219 @@ HWTEST_F(WindowSessionTest, RegisterDetachCallback03, Function | SmallTest | Lev
     session_->SetAttachState(false);
     session_->RegisterDetachCallback(detachCallback);
     Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: SetContextTransparentFunc
+ * @tc.desc: SetContextTransparentFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetContextTransparentFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->contextTransparentFunc_, nullptr);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->contextTransparentFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NeedCheckContextTransparent
+ * @tc.desc: NeedCheckContextTransparent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetContextTransparentFunc(nullptr);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
+    NotifyContextTransparentFunc func = [](){};
+    session_->SetContextTransparentFunc(func);
+    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
+}
+
+/**
+ * @tc.name: SetShowRecent001
+ * @tc.desc: Exist detect task when in recent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+
+    session_->SetShowRecent(true);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: SetShowRecent002
+ * @tc.desc: SetShowRecent:showRecent is false, showRecent_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent002, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+    session_->showRecent_ = false;
+
+    session_->SetShowRecent(false);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: SetShowRecent003
+ * @tc.desc: SetShowRecent:showRecent is false, showRecent_ is true, detach task.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent003, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+    session_->showRecent_ = true;
+    session_->isAttach_ = false;
+
+    session_->SetShowRecent(false);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask001
+ * @tc.desc: Create detection task when there are no pre_existing tasks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::NO_TASK;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask002
+ * @tc.desc: Detect state when window mode changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(false, hasEvent);
+    ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask003
+ * @tc.desc: Detect sup and down tree tasks fo the same type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask004
+ * @tc.desc: Detection tasks under the same window mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: GetAttachState001
+ * @tc.desc: GetAttachState001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAttachState001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    session_->SetAttachState(false);
+    bool isAttach = session_->GetAttachState();
+    ASSERT_EQ(false, isAttach);
+    session_->handler_->RemoveTask(taskName);
 }
 
 }

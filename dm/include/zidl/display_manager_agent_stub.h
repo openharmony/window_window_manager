@@ -48,6 +48,7 @@ private:
     int32_t ProcDisplayModechanged(MessageParcel& data);
     int32_t ProcAvailableAreaChanged(MessageParcel& data);
     int32_t ProcFoldAngleChanged(MessageParcel& data);
+    int32_t ProcCaptureStatusChanged(MessageParcel& data);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H

@@ -164,7 +164,7 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
-            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }
     return true;
@@ -184,5 +184,13 @@ bool SubSession::IfNotNeedAvoidKeyBoardForSplit()
         return false;
     }
     return true;
+}
+
+void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+{
+    uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
+    uint32_t minHeight = GetSystemConfig().miniHeightOfSubWindow_;
+    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
 }
 } // namespace OHOS::Rosen

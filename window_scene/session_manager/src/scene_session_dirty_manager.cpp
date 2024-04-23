@@ -187,15 +187,15 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     MMI::Rect touchRect = {
         .x = -touchOffset,
         .y = -touchOffset,
-        .width = windowRect.width_ + touchOffset * 2,  // 2 : double touchOffset
-        .height = windowRect.height_ + touchOffset * 2 // 2 : double touchOffset
+        .width = static_cast<int>(windowRect.width_ + touchOffset * 2),  // 2 : double touchOffset
+        .height = static_cast<int>(windowRect.height_ + touchOffset * 2) // 2 : double touchOffset
     };
 
     MMI::Rect pointerRect = {
         .x = -pointerOffset,
         .y = -pointerOffset,
-        .width = windowRect.width_ + pointerOffset * 2,  // 2 : double pointerOffset
-        .height = windowRect.height_ + pointerOffset * 2 // 2 : double pointerOffset
+        .width = static_cast<int>(windowRect.width_ + pointerOffset * 2),  // 2 : double pointerOffset
+        .height = static_cast<int>(windowRect.height_ + pointerOffset * 2) // 2 : double pointerOffset
     };
 
     touchHotAreas.emplace_back(touchRect);
@@ -216,8 +216,8 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         MMI::Rect rect;
         rect.x = area.posX_;
         rect.y = area.posY_;
-        rect.width = area.width_;
-        rect.height = area.height_;
+        rect.width = static_cast<int>(area.width_);
+        rect.height = static_cast<int>(area.height_);
         auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
             [&rect](const MMI::Rect& var) { return rect == var; });
         if (iter != touchHotAreas.end()) {
@@ -225,7 +225,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         }
         touchHotAreas.emplace_back(rect);
         pointerHotAreas.emplace_back(rect);
-        if (touchHotAreas.size() == static_cast<int>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
+        if (touchHotAreas.size() == static_cast<u_int32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
             auto sessionid = sceneSession->GetWindowId();
             WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionid, static_cast<int>(hotAreas.size()));
             break;
@@ -332,11 +332,13 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         auto iter = (sceneSessionValue->GetParentPersistentId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetParentPersistentId());
-        if (iter != dialogMap.end() && iter->second != nullptr) {
+        if (iter != dialogMap.end() && iter->second != nullptr &&
+            sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-            WLOGFI("Change agentId, dialogId: %{public}d, parentId: %{public}d",
-                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"
+                " CallingPid: %{public}d",
+                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
         windowIDLstLog.append(std::to_string(windowInfo.id).append(", "));
@@ -438,7 +440,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
         .transform = transformData,
-        .pixelMap = pixelMap
+        .pixelMap = pixelMap,
+        .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr && (property->GetWindowFlags() &

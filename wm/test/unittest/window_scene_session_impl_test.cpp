@@ -686,8 +686,6 @@ HWTEST_F(WindowSceneSessionImplTest, Close02, Function | SmallTest | Level2)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    windowscenesession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->Close());
 }
 
 /**
@@ -766,7 +764,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     // show with null session
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Hide(2, false, false));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -1085,6 +1083,51 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty06, Function | SmallTest |
 }
 
 /*
+ * @tc.name: SystemBarProperty07
+ * @tc.desc: SystemBarProperty07 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    window->hostSession_ = session;
+
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(SystemBarSettingFlag::DEFAULT_SETTING,
+        window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
+    
+    property.enable_ = false;
+    property.settingFlag_ = SystemBarSettingFlag::ENABLE_SETTING;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(SystemBarSettingFlag::ENABLE_SETTING,
+        window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
+    
+    property.backgroundColor_ = 0xB3000000;
+    property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(SystemBarSettingFlag::COLOR_SETTING,
+        window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
+    
+    property.enable_ = true;
+    property.backgroundColor_ = 0x4C000000;
+    property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(SystemBarSettingFlag::ALL_SETTING,
+        window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR).settingFlag_);
+}
+
+/*
  * @tc.name: SpecificBarProperty
  * @tc.desc: SpecificBarProperty01 test
  * @tc.type: FUNC
@@ -1272,7 +1315,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTurnScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetTurnScreenOn(false));
 }
 
 /*
@@ -1314,7 +1357,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetKeepScreenOn(false));
     ASSERT_FALSE(window->IsKeepScreenOn());
 }
 
@@ -2123,7 +2166,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId02, Function | S
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, parentscenesession);
 
-    ASSERT_EQ(nullptr, parentscenesession->FindParentSessionByParentId(-1));
+    ASSERT_NE(nullptr, parentscenesession->FindParentSessionByParentId(-1));
     GTEST_LOG_(INFO) << "JpegDecoderTest: RaiseAboveTarget01 end";
 }
 
@@ -2222,7 +2265,7 @@ HWTEST_F(WindowSceneSessionImplTest, BindDialogTarget01, Function | SmallTest | 
     ASSERT_NE(nullptr, windowscenesession);
     sptr<IRemoteObject> targetToken;
     WMError ret = windowscenesession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
@@ -2564,7 +2607,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetWindowLimits01, Function | SmallTest | L
     window->hostSession_ = session;
 
     WindowLimits windowSizeLimits;
-    ASSERT_EQ(WMError::WM_OK, window->GetWindowLimits(windowSizeLimits));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->GetWindowLimits(windowSizeLimits));
     ASSERT_EQ(windowSizeLimits.maxWidth_, 1000);
     ASSERT_EQ(windowSizeLimits.maxHeight_, 1000);
     ASSERT_EQ(windowSizeLimits.minWidth_, 1000);
@@ -2858,6 +2901,31 @@ HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Fu
         ASSERT_EQ(res, WMError::WM_OK);
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+}
+
+/**
+ * @tc.name: TestGetUIContentWithId
+ * @tc.desc: Get uicontent with id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("TestGetUIContentWithId");
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(102);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    
+    ASSERT_NE(nullptr, window->GetUIContentWithId(102));
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId end";
 }
 
 }

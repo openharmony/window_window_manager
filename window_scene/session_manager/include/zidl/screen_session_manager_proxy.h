@@ -32,6 +32,7 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
 
@@ -93,6 +94,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
@@ -124,6 +126,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
+    bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
 

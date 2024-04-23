@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_JS_WINDOW_MANAGER_H
+#define OHOS_JS_WINDOW_MANAGER_H
+
 #include "js_runtime_utils.h"
 #include "js_window_register_manager.h"
 #include "native_engine/native_engine.h"
@@ -20,8 +23,6 @@
 #include "native_engine/native_value.h"
 #include "wm_common.h"
 
-#ifndef OHOS_JS_WINDOW_MANAGER_H
-#define OHOS_JS_WINDOW_MANAGER_H
 namespace OHOS {
 namespace Rosen {
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj);
@@ -59,6 +60,8 @@ private:
     static napi_value OnSetGestureNavigationEnabled(napi_env env, napi_callback_info info);
     static napi_value OnSetWaterMarkImage(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowFocus(napi_env env, napi_callback_info info);
+    static bool ParseRequiredConfigOption(
+        napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

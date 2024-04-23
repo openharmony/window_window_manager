@@ -44,7 +44,6 @@
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
-#include "window_rate_manager.h"
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
@@ -129,12 +128,13 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("[WMSCom]Property is null");
         return;
     }
+    WindowType optionWindowType = option->GetWindowType();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = option->GetBundleName();
     property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
-    property_->SetWindowType(option->GetWindowType());
+    property_->SetWindowType(optionWindowType);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
@@ -148,15 +148,24 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPC && WindowHelper::IsSubWindow(option->GetWindowType())) {
+    if (isPC && WindowHelper::IsSubWindow(optionWindowType)) {
         WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
             option->GetSubWindowTitle().c_str(), option->GetSubWindowDecorEnable());
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
         property_->SetDragEnabled(option->GetSubWindowDecorEnable());
         subWindowTitle_ = option->GetSubWindowTitle();
     }
+    bool isDialog = WindowHelper::IsDialogWindow(optionWindowType);
+    if (isPC && isDialog) {
+        bool dialogDecorEnable = option->GetDialogDecorEnable();
+        property_->SetDecorEnable(dialogDecorEnable);
+        property_->SetDragEnabled(dialogDecorEnable);
+        dialogTitle_ = option->GetDialogTitle();
+        WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+            dialogTitle_.c_str(), dialogDecorEnable);
+    }
 
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
@@ -448,6 +457,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
+    if (context_) {
+        context_.reset();
+    }
     return WMError::WM_OK;
 }
 
@@ -705,7 +717,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPC && WindowHelper::IsSubWindow(GetType())) {
+    WindowType windowType = GetType();
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    if (isPC && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent_->HideWindowTitleButton(true, true, true);
         return;
@@ -743,15 +758,9 @@ WMError WindowSessionImpl::SetUIContentByAbc(
     return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
 }
 
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "interrupt set uicontent because window is invalid! window state: %{public}d",
-            state_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (uiContent_) {
         uiContent_->Destroy();
     }
@@ -765,8 +774,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (type) {
         default:
         case WindowSetUIContentType::DEFAULT:
@@ -797,9 +804,32 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
 
     WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
         uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
+    return WMError::WM_OK;
+}
 
-    if (WindowHelper::IsSubWindow(GetType()) && IsDecorEnable()) {
-        SetAPPWindowLabel(subWindowTitle_);
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
+    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "interrupt set uicontent because window is invalid! window state: %{public}d",
+            state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, type, ability, aceRet);
+    if (initUIContentRet != WMError::WM_OK) {
+        return initUIContentRet;
+    }
+    WindowType winType = GetType();
+    bool isSubWindow = WindowHelper::IsSubWindow(winType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
+    if (IsDecorEnable()) {
+        if (isSubWindow) {
+            SetAPPWindowLabel(subWindowTitle_);
+        } else if (isDialogWindow) {
+            SetAPPWindowLabel(dialogTitle_);
+        }
     }
 
     uint32_t version = 0;
@@ -853,7 +883,7 @@ std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std
     begin = file.tellg();
     file.seekg(0, std::ios::end);
     end = file.tellg();
-    size_t len = end - begin;
+    size_t len = static_cast<uint32_t>(end - begin);
     WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
 
     if (len <= 0) {
@@ -874,6 +904,9 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
                 || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
         WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
+        if (windowSystemConfig_.freeMultiWindowSupport_) {
+                decorVisible = decorVisible && windowSystemConfig_.freeMultiWindowEnable_;
+        }
         uiContent_->UpdateDecorVisible(decorVisible, isDecorEnable);
     } else {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
@@ -896,6 +929,9 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
                 || (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+            if (windowSystemConfig_.freeMultiWindowSupport_) {
+                decorVisible = decorVisible && windowSystemConfig_.freeMultiWindowEnable_;
+            }
             WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
             uiContent_->UpdateDecorVisible(decorVisible, IsDecorEnable());
         }
@@ -1152,6 +1188,16 @@ std::string WindowSessionImpl::GetContentInfo()
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
 {
     return uiContent_.get();
+}
+
+Ace::UIContent* WindowSessionImpl::GetUIContentWithId(uint32_t winId) const
+{
+    sptr<Window> targetWindow = FindWindowById(winId);
+    if (targetWindow == nullptr) {
+        WLOGE("target window is null");
+        return nullptr;
+    }
+    return targetWindow->GetUIContent();
 }
 
 void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
@@ -1638,7 +1684,13 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
-    WindowRateManager::GetInstance().AddWindowRate(GetPersistentId());
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable ture failed, vsyncStation is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: ture, linkerId = %{public}" PRIu64,
+        vsyncStation_->GetFrameRateLinkerId());
+    vsyncStation_->SetFrameRateLinkerEnable(true);
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1651,7 +1703,13 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
-    WindowRateManager::GetInstance().RemoveWindowRate(GetPersistentId(), vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable false failed, vsyncStation is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: false, linkerId = %{public}" PRIu64,
+        vsyncStation_->GetFrameRateLinkerId());
+    vsyncStation_->SetFrameRateLinkerEnable(false);
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
@@ -2497,7 +2555,11 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 void WindowSessionImpl::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WindowRateManager::GetInstance().FlushFrameRate(GetPersistentId(), rate, vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->FlushFrameRate(rate);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
@@ -2705,6 +2767,11 @@ void WindowSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimat
 }
 
 WSError WindowSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable)
 {
     return WSError::WS_OK;
 }

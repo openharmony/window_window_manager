@@ -27,6 +27,23 @@ class ScreenSessionTest : public testing::Test {
 };
 
 namespace {
+
+/**
+ * @tc.name: create ScreenSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenSession, Function | SmallTest | Level2)
+{
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    EXPECT_NE(nullptr, screenSession);
+}
+
 /**
  * @tc.name: SetDisplayNodeScreenId
  * @tc.desc: normal function

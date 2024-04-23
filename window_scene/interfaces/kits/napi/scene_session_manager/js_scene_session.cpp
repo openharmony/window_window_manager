@@ -110,6 +110,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     napi_set_named_property(env, objValue, "isAppType", CreateJsValue(env, session->IsFloatingWindowAppType()));
     napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
+    napi_set_named_property(env, objValue, "keyboardGravity",
+        CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
 
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsSceneSession::RegisterCallback);
@@ -274,7 +276,7 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
             WLOGFE("[NAPI]jsHotAreaRect is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsHotAreaType, [1] = jsHotAreaReason, [2] = jsHotAreaRect};
+        napi_value argv[] = {jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnWindowDragHotArea");
@@ -1585,7 +1587,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
             WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = CreateJsError(env, 0), [1] = jsSceneSessionObj};
+        napi_value argv[] = {CreateJsError(env, 0), jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnRaiseAboveTarget: " + std::to_string(subWindowId));
@@ -2080,7 +2082,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsSessionInfo, [1] = jsNeedRemoveSession};
+        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);
