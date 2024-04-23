@@ -219,6 +219,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         if (preRect.IsUninitializedRect() && !rect.IsUninitializedRect()) {
             property->SetWindowRect(rect);
         }
+        property->SetCollaboratorType(reply.ReadInt32());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
