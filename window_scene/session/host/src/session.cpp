@@ -1063,7 +1063,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
         TLOGD(WmsLogTag::WMS_LIFE, "SetAttachState:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
-        if (!session->isAttach_ && session->detachCallback_ != nullptr) {
+        if (isAttach && session->detachCallback_ != nullptr) {
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
