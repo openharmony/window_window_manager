@@ -2947,6 +2947,9 @@ HWTEST_F(WindowSceneSessionImplTest, Test01, Function | SmallTest | Level3)
     AvoidArea avoidArea;
     AvoidArea avoidArea1;
     ASSERT_EQ((avoidArea != avoidArea1), false);
+}
+
+/**
  * @tc.name: RegisterSessionRecoverListenerInputMethodFloat
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
