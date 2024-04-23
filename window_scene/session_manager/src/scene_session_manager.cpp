@@ -7466,7 +7466,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
             WLOGFD("session is not visible!");
             return WSError::WS_DO_NOTHING;
         }
-       FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+        FocusChangeReason reason = FocusChangeReason::MOVE_UP;
         RequestSessionFocus(persistentId, true, reason);
         if (WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
             sceneSession->RaiseToAppTop();
