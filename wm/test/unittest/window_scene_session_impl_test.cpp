@@ -568,6 +568,7 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Resize01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
 
@@ -581,6 +582,33 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     windowscenesession->state_ = WindowState::STATE_FROZEN;
     windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowscenesession->Resize(1, 1));
+}
+
+/**
+ * @tc.name: Resize02
+ * @tc.desc: Resize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Resize02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("Resize02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+
+    windowscenesession->property_->SetPersistentId(888);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->state_ = WindowState::STATE_FROZEN;
+    windowscenesession->hostSession_ = session;
+
+    windowscenesession->SetDefaultProperty();
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Resize(1, 1));
+
+    windowscenesession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowscenesession->Resize(1, 1));
 }
 

@@ -1262,9 +1262,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (property_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT &&
-        property_->GetWindowType() != WindowType::WINDOW_TYPE_PANEL &&
-        GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
