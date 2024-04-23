@@ -349,7 +349,7 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayManagerTest, GetDisplayById, Function | SmallTest | Level1)
 {
-    DisplayId displayId = 0;
+    DisplayId displayId = -1;
     DisplayManager::GetInstance().destroyed_ = true;
     auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
     ASSERT_EQ(ret, nullptr);
