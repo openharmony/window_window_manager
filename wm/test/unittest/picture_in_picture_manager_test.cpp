@@ -144,7 +144,7 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     PictureInPictureManager::autoStartController_ = pipController1;
     sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
     ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
-    PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl；
+    PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
     ASSERT_EQ(result, 1);
 }
