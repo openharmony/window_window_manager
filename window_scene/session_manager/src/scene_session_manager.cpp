@@ -1977,7 +1977,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
         if (recoveringFinished_) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "recover finished");
+            TLOGW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         // recover specific session
@@ -2094,7 +2094,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, &session, property, token, pid, uid]() {
         if (recoveringFinished_) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "recover finished");
+            TLOGW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         SessionInfo sessionInfo = RecoverSessionInfo(property);
