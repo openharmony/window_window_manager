@@ -589,7 +589,7 @@ private:
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    bool isAttach_{ false };
+    std::atomic<bool> isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
