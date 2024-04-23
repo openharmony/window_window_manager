@@ -3219,6 +3219,22 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureExtSessionShouldHide, Function | S
 }
 
 /**
+ * @tc.name: ClearUnrecoveredSessions
+ * @tc.desc: test func ClearUnrecoveredSessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ClearUnrecoveredSessions, Function | SmallTest | Level1)
+{
+    ssm_->alivePersistentIds_.push_back(23);
+    ssm_->alivePersistentIds_.push_back(24);
+    ssm_->alivePersistentIds_.push_back(25);
+    std::vector<int32_t> recoveredPersistentIds;
+    recoveredPersistentIds.push_back(23);
+    recoveredPersistentIds.push_back(24);
+    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: SceneSesionManager hide non-secure windows by scene session
  * @tc.type: FUNC
