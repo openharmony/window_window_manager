@@ -2932,6 +2932,89 @@ HWTEST_F(WindowSceneSessionImplTest, SyncDestroyAndDisconnectSpecificSession, Fu
 }
 
 /**
+ * @tc.name: SetGrayScale01
+ * @tc.desc: SetGrayScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetGrayScale01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    constexpr float grayScale = 0.5f;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetGrayScale(grayScale));
+}
+
+/**
+ * @tc.name: SetGrayScale02
+ * @tc.desc: SetGrayScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetGrayScale02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    std::vector<WindowType> types = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+                                      WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+                                      WindowType::SYSTEM_WINDOW_BASE };
+    for (WindowType type : types) {
+        window->SetWindowType(type);
+        float grayScale = -0.001f;
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGrayScale(grayScale));
+        grayScale = 1.001f;
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGrayScale(grayScale));
+    }
+}
+
+/**
+ * @tc.name: SetGrayScale03
+ * @tc.desc: SetGrayScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetGrayScale03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    std::vector<WindowType> types = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+                                      WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+                                      WindowType::SYSTEM_WINDOW_BASE };
+    for (WindowType type : types) {
+        window->SetWindowType(type);
+        float grayScale = 0.0f;
+        ASSERT_EQ(WMError::WM_OK, window->SetGrayScale(grayScale));
+        grayScale = 1.0f;
+        ASSERT_EQ(WMError::WM_OK, window->SetGrayScale(grayScale));
+        grayScale = 0.5f;
+        ASSERT_EQ(WMError::WM_OK, window->SetGrayScale(grayScale));
+    }
+}
+
+/**
  * @tc.name: TestGetUIContentWithId
  * @tc.desc: Get uicontent with id
  * @tc.type: FUNC
