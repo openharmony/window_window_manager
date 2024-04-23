@@ -38,7 +38,7 @@ public:
     {
         if (HiLogIsLoggable(OHOS::Rosen::HILOG_DOMAIN_WINDOW, tag_, level_)) {
             if (logfn_ != nullptr) {
-                logfn_("in %{public}s, enter");
+                logfn_("enter");
             }
         }
     }
@@ -46,7 +46,7 @@ public:
     {
         if (HiLogIsLoggable(OHOS::Rosen::HILOG_DOMAIN_WINDOW, tag_, level_)) {
             if (logfn_ != nullptr) {
-                logfn_("in %{public}s, leave");
+                logfn_("leave");
             }
         }
     }

@@ -30,7 +30,6 @@
 #include "anr_manager.h"
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
-#include "window_rate_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -64,6 +63,7 @@ private:
 } // namespace
 
 sptr<RootScene> RootScene::staticRootScene_;
+std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> RootScene::configurationUpdatedCallback_;
 
 RootScene::RootScene()
 {
@@ -155,6 +155,9 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
     WLOGD("notify root scene ace for all");
     if (staticRootScene_) {
         staticRootScene_->UpdateConfiguration(configuration);
+        if (configurationUpdatedCallback_) {
+            configurationUpdatedCallback_(configuration);
+        }
     }
 }
 
@@ -202,7 +205,11 @@ int64_t RootScene::GetVSyncPeriod()
 void RootScene::FlushFrameRate(uint32_t rate)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    WindowRateManager::GetInstance().FlushFrameRateForRootWindow(rate, vsyncStation_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->FlushFrameRate(rate);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)
@@ -211,6 +218,12 @@ void RootScene::OnBundleUpdated(const std::string& bundleName)
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
+}
+
+void RootScene::SetOnConfigurationUpdatedCallback(
+    const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback)
+{
+    configurationUpdatedCallback_ = callback;
 }
 
 void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)

@@ -100,9 +100,14 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             WLOGFE("There is no need to connect the screen");
             return;
         }
-        auto screenProperty = screenSessionManager_->GetScreenProperty(screenId);
-        auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
-        sptr<ScreenSession> screenSession = new ScreenSession(screenId, rsId, name, screenProperty, displayNode);
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = rsId,
+            .name = name,
+        };
+        config.property = screenSessionManager_->GetScreenProperty(screenId);
+        config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
@@ -387,5 +392,19 @@ bool ScreenSessionManagerClient::IsFoldable()
         return false;
     }
     return screenSessionManager_->IsFoldable();
+}
+
+void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    if (screenSession->isScreenGroup_) {
+        WLOGFE("cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64, screenId);
+        return;
+    }
+    screenSession->SetScreenSceneDpi(virtualPixelRatio);
 }
 } // namespace OHOS::Rosen

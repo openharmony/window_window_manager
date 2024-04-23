@@ -53,6 +53,12 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) override { return nullptr; }
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
+        DmErrorCode* errorCode = nullptr) override
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     virtual DMError SetScreenRotationLocked(bool isLocked) override { return DMError::DM_OK; }
     virtual DMError IsScreenRotationLocked(bool& isLocked) override { return DMError::DM_OK; }
 
@@ -100,6 +106,10 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override {}
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override { return DMError::DM_OK; }
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override { return DMError::DM_OK; }
+    virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError GetDensityInCurResolution(ScreenId screenId,
@@ -120,6 +130,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
     bool IsFoldable() override { return false; };
+    bool IsCaptured() override { return false; };
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
 

@@ -65,6 +65,7 @@ public:
         TRANS_ID_GET_ALL_SCREEN_INFOS,
         TRANS_ID_SET_ORIENTATION,
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO,
+        TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM,
         TRANS_ID_SET_RESOLUTION,
         TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
@@ -124,6 +125,8 @@ public:
         TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE,
         TRANS_ID_GET_DEVICE_SCREEN_CONFIG,
         TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE,
+        TRANS_ID_DEVICE_IS_CAPTURE,
+        TRANS_ID_GET_SNAPSHOT_BY_PICKER,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -144,6 +147,11 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr)
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
@@ -220,6 +228,10 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) = 0;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) = 0;
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }
@@ -229,6 +241,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool IsFoldable() { return false; }
+    virtual bool IsCaptured() { return false; }
 
     virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; }
 

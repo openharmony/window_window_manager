@@ -203,6 +203,8 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
+    uint32_t windowInputType_ = 0;
+    std::string continueSessionId_ = "";
 };
 
 enum class SessionFlag : uint32_t {
@@ -377,12 +379,25 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
+struct StartingWindowInfo {
+    int32_t startingWindowBackgroundId_;
+    int32_t startingWindowIconId_;
+    uint32_t startingWindowBackgroundColor_;
+    std::string startingWindowIconPath_;
+};
+
 struct StartingWindowAnimationConfig {
     bool enabled_ = true;
     int duration_ = 200;
     std::string curve_ = "linear";
     float opacityStart_ = 1;
     float opacityEnd_ = 0;
+};
+
+struct SystemUIStatusBarConfig {
+    bool showInLandscapeMode_ = false;
+    std::string immersiveStatusBarBgColor_ = "#4c000000";
+    std::string immersiveStatusBarContentColor_ = "#ffffff";
 };
 
 struct AppWindowSceneConfig {
@@ -394,6 +409,7 @@ struct AppWindowSceneConfig {
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
+    SystemUIStatusBarConfig systemUIStatusBarConfig_;
 };
 
 struct DeviceScreenConfig {

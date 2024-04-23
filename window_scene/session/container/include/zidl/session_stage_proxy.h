@@ -58,6 +58,7 @@ public:
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
+    WSError SwitchFreeMultiWindow(bool enable) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

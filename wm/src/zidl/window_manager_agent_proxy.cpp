@@ -253,6 +253,33 @@ void WindowManagerAgentProxy::NotifyWaterMarkFlagChangedResult(bool showWaterMar
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::UpdateVisibleWindowNum(
+    const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    bool res = MarshallingHelper::MarshallingVectorObj<VisibleWindowNumInfo>(data, visibleWindowNumInfo,
+        [](Parcel& parcel, const VisibleWindowNumInfo& num) {
+            return parcel.WriteUint32(num.displayId) && parcel.WriteUint32(num.visibleWindowNum);
+        }
+    );
+    if (!res) {
+        WLOGFE("Write VisibleWindowNumInfo failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::NotifyGestureNavigationEnabledResult(bool enable)
 {
     MessageParcel data;

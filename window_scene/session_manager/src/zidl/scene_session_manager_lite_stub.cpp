@@ -49,6 +49,9 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleGetSessionInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         &SceneSessionManagerLiteStub::HandleGetSessionInfo),
+    std::make_pair(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
+        &SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
         &SceneSessionManagerLiteStub::HandleTerminateSessionNew),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
@@ -152,6 +155,9 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
 {
     WLOGFD("run HandleRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    if (listener == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -161,6 +167,9 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
 {
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    if (listener == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UnRegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -200,6 +209,24 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         WLOGFE("GetSessionInfo result error");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
+{
+    SessionInfoBean info;
+    std::string continueSessionId = data.ReadString();
+    TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
+    if (!reply.WriteParcelable(&info)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId error");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

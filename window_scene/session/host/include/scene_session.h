@@ -27,6 +27,8 @@ namespace OHOS::PowerMgr {
 namespace OHOS::Rosen {
 namespace PARAM_KEY {
     const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+    const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
+    const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 class SceneSession;
 
@@ -123,6 +125,11 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect(bool isFromClient = false) override;
+    virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
+    virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
+    virtual void BindKeyboardSession(sptr<SceneSession> session) {};
+    virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
+    virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -188,11 +195,10 @@ public:
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     virtual int32_t GetMissionId() const { return persistentId_; };
-    const std::string& GetWindowName() const;
-    const std::string& GetWindowNameAllType() const;
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
+    const std::string& GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
 
     bool IsVisible() const;
@@ -250,6 +256,9 @@ public:
     static MaximizeMode maximizeMode_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    void SetForceHideState(bool hideFlag);
+    bool GetForceHideState() const;
+
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -267,6 +276,8 @@ protected:
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    sptr<SceneSession> keyboardPanelSession_ = nullptr;
+    sptr<SceneSession> keyboardSession_ = nullptr;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -291,7 +302,8 @@ private:
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    
+    void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
+
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
@@ -308,7 +320,7 @@ private:
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::set<int32_t> secureExtSessionSet_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
-
+    bool forceHideState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

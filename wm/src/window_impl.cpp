@@ -72,8 +72,8 @@ std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avo
 std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
-int constructorCnt = 0;
-int deConstructorCnt = 0;
+int g_constructorCnt = 0;
+int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -109,8 +109,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     if (moveDragProperty_ == nullptr) {
         WLOGFE("MoveDragProperty is null");
     }
-    WLOGFD("constructorCnt: %{public}d name: %{public}s",
-        ++constructorCnt, property_->GetWindowName().c_str());
+    WLOGFD("g_constructorCnt: %{public}d name: %{public}s",
+        ++g_constructorCnt, property_->GetWindowName().c_str());
 }
 
 void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
@@ -163,8 +163,8 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
 
 WindowImpl::~WindowImpl()
 {
-    WLOGI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
-        GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
+    WLOGI("windowName: %{public}s, windowId: %{public}d, g_deConstructorCnt: %{public}d, surfaceNode:%{public}d",
+        GetWindowName().c_str(), GetWindowId(), ++g_deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy(true, false);
 }
 
@@ -658,7 +658,7 @@ std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::strin
     begin = file.tellg();
     file.seekg(0, std::ios::end);
     end = file.tellg();
-    size_t len = end - begin;
+    size_t len = static_cast<uint32_t>(end - begin);
     WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
 
     if (len <= 0) {
@@ -674,6 +674,11 @@ std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::strin
 Ace::UIContent* WindowImpl::GetUIContent() const
 {
     return uiContent_.get();
+}
+
+Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
+{
+    return nullptr;
 }
 
 std::string WindowImpl::GetContentInfo()

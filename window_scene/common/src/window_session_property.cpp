@@ -487,7 +487,8 @@ bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
             return false;
         }
         if (!(parcel.WriteBool(it.second.enable_) && parcel.WriteUint32(it.second.backgroundColor_) &&
-              parcel.WriteUint32(it.second.contentColor_) && parcel.WriteBool(it.second.enableAnimation_))) {
+              parcel.WriteUint32(it.second.contentColor_) && parcel.WriteBool(it.second.enableAnimation_) &&
+              parcel.WriteUint32(static_cast<uint32_t>(it.second.settingFlag_)))) {
             return false;
         }
     }
@@ -504,7 +505,8 @@ void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSess
 
     for (uint32_t i = 0; i < size; i++) {
         WindowType type = static_cast<WindowType>(parcel.ReadUint32());
-        SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadBool() };
+        SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadBool(),
+            static_cast<SystemBarSettingFlag>(parcel.ReadUint32()) };
         property->SetSystemBarProperty(type, prop);
     }
 }
@@ -702,6 +704,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
     forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
+    topmost_ = property->topmost_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;

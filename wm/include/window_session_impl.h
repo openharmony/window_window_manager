@@ -100,6 +100,7 @@ public:
     bool GetFocusable() const override;
     std::string GetContentInfo() override;
     Ace::UIContent* GetUIContent() const override;
+    Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     void OnNewWant(const AAFwk::Want& want) override;
     WMError SetAPPWindowLabel(const std::string& label) override;
@@ -288,7 +289,7 @@ protected:
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
     virtual bool IfNotNeedAvoidKeyBoardForSplit();
-
+    WSError SwitchFreeMultiWindow(bool enable) override;
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -332,6 +333,8 @@ private:
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
+    WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType type, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
@@ -384,6 +387,7 @@ private:
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
+    std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     KeyEventFilterFunc keyEventFilter_;
 };

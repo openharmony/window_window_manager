@@ -73,6 +73,22 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     return WSError::WS_OK;
 }
 
+
+void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        return;
+    }
+    keyboardSession_ = session;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
+}
+
+sptr<SceneSession> SCBSystemSession::GetKeyboardSession() const
+{
+    return keyboardSession_;
+}
+
 void SCBSystemSession::PresentFocusIfPointDown()
 {
     WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
@@ -131,7 +147,7 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
 WSError SCBSystemSession::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("session is system, id: %{public}d, mode: %{public}d, name: %{public}s, state: %{public}u",
-        GetPersistentId(), static_cast<int32_t>(mode), sessionInfo_.bundleName_.c_str(), state_);
+        GetPersistentId(), static_cast<int32_t>(mode), sessionInfo_.bundleName_.c_str(), GetSessionState());
     return WSError::WS_ERROR_INVALID_SESSION;
 }
 
