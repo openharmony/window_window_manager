@@ -93,7 +93,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 
 bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
-    std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
+    std::lock_guard<std::mutex> guard(mtx_);
     if (DelayedSingleton<EventStage>::GetInstance()->CheckAnrStatus(persistentId)) {
         WLOGFE("Application not respond, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
             persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
@@ -105,13 +105,9 @@ bool ANRManager::IsANRTriggered(int32_t persistentId)
 void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
-    {
-        std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
-        if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-            WLOGFD("Disconnect session, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s", persistentId,
-                applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
-        }
-    }
+    std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("Disconnect session, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+        persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
@@ -119,20 +115,16 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 void ANRManager::OnBackground(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
-    {
-        std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
-        if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-            WLOGFD("Background session, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s", persistentId,
-                applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
-        }
-    }
+    std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("Background session, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+        persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
 
 void ANRManager::SetApplicationInfo(int32_t persistentId, int32_t pid, const std::string& bundleName)
 {
-    std::unique_lock<std::shared_mutex> lock(applicationMapMutex_);
+    std::lock_guard<std::mutex> guard(mtx_);
     WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
         persistentId, pid, bundleName.c_str());
     applicationMap_[persistentId] = { pid, bundleName };
@@ -148,13 +140,10 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 
 ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 {
-    {
-        std::shared_lock<std::shared_mutex> lock(applicationMapMutex_);
-        if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-            WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
-                persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
-            return applicationMap_[persistentId];
-        }
+    if (applicationMap_.find(persistentId) != applicationMap_.end()) {
+        WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
+        return applicationMap_[persistentId];
     }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
     return ANRManager::AppInfo();
@@ -173,10 +162,7 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 void ANRManager::RemovePersistentId(int32_t persistentId)
 {
     WLOGFD("RemovePersistentId:%{public}d", persistentId);
-    {
-        std::unique_lock<std::shared_mutex> lock(applicationMapMutex_);
-        applicationMap_.erase(persistentId);
-    }
+    applicationMap_.erase(persistentId);
     DelayedSingleton<EventStage>::GetInstance()->OnSessionLost(persistentId);
 }
 
