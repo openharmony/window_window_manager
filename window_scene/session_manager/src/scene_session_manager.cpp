@@ -2132,8 +2132,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         session = sceneSession;
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task, "RecoverAndReconnectSceneSession");
-    return WSError::WS_OK;
+    return taskScheduler_->PostSyncTask(task, "RecoverAndReconnectSceneSession");
 }
 
 void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func)
