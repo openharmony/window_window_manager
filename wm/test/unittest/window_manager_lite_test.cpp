@@ -162,5 +162,28 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Functio
     windowManager.pImpl_->cameraWindowChangedListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->cameraWindowChangedListeners_ = oldListeners;
 }
+
+/**
+ * @tc.name: Test01
+ * @tc.desc: check UnregisterCameraWindowChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
+{
+    sptr<IFocusChangedListener> listener = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().RegisterFocusChangedListener(listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().UnregisterFocusChangedListener(listener));
+    sptr<IVisibilityChangedListener> listener1 = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().RegisterVisibilityChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().UnregisterVisibilityChangedListener(listener1));
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    ASSERT_EQ(WMError::WM_OK, WindowManagerLite::GetInstance().GetVisibilityWindowInfo(infos));
+    sptr<IDrawingContentChangedListener> listener2 = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().RegisterDrawingContentChangedListener(listener2));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().UnregisterDrawingContentChangedListener(listener2));
+    sptr<IWindowModeChangedListener> listener3 = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().RegisterWindowModeChangedListener(listener3));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowManagerLite::GetInstance().UnregisterWindowModeChangedListener(listener3));
+}
 }
 }
