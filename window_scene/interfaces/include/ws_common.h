@@ -158,8 +158,7 @@ enum class ManagerState : uint32_t {
     MANAGER_STATE_SCREEN_LOCKED = 0,
 };
 
-enum class FocusChangeReason
-{
+enum class FocusChangeReason {
     /**
      * default focus change reason
      */
@@ -230,8 +229,7 @@ enum class FocusChangeReason
     MAX,
 };
 
-struct SessionInfo
-{
+struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
