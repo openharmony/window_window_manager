@@ -142,7 +142,7 @@ if (scene_board_enabled) {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+      cfi_vcal_icall_only = true
       debug = false
     }
     defines = []
