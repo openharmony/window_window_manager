@@ -228,7 +228,7 @@ enum class FocusChangeReason
      * focus change maz
      */
     MAX,
-}
+};
 
 struct SessionInfo
 {
