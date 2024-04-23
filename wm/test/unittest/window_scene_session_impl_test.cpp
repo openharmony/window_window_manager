@@ -581,7 +581,7 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     windowscenesession->state_ = WindowState::STATE_FROZEN;
     windowscenesession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, windowscenesession->Resize(1, 1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowscenesession->Resize(1, 1));
 }
 
 /**
@@ -781,7 +781,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
 
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     if (window->Destroy(false) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
     }
 }
 
@@ -915,7 +915,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     AvoidArea avoidarea;
-    ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 }
 
 /*
@@ -1627,7 +1627,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransform01, Function | SmallTest | Leve
     Transform trans_;
     window->SetTransform(trans_);
     ASSERT_TRUE(trans_ == window->GetTransform());
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
@@ -2071,7 +2071,7 @@ HWTEST_F(WindowSceneSessionImplTest, DumpSessionElementInfo1, Function | SmallTe
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_EQ(WMError::WM_OK, window->NotifyMemoryLevel(2));
     delete option;
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
@@ -2094,7 +2094,7 @@ HWTEST_F(WindowSceneSessionImplTest, DumpSessionElementInfo2, Function | SmallTe
     window->DumpSessionElementInfo(params);
     ASSERT_EQ(WMError::WM_OK, window->NotifyMemoryLevel(2));
     delete option;
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
@@ -2115,7 +2115,7 @@ HWTEST_F(WindowSceneSessionImplTest, DumpSessionElementInfo3, Function | SmallTe
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_EQ(WMError::WM_OK, window->NotifyMemoryLevel(2));
     delete option;
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
