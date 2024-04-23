@@ -35,6 +35,7 @@ ohos_static_library("libwmutil_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
     integer_overflow = true
     ubsan = true
@@ -108,6 +109,7 @@ ohos_shared_library("libwmutil_base") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [
