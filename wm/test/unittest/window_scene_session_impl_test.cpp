@@ -2928,6 +2928,26 @@ HWTEST_F(WindowSceneSessionImplTest, TestGetUIContentWithId, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: TestGetUIContentWithId end";
 }
 
+/**
+ * @tc.name: Test01
+ * @tc.desc: Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Test01, Function | SmallTest | Level3)
+{
+    WindowLimits windowLimits = {3, 3, 3, 3, 2.0, 2.0};
+    ASSERT_EQ(windowLimits.IsEmpty(), false);
+    Rect rect = {2, 2, 2, 2};
+    Rect rect1 = {2, 2, 2, 2};
+    ASSERT_EQ(rect.IsInsideOf(rect1), true);
+    TitleButtonRect titleButtonRect = {3, 3, 3, 3};
+    TitleButtonRect titleButtonRect1 = {3, 3, 3, 3};
+    ASSERT_EQ(titleButtonRect.IsUninitializedRect(), false);
+    ASSERT_EQ(titleButtonRect.IsInsideOf(titleButtonRect1 ), false);
+    AvoidArea avoidArea;
+    AvoidArea avoidArea1;
+    ASSERT_EQ((avoidArea != avoidArea1), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
