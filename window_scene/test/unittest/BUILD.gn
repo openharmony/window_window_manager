@@ -31,6 +31,7 @@ group("unittest") {
     ":ws_move_drag_controller_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
+    ":ws_scene_input_manager_test",
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
@@ -71,6 +72,28 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_scene_input_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_input_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:libcomposer",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "input:libmmi-client",
   ]
 }
 
