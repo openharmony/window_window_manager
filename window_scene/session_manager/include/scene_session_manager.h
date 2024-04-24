@@ -531,6 +531,8 @@ private:
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
     RSInterfaces& rsInterface_;
+    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
+    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool isNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);

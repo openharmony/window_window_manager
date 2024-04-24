@@ -810,5 +810,15 @@ bool WindowSessionProperty::GetIsShaped() const
 {
     return isShaped_;
 }
+
+int32_t WindowSessionProperty::GetCollaboratorType() const
+{
+    return collaboratorType_;
+}
+
+void WindowSessionProperty::SetCollaboratorType(int32_t collaboratorType)
+{
+    collaboratorType_ = collaboratorType;
+}
 } // namespace Rosen
 } // namespace OHOS

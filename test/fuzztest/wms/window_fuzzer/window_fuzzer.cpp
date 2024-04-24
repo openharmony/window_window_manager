@@ -380,6 +380,10 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->UpdateSurfaceNodeAfterCustomAnimation(boolVal);
+
+    float grayScale;
+    startPos += GetObject(grayScale, data + startPos, size - startPos);
+    window->SetGrayScale(grayScale);
 }
 
 void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data, size_t size)

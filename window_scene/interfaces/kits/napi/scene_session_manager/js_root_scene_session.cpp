@@ -213,6 +213,7 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
 {
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]PendingSessionActivationInner find callback failed.");
         return;
     }
     auto jsCallBack = iter->second;
@@ -250,7 +251,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
-    
+
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]session: %{public}d isNeedBackToOther: %{public}d",

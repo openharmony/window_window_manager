@@ -50,6 +50,8 @@ namespace {
     constexpr size_t INDEX_ZERO = 0;
     constexpr size_t INDEX_ONE = 1;
     constexpr size_t INDEX_TWO = 2;
+    constexpr double MIN_GRAY_SCALE = 0.0;
+    constexpr double MAX_GRAY_SCALE = 1.0;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -813,6 +815,13 @@ napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]SetWindowMask");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowMask(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowGrayScale");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowGrayScale(env, info) : nullptr;
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -5715,6 +5724,52 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetWindowGrayScale(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {    // 1: the param num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to grayScale");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    double grayScale = 0.0;
+    napi_get_value_double(env, nativeVal, &grayScale);
+    constexpr double eps = 1e-6;
+    if (grayScale < (MIN_GRAY_SCALE - eps) || grayScale > (MAX_GRAY_SCALE + eps)) {
+        WLOGFE("grayScale should be greater than or equal to 0.0, and should be smaller than or equal to 1.0");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, grayScale](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                WLOGFE("window is nullptr");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGrayScale(static_cast<float>(grayScale)));
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Set window gray scale failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] OnSetWindowGrayScale end, grayScale = %{public}f",
+                window->GetWindowId(), window->GetWindowName().c_str(), grayScale);
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowGrayScale",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -5823,6 +5878,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
+    BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
 }
 }  // namespace Rosen
 }  // namespace OHOS

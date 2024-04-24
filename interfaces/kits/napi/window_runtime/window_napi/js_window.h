@@ -151,6 +151,7 @@ public:
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+    static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -269,6 +270,7 @@ private:
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
