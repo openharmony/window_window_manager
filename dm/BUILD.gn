@@ -31,8 +31,12 @@ config("libdm_public_config") {
   include_dirs = [
     "../interfaces/innerkits/dm",
     "../utils/include",
-    "${multimedia_path}/interfaces/innerkits/include",
   ]
+}
+
+config("for_libdm_public_config") {
+  include_dirs =
+      [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
 }
 
 ## Build libdm_static.a
@@ -71,7 +75,10 @@ ohos_static_library("libdm_static") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  public_external_deps = [ "graphic_2d:color_manager" ]
+  public_external_deps = [
+    "graphic_2d:color_manager",
+    "image_framework:image_native",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",
@@ -107,7 +114,10 @@ ohos_shared_library("libdm") {
     "../resources/config/build:coverage_flags",
   ]
 
-  public_configs = [ ":libdm_public_config" ]
+  public_configs = [
+    ":for_libdm_public_config",
+    ":libdm_public_config",
+  ]
 
   deps = [
     "${window_base_path}/utils:libwmutil",

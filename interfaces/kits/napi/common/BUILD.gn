@@ -27,7 +27,7 @@ config("dm_napi_common_config") {
 config("dm_napi_common_public_config") {
   include_dirs = [
     ".",
-    "//third_party/node/src",
+    "../../../../../../../third_party/node/src",
     "../../../innerkits/dm",
   ]
 }

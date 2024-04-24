@@ -20,9 +20,6 @@ config("display_config") {
   include_dirs = [
     ".",
     "../../../../utils/include",
-
-    # because of pixle_map.h
-    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
 }
 
@@ -60,6 +57,8 @@ ohos_shared_library("display_napi") {
     "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
+
+  public_external_deps = [ "image_framework:image_native" ]
 
   relative_install_dir = "module"
   part_name = "window_manager"
