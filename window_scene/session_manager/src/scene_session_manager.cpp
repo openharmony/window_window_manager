@@ -8205,4 +8205,17 @@ WMError SceneSessionManager::GetWindowBackHomeStatus(bool &isBackHome)
     WLOGFI("Get back home status success, isBackHome: %{public}d", isBackHome);
     return WMError::WM_OK;
 }
+
+int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
+{
+    int32_t height = 0;
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session with persistentId %{public}d not found", persistentId);
+        return 0;
+    }
+    height = sceneSession->GetCustomDecorHeight();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "GetCustomDecorHeight: %{public}d", height);
+    return height;
+}
 } // namespace OHOS::Rosen

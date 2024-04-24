@@ -1151,4 +1151,24 @@ void SessionProxy::SetCallingSessionId(const uint32_t callingSessionId)
         return;
     }
 }
+
+void SessionProxy::SetCustomDecorHeight(int32_t height)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "writeInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write height failed.");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
