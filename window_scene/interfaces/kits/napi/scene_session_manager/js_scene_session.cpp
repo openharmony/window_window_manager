@@ -1091,7 +1091,7 @@ napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info in
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]NotifyDisplayStatusBarTemporarily");
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyDisplayStatusBarTemporarily(env, info) : nullptr;
 }
@@ -2640,8 +2640,8 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     bool isTempDisplay = false;
     if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
