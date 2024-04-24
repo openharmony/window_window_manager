@@ -406,7 +406,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    WLOGFD("dms OnRemoteDied");
+    WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
