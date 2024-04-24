@@ -1091,7 +1091,7 @@ napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info in
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]NotifyDisplayStatusBarTemporarily");
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]NotifyDisplayStatusBarTemporarily");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyDisplayStatusBarTemporarily(env, info) : nullptr;
 }
@@ -2635,7 +2635,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("[NAPI]session is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]session is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -2646,7 +2646,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
     bool isTempDisplay = false;
     if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
         if (!ConvertFromJsValue(env, argv[0], isTempDisplay)) {
-            WLOGFE("[NAPI]failed to convert parameter to bool");
+            TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]failed to convert parameter to bool");
             return NapiGetUndefined(env);
         }
     }
