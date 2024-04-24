@@ -3290,6 +3290,7 @@ HWTEST_F(SceneSessionTest, OnMoveDragCallback, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
+    Session session(info);
     WSRect rect;
     sceneSession->UpdateWinRectForSystemBar(rect);
     sceneSession->SetSurfaceBounds(rect);
