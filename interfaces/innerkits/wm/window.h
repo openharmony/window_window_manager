@@ -1927,6 +1927,13 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set gray scale of window
+     * @param grayScale gray scale of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
