@@ -200,7 +200,7 @@ enum class FocusChangeReason {
      */
     SCB_SESSION_REQUEST_UNFOCUS,
     /**
-     * focus change for client requerst 10
+     * focus change for client requerst.10
      */
     CLIENT_REQUEST,
     /**
@@ -224,7 +224,7 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     * focus change maz
+     * focus change max.
      */
     MAX,
 };
