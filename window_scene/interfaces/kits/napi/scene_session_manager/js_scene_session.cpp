@@ -320,11 +320,15 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
 void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
     WLOGFI("[NAPI]SetLandScapeMultiWindow, isLandscapeMultiWindow: %{public}u", isLandscapeMultiWindow);
-    auto iter = jsCbMap_.find(LANDSCAPE_MULTI_WINDOW_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(LANDSCAPE_MULTI_WINDOW_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        auto jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
     auto task = [isLandscapeMultiWindow, jsCallBack, env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
