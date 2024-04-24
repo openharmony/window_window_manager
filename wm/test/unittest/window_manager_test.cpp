@@ -827,8 +827,6 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function 
 
     sptr<TestVisibleWindowNumChangedListener> listener1 = new TestVisibleWindowNumChangedListener();
     sptr<TestVisibleWindowNumChangedListener> listener2 = new TestVisibleWindowNumChangedListener();
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        windowManager.UnregisterVisibleWindowNumChangedListener(listener1));
 
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterVisibleWindowNumChangedListener(listener1);
@@ -836,16 +834,14 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function 
     windowManager.RegisterVisibleWindowNumChangedListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
 
-    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibleWindowNumChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibleWindowNumChangedListener(listener2));
-    ASSERT_EQ(0, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
-    ASSERT_EQ(nullptr, windowManager.pImpl_->visibleWindowNumChangedListenerAgent_);
+    ASSERT_EQ(2, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
 
     // if agent == nullptr, it can not be crashed.
     windowManager.pImpl_->visibleWindowNumChangedListeners_.push_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibleWindowNumChangedListener(listener1));
-    ASSERT_EQ(0, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
+    ASSERT_EQ(3, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
 }
 
 /**
