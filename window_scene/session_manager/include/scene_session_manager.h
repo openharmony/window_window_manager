@@ -313,6 +313,8 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     WSError SwitchFreeMultiWindow(bool enable);
     const SystemSessionConfig& GetSystemSessionConfig() const;
+    int32_t GetCustomDecorHeight(int32_t persistentId);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

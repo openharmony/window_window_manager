@@ -258,6 +258,15 @@ public:
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
 
+    int32_t GetCustomDecorHeight() override
+    {
+        return customDecorHeight_;
+    }
+
+    void SetCustomDecorHeight(int32_t height) override
+    {
+        customDecorHeight_ = height;
+    }
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -318,6 +327,7 @@ private:
     std::set<int32_t> secureExtSessionSet_;
     std::map<int32_t, uint32_t> extWindowFlagsMap_;
     bool forceHideState_ = false;
+    int32_t customDecorHeight_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
