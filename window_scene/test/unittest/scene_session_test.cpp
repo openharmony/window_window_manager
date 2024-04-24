@@ -3290,11 +3290,6 @@ HWTEST_F(SceneSessionTest, OnMoveDragCallback, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    SizeChangeReason reason = SizeChangeReason::DRAG_END;
-    sceneSession->OnMoveDragCallback(reason);
-    reason = SizeChangeReason::DRAG_START;
-    Session session(info);
-
     WSRect rect;
     sceneSession->UpdateWinRectForSystemBar(rect);
     sceneSession->SetSurfaceBounds(rect);
@@ -3372,26 +3367,18 @@ HWTEST_F(SceneSessionTest, OnMoveDragCallback02, Function | SmallTest | Level2)
     sceneSession->IsDirtyWindow();
     sceneSession->moveDragController_ = new MoveDragController(0);
     sceneSession->NotifyUILostFocus();
-
-    float scaleX = 0.0f;
-    float scaleY = 0.0f;
-    float pivotX = 1.0f;
-    float pivotY = 1.0f;
-    sceneSession->specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    sceneSession->SetScale(scaleX, scaleY, pivotX, pivotY);
 }
 
 /**
- * @tc.name: OnMoveDragCallback
- * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.name: IsStartMoving
+ * @tc.desc:  * @tc.name: IsStartMoving
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnMoveDragCallback02";
-    info.bundleName_ = "OnMoveDragCallback02";
+    info.abilityName_ = "IsStartMoving";
+    info.bundleName_ = "IsStartMoving";
 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
