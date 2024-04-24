@@ -327,7 +327,7 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
         if (iter == jsCbMap_.end()) {
             return;
         }
-        auto jsCallBack = iter->second;
+        jsCallBack = iter->second;
     }
     auto task = [isLandscapeMultiWindow, jsCallBack, env = env_]() {
         if (!jsCallBack) {
