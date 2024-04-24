@@ -2504,60 +2504,42 @@ void SceneSession::SetIsStartMoving(const bool startMoving)
     isStartMoving_.store(startMoving);
 }
 
-bool SceneSession::ShouldHideNonSecureWindows() const
-{
-    return IsSessionForeground() && (shouldHideNonSecureWindows_.load() || !secureExtSessionSet_.empty());
-}
-
 void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)
 {
     shouldHideNonSecureWindows_.store(shouldHide);
 }
 
-WSError SceneSession::AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide)
+void SceneSession::CalculateCombinedExtWindowFlags()
 {
-    auto task = [weakThis = wptr(this), persistentId, shouldHide]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "session is nullptr");
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-
-        auto& sessionSet = session->secureExtSessionSet_;
-        if (shouldHide) {
-            sessionSet.insert(persistentId);
-        } else {
-            sessionSet.erase(persistentId);
-        }
-        return WSError::WS_OK;
-    };
-
-    return PostSyncTask(task, "AddOrRemoveSecureExtSession");
+    // Only correct when each flag is true when active, and once a uiextension is active, the host is active
+    combinedExtWindowFlags_.bitData = 0;
+    for (const auto& iter: extWindowFlagsMap_) {
+        combinedExtWindowFlags_.bitData |= iter.second.bitData;
+    }
 }
 
-void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags)
+void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
+    const ExtensionWindowFlags& extWindowActions)
 {
     auto iter = extWindowFlagsMap_.find(extPersistentId);
-    if (iter == extWindowFlagsMap_.end()) {
-        extWindowFlagsMap_.insert({ extPersistentId, extWindowFlags });
+    // Each flag is false when inactive, 0 means all flags are inactive
+    auto oldFlags = iter != extWindowFlagsMap_.end() ? iter->second : ExtensionWindowFlags();
+    ExtensionWindowFlags newFlags((extWindowFlags.bitData & extWindowActions.bitData) |
+        (oldFlags.bitData & ~extWindowActions.bitData));
+    if (newFlags.bitData == 0) {
+        extWindowFlagsMap_.erase(extPersistentId);
     } else {
-        extWindowFlagsMap_[iter->first] = extWindowFlags;
+        extWindowFlagsMap_[extPersistentId] = newFlags;
     }
+    CalculateCombinedExtWindowFlags();
 }
-bool SceneSession::IsExtWindowHasWaterMarkFlag()
+
+ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags() const
 {
-    bool isExtWindowHasWaterMarkFlag = false;
-    for (const auto& iter: extWindowFlagsMap_) {
-        auto& extWindowFlags = iter.second;
-        if (!extWindowFlags) {
-            continue;
-        }
-        if (extWindowFlags & static_cast<uint32_t>(ExtensionWindowFlag::EXTENSION_WINDOW_FLAG_WATER_MARK)) {
-            isExtWindowHasWaterMarkFlag = true;
-            break;
-        }
-    }
-    return isExtWindowHasWaterMarkFlag;
+    auto combinedExtWindowFlags = combinedExtWindowFlags_;
+    combinedExtWindowFlags.hideNonSecureWindowsFlag = IsSessionForeground() &&
+        (combinedExtWindowFlags.hideNonSecureWindowsFlag || shouldHideNonSecureWindows_.load());
+    return combinedExtWindowFlags;
 }
 
 void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
@@ -2569,16 +2551,16 @@ void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
     }
 }
 
-void SceneSession::RomoveExtWindowFlags(int32_t extPersistentId)
+void SceneSession::RemoveExtWindowFlags(int32_t extPersistentId)
 {
-    auto iter = extWindowFlagsMap_.find(extPersistentId);
-    if (iter != extWindowFlagsMap_.end()) {
-        extWindowFlagsMap_.erase(iter);
-    }
+    extWindowFlagsMap_.erase(extPersistentId);
+    CalculateCombinedExtWindowFlags();
 }
+
 void SceneSession::ClearExtWindowFlags()
 {
     extWindowFlagsMap_.clear();
+    combinedExtWindowFlags_.bitData = 0;
 }
 
 WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)

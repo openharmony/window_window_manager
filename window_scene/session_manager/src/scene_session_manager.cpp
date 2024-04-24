@@ -1931,13 +1931,18 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
         auto sceneSession = GetSceneSession(parentId);
         if (sceneSession != nullptr) {
-            auto oldWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
-            sceneSession->RomoveExtWindowFlags(persistentId);
-            if (oldWaterMark) {
+            auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
+            sceneSession->RemoveExtWindowFlags(persistentId);
+            if (oldFlags.hideNonSecureWindowsFlag) {
+                HandleSecureSessionShouldHide(sceneSession);
+            }
+            if (oldFlags.waterMarkFlag) {
                 CheckAndNotifyWaterMarkChangedResult();
             }
+            if (oldFlags.privacyModeFlag) {
+                UpdatePrivateStateAndNotify(parentId);
+            }
         }
-        AddOrRemoveSecureExtSession(persistentId, parentId, false);
         remoteExtSessionMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroyExtensionSession");
@@ -4615,7 +4620,8 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount()
                                 sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE);
         }
         bool isPrivate = sceneSession->GetSessionProperty() != nullptr &&
-            sceneSession->GetSessionProperty()->GetPrivacyMode();
+            (sceneSession->GetSessionProperty()->GetPrivacyMode() ||
+             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag);
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForeground || IsSystemWindowVisible) && isPrivate;
     };
@@ -4969,7 +4975,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             }
             bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
                 & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-            bool isExtWindowHasWaterMarkFlag = session->IsExtWindowHasWaterMarkFlag();
+            bool isExtWindowHasWaterMarkFlag = session->GetCombinedExtWindowFlags().waterMarkFlag;
             if ((hasWaterMark && session->GetVisible()) || isExtWindowHasWaterMarkFlag) {
                 currentWaterMarkShowState = true;
                 break;
@@ -7764,7 +7770,7 @@ WSError SceneSessionManager::HandleSecureSessionShouldHide(const sptr<SceneSessi
     }
 
     auto persistentId = sceneSession->GetPersistentId();
-    auto shouldHide = sceneSession->ShouldHideNonSecureWindows();
+    auto shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
     size_t sizeBefore = 0;
     size_t sizeAfter = 0;
     AddSecureSession(persistentId, shouldHide, sizeBefore, sizeAfter);
@@ -7787,6 +7793,11 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto task = [this, persistentId, shouldHide]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(persistentId);
@@ -7805,58 +7816,57 @@ WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
+WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    uint32_t extWindowActions)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, shouldHide=%{public}u", persistentId,
-        parentId, shouldHide);
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, extWindowFlags=%{public}d, "
+        "actions=%{public}d", parentId, persistentId, extWindowFlags, extWindowActions);
+
+    ExtensionWindowFlags actions(extWindowActions);
+    auto ret = WSError::WS_OK;
+    bool needSystemCalling = actions.hideNonSecureWindowsFlag || actions.waterMarkFlag;
+    if (needSystemCalling && !SessionPermission::IsSystemCalling()) {
+        actions.hideNonSecureWindowsFlag = false;
+        actions.waterMarkFlag = false;
+        TLOGE(WmsLogTag::WMS_UIEXT, "system calling permission denied!");
+        ret = WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto needPrivacyWindow = actions.privacyModeFlag;
+    if (needPrivacyWindow && !SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
+        actions.privacyModeFlag = false;
+        TLOGE(WmsLogTag::WMS_UIEXT, "privacy window permission denied!");
+        ret = WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (actions.bitData == 0) {
+        return ret;
     }
 
-    auto task = [this, persistentId, parentId, shouldHide]() {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        auto iter = sceneSessionMap_.find(parentId);
-        if (iter == sceneSessionMap_.end()) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureExtSession: Parent session with persistentId %{public}d not "
-                "found", parentId);
-            // process UIExtension that created by SceneBoard
-            return HandleSecureExtSessionShouldHide(persistentId, shouldHide);
-        }
-
-        auto sceneSession = iter->second;
-        sceneSession->AddOrRemoveSecureExtSession(persistentId, shouldHide);
-        return HandleSecureSessionShouldHide(sceneSession);
-    };
-
-    taskScheduler_->PostAsyncTask(task, "AddOrRemoveSecureExtSession");
-    return WSError::WS_OK;
-}
-
-WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags, parentId:%{public}d, persistentId:%{public}d, \
-        extWindowFlags:%{public}d", parentId, persistentId, extWindowFlags);
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
-    auto task = [this, parentId, persistentId, extWindowFlags]() {
+    ExtensionWindowFlags flags(extWindowFlags);
+    auto task = [this, parentId, persistentId, flags, actions]() {
         auto sceneSession = GetSceneSession(parentId);
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", parentId);
-            return WSError::WS_ERROR_INVALID_SESSION;
+            TLOGD(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags: Parent session with persistentId %{public}d not found",
+                parentId);
+            return HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
         }
-        auto oldWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
-        sceneSession->UpdateExtWindowFlags(persistentId, extWindowFlags);
-        auto newWaterMark = sceneSession->IsExtWindowHasWaterMarkFlag();
-        if (oldWaterMark != newWaterMark) {
+
+        auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
+        sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
+        auto newFlags = sceneSession->GetCombinedExtWindowFlags();
+        if (oldFlags.hideNonSecureWindowsFlag != newFlags.hideNonSecureWindowsFlag) {
+            HandleSecureSessionShouldHide(sceneSession);
+        }
+        if (oldFlags.waterMarkFlag != newFlags.waterMarkFlag) {
             CheckAndNotifyWaterMarkChangedResult();
+        }
+        if (oldFlags.privacyModeFlag != newFlags.privacyModeFlag) {
+            UpdatePrivateStateAndNotify(parentId);
         }
         return WSError::WS_OK;
     };
+
     taskScheduler_->PostAsyncTask(task, "UpdateExtWindowFlags");
-    return WSError::WS_OK;
+    return ret;
 }
 
 void SceneSessionManager::ReportWindowProfileInfos()

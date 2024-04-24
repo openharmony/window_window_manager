@@ -63,7 +63,7 @@ using NotifyTouchOutsideFunc = std::function<void()>;
 using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
-using NotifyAddOrRemoveSecureSessionFunc = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
+using HandleSecureSessionShouldHideCallback = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
@@ -81,7 +81,7 @@ public:
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
         OnOutsideDownEvent onOutsideDownEvent_;
-        NotifyAddOrRemoveSecureSessionFunc onHandleSecureSessionShouldHide_;
+        HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
     };
 
@@ -235,13 +235,12 @@ public:
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
-    bool ShouldHideNonSecureWindows() const;
     void SetShouldHideNonSecureWindows(bool shouldHide);
-    WSError AddOrRemoveSecureExtSession(int32_t persistentId, bool shouldHide);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
-    void UpdateExtWindowFlags(int32_t extPersistentId, uint32_t extWindowFlags);
-    bool IsExtWindowHasWaterMarkFlag();
-    void RomoveExtWindowFlags(int32_t extPersistentId);
+    void UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
+        const ExtensionWindowFlags& extWindowActions);
+    ExtensionWindowFlags GetCombinedExtWindowFlags() const;
+    void RemoveExtWindowFlags(int32_t extPersistentId);
     void ClearExtWindowFlags();
     void NotifyDisplayMove(DisplayId from, DisplayId to);
 
@@ -284,6 +283,7 @@ private:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
@@ -315,8 +315,8 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
-    std::set<int32_t> secureExtSessionSet_;
-    std::map<int32_t, uint32_t> extWindowFlagsMap_;
+    ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
+    std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     bool forceHideState_ = false;
 };
 } // namespace OHOS::Rosen
