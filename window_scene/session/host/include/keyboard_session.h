@@ -42,6 +42,7 @@ public:
     void BindKeyboardPanelSession(sptr<SceneSession> panelSession) override;
     sptr<SceneSession> GetKeyboardPanelSession() const override;
     SessionGravity GetKeyboardGravity() const override;
+    void OnKeyboardPanelUpdated() override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -49,22 +50,21 @@ private:
 
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
-    sptr<SceneSession> GetCallingSession();
+    uint32_t GetCallingSessionId();
 
     bool IsStatusBarVisible(const sptr<SceneSession>& session);
     int32_t GetStatusBarHeight();
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea);
-    void RaiseCallingSession(bool isKeyboardUpdated = false);
+    void RaiseCallingSession();
     void RestoreCallingSession();
     void UseFocusIdIfCallingSessionIdInvalid();
-    void OnKeyboardSessionShown();
     void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
     void RelayoutKeyBoard();
+    void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
+    bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
-    WSRect callingSessionRestoringRect_ = {0, 0, 0, 0};
-    WSRect callingSessionRaisedRect_ = {0, 0, 0, 0};
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

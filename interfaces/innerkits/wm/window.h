@@ -445,6 +445,21 @@ public:
     virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
 };
 
+/**
+ * @class IKeyboardPanelInfoChangeListener
+ *
+ * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
+ */
+class IKeyboardPanelInfoChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when keyboard info changed.
+     *
+     * @param KeyboardPanelInfo keyboardPanelInfo of the keyboard panel;
+     */
+    virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1875,6 +1890,28 @@ public:
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
     }
 
     /**
