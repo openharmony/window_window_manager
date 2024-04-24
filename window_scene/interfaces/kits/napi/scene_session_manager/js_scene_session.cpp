@@ -1091,7 +1091,6 @@ napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info in
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyDisplayStatusBarTemporarily(env, info) : nullptr;
 }
@@ -2651,6 +2650,8 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
         }
     }
     session->SetIsDisplayStatusBarTemporarily(isTempDisplay);
+    TLOGI(WmsLogTag::WMS_IMMS, "Set success with id:%{public}u name:%{public}s isTempDisplay:%{public}u",
+        persistentId, session->GetWindowName().c_st(), isTempDisplay);
     return NapiGetUndefined(env);
 }
 
