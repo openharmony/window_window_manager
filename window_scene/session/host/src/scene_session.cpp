@@ -911,8 +911,16 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             continue;
         }
-        WSRect inputMethodRect = inputMethod->GetSessionRect();
-        CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+        if (isKeyboardPanelEnabled_) {
+            WSRect keyboardRect = {0, 0, 0, 0};
+            if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
+                keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+            }
+            CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
+        } else {
+            WSRect inputMethodRect = inputMethod->GetSessionRect();
+            CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+        }
     }
 
     return;
@@ -1476,6 +1484,11 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         UpdateRect(rect, reason);
     }
     if (reason == SizeChangeReason::DRAG_END) {
+        if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");
+            WSRect restoringRect = {0, 0, 0, 0};
+            SetRestoringRectForKeyboard(restoringRect);
+        }
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
@@ -2255,6 +2268,16 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     lastSafeRect.width_ = rect.width_;
     lastSafeRect.height_ = rect.height_;
     return;
+}
+
+WSRect SceneSession::GetRestoringRectForKeyboard() const
+{
+    return restoringRectForKeyboard_;
+}
+
+void SceneSession::SetRestoringRectForKeyboard(WSRect rect)
+{
+    restoringRectForKeyboard_ = rect;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)

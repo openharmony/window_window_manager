@@ -81,6 +81,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyDisplayMove),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
         &SessionStageStub::HandleSwitchFreeMultiWindow),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
+        &SessionStageStub::HandleNotifyKeyboardPanelInfoChange),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -376,6 +378,20 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "HandleNotifyKeyboardPanelInfoChange!");
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = data.ReadParcelable<KeyboardPanelInfo>();
+    if (keyboardPanelInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardPanelInfo is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyKeyboardPanelInfoChange(*keyboardPanelInfo);
+
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

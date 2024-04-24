@@ -62,6 +62,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
+            session->keyboardPanelRectUpdateCallback_();
+        }
         // clear after use
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
@@ -73,6 +77,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     return WSError::WS_OK;
 }
 
+void SCBSystemSession::SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func)
+{
+    keyboardPanelRectUpdateCallback_ = func;
+}
 
 void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
 {
@@ -81,6 +89,12 @@ void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
         return;
     }
     keyboardSession_ = session;
+    KeyboardPanelRectUpdateCallback onKeyboardPanelRectUpdate = [this]() {
+        if (this->keyboardSession_ != nullptr) {
+            this->keyboardSession_->OnKeyboardPanelUpdated();
+        }
+    };
+    SetKeyboardPanelRectUpdateCallback(onKeyboardPanelRectUpdate);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
 }
 
