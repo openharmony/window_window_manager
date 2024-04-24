@@ -157,7 +157,8 @@ const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
 };
 
 enum class ApiOrientation : uint32_t {
-    UNSPECIFIED = 0,
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
     PORTRAIT = 1,
     LANDSCAPE = 2,
     PORTRAIT_INVERTED = 3,
@@ -174,6 +175,8 @@ enum class ApiOrientation : uint32_t {
     USER_ROTATION_LANDSCAPE = 14,
     USER_ROTATION_PORTRAIT_INVERTED = 15,
     USER_ROTATION_LANDSCAPE_INVERTED = 16,
+    FOLLOW_DESKTOP = 17,
+    END = FOLLOW_DESKTOP,
 };
 
 const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
@@ -194,6 +197,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::USER_ROTATION_LANDSCAPE,               Orientation::USER_ROTATION_LANDSCAPE            },
     {ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED,       Orientation::USER_ROTATION_PORTRAIT_INVERTED    },
     {ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED,      Orientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {ApiOrientation::FOLLOW_DESKTOP,                        Orientation::FOLLOW_DESKTOP                     },
 };
 
 const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
@@ -215,6 +219,7 @@ const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
     {Orientation::USER_ROTATION_LANDSCAPE,               ApiOrientation::USER_ROTATION_LANDSCAPE            },
     {Orientation::USER_ROTATION_PORTRAIT_INVERTED,       ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED    },
     {Orientation::USER_ROTATION_LANDSCAPE_INVERTED,      ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {Orientation::FOLLOW_DESKTOP,                        ApiOrientation::FOLLOW_DESKTOP                     },
 };
 
 enum class RectChangeReason : uint32_t {

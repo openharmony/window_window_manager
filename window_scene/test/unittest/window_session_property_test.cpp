@@ -119,6 +119,10 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
     property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
     Orientation ret5 = property->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+
+    property->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    Orientation ret6 = property->GetRequestedOrientation();
+    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 }
 
 /**
