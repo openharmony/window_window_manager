@@ -26,7 +26,7 @@
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 
-#include "../../proxy/include/window_info.h"
+#include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
