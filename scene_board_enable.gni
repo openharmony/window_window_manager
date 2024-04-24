@@ -11,8 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare_args() {
-  scene_board_enabled = false
-}
-
 print("scene_board_enabled = ${scene_board_enabled}")
