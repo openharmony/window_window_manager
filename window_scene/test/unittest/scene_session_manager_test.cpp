@@ -3598,20 +3598,20 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureSession, Function | SmallTest
 }
 
 /**
- * @tc.name: AddOrRemoveSecureExtSession
- * @tc.desc: SceneSesionManager hide non-secure windows by extension session
+ * @tc.name: UpdateExtWindowFlags
+ * @tc.desc: SceneSesionManager update uiextension window flags
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureExtSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateExtWindowFlags, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.abilityName_ = "AddOrRemoveSecureExtSession";
-    info.bundleName_ = "AddOrRemoveSecureExtSession1";
+    info.abilityName_ = "UpdateExtWindowFlags";
+    info.bundleName_ = "UpdateExtWindowFlags";
 
-    int32_t persistentId = 12345;
     int32_t parentId = 1234;
-    auto ret = ssm_->AddOrRemoveSecureExtSession(persistentId, parentId, true);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    int32_t persistentId = 12345;
+    auto ret = ssm_->UpdateExtWindowFlags(parentId, persistentId, 7, 7);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**

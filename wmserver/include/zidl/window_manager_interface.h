@@ -196,11 +196,8 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags)
+    virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions)
     {
         return WSError::WS_OK;
     }
