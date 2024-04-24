@@ -175,14 +175,17 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]sceneSession is nullptr");
         return;
     }
-    auto iter = jsCbMap_.find(CREATE_SYSTEM_SESSION_CB);
-    if (iter == jsCbMap_.end()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(CREATE_SYSTEM_SESSION_CB);
+        if (iter == jsCbMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
+            return;
+        }
+        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
+        jsCallBack = iter->second;
     }
-
-    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]OnCreateSystemSession, id: %{public}d", sceneSession->GetPersistentId());
-    auto jsCallBack = iter->second;
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack, env = env_]() {
         auto specificSession = weakSession.promote();
@@ -298,12 +301,15 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
 {
     WLOGFI("[NAPI]OnStatusBarEnabledUpdate");
-    auto iter = jsCbMap_.find(STATUS_BAR_ENABLED_CHANGE_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(STATUS_BAR_ENABLED_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-
-    auto jsCallBack = iter->second;
     auto task = [this, enable, jsCallBack, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, enable)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -314,12 +320,15 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
 void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
 {
     WLOGFI("[NAPI]OnGestureNavigationEnabledUpdate");
-    auto iter = jsCbMap_.find(GESTURE_NAVIGATION_ENABLED_CHANGE_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(GESTURE_NAVIGATION_ENABLED_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-
-    auto jsCallBack = iter->second;
     auto task = [this, enable, jsCallBack, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, enable)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -330,11 +339,15 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
 void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
 {
     WLOGFI("[NAPI]OnStartUIAbilityError");
-    auto iter = jsCbMap_.find(START_UI_ABILITY_ERROR);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(START_UI_ABILITY_ERROR);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
     auto task = [this, errorCode, jsCallBack, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, errorCode)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -345,12 +358,15 @@ void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
     WLOGFD("[NAPI]OnOutsideDownEvent");
-    auto iter = jsCbMap_.find(OUTSIDE_DOWN_EVENT_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(OUTSIDE_DOWN_EVENT_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-
-    auto jsCallBack = iter->second;
     auto task = [this, x, y, jsCallBack, env = env_]() {
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
@@ -371,12 +387,15 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnShiftFocus");
-    auto iter = jsCbMap_.find(SHIFT_FOCUS_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(SHIFT_FOCUS_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-
-    auto jsCallBack = iter->second;
     auto task = [this, persistentId, jsCallBack, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, persistentId)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -387,11 +406,15 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t windowId)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingSessionIdChange");
-    auto iter = jsCbMap_.find(CALLING_WINDOW_ID_CHANGE_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(CALLING_WINDOW_ID_CHANGE_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
     auto task = [this, windowId, jsCallBack, env = env_]() {
         napi_value argv[] = { CreateJsValue(env, windowId) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -809,6 +832,7 @@ napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_ca
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
+    std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         return false;
     }
