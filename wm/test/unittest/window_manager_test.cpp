@@ -874,6 +874,26 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
     windowManager.UpdateVisibleWindowNum(visibleWindowNumInfo);
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: Test01
+ * @tc.desc: Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
+{
+    sptr<IWMSConnectionChangedListener> listener = nullptr;
+    WMError res = WindowManager::GetInstance().RegisterWMSConnectionChangedListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    WMError res1 = WindowManager::GetInstance().UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, res1);
+    WMError res2 = WindowManager::GetInstance().RaiseWindowToTop(5);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, res2);
+    WMError res3 = WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(5, 5, true);
+    ASSERT_EQ(WMError::WM_OK, res3);
+    WMError res4 = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res4);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
