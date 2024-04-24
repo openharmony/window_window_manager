@@ -68,10 +68,9 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
 
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
-    TLOGI(WmsLogTag::DMS, "[DPNODE]config screenId: %{public}d, isMirrored: %{public}d, mirrorNodeId: %{public}d ",
-        static_cast<int32_t>(config.screenId),
-        static_cast<int32_t>(config.isMirrored),
-        static_cast<int32_t>(config.mirrorNodeId));
+    TLOGI(WmsLogTag::DMS,
+        "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", isMirrored: %{public}d",
+        config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.isMirrored));
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
