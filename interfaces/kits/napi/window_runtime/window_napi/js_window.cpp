@@ -5116,7 +5116,7 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 	
-	if (windowToken_ == nullptr) {
+    if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
@@ -5178,7 +5178,7 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 	
-	if (windowToken_ == nullptr) {
+    if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
