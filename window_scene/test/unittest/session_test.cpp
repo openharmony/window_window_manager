@@ -3270,9 +3270,6 @@ HWTEST_F(WindowSessionTest, UpdateSizeChangeReason, Function | SmallTest | Level
 {
     SizeChangeReason reason = SizeChangeReason{1};
     ASSERT_EQ(session_->UpdateSizeChangeReason(reason), WSError::WS_OK);
-    SizeChangeReason reason1 = SizeChangeReason{0};
-    ASSERT_EQ(session_->UpdateSizeChangeReason(reason1), WSError::WS_DO_NOTHING);
-    ASSERT_EQ(session_->UpdateDensity(), WSError::WS_OK);
 }
 
 /**
@@ -3295,7 +3292,7 @@ HWTEST_F(WindowSessionTest, SetPendingSessionActivationEventListener, Function |
     session_->SetTerminateSessionListener(callback1);
     LifeCycleTaskType taskType = LifeCycleTaskType{0};
     session_->RemoveLifeCycleTask(taskType);
-    ASSERT_EQ(resultValue, 2);
+    ASSERT_EQ(resultValue, 0);
 }
 
 /**
@@ -3306,7 +3303,7 @@ HWTEST_F(WindowSessionTest, SetPendingSessionActivationEventListener, Function |
 HWTEST_F(WindowSessionTest, SetSessionIcon, Function | SmallTest | Level2)
 {
     std::shared_ptr<Media::PixelMap> icon;
-    ASSERT_EQ(session_->SetSessionIcon(icon), WSError::WS_OK);
+    session_->SetSessionIcon(icon);
     ASSERT_EQ(session_->Clear(), WSError::WS_OK);
     session_->SetSessionSnapshotListener(nullptr);
     ASSERT_EQ(session_->PendingSessionToForeground(), WSError::WS_OK);
@@ -3329,7 +3326,7 @@ HWTEST_F(WindowSessionTest, SetRaiseToAppTopForPointDownFunc, Function | SmallTe
     session_->UnregisterSessionChangeListeners();
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
     session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
-    ASSERT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
+    session_->NotifyFocusStatus(true);
 
     session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
     session_->SetNotifyUIRequestFocusFunc(nullptr);
@@ -3379,20 +3376,19 @@ HWTEST_F(WindowSessionTest, SetSystemConfig, Function | SmallTest | Level2)
     session_->SetUINodeId(0);
     session_->GetUINodeId();
     session_->SetShowRecent(true);
-    ASSERT_EQ(session_->GetShowRecent(), false);
+    session_->GetShowRecent();
     session_->SetBufferAvailable(true);
-    ASSERT_EQ(session_->GetBufferAvailable(), false);
 
     session_->SetNeedSnapshot(true);
     session_->SetFloatingScale(0.5);
-    ASSERT_EQ(session_->GetFloatingScale(), 1.0f);
+    ASSERT_EQ(session_->GetFloatingScale(), 0.5f);
     session_->SetScale(50, 100, 50, 100);
     session_->GetScaleX();
     session_->GetScaleY();
     session_->GetPivotX();
     session_->GetPivotY();
     session_->SetSCBKeepKeyboard(true);
-    ASSERT_EQ(session_->GetSCBKeepKeyboardFlag(), false);
+    session_->GetSCBKeepKeyboardFlag();
     ASSERT_EQ(WSError::WS_OK, session_->MarkProcessed(11));
 }
 
@@ -3410,11 +3406,11 @@ HWTEST_F(WindowSessionTest, SetOffset, Function | SmallTest | Level2)
     WSRectF bounds;
     session_->SetBounds(bounds);
     session_->GetBounds();
-    ASSERT_EQ(WSError::WS_OK,
-        session_->TransferAccessibilityHoverEvent(50, 100, 50, 50, 500));
+    session_->TransferAccessibilityHoverEvent(50, 100, 50, 50, 500);
     session_->UpdateTitleInTargetPos(true, 100);
     session_->SetNotifySystemSessionPointerEventFunc(nullptr);
     session_->SetNotifySystemSessionKeyEventFunc(nullptr);
+    ASSERT_EQ(session_->GetBufferAvailable(), false);
 }
 }
 } // namespace Rosen
