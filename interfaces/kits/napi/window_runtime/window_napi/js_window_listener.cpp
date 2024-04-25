@@ -505,7 +505,18 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    RectChangeReason rectChangReason = JS_SIZE_CHANGE_REASON.at(reason);
+    RectChangeReason rectChangReason = RectChangeReason::UNDEFINED;
+    if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
+        !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
+        rectChangReason = JS_SIZE_CHANGE_REASON.at(reason);
+    }
+    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
+        return;
+    }
+    if (currentReason_ == RectChangeReason::MOVE && rectChangReason == RectChangeReason::DRAG_END) {
+        rectChangReason = RectChangeReason::MOVE;
+    }
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, rectChangReason, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChange");
@@ -542,6 +553,7 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     currentWidth_ = rect.width_;
     currentHeight_ = rect.height_;
+    currentReason_ = rectChangReason;
 }
 } // namespace Rosen
 } // namespace OHOS
