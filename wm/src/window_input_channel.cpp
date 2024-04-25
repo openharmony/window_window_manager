@@ -162,6 +162,14 @@ void WindowInputChannel::Destroy()
     isAvailable_ = false;
 }
 
+Rect WindowInputChannel::GetWindowRect()
+{
+    if (window_ == nullptr) {
+        return { 0, 0, 0, 0 };
+    }
+    return window_->GetRect();
+}
+
 bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     int32_t keyCode = keyEvent->GetKeyCode();
