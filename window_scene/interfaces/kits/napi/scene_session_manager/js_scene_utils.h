@@ -163,6 +163,7 @@ napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsSessionRect(napi_env env, const WSRect& rect);
+napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value SessionTypeInit(napi_env env);
