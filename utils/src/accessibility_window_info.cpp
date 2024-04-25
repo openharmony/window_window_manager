@@ -68,9 +68,12 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
     info->type_ = static_cast<WindowType>(parcel.ReadUint32());
     info->bundleName_ = parcel.ReadString();
     size_t touchHotAreasCnt = parcel.ReadUint32();
-    for (size_t i = 0; i < touchHotAreasCnt; i++) {
-        info->touchHotAreas_.push_back({.posX_ = parcel.ReadInt32(), .posY_ = parcel.ReadInt32(),
-                                        .width_ = parcel.ReadUint32(), .height_ = parcel.ReadUint32()});
+    constexpr size_t touchHotAreasCntMax = 10000;
+    if (touchHotAreasCnt <= touchHotAreasCntMax) {
+        for (size_t i = 0; i < touchHotAreasCnt; i++) {
+            info->touchHotAreas_.push_back({.posX_ = parcel.ReadInt32(), .posY_ = parcel.ReadInt32(),
+                                           .width_ = parcel.ReadUint32(), .height_ = parcel.ReadUint32()});
+        }
     }
     return info;
 }
