@@ -3374,6 +3374,128 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent03, Function | SmallTest | Level2
     sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 }
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback";
+    info.bundleName_ = "OnMoveDragCallback";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    Session session(info);
+    WSRect rect;
+    sceneSession->UpdateWinRectForSystemBar(rect);
+    sceneSession->SetSurfaceBounds(rect);
+    sceneSession->GetWindowNameAllType();
+    session.scenePersistence_ = new ScenePersistence("aa", 0);
+    sceneSession->GetUpdatedIconPath();
+
+    bool visible = true;
+    sceneSession->UpdateNativeVisibility(visible);
+}
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback01";
+    info.bundleName_ = "OnMoveDragCallback01";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    double alpha = 0.5;
+    Session session(info);
+
+    sceneSession->SetSystemSceneOcclusionAlpha(alpha);
+    sceneSession->IsNeedDefaultAnimation();
+    bool isPlaying = true;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    sceneSession->NotifyIsCustomAnimationPlaying(isPlaying);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    bool visible = true;
+    sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+}
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback02";
+    info.bundleName_ = "OnMoveDragCallback02";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<SceneSession> ssession = nullptr;
+    sceneSession->HandleCastScreenConnection(info, ssession);
+
+    Session session(info);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    session.isTerminating = true;
+    sceneSession->TerminateSession(abilitySessionInfo);
+
+    bool needRemoveSession = true;
+    session.sessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    session.jsSceneSessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
+
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    sceneSession->NotifyPiPWindowPrepareClose();
+
+    bool isLandscapeMultiWindow = true;
+    sceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    bool isPreImeEvent = true;
+    sceneSession->SendKeyEventToUI(keyEvent, isPreImeEvent);
+    sceneSession->IsDirtyWindow();
+    sceneSession->moveDragController_ = new MoveDragController(0);
+    sceneSession->NotifyUILostFocus();
+}
+
+/**
+ * @tc.name: IsStartMoving
+ * @tc.desc:  * @tc.name: IsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsStartMoving";
+    info.bundleName_ = "IsStartMoving";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->IsStartMoving();
+    bool startMoving = true;
+    sceneSession->SetIsStartMoving(startMoving);
+    ExtensionWindowFlags extWindowActions;
+    sceneSession->UpdateExtWindowFlags(1, 0, extWindowActions);
+    DisplayId from = 0;
+    DisplayId to = 0;
+    sceneSession->NotifyDisplayMove(from, to);
+    sceneSession->RemoveExtWindowFlags(0);
+    sceneSession->ClearExtWindowFlags();
+    bool isRegister = true;
+    sceneSession->UpdateRectChangeListenerRegistered(isRegister);
+}
 }
 }
 }
