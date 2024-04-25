@@ -4549,7 +4549,14 @@ static void FillSecCompEnhanceData(const std::shared_ptr<MMI::PointerEvent>& poi
 }
 #endif // SECURITY_COMPONENT_MANAGER_ENABLE
 
-WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
+void SceneSessionManager::UpdateLastDownEventDeviceId(int32_t deviceId)
+{
+    lastDownEventDeviceId_ = deviceId;
+    TLOGD(WmsLogTag::WMS_EVENT, "deviceId:%{public}d", lastDownEventDeviceId_);
+    return;
+}
+
+WSError SceneSessionManager::SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
 {
     if (!pointerEvent) {
         WLOGFE("pointerEvent is null");
@@ -4563,8 +4570,9 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    WLOGFI("[EventDispatch] SendTouchEvent PointerId = %{public}d, action = %{public}d",
-        pointerEvent->GetPointerId(), pointerEvent->GetPointerAction());
+    TLOGI(WmsLogTag::WMS_EVENT, "PointerId:%{public}d,action:%{public}d,deviceId:%{public}d",
+        pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), lastDownEventDeviceId_);
+    pointerEvent->SetDeviceId(lastDownEventDeviceId_);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
     return WSError::WS_OK;
 }
