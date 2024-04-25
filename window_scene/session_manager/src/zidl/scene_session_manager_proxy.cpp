@@ -288,7 +288,7 @@ WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSession
 WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
-    WLOGFD("SceneSessionManagerProxy::RequestFocusStatus id: %{public}d , focusState: %{public}u , byForeground:\
+    TLOGI(WmsLogTag::WMS_FOCUS, "SceneSessionManagerProxy::RequestFocusStatus id: %{public}d , focusState: %{public}u , byForeground:\
         %{public}d , reason: %{public}d", persistentId, isFocused, byForeground, reason);
     MessageParcel data;
     MessageParcel reply;
