@@ -31,6 +31,10 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
+    }
     SetMoveDragCallback();
     TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
 }
