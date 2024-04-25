@@ -23,6 +23,7 @@
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
+#include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
@@ -132,6 +133,11 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 {
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
+        return;
+    }
+    // Arkui is not adapted to multi-display, which constantly refreshes the internal screen dpi. 
+    // Currently, the system is temporarily isolated and needs to be formally rectified in the future
+    if (rect.width_ == 340 && rect.height_ == 340 && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         return;
     }
     Ace::ViewportConfig config;

@@ -29,21 +29,24 @@ public:
     virtual ~FoldScreenPolicy();
 
     virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
-    virtual FoldDisplayMode GetScreenDisplayMode();
-    virtual FoldStatus GetFoldStatus();
-    virtual void SetFoldStatus(FoldStatus foldStatus);
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void LockDisplayStatus(bool locked);
     virtual void SetOnBootAnimation(bool onBootAnimation);
     virtual void UpdateForPhyScreenPropertyChange();
-
+    void ClearState();
+    FoldDisplayMode GetScreenDisplayMode();
+    FoldStatus GetFoldStatus();
+    void SetFoldStatus(FoldStatus foldStatus);
+    
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
+    FoldDisplayMode globalDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    FoldStatus globalFoldStatus_ = FoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
