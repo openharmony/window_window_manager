@@ -196,21 +196,17 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    std::string errMsg = "";
     if (argc < 1) {
-        errMsg = "Missing args when creating pipController";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
+        return NapiThrowInvalidParam(env, "Missing args when creating pipController");
     }
     napi_value config = argv[0];
     if (config == nullptr) {
-        errMsg = "Failed to convert object to pipConfiguration or pipConfiguration is null";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
+        TLOGE(WmsLogTag::WMS_PIP, "config is null");
+        return NapiThrowInvalidParam(env, "Failed to convert object to pipConfiguration or pipConfiguration is null");
     }
     PipOption pipOption;
     if (GetPictureInPictureOptionFromJs(env, config, pipOption) == -1) {
-        errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
+        std::string errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
             " or controlGroup mismatch the corresponding pipTemplateType";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
