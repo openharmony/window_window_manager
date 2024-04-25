@@ -2159,7 +2159,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
     wptr<Window> weakToken, std::map<WindowType, SystemBarProperty>& systemBarProperties,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, std::shared_ptr<WMError> errCodePtr)
 {
-    execute = [weakToken, systemBarProperties, systemBarPropertyFlags, errCodePtr] () mutable {
+    execute = [weakToken, systemBarProperties, systemBarPropertyFlags, errCodePtr]() mutable {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -2179,7 +2179,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
         TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set set system bar enalbe end, ret = %{public}d",
             spWindow->GetWindowId(), spWindow->GetWindowName().c_str(), *errCodePtr);
     };
-    complete = [weakToken, errCodePtr] (napi_env env, NapiAsyncTask& task, int32_t status) {
+    complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
             return;
@@ -2214,10 +2214,6 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
         *errCodePtr = WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (*errCodePtr != WMError::WM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-    }
-    
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
