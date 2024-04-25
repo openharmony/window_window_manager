@@ -1214,7 +1214,8 @@ HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     uint32_t width = 33;
     uint32_t height = 31;
-    window->LimitCameraFloatWindowMininumSize(width, height);
+    float vpr = 0.0f;
+    window->LimitCameraFloatWindowMininumSize(width, height, vpr);
 }
 
 /*
