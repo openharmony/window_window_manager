@@ -1965,7 +1965,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     if (argc > MIN_ARG_COUNT) {
         if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], reason)) {
-            WLOGFE("[NAPI]Failed to convert parameter to reason");
+            TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]Failed to convert parameter to reason");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);
