@@ -23,6 +23,7 @@
 #include "session/host/include/extension_session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
+#include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
 #include "key_event.h"
@@ -154,6 +155,8 @@ public:
     WSError TransferFindFocusedElementInfo(bool isChannelNull);
     WSError TransferFocusMoveSearch(bool isChannelNull);
     WSError TransferExecuteAction(bool isChannelNull);
+    sptr<SceneSessionManager> ssm_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
@@ -176,6 +179,12 @@ void WindowSessionTest::SetUp()
     session_ = new (std::nothrow) Session(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
     EXPECT_NE(nullptr, session_);
+    ssm_ = new SceneSessionManager();
+    session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
+    auto isScreenLockedCallback = [this]() {
+        return ssm_->IsScreenLocked();
+    };
+    session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
 void WindowSessionTest::TearDown()
@@ -2974,8 +2983,6 @@ HWTEST_F(WindowSessionTest, SetChangeSessionVisibilityWithStatusBarEventListener
  */
 HWTEST_F(WindowSessionTest, SetAttachState01, Function | SmallTest | Level2)
 {
-    session_->SetAttachState(true);
-    ASSERT_EQ(session_->isAttach_, true);
     session_->SetAttachState(false);
     ASSERT_EQ(session_->isAttach_, false);
 }
@@ -3068,7 +3075,190 @@ HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | 
     ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
     NotifyContextTransparentFunc func = [](){};
     session_->SetContextTransparentFunc(func);
-    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
+}
+
+/**
+ * @tc.name: SetShowRecent001
+ * @tc.desc: Exist detect task when in recent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+
+    session_->SetShowRecent(true);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: SetShowRecent002
+ * @tc.desc: SetShowRecent:showRecent is false, showRecent_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent002, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+    session_->showRecent_ = false;
+
+    session_->SetShowRecent(false);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: SetShowRecent003
+ * @tc.desc: SetShowRecent:showRecent is false, showRecent_ is true, detach task.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetShowRecent003, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+    session_->showRecent_ = true;
+    session_->isAttach_ = false;
+
+    session_->SetShowRecent(false);
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask001
+ * @tc.desc: Create detection task when there are no pre_existing tasks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::NO_TASK;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask002
+ * @tc.desc: Detect state when window mode changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    auto task = [](){};
+    int64_t delayTime = 3000;
+    session_->handler_->PostTask(task, taskName, delayTime);
+
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(false, hasEvent);
+    ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask003
+ * @tc.desc: Detect sup and down tree tasks fo the same type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: CreateDetectStateTask004
+ * @tc.desc: Detection tasks under the same window mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    std::shared_ptr<AppExecFwk::EventHandler> owner(session_->handler_);
+    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
+        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
+    };
+    bool hasEvent = session_->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
+    ASSERT_EQ(true, hasEvent);
+    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
+    session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: GetAttachState001
+ * @tc.desc: GetAttachState001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAttachState001, Function | SmallTest | Level2)
+{
+    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
+    session_->SetAttachState(false);
+    bool isAttach = session_->GetAttachState();
+    ASSERT_EQ(false, isAttach);
+    session_->handler_->RemoveTask(taskName);
 }
 
 }

@@ -35,6 +35,7 @@ ohos_shared_library("intention_event_anr_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [

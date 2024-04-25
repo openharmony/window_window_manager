@@ -62,6 +62,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
+            session->keyboardPanelRectUpdateCallback_();
+        }
         // clear after use
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
@@ -71,6 +75,32 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     };
     PostTask(task, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
+}
+
+void SCBSystemSession::SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func)
+{
+    keyboardPanelRectUpdateCallback_ = func;
+}
+
+void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        return;
+    }
+    keyboardSession_ = session;
+    KeyboardPanelRectUpdateCallback onKeyboardPanelRectUpdate = [this]() {
+        if (this->keyboardSession_ != nullptr) {
+            this->keyboardSession_->OnKeyboardPanelUpdated();
+        }
+    };
+    SetKeyboardPanelRectUpdateCallback(onKeyboardPanelRectUpdate);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
+}
+
+sptr<SceneSession> SCBSystemSession::GetKeyboardSession() const
+{
+    return keyboardSession_;
 }
 
 void SCBSystemSession::PresentFocusIfPointDown()
@@ -131,7 +161,7 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
 WSError SCBSystemSession::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("session is system, id: %{public}d, mode: %{public}d, name: %{public}s, state: %{public}u",
-        GetPersistentId(), static_cast<int32_t>(mode), sessionInfo_.bundleName_.c_str(), state_);
+        GetPersistentId(), static_cast<int32_t>(mode), sessionInfo_.bundleName_.c_str(), GetSessionState());
     return WSError::WS_ERROR_INVALID_SESSION;
 }
 

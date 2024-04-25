@@ -681,4 +681,25 @@ void SessionStageProxy::NotifyDisplayMove(DisplayId from, DisplayId to)
     }
 }
 
+void SessionStageProxy::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(&keyboardPanelInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardPanelInfo marshalling failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest notify keyboard panel info change failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

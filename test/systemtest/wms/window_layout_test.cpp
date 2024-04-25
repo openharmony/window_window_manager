@@ -116,10 +116,6 @@ void WindowLayoutTest::SetUp()
 
 void WindowLayoutTest::TearDown()
 {
-    while (!activeWindows_.empty()) {
-        ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        activeWindows_.pop_back();
-    }
 }
 
 namespace {

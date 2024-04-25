@@ -90,7 +90,6 @@ private:
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
-    int HandleAddOrRemoveSecureExtSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
