@@ -3387,12 +3387,12 @@ HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
     sceneSession->IsStartMoving();
     bool startMoving = true;
     sceneSession->SetIsStartMoving(startMoving);
-    sceneSession->UpdateExtWindowFlags(1, 0);
-    sceneSession->IsExtWindowHasWaterMarkFlag();
+    ExtensionWindowFlags extWindowActions;
+    sceneSession->UpdateExtWindowFlags(1, 0,extWindowActions);
     DisplayId from = 0;
     DisplayId to = 0;
     sceneSession->NotifyDisplayMove(from, to);
-    sceneSession->RomoveExtWindowFlags(0);
+    sceneSession->RemoveExtWindowFlags(0);
     sceneSession->ClearExtWindowFlags();
     bool isRegister = true;
     sceneSession->UpdateRectChangeListenerRegistered(isRegister);
