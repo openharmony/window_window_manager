@@ -1822,6 +1822,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
 
 void WindowSessionImpl::NotifyAfterDestroy()
 {
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterDestroyed, lifecycleListeners);
 }
