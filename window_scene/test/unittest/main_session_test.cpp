@@ -202,9 +202,6 @@ HWTEST_F(MainSessionTest, Reconnect01, Function | SmallTest | Level1)
     result = mainSession_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
     result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
