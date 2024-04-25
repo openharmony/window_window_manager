@@ -129,7 +129,7 @@ private:
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
     void OnBufferAvailableChange(const bool isBufferAvailable);
-    void OnSessionEvent(uint32_t eventId);
+    void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -156,7 +156,7 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
-    void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason);
     void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();

@@ -237,7 +237,7 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
-    NotifyWindowDragHotAreaFunc func = [this](int32_t type, const SizeChangeReason& reason) {
+    NotifyWindowDragHotAreaFunc func = [this](uint32_t type, const SizeChangeReason& reason) {
         this->OnWindowDragHotArea(type, reason);
     };
     auto session = weakSession_.promote();
@@ -248,7 +248,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason)
+void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason)
 {
     WLOGFI("[NAPI]OnWindowDragHotArea");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
@@ -593,7 +593,8 @@ void JsSceneSession::ProcessSessionEventRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = std::bind(&JsSceneSession::OnSessionEvent, this, std::placeholders::_1);
+    sessionchangeCallback->OnSessionEvent_ = std::bind(&JsSceneSession::OnSessionEvent,
+        this, std::placeholders::_1, std::placeholders::_2);
     WLOGFD("ProcessSessionEventRegister success");
 }
 
@@ -762,7 +763,7 @@ void JsSceneSession::ProcessContextTransparentRegister()
     WLOGFD("ProcessContextTransparentRegister success");
 }
 
-void JsSceneSession::OnSessionEvent(uint32_t eventId)
+void JsSceneSession::OnSessionEvent(uint32_t eventId, const SessionEventParam& param)
 {
     WLOGFI("[NAPI]OnSessionEvent, eventId: %{public}d", eventId);
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
@@ -774,9 +775,10 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId)
         }
         jsCallBack = iter->second;
     }
-    auto task = [eventId, jsCallBack, env = env_]() {
+    auto task = [eventId, param, jsCallBack, env = env_]() {
         napi_value jsSessionStateObj = CreateJsValue(env, eventId);
-        napi_value argv[] = {jsSessionStateObj};
+        napi_value jsSessionParamObj = CreateJsSessionEventParam(env, param);
+        napi_value argv[] = {jsSessionStateObj, jsSessionParamObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
