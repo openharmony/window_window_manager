@@ -500,7 +500,8 @@ WMError WindowManagerProxy::SetWindowGravity(uint32_t windowId, WindowGravity gr
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+__attribute__((no_sanitize("cfi"))) WMError WindowManagerProxy::GetTopWindowId(
+    uint32_t mainWinId, uint32_t& topWinId)
 {
     MessageParcel data;
     MessageParcel reply;
