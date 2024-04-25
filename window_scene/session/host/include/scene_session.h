@@ -46,7 +46,7 @@ using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId)>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
-using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
+using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
@@ -185,7 +185,9 @@ public:
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
+    void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetRestoringRectForKeyboard(WSRect rect);
 
     int32_t GetCollaboratorType() const;
@@ -215,6 +217,7 @@ public:
     void NotifyUILostFocus() override;
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
+    bool GetIsDisplayStatusBarTemporarily() const;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -255,7 +258,7 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static std::map<int32_t, WSRect> windowDragHotAreaMap_;
+    static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
@@ -310,6 +313,7 @@ private:
     void SetSurfaceBounds(const WSRect &rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
+    bool IsMovableWindowType();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
 
@@ -323,8 +327,10 @@ private:
     std::vector<sptr<SceneSession>> subSession_;
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_;
+    SessionEventParam sessionEventParam_ = { 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
+    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
