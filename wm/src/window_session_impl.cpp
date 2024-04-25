@@ -1502,7 +1502,7 @@ WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRe
 {
     std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
     WMError ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-    if (ret == WMError::WM_OK) {
+    if (hostSession_ != nullptr && ret == WMError::WM_OK) {
         hostSession_->UpdateRectChangeListenerRegistered(true);
     }
     return ret;
@@ -1512,7 +1512,10 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
 {
     std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
     WMError ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-    hostSession_->UpdateRectChangeListenerRegistered(false);
+    if (hostSession_ != nullptr && (windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
+        windowRectChangeListeners_[GetPersistentId()].empty())) {
+        hostSession_->UpdateRectChangeListenerRegistered(false);
+    }
     return ret;
 }
 

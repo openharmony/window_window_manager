@@ -159,7 +159,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         WLOGFD("No need to move action id: %{public}d", action);
         return false;
     }
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    SizeChangeReason reason = SizeChangeReason::MOVE;
     bool ret = true;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
