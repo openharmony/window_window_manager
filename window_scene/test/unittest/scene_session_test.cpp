@@ -2542,6 +2542,24 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.desc:  * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsDisplayStatusBarTemporarily, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
+    info.bundleName_ = "SetIsDisplayStatusBarTemporarily";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
+    sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc:  * @tc.name: UpdateAvoidArea
  * @tc.type: FUNC

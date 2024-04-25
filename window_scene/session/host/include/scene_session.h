@@ -186,6 +186,7 @@ public:
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetRestoringRectForKeyboard(WSRect rect);
 
     int32_t GetCollaboratorType() const;
@@ -215,6 +216,7 @@ public:
     void NotifyUILostFocus() override;
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
+    bool GetIsDisplayStatusBarTemporarily() const;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -325,6 +327,7 @@ private:
     PiPTemplateInfo pipTemplateInfo_;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
+    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
