@@ -158,6 +158,77 @@ enum class ManagerState : uint32_t {
     MANAGER_STATE_SCREEN_LOCKED = 0,
 };
 
+enum class FocusChangeReason {
+    /**
+     * default focus change reason
+     */
+    DEFAULT = 0,
+    /**
+     * focus change for move up
+     */
+    MOVE_UP,
+    /**
+     * focus change for click
+     */
+    CLICK,
+    /**
+     * focus change for foreground
+     */
+    FOREGROUND,
+    /**
+     * focus change for background
+     */
+    BACKGROUND,
+    /**
+     * focus change for split screen.5
+     */
+    SPLIT_SCREEN,
+    /**
+     * focus change for full screen
+     */
+    FULL_SCREEN,
+    /**
+     * focus change for global search
+     */
+    SCB_SESSION_REQUEST,
+    /**
+     * focus change for floating scene
+     */
+    FLOATING_SCENE,
+    /**
+     * focus change for losing focus
+     */
+    SCB_SESSION_REQUEST_UNFOCUS,
+    /**
+     * focus change for client requerst.10
+     */
+    CLIENT_REQUEST,
+    /**
+     * focus change for wind
+     */
+    WIND,
+    /**
+     * focus change for app foreground
+     */
+    APP_FOREGROUND,
+    /**
+     * focus change for app background
+     */
+    APP_BACKGROUND,
+    /**
+     * focus change for recent,Multitasking
+     */
+    RECENT,
+    /**
+     * focus change for inner app.
+     */
+    SCB_START_APP,
+    /**
+     * focus change max.
+     */
+    MAX,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -414,6 +485,11 @@ struct AppWindowSceneConfig {
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+};
+
+struct SessionEventParam {
+    int32_t pointerX_ = 0;
+    int32_t pointerY_ = 0;
 };
 
 /**

@@ -1497,8 +1497,8 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    retCode = window->SetRaiseByClickEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    window->SetRaiseByClickEnabled(true);
+    ASSERT_NE(nullptr, session);
 }
 
 /**

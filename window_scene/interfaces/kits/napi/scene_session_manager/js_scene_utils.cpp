@@ -49,6 +49,20 @@ int32_t GetMMITouchType(int32_t aceType)
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
     }
 }
+
+int32_t GetMMISourceType(int32_t sourceType)
+{
+    switch (sourceType) {
+        case 1:
+            return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+        case NUMBER_2:
+            return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+        case NUMBER_3:
+            return MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD;
+        default:
+            return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    }
+}
 } // namespace
 
 napi_value NapiGetUndefined(napi_env env)
@@ -557,7 +571,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("[NAPI]Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent.SetSourceType(GetMMISourceType(sourceType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("[NAPI]Failed to convert parameter to timestamp");
@@ -929,6 +943,21 @@ napi_value CreateJsSessionRect(napi_env env, const WSRect& rect)
     napi_set_named_property(env, objValue, "posY_", CreateJsValue(env, rect.posY_));
     napi_set_named_property(env, objValue, "width_", CreateJsValue(env, rect.width_));
     napi_set_named_property(env, objValue, "height_", CreateJsValue(env, rect.height_));
+    return objValue;
+}
+
+napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param)
+{
+    WLOGFD("CreateJsSessionEventParam.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
+    napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     return objValue;
 }
 
