@@ -39,6 +39,7 @@ ohos_shared_library("pip_napi") {
   deps = [
     "../../../../../dm:libdm",
     "../../../../../utils:libwmutil",
+    "../../../../../utils:libwmutil_base",
     "../../../../../wm:libwm",
   ]
 

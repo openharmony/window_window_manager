@@ -41,6 +41,7 @@ ohos_shared_library("pipwindow_napi") {
   deps = [
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 
