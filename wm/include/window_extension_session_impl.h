@@ -82,8 +82,7 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
-    WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) override;
-    WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) override;
+    WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
 
 protected:
@@ -99,17 +98,14 @@ private:
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
-    WMError SetExtWindowFlags(uint32_t flags);
-    WMError UpdateExtWindowFlags();
+    WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
 
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     int16_t rotationAnimationCount_ { 0 };
-    bool shouldHideNonSecureWindows_ = false;
-    bool isWaterMarkEnable_ = false;
-    uint32_t extensionWindowFlags_ = 0;
+    ExtensionWindowFlags extensionWindowFlags_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

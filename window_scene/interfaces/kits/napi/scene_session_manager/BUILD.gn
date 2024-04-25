@@ -24,6 +24,7 @@ ohos_shared_library("scenesessionmanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [
@@ -56,6 +57,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

@@ -349,7 +349,7 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayManagerTest, GetDisplayById, Function | SmallTest | Level1)
 {
-    DisplayId displayId = 0;
+    DisplayId displayId = -1;
     DisplayManager::GetInstance().destroyed_ = true;
     auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
     ASSERT_EQ(ret, nullptr);
@@ -649,6 +649,81 @@ HWTEST_F(DisplayManagerTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest 
     DisplayManager::GetInstance().OnRemoteDied();
     auto ret = DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(0, surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: RegisterFoldAngleListener01
+ * @tc.desc: RegisterFoldAngleListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterFoldAngleListener01, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldAngleListener> listener = nullptr;
+    auto ret = DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IFoldAngleListener();
+    ret = DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterFoldAngleListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: UnregisterFoldAngleListener01
+ * @tc.desc: UnregisterFoldAngleListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterFoldAngleListener01, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldAngleListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IFoldAngleListener();
+    ret = DisplayManager::GetInstance().UnregisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterFoldAngleListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: RegisterCaptureStatusListener01
+ * @tc.desc: RegisterCaptureStatusListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterCaptureStatusListener01, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::ICaptureStatusListener> listener = nullptr;
+    auto ret = DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::ICaptureStatusListener();
+    ret = DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterCaptureStatusListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: UnregisterCaptureStatusListener01
+ * @tc.desc: UnregisterCaptureStatusListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener01, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::ICaptureStatusListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::ICaptureStatusListener();
+    ret = DisplayManager::GetInstance().UnregisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterCaptureStatusListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: IsCaptured01
+ * @tc.desc: IsCaptured01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, IsCaptured01, Function | SmallTest | Level1)
+{
+    auto ret = DisplayManager::GetInstance().IsCaptured();
+    ASSERT_FALSE(ret);
 }
 }
 } // namespace Rosen

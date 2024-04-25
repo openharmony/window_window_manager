@@ -445,6 +445,21 @@ public:
     virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
 };
 
+/**
+ * @class IKeyboardPanelInfoChangeListener
+ *
+ * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
+ */
+class IKeyboardPanelInfoChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when keyboard info changed.
+     *
+     * @param KeyboardPanelInfo keyboardPanelInfo of the keyboard panel;
+     */
+    virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1796,6 +1811,17 @@ public:
     }
 
     /**
+     * @brief Set water mark flag.
+     *
+     * @param isEnable bool.
+     * @return WMError
+     */
+    virtual WMError SetWaterMarkFlag(bool isEnable)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.
@@ -1813,22 +1839,6 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Add uiextension window flag.
-     *
-     * @param flag Flag of uiextension window.
-     * @return WM_OK means add success, others means failed.
-     */
-    virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Remove uiextension window flag.
-     *
-     * @param flag Flag of uiextension window
-     * @return WM_OK means remove success, others means failed.
-     */
-    virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Make multi-window become landscape or not.
@@ -1883,6 +1893,28 @@ public:
     }
 
     /**
+     * @brief Register keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Get window by id
      *
      * @param windId window id
@@ -1927,6 +1959,13 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set gray scale of window
+     * @param grayScale gray scale of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
