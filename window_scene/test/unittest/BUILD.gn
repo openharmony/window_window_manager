@@ -35,6 +35,7 @@ group("unittest") {
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
+    ":ws_scene_session_dirty_manager_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
@@ -554,6 +555,26 @@ ohos_unittest("ws_scene_session_test") {
     "ability_base:session_info",
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_dirty_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_dirty_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "input:libmmi-client",
   ]
 }
 
