@@ -1985,7 +1985,7 @@ void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo
 
 void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
 {
-    std::shared_lock<std::shared_mutex> lock(selfTokenMutex_);
+    std::unique_lock<std::shared_mutex> lock(selfTokenMutex_);
     selfToken_ = selfToken;
 }
 
