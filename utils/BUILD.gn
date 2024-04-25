@@ -23,10 +23,7 @@ config("libwmutil_private_config") {
 }
 
 config("libwmutil_public_config") {
-  include_dirs = [
-    "include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 ## build libwmutil_static.a
