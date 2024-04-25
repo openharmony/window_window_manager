@@ -1344,7 +1344,14 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
         WLOGFI("[NAPI]isToDesktop: %{public}u", isToDesktop);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop);
+    bool isSaveSnapShot = true;
+    if (argc == ARGC_FOUR && GetType(env, argv[3]) == napi_boolean) {
+        ConvertFromJsValue(env, argv[3], isSaveSnapShot);
+        WLOGFI("[NAPI]isSaveSnapShot: %{public}u", isSaveSnapShot);
+    }
+
+    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop,
+        isSaveSnapShot);
     return NapiGetUndefined(env);
 }
 
