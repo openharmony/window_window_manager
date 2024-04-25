@@ -345,6 +345,7 @@ private:
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
+    float subDensityDpi_ { 1.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     uint32_t defaultDpi {0};
 
@@ -375,6 +376,7 @@ private:
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
+    void RegisterApplicationStateObserver();
 };
 } // namespace OHOS::Rosen
 

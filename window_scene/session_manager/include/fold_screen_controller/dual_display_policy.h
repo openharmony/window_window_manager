@@ -23,22 +23,22 @@
 #include "session/screen/include/screen_session.h"
 
 namespace OHOS::Rosen {
-class DualDisplayDevicePolicy : public FoldScreenPolicy {
+class DualDisplayPolicy : public FoldScreenPolicy {
 public:
-    DualDisplayDevicePolicy(std::recursive_mutex& displayInfoMutex,
+    DualDisplayPolicy(std::recursive_mutex& displayInfoMutex,
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
-    ~DualDisplayDevicePolicy() = default;
+    ~DualDisplayPolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
     void SendSensorResult(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
+
 private:
-    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId, int32_t onScreenId);
+    void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId);
+    void ChangeScreenDisplayModeToCoordination();
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();
