@@ -127,6 +127,7 @@ ohos_unittest("utils_window_property_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "input:libmmi-client",
   ]
 }
 
