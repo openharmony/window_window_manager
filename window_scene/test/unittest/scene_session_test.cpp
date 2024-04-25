@@ -3388,7 +3388,7 @@ HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
     bool startMoving = true;
     sceneSession->SetIsStartMoving(startMoving);
     ExtensionWindowFlags extWindowActions;
-    sceneSession->UpdateExtWindowFlags(1, 0,extWindowActions);
+    sceneSession->UpdateExtWindowFlags(1, 0, extWindowActions);
     DisplayId from = 0;
     DisplayId to = 0;
     sceneSession->NotifyDisplayMove(from, to);
