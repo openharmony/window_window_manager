@@ -1980,7 +1980,6 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "OnRequestAllAppSessionUnfocus");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
