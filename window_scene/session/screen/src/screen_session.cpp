@@ -169,6 +169,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
     screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
         screenChangeListener->OnConnect(screenId_);
+        WLOGFI("Success to call onconnect callback.");
     }
     WLOGFI("Success to register screen change listener.");
 }
