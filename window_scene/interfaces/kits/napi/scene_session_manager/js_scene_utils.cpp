@@ -946,6 +946,21 @@ napi_value CreateJsSessionRect(napi_env env, const WSRect& rect)
     return objValue;
 }
 
+napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param)
+{
+    WLOGFD("CreateJsSessionEventParam.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
+    napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
+    return objValue;
+}
+
 static std::string GetHexColor(uint32_t color)
 {
     const int32_t rgbaLength = 8;
