@@ -573,22 +573,6 @@ public:
     WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
 
     /**
-     * @brief NotifyWindowDrawingContentInfoChanged.
-     *
-     * @param info DrawingContent window info
-     * @return WM_OK means get success, others means get failed.
-     */
-    void NotifyWindowDrawingContentInfoChanged(const WindowDrawingContentInfo& info);
-
-    /**
-     * @brief UpdateWindowDrawingContentInfo.
-     *
-     * @param info DrawingContent window info
-     * @return WM_OK means get success, others means get failed.
-     */
-    void UpdateWindowDrawingContentInfo(const WindowDrawingContentInfo& info) const;
-
-    /**
      * @brief Shift window focus within the same application. Only main window and subwindow.
      *
      * @param sourcePersistentId Window id which the focus shift from
