@@ -89,6 +89,7 @@ public:
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool& isTimeOut, bool isPreImeEvent = false);
+    WSError TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background() override;
 
