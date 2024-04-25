@@ -67,7 +67,7 @@
           "frame_aware_sched_override",
           "imf",
           "frame_aware_sched",
-          "memmgr_plugin",
+          "memmgr_override",
           "data_share",
           "accessibility",
           "security_component_manager",
