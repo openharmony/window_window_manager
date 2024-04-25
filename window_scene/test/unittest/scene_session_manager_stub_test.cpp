@@ -415,25 +415,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function |
     data.WriteInt32(12345);
     data.WriteBool(true);
 
-    int res = stub_->HandleAddOrRemoveSecureExtSession(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleAddOrRemoveSecureExtSession
- * @tc.desc: test HandleAddOrRemoveSecureExtSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureExtSession, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteInt32(12345);
-    data.WriteInt32(1234);
-    data.WriteBool(true);
-
-    int res = stub_->HandleAddOrRemoveSecureExtSession(data, reply);
+    int res = stub_->HandleAddOrRemoveSecureSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -450,6 +432,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
     data.WriteString("test_01");
 
     int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateExtWindowFlags
+ * @tc.desc: test HandleUpdateExtWindowFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(1234);
+    data.WriteInt32(12345);
+    data.WriteInt32(7);
+    data.WriteInt32(7);
+
+    int res = stub_->HandleUpdateExtWindowFlags(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

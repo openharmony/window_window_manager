@@ -424,7 +424,35 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows, Function | SmallT
     windowExtensionSessionImpl.state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.HideNonSecureWindows(true));
     windowExtensionSessionImpl.state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.HideNonSecureWindows(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowExtensionSessionImpl.HideNonSecureWindows(false));
+}
+
+/**
+ * @tc.name: SetWaterMarkFlag
+ * @tc.desc: SetWaterMarkFlag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    windowExtensionSessionImpl.state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.SetWaterMarkFlag(true));
+    windowExtensionSessionImpl.state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowExtensionSessionImpl.SetWaterMarkFlag(false));
+}
+
+/**
+ * @tc.name: UpdateExtWindowFlags
+ * @tc.desc: UpdateExtWindowFlags Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowExtensionSessionImpl.UpdateExtWindowFlags(ExtensionWindowFlags(7),
+        ExtensionWindowFlags(7)));
 }
 
 /**
@@ -649,8 +677,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level
 
     sptr<IRemoteObject> impl;
     windowExtensionSessionImpl.hostSession_ = new OHOS::Rosen::SessionProxy(impl);
-    windowExtensionSessionImpl.shouldHideNonSecureWindows_ = true;
-    ASSERT_EQ(true, windowExtensionSessionImpl.shouldHideNonSecureWindows_);
     windowExtensionSessionImpl.Destroy(needNotifyServer, needClearListener);
 
     ASSERT_NE(nullptr, windowExtensionSessionImpl.hostSession_);

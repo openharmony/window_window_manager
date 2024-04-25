@@ -28,6 +28,7 @@ ohos_shared_library("libmodal_system_ui_extension_client") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   install_enable = true

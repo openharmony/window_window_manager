@@ -39,6 +39,7 @@ ohos_shared_library("embeddablewindowstage") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [ "embeddable_window_stage_module.cpp" ]
@@ -75,6 +76,7 @@ ohos_shared_library("embeddablewindowstage_kit") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [ "js_embeddable_window_stage.cpp" ]
