@@ -76,6 +76,7 @@ constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
+std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -3169,6 +3170,51 @@ bool WindowSceneSessionImpl::IfNotNeedAvoidKeyBoardForSplit()
         return false;
     }
     return true;
+}
+
+WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
+    const sptr<IKeyboardPanelInfoChangeListener>& listener)
+{
+    if (!SessionPermission::IsStartedByInputMethod()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Listeners_ not registered by inputMethod id: %{public}d",
+            GetPersistentId());
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::lock_guard<std::mutex> lockListener(keyboardPanelInfoChangeListenerMutex_);
+    if (keyboardPanelInfoChangeListeners_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Register keyboard Panel info change listener id: %{public}d",
+            GetPersistentId());
+        keyboardPanelInfoChangeListeners_ = listener;
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard Panel info change, listener already registered");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(
+    const sptr<IKeyboardPanelInfoChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(keyboardPanelInfoChangeListenerMutex_);
+    keyboardPanelInfoChangeListeners_ = nullptr;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "UnRegister keyboard Panel info change listener id: %{public}d", GetPersistentId());
+
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isKeyboardPanelShown: %{public}d, gravity: %{public}d"
+        ", rect_: [%{public}d, %{public}d, %{public}d, %{public}d]", keyboardPanelInfo.isShowing_,
+        keyboardPanelInfo.gravity_, keyboardPanelInfo.rect_.posX_, keyboardPanelInfo.rect_.posY_,
+        keyboardPanelInfo.rect_.width_, keyboardPanelInfo.rect_.height_);
+    std::lock_guard<std::mutex> lockListener(keyboardPanelInfoChangeListenerMutex_);
+    if (keyboardPanelInfoChangeListeners_ && keyboardPanelInfoChangeListeners_.GetRefPtr()) {
+        keyboardPanelInfoChangeListeners_.GetRefPtr()->OnKeyboardPanelInfoChanged(keyboardPanelInfo);
+    } else {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanelInfoChangeListeners_ is unRegistered");
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

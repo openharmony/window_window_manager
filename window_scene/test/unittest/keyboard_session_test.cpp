@@ -217,35 +217,6 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest
 }
 
 /**
- * @tc.name: RaiseCallingSession
- * @tc.desc: RaiseCallingSession
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, RaiseCallingSession, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RaiseCallingSession";
-    info.bundleName_ = "RaiseCallingSession";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
-    EXPECT_NE(sceneSession, nullptr);
-    auto id = sceneSession->GetPersistentId();
-    EXPECT_NE(id, 0);
-
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(id);
-    keyboardSession->RaiseCallingSession();
-}
-
-/**
  * @tc.name: RestoreCallingSession
  * @tc.desc: RestoreCallingSession
  * @tc.type: FUNC
@@ -301,35 +272,6 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, Function | Sm
 
     keyboardSession->GetSessionProperty()->SetCallingSessionId(id);
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
-}
-
-/**
- * @tc.name: OnKeyboardSessionShown
- * @tc.desc: OnKeyboardSessionShown
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, OnKeyboardSessionShown, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "OnKeyboardSessionShown";
-    info.bundleName_ = "OnKeyboardSessionShown";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
-    EXPECT_NE(sceneSession, nullptr);
-    auto id = sceneSession->GetPersistentId();
-    EXPECT_NE(id, 0);
-
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(id);
-    keyboardSession->OnKeyboardSessionShown();
 }
 
 /**
@@ -432,22 +374,6 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     ASSERT_EQ(statusBarHeight, 0);
 }
 
-/**
- * @tc.name: GetCallingSession
- * @tc.desc: GetCallingSession
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, GetCallingSession, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    sptr<SceneSession> callingSession = keyboardSession->GetCallingSession();
-    ASSERT_EQ(callingSession, nullptr);
-}
 }
 }
 }

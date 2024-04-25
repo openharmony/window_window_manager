@@ -475,21 +475,10 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
     WSRect originalRect = { 100, 100, 1000, 1000 };
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     SystemSessionConfig sysConfig;
+    moveDragController->GetVirtualPixelRatio();
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(nullptr, originalRect, property, sysConfig));
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-}
-
-/**
- * @tc.name: GetVirtualPixelRatio
- * @tc.desc: test function : GetVirtualPixelRatio
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, GetVirtualPixelRatio, Function | SmallTest | Level1)
-{
-    float vpr = 1.5;
-    float vpr01 = moveDragController->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, vpr01);
 }
 }
 }

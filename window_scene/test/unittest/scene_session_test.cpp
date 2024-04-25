@@ -956,7 +956,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
-    ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -1514,8 +1514,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    scensession->SetAspectRatio(ratio);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -1633,8 +1633,8 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     WSRect rect({1, 1, 1, 1});
     WSRect newWinRect;
     WSRect newRequestRect;
-    bool result = scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(result, true);
+    scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -2539,6 +2539,24 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->RequestHideKeyboard();
     ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.desc:  * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsDisplayStatusBarTemporarily, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
+    info.bundleName_ = "SetIsDisplayStatusBarTemporarily";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
+    sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
 
 /**

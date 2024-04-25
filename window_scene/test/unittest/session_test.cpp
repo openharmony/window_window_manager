@@ -3075,7 +3075,7 @@ HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | 
     ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
     NotifyContextTransparentFunc func = [](){};
     session_->SetContextTransparentFunc(func);
-    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
 
 /**

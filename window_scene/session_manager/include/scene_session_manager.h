@@ -314,6 +314,8 @@ public:
     WSError SwitchFreeMultiWindow(bool enable);
     const SystemSessionConfig& GetSystemSessionConfig() const;
     void UpdateLastDownEventDeviceId(int32_t deviceId);
+    int32_t GetCustomDecorHeight(int32_t persistentId);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

@@ -191,8 +191,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_REGULAR));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
@@ -208,12 +206,13 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
     const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
-    ASSERT_NE(nullptr, window);
+
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
     WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 } // namespace

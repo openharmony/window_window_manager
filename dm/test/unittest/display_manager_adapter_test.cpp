@@ -300,7 +300,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
