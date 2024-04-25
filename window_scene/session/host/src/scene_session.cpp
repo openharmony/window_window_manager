@@ -864,6 +864,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
+    if (isDisplayStatusBarTemporarily_.load()) {
+        return;
+    }
     std::vector<sptr<SceneSession>> statusBarVector;
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
@@ -911,8 +914,16 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             continue;
         }
-        WSRect inputMethodRect = inputMethod->GetSessionRect();
-        CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+        if (isKeyboardPanelEnabled_) {
+            WSRect keyboardRect = {0, 0, 0, 0};
+            if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
+                keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+            }
+            CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
+        } else {
+            WSRect inputMethodRect = inputMethod->GetSessionRect();
+            CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+        }
     }
 
     return;
@@ -950,6 +961,9 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
 {
+    if (isDisplayStatusBarTemporarily_.load()) {
+        return;
+    }
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         return;
@@ -1476,6 +1490,11 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         UpdateRect(rect, reason);
     }
     if (reason == SizeChangeReason::DRAG_END) {
+        if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");
+            WSRect restoringRect = {0, 0, 0, 0};
+            SetRestoringRectForKeyboard(restoringRect);
+        }
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
@@ -2257,6 +2276,16 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
+WSRect SceneSession::GetRestoringRectForKeyboard() const
+{
+    return restoringRectForKeyboard_;
+}
+
+void SceneSession::SetRestoringRectForKeyboard(WSRect rect)
+{
+    restoringRectForKeyboard_ = rect;
+}
+
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
 {
     if (subSession == nullptr) {
@@ -2586,5 +2615,16 @@ void SceneSession::SetForceHideState(bool hideFlag)
 bool SceneSession::GetForceHideState() const
 {
     return forceHideState_;
+}
+
+void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "SetIsTemporarily:%{public}u", isTemporary);
+    isDisplayStatusBarTemporarily_.store(isTemporary);
+}
+
+bool SceneSession::GetIsDisplayStatusBarTemporarily() const
+{
+    return isDisplayStatusBarTemporarily_.load();
 }
 } // namespace OHOS::Rosen

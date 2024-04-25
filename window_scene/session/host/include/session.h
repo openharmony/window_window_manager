@@ -407,6 +407,10 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
+    virtual int32_t GetCustomDecorHeight()
+    {
+        return 0;
+    };
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

@@ -2337,6 +2337,36 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: RegisterKeyboardPanelInfoChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
+    auto ret = window->RegisterKeyboardPanelInfoChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterKeyboardPanelInfoChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
+    auto ret = window->UnregisterKeyboardPanelInfoChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetTopWindowWithContext
  * @tc.desc: get
  * @tc.type: FUNC

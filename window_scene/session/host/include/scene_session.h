@@ -130,6 +130,7 @@ public:
     virtual void BindKeyboardSession(sptr<SceneSession> session) {};
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
+    virtual void OnKeyboardPanelUpdated() {};
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -185,6 +186,8 @@ public:
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+    void SetRestoringRectForKeyboard(WSRect rect);
 
     int32_t GetCollaboratorType() const;
     sptr<IRemoteObject> GetSelfToken() const;
@@ -199,6 +202,7 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     const std::string& GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    WSRect GetRestoringRectForKeyboard() const;
 
     bool IsVisible() const;
     bool IsDecorEnable() const;
@@ -212,6 +216,7 @@ public:
     void NotifyUILostFocus() override;
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
+    bool GetIsDisplayStatusBarTemporarily() const;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -256,7 +261,15 @@ public:
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
+    int32_t GetCustomDecorHeight() override
+    {
+        return customDecorHeight_;
+    }
 
+    void SetCustomDecorHeight(int32_t height) override
+    {
+        customDecorHeight_ = height;
+    }
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -314,10 +327,13 @@ private:
     PiPTemplateInfo pipTemplateInfo_;
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
+    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     bool forceHideState_ = false;
+    int32_t customDecorHeight_ = 0;
+    WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
