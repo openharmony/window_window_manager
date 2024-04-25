@@ -74,11 +74,25 @@ public:
 
     std::string formatTimestamp(const std::chrono::system_clock::time_point& timePoint) const
     {
-        std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);
-        std::tm tm = *std::localtime(&timeT);
-        std::stringstream ss;
-        ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
-        return ss.str();
+        const int32_t WIDTH_TIME = 2;
+        const int32_t WIDTH_TIME_MS = 3;
+        const int32_t TIME_CONVERT_MS = 1000;
+        const char DEFAULT_CHAR = '0';
+        auto time = std::chrono::system_clock::to_time_t(timePoint);
+        std::tm localTime;
+        localtime_r(&time, &localTime);
+        auto timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            timePoint.time_since_epoch()) % TIME_CONVERT_MS;
+
+        std::ostringstream oss;
+        oss << std::setfill(DEFAULT_CHAR)
+            << std::setw(WIDTH_TIME) << (localTime.tm_mon + 1) << '-'
+            << std::setw(WIDTH_TIME) << localTime.tm_mday << ' '
+            << std::setw(WIDTH_TIME) << localTime.tm_hour << ':'
+            << std::setw(WIDTH_TIME) << localTime.tm_min << ':'
+            << std::setw(WIDTH_TIME) << localTime.tm_sec << '.'
+            << std::setw(WIDTH_TIME_MS) << timeMs.count();
+        return oss.str();
     }
 
     const std::map<TrackSupportEvent, std::vector<TrackInfo>>& GetRecordMap() const
