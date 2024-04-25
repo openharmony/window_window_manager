@@ -1514,7 +1514,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    scensession->SetAspectRatio(ratio);
     EXPECT_NE(scensession, nullptr);
 }
 
