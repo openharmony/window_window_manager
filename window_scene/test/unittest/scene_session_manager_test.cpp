@@ -3240,6 +3240,23 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTes
 }
 
 /**
+ * @tc.name: StartAbilityBySpecified
+ * @tc.desc: SceneSesionManager start ability by specified
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    AAFwk::Want want;
+    want.SetElementName("", "bundleName", "abilityName", "moduleName");
+    AAFwk::WantParams wantParams;
+    want.SetParams(wantParams);
+    SessionInfo info;
+    ssm_->StartAbilityBySpecified(info);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: FindMainWindowWithToken
  * @tc.desc: SceneSesionManager find main window with token
  * @tc.type: FUNC
