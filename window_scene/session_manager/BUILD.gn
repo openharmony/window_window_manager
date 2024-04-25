@@ -61,6 +61,7 @@ ohos_shared_library("scene_session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [
@@ -140,8 +141,8 @@ ohos_shared_library("scene_session_manager") {
 
   defines = []
   if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_memmgr_plugin)) {
-    external_deps += [ "memmgr_plugin:memmgrclient" ]
+      defined(global_parts_info.resourceschedule_memmgr_override)) {
+    external_deps += [ "memmgr_override:memmgrclient" ]
     defines += [ "MEMMGR_WINDOW_ENABLE" ]
   }
 
@@ -196,6 +197,7 @@ ohos_shared_library("screen_session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [
@@ -297,6 +299,7 @@ ohos_shared_library("session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [
@@ -347,6 +350,7 @@ ohos_shared_library("session_manager_lite") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcal_icall_only = true
     debug = false
   }
   sources = [

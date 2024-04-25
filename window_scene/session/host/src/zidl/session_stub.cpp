@@ -101,6 +101,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetKeyboardSessionGravity),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
         &SessionStub::HandleSetCallingSessionId),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
+        &SessionStub::HandleSetCustomDecorHeight),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -251,6 +253,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(winRect.posY_);
         reply.WriteUint32(winRect.width_);
         reply.WriteUint32(winRect.height_);
+        reply.WriteInt32(property->GetCollaboratorType());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -601,8 +604,8 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleProcessPointDownSession!");
-    uint32_t posX = data.ReadInt32();
-    uint32_t posY = data.ReadInt32();
+    int32_t posX = data.ReadInt32();
+    int32_t posY = data.ReadInt32();
     WSError errCode = ProcessPointDownSession(posX, posY);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -646,6 +649,14 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
     SetCallingSessionId(callingSessionId);
     reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    int32_t height = data.ReadInt32();
+    SetCustomDecorHeight(height);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

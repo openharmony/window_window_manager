@@ -64,6 +64,8 @@ namespace AncoConsts {
 class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
+    const sptr<SceneSession>& panelSession)>;
 using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
@@ -143,6 +145,7 @@ public:
         const sptr<IRemoteObject>& callback) override;
     WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     void SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func);
+    void SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
     void SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func);
     void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
@@ -173,7 +176,7 @@ public:
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
-    WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
+    WSError SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -292,12 +295,12 @@ public:
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
         int32_t parentId) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
-    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions) override;
     void CheckSceneZOrder();
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
-    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override;
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
@@ -310,11 +313,16 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     WSError SwitchFreeMultiWindow(bool enable);
     const SystemSessionConfig& GetSystemSessionConfig() const;
+    void UpdateLastDownEventDeviceId(int32_t deviceId);
+    int32_t GetCustomDecorHeight(int32_t persistentId);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
 
 private:
+    bool isKeyboardPanelEnabled_ = false;
+    int32_t lastDownEventDeviceId_ { -1 };
     void Init();
     void InitScheduleUtils();
     void RegisterAppListener();
@@ -326,6 +334,7 @@ private:
     void ConfigDefaultKeyboardAnimation();
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
+    void ConfigSystemUIStatusBar(const WindowSceneConfig::ConfigItem& statusBarConfig);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
@@ -474,6 +483,7 @@ private:
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
+    NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
     std::map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
     std::map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     bool recoveringFinished_ = false;
@@ -525,6 +535,8 @@ private:
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
     RSInterfaces& rsInterface_;
+    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
+    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool isNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -582,6 +594,7 @@ private:
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
+    void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
@@ -602,6 +615,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void ProcessBackHomeStatus();
     bool IsBackHomeStatus();
+    void DeleteStateDetectTask();
 };
 } // namespace OHOS::Rosen
 

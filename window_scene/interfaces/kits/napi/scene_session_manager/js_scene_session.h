@@ -54,11 +54,12 @@ private:
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
-    static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
-    static napi_value SetOffset(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
+    static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
+    static napi_value SetOffset(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
+    static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -72,11 +73,12 @@ private:
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
-    napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
-    napi_value OnSetOffset(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
+    napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
+    napi_value OnSetOffset(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -113,8 +115,8 @@ private:
     void ProcessRequestedOrientationChange();
     void ProcessRaiseAboveTargetRegister();
     void ProcessForceHideChangeRegister();
-    void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessTouchOutsideRegister();
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
@@ -154,8 +156,8 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
-    void OnTouchOutside();
     void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
+    void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
     void OnContextTransparent();

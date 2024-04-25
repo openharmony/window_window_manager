@@ -30,9 +30,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(moveDragControllerMutex_);
-        moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
     SetMoveDragCallback();
     TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
@@ -114,7 +115,6 @@ WSError SubSession::Reconnect(const sptr<ISessionStage>& sessionStage, const spt
 WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
     if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
@@ -136,7 +136,6 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
         WLOGFE("KeyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, not transfer pointer event");
         return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -148,7 +147,6 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 
 int32_t SubSession::GetMissionId() const
 {
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
 }
 
@@ -170,7 +168,7 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
-            "state: %{public}d, action:%{public}d]", GetPersistentId(), state_, action);
+            "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }
     return true;

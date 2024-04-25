@@ -538,8 +538,8 @@ void PictureInPictureController::UpdateXComponentPositionAndSize()
     mainWindowXComponentController_->GetSize(width, height);
     windowRect_.width_ = static_cast<uint32_t>(width);
     windowRect_.height_ = static_cast<uint32_t>(height);
-    windowRect_.posX_ = static_cast<uint32_t>(posX);
-    windowRect_.posY_ = static_cast<uint32_t>(posY);
+    windowRect_.posX_ = static_cast<int>(posX);
+    windowRect_.posY_ = static_cast<int>(posY);
     TLOGD(WmsLogTag::WMS_PIP, "position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
         windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
 }

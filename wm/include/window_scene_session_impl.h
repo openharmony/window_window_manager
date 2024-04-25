@@ -104,6 +104,7 @@ public:
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
+    virtual WMError SetGrayScale(float grayScale) override;
 
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
@@ -145,6 +146,8 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
+
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
@@ -194,6 +197,11 @@ private:
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     uint32_t getAvoidAreaCnt_ = 0;
+
+    WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
+    WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
+    static std::mutex keyboardPanelInfoChangeListenerMutex_;
+    sptr<IKeyboardPanelInfoChangeListener> keyboardPanelInfoChangeListeners_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
