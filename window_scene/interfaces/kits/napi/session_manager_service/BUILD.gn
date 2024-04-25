@@ -42,6 +42,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
 
   deps = [
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/session_manager_service:session_manager_service",
   ]
 
