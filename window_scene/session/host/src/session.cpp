@@ -73,6 +73,7 @@ std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
+    std::unique_lock<std::shared_mutex> lock(propertyMutex_);
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     if (!g_mainHandler) {
@@ -820,15 +821,13 @@ __attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISession
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
-    {
-        std::shared_lock<std::shared_mutex> lock(propertyMutex_);
-        if (property_ && property_->GetIsNeedUpdateWindowMode() && property) {
-            property->SetIsNeedUpdateWindowMode(true);
-            property->SetWindowMode(property_->GetWindowMode());
-        }
-        if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
-            property->SetDisplayId(GetSessionInfo().screenId_);
-        }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
+        property->SetIsNeedUpdateWindowMode(true);
+        property->SetWindowMode(sessionProperty->GetWindowMode());
+    }
+    if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
+        property->SetDisplayId(GetSessionInfo().screenId_);
     }
 
     SetSessionProperty(property);
@@ -1559,15 +1558,13 @@ void Session::NotifyPointerEventToRs(int32_t pointAction)
 
 WSError Session::HandleSubWindowClick(int32_t action)
 {
-    {
-        auto parentSession = GetParentSession();
-        if (parentSession && parentSession->CheckDialogOnForeground()) {
-            TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
-            return WSError::WS_ERROR_INVALID_PERMISSION;
-        }
+    auto parentSession = GetParentSession();
+    if (parentSession && parentSession->CheckDialogOnForeground()) {
+        TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
-    bool raiseEnabled = property_->GetRaiseEnabled() &&
+    auto property = GetSessionProperty();
+    bool raiseEnabled = property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
@@ -1977,23 +1974,22 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
         static_cast<int32_t>(mode));
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFD("id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
-
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     if (state_ == SessionState::STATE_END) {
         WLOGFI("session is already destroyed or property is nullptr! id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
-        property_->SetWindowMode(mode);
-        property_->SetIsNeedUpdateWindowMode(true);
+        property->SetWindowMode(mode);
+        property->SetIsNeedUpdateWindowMode(true);
     } else {
-        property_->SetWindowMode(mode);
+        property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+            property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
@@ -2050,10 +2046,10 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
         oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-        if (property_) {
-            std::shared_lock<std::shared_mutex> lock(propertyMutex_);
-            oss << " windowName: " << property_->GetWindowName() << ",";
-            oss << " windowState: " << static_cast<uint32_t>(property_->GetWindowState()) << ",";
+        auto property = GetSessionProperty();
+        if (property) {
+            oss << " windowName: " << property->GetWindowName() << ",";
+            oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
         }
         oss << " curWidth: " << curWidth << ",";
         oss << " curHeight: " << curHeight << ",";
@@ -2090,10 +2086,10 @@ void Session::RectCheckProcess()
             oss << " RectCheck err ratio ";
             oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-            if (property_) {
-                std::shared_lock<std::shared_mutex> lock(propertyMutex_);
-                oss << " windowName: " << property_->GetWindowName() << ",";
-                oss << " windowState: " << static_cast<uint32_t>(property_->GetWindowState()) << ",";
+            auto property = GetSessionProperty();
+            if (property) {
+                oss << " windowName: " << property->GetWindowName() << ",";
+                oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
             }
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
@@ -2260,8 +2256,8 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     } else if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         mode = MaximizeMode::MODE_FULL_FILL;
     }
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
-    property_->SetMaximizeMode(mode);
+    auto property = GetSessionProperty();
+    property->SetMaximizeMode(mode);
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
