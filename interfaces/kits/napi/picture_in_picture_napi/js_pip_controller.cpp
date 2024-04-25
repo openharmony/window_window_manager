@@ -213,18 +213,18 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
     std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], width) || width <= 0) {
         errMsg = "Failed to convert parameter to int or width <= 0";
-        TLOGE(WmsLogTag::WMS_PIP, errMsg);
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[1], height) || height <= 0) {
         errMsg = "Failed to convert parameter to int or height <= 0";
-        TLOGE(WmsLogTag::WMS_PIP, errMsg);
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     if (pipController_ == nullptr) {
-        errMsg = "OnUpdateContentSize error, controller is nullptr"
-        TLOGE(WmsLogTag::WMS_PIP, errMsg);
+        errMsg = "OnUpdateContentSize error, controller is nullptr";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);
