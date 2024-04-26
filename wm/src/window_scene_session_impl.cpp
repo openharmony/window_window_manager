@@ -3115,11 +3115,12 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
+            uint32_t channel = windowMask[i][j] > 0 ? fullChannel : 0;
             uint32_t channelIndex = idx * bgraChannel;
-            data[channelIndex] = 0; // blue channel
-            data[channelIndex + greenChannel] = 0;
+            data[channelIndex] = channel; // blue channel
+            data[channelIndex + greenChannel] = channel;
             data[channelIndex + redChannel] = fullChannel;
-            data[channelIndex + alphaChannel] = windowMask[i][j] > 0 ? fullChannel : 0;
+            data[channelIndex + alphaChannel] = channel;
         }
     }
     std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
@@ -3144,6 +3145,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
+    surfaceNode_->SetAbilityBGAlpha(0);
     surfaceNode_->SetMask(rsMask); // RS interface to set mask
     RSTransaction::FlushImplicitTransaction();
 
