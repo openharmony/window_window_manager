@@ -262,7 +262,7 @@ void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std
         xmlChar* context = xmlNodeGetContent(curNodePtr);
         std::string str = reinterpret_cast<const char*>(context);
         stringVec.emplace_back(str);
-        xmlFree(rootContext);
+        xmlFree(context);
     }
     stringListConfig_[name] = stringVec;
     xmlFree(rootContext);
