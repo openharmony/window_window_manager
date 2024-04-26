@@ -60,6 +60,7 @@ public:
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo) override;
 
 private:
     template<typename T>

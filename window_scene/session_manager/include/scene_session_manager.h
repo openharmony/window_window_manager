@@ -317,6 +317,7 @@ public:
     const SystemSessionConfig& GetSystemSessionConfig() const;
     void UpdateLastDownEventDeviceId(int32_t deviceId);
     int32_t GetCustomDecorHeight(int32_t persistentId);
+    WMError GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo);
 
 protected:
     SceneSessionManager();

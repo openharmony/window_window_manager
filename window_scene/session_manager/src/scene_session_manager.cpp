@@ -8242,4 +8242,44 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     TLOGD(WmsLogTag::WMS_LAYOUT, "GetCustomDecorHeight: %{public}d", height);
     return height;
 }
+
+WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+{
+    if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
+        WLOGFE("GetTopNMainWindowInfos permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    if (!topNInfo.empty() || (topNum <= 0)) {
+        return WMError::WN_ERROR_INVALID_PARAM;
+    }
+
+    WLOGFD("GetTopNMainWindowInfos topNum: %{public}d", topNum);
+    auto func = [this, &topNum, &topNInfo](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            return false;
+        }
+
+        if (topNum == 0) {
+            return true;
+        }
+
+        if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !IsSessionVisible(session)) {
+            WLOGFD("GetTopNMainWindowInfos: not main window %{public}d", session->GetWinowType());
+            return false;
+        }
+
+        TopNMainWindowInfo info;
+        info.pid = session->GetCallingPid();
+        info.bundleName = session->GetSessionInfo().bundleName_;
+        topNInfo.push_back(info);
+        topNum--;
+        WLOGFD("GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d, bundleName: %{public}s",
+            topNum, info.pid, info.bundleName.c_str());
+        return false;
+    };
+    TraverseSessionTree(func, true);
+
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen

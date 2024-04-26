@@ -83,6 +83,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
                    &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
         &SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
+        &SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -421,6 +423,35 @@ int SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(MessageParcel &da
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGI("run HandleGetTopNMainWinodowInfo lite");
+    int32_t topN = 0;
+    if (!data.ReadInt32(topN)) {
+        WLOGFE("failed to read topN");
+        return ERR_INVALID_DATA;
+    }
+    WLOGFD("HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
+    std::vector<TopNMainWindowInfo> topNInfos;
+    WMError errCode = GetTopNMainWinodowInfos(topN, topNInfos);
+
+    reply.WriteInt32(topNInfo.size());
+    for (auto& it : topNInfos) {
+        if (!reply.WriteParcelable(&it)) {
+            WLOGFE("HandleGetTopNMainWinodowInfo write topNinfo fail");
+            return ERR_INVALID_DATA;
+        }
+
+        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, topNinfo %{public}d", it.pid, it.bundleName.c_str());
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

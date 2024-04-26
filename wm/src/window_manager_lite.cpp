@@ -620,5 +620,11 @@ WMError WindowManagerLite::UnregisterWindowBackHomeListener(const sptr<IWindowBa
     }
     return ret;
 }
+
+WMError WindowManagerLite::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
+    return SingletonContainer::Get<WindowAdapterLite>().GetTopNMainWindowInfos(topNum, topNInfo);
+}
 } // namespace Rosen
 } // namespace OHOS
