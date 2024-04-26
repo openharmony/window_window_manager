@@ -436,7 +436,7 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
     }
     WLOGFD("HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
     std::vector<TopNMainWindowInfo> topNInfos;
-    WMError errCode = GetTopNMainWinodowInfos(topN, topNInfos);
+    WMError errCode = GetTopNMainWindowInfos(topN, topNInfos);
 
     reply.WriteInt32(topNInfo.size());
     for (auto& it : topNInfos) {
