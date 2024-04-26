@@ -8251,7 +8251,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
     }
 
     if (!topNInfo.empty() || (topNum <= 0)) {
-        return WMError::WN_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     WLOGFD("GetTopNMainWindowInfos topNum: %{public}d", topNum);
