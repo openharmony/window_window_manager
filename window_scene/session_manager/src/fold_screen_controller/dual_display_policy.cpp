@@ -32,12 +32,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplayPolicy"};
     const ScreenId SCREEN_ID_MAIN = 0;
     const ScreenId SCREEN_ID_SUB = 5;
-
-    #ifdef TP_FEATURE_ENABLE
     const int32_t TP_TYPE = 12;
     const std::string MAIN_TP = "0";
     const std::string SUB_TP = "1";
-    #endif
 } // namespace
 
 DualDisplayPolicy::DualDisplayPolicy(std::recursive_mutex& displayInfoMutex,
@@ -234,7 +231,7 @@ void DualDisplayPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t o
 }
 
 void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId,
-    int32_ onScreenId)
+    int32_t onScreenId)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);

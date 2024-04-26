@@ -23,32 +23,38 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const static std::string foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
-    const static std::string SINGLE_DISPLAY = "1";
-    const static std::string DUAL_DISPLAY = "2";
+    static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
+    static const  std::string SINGLE_DISPLAY = "1";
+    static const std::string DUAL_DISPLAY = "2";
 }
 class FoldScreenStateInternel {
 public:
     static bool IsFoldScreenDevice()
     {
-        return foldScreenFlag != "";
+        return g_foldScreenType != "";
     }
 
     static bool IsDualDisplayFoldDevice()
     {
-        if (!IsValidFoldType(foldScreenFlag)) {
+        if (!IsValidFoldType(g_foldScreenType)) {
             return false;
         }
-        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',');
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return false;
+        }
         return foldTypes[0] == DUAL_DISPLAY;
     }
 
     static bool IsSingleDisplayFoldDevice()
     {
-        if (!IsValidFoldType(foldScreenFlag)) {
+        if (!IsValidFoldType(g_foldScreenType)) {
             return false;
         }
-        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',');
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return false;
+        }
         return foldTypes[0] == SINGLE_DISPLAY;
     }
 

@@ -76,9 +76,9 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t VIRTUAL_SCREEN_ID_START = 1000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
-const static int32_t screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
-const static int32_t ROTATION_90 = 1;
-const static int32_t ROTATION_270 = 3;
+static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+static const int32_t ROTATION_90 = 1;
+static const  int32_t ROTATION_270 = 3;
 } // namespace
 
 // based on the bundle_util
@@ -119,7 +119,7 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
-    rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, ScreenRotation::ROTATION_270);
+    rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
         #ifdef TP_FEATURE_ENABLE
@@ -896,7 +896,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetRefreshRate(screenRefreshRate);
 
     if (foldScreenController_ != nullptr && screenId == 0
-        && (screenRotation == ROTATION_90 || screenRotation == ROTATION_270)) {
+        && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
         property.SetBounds(screenBounds);
     }
