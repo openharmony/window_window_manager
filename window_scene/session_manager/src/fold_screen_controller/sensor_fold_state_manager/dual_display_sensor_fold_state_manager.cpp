@@ -51,10 +51,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplaySensorFoldStateManager"};
     static float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.folded_threshold", 85));
-    static float INWARD_FOLDED_LOWER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.low_threshold", 10));
-    static float INWARD_FOLDED_UPPER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.upper_threshold", 20));
     static float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.expand_threshold", 145));
     static float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
@@ -64,6 +60,8 @@ namespace {
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ANGLE_MIN_VAL = 0.0F;
+    constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
+    constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
 } // namespace
 
 DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()

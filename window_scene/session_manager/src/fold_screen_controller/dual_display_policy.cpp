@@ -32,7 +32,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplayPolicy"};
     const ScreenId SCREEN_ID_MAIN = 0;
     const ScreenId SCREEN_ID_SUB = 5;
+    #ifdef TP_FEATURE_ENABLE
     const int32_t TP_TYPE = 12;
+    #endif
     const std::string MAIN_TP = "0";
     const std::string SUB_TP = "1";
 } // namespace
@@ -50,7 +52,7 @@ void DualDisplayPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
     if (displayMode == FoldDisplayMode::SUB) {
         screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
-    } 
+    }
     if (screenSession == nullptr) {
         WLOGE("ChangeScreenDisplayMode default screenSession is null");
         return;
