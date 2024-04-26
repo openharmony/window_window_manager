@@ -788,4 +788,35 @@ WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
     isBackHome = reply.ReadBool();
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerLiteProxy::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+{
+    WLOGFD("GetTopNMainWindowInfos %{public}d", topNum);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(topNum)) {
+        WLOGFE("GetTopNMainWindowInfos topNum write fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<int32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
+                              data, reply, option) != ERR_NONE) {
+        WLOGFE("GetTopNMainWindowInfos send request fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    WMError error = static_cast<WMError>(GetParcelableInfos(reply, topNInfo));
+    if (error != WMError::WM_OK) {
+        WLOGFE("GetTopNMainWindowInfos");
+        return error;
+    }
+
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

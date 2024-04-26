@@ -63,6 +63,7 @@ private:
     int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowBackHomeStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTopNMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_STUB_H
