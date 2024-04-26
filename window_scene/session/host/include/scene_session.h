@@ -322,6 +322,7 @@ private:
     static std::mutex enterSessionMutex_;
     mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    mutable std::shared_mutex selfTokenMutex_;
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
